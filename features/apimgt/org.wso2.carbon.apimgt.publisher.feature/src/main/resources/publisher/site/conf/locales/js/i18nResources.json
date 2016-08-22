@@ -28,6 +28,7 @@
     "Duplicate Document Name.": "Duplicate Document Name.",
     "Duplicate context value.": "Duplicate context value.",
     "Empty curly brackets \"{}\" are not allowed in the context field.": "Empty curly brackets \"{}\" are not allowed in the context field.",
+    "\"{version}\" or \"/{version}\" cannot be used solely in the context field.": "\"{version}\" or \"/{version}\" cannot be used solely in the context field.",
     "Error": "Error",
     "Error Message Thumbnail": "Error Message Thumbnail",
     "Error occurred while adding sample API": "Error occurred while adding sample API",

@@ -35,6 +35,9 @@ public final class APIConstants {
 
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
+
+    //key value of the APIImpl rxt
+    public static final String COMPOSITE_API_KEY = "composite-api";
     
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
@@ -42,6 +45,9 @@ public final class APIConstants {
     public static final String API_CONTEXT_ID = "api.context.id";
     //This is the resource name of API
     public static final String API_RESOURCE_NAME ="/api";
+
+    //This is the resource name of composite API
+    public static final String COMPOSITE_API_RESOURCE_NAME ="/composite-api";
 
     //Association between documentation and its content
     public static final String DOCUMENTATION_CONTENT_ASSOCIATION = "hasContent";
@@ -69,6 +75,8 @@ public final class APIConstants {
     
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
+
+    public static final String COMPOSITE_API_LOCATION = API_APPLICATION_DATA_LOCATION + "/consumer";
 
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 

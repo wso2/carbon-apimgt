@@ -378,6 +378,54 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+	/**
+     * Get composite API
+     *
+     * @param identifier composite API id
+     * @return composite API
+     * @throws APIManagementException if an error occurs while retrieving composite API
+     */
+    public API getCompositeAPI(APIIdentifier identifier) throws APIManagementException {
+        String apiPath = APIUtil.getCompositeAPIPath(identifier);
+        Registry registry;
+        try {
+            String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            int apiTenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                    .getTenantId(apiTenantDomain);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
+                APIUtil.loadTenantRegistry(apiTenantId);
+            }
+
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
+                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        MultitenantUtils.getTenantAwareUsername(
+                                APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
+            } else {
+                registry = this.registry;
+            }
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                                APIConstants.COMPOSITE_API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+
+            API compositeApi = APIUtil.getCompositeAPIForPublishing(apiArtifact, registry);
+
+            return compositeApi;
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        }
+    }
+
     /**
      * Get API by registry artifact id
      *

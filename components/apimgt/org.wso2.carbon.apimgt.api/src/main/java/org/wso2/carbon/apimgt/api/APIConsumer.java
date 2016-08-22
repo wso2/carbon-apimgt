@@ -608,4 +608,55 @@ public interface APIConsumer extends APIManager {
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
+	/**
+     * Add new composite API
+     *
+     * @param api composite API
+     * @throws APIManagementException If an error occurs while adding composite API
+     */
+    void addCompositeAPI(API api) throws APIManagementException;
+
+    /**
+     * This method updates Swagger 2.0 resources of the composite api  in the registry
+     *
+     * @param apiId    id of the APIIdentifier
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException If an error occurs while saving swagger definition
+     */
+    void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
+
+	/**
+     * Checks the validity of composite api update
+     *
+     * @param api  composite API
+     * @return whether update is valid or not
+     * @throws APIManagementException If an error ocurs while checking update validity
+     */
+    boolean isCompositeAPIUpdateValid(API api) throws APIManagementException;
+
+    /**
+     * Checks if a given composite API exists in the registry
+     *
+     * @param apiId composite API id
+     * @return boolean whether api exists
+     * @throws APIManagementException If an error occurs while checking API existance
+     */
+    boolean checkIfCompositeAPIExists(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Returns details of a composite API
+     *
+     * @param identifier composite API Id
+     * @return A composite API  related to the given id or null
+     * @throws APIManagementException if failed get API from id
+     */
+    API getCompositeAPI(APIIdentifier identifier) throws APIManagementException;
+
+	/**
+	 * Update composite API
+     *
+     * @param api  composite API
+     * @throws APIManagementException If an error occurs while updating composite API
+     */
+    void updateCompositeAPI(API api) throws APIManagementException;
 }

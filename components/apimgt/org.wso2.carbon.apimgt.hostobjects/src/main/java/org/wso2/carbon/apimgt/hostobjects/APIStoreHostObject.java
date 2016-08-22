@@ -25,11 +25,16 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.entity.mime.content.FileBody;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -38,15 +43,20 @@ import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -59,6 +69,8 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -67,6 +79,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -101,6 +114,8 @@ import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -112,6 +127,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -134,6 +150,9 @@ public class APIStoreHostObject extends ScriptableObject {
     private APIConsumer apiConsumer;
 
     private String username;
+
+    // API definitions from swagger v2.0
+    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
@@ -1929,7 +1948,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("name", row, apiIdentifier.getApiName());
                         row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         row.put("version", row, apiIdentifier.getVersion());
-                        row.put("description", row, api.getDescription());
+                        row.put("description", row, StringEscapeUtils.unescapeHtml(api.getDescription()));
                         row.put("rates", row, api.getRating());
                         row.put("endpoint", row, api.getUrl());
                         row.put("wsdl", row, api.getWsdlUrl());
@@ -4706,4 +4725,277 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
         
     }
+
+    /**
+     * This method saves or updates the composite API object
+     *
+     * @param api composite API
+     * @return true if the API was added successfully
+     * @throws APIManagementException If an error occurs while saving composite API
+     */
+    private static boolean saveCompositeAPI(APIConsumer compApiProvider, API api, boolean isNewApi)
+            throws APIManagementException, FaultGatewaysException {
+        boolean success = false;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            if(tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            //todo : adding composite API thumbnail
+            /*if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                                                fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
+            }*/
+            if (isNewApi) {
+                compApiProvider.addCompositeAPI(api);
+            } else {
+                //update composite API
+                compApiProvider.updateCompositeAPI(api);
+            }
+            success = true;
+
+
+            success = true;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        return success;
+    }
+
+    /**
+     * Updates composite API design
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return true if the API was added successfully
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static boolean jsFunction_updateCompositeAPIDesign(Context cx, Scriptable thisObj,
+                                                     Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
+
+        if (args==null||args.length == 0) {
+            handleException("Invalid number of input parameters.");
+        }
+
+        boolean success = false;
+
+        NativeObject apiData = (NativeObject) args[0];
+        String provider = String.valueOf(apiData.get("provider", apiData));
+        String name = (String) apiData.get("apiName", apiData);
+        //String version = (String) apiData.get("version", apiData);
+        //FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
+        //        String contextVal = (String) apiData.get("context", apiData);
+        String description = (String) apiData.get("description", apiData);
+
+        /* Business Information*/
+        /*String techOwner = (String) apiData.get("techOwner", apiData);
+        String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
+        String bizOwner = (String) apiData.get("bizOwner", apiData);
+        String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);*/
+
+        //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+        //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+        //TODO: check and remove
+      /*  if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context= "/t/"+ providerDomain+context;
+        }*/
+
+        /*String tags = (String) apiData.get("tags", apiData);
+        Set<String> tag = new HashSet<String>();
+
+        if (tags != null) {
+            if (tags.contains(",")) {
+                String[] userTag = tags.split(",");
+                tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
+            } else {
+                tag.add(tags);
+            }
+        }
+
+        String visibility = (String) apiData.get("visibility", apiData);
+        String visibleRoles = "";
+
+
+        if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
+            visibleRoles = (String) apiData.get("visibleRoles", apiData);
+        }*/
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        //version = (version != null ? version.trim() : null);
+        APIIdentifier apiId = new APIIdentifier(provider, name, null);
+        //API consumer is the composite API provider
+        APIConsumer compApiProvider = getAPIConsumer(thisObj);
+        API api = null;
+        boolean isTenantFlowStarted = false;
+        String tenantDomain;
+        try {
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if(tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            api = compApiProvider.getCompositeAPI(apiId);
+            boolean isValid = compApiProvider.isCompositeAPIUpdateValid(api);
+            if(!isValid){
+                throw new APIManagementException(" User doesn't have permission for update");
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        if (apiData.containsKey("wsdl")) {
+            String wsdl = (String) apiData.get("wsdl", apiData);
+            if (StringUtils.isNotEmpty(wsdl)) {
+                api.setWsdlUrl(wsdl);
+            }
+        }
+
+        if (apiData.get("swagger", apiData) != null) {
+            // Read URI Templates from swagger resource and set it to api object
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                                                                                    (String) apiData.get("swagger", apiData));
+            api.setUriTemplates(uriTemplates);
+
+            // Save the swagger definition in the registry
+            compApiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+        }
+
+        api.setDescription(StringEscapeUtils.unescapeHtml(description));
+
+        return saveCompositeAPI(compApiProvider, api, false);
+    }
+
+    /**
+     * This method is to functionality of create a new composite API
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return true if the API was added successfully
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static boolean jsFunction_createCompositeAPI(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
+            throws APIManagementException, ScriptException, FaultGatewaysException {
+
+        if (args == null||args.length == 0) {
+            handleException("Invalid number of input parameters.");
+        }
+
+
+        NativeObject apiData = (NativeObject) args[0];
+
+        String provider = String.valueOf(apiData.get("provider", apiData));
+        String name = (String) apiData.get("apiName", apiData);
+        String contextVal = (String) apiData.get("context", apiData);
+
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+        if(!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context= "/t/" + providerDomain + context;
+        }
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+
+        APIIdentifier apiId = new APIIdentifier(provider, name, null);
+        APIConsumer compApiProvider = getAPIConsumer(thisObj);
+
+        if (compApiProvider.isAPIAvailable(apiId)) {
+            handleException("Error occurred while adding the API. A duplicate API already exists for " + name);
+        }
+
+        API api = new API(apiId);
+        api.setStatus(APIStatus.CREATED);
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        //context = checkAndSetVersionParam(context);
+        api.setContextTemplate(context);
+
+        //context = updateContextWithVersion(version, contextVal, context);
+
+        api.setContext(context);
+        api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
+        api.setLastUpdated(new Date());
+
+        return saveCompositeAPI(compApiProvider, api, true);
+    }
+
+	/**
+     * Checks if provided composite API exists
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return True if a resource with provided composite API id exist
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static boolean jsFunction_checkIfResourceExists(Context cx, Scriptable thisObj,
+                                                           Object[] args,
+                                                           Function funObj) throws APIManagementException {
+        boolean result = false;
+
+        if (args == null || args.length == 0) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        NativeObject apiData = (NativeObject) args[0];
+
+        String providerName = String.valueOf(apiData.get("provider", apiData));
+        //        String providerNameTenantFlow = args[0].toString();
+        providerName = APIUtil.replaceEmailDomain(providerName);
+        String apiName = (String) apiData.get("apiName", apiData);
+        //String version = (String) apiData.get("version", apiData);
+
+        APIIdentifier apiId = new APIIdentifier(providerName, apiName, null);
+        APIConsumer compApiProvider = getAPIConsumer(thisObj);
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.
+                                                          getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null &&
+                !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(tenantDomain, true);
+            }
+            result = compApiProvider.checkIfCompositeAPIExists(apiId);
+        } catch (Exception e) {
+            handleException("Error occurred while checking if API exists " + apiName, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+
 }

@@ -882,7 +882,7 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
         }
 
-        api.setDescription(StringEscapeUtils.escapeHtml(description));
+        api.setDescription(StringEscapeUtils.unescapeHtml(description));
         HashSet<String> deletedTags = new HashSet<String>(api.getTags());
         deletedTags.removeAll(tag);
         api.removeTags(deletedTags);
@@ -1914,7 +1914,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
-        api.setDescription(StringEscapeUtils.escapeHtml(description));
+        api.setDescription(StringEscapeUtils.unescapeHtml(description));
         api.setLastUpdated(new Date());
         api.setUrl(endpoint);
         api.setSandboxUrl(sandboxUrl);
@@ -2522,7 +2522,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 Set<URITemplate> uriTemplates = api.getUriTemplates();
 
                 myn.put(0, myn, checkValue(api.getId().getApiName()));
-                myn.put(1, myn, checkValue(api.getDescription()));
+                myn.put(1, myn, checkValue(StringEscapeUtils.unescapeHtml(api.getDescription())));
                 myn.put(2, myn, checkValue(api.getUrl()));
                 myn.put(3, myn, checkValue(api.getWsdlUrl()));
                 myn.put(4, myn, checkValue(api.getId().getVersion()));

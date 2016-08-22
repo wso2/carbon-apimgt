@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<artifactType type="application/vnd.wso2-composite-api+xml" shortName="composite-api" singularLabel="Composite API"
+pluralLabel="Composite APIs" hasNamespace="false" iconSet="7">
+	<storagePath>/apimgt/applicationdata/consumer/@{overview_provider}/@{overview_name}/composite-api</storagePath>
+	<nameAttribute>overview_name</nameAttribute>
+	<ui>
+        <list>
+            <column name="Provider">
+                <data type="path" value="overview_provider" href="@{storagePath}"/>
+            </column>
+            <column name="Name">
+                <data type="path" value="overview_name" href="@{storagePath}"/>
+            </column>
+            <column name="Version">
+                <data type="path" value="overview_version" href="@{storagePath}"/>
+            </column>
+        </list>
+	</ui>
+	<content>
+    <table name="Overview">
+        <field type="text" required="true">
+            <name>Provider</name>
+        </field>
+        <field type="text" required="true">
+            <name>Name</name>
+        </field>
+        <field type="text" required="true">
+            <name>Context</name>
+        </field>
+        <field type="text" required="true">
+            <name>Context Template</name>
+        </field>
+        <field type="text">
+            <name>Version</name>
+        </field>
+		<field type="text">
+            <name>Version Type</name>
+        </field>
+        <field type="text-area">
+            <name>Description</name>
+        </field>
+        <field type="text">
+            <name>Implementation</name>
+        </field>
+        <field type="text">
+            <name>Thumbnail</name>
+        </field>
+        <field type="options">
+            <name label="Status">Status</name>
+            <values>
+                <value>CREATED</value>
+                <value>PUBLISHED</value>
+                <value>RETIRED</value>
+            </values>
+        </field>
+    </table>
+    <table name="URITemplate" columns="2">
+            <subheading>
+                <heading>URL Pattern</heading>
+                <heading>HTTP Verb</heading>
+            </subheading>
+            <field type="text">
+                <name>URL Pattern0</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb0</name>
+            </field>
+            <field type="text">
+                <name>URL Pattern1</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb1</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern2</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb2</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern3</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb3</name>
+            </field>
+             <field type="text">
+                <name>URL Pattern4</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb4</name>
+            </field>
+            <field type="text">
+                <name>URL Pattern5</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb5</name>
+            </field>
+        </table>
+</content>
+
+</artifactType>
