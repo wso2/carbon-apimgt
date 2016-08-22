@@ -5,7 +5,7 @@
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
     <version>6.0.5-SNAPSHOT</version>
-    <name>WSO2 Carbon - API Management Aggregator Pom</name>
+    <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
 
