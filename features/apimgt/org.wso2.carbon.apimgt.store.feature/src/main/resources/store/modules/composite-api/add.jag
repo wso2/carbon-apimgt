@@ -6,9 +6,7 @@ var checkIfResourceExists = function (api) {
     var success, log = new Log(),
             provider = jagg.module("manager").getAPIStoreObj();
     try {
-        log.info("came to checkif resoruce");
         success = provider.checkIfResourceExists(api);
-        log.info("went from checkif resoruce");
         if (log.isDebugEnabled()) {
             log.debug("checkIfResourceExists : " + api.name);
         }
@@ -44,9 +42,7 @@ var createCompositeAPI = function (api) {
     var success, log = new Log(),
             provider = jagg.module("manager").getAPIStoreObj();
     try {
-        log.info("came to createapi");
         success = provider.createCompositeAPI(api);
-        log.info("went from checkif resoruce");
         if (log.isDebugEnabled()) {
             log.debug("createAPI : " + api.name + "-" + api.version);
         }
