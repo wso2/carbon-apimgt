@@ -175,8 +175,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 String userName = MultitenantUtils.getTenantAwareUsername(userId);
+                String tenantDomain = MultitenantUtils.getTenantDomain(userId);
                 userNameForSP = userName;
-                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
+                //applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
+                applicationName = userId+"@"+tenantDomain+"_"+profile.getClientName();
 
                 grantTypes = profile.getGrantType();
 
@@ -191,12 +193,13 @@ public class RegistrationServiceImpl implements RegistrationService {
                     log.error(errorMsg);
                 }
                 if (appServiceProvider != null) {
+                    System.out.println("aPPLICATION Exixtsssss   ");
                     //retrieving the existing application
                     retrievedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
                         returnedAPP = retrievedApp;
                 } else {
                     //create a new client application if the application name doesn't exists.
-                    returnedAPP = this.createApplication(appRequest,userNameForSP,grantTypes);
+                    returnedAPP = this.createApplication(applicationName,appRequest,userNameForSP,grantTypes);
                     if (returnedAPP != null) {
                         return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
                     }
@@ -310,13 +313,15 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @return created Application
      * @throws APIKeyMgtException
      */
-    private OAuthApplicationInfo createApplication(OAuthAppRequest appRequest,String userNameForSP,
+    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,String userNameForSP,
                                                    String grantType) throws APIManagementException {
+
+        System.out.println("Inside app creation");
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
 
         String callbackUrl = applicationInfo.getCallBackURL();
-        appName = applicationInfo.getClientName();
+        String appName = applicationInfo.getClientName();
         String userId = (String) applicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
         boolean isTenantFlowStarted = false;
 
@@ -340,11 +345,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                 userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
             // Append the username before Application name to make application name unique across two users.
-            appName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + appName;
+            //appName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + appName;
 
             //creating the service provider
             ServiceProvider serviceprovider = new ServiceProvider();
-            serviceprovider.setApplicationName(appName);
+            serviceprovider.setApplicationName(applicationName);
             serviceprovider.setDescription("Service Provider for application " + appName);
             serviceprovider.setSaasApp(applicationInfo.getIsSaasApplication());
 
@@ -353,13 +358,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //retrieving the created service provider
             ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs
-                    (appName, tenantDomain);
+                    (applicationName, tenantDomain);
             if (createdServiceProvider == null) {
                 throw new APIManagementException ("Error occured while creating Service Provider Application" + appName);
             }
 
             //creating the OAuth app
-            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp(callbackUrl,grantType,userName);
+            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp(applicationName,callbackUrl,grantType,userName);
 
             // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
@@ -415,7 +420,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * @return created client App
      */
-    private OAuthConsumerAppDTO createOAuthApp(String callbackUrl,String grantTypes,String userName) {
+    private OAuthConsumerAppDTO createOAuthApp(String appName, String callbackUrl,String grantTypes,String userName) {
 
         OAuthConsumerAppDTO createdApp = null;
         OAuthAdminService oauthAdminService = new OAuthAdminService();
