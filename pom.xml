@@ -5,7 +5,7 @@
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
     <version>6.0.5-SNAPSHOT</version>
-    <name>WSO2 Carbon - API Management Aggregator Pom</name>
+    <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
 
@@ -1057,12 +1057,12 @@
         <analytics.shared.version>1.0.1</analytics.shared.version>
         <carbon.analytics.common.version>5.1.0</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.7</carbon.kernel.version>
+        <carbon.kernel.version>4.4.8</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.4</carbon.commons.version>
         <carbon.registry.version>4.5.6</carbon.registry.version>
-        <carbon.mediation.version>4.6.1</carbon.mediation.version>
+        <carbon.mediation.version>4.6.6</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.2.0</carbon.identity.version>
@@ -1131,7 +1131,7 @@
         <jaggery.version>0.12.6</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v3</synapse.version>
+        <synapse.version>2.1.7-wso2v7</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
