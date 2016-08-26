@@ -941,12 +941,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
-                if (api.getUrl() != null && !"".equals(api.getUrl())) {
-                    String path = APIUtil.createEndpoint(api.getUrl(), registry);
-                    if (path != null) {
-                        registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                    }
-                }
             }
             artifactManager.updateGenericArtifact(updateApiArtifact);
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
@@ -2144,13 +2138,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                     artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path to permlink
                     artifactManager.updateGenericArtifact(artifact); //update the  artifact
-                }
-            }
-
-            if (api.getUrl() != null && !api.getUrl().isEmpty())    {
-                String path = APIUtil.createEndpoint(api.getUrl(), registry);
-                if (path != null) {
-                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                 }
             }
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
