@@ -21,14 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>5.0.5-SNAPSHOT</version>
+        <version>5.0.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>5.0.5-SNAPSHOT</version>
+    <version>5.0.5</version>
     <name>WSO2 Carbon - API Security Handler Service Stub</name>
     <url>http://wso2.org</url>
 
