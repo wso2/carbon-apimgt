@@ -1,5 +1,12 @@
 <% jagg.template("stats/api-top-users", function(inputs, outputs, jagg) { %>
 
+<% if(outputs.apiName != null && outputs.version != null) { %>
+    <script>
+        window.requestedApiName = '<%=outputs.apiName%>';
+        window.requestedVersion = '<%=outputs.version%>';
+    </script>
+<%}%>        
+ 
 <div class="page-header"> <h2><%=i18n.localize("Top API Users")%></h2></div>
 <div id="apiTopUsers-stat-page" class="stat-page">
     <%
@@ -38,7 +45,7 @@
 			<div id="rangeSliderWrapper" >
                 <div id="dateRangePickerContainer" style="text-align:right">
                     <div class="btn-group" role="group">
-                       <button id="hour-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Hour")%>
+                       <button id="hour-btn" type="button" class="btn btn-default date-range disabled"><%=i18n.localize("Hour")%>
                        </button>
                        <button id="today-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Day")%>
                        </button>
