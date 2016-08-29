@@ -1161,8 +1161,8 @@
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
-        <swagger.parser.version>1.0.17.wso2v1</swagger.parser.version>
+        <swagger.codegen.version>2.2.0.wso2v1</swagger.codegen.version>
+        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
