@@ -1,5 +1,33 @@
 $( document ).ready(function() {
 
+    $("#designNewAPI").click(function(){
+        var btn = $(this);
+        $(btn).buttonLoader('start');
+        $('#designNewAPI-form').ajaxSubmit({
+            success:function(responseText, statusText, xhr, $form){
+                $(btn).buttonLoader('stop');
+                if (!responseText.error) {
+                    window.location = jagg.site.context + "/design"
+                }else {
+                    if (responseText.message == "timeout") {
+                        if (ssoEnabled) {
+                             var currentLoc = window.location.pathname;
+                             if (currentLoc.indexOf(".jag") >= 0) {
+                                 location.href = "index.jag";
+                             } else {
+                                 location.href = 'site/pages/index.jag';
+                             }
+                        } else {
+                             jagg.showLogin();
+                        }
+                    } else {
+                        jagg.message({content:responseText.message,type:"error"});
+                    }
+                }
+            }, dataType: 'json'
+        });
+    });
+
     $("#startFromExistingAPI").click(function(){
         var btn = $(this);
         $(btn).buttonLoader('start');
