@@ -177,9 +177,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                 String userName = MultitenantUtils.getTenantAwareUsername(userId);
                 String tenantDomain = MultitenantUtils.getTenantDomain(userId);
                 userNameForSP = userName;
-                //applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
-                applicationName = userId+"@"+tenantDomain+"_"+profile.getClientName();
-
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
+               
                 grantTypes = profile.getGrantType();
 
                 ApplicationManagementService applicationManagementService = ApplicationManagementService.getInstance();
@@ -193,7 +192,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                     log.error(errorMsg);
                 }
                 if (appServiceProvider != null) {
-                    System.out.println("aPPLICATION Exixtsssss   ");
                     //retrieving the existing application
                     retrievedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
                         returnedAPP = retrievedApp;
