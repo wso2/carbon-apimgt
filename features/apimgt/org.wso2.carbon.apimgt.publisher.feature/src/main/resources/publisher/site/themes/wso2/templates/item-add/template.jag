@@ -115,8 +115,10 @@
 			</div>
 			<div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 				<div class="panel-body">
-					<form class="form-horizontal">
-	                        <button onclick="location.href='<%=jagg.url("/design")%>'" id="designNewAPI" id="designNewAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>
+					<form class="form-horizontal" id="designNewAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="new" type="hidden"/>
+	                        <button id="designNewAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>
 					</form>
 				</div>
 			</div>
