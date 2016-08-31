@@ -313,7 +313,6 @@
 												wsdl = api.wsdl;
 											}
 
-											session.put( "wsdl", null );
 										%>
 										<div id="api_designer" class="col-sm-9">
 											<div class="form-group form-inline api_wsdl">
