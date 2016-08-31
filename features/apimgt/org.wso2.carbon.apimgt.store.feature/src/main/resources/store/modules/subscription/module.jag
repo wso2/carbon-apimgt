@@ -1,7 +1,7 @@
 <%
 jagg.module("subscription", {
-    generateClientSdk:function(){
-        return jagg.require(jagg.getModulesDir()+"subscription/list.jag").generateClientSdk.apply(this, arguments);
+    generateClientSDK:function(){
+        return jagg.require(jagg.getModulesDir()+"subscription/list.jag").generateClientSDK.apply(this, arguments);
     },
     addAPISubscription:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addAPISubscription.apply(this, arguments);

@@ -1,8 +1,8 @@
 
-function generateAndroidSdk(app,lang) {
+function generateSDK(app,lang) {
     $("#cssload-contain").fadeIn();
-    jagg.post("/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSdk&selectedApp=&language=", {
-        action:"generateSdk",
+    jagg.post("/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSDK&selectedApp=&language=", {
+        action:"generateSDK",
         selectedApp:app,
         language:lang,
     }, function (result) {

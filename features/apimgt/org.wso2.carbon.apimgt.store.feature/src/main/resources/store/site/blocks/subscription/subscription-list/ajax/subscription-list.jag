@@ -25,7 +25,7 @@ include("/jagg/jagg.jag");
             error:true,
             message: msg.error.invalidInputs(validation_errors)
         });
-    } else if (action == "generateSdk"){
+    } else if (action == "generateSDK"){
         if (!user) {
             if(!ssoEnabled){
                 print({
@@ -56,9 +56,28 @@ include("/jagg/jagg.jag");
             language=null;
         }
 
+        if (request.getParameter('apiName') != null) {
+            apiName = request.getParameter('apiName');
+        }
+        else {
+            apiName = null;
+        }
+        if (request.getParameter('apiVersion') != null) {
+            apiVersion = request.getParameter('apiVersion');
+        }
+        else {
+            apiVersion = null;
+        }
+        if (request.getParameter('apiProvider') != null) {
+            apiProvider = request.getParameter('apiProvider');
+        }
+        else {
+            apiProvider = null;
+        }
+
         var groupId = session.get("groupId");
         mod = jagg.module("subscription");
-        result = mod.generateClientSdk(selectedApp,language,user.username,groupId);
+        result = mod.generateClientSDK(selectedApp, language, user.username, groupId, apiName, apiVersion, apiProvider);
 
         if (result.error) {
             if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
