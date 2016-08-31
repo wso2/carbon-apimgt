@@ -114,8 +114,8 @@ var drawTopAPIUsersTable = function () {
     var $dataTable = $('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiTopUsersTable"></table>');
 
     $dataTable.append($('<thead class="tableHead"><tr>' +
-        '<th width="20%">User</th>' +
-        '<th  width="15%">Number of API Calls</th>' +
+        '<th width="40%">User</th>' +
+        '<th  width="60%">Number of API Calls</th>' +
         '</tr></thead>'));
     $('#tableContainer').append($dataTable);
 
@@ -137,13 +137,26 @@ var drawTopAPIUsersTable = function () {
         },
         "columns": [
             {"data": "user"},
-            {"data": "totalRequestCount"}
-        ]
+            {"data": "requestCount"}
+        ],
+        "columnDefs": [{
+            "targets": 0,
+            "render": function (data, type, full, meta) {
+                return '<a href="#" class="show-model-user" data-user="' + data + '">' + data + '</a>';
+            }
+        },{
+            "targets": 1,
+            "render": function (data, type, full, meta) {
+                var total = full.totalRequestCount;
+                var value = ((data / total) * 100).toPrecision(3);
+                return '<div class="text-xs-center" id="example-caption-1">'+ data + '<i> (' + value+'%)</i></div><div class="progress"><div class="progress-bar progress-bar-success active progress-bar-animated" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:'+ value+'%"></div></div>';
+            }
+        }]
     });
 
-    $dataTable.on( 'draw.dt', function () {
+    $dataTable.on('draw.dt', function () {
         var $noDataContainer = $('#noData');
-        if($dataTable.DataTable().data().length === 0) {
+        if ($dataTable.DataTable().data().length === 0) {
             $('#tableContainer').hide();
             $noDataContainer.html('');
             $noDataContainer.append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
@@ -152,6 +165,32 @@ var drawTopAPIUsersTable = function () {
             $noDataContainer.html('');
         }
     });
+
+    $(document).on("click", ".show-model-user", function () {
+        var username = $(this).data('user');
+        jagg.post("/site/blocks/user/ajax/user.jag", {action: "getUserDefaultProfile", username: username},
+            function (json) {
+                if (!json.error) {
+                    var profileTable = $('#profileTable');
+                    profileTable.find('thead tr').empty();
+                    profileTable.find('tbody tr').empty();
+                    var profileData = json.profileData;
+                    insertFieldToProfileTable("profileTable", "Username", username);
+                    for (var field in profileData) {
+                        if (profileData.hasOwnProperty(field)) {
+                            insertFieldToProfileTable("profileTable", field, profileData[field]);
+                        }
+                    }
+                    $("#userProfileModel").modal();
+                }
+            }
+        );
+    });
+
+    function insertFieldToProfileTable (table, field, value) {
+        var profileTable = $('#' + table);
+        profileTable.find('tbody').append('<tr><td>' + field + '</td><td>' + value + '</td></tr>');
+    }
 };
 
 var populateAPIList = function () {
@@ -218,9 +257,5 @@ function getDateTime(currentDay, fromDay) {
 function reloadDataTable() {
     var dataTable = $('#apiTopUsersTable').DataTable();
     dataTable.draw();
-    
-    /*if (dataTable.data().length === 0) {
-        alert();
-    }*/
 }
 

@@ -6,7 +6,9 @@
         window.requestedVersion = '<%=outputs.version%>';
     </script>
 <%}%>        
- 
+<style>
+    .modal-dialog{ position: relative; display: table; overflow-y: auto; overflow-x: auto; width: auto; min-width: 500px; }
+</style>
 <div class="page-header"> <h2><%=i18n.localize("Top API Users")%></h2></div>
 <div id="apiTopUsers-stat-page" class="stat-page">
     <%
@@ -36,10 +38,14 @@
         </div>
     
         <div class="col-sm-2">   
-            <select id="apiSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
+            <select id="apiSelect" class="selectpicker" data-live-search="true" style="margin-left :10px">
+                <option value="default" disabled>Loading ..</option>
+            </select>
         </div>  
         <div class="col-sm-2" id="select-version-btn">
-            <select id="versionSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
+            <select id="versionSelect" class="selectpicker" data-live-search="true" style="margin-left :10px">
+                <option value="default" disabled>Loading ..</option>
+            </select>
         </div>
         <div class="col-sm-6">
 			<div id="rangeSliderWrapper" >
@@ -66,6 +72,29 @@
     
     <div id="spinner" class="center-wrapper">
             <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userProfileModel" class="modal model-sm fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">User Information</h4>
+          </div>
+          <div class="modal-body">
+              <table id="profileTable" class="table table-striped">
+                <tbody>
+                  <tr></tr>
+                </tbody>
+              </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="noData"></div>
