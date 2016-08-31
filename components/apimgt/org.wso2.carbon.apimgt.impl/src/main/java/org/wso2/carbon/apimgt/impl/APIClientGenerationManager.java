@@ -18,14 +18,20 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.swagger.codegen.ClientOptInput;
+import io.swagger.codegen.DefaultGenerator;
+import io.swagger.codegen.Generator;
+import io.swagger.codegen.config.CodegenConfigurator;
+import io.swagger.models.Model;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
-import io.swagger.models.Model;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -33,22 +39,12 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import io.swagger.codegen.config.CodegenConfigurator;
-import io.swagger.codegen.ClientOptInput;
-import io.swagger.codegen.DefaultGenerator;
+import java.util.*;
 
 /*
  * This class is used to generate SDKs for subscribed APIs
@@ -96,10 +92,10 @@ public class APIClientGenerationManager {
      * @param apiVersion version of the subscribed API
      * @param apiProvider provider of the subscribed API
      * @return a map containing the zip file name and its' temporary location until it is downloaded
-     * @throws APIClientGenerationException if failed to generate the SDK
+     * @throws org.wso2.carbon.apimgt.impl.APIClientGenerationException if failed to generate the SDK
      */
     public Map<String, String> generateSDK(String appName, String sdkLanguage, String userName, String groupId,
-                                             String apiName, String apiVersion, String apiProvider)
+                                           String apiName, String apiVersion, String apiProvider)
             throws APIClientGenerationException {
         Subscriber currentSubscriber = null;
         String swaggerAPIDefinition = null;
@@ -119,10 +115,10 @@ public class APIClientGenerationManager {
         if (apiSet.isEmpty()) {
             return null;
         }
-
         File spec = null;
+        boolean isFirstApi = true;
         String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator +
-                                                                    UUID.randomUUID().toString() + ".json";
+                UUID.randomUUID().toString() + ".json";
         String clientOutPutDir;
         String sourceToZip;
         String zipName;
@@ -159,8 +155,6 @@ public class APIClientGenerationManager {
         for (Iterator<SubscribedAPI> apiIterator = apiSet.iterator(); apiIterator.hasNext(); ) {
 
             SubscribedAPI subscribedAPI = apiIterator.next();
-
-            //get the exact API for the subscription
             if (subscribedAPI.getApiId().getApiName().equals(apiName) &&
                     subscribedAPI.getApiId().getVersion().equals(apiVersion) &&
                     subscribedAPI.getApiId().getProviderName().equals(apiProvider)) {
@@ -169,15 +163,14 @@ public class APIClientGenerationManager {
                         subscribedAPI.getApiId().getVersion(), subscribedAPI.getApiId().getProviderName());
                 String swaggerJsonResourcePath = resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
 
-
-
                 try {
-                    isResourceExists = consumer.registry.resourceExists(swaggerJsonResourcePath);
+                    isResourceExists = consumer.registry.resourceExists
+                            (swaggerJsonResourcePath);
                 } catch (RegistryException e) {
                     log.error("Error while checking the swagger resource exists or not in : "+swaggerJsonResourcePath, e);
                     throw new APIClientGenerationException("Error while checking the swagger resource exists or not in : "+swaggerJsonResourcePath, e);
                 }
-                if (isResourceExists) {
+                if (isFirstApi && isResourceExists) {
                     try {
                         swaggerAPIDefinition = consumer.definitionFromSwagger20.getAPIDefinition
                                 (subscribedAPI.getApiId(), consumer.registry);
@@ -189,17 +182,18 @@ public class APIClientGenerationManager {
                     paths = initial.getPaths();
                     definitions = initial.getDefinitions();
                     securityDefinitions = initial.getSecurityDefinitions();
-
+                    isFirstApi = false;
                 }
 
                 isResourceExists = false;
                 try {
-                    isResourceExists = consumer.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
+                    isResourceExists = consumer.registry.resourceExists
+                            (resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
                 } catch (RegistryException e) {
                     log.error("Problem while checking whether the resource exists or not", e);
                     throw new APIClientGenerationException("Problem while checking whether the resource exists or not", e);
                 }
-                if (isResourceExists) {
+                if (!isFirstApi && isResourceExists) {
                     try {
                         swaggerAPIDefinition = consumer.definitionFromSwagger20.getAPIDefinition
                                 (subscribedAPI.getApiId(), consumer.registry);
@@ -207,9 +201,6 @@ public class APIClientGenerationManager {
                         log.error("Error loading swagger file from registry", e);
                         throw new APIClientGenerationException("Error loading swagger file from registry", e);
                     }
-
-                    //initial = new SwaggerParser().parse(swaggerAPIDefinition);//for below code block
-
                     temp = new SwaggerParser().parse(swaggerAPIDefinition);
                     tempPaths = temp.getPaths();
                     if (paths == null && tempPaths != null) {
@@ -253,8 +244,8 @@ public class APIClientGenerationManager {
                     bufferedWriter = new BufferedWriter(fileWriter);
                     bufferedWriter.write(swaggerAPIDefinition);
                 } catch (IOException e) {
-                    log.error("Error occurred while creating the temporary swagger file.", e);
-                    throw new APIClientGenerationException("Error occurred while creating the temporary swagger file.", e);
+                    log.error("problem when storing the temporary swagger file", e);
+                    throw new APIClientGenerationException("problem when storing the temporary swagger file", e);
                 } finally {
                     IOUtils.closeQuietly(bufferedWriter);
                     IOUtils.closeQuietly(fileWriter);
