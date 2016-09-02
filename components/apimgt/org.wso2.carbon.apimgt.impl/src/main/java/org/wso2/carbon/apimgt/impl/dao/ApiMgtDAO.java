@@ -791,9 +791,9 @@ public class ApiMgtDAO {
         boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
         if(!isAdvancedThrottleEnabled) {
             if (defaultVersionInvoked) {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL_API_PRODUCT;
             } else {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL_API_PRODUCT;
             }
         } else {
             if (defaultVersionInvoked) {
@@ -855,7 +855,10 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
-                infoDTO.setProductID("1");
+
+                //TODO when we implemented API_Product concept completely product id should be retrieved as part of
+                //key validation process that need to implemented here
+                infoDTO.setProductID(rs.getString("API_PRODUCT_ID"));
 
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
