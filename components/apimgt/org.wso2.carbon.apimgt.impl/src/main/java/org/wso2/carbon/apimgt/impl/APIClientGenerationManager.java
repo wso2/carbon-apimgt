@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -20,14 +20,11 @@ package org.wso2.carbon.apimgt.impl;
 
 import io.swagger.codegen.ClientOptInput;
 import io.swagger.codegen.DefaultGenerator;
-import io.swagger.codegen.Generator;
 import io.swagger.codegen.config.CodegenConfigurator;
-import io.swagger.models.Model;
-import io.swagger.models.Path;
 import io.swagger.models.Swagger;
-import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -44,16 +41,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /*
- * This class is used to generate SDKs for subscribed APIs
+ * This class is used to generate SDKs for subscribed APIs for a given application.
  */
 
 public class APIClientGenerationManager {
 
     private static final Log log = LogFactory.getLog(APIClientGenerationManager.class);
-    private static final Map<String, String> langCodeGen= new HashMap<String, String>();
+    private static final Map<String, String> langCodeGen = new HashMap<String, String>();
 
     public APIClientGenerationManager() {
         langCodeGen.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
@@ -82,48 +83,46 @@ public class APIClientGenerationManager {
     }
 
     /**
-     * This method generates SDK for a given API subscriptions with a given application
+     * This method generates client side SDK for a given API subscriptions with a given application
      *
-     * @param appName name of the application
+     * @param appName     name of the application
      * @param sdkLanguage preferred SDK language
-     * @param userName username of the logged in user
-     * @param groupId group ID of the logged in user
-     * @param apiName name of the subscribed API
-     * @param apiVersion version of the subscribed API
+     * @param userName    username of the logged in user
+     * @param groupId     group ID of the logged in user
+     * @param apiName     name of the subscribed API
+     * @param apiVersion  version of the subscribed API
      * @param apiProvider provider of the subscribed API
      * @return a map containing the zip file name and its' temporary location until it is downloaded
-     * @throws org.wso2.carbon.apimgt.impl.APIClientGenerationException if failed to generate the SDK
+     * @throws APIClientGenerationException if failed to generate the SDK
      */
     public Map<String, String> generateSDK(String appName, String sdkLanguage, String userName, String groupId,
                                            String apiName, String apiVersion, String apiProvider)
             throws APIClientGenerationException {
-        Subscriber currentSubscriber = null;
-        String swaggerAPIDefinition = null;
-        Set<SubscribedAPI> apiSet = null;
-        String resourcePath = null;
-        APIConsumerImpl consumer = null;
+
+        Set<SubscribedAPI> subscribedAPIs;
+        APIConsumerImpl consumerImplInstance;
         try {
-            consumer = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
+            consumerImplInstance = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-            currentSubscriber = apiMgtDAO.getSubscriber(userName);
-            apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName, groupId);
+            Subscriber currentSubscriber = apiMgtDAO.getSubscriber(userName);
+            if (currentSubscriber == null) {
+                log.error("No subscription exists for application : " + appName);
+                throw new APIClientGenerationException("No subscription exists for application : " + appName);
+            }
+            subscribedAPIs = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName, groupId);
         } catch (APIManagementException e) {
             log.error("Error while getting the subscribed API set for application : " + appName, e);
-            throw new APIClientGenerationException("Error while getting the subscribed API set for application : " + appName, e);
+            throw new APIClientGenerationException("Error while getting the subscribed API set for application : " +
+                    appName, e);
         }
 
-        if (apiSet.isEmpty()) {
+        if (subscribedAPIs.isEmpty()) {
+            log.info("No subscription exists for application : " + appName);
             return null;
         }
-        File spec = null;
-        boolean isFirstApi = true;
-        String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator +
-                UUID.randomUUID().toString() + ".json";
-        String clientOutPutDir;
-        String sourceToZip;
-        String zipName;
-        ZIPUtils zipUtils = new ZIPUtils();
-        File tempFolder = new File("tmp" + File.separator + "swaggerCodegen");
+
+        File tempFolder = new File
+                (APIConstants.TEMP_DIRECTORY_NAME + File.separator + APIConstants.SWAGGER_CODEGEN_DIRECTORY);
         if (!tempFolder.exists()) {
             tempFolder.mkdir();
         } else {
@@ -142,97 +141,51 @@ public class APIClientGenerationManager {
             tempFolder.mkdir();
         }
 
-        Swagger initial = null;
-        Map<String, Path> paths = null;
-        Map<String, Path> tempPaths = null;
-        Map<String, Model> definitions = null;
-        Map<String, Model> tempDefinitions = null;
-        Map<String, SecuritySchemeDefinition> securityDefinitions = null;
-        Map<String, SecuritySchemeDefinition> tempSecurityDefinitions = null;
-        Swagger temp;
-        boolean isResourceExists = false;
+        File spec = null;
+        String specLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator +
+                APIConstants.SWAGGER_CODEGEN_DIRECTORY + File.separator + UUID.randomUUID().toString() +
+                APIConstants.JSON_FILE_EXTENSION;
 
-        for (Iterator<SubscribedAPI> apiIterator = apiSet.iterator(); apiIterator.hasNext(); ) {
+        for (SubscribedAPI subscribedAPI : subscribedAPIs) {
 
-            SubscribedAPI subscribedAPI = apiIterator.next();
-            if (subscribedAPI.getApiId().getApiName().equals(apiName) &&
-                    subscribedAPI.getApiId().getVersion().equals(apiVersion) &&
-                    subscribedAPI.getApiId().getProviderName().equals(apiProvider)) {
+            String subscribedAPIName = subscribedAPI.getApiId().getApiName();
+            String subscribedAPIVersion = subscribedAPI.getApiId().getVersion();
+            String subscribedAPIProvider = subscribedAPI.getApiId().getProviderName();
 
-                resourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPI.getApiId().getApiName(),
-                        subscribedAPI.getApiId().getVersion(), subscribedAPI.getApiId().getProviderName());
-                String swaggerJsonResourcePath = resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
+            //the following condition will fetch the exact API for the subscription
+            if (subscribedAPIName.equals(apiName) && subscribedAPIVersion.equals(apiVersion) &&
+                    subscribedAPIProvider.equals(apiProvider)) {
+
+                boolean isResourceExists;
+                String registryResourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPIName,
+                        subscribedAPIVersion, subscribedAPIProvider);
+                String swaggerResourceAbsolutePath = registryResourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
 
                 try {
-                    isResourceExists = consumer.registry.resourceExists
-                            (swaggerJsonResourcePath);
+                    isResourceExists = consumerImplInstance.registry.resourceExists(swaggerResourceAbsolutePath);
                 } catch (RegistryException e) {
-                    log.error("Error while checking the swagger resource exists or not in : "+swaggerJsonResourcePath, e);
-                    throw new APIClientGenerationException("Error while checking the swagger resource exists or not in : "+swaggerJsonResourcePath, e);
-                }
-                if (isFirstApi && isResourceExists) {
-                    try {
-                        swaggerAPIDefinition = consumer.definitionFromSwagger20.getAPIDefinition
-                                (subscribedAPI.getApiId(), consumer.registry);
-                    } catch (APIManagementException e) {
-                        log.error("Error loading swagger file from registry", e);
-                        throw new APIClientGenerationException("Error loading swagger file from registry", e);
-                    }
-                    initial = new SwaggerParser().parse(swaggerAPIDefinition);
-                    paths = initial.getPaths();
-                    definitions = initial.getDefinitions();
-                    securityDefinitions = initial.getSecurityDefinitions();
-                    isFirstApi = false;
+                    log.error("Error while checking whether the resource exists or not", e);
+                    throw new APIClientGenerationException
+                            ("Error while checking whether the resource exists or not", e);
                 }
 
-                isResourceExists = false;
-                try {
-                    isResourceExists = consumer.registry.resourceExists
-                            (resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
-                } catch (RegistryException e) {
-                    log.error("Problem while checking whether the resource exists or not", e);
-                    throw new APIClientGenerationException("Problem while checking whether the resource exists or not", e);
-                }
-                if (!isFirstApi && isResourceExists) {
+                String swaggerAPIDefinition;
+                Swagger swaggerDoc;
+                if (isResourceExists) {
                     try {
-                        swaggerAPIDefinition = consumer.definitionFromSwagger20.getAPIDefinition
-                                (subscribedAPI.getApiId(), consumer.registry);
+                        swaggerAPIDefinition = consumerImplInstance.getSwagger20Definition(subscribedAPI.getApiId());
                     } catch (APIManagementException e) {
-                        log.error("Error loading swagger file from registry", e);
-                        throw new APIClientGenerationException("Error loading swagger file from registry", e);
+                        log.error("Error loading swagger file from registry.", e);
+                        throw new APIClientGenerationException("Error loading swagger file from registry.", e);
                     }
-                    temp = new SwaggerParser().parse(swaggerAPIDefinition);
-                    tempPaths = temp.getPaths();
-                    if (paths == null && tempPaths != null) {
-                        paths = tempPaths;
-                    } else if (tempPaths != null) {
-                        for (Map.Entry<String, Path> entryPath : tempPaths.entrySet()) {
-                            paths.put(entryPath.getKey(), entryPath.getValue());
-                        }
-                    }
-                    tempDefinitions = temp.getDefinitions();
-                    if (definitions == null && tempDefinitions != null) {
-                        definitions = tempDefinitions;
-                    } else if (tempDefinitions != null) {
-                        for (Map.Entry<String, Model> entryDef : tempDefinitions.entrySet()) {
-                            definitions.put(entryDef.getKey(), entryDef.getValue());
-                        }
-                    }
-                    tempSecurityDefinitions = temp.getSecurityDefinitions();
-                    if (securityDefinitions == null && tempSecurityDefinitions != null) {
-                        securityDefinitions = tempSecurityDefinitions;
-                    } else if (tempSecurityDefinitions != null) {
-                        for (Map.Entry<String, SecuritySchemeDefinition> entrySecurityDef : tempSecurityDefinitions
-                                .entrySet()) {
-                            securityDefinitions.put(entrySecurityDef.getKey(), entrySecurityDef.getValue());
-                        }
-                    }
+                    swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
+                } else {
+                    log.error("Resource does not exists in : " + swaggerResourceAbsolutePath);
+                    throw new APIClientGenerationException("Resource does not exists in : " +
+                            swaggerResourceAbsolutePath);
                 }
-
-                initial.setPaths(paths);
-                initial.setDefinitions(definitions);
-                initial.setSecurityDefinitions(securityDefinitions);
-                swaggerAPIDefinition = Json.pretty(initial);
+                //format the swagger definition before writing to the file
+                String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
                 spec = new File(specLocation);
                 FileWriter fileWriter = null;
                 BufferedWriter bufferedWriter = null;
@@ -242,10 +195,10 @@ public class APIClientGenerationManager {
                     }
                     fileWriter = new FileWriter(spec.getAbsoluteFile());
                     bufferedWriter = new BufferedWriter(fileWriter);
-                    bufferedWriter.write(swaggerAPIDefinition);
+                    bufferedWriter.write(formattedSwaggerAPIDefinition);
                 } catch (IOException e) {
-                    log.error("problem when storing the temporary swagger file", e);
-                    throw new APIClientGenerationException("problem when storing the temporary swagger file", e);
+                    log.error("Error while storing the temporary swagger file.", e);
+                    throw new APIClientGenerationException("Error while storing the temporary swagger file.", e);
                 } finally {
                     IOUtils.closeQuietly(bufferedWriter);
                     IOUtils.closeQuietly(fileWriter);
@@ -253,27 +206,28 @@ public class APIClientGenerationManager {
                 break;
             }
         }
-        clientOutPutDir = "tmp" + File.separator + "swaggerCodegen" + File.separator + appName + "_" + apiName + "_" +
-                apiVersion + "_" + sdkLanguage;
-        generateClient(appName, specLocation, sdkLanguage, clientOutPutDir);
-        sourceToZip = "tmp" + File.separator + "swaggerCodegen" + File.separator + appName + "_" + apiName + "_" +
-                apiVersion + "_" + sdkLanguage;
-        zipName = "tmp" + File.separator + "swaggerCodegen" +
-                File.separator + appName + "_" + apiName + "_" + apiVersion + "_" + sdkLanguage + ".zip";
-        File deleteProject = new File(clientOutPutDir);
+
+        String outputDirectoryName = appName + "_" + apiName + "_" + apiVersion + "_" + sdkLanguage;
+        String temporaryOutputPath = APIConstants.TEMP_DIRECTORY_NAME + File.separator +
+                APIConstants.SWAGGER_CODEGEN_DIRECTORY + File.separator + outputDirectoryName;
+        generateClient(appName, specLocation, sdkLanguage, temporaryOutputPath);
+        String temporaryZipFilePath = temporaryOutputPath + APIConstants.ZIP_FILE_EXTENSION;
+
         try {
-            zipUtils.zipDir(sourceToZip, zipName);
-            FileUtils.deleteDirectory(deleteProject);
+            ZIPUtils zipUtils = new ZIPUtils();
+            zipUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
+            FileUtils.deleteDirectory(new File(temporaryOutputPath));
         } catch (IOException e) {
-            log.error("Problem while archiving the generated SDK", e);
-            throw new APIClientGenerationException("Problem while archiving the generated SDK", e);
+            log.error("Error while generating .zip archive for the generated SDK.", e);
+            throw new APIClientGenerationException("Error while generating .zip archive for the generated SDK.", e);
         }
-        spec.delete();
-        File zipFile = new File(zipName);
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("path", zipFile.getAbsolutePath());
-        result.put("fileName", appName + "_" + apiName + "_" + apiVersion + "_" + sdkLanguage + ".zip");
-        return result;
+        FileUtils.deleteQuietly(spec);
+        //The below file object is closed and deleted by the caller, so it should left open until the SDK is downloaded.
+        File sdkArchive = new File(temporaryZipFilePath);
+        Map<String, String> sdkDataMap = new HashMap<String, String>();
+        sdkDataMap.put("path", sdkArchive.getAbsolutePath());
+        sdkDataMap.put("fileName", outputDirectoryName + APIConstants.ZIP_FILE_EXTENSION);
+        return sdkDataMap;
     }
 
     /**
@@ -281,24 +235,24 @@ public class APIClientGenerationManager {
      *
      * @return supported languages for SDK generation
      */
-    public String getSupportedSDKLanguages()    {
+    public String getSupportedSDKLanguages() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
 
         String supportedLanguages = config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
-
         return supportedLanguages;
 
     }
 
     /**
+     * This method is used to generate SDKs for subscribed APIs for a given application
      *
-     * @param appName
-     * @param spec
-     * @param lang
-     * @param outPutDir
+     * @param appName             name of the application
+     * @param specLocation        location of the swagger spec for the API
+     * @param sdkLanguage         preferred SDK language
+     * @param temporaryOutputPath temporary location where the SDK archive is saved until downloaded
      */
-    private void generateClient(String appName, String spec, String lang, String outPutDir) {
+    private void generateClient(String appName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
@@ -309,9 +263,9 @@ public class APIClientGenerationManager {
         codegenConfigurator
                 .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + appName);
         codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + appName);
-        codegenConfigurator.setInputSpec(spec);
-        codegenConfigurator.setLang(langCodeGen.get(lang));
-        codegenConfigurator.setOutputDir(outPutDir);
+        codegenConfigurator.setInputSpec(specLocation);
+        codegenConfigurator.setLang(langCodeGen.get(sdkLanguage));
+        codegenConfigurator.setOutputDir(temporaryOutputPath);
         final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
 
