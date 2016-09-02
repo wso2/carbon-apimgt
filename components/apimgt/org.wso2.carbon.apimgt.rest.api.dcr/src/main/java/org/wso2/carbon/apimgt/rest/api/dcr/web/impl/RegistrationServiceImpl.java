@@ -172,13 +172,12 @@ public class RegistrationServiceImpl implements RegistrationService {
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
 
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 String userName = MultitenantUtils.getTenantAwareUsername(userId);
                 String tenantDomain = MultitenantUtils.getTenantDomain(userId);
                 userNameForSP = userName;
                 applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
-               
+
                 grantTypes = profile.getGrantType();
 
                 ApplicationManagementService applicationManagementService = ApplicationManagementService.getInstance();
@@ -313,8 +312,6 @@ public class RegistrationServiceImpl implements RegistrationService {
      */
     private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,String userNameForSP,
                                                    String grantType) throws APIManagementException {
-
-        System.out.println("Inside app creation");
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
 
@@ -524,7 +521,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         Iterator it = sampleMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            System.out.println(pair.getKey() + " = " + pair.getValue());
             updatingApp.addParameter((String) pair.getKey(), pair.getValue());
             it.remove();
         }
