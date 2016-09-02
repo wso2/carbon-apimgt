@@ -267,6 +267,32 @@ public class SQLConstants {
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
+        public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL_API_PRODUCT =
+                " SELECT " +
+                        "   SUB.TIER_ID," +
+                        "   SUBS.USER_ID," +
+                        "   SUB.SUB_STATUS," +
+                        "   SUB.API_PRODUCT_ID," +
+                        "   APP.APPLICATION_ID," +
+                        "   APP.NAME," +
+                        "   APP.APPLICATION_TIER," +
+                        "   AKM.KEY_TYPE," +
+                        "   API.API_NAME," +
+                        "   API.API_PROVIDER " +
+                        " FROM " +
+                        "   AM_SUBSCRIPTION SUB," +
+                        "   AM_SUBSCRIBER SUBS," +
+                        "   AM_APPLICATION APP," +
+                        "   AM_APPLICATION_KEY_MAPPING AKM," +
+                        "   AM_API API " +
+                        " WHERE " +
+                        "   API.CONTEXT = ? " +
+                        "   AND AKM.CONSUMER_KEY = ? " +
+                        "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                        "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                        "   AND API.API_ID = SUB.API_ID" +
+                        "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+
     public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
             "   SUB.TIER_ID," +
@@ -292,6 +318,33 @@ public class SQLConstants {
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+
+        public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL_API_PRODUCT =
+                " SELECT " +
+                        "   SUB.TIER_ID," +
+                        "   SUBS.USER_ID," +
+                        "   SUB.SUB_STATUS," +
+                        "   SUB.API_PRODUCT_ID," +
+                        "   APP.APPLICATION_ID," +
+                        "   APP.NAME," +
+                        "   APP.APPLICATION_TIER," +
+                        "   AKM.KEY_TYPE," +
+                        "   API.API_NAME," +
+                        "   API.API_PROVIDER" +
+                        " FROM " +
+                        "   AM_SUBSCRIPTION SUB," +
+                        "   AM_SUBSCRIBER SUBS," +
+                        "   AM_APPLICATION APP," +
+                        "   AM_APPLICATION_KEY_MAPPING AKM," +
+                        "   AM_API API" +
+                        " WHERE " +
+                        "   API.CONTEXT = ? " +
+                        "   AND AKM.CONSUMER_KEY = ? " +
+                        "   AND API.API_VERSION = ? " +
+                        "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                        "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                        "   AND API.API_ID = SUB.API_ID" +
+                        "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
