@@ -88,7 +88,7 @@
 							    <div class="row">
 							        <div class="col-sm-12">
 									<div class="panel-group accordion" role="tablist">
-									<div class="panel panel-default">
+									<div class="panel panel-default" id="select-managed-api">
 							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
 						                    <div>
@@ -140,7 +140,7 @@
 																  {{#if label }}
 																  <span class="input-group-addon">{{ label }}</span>
 																  {{/if}}
-																  <input type="text" class="form-control endpoint_input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">																  
+																  <input type="text" class="form-control endpoint_input" id="endpoint-input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">
 																  <span class="input-group-btn">
 																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title='<%=i18n.localize("Advanced Options")%>'><i class="fw fw-settings"></i></button>
 																    <button class="btn btn-secondary check_url_valid" type="button" ><%= i18n.localize("Test")%></button>
