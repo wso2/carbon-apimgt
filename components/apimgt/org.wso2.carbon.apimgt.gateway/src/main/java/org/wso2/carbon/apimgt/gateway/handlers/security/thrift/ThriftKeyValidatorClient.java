@@ -120,6 +120,7 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setSubscriberTenantDomain(thriftDTO.getSubscriberTenantDomain());
         apiKeyValidationInfoDTO.setStopOnQuotaReach(thriftDTO.isStopOnQuotaReach());
         apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
+        apiKeyValidationInfoDTO.setProductID(thriftDTO.getProductId());
         return apiKeyValidationInfoDTO;
     }
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion

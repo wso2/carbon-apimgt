@@ -59,6 +59,17 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+
+    public String getProductID() {
+        return productID;
+    }
+
+    public void setProductID(String productID) {
+        this.productID = productID;
+    }
+
+    private  String productID;
+
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
     }

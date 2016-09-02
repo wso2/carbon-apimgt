@@ -855,6 +855,7 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
+                infoDTO.setProductID("1");
 
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
