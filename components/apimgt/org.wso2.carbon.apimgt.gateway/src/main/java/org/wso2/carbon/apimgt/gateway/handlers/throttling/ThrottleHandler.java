@@ -154,6 +154,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
         String apiLevelThrottleKey;
 
+        //Product id will be used to identify product which API belogs to.
+        String apiProductId;
+
         //Throttle Tiers
         String applicationLevelTier;
         String subscriptionLevelTier;
@@ -190,6 +193,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
+            apiProductId = authContext.getApiProductID();
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
 
@@ -219,7 +223,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriberTenantDomain = authContext.getSubscriberTenantDomain();
                 applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
                 //TODO API level throttle key need to replace with API_PRODUCT Throttle key.
-                apiLevelThrottleKey = apiContext + ":" + apiVersion;
+                //API level throttle key need to replace with product ID
+                //apiLevelThrottleKey = apiContext + ":" + apiVersion;
+                apiLevelThrottleKey = apiProductId;
                 stopOnQuotaReach = authContext.isStopOnQuotaReach();
                 //If request is not blocked then only we perform throttling.
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
@@ -318,8 +324,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     if (!isResourceLevelThrottled) {
                         //Subscription Level Throttling
                         //TODO need to add logic for get API product Details as users are subscribe to product now and not API.
-                        subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
-                                                       + apiVersion;
+                        //Again this need to add API product ID and it should replace API id as follows.
+                        //subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"+ apiVersion;
+                        subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiProductId;
                         isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
                         if (!isSubscriptionLevelThrottled && authContext.getSpikeArrestLimit() > 0) {
