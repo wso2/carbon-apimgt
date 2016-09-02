@@ -33,6 +33,7 @@ struct APIKeyValidationInfoDTO {
     22: optional string subscriberTenantDomain;
     23: optional string spikeArrestUnit;
     24: optional bool stopOnQuotaReach;
+    25: optional string productId;
 }
 
 
