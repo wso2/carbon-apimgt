@@ -93,6 +93,20 @@ public abstract class APIUsageStatisticsClient {
                                                      String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
+     * this method return the top users for the for the provided API.
+     *
+     * @param apiName API name
+     * @param version version of the required API
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @param limit limit of the result
+     * @return a collection containing the data related to Api usage
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public abstract List<ApiTopUsersDTO> getTopApiUsers(String apiName, String version,
+            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+
+    /**
      * @param subscriberName subscriber name
      * @param groupId        group id of the subscriber
      * @param fromDate       starting date

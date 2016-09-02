@@ -210,6 +210,11 @@
             <groupId>xerces.wso2</groupId>
             <artifactId>xercesImpl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.identity.user.profile.stub</artifactId>
+            <version>5.2.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

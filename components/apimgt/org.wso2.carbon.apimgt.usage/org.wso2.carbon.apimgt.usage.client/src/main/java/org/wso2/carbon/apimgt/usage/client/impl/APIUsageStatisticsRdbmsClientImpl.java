@@ -400,6 +400,101 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
+     * this method return the top users for the for the provided API.
+     *
+     * @param apiName API name
+     * @param version version of the required API
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @param limit limit of the result
+     * @return a collection containing the data related to Api usage
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    @Override
+    public List<ApiTopUsersDTO> getTopApiUsers(String apiName, String version, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException {
+        return getTopApiUsers(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, apiName, version, fromDate,
+                toDate, limit);
+    }
+
+    /**
+     * This method gets the top user usage data for invoking APIs
+     *
+     * @param tableName name of the required table in the database
+     * @param apiName API name
+     * @param version version of the required API
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @param limit limit of the result
+     * @return a collection containing the data related to Api usage
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private List<ApiTopUsersDTO> getTopApiUsers(String tableName, String apiName, String version,
+            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+        //ignoring sql injection for keyString since it construct locally and no public access
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        List<ApiTopUsersDTO> apiTopUsersDataList = new ArrayList<ApiTopUsersDTO>();
+        try {
+            connection = dataSource.getConnection();
+            StringBuilder topApiUserQuery;
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+                long totalRequestCount = getTotalRequestCountOfAPIVersion(tableName, apiName, version,
+                        fromDate, toDate);
+                topApiUserQuery = new StringBuilder("SELECT " + APIUsageStatisticsClientConstants.USER_ID + ","
+                        + "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") "
+                        + "AS net_total_requests FROM "  + tableName + " WHERE "
+                        + APIUsageStatisticsClientConstants.API + "= ? AND ");
+
+                if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(version)) {
+                    topApiUserQuery.append(APIUsageStatisticsClientConstants.VERSION + "= ? AND ");
+                }
+
+                topApiUserQuery.append( "time BETWEEN  ? AND ? " + " GROUP BY "
+                        + APIUsageStatisticsClientConstants.USER_ID 
+                        + " ORDER BY net_total_requests DESC");
+
+                statement = connection.prepareStatement(topApiUserQuery.toString());
+                int index = 1;
+                statement.setString(index++, apiName);
+                if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(version)) {
+                    statement.setString(index++, version);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
+                resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
+                    long requestCount = resultSet.getLong("net_total_requests");
+                    ApiTopUsersDTO apiTopUsersDTO = new ApiTopUsersDTO();
+                    apiTopUsersDTO.setApiName(apiName);
+                    apiTopUsersDTO.setFromDate(fromDate);
+                    apiTopUsersDTO.setToDate(toDate);
+                    apiTopUsersDTO.setVersion(version);
+                    
+                    //remove @carbon.super from super tenant users
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(MultitenantUtils
+                            .getTenantDomain(userId))) {
+                        userId = MultitenantUtils.getTenantAwareUsername(userId);
+                    }
+                    apiTopUsersDTO.setUser(userId);
+                    apiTopUsersDTO.setRequestCount(requestCount);
+                    apiTopUsersDTO.setTotalRequestCount(totalRequestCount);
+                    apiTopUsersDataList.add(apiTopUsersDTO);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying top api users data from JDBC database", e);
+        } finally {
+            closeDatabaseLinks(resultSet, statement, connection);
+        }
+        return apiTopUsersDataList;
+    }
+
+    /**
      * This method gets the API faulty invocation data
      *
      * @param tableName name of the required table in the database
@@ -1589,6 +1684,36 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } finally {
             closeDatabaseLinks(rs, statement, connection);
         }
+    }
+
+    /**
+     * Retrieves total request count for the given period of time for particular API and Version. If version provided 
+     * as FOR_ALL_API_VERSIONS it will get total aggregated request count for all api versions
+     * 
+     * @param tableName tableName
+     * @param apiName API name
+     * @param apiVersion API version
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @return Total request count
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    private long getTotalRequestCountOfAPIVersion(String tableName, String apiName, String apiVersion, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+        List<APIUsage> apiUsages = getUsageByAPIVersionsData (tableName, fromDate, toDate, apiName);
+        long totalRequestCount = 0;
+        if (APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(apiVersion)) {
+            for (APIUsage usage : apiUsages) {
+                totalRequestCount += usage.getRequestCount();
+            }
+        } else {
+            for (APIUsage usage : apiUsages) {
+                if (apiVersion.equals(usage.getApiVersion())) {
+                    totalRequestCount += usage.getRequestCount();
+                }
+            }
+        }
+        return totalRequestCount;
     }
 
     /**
