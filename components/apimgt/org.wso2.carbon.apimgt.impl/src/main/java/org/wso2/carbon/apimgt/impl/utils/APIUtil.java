@@ -1176,12 +1176,10 @@ public final class APIUtil {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(key, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, key);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
+                    log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
                             ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
                             ", Tenant domain set in PrivilegedCarbonContext: " +
                             PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-                }
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
