@@ -28,25 +28,7 @@ import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -5388,6 +5370,37 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
     }
+
+
+    public void addAPIProduct(APIProduct apiProduct, int tenantId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        String query = SQLConstants.ADD_API_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(query, new String[]{"api_id"});
+            prepStmt.setString(1, apiProduct.getProvider());
+            prepStmt.setString(2, apiProduct.getProductName());
+            prepStmt.setString(3, apiProduct.getProductVersion());
+            prepStmt.setString(4, apiProduct.getApiProductTier());
+            prepStmt.setString(5, apiProduct.getCreatedUser());
+            prepStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(7, apiProduct.getUpdatedUser());
+            prepStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            prepStmt.execute();
+            connection.commit();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API: " + apiProduct.getProductName()+ " to the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+    }
+
+
 
     public void addAPI(API api, int tenantId) throws APIManagementException {
         Connection connection = null;
