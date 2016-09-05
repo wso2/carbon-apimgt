@@ -728,7 +728,7 @@ paths:
               type: string
         400:
           description: |
-            Bad Request.
+            Bad Request.                                            api
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
@@ -1360,6 +1360,468 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "APIProduct Collection" resource APIs
+######################################################
+  /products:
+
+#-----------------------------------------------------
+# Retrieve all APIProducts of a certain publisher
+#-----------------------------------------------------
+    get:
+      x-scope: apim:product_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v0.10/products\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v0.10/products
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP\/1.1 200 OK\nContent-Type:  application\/json\n \n{ \n   \"previous\":  \"\", \n   \"list\":     [ \n            { \n         \"productId\":  \"64eca60b-2e55-4c38-8603-e9e6bad7d809\", \n         \"provider\":  \"admin\", \n         \"name\":  \"ShoppingService-Premium\", \n         \"version\":  \"1.0.0\", \n         \"description\":  \"Shopping Service APIs product with premium access\", \n         \"status\":  \"PUBLISHED\"\n      }, \n            { \n         \"productId\":  \"79ecb63t-3e75-6c35-9204-i5u6bjl7i714\", \n         \"provider\":  \"admin\", \n         \"name\":  \"ShoppingService-Basic\", \n         \"version\":  \"1.0.0\", \n         \"description\":  \"Shopping Service APIs product with basic access\", \n         \"status\":  \"PUBLISHED\"\n      }, \n            { \n         \"productId\":  \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\", \n         \"provider\":  \"admin\", \n         \"name\":  \"OrderManager\", \n         \"version\":  \"2.0.0\", \n         \"description\":  \"Order Management related APIs product\", \n         \"status\":  \"PUBLISHED\"\n      } ], \n   \"next\":  \"\", \n   \"count\":  3\n }"
+      summary: Get all API products
+      description: |
+        This operation provides you a list of available API products of the user associated with the provided access token, qualifying under a given search condition.
+
+        Each retrieved API product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation.
+      parameters:
+        - $ref : '#/parameters/limit'
+        - $ref : '#/parameters/offset'
+        - name : query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an API Product if the provider of the API Product is exactly "wso2".
+
+            Additionally you can use wildcards.
+
+            Eg.
+            "provider:wso2*" will match an API Product if the provider of the API Product starts with "wso2".
+
+            Supported attribute modifiers are [**version, context, status,
+            description, subcontext, doc, provider**]
+
+            If no advanced attribute modifier has been specified, search will match the
+            given query string against API Product Name.
+
+          type: string
+        - $ref : "#/parameters/Accept"
+        - $ref : "#/parameters/If-None-Match"
+      tags:
+        - APIProduct (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying API Products is returned.
+          schema:
+            $ref: '#/definitions/APIProductList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        406:
+          description: |
+            Not Acceptable. The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+
+#-----------------------------------------------------
+# Create a new APIProduct
+#-----------------------------------------------------
+    post:
+      x-scope: apim:product_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/products"
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/products\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n  \r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n  \r\n}"
+      summary: Create a new API Product
+      description: |
+        This operation can be used to create a new API Product specifying the details of the API Product in the payload. The new API Product will be in `CREATED` state.
+
+      parameters:
+        - in: body
+          name: body
+          description: |
+            API Product object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/APIProduct'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - APIProduct (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/APIProduct'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# The "Individual APIProduct" resource APIs
+######################################################
+  /products/{productId}:
+
+#-----------------------------------------------------
+# Retrieve the details of an APIProduct definition
+#-----------------------------------------------------
+    get:
+      x-scope: apim:product_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\r\n   \r\n}"
+      summary: Get details of an API Product
+      description: |
+        Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API Product to retrive it.
+      parameters:
+        - $ref: '#/parameters/productId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - APIProduct (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Product is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+            $ref: '#/definitions/APIProduct'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API Product does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update the definition of an APIProduct
+#-----------------------------------------------------
+    put:
+      x-scope: apim:product_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f"
+      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n \r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n \r\n}"
+      summary: Update an API Product
+      description: |
+        This operation can be used to update an existing API Product.
+        But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.
+      parameters:
+        - $ref: '#/parameters/productId'
+        - in: body
+          name: body
+          description: |
+            API Product object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/APIProduct'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - APIProduct (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API Product object
+          schema:
+            $ref: '#/definitions/APIProduct'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete the definition of an APIProduct
+#-----------------------------------------------------
+    delete:
+      x-scope: apim:product_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/products/6fb74674-4ab8-4b52-9886-f9a376985060"
+      x-wso2-request: |
+        DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/products/6fb74674-4ab8-4b52-9886-f9a376985060
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete an API Product
+      description: |
+        This operation can be used to delete an existing API Product providing the Id of the API Product.
+      parameters:
+        - $ref: '#/parameters/productId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - APIProduct (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# The "Copy APIProduct" Processing Function resource API
+######################################################
+  /apis/copy-product:
+
+#-----------------------------------------------------
+# Create a new APIProduct based on an already existing one
+#-----------------------------------------------------
+    post:
+      x-scope: apim:product_create
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/copy-product?productId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\""
+      x-wso2-request: |
+        POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis/copy-product?productId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"2.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n \r\n}"
+      summary: Create a new API Product version
+      description: |
+        This operation can be used to create a new version of an existing API Product. The new version is specified as `newVersion` query parameter. New API Product will be in `CREATED` state.
+      parameters:
+        - name: newVersion
+          description: Version of the new API Product.
+          type: string
+          in: query
+          required: true
+        - $ref: '#/parameters/productId-Q'
+      tags:
+        - APIProduct (Individual)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created API Product as entity in the body. Location header contains URL of newly created API Product.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created API Product.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            API to copy does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Change APIProduct Lifecycle" Processing Function resource API
+######################################################
+  /apis/change-product-lifecycle:
+
+#-----------------------------------------------------
+# Change the lifecycle of an APIProduct
+#-----------------------------------------------------
+    post:
+      x-scope: apim:product_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/change-product-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
+      x-wso2-request: |
+        POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis/change-product-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Change API Product Status
+      description: |
+        This operation is used to change the lifecycle of an API Product. Eg: Publish an API Product which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.
+
+        For example, to Publish an API Product, `action` should be `Publish`.
+
+        Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.
+      parameters:
+        - name: action
+          description: |
+            The action to demote or promote the state of the API Product.
+
+            Supported actions are [ **Publish, Demote to Created, Block, Deprecate, Re-Publish, Retire **]
+
+          in: query
+          type: string
+          required: true
+          enum:
+            - Publish
+            - Demote to Created
+            - Block
+            - Deprecate
+            - Re-Publish
+            - Retire
+        - name: lifecycleChecklist
+          description: |
+
+            You can specify additional checklist items by using an **"attribute:"** modifier.
+
+            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API Product when it is promoted to
+            Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false"
+            format.
+
+            Supported checklist items are as follows.
+            1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API Product when it is promoted to Published state from Created state.
+            2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API Product although they may have subscribed to an older version.
+
+          type: string
+          in: query
+        - $ref: '#/parameters/productId-Q'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - APIProduct (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle changed successfully.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the changed API Product. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the API Product lifecycle has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API Product does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # The "Subscription Collection" resource APIs
@@ -2053,6 +2515,30 @@ parameters:
     required: true
     type: string
 
+# APIProduct Identifier
+# Specified as part of the path expression
+  productId:
+    name: productId
+    in: path
+    description: |
+      **API Product ID** consisting of the **UUID** of the API Product.
+      The combination of the provider of the API Product, name of the API Product and the version is also accepted as a valid API Product ID.
+      Should be formatted as **provider-name-version**.
+    required: true
+    type: string
+
+# APIProduct Identifier
+# Specified as part of the query string
+  productId-Q:
+    name: productId
+    in: query
+    description: |
+      **API PRODUCT ID** consisting of the **UUID** of the API Product.
+      The combination of the provider of the API Product, name of the API Product and the version is also accepted as a valid API Product ID.
+      Should be formatted as **provider-name-version**.
+    required: true
+    type: string
+
 
 # Document Identifier
 # Specified as part of the path expression
@@ -2497,6 +2983,115 @@ definitions:
       groupId:
         type: string
         example: ""
+
+#-----------------------------------------------------
+# The API Product List resource
+#-----------------------------------------------------
+  APIProductList:
+    title: API Product List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API Products returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/products?limit=1&offset=2&query="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/products?limit=1&offset=0&query="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIProductInfo'
+
+
+#-----------------------------------------------------
+# The API Product info resource
+#-----------------------------------------------------
+  APIProductInfo:
+    title: APIProductInfo
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: BankFunctions
+      version:
+        type: string
+        example: 1.0.0
+      description:
+        type: string
+        example: A collection of Banking functionality APIs to meet your banking needs
+      provider:
+        type: string
+        example: admin
+      status:
+        type: string
+        example: CREATED
+
+
+#-----------------------------------------------------
+# The API Product resource
+#-----------------------------------------------------
+  APIProduct:
+    title: APIProduct
+    required:
+      - name
+      - throttlingTier
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: BankFunctions
+      version:
+        type: string
+        example: 1.0.0
+      description:
+        type: string
+        example: A collection of Banking functionality APIs to meet your banking needs
+      provider:
+        type: string
+        example: admin
+      throttlingTiers:
+        type: array
+        items:
+          type: string
+        example: ["Unlimited","Gold"]
+      status:
+        type: string
+        example: CREATED
+      apis:
+        type: array
+        items:
+          type: string
+        example: ["3ec1e9ce-d347-4d90-a6cc-1882f0537ce1","f9da2c98-0771-45e4-8dc8-a731105003a8"]
+      businessInformation:
+        properties:
+          businessOwner:
+            type: string
+            example: businessowner
+          businessOwnerEmail:
+            type: string
+            example: businessowner@wso2.com
+          technicalOwner:
+            type: string
+            example: technicalowner
+          technicalOwnerEmail:
+            type: string
+            example: technicalowner@wso2.com
 
 #-----------------------------------------------------
 # The Document List resource
