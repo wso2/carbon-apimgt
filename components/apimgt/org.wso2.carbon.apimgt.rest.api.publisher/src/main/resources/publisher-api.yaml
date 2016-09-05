@@ -3065,7 +3065,7 @@ definitions:
       provider:
         type: string
         example: admin
-      throttlingTiers:
+      throttlingTier:
         type: array
         items:
           type: string
