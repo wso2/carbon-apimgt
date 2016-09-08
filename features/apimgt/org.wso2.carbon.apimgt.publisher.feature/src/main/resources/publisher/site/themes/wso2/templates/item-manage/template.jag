@@ -317,7 +317,7 @@
 
 
                                             <hr />
-                                            <div class="form-group">
+                                            <div class="form-group" id="subscription-tiers">
                                         	    <label class="control-label col-sm-3" for="tiertier">
                                                     <%=i18n.localize("Subscription Tiers")%>:
                                                     <span class="requiredAstrix">*</span>
