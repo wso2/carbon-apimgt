@@ -133,7 +133,7 @@ public class APIKeyValidatorClient {
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
         dto.setApiPublisher(generatedDto.getApiPublisher());
-        dto.setApiName(generatedDto.getApiName());
+        dto.setApiName(generatedDto.getApiProductName());
         dto.setValidityPeriod(generatedDto.getValidityPeriod());
         dto.setIssuedTime(generatedDto.getIssuedTime());
         dto.setApiTier(generatedDto.getApiTier());

@@ -384,7 +384,7 @@ msgid "api"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:555
-msgid "apiOwner"
+msgid "apiProductOwner"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:556

@@ -18,18 +18,46 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class APIProduct {
+    private APIProductIdentifier id;
     private String uuid;
 
     private String description;
-    private String provider;
-    private String productName;
-    private String productVersion;
     private String productTiers;
-    private String createdTime;
+    private Date createdTime;
     private String createdUser;
-    private String updatedTime;
+    private Date updatedTime;
     private String updatedUser;
+    private APIProductStatus status;
+    private String thumbnailUrl;
+    private String apiProductLevelPolicy;
+    private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private String monetizationCategory;
+    private boolean isLatest;
+    private Set<String> tags = new LinkedHashSet<String>();
+
+    private String visibility;
+    private String visibleRoles;
+    private String visibleTenants;
+
+    private String technicalOwner;
+    private String technicalOwnerEmail;
+    private String businessOwner;
+    private String businessOwnerEmail;
+
+    private String apiProductOwner;
+
+    private String subscriptionAvailability;
+    private String subscriptionAvailableTenants;
+
+    public APIProduct(APIProductIdentifier id) {
+        this.id = id;
+    }
 
     public String getApiProductId() {
         return apiProductId;
@@ -51,28 +79,12 @@ public class APIProduct {
 
     private String apiProductTier;
 
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public String getUuid() {
+    public String getUUID() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUUID(String uuid) {
         this.uuid = uuid;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
 
     public String getDescription() {
@@ -83,14 +95,6 @@ public class APIProduct {
         this.description = description;
     }
 
-    public String getProductVersion() {
-        return productVersion;
-    }
-
-    public void setProductVersion(String productVersion) {
-        this.productVersion = productVersion;
-    }
-
     public String getProductTiers() {
         return productTiers;
     }
@@ -99,11 +103,11 @@ public class APIProduct {
         this.productTiers = productTiers;
     }
 
-    public String getCreatedTime() {
+    public Date getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(String createdTime) {
+    public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -115,11 +119,11 @@ public class APIProduct {
         this.createdUser = createdUser;
     }
 
-    public String getUpdatedTime() {
+    public Date getUpdatedTime() {
         return updatedTime;
     }
 
-    public void setUpdatedTime(String updatedTime) {
+    public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
     }
 
@@ -132,4 +136,158 @@ public class APIProduct {
     }
 
 
+    public APIProductStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(APIProductStatus status) {
+        this.status = status;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getTechnicalOwner() {
+        return technicalOwner;
+    }
+
+    public void setTechnicalOwner(String technicalOwner) {
+        this.technicalOwner = technicalOwner;
+    }
+
+    public String getTechnicalOwnerEmail() {
+        return technicalOwnerEmail;
+    }
+
+    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+        this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+
+    public void setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+    }
+
+    public String getBusinessOwnerEmail() {
+        return businessOwnerEmail;
+    }
+
+    public void setBusinessOwnerEmail(String businessOwnerEmail) {
+        this.businessOwnerEmail = businessOwnerEmail;
+    }
+
+    public String getSubscriptionAvailability() {
+        return subscriptionAvailability;
+    }
+
+    public void setSubscriptionAvailability(String subscriptionAvailability) {
+        this.subscriptionAvailability = subscriptionAvailability;
+    }
+
+    public String getSubscriptionAvailableTenants() {
+        return subscriptionAvailableTenants;
+    }
+
+    public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
+        this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+    }
+
+    public String getApiProductLevelPolicy() {
+        return apiProductLevelPolicy;
+    }
+
+    public void setApiProductLevelPolicy(String apiProductLevelPolicy) {
+        this.apiProductLevelPolicy = apiProductLevelPolicy;
+    }
+
+    public APIProductIdentifier getId() {
+        return id;
+    }
+
+    public Set<Tier> getAvailableTiers() {
+        return Collections.unmodifiableSet(availableTiers);
+    }
+
+    public void addAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.addAll(availableTiers);
+    }
+
+    /**
+     * Removes all Tiers from the API object.
+     */
+    public void removeAllTiers(){
+        availableTiers.clear();
+    }
+
+    public void removeAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
+    }
+
+    public String getMonetizationCategory() {
+        return monetizationCategory;
+    }
+
+    public void setMonetizationCategory(String monetizationCategory) {
+        this.monetizationCategory = monetizationCategory;
+    }
+
+    public boolean isLatest() {
+        return isLatest;
+    }
+
+    public void setLatest(boolean latest) {
+        isLatest = latest;
+    }
+
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public void addTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+
+    public void removeTags(Set<String> tags) {
+        this.tags.removeAll(tags);
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+
+    public String getVisibleTenants() {
+        return visibleTenants;
+    }
+
+    public void setVisibleTenants(String visibleTenants) {
+        this.visibleTenants = visibleTenants;
+    }
+
+    public String getApiProductOwner() {
+        return apiProductOwner;
+    }
+
+    public void setApiProductOwner(String apiProductOwner) {
+        this.apiProductOwner = apiProductOwner;
+    }
 }

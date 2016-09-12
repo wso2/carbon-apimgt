@@ -678,6 +678,157 @@ public final class APIUtil {
     }
 
     /**
+     * This method used to get API Product from governance artifact
+     *
+     * @param artifact API Product artifact
+     * @param registry Registry
+     * @return APIProduct
+     * @throws APIManagementException if failed to get API from artifact
+     */
+    public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        APIProduct apiProduct;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_PROVIDER);
+            String apiProductName = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_NAME);
+            String apiProductVersion = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_VERSION);
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, apiProductName, apiProductVersion);
+            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
+
+            if (apiProductId == -1) {
+                return null;
+            }
+            apiProduct = new APIProduct(apiProductIdentifier);
+            // set rating
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+
+
+            //set description
+            apiProduct.setDescription(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION));
+            //set created time
+            apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
+            //set last access time
+            apiProduct.setUpdatedTime(registry.get(artifactPath).getLastModified());
+            //set uuid
+            apiProduct.setUUID(artifact.getId());
+            // set url
+            apiProduct.setStatus(getApiProductStatus(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_STATUS)));
+            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_THUMBNAIL_URL));
+            apiProduct.setTechnicalOwner(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER));
+            apiProduct.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER_EMAIL));
+            apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER));
+            apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER_EMAIL));
+
+            apiProduct.setSubscriptionAvailability(artifact.getAttribute(
+                                                    APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(
+                                                    APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+
+
+            if(isGlobalThrottlingEnabled){
+                String apiLevelTier = ApiMgtDAO.getInstance().getAPIProductLevelTier(apiProductId);
+                apiProduct.setApiProductLevelPolicy(apiLevelTier);
+            }
+
+            String tiers = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER);
+            Map<String, Tier> definedTiers = getTiers(tenantId);
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiProductName);
+            apiProduct.addAvailableTiers(availableTier);
+
+            apiProduct.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_IS_LATEST)));
+
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            apiProduct.addTags(tags);
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Provider";
+            throw new APIManagementException(msg, e);
+        }
+        return apiProduct;
+    }
+
+
+    private static void setAPIProductTierInfo(APIProduct apiProduct, int apiProductId, GovernanceArtifact artifact)
+            throws GovernanceException, APIManagementException {
+         APIProductIdentifier productId = apiProduct.getId();
+
+        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+
+        if(isGlobalThrottlingEnabled){
+            String apiProductLevelTier = ApiMgtDAO.getInstance().getAPIProductLevelTier(apiProductId);
+            apiProduct.setApiProductLevelPolicy(apiProductLevelTier);
+
+            Set<Tier> availablePolicy = new HashSet<Tier>();
+            String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB,
+                    replaceEmailDomainBack(productId.getProviderName()));
+            List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+            String policies = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER);
+            if (policies != null && !"".equals(policies)) {
+                String[] policyNames = policies.split("\\|\\|");
+                for (String policyName : policyNames) {
+                    if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
+                        Tier p = new Tier(policyName);
+                        availablePolicy.add(p);
+                    } else {
+                        log.warn("Unknown policy: " + policyName + " found on APIProduct: " +
+                                                                                    productId.getApiProductName());
+                    }
+                }
+            }
+
+            apiProduct.addAvailableTiers(availablePolicy);
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(
+                                                                                        productId.getProviderName()));
+            apiProduct.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
+        } else {
+            //deprecated throttling method
+            Set<Tier> availableTier = new HashSet<Tier>();
+            String tiers = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER);
+            if (tiers != null) {
+                String[] tierNames = tiers.split("\\|\\|");
+                for (String tierName : tierNames) {
+                    Tier tier = new Tier(tierName);
+                    availableTier.add(tier);
+
+                }
+
+                apiProduct.addAvailableTiers(availableTier);
+                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(
+                                                                                        productId.getProviderName()));
+                apiProduct.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
+            }
+        }
+    }
+
+    /**
+     * Utility method to get API provider path
+     *
+     * @param identifier APIIdentifier
+     * @return API provider path
+     */
+    public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
+        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+    }
+
+
+    /**
      * This method used to get Provider from provider artifact
      *
      * @param artifact provider artifact
@@ -994,6 +1145,100 @@ public final class APIUtil {
         }
         return apiStatus;
 
+    }
+
+    public static APIProductStatus getApiProductStatus(String status) throws APIManagementException {
+        APIProductStatus apiProductStatus = null;
+        for (APIProductStatus statusValue : APIProductStatus.values()) {
+            if (statusValue.getStatus().equalsIgnoreCase(status)) {
+                apiProductStatus = statusValue;
+            }
+        }
+        return apiProductStatus;
+
+    }
+
+    /**
+     * Create Governance artifact from given attributes
+     *
+     * @param artifact initial governance artifact
+     * @param apiProduct      APIProduct object with the attributes value
+     * @return GenericArtifact
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create APIProduct
+     */
+    public static GenericArtifact createAPIProductArtifactContent(GenericArtifact artifact, APIProduct apiProduct)
+            throws APIManagementException {
+        try {
+            String apiStatus = apiProduct.getStatus().getStatus();
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_NAME, apiProduct.getId().getApiProductName());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VERSION, apiProduct.getId().getVersion());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_STATUS, apiStatus);
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER, apiProduct.getTechnicalOwner());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER_EMAIL, apiProduct.getTechnicalOwnerEmail());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_OWNER, apiProduct.getApiProductOwner());
+
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABILITY,
+                                                                        apiProduct.getSubscriptionAvailability());
+            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS,
+                                                                        apiProduct.getSubscriptionAvailableTenants());
+
+            StringBuilder policyBuilder = new StringBuilder();
+            for (Tier tier : apiProduct.getAvailableTiers()) {
+                policyBuilder.append(tier.getName());
+                policyBuilder.append("||");
+            }
+
+            String policies = policyBuilder.toString();
+
+            if (!"".equals(policies)) {
+                policies = policies.substring(0, policies.length() - 2);
+                artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER, policies);
+            }
+
+            StringBuilder tiersBuilder = new StringBuilder();
+            for (Tier tier : apiProduct.getAvailableTiers()) {
+                tiersBuilder.append(tier.getName());
+                tiersBuilder.append("||");
+            }
+
+            String tiers = tiersBuilder.toString();
+
+            if (!"".equals(tiers)) {
+                tiers = tiers.substring(0, tiers.length() - 2);
+                artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER, tiers);
+            }
+
+            if (APIConstants.PUBLISHED.equals(apiStatus)) {
+                artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_IS_LATEST, "true");
+            }
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to create APIProduct for : " + apiProduct.getId().getApiProductName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return artifact;
+    }
+
+    /**
+     * Utility method to get api path from APIIdentifier
+     *
+     * @param identifier APIIdentifier
+     * @return API path
+     */
+    public static String getAPIProductPath(APIProductIdentifier identifier) {
+        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiProductName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
     }
 
 
