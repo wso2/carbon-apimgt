@@ -69,6 +69,18 @@ x-wso2-security:
         key: apim:api_publish
       - description: ""
         roles: admin
+        name: apim:product_view
+        key: apim:product_view
+      - description: ""
+        roles: admin
+        name: apim:product_create
+        key: apim:product_create
+      - description: ""
+        roles: admin
+        name: apim:product_publish
+        key: apim:product_publish
+      - description: ""
+        roles: admin
         name: apim:tier_view
         key: apim:tier_view
       - description: ""
@@ -1444,8 +1456,8 @@ paths:
     post:
       x-scope: apim:product_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/products"
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/products\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n  \r\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n  \r\n}"
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/products\nAuthorization:   Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{ \r\n   \n    \"name\":    OrderManager, \r\n    \"version\":    \"1.0.0\", \r\n    \"description\":    \"Order Management related APIs product\", \r\n    \"provider\":    \"admin\", \r\n   \"tags\":  [ \"order\", \"management\" ], \r\n   \"visibility\":   \"PUBLIC\", \r\n   \"visibleRoles\":   [ ], \r\n   \"visibleTenants\":   [ ], \r\n   \"subscriptionAvailability\":   null, \r\n   \"subscriptionAvailableTenants\":   [ ], \r\n    \"businessInformation\":       { \r\n      \"businessOwnerEmail\":    \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":    \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":    \"John Doe\", \r\n      \"businessOwner\":    \"Jane Roe\"\r\n   }, \n    \"tiers\":    [ \"Unlimited\", \"Gold\" ]\n  \r\n }"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation:   https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type:   application/json\n\n{ \r\n   \"id\":   \"7a2298c4-c905-403f-8fac-38c73301631f\", \r\n   \"name\":    OrderManager, \r\n    \"version\":    \"1.0.0\", \r\n    \"description\":    \"Order Management related APIs product\", \r\n    \"provider\":    \"admin\", \r\n   \"thumbnailUri\":   null, \r\n   \"tags\":  [ \"order\", \"management\" ], \r\n   \"visibility\":   \"PUBLIC\", \r\n   \"visibleRoles\":   [ ], \r\n   \"visibleTenants\":   [ ], \r\n   \"subscriptionAvailability\":   null, \r\n   \"subscriptionAvailableTenants\":   [ ], \r\n    \"businessInformation\":       { \r\n      \"businessOwnerEmail\":    \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":    \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":    \"John Doe\", \r\n      \"businessOwner\":    \"Jane Roe\"\r\n   }, \n    \"tiers\":    [ \"Unlimited\", \"Gold\" ]\n  \r\n }"
       summary: Create a new API Product
       description: |
         This operation can be used to create a new API Product specifying the details of the API Product in the payload. The new API Product will be in `CREATED` state.
@@ -1565,8 +1577,8 @@ paths:
     put:
       x-scope: apim:product_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f"
-      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n \r\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \n    \"name\":  OrderManager, \n    \"version\":  \"1.0.0\", \n    \"description\":  \"Order Management related APIs product\", \n    \"provider\":  \"admin\", \n    \"businessInformation\":     { \r\n      \"businessOwnerEmail\":  \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":  \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":  \"John Doe\", \r\n      \"businessOwner\":  \"Jane Roe\"\r\n   }, \n    \"tiers\":  [\"Unlimited\", \"Gold\"]\n \r\n}"
+      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/products/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization:   Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type:   application/json\n\n{ \r\n   \"id\":   \"7a2298c4-c905-403f-8fac-38c73301631f\", \r\n   \n    \"name\":    OrderManager, \r\n    \"version\":    \"1.0.0\", \r\n    \"description\":    \"Order Management related APIs product\", \r\n    \"provider\":    \"admin\", \r\n   \"thumbnailUri\":   null, \r\n   \"tags\":  [ \"order\", \"management\" ], \r\n   \"visibility\":   \"PUBLIC\", \r\n   \"visibleRoles\":   [ ], \r\n   \"visibleTenants\":   [ ], \r\n   \"subscriptionAvailability\":   null, \r\n   \"subscriptionAvailableTenants\":   [ ], \n    \"businessInformation\":       { \r\n      \"businessOwnerEmail\":    \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":    \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":    \"John Doe\", \r\n      \"businessOwner\":    \"Jane Roe\"\r\n   }, \n    \"tiers\":    [ \"Unlimited\", \"Gold\" ]\n \r\n }"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:   application/json\n\n{ \r\n   \"id\":   \"7a2298c4-c905-403f-8fac-38c73301631f\", \r\n   \n    \"name\":    OrderManager, \r\n    \"version\":    \"1.0.0\", \r\n    \"description\":    \"Order Management related APIs product\", \r\n    \"provider\":    \"admin\", \r\n   \"thumbnailUri\":   null, \r\n   \"tags\":  [ \"order\", \"management\" ], \r\n   \"visibility\":   \"PUBLIC\", \r\n   \"visibleRoles\":   [ ], \r\n   \"visibleTenants\":   [ ], \r\n   \"subscriptionAvailability\":   null, \r\n   \"subscriptionAvailableTenants\":   [ ], \r\n    \"businessInformation\":       { \r\n      \"businessOwnerEmail\":    \"marketing@ordermanager.com\", \r\n      \"technicalOwnerEmail\":    \"architecture@ordermanager.com\", \r\n      \"technicalOwner\":    \"John Doe\", \r\n      \"businessOwner\":    \"Jane Roe\"\r\n   }, \n    \"tiers\":    [ \"Unlimited\", \"Gold\" ]\n \r\n }"
       summary: Update an API Product
       description: |
         This operation can be used to update an existing API Product.
@@ -1682,7 +1694,7 @@ paths:
 ######################################################
 # The "Copy APIProduct" Processing Function resource API
 ######################################################
-  /apis/copy-product:
+  /products/copy-product:
 
 #-----------------------------------------------------
 # Create a new APIProduct based on an already existing one
@@ -1732,7 +1744,7 @@ paths:
 ######################################################
 # The "Change APIProduct Lifecycle" Processing Function resource API
 ######################################################
-  /apis/change-product-lifecycle:
+  /products/change-product-lifecycle:
 
 #-----------------------------------------------------
 # Change the lifecycle of an APIProduct
@@ -3065,6 +3077,32 @@ definitions:
       provider:
         type: string
         example: admin
+      visibility:
+        type: string
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
+          - CONTROLLED
+        example: PUBLIC
+      visibleRoles:
+        type: array
+        items:
+          type: string
+        example: []
+      visibleTenants:
+        type: array
+        items:
+          type: string
+        example: []
+      tags:
+        type: array
+        items:
+          type: string
+        example: ["finance","banking"]
+      thumbnailUri:
+        type: string
+        example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
       throttlingTier:
         type: array
         items:
@@ -3092,6 +3130,18 @@ definitions:
           technicalOwnerEmail:
             type: string
             example: technicalowner@wso2.com
+      subscriptionAvailability:
+        type: string
+        enum:
+          - current_tenant
+          - all_tenants
+          - specific_tenants
+        example: current_tenant
+      subscriptionAvailableTenants:
+        type: array
+        items:
+          type: string
+        example: []
 
 #-----------------------------------------------------
 # The Document List resource
