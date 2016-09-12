@@ -31,6 +31,16 @@ public class APIProduct {
     private String updatedTime;
     private String updatedUser;
 
+    public String getApiProductId() {
+        return apiProductId;
+    }
+
+    public void setApiProductId(String apiProductId) {
+        this.apiProductId = apiProductId;
+    }
+
+    private String apiProductId;
+
     public String getApiProductTier() {
         return apiProductTier;
     }
