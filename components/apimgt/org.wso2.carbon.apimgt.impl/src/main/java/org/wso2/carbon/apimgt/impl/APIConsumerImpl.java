@@ -947,7 +947,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                     latestPublishedAPIs.put(key, api);
                                 }
                             } else { //If allow showing multiple versions of an API
-    //                            key = api.getId().getProviderName() + ":" + api.getId().getApiName() + ":" + api.getId()
+    //                            key = api.getId().getProviderName() + ":" + api.getId().getApiProductName() + ":" + api.getId()
     //                                    .getVersion();
                                 multiVersionedAPIs.add(api);
                             }

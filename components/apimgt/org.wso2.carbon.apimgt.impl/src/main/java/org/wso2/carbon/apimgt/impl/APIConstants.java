@@ -35,6 +35,9 @@ public final class APIConstants {
 
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
+
+    //key value of the APIProductImpl rxt
+    public static final String API_PRODUCT_KEY = "api-product";
     
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
@@ -150,7 +153,12 @@ public final class APIConstants {
     public static final String API_DOC_2_0_RESOURCE_NAME = "swagger.json";
 
     public static final String API_ICON_IMAGE = "icon";
-    
+
+    public static final String API_PRODUCT_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-product-icons";
+
+    //registry location for consumer
+    public static final String API_PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-product";
+
     public static final String API_GLOBAL_VISIBILITY = "public";
     public static final String VISIBILITY = "visibility";
 
@@ -258,7 +266,33 @@ public final class APIConstants {
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS = "overview_tenants";
     
     public static final String API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED = "overview_destinationStatsEnabled";
-    
+
+    // Those constants are used in API Product artifact.
+    public static final String API_PRODUCT_NAME = "Name";
+
+    public static final String API_PRODUCT_OVERVIEW_NAME = "overview_name";
+    public static final String API_PRODUCT_OVERVIEW_VERSION = "overview_version";
+    public static final String API_PRODUCT_OVERVIEW_PROVIDER = "overview_provider";
+    public static final String API_PRODUCT_OVERVIEW_DESCRIPTION = "overview_description";
+    public static final String API_PRODUCT_OVERVIEW_STATUS="overview_status";
+    public static final String API_PRODUCT_OVERVIEW_THUMBNAIL_URL="overview_thumbnail";
+    public static final String API_PRODUCT_OVERVIEW_TIER="overview_tier";
+    public static final String API_PRODUCT_OVERVIEW_IS_LATEST ="overview_isLatest";
+
+    public static final String API_PRODUCT_OVERVIEW_TEC_OWNER ="overview_technicalOwner";
+    public static final String API_PRODUCT_OVERVIEW_TEC_OWNER_EMAIL ="overview_technicalOwnerEmail";
+    public static final String API_PRODUCT_OVERVIEW_BUSS_OWNER ="overview_businessOwner";
+    public static final String API_PRODUCT_OVERVIEW_BUSS_OWNER_EMAIL ="overview_businessOwnerEmail";
+
+    public static final String API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABILITY = "overview_subscriptionAvailability";
+    public static final String API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS = "overview_tenants";
+
+    public static final String API_PRODUCT_OVERVIEW_VISIBILITY ="overview_visibility";
+    public static final String API_PRODUCT_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
+    public static final String API_PRODUCT_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
+
+    public static final String API_PRODUCT_OVERVIEW_OWNER = "overview_apiOwner";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME= "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";

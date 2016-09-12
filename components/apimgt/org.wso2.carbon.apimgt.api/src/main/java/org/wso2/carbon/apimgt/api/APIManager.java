@@ -435,4 +435,22 @@ public interface APIManager {
      */
     Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
                                            boolean limitAttributes) throws APIManagementException;
+
+    /**
+     * Checks the Availability of given APIIdentifier
+     *
+     * @param identifier APIIdentifier
+     * @return true, if already exists. False, otherwise
+     * @throws APIManagementException if failed to get API availability
+     */
+    boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param identifier APIProductIdentifier
+     * @return An APIProduct object related to the given identifier or null
+     * @throws APIManagementException if failed get API from APIProductIdentifier
+     */
+    APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
 }

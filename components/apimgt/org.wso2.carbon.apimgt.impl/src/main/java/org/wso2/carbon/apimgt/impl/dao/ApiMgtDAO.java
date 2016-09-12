@@ -5376,15 +5376,16 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
+        APIProductIdentifier productId = apiProduct.getId();
 
-        String query = SQLConstants.ADD_API_SQL;
+        String query = SQLConstants.ADD_API_PRODUCT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(query, new String[]{"api_id"});
-            prepStmt.setString(1, apiProduct.getProvider());
-            prepStmt.setString(2, apiProduct.getProductName());
-            prepStmt.setString(3, apiProduct.getProductVersion());
+            prepStmt = connection.prepareStatement(query, new String[]{"api_product_id"});
+            prepStmt.setString(1, productId.getProviderName());
+            prepStmt.setString(2, productId.getApiProductName());
+            prepStmt.setString(3, productId.getVersion());
             prepStmt.setString(4, apiProduct.getApiProductTier());
             prepStmt.setString(5, apiProduct.getCreatedUser());
             prepStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
@@ -5394,7 +5395,9 @@ public class ApiMgtDAO {
             connection.commit();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding the API: " + apiProduct.getProductName()+ " to the database", e);
+            handleException("Error while adding the APIProduct: " + productId.getProviderName()+ "-"+
+                                productId.getApiProductName() + "-" + productId.getVersion() +
+                                " to the database", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -6264,6 +6267,47 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+        return id;
+    }
+
+    public int getAPIProductID(APIProductIdentifier apiProductId, Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        int id = -1;
+        String getAPIProductQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+
+        try {
+            if (connection == null) {
+
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+
+            prepStmt = connection.prepareStatement(getAPIProductQuery);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductId.getProviderName()));
+            prepStmt.setString(2, apiProductId.getApiProductName());
+            prepStmt.setString(3, apiProductId.getVersion());
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("API_PRODUCT_ID");
+            }
+            if (id == -1) {
+                String msg = "Unable to find the API Product: " + apiProductId + " in the database";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+        } catch (SQLException e) {
+            handleException("Error while locating API Product: " + apiProductId + " from the database", e);
         } finally {
             if (created) {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -10955,6 +10999,29 @@ public class ApiMgtDAO {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }
          return apiLevelTier;
+    }
+
+    public String getAPIProductLevelTier(int id) throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        String apiProductLevelTier = null;
+        try {
+            String query = SQLConstants.GET_API_PRODUCT_DETAILS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query + " WHERE API_PRODUCT_ID = ?");
+            selectPreparedStatement.setInt(1, id);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                apiProductLevelTier = resultSet.getString("API_PRODUCT_TIER");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get APIProduct Details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return apiProductLevelTier;
     }
 
     private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
