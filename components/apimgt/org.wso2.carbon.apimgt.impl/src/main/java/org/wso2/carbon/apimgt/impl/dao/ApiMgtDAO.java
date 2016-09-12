@@ -777,6 +777,7 @@ public class ApiMgtDAO {
             } else {
                 sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL_API_PRODUCT;
             }
+            //TODO this need to fix with API PRoduct fixes.
         } else {
             if (defaultVersionInvoked) {
                 sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
@@ -1159,6 +1160,59 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
         }
         return subscriptionId;
+    }
+
+    /**
+     * TODO Refactor this class according to given requirements. Need to move db query to constants and handle
+     * iterations etc.
+     * @param apiProduct
+     * @param applicationId
+     * @param status
+     * @param subscriber
+     * @throws APIManagementException
+     */
+    public void addSubscriptionForAPIProduct(APIProduct apiProduct, int applicationId, String status,
+                                             String subscriber) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForInsert = null;
+        ResultSet rs = null;
+        int subscriptionId = -1;
+        int apiId;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String query = "select API.API_PROVIDER, API.API_NAME, API.CONTEXT, API.API_VERSION from " +
+                    "AM_API API, AM_API_PRODUCT_MAPPING PRODUCT_MAPPING" +
+                    " where PRODUCT_MAPPING.API_PRODUCT_ID = " + apiProduct.getApiProductId() + " AND " +
+                    // "PRODUCT_MAPPING.API_PRODUCT_VERSION = " + apiProduct.getProductVersion() + " AND "+
+                    " PRODUCT_MAPPING.API_ID=API.API_ID;";
+            ps = conn.prepareStatement(query);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                String apiProvider = resultSet.getString("API_PROVIDER");
+                String apiName = resultSet.getString("API_NAME");
+                String apiContext = resultSet.getString("CONTEXT");
+                String apiVersion = resultSet.getString("API_VERSION");
+                APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
+                addSubscription(apiIdentifier, apiContext, applicationId, status, subscriber);
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add subscription ", e1);
+                }
+            }
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
+        }
     }
 
     /**
