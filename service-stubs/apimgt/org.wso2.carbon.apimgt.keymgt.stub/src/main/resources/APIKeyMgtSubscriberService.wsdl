@@ -262,7 +262,7 @@
          <xs:complexType name="APIInfoDTO">
             <xs:sequence>
                <xs:element minOccurs="0" name="APIIdentifier" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="apiProductName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="providerId" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resources" nillable="true" type="ax2112:Set"/>
