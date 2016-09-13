@@ -84,7 +84,7 @@
                     <ul class="nav navbar-nav">
                     	<% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.getAbsoluteUrl("/"))){ %>
 	                        <%if(isCreatePermitted) {%>
-	                        <li>
+	                        <li id="top-menu-api-add">
 	                            <a title="<%=i18n.localize("Add New API")%>" href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add New API")%>"></i>
