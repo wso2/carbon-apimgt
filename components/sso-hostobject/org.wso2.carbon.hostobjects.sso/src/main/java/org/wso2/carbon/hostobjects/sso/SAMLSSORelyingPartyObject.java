@@ -563,14 +563,13 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             }
         }
 
-        String isAssertionEncryptionEnabled = (String)args[1];
+        String isAssertionEncryptionEnabled = (String) args[1];
 
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-
 
             // Check for duplicate saml:Response
             NodeList list = samlResponse.getDOM().getElementsByTagNameNS(SAMLConstants.SAML20P_NS, "Response");
@@ -593,12 +592,11 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 if (!CollectionUtils.isEmpty(encryptedAssertions)) {
                     encryptedAssertion = encryptedAssertions.get(0);
                     try {
-                            assertion = Util.getDecryptedAssertion(encryptedAssertion,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
-                                    relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                    MultitenantConstants.SUPER_TENANT_ID,
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
@@ -608,15 +606,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     }
                 }
                 //Validate assertion validity period
-                boolean isTimeValid = relyingPartyObject
-                        .validateAssertionValidityPeriod(assertion);
+                boolean isTimeValid = relyingPartyObject.validateAssertionValidityPeriod(assertion);
                 if (isTimeValid) {
                     // Validate the audience restrictions
                     String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
                     return relyingPartyObject.validateAudienceRestriction(assertion, issuerId);
                 }
 
-            }else {
+            } else {
 
                 List<Assertion> assertions = samlResponse.getAssertions();
                 //Validate assertion validity period
@@ -667,7 +664,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
         String username = null;
-        String isAssertionEncryptionEnabled = (String)args[1];
+        String isAssertionEncryptionEnabled = (String) args[1];
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
@@ -684,8 +681,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                                 relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                MultitenantConstants.SUPER_TENANT_ID,
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
                         Subject subject = assertion.getSubject();
                         if (subject != null) {
@@ -705,8 +701,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     }
                 }
 
-
-            }else {
+            } else {
                 List<Assertion> assertions = samlResponse.getAssertions();
 
                 // extract the username
@@ -952,7 +947,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String username = null;
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-            String isAssertionEncryptionEnabled = (String)args[3];
+            String isAssertionEncryptionEnabled = (String) args[3];
             Assertion assertion = null;
 
             if ("true".equals(isAssertionEncryptionEnabled)) {
@@ -965,8 +960,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                                 relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                MultitenantConstants.SUPER_TENANT_ID,
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
@@ -986,19 +980,19 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 }
 
             }
-                List<AuthnStatement> authenticationStatements = assertion.getAuthnStatements();
-                AuthnStatement authnStatement = authenticationStatements.get(0);
-                if (authnStatement != null) {
-                    if (authnStatement.getSessionIndex() != null) {
-                        sessionIndex = authnStatement.getSessionIndex();
-                    }
+            List<AuthnStatement> authenticationStatements = assertion.getAuthnStatements();
+            AuthnStatement authnStatement = authenticationStatements.get(0);
+            if (authnStatement != null) {
+                if (authnStatement.getSessionIndex() != null) {
+                    sessionIndex = authnStatement.getSessionIndex();
                 }
-                Subject subject = assertion.getSubject();
-                if (subject != null) {
-                    if (subject.getNameID() != null) {
-                        username = subject.getNameID().getValue();
-                    }
+            }
+            Subject subject = assertion.getSubject();
+            if (subject != null) {
+                if (subject.getNameID() != null) {
+                    username = subject.getNameID().getValue();
                 }
+            }
 
         }
         if (sessionIndex == null) {
@@ -1606,7 +1600,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         XMLObject samlObject = Util.unmarshall(decodedString);
         String tenantDomain = Util.getDomainName(samlObject);
 
-        String isAssertionEncryptionEnabled = (String)args[1];
+        String isAssertionEncryptionEnabled = (String) args[1];
 
         int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
 
@@ -1626,10 +1620,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                                 relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                MultitenantConstants.SUPER_TENANT_ID,
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-
-
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
@@ -1638,7 +1629,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                         throw new Exception("Unable to decrypt the SAML2 Assertion");
                     }
                 }
-            }else{
+            } else {
                 List<Assertion> assertions = samlResponse.getAssertions();
                 if (assertions != null && assertions.size() == 1) {
                     assertion = assertions.get(0);
@@ -1649,46 +1640,41 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
             boolean sigValid = false;
             // validate the assertion signature
-            //if (assertions != null && assertions.size() == 1) {
+            Signature assertionSignature = assertion.getSignature();
+            try {
+                //Try and validate the signature using the super tenant key store.
 
-                Signature assertionSignature = assertion.getSignature();
+                if (assertionSignature == null) {
+                    log.error("SAMLAssertion signing is enabled, but signature element not found in "
+                            + "SAML Assertion element.");
+
+                    return false;
+                }
+                sigValid = Util.validateSignature(assertionSignature,
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS), MultitenantConstants.SUPER_TENANT_ID,
+                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+            } catch (SignatureVerificationFailure e) {
+                //do nothing at this point since we want to verify signature using the tenant key-store as well.
+                log.error("Signature verification failed with Super-Tenant Key Store", e);
+                return false;
+            }//
+            //If not success, try and validate the signature using tenant key store.
+            if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 try {
-                    //Try and validate the signature using the super tenant key store.
-
-                    if (assertionSignature == null) {
-                        log.error("SAMLAssertion signing is enabled, but signature element not found in " +
-                                "SAML Assertion element.");
-
-                        return false;
-                    }
                     sigValid = Util.validateSignature(assertionSignature,
                             relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                             relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                            MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS), tenantId, tenantDomain);
 
                 } catch (SignatureVerificationFailure e) {
-                    //do nothing at this point since we want to verify signature using the tenant key-store as well.
-                    log.error("Signature verification failed with Super-Tenant Key Store", e);
+                    log.error("Signature Verification Failed using super tenant and tenant key stores", e);
                     return false;
-                }//
-                //If not success, try and validate the signature using tenant key store.
-                if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    try {
-                        sigValid = Util.validateSignature(assertionSignature,
-                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
-                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                tenantId, tenantDomain);
-
-                    } catch (SignatureVerificationFailure e) {
-                        log.error("Signature Verification Failed using super tenant and tenant key stores", e);
-                        return false;
-                    }
                 }
-//            } else {
-//                throw new ScriptException("SAML Response contains invalid number of assertions.");
-//            }
+            }
+
             return sigValid;
         }
         if (log.isWarnEnabled()) {

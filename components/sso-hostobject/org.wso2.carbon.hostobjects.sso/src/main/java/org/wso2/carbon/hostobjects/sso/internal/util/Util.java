@@ -337,21 +337,9 @@ public class Util {
             KeyStore keyStore = null;
 
             java.security.cert.X509Certificate cert = null;
-//            if (tenantId != -1234) {
-//                // get an instance of the corresponding Key Store Manager instance
-//                KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantId);
-//                keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(tenantDomain));
-//                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(tenantDomain);
-//            } else {
-//                keyStore = KeyStore.getInstance("JKS");
-//                keyStore.load(new FileInputStream(new File(keyStoreName)), keyStorePassword.toCharArray());
-//                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(alias);
-//            }
 
-
-            SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
-                    new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
-
+            SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential = new SSOAgentCarbonX509Credential(tenantId,
+                    tenantDomain);
 
             KeyInfoCredentialResolver keyResolver = new StaticKeyInfoCredentialResolver(
                     new X509CredentialImpl(ssoAgentCarbonX509Credential));
