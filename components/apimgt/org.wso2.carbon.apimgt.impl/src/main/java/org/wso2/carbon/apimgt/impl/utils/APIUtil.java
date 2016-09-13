@@ -2194,7 +2194,7 @@ public final class APIUtil {
      * Get user profiles of user
      *
      * @param username username
-     * @return user profiles of user
+     * @return default user profile of user
      * @throws APIManagementException
      */
     public static UserProfileDTO getUserDefaultProfile(String username) throws APIManagementException {
@@ -2204,7 +2204,8 @@ public final class APIUtil {
         String errorMsg = "Error while getting profile of user ";
         try {
             UserProfileMgtServiceStub stub = new UserProfileMgtServiceStub(
-                    ServiceReferenceHolder.getContextService().getClientConfigContext(), url + "UserProfileMgtService");
+                    ServiceReferenceHolder.getContextService().getClientConfigContext(),
+                    url + APIConstants.USER_PROFILE_MGT_SERVICE);
             ServiceClient gatewayServiceClient = stub._getServiceClient();
             CarbonUtils.setBasicAccessSecurityHeaders(
                     apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME),
@@ -2212,7 +2213,7 @@ public final class APIUtil {
                     gatewayServiceClient);
             UserProfileDTO[] profiles = stub.getUserProfiles(username);
             for (UserProfileDTO dto : profiles) {
-                if (dto.getProfileName().equals("default")) {
+                if (APIConstants.USER_DEFAULT_PROFILE.equals(dto.getProfileName())) {
                     return dto;
                 }
             }

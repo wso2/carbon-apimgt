@@ -5,6 +5,7 @@ var apiName;
 var version;
 var d = new Date();
 var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds());
+var dataTable;
 
 //setting default date
 var to;
@@ -119,7 +120,7 @@ var drawTopAPIUsersTable = function () {
         '</tr></thead>'));
     $('#tableContainer').append($dataTable);
 
-    $dataTable.DataTable({
+    dataTable = $dataTable.DataTable({
         "processing": true,
         "serverSide": true,
         "searching": false,

@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.usage.client.dto;
 public class ApiTopUsersDTO {
     private String apiName;
     private String version;
+    private String provider;
     private String user;
     private long requestCount;
     private long totalRequestCount;
@@ -84,4 +85,11 @@ public class ApiTopUsersDTO {
         this.requestCount = requestCount;
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
 }

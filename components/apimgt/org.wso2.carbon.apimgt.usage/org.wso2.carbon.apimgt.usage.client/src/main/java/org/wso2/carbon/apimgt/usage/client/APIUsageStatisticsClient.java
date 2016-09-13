@@ -99,12 +99,13 @@ public abstract class APIUsageStatisticsClient {
      * @param version version of the required API
      * @param fromDate Start date of the time span
      * @param toDate End date of time span
-     * @param limit limit of the result
+     * @param start starting index of the result
+     * @param limit number of results to return
      * @return a collection containing the data related to Api usage
      * @throws APIMgtUsageQueryServiceClientException
      */
-    public abstract List<ApiTopUsersDTO> getTopApiUsers(String apiName, String version,
-            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+    public abstract ApiTopUsersListDTO getTopApiUsers(String apiName, String version, String tenantDomain,
+            String fromDate, String toDate, int start, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * @param subscriberName subscriber name

@@ -406,15 +406,37 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param version version of the required API
      * @param fromDate Start date of the time span
      * @param toDate End date of time span
-     * @param limit limit of the result
+     * @param start starting index of the result
+     * @param limit number of results to return
      * @return a collection containing the data related to Api usage
      * @throws APIMgtUsageQueryServiceClientException
      */
     @Override
-    public List<ApiTopUsersDTO> getTopApiUsers(String apiName, String version, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
-        return getTopApiUsers(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, apiName, version, fromDate,
-                toDate, limit);
+    public ApiTopUsersListDTO getTopApiUsers(String apiName, String version, String tenantDomain, String fromDate, String toDate,
+            int start, int limit) throws APIMgtUsageQueryServiceClientException {
+        List<ApiTopUsersDTO> allTopUsersDTOs = getTopApiUsers(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
+                apiName, version, fromDate, toDate);
+        
+        //filter out other tenants' data
+        List<ApiTopUsersDTO> tenantFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
+        for (ApiTopUsersDTO dto : allTopUsersDTOs) {
+            if (tenantDomain != null && tenantDomain.equals(MultitenantUtils.getTenantDomain(dto.getProvider()))) {
+                tenantFilteredTopUsersDTOs.add(dto);
+            }
+        }
+        
+        //filter based on pagination
+        List<ApiTopUsersDTO> paginationFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
+        ApiTopUsersListDTO apiTopUsersListDTO = new ApiTopUsersListDTO();
+        int end = (start + limit) <= tenantFilteredTopUsersDTOs.size() ? (start + limit) : tenantFilteredTopUsersDTOs.size();
+        for (int i = start; i < end; i++) {
+            paginationFilteredTopUsersDTOs.add(tenantFilteredTopUsersDTOs.get(i));
+        }
+        apiTopUsersListDTO.setApiTopUsersDTOs(paginationFilteredTopUsersDTOs);
+        apiTopUsersListDTO.setLimit(limit);
+        apiTopUsersListDTO.setOffset(start);
+        apiTopUsersListDTO.setTotalRecordCount(tenantFilteredTopUsersDTOs.size());
+        return apiTopUsersListDTO;
     }
 
     /**
@@ -425,12 +447,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param version version of the required API
      * @param fromDate Start date of the time span
      * @param toDate End date of time span
-     * @param limit limit of the result
      * @return a collection containing the data related to Api usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<ApiTopUsersDTO> getTopApiUsers(String tableName, String apiName, String version,
-            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         //ignoring sql injection for keyString since it construct locally and no public access
         Connection connection = null;
         PreparedStatement statement = null;
@@ -444,6 +465,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 long totalRequestCount = getTotalRequestCountOfAPIVersion(tableName, apiName, version,
                         fromDate, toDate);
                 topApiUserQuery = new StringBuilder("SELECT " + APIUsageStatisticsClientConstants.USER_ID + ","
+                        + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                         + "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") "
                         + "AS net_total_requests FROM "  + tableName + " WHERE "
                         + APIUsageStatisticsClientConstants.API + "= ? AND ");
@@ -453,7 +475,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
 
                 topApiUserQuery.append( "time BETWEEN  ? AND ? " + " GROUP BY "
-                        + APIUsageStatisticsClientConstants.USER_ID 
+                        + APIUsageStatisticsClientConstants.USER_ID + ","
+                        + APIUsageStatisticsClientConstants.API_PUBLISHER
                         + " ORDER BY net_total_requests DESC");
 
                 statement = connection.prepareStatement(topApiUserQuery.toString());
@@ -473,6 +496,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     apiTopUsersDTO.setFromDate(fromDate);
                     apiTopUsersDTO.setToDate(toDate);
                     apiTopUsersDTO.setVersion(version);
+                    apiTopUsersDTO.setProvider(resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER));
                     
                     //remove @carbon.super from super tenant users
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(MultitenantUtils

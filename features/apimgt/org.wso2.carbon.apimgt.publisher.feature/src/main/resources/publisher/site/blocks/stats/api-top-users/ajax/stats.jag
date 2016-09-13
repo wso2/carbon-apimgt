@@ -17,13 +17,17 @@ include("/jagg/jagg.jag");
         if (action === "getTopApiUsers") {
             mod = jagg.module("statistics");
             var currentLocation = request.getParameter("currentLocation");
+            var provider = jagg.getUser().username;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(provider);
             var mode = request.getParameter("mode");
             var apiName = request.getParameter("apiName");
             var version = request.getParameter("version");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
-
-            result = mod.getTopApiUsers(apiName, version, from, to, 10);
+            var start = request.getParameter("start");
+            var limit = request.getParameter("length");
+            result = mod.getTopApiUsers(apiName, version, tenantDomain, from, to, start, limit);
 
             if (result.error == "true") {
                 obj = {
@@ -33,9 +37,9 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    recordsTotal: result.usage.length,
-                    recordsFiltered: result.usage.length,
-                    data: result.usage
+                    recordsTotal: result.usage.totalRecordCount,
+                    recordsFiltered: result.usage.totalRecordCount,
+                    data: result.usage.apiTopUsersDTOs
                 }
             }
             print(obj);

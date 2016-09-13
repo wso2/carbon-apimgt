@@ -985,10 +985,10 @@ function getApisList(provider, apiFilter, limit) {
     }
 }
 
-function getTopApiUsers(apiName, version, fromDate, toDate, limit) {
+function getTopApiUsers(apiName, version, tenantDomain, fromDate, toDate, start, limit) {
     var usage;
     try {
-        usage = usageClient.getTopApiUsers(apiName, version, fromDate, toDate, limit);
+        usage = usageClient.getTopApiUsers(apiName, version, tenantDomain, fromDate, toDate, start, limit);
         if (usage == null) {
             return {
                 error:true
