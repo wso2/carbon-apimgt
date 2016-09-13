@@ -70,9 +70,9 @@
             <div id="rangeSliderWrapper" class="col-sm-5">
                <div id="dateRangePickerContainer" style="text-align:right">
                    <div class="btn-group" role="group">
-                       <button id="today-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Day")%></button>
+                       <button id="today-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Day")%></button>
                        <button id="week-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Week")%></button>
-                       <button id="month-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Month")%></button>
+                       <button id="month-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Month")%></button>
                        <button id="date-range" type="button" class="btn btn-default date-range last-child" >
                          <i class="fw fw-calendar" title="date-range"></i>
                          <span></span> <b class="caret"></b>
