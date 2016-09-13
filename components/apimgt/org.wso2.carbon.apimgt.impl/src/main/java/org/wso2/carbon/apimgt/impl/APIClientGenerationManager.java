@@ -83,22 +83,22 @@ public class APIClientGenerationManager {
     }
 
     /**
-     * This method generates client side SDK for a given API subscriptions with a given application
+     * This method generates client side SDK for a given application
      *
      * @param appName     name of the application
-     * @param sdkLanguage preferred SDK language
+     * @param sdkLanguage preferred language to generate the SDK
      * @param userName    username of the logged in user
      * @param groupId     group ID of the logged in user
-     * @param apiName     name of the subscribed API
-     * @param apiVersion  version of the subscribed API
-     * @param apiProvider provider of the subscribed API
      * @return a map containing the zip file name and its' temporary location until it is downloaded
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public Map<String, String> generateSDK(String appName, String sdkLanguage, String userName, String groupId,
-                                           String apiName, String apiVersion, String apiProvider)
+    public Map<String, String> generateSDK(String appName, String sdkLanguage, String userName, String groupId)
             throws APIClientGenerationException {
 
+        if (appName == null || appName.isEmpty()) {
+            log.error("Application name should not be null or empty.");
+            throw new APIClientGenerationException("Application name should not be null or empty.");
+        }
         Set<SubscribedAPI> subscribedAPIs;
         APIConsumerImpl consumerImplInstance;
         try {
@@ -121,98 +121,89 @@ public class APIClientGenerationManager {
             return null;
         }
 
-        File tempFolder = new File
-                (APIConstants.TEMP_DIRECTORY_NAME + File.separator + APIConstants.SWAGGER_CODEGEN_DIRECTORY);
-        if (!tempFolder.exists()) {
-            tempFolder.mkdir();
-        } else {
-            // On Windows OS, deleting the folder fails stating that a file within it is still open, attempting to close
-            // the open file from the jaggery side has not been successful. For the time being we will avoid deleting
-            // the directory. This is not an issue since existing zip files will be overwritten on the server side.
-            // This issue is not encountered on Linux however.
-            /*
-            try {
-                FileUtils.deleteDirectory(tempFolder);
-            } catch (IOException e) {
-                log.error("Problem deleting the temporary swaggerCodegen folder", e);
-                throw new APIClientGenerationException("Problem deleting the temporary swaggerCodegen folder", e);
-            }
-            */
-            tempFolder.mkdir();
+        File tempFolder = new File(APIConstants.TEMP_DIRECTORY_NAME + File.separator + appName);
+        // On Windows OS, deleting the folder fails stating that a file within it is still open, attempting to close
+        // the open file from the jaggery side has not been successful. For the time being we will avoid deleting
+        // the directory. This is not an issue since existing zip files will be overwritten on the server side.
+        // This issue is not encountered on Linux however. Hence we are not going to delete the directory using
+        // FileUtils.deleteDirectory(tempFolder). Reference :  APIMANAGER-4981
+        boolean isTempFolderCreated = tempFolder.mkdir();
+        if (!isTempFolderCreated) {
+            log.error("Error while creating the temporary folder for SDK generation for application : " + appName);
+            throw new APIClientGenerationException
+                    ("Error while creating the temporary folder for SDK generation for application : " + appName);
         }
-
-        File spec = null;
-        String specLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator +
-                APIConstants.SWAGGER_CODEGEN_DIRECTORY + File.separator + UUID.randomUUID().toString() +
-                APIConstants.JSON_FILE_EXTENSION;
+        File swaggerSpecFile = null;
+        String specLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + appName + File.separator +
+                UUID.randomUUID().toString() + APIConstants.JSON_FILE_EXTENSION;
 
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-
             String subscribedAPIName = subscribedAPI.getApiId().getApiName();
             String subscribedAPIVersion = subscribedAPI.getApiId().getVersion();
             String subscribedAPIProvider = subscribedAPI.getApiId().getProviderName();
+            boolean isResourceExists;
+            String registryResourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPIName,
+                    subscribedAPIVersion, subscribedAPIProvider);
+            String swaggerResourceAbsolutePath = registryResourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
 
-            //the following condition will fetch the exact API for the subscription
-            if (subscribedAPIName.equals(apiName) && subscribedAPIVersion.equals(apiVersion) &&
-                    subscribedAPIProvider.equals(apiProvider)) {
-
-                boolean isResourceExists;
-                String registryResourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPIName,
-                        subscribedAPIVersion, subscribedAPIProvider);
-                String swaggerResourceAbsolutePath = registryResourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
-
-                try {
-                    isResourceExists = consumerImplInstance.registry.resourceExists(swaggerResourceAbsolutePath);
-                } catch (RegistryException e) {
-                    log.error("Error while checking whether the resource exists or not", e);
-                    throw new APIClientGenerationException
-                            ("Error while checking whether the resource exists or not", e);
-                }
-
-                String swaggerAPIDefinition;
-                Swagger swaggerDoc;
-                if (isResourceExists) {
-                    try {
-                        swaggerAPIDefinition = consumerImplInstance.getSwagger20Definition(subscribedAPI.getApiId());
-                    } catch (APIManagementException e) {
-                        log.error("Error loading swagger file from registry.", e);
-                        throw new APIClientGenerationException("Error loading swagger file from registry.", e);
-                    }
-                    swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
-                } else {
-                    log.error("Resource does not exists in : " + swaggerResourceAbsolutePath);
-                    throw new APIClientGenerationException("Resource does not exists in : " +
-                            swaggerResourceAbsolutePath);
-                }
-                //format the swagger definition before writing to the file
-                String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
-                spec = new File(specLocation);
-                FileWriter fileWriter = null;
-                BufferedWriter bufferedWriter = null;
-                try {
-                    if (!spec.exists()) {
-                        spec.createNewFile();
-                    }
-                    fileWriter = new FileWriter(spec.getAbsoluteFile());
-                    bufferedWriter = new BufferedWriter(fileWriter);
-                    bufferedWriter.write(formattedSwaggerAPIDefinition);
-                } catch (IOException e) {
-                    log.error("Error while storing the temporary swagger file.", e);
-                    throw new APIClientGenerationException("Error while storing the temporary swagger file.", e);
-                } finally {
-                    IOUtils.closeQuietly(bufferedWriter);
-                    IOUtils.closeQuietly(fileWriter);
-                }
-                break;
+            try {
+                isResourceExists = consumerImplInstance.registry.resourceExists(swaggerResourceAbsolutePath);
+            } catch (RegistryException e) {
+                log.error("Error while checking whether the resource exists or not.", e);
+                throw new APIClientGenerationException
+                        ("Error while checking whether the resource exists or not.", e);
             }
+
+            String swaggerAPIDefinition;
+            Swagger swaggerDoc;
+            if (isResourceExists) {
+                try {
+                    swaggerAPIDefinition = consumerImplInstance.getSwagger20Definition(subscribedAPI.getApiId());
+                } catch (APIManagementException e) {
+                    log.error("Error loading swagger file from registry.", e);
+                    throw new APIClientGenerationException("Error loading swagger file from registry.", e);
+                }
+                swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
+            } else {
+                log.error("Resource does not exists in : " + swaggerResourceAbsolutePath);
+                throw new APIClientGenerationException("Resource does not exists in : " +
+                        swaggerResourceAbsolutePath);
+            }
+            //format the swagger definition before writing to the file
+            String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
+            swaggerSpecFile = new File(specLocation);
+            FileWriter fileWriter = null;
+            BufferedWriter bufferedWriter = null;
+            try {
+                if (!swaggerSpecFile.exists()) {
+                    boolean isSpecFileCreated = swaggerSpecFile.createNewFile();
+                    if (!isSpecFileCreated) {
+                        log.error("Unable to create the swagger spec file for API : " + subscribedAPIName +
+                                " in " + specLocation);
+                        throw new APIClientGenerationException("Unable to create the swagger spec file for API : " +
+                                subscribedAPIName + " in " + specLocation);
+                    }
+                }
+                fileWriter = new FileWriter(swaggerSpecFile.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write(formattedSwaggerAPIDefinition);
+            } catch (IOException e) {
+                log.error("Error while storing the temporary swagger file.", e);
+                throw new APIClientGenerationException("Error while storing the temporary swagger file.", e);
+            } finally {
+                IOUtils.closeQuietly(bufferedWriter);
+                IOUtils.closeQuietly(fileWriter);
+            }
+            String outputDirectoryName = appName + "_" + subscribedAPIName + "_" + subscribedAPIVersion + "_" +
+                    sdkLanguage;
+            String temporaryOutputPath = APIConstants.TEMP_DIRECTORY_NAME + File.separator + appName + File.separator +
+                    outputDirectoryName;
+            generateClient(appName, subscribedAPIName, subscribedAPIVersion, specLocation, sdkLanguage,
+                    temporaryOutputPath);
         }
-
-        String outputDirectoryName = appName + "_" + apiName + "_" + apiVersion + "_" + sdkLanguage;
-        String temporaryOutputPath = APIConstants.TEMP_DIRECTORY_NAME + File.separator +
-                APIConstants.SWAGGER_CODEGEN_DIRECTORY + File.separator + outputDirectoryName;
-        generateClient(appName, specLocation, sdkLanguage, temporaryOutputPath);
+        FileUtils.deleteQuietly(swaggerSpecFile);
+        String temporaryOutputPath = APIConstants.TEMP_DIRECTORY_NAME + File.separator + appName;
         String temporaryZipFilePath = temporaryOutputPath + APIConstants.ZIP_FILE_EXTENSION;
-
         try {
             ZIPUtils zipUtils = new ZIPUtils();
             zipUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
@@ -221,12 +212,11 @@ public class APIClientGenerationManager {
             log.error("Error while generating .zip archive for the generated SDK.", e);
             throw new APIClientGenerationException("Error while generating .zip archive for the generated SDK.", e);
         }
-        FileUtils.deleteQuietly(spec);
         //The below file object is closed and deleted by the caller, so it should left open until the SDK is downloaded.
         File sdkArchive = new File(temporaryZipFilePath);
         Map<String, String> sdkDataMap = new HashMap<String, String>();
         sdkDataMap.put("path", sdkArchive.getAbsolutePath());
-        sdkDataMap.put("fileName", outputDirectoryName + APIConstants.ZIP_FILE_EXTENSION);
+        sdkDataMap.put("fileName", appName + APIConstants.ZIP_FILE_EXTENSION);
         return sdkDataMap;
     }
 
@@ -252,7 +242,8 @@ public class APIClientGenerationManager {
      * @param sdkLanguage         preferred SDK language
      * @param temporaryOutputPath temporary location where the SDK archive is saved until downloaded
      */
-    private void generateClient(String appName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
+    private void generateClient(String appName, String apiName, String apiVersion, String specLocation,
+                                String sdkLanguage, String temporaryOutputPath) {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();

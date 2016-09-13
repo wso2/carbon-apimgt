@@ -100,7 +100,7 @@ var generateClientSDK = function (appName, language, userName, groupId, apiName,
 
     try {
         var result = Packages.java.utils.Map;
-        result = generator.generateSDK(appName,language,userName,groupId,apiName,apiVersion,apiProvider);
+        result = generator.generateSDK(appName,language,userName,groupId);
         if(result!=null){
             var fileName = result.get("fileName");
             var path =  result.get("path");
