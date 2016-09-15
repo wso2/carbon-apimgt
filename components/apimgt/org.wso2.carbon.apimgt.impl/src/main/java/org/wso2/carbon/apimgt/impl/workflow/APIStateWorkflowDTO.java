@@ -31,6 +31,14 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
     private String apiName;
     private String apiProvider;
     private String apiVersion;
+    private String invoker;
+    
+    public String getInvoker() {
+        return invoker;
+    }
+    public void setInvoker(String invoker) {
+        this.invoker = invoker;
+    }
     public String getApiCurrentState() {
         return apiCurrentState;
     }

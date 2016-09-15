@@ -122,7 +122,7 @@ public class WorkflowExecutorFactory {
             workflowDTO = new WorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType)){
-            workflowDTO = new WorkflowDTO();
+            workflowDTO = new APIStateWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         }
         

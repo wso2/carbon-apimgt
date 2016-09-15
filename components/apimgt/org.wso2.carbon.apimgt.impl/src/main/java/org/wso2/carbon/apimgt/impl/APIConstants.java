@@ -1212,5 +1212,7 @@ public final class APIConstants {
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
     }
+    
+    public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";
 
 }

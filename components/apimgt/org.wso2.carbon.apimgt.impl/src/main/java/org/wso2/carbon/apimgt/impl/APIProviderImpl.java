@@ -65,6 +65,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
+import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -3635,26 +3640,82 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);        
             String targetStatus;
             if (apiArtifact != null) {
+                
+                /**
+                 * wfstate;
+                 * if wfstate is not created
+                 *      execute wf
+                 *      update wfstate
+                 * 
+                 * if wfstate is approved
+                 *      execute action
+                 *      
+                 * 
+                 * 
+                 * 
+                 */
+                
+                String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+                String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+                String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);                
                 String currentStatus = apiArtifact.getLifecycleState();
-                targetStatus = "";
-                if (!currentStatus.equalsIgnoreCase(action)) {
+                String apiWFState = apiArtifact.getAttribute(APIConstants.API_WORKFLOW_STATE_ATTR);   
+                
+                //if the workflow has started, then executor should not fire again
+                if(!WorkflowStatus.CREATED.toString().equals(apiWFState)){
+
+                    try {
+
+                        ////////////// handle exception
+                        WorkflowExecutor apiStateWFExecutor = WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+                        APIStateWorkflowDTO apiStateWorkflow = new APIStateWorkflowDTO();
+                        apiStateWorkflow.setApiCurrentState(currentStatus);
+                        apiStateWorkflow.setApiLCAction(action);
+                        apiStateWorkflow.setApiName(apiName);
+                        apiStateWorkflow.setApiVersion(apiVersion);
+                        apiStateWorkflow.setApiProvider(providerName);
+                        apiStateWorkflow.setCallbackUrl(apiStateWFExecutor.getCallbackURL());
+                        apiStateWorkflow.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
+                        apiStateWorkflow.setTenantId(tenantId);
+                        apiStateWorkflow.setTenantDomain(this.tenantDomain);
+                        apiStateWorkflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
+                        apiStateWorkflow.setStatus(WorkflowStatus.CREATED);
+                        apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
+                        apiStateWorkflow.setWorkflowReference(apiIdentifier.toString());
+                        apiStateWorkflow.setInvoker(this.username);
+
+                        ////////////// handle exception
+
+                        apiStateWFExecutor.execute(apiStateWorkflow);
+                    } catch (Exception e) {
+
+                    }
+                    
+                    //get the workflow state once the executor is executed. 
+                    apiWFState = apiArtifact.getAttribute(APIConstants.API_WORKFLOW_STATE_ATTR);
+                } 
+                
+                //only change the lifecycle if approved
+                if(WorkflowStatus.APPROVED.toString().equals(apiWFState)){
+                    targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();
                     if(!currentStatus.equals(targetStatus)){
                         apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
+                    if (log.isDebugEnabled()) {
+                        String logMessage =
+                                "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
+                                apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                        log.debug(logMessage);
+                    }
+                    return true;
                 }
-                if (log.isDebugEnabled()) {
-                    String logMessage =
-                            "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
-                            apiIdentifier.getVersion() + ", New Status : " + targetStatus;
-                    log.debug(logMessage);
-                }
-                return true;
             }
         } catch (GovernanceException e) {
             String cause = e.getCause().getMessage();
