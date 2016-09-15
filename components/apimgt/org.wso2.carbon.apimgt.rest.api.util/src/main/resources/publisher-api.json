@@ -49,6 +49,24 @@
                 {
                     "description": "",
                     "roles": "admin",
+                    "name": "apim:product_view",
+                    "key": "apim:product_view"
+                },
+                {
+                    "description": "",
+                    "roles": "admin",
+                    "name": "apim:product_create",
+                    "key": "apim:product_create"
+                },
+                {
+                    "description": "",
+                    "roles": "admin",
+                    "name": "apim:product_publish",
+                    "key": "apim:product_publish"
+                },
+                {
+                    "description": "",
+                    "roles": "admin",
                     "name": "apim:tier_view",
                     "key": "apim:tier_view"
                 },
