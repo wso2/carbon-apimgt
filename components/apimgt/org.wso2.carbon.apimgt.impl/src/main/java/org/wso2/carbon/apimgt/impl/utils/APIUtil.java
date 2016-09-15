@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -100,6 +101,9 @@ import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
+import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
@@ -2429,6 +2433,43 @@ public final class APIUtil {
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
         return stub.getUserInfo();
+    }
+
+    /**
+     * Get user profiles of user
+     *
+     * @param username username
+     * @return default user profile of user
+     * @throws APIManagementException
+     */
+    public static UserProfileDTO getUserDefaultProfile(String username) throws APIManagementException {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String url = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        String errorMsg = "Error while getting profile of user ";
+        try {
+            UserProfileMgtServiceStub stub = new UserProfileMgtServiceStub(
+                    ServiceReferenceHolder.getContextService().getClientConfigContext(),
+                    url + APIConstants.USER_PROFILE_MGT_SERVICE);
+            ServiceClient gatewayServiceClient = stub._getServiceClient();
+            CarbonUtils.setBasicAccessSecurityHeaders(
+                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME),
+                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD),
+                    gatewayServiceClient);
+            UserProfileDTO[] profiles = stub.getUserProfiles(username);
+            for (UserProfileDTO dto : profiles) {
+                if (APIConstants.USER_DEFAULT_PROFILE.equals(dto.getProfileName())) {
+                    return dto;
+                }
+            }
+        } catch (AxisFault axisFault) {
+            handleException(errorMsg + username, axisFault);
+        } catch (RemoteException e) {
+            handleException(errorMsg + username, e);
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
+            handleException(errorMsg + username, e);
+        }
+        return null;
     }
 
     /**

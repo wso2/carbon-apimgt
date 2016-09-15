@@ -41,7 +41,7 @@
         <div class="container-fluid" style="padding-left:0">
 	<div id="newDoc" style="display:none;">
 		<div class="row-fluid">
-		    <div class="col-sm-4 name-column">
+		    <div class="col-sm-4 name-column" style="margin-bottom: 10px">
 		        <div class="control-group">
 		            <label class="control-label" for="docName"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
 		            <div class="form-group">
@@ -57,18 +57,20 @@
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
 		        <div class="control-group">
-		             <label class="control-label" for="textarea"><%=i18n.localize("Visibility")%></label>
-		             <div class="controls">
-		             <a class="icon-question-sign help_popup" title="doc_help" help_data="doc_help"></a>
-                     <p id="doc_help" class="hide">
-                        <%=i18n.localize("<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role.")%>
-                    </p>
-		            <select id="docVisibility" style="width:100%">
-		              <option value="API_LEVEL" selected="true">Same as API visibility</option>
-		              <option value="OWNER_ONLY">Private</option>
-		              <option value="PRIVATE">Visible to my domain</option>
-
-		            </select>
+		             <label class="control-label" for="docVisibility"><%=i18n.localize("Visibility")%></label>
+					 <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" title="name_help">
+					     <span class="icon fw-stack fw-lg" style="font-size:6px">
+						     <i class="fw fw-circle fw-stack-2x"></i>
+						     <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+						 </span>
+					 </a>
+					 <p id="name_help" class="hide"><%=i18n.localize("<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role.")%></p>
+		             <div class="controls form-group">
+						 <select id="docVisibility" style="width:100%">
+							 <option value="API_LEVEL" selected="true">Same as API visibility</option>
+							 <option value="OWNER_ONLY">Private</option>
+							 <option value="PRIVATE">Visible to my domain</option>
+						 </select>
 		             </div>
 		        </div>
 		        <%}%>

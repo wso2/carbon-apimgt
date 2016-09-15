@@ -14,6 +14,8 @@
     var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
     var isLogoutResponse = false;
     var isLogoutRequest = false;
+    var isAsssertionEncryptionEnabled  = site.ssoConfiguration.assertionEncryptionEnabled;
+
 
     // if saml response is not a log out response
     if (samlResponse != null) {
@@ -23,14 +25,14 @@
             var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
             //Validate the saml response schema-check the number of response elements is 1 and check the number of assertions
             //is equal to 1  and check the assertion validity period and check audience restrictions
-            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse);
+            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse,isAsssertionEncryptionEnabled);
             if (!Boolean(isResponseValid)) {
                  log.error("SAML response schema verification is failed.");
                  response.sendRedirect("../site/pages/error-pages/401.html");
                  return;
             }
 
-            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse,isAsssertionEncryptionEnabled);
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             var domainName = null;
             if(fullUserName != null){
@@ -64,7 +66,7 @@
                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                    jagg.module("manager").loadTenantRegistry(String(domainName));
                }
-               var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse);
+               var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse,isAsssertionEncryptionEnabled);
                if (!Boolean(isAssertionSignatureValid)) {
                log.error("SAML assertion signature is verification failed.");
                response.sendRedirect("../site/pages/error-pages/401.html");
@@ -72,7 +74,7 @@
                }
                }
 
-            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session,isAsssertionEncryptionEnabled);
             ssoRelyingParty.addSession(session);
             session.put("showLogin", "false");
             var api = jagg.module("api");
@@ -85,7 +87,7 @@
             if (isUserCreatePermitted.permitted) {
                 jagg.setUser({username: ssoRelyingParty.getLoggedInUser(sessionId), cookie: null});
                 sessionId = session.getId();
-                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session,isAsssertionEncryptionEnabled);
                 ssoRelyingParty.addSession(session);
                 session.put("showLogin", "false");
                 session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
