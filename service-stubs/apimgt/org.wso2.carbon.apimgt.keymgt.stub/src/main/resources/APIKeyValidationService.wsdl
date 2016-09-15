@@ -103,7 +103,7 @@
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
          <xs:complexType name="APIKeyValidationInfoDTO">
             <xs:sequence>
-               <xs:element minOccurs="0" name="apiProductName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="apiPublisher" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="apiTier" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="applicationId" nillable="true" type="xs:string"/>
