@@ -58,6 +58,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     private String username;
     private String password;
     private String processDefinitionKey;
+    
+    private final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
+    
 
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
 
@@ -142,7 +145,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
         URL serviceEndpointURL = new URL(serviceEndpoint);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPost httpPost = new HttpPost(serviceEndpoint);
+        HttpPost httpPost = new HttpPost(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH);
         String authHeader = getBasicAuthHeader();
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
         StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
@@ -245,6 +248,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         JSONObject payload = new JSONObject();
         payload.put("processDefinitionKey", processDefinitionKey);
         payload.put("tenantId", apiStateWorkFlowDTO.getTenantId());
+        //set workflowreferencid to business key so we can later query the process instance using this value
+        //if we want to delete the instance
+        payload.put("businessKey", apiStateWorkFlowDTO.getExternalWorkflowReference());
         payload.put("variables", variables);
 
         return payload.toJSONString();
@@ -306,6 +312,61 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
         // TODO implement what should happen when api is deleted
+        
+        //two steps.
+        
+        //get the process id 
+        //GET https://172.16.225.128:9443/bpmn/runtime/process-instances?businessKey=workflowExtRef
+        //    Authorization Basic YWRtaW46YWRtaW4=
+        
+        //resp 
+        
+        /*
+         * {
+                "order": "asc",
+                "start": 0,
+                "sort": "id",
+                "total": 2,
+                "data": [
+                    {
+                        "suspended": false,
+                        "url": "https://localhost:9443/bpmn/runtime/process-instances/37",
+                        "tenantId": "-1234",
+                        "variables": [],
+                        "activityId": "usertask1",
+                        "processDefinitionId": "myProcess:1:4",
+                        "businessKey": "ssssssssssss",
+                        "ended": false,
+                        "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:4",
+                        "completed": false,
+                        "id": "37"
+                    },
+                    {
+                        "suspended": false,
+                        "url": "https://localhost:9443/bpmn/runtime/process-instances/47",
+                        "tenantId": "1",
+                        "variables": [],
+                        "activityId": "usertask1",
+                        "processDefinitionId": "myProcess:1:46",
+                        "businessKey": "ssssssssssss",
+                        "ended": false,
+                        "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:46",
+                        "completed": false,
+                        "id": "47"
+                    }
+                ],
+                "message": null,
+                "size": 2
+            }
+         */
+        
+        //based on tenant id , get the id 
+        
+        
+        //step two
+        //DELETE https://172.16.225.128:9443/bpmn/runtime/process-instances/id
+        
+        
         super.cleanUpPendingTask(workflowExtRef);
     }
 
