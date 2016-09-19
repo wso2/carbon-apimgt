@@ -7,7 +7,7 @@
                 if (supportedLangs.langs != null && langsArray.length > 0) { %>
                     <div class="row">
                         <div class="col-md-12">
-                            <%=i18n.localize("Download client-side SDK for your subscriptions.")%>
+                            <%=i18n.localize("Download client-side SDKs for this API.")%>
                         </div>
                         <br><br>
                         <div class="col-md-12">
