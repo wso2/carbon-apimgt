@@ -92,7 +92,7 @@ var getAPISubscriptionsForApplication = function (username, appName) {
         };
     }
 };
-var generateClientSDK = function (appName, language, userName, groupId, apiName, apiVersion, apiProvider){
+var generateClientSDK = function (language, userName, apiName, apiVersion, apiProvider){
     var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
     var generator = new sdkGen();
     var object = null;
@@ -100,7 +100,7 @@ var generateClientSDK = function (appName, language, userName, groupId, apiName,
 
     try {
         var result = Packages.java.utils.Map;
-        result = generator.generateSDK(appName,language,userName,groupId);
+        result = generator.generateSDK(language, userName, apiName, apiVersion, apiProvider);
         if(result!=null){
             var fileName = result.get("fileName");
             var path =  result.get("path");
