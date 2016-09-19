@@ -103,11 +103,6 @@ for(var i=0;i < outputs.tiers.length; i++){
       <div role="tabpanel" class="tab-pane fade" id="subscription">      
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
-
-
-
-
-
       <% } %>      
     </div>
   </div>
