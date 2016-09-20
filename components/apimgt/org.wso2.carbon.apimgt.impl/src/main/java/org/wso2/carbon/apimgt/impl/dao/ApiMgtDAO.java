@@ -8186,6 +8186,31 @@ public class ApiMgtDAO {
         return false;
     }
 
+    public List<String> getApiNames(String context) throws APIManagementException {
+        Connection conn=null;
+        ResultSet resultSet=null;
+        PreparedStatement ps = null;
+        List<String> nameList = null;
+
+        String sqlQuery = SQLConstants.GET_API_NAMES_MATCHING_CONTEXT_SQL;
+        try {
+            conn=APIMgtDBUtil.getConnection();
+            ps=conn.prepareStatement(sqlQuery);
+            ps.setString(1,context);
+
+            resultSet=ps.executeQuery();
+            while(resultSet.next()){
+                nameList.add(resultSet.getString("API_NAME"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API names which match context " + context, e);
+        }finally {
+            APIMgtDBUtil.closeAllConnections(ps,conn,resultSet);
+        }
+        return nameList;
+    }
+
+
     /**
      * @param consumerKey
      * @return

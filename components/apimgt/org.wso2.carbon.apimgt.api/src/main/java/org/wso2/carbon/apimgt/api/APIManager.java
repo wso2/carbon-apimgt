@@ -411,7 +411,15 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
-    
+
+
+    /**
+     * return a list of API names matches to the given context
+     * @param context context in the payload
+     * @return list of API names
+     * @throws APIManagementException
+     */
+    List<String> getNamesWithContext(String context) throws APIManagementException;
 
     /**
      * Get policy object for given level and user name
