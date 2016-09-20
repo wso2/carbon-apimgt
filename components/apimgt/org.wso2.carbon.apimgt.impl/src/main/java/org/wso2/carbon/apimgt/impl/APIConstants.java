@@ -454,6 +454,9 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR
             + "KeyValidationHandlerClassName";
 
+    public static final String USER_DEFAULT_PROFILE = "default";
+    public static final String USER_PROFILE_MGT_SERVICE = "UserProfileMgtService";
+    
     public static final String API_RESTAPI = "RESTAPI.";
     public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
     public static final String API_RESTAPI_WHITELISTED_URI_URI = API_RESTAPI_WHITELISTED_URI + "URI";
