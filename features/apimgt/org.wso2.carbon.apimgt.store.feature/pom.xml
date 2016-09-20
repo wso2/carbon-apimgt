@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.0.4</version>
+        <version>6.0.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -114,6 +114,10 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.samskivert</groupId>
             <artifactId>jmustache</artifactId>
         </dependency>
@@ -178,6 +182,7 @@
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
+                                <bundleDef>org.yaml:snakeyaml</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>

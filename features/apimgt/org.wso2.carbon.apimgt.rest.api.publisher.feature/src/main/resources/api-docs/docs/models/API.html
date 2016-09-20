@@ -149,6 +149,24 @@
                 
                     <tr>
                         <td class="parameter">
+                            <p>wsdlUri</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">WSDL URL if the API is based on a WSDL endpoint\n</p></td>
+                        <td class="parameter">
+                            
+                                <a href="#!/models#string">string</a>
+                            
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">http://www.webservicex.com/globalweather.asmx?wsdl</p></td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
                             <p>status</p>
                             <p class="param-required">
                                 
@@ -293,7 +311,25 @@
                 
                     <tr>
                         <td class="parameter">
-                            <p>thumbnailUrl</p>
+                            <p>maxTps</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                            
+                                <a href="#!/models#API_maxTps">API_maxTps</a>
+                            
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            <p>thumbnailUri</p>
                             <p class="param-required">
                                 
                                 optional
@@ -306,7 +342,7 @@
                             
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked"></p></td>
+                        <td class="parameter"> <p class="marked">/apis/01234567-0123-0123-0123-012345678901/thumbnail</p></td>
                     </tr>
                 
                     <tr>
@@ -378,7 +414,25 @@
                             
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">{&quot;production_endpoints&quot;:{&quot;url&quot;:&quot;http://localhost:9763/am/sample/calculator/v1/api&quot;,&quot;config&quot;:null},&quot;implementation_status&quot;:&quot;managed&quot;,&quot;endpoint_type&quot;:&quot;http&quot;}</p></td>
+                        <td class="parameter"> <p class="marked">{&quot;production_endpoints&quot;:{&quot;url&quot;:&quot;https://127.0.0.1:9443/am/sample/calculator/v1/api&quot;,&quot;config&quot;:null},&quot;implementation_status&quot;:&quot;managed&quot;,&quot;endpoint_type&quot;:&quot;http&quot;}</p></td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            <p>endpointSecurity</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                            
+                                <a href="#!/models#API_endpointSecurity">API_endpointSecurity</a>
+                            
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">null</p></td>
                     </tr>
                 
                     <tr>

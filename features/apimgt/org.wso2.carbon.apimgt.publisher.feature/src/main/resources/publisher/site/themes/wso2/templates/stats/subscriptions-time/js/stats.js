@@ -99,7 +99,10 @@ $(document).ready(function(){
         nv.utils.windowResize(chart.update);
         //update api list
         apiFilterList();
+<<<<<<< HEAD
+=======
         getDateTime(to, from);
+>>>>>>> release-6.0.0
         return chart;
     });
 });
@@ -118,10 +121,17 @@ function apiFilterList(){
                 $('#apiSelect')
                    .append(apiName)
                    .selectpicker('refresh');
+<<<<<<< HEAD
+                getDateTime(to, from);
+                $('#apiSelect').on('change', function() {
+                    getDateTime(to, from);
+                });
+=======
                 $('#apiSelect').on('change', function() {
                     drawSubTime(from,to);
                 });
                 drawSubTime(from,to);
+>>>>>>> release-6.0.0
             }
         else {
             if (json.message == "AuthenticateError") {

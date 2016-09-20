@@ -96,6 +96,11 @@ $(document).ready(function(){
         nv.utils.windowResize(chart.update);
         //update api list
         apiFilterList();
+<<<<<<< HEAD
+        //draw graph
+        getDateTime(to, from);
+=======
+>>>>>>> release-6.0.0
         return chart;
     });
 });

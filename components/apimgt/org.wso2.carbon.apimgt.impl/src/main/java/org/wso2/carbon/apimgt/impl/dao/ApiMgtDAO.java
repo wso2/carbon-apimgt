@@ -776,7 +776,11 @@ public class ApiMgtDAO {
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
         boolean defaultVersionInvoked = false;
-
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
+        if(apiTenantDomain == null) {
+            apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         //Check if the api version has been prefixed with _default_
         if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
             defaultVersionInvoked = true;
@@ -784,7 +788,8 @@ public class ApiMgtDAO {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
         String sql;
-        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+        boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        if(!isAdvancedThrottleEnabled) {
             if (defaultVersionInvoked) {
                 sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
             } else {
@@ -807,9 +812,17 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
-            if (!defaultVersionInvoked) {
-                ps.setString(3, version);
+            if(isAdvancedThrottleEnabled) {
+                ps.setInt(3, apiOwnerTenantId);
+                if (!defaultVersionInvoked) {
+                    ps.setString(4, version);
+                }
+            } else {
+                if (!defaultVersionInvoked) {
+                    ps.setString(3, version);
+                }
             }
+
             rs = ps.executeQuery();
             if (rs.next()) {
                 String subscriptionStatus = rs.getString("SUB_STATUS");
@@ -5388,6 +5401,12 @@ public class ApiMgtDAO {
             prepStmt.setString(3, api.getId().getVersion());
             prepStmt.setString(4, api.getContext());
             String contextTemplate = api.getContextTemplate();
+            //Validate if the API has an unsupported context before executing the query
+            String invalidContext = "/" + APIConstants.VERSION_PLACEHOLDER;
+            if (invalidContext.equals(contextTemplate)) {
+                throw new APIManagementException("Cannot add API : " + api.getId() + " with unsupported context : "
+                        + contextTemplate);
+            }
             //If the context template ends with {version} this means that the version will be at the end of the context.
             if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
                 //Remove the {version} part from the context template.

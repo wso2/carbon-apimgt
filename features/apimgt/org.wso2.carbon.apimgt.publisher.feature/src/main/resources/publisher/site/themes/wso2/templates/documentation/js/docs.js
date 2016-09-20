@@ -24,7 +24,7 @@ $(document).ready(function() {
         var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
         var illegalCharsCondition = illegalChars.test(docId.val());
         // @todo: param_string
-        validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
+        validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
 
         if(!illegalCharsCondition) {
             //Check the doc name is duplicated
@@ -45,12 +45,20 @@ $(document).ready(function() {
         null,
         { "bSortable": false }
         ];
-    } else {
+    } else if (docTableColCount == 4){
         docTableColumnStructure = [
         null,
         null,
         null,
         { "bSortable": false }
+        ];
+    } else if (docTableColCount == 5){
+        docTableColumnStructure = [
+            null,
+            null,
+            null,
+            null,
+            { "bSortable": false }
         ];
     }
 
@@ -231,7 +239,7 @@ var saveDoc=function(){
     var illegalCharsCondition = illegalChars.test(docId.val());
 
     // @todo: param_string
-    if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
+    if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
         return;
     }
     if($('#saveDocBtn').val() != "Update"){

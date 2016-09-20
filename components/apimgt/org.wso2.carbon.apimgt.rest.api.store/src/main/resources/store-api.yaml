@@ -6,10 +6,9 @@ info:
   version: "0.10.0"
   title: "WSO2 API Manager - Store"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
-
-    It is written with [swagger 2](http://swagger.io/).
-
+    This specifies a **RESTful API** for WSO2 **API Manager** - Store.
+    
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
   contact:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
@@ -70,12 +69,22 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition  
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" http://127.0.0.1:9763/api/am/store/v0.10/apis"
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This API provide Account Status Validation.\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account/1.0.0\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"status\": \"PUBLISHED\",\n         \"name\": \"api1\",\n         \"context\": \"/api1/1.0.0\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"2.0.0\",\n         \"description\": \"Verify a phone number\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"PhoneVerification\",\n         \"context\": \"/phoneverify/2.0.0\",\n         \"id\": \"c43a325c-260b-4302-81cb-768eafaa3aed\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
       summary: |
-        Retrieving APIs
+        Retrieve/Search APIs
       description: |
-        Get a list of available APIs qualifying under a given search condition.
+        This operation provides you a list of available APIs qualifying under a given search condition.
+        
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+        
+        This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
+        * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles.
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
@@ -85,7 +94,7 @@ paths:
           description: |
             **Search condition**.
 
-            You can search in attributes by using an **"attribute:"** modifier.
+            You can search in attributes by using an **"<attribute>:"** modifier.
 
             Eg.
             "provider:wso2" will match an API if the provider of the API is exactly "wso2".
@@ -93,18 +102,19 @@ paths:
             Additionally you can use wildcards.
 
             Eg.
-            "provider:wso2\*" will match an API if the provider of the API starts with "wso2".
+            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
 
             Supported attribute modifiers are [**version, context, status,
             description, subcontext, doc, provider, tag**]
 
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
+            
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - apisAPI
+        - API (Collection)
       responses:
         200:
           description: |
@@ -118,12 +128,12 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         406:
           description: |
             Not Acceptable.
@@ -140,12 +150,19 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" http://127.0.0.1:9763/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\n   \"isDefaultVersion\": false,\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"2.0.0\",\n   \"description\": \"Verify a phone number\",\n   \"status\": \"PUBLISHED\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify/2.0.0\",\n   \"id\": \"c43a325c-260b-4302-81cb-768eafaa3aed\"\n}"
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"thumbnailUrl\": null,\r\n   \"tiers\": [\"Unlimited\"],\r\n   \"businessInformation\":    {\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"businessOwner\": \"Jane Roe\",\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\"\r\n   },\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"},\\\"Content-Type\\\":{\\\"description\\\":\\\"The content type of the body.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.\\\"}}}},\\\"/order/{orderId}\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Get details of an Order\\\",\\\"parameters\\\":[{\\\"description\\\":\\\"Order Id\\\",\\\"name\\\":\\\"orderId\\\",\\\"format\\\":\\\"integer\\\",\\\"type\\\":\\\"number\\\",\\\"required\\\":true,\\\"in\\\":\\\"path\\\"}],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK Requested Order will be returned\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"endpointURLs\": [   {\r\n      \"environmentName\": \"Production and Sandbox\",\r\n      \"environmentType\": \"hybrid\",\r\n      \"environmentURLs\":       {\r\n         \"http\": \"http://10.100.7.77:8280//pizzashack/1.0.0\",\r\n         \"https\": \"https://10.100.7.77:8243//pizzashack/1.0.0\"\r\n      }\r\n   }],\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"version\": \"1.0.0\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"provider\": \"admin\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"context\": \"/pizzashack/1.0.0\",\r\n   \"id\": \"8848faaa-7fd1-478a-baa2-48a4ebb92c98\",\r\n   \"status\": \"PUBLISHED\"\r\n}  "
       summary: |
-        Get Details of API
-      description: |
         Get details of an API
+      description: |
+        Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
+        
+        `X-WSO2-Tenant` header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+        
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
@@ -153,7 +170,7 @@ paths:
         - $ref: '#/parameters/If-Modified-Since'
         - $ref: '#/parameters/requestedTenant'
       tags:
-        - API (individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -166,19 +183,19 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
           schema:
             $ref: '#/definitions/API'
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -198,12 +215,19 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" http://127.0.0.1:9763/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"2.0.0\"\n   }\n}\n"
       summary: |
-        Get the swagger of an API
+        Get swagger definition
       description: |
-        Get the swagger of an API
+        You can use this operation to retrieve the swagger definition of an API.
+        
+         `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+         
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
@@ -211,7 +235,7 @@ paths:
         - $ref: '#/parameters/If-Modified-Since'
         - $ref: '#/parameters/requestedTenant'
       tags:
-        - API (individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -224,17 +248,17 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -257,12 +281,19 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" http://127.0.0.1:9763/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"850a4f34-db2c-4d23-9d85-3f95fbfb082c\",\n         \"summary\": \"This is a sample documentation for v1.0.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"98e18be8-5861-43c7-ba26-8cbbccd3a76f\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      },\n            {\n         \"sourceType\": \"FILE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"b66451ff-c6c2-4f6a-b91d-3821dc119b04\",\n         \"summary\": \"This is a sample documentation pdf\",\n         \"name\": \"Introduction to PhoneVerification API PDF\",\n         \"type\": \"HOWTO\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
       summary: |
-        Get a list of documents belonging to an API.
+        Get a list of documents of an API
       description: |
-        Get a list of documents belonging to an API.
+        This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
+        
+        `X-WSO2-Tenant` header can be used to retrive documents of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+        
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's documents, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
@@ -271,7 +302,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (individual)
+        - Document (Collection)
       responses:
         200:
           description: |
@@ -286,12 +317,12 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -314,12 +345,19 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
+      x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c\""
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"850a4f34-db2c-4d23-9d85-3f95fbfb082c\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
       summary: |
-        Get a particular document associated with an API.
+        Get a document of an API
       description: |
-        Get a particular document associated with an API.
+        This operation can be used to retrieve a particular document's metadata associated with an API.
+        
+        `X-WSO2-Tenant` header can be used to retrive a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's document, you need to provide Authorization header.        
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
@@ -328,7 +366,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
+        - Document (Individual)
       responses:
         200:
           description: |
@@ -344,17 +382,17 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -379,12 +417,28 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
-        x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content\" > sample.pdf"
+        x-wso2-request: |
+          GET https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
+        x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content\" > sample.pdf"
         x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
         summary: |
-          Downloads a FILE type document/get the inline content or source url of a certain document.
+          Get the content of an API document
         description: |
-          Downloads a FILE type document/get the inline content or source url of a certain document.
+          This operation can be used to retrive the content of an API's document.
+          
+          The document can be of 3 types. In each cases responses are different.
+          
+          1. **Inline type**:
+             The content of the document will be retrieved in `text/plain` content type
+          2. **FILE type**: 
+             The file will be downloaded with the related content type (eg. `application/pdf`)
+          3. **URL type**:
+              The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
+          
+          `X-WSO2-Tenant` header can be used to retrive the content of a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+          **NOTE:**
+          * This operation does not require an Authorization header by default. But in order to see a restricted API's document content, you need to provide Authorization header.        
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
@@ -393,7 +447,7 @@ paths:
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
         tags:
-          - API (individual)
+          - Document (Individual)
         responses:
           200:
             description: |
@@ -407,12 +461,12 @@ paths:
               ETag:
                 description: |
                   Entity Tag of the response resource.
-                  Used by caches, or in conditional requests.
+                  Used by caches, or in conditional requests (Will be supported in future).
                 type: string
               Last-Modified:
                 description: |
                   Date and time the resource has been modifed the last time.
-                  Used by caches, or in conditional reuquests.
+                  Used by caches, or in conditional requests (Will be supported in future).
                 type: string
           303:
             description: |
@@ -426,7 +480,7 @@ paths:
           304:
             description: |
               Not Modified.
-              Empty body because the client has already the latest version of the requested resource.
+              Empty body because the client has already the latest version of the requested resource (Will be supported in future).
           404:
             description: |
               Not Found.
@@ -449,18 +503,23 @@ paths:
 # Downloads a thumbnail image of an API
 #-------------------------------------------------------------------------------------------------
     get:
-      x-wso2-curl: "curl  http://127.0.0.1:9763/api/am/store/v0.10/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg"
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]"
-      summary: Get the thumbnail image
+      summary: Get thumbnail image
       description: |
-        Downloads a thumbnail image of an API
+        This operation can be used to download a thumbnail image of an API.
+        
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.        
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -474,17 +533,17 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -508,12 +567,15 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/applications\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.10/applications\""
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"description\": \"\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"description\": null,\n         \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
       summary: |
-        Get a list of applications
+        Retrieve/Search applications
       description: |
-        Get a list of applications
+        This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token.
       parameters:
         - $ref: '#/parameters/groupId'
         - name : query
@@ -533,7 +595,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Application Collection
+        - Application (Collection)
       responses:
         200:
           description: |
@@ -549,12 +611,12 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         400:
           description: |
             Bad Request.
@@ -573,13 +635,13 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -H \"Content-Type: application/json\" -X POST -d @data.json \"http://127.0.0.1:9763/api/am/store/v0.10/applications\""
-      x-wso2-request: "{\n    \"groupId\": \"\",\n    \"subscriber\": \"admin\",\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"status\": \"APPROVED\",\n    \"name\": \"sampleapp\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.10/applications\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/store/v0.10/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
       summary: |
-        Create a new application.
+        Create a new application
       description: |
-        Create a new application.
+        This operation can be used to create a new application specifying the details of the application in the payload.
       parameters:
         - in: body
           name: body
@@ -590,7 +652,7 @@ paths:
             $ref: '#/definitions/Application'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         201:
           description: |
@@ -610,7 +672,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         400:
           description: |
@@ -641,19 +703,22 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/applications/896658a0-b4ee-4535-bbfa-806c894a4015\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.10/applications/896658a0-b4ee-4535-bbfa-806c894a4015\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/applications/896658a0-b4ee-4535-bbfa-806c894a4015
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}"
       summary: |
-        Get application details
+        Get details of an application
       description: |
-        Get application details
+        This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -668,17 +733,17 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -697,13 +762,13 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
-      x-wso2-request: "{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\"\n}"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
+      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingTier\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\"\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
       summary: |
-        Update application details
+        Update an application
       description: |
-        Update application details
+        This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.
       parameters:
         - $ref: '#/parameters/applicationId'
         - in: body
@@ -717,7 +782,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -736,12 +801,12 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         400:
           description: |
@@ -758,7 +823,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
+            The request has not been performed because one of the preconditions is not met (Will be supported in future).
           schema:
             $ref: '#/definitions/Error'
 
@@ -767,18 +832,21 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -X DELETE \"http://127.0.0.1:9763/api/am/store/v0.10/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://127.0.0.1:9443/api/am/store/v0.10/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
+      x-wso2-request: |
+        DELETE https://127.0.0.1:9443/api/am/store/v0.10/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
         Remove an application
       description: |
-        Remove an application
+        This operation can be used to remove an application specifying its id.
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -793,7 +861,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
+            The request has not been performed because one of the preconditions is not met (Will be supported in future).
           schema:
             $ref: '#/definitions/Error'
 
@@ -807,13 +875,13 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -H \"Content-Type: application/json\" -X POST -d @data.json  \"http://127.0.0.1:9763/api/am/store/v0.10/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
-      x-wso2-request: "{\n  \"validityTime\": \"3600\",\n  \"keyType\": \"PRODUCTION\",\n  \"accessAllowDomains\": [\"ALL\"\n  ]\n}"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json  \"https://127.0.0.1:9443/api/am/store/v0.10/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/store/v0.10/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n  \"validityTime\": \"3600\",\n  \"keyType\": \"PRODUCTION\",\n  \"accessAllowDomains\": [\"ALL\"\n  ]\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"consumerSecret\": \"8V7DDKtKGtuG_9GDjaOJ5sijdX0a\",\n   \"consumerKey\": \"LOFL8He72MSGVil4SS_bsh9O8MQa\",\n   \"keyState\": \"APPROVED\",\n   \"keyType\": \"PRODUCTION\",\n   \"supportedGrantTypes\":    [\n      \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n      \"iwa:ntlm\",\n      \"refresh_token\",\n      \"client_credentials\",\n      \"password\"\n   ],\n   \"token\":    {\n      \"validityTime\": 3600,\n      \"accessToken\": \"fd2cdc4906fbc162e033d57f85a71c21\",\n      \"tokenScopes\":       [\n         \"am_application_scope\",\n         \"default\"\n      ]\n   }\n}"
-      description: |
-        Generate keys for application
       summary: |
         Generate keys for application
+      description: |
+        This operation can be used to generate client Id and client secret for an application
       parameters:
         - $ref: '#/parameters/applicationId-Q'
         - in: body
@@ -827,7 +895,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -843,12 +911,12 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional request.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.‚
+                Used by caches, or in conditional requests (Will be supported in future).‚
               type: string
         400:
           description: |
@@ -865,7 +933,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
+            The request has not been performed because one of the preconditions is not met (Will be supported in future).
           schema:
             $ref: '#/definitions/Error'
 
@@ -879,14 +947,24 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"tier\": \"Bronze\",\n         \"subscriptionId\": \"03b8ef2b-5ae5-41f5-968e-52fa7fbd5d33\",\n         \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"status\": \"UNBLOCKED\"\n      },\n            {\n         \"tier\": \"Bronze\",\n         \"subscriptionId\": \"5ed42650-9f5e-4dd4-94f3-3f09f1b17354\",\n         \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n         \"applicationId\": \"846118a5-3b25-4c22-a983-2d0278936f09\",\n         \"status\": \"UNBLOCKED\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
       summary: |
-        Get subscription list.
+        Get all subscriptions
       description: |
-        Get subscription list.
-        The API Identifier or Application Identifier
-        the subscriptions of which are to be returned are passed as parameters.
+        This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
+        
+        1. Retrieving applications which are subscibed to a specific API.
+        `GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
+        
+        2. Retrieving APIs which are subscribed by a specific application.
+        `GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`
+        
+        **IMPORTANT:**
+        * It is mandatory to provide either **apiId** or **applicationId**.
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
@@ -896,7 +974,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Subscription Collection
+        - Subscription (Collection)
       responses:
         200:
           description: |
@@ -912,12 +990,12 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         406:
           description: |
             Not Acceptable. The requested media type is not supported
@@ -929,13 +1007,13 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"http://127.0.0.1:9763/api/am/store/v0.10/subscriptions\""
-      x-wso2-request: "{\n    \"tier\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.10/subscriptions\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/store/v0.10/subscriptions\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"tier\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
       summary: |
         Add a new subscription
       description: |
-        Add a new subscription
+        This operation can be used to add a new subscription providing the id of the API and the application.
       parameters:
         - in: body
           name: body
@@ -946,7 +1024,7 @@ paths:
             $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
       responses:
         201:
           description: |
@@ -966,7 +1044,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         400:
           description: |
@@ -989,19 +1067,22 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
-      description: |
-        Get subscription details
       summary: |
-        Get subscription details
+        Get details of a subscription
+      description: |
+        This operation can be used to get details of a single subscription.
       parameters:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
       responses:
         200:
           description: |
@@ -1014,15 +1095,17 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
-              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
+              description: |
+                Date and time the resource has been modifed the last time. Used by caches, or in conditional requests (Will be supported in future).
               type: string
         '304':
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         '404':
           description: |
             Not Found.
@@ -1035,18 +1118,20 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" -X DELETE \"http://127.0.0.1:9763/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://127.0.0.1:9443/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
+      x-wso2-request: |
+        DELETE https://127.0.0.1:9443/api/am/store/v0.10/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: |
-        Remove subscription
+        Remove a subscription
       description: |
-        Remove subscription
+        This operation can be used to remove a subscription.
       parameters:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
       responses:
         200:
           description: |
@@ -1061,7 +1146,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
+            The request has not been performed because one of the preconditions is not met (Will be supported in future).
           schema:
             $ref: '#/definitions/Error'
 
@@ -1074,12 +1159,17 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/tiers/api\""
+      x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/tiers/api\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/tiers/api
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"count\": 4,\n   \"next\": \"\"\n}"
-      description: |
-        Get available tiers
       summary: |
         Get available tiers
+      description: |
+        This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of `api` and `application`.
+        
+        **NOTE**:
+        * API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -1088,7 +1178,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Tier Collection
+        - Throttling Tier (Collection)
       responses:
         200:
           description: |
@@ -1105,12 +1195,12 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         406:
           description: |
             Not Acceptable.
@@ -1127,12 +1217,14 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/tiers/api/Bronze\""
+      x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/tiers/api/Bronze\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/tiers/api/Bronze
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"stopOnQuotaReach\": true,\n   \"tierLevel\": \"api\",\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
-      description: |
-        Get tier details
       summary: |
-        Get tier details
+        Get details of a tier
+      description: |
+        This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
@@ -1141,7 +1233,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Tier (individual)
+        - Throttling Tier (Individual)
       responses:
         200:
           description: |
@@ -1157,17 +1249,17 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
             Last-Modified:
               description: |
                 Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -1190,12 +1282,14 @@ paths:
 # Retrieve the list of tags qualifying under a search condition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"http://127.0.0.1:9763/api/am/store/v0.10/tags\""
+      x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/tags\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/tags
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"weight\": 1,\n         \"name\": \"mobile\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"multimedia\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"phone\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
-      description: |
-        Get a list of tags that are already added to APIs
       summary: |
-        Get a list of tags that are already added to APIs
+        Get all tags
+      description: |
+        This operation can be used to retrieve a list of tags that are already added to APIs.
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -1203,7 +1297,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Tag Collection
+        - Tag (Collection)
       responses:
         200:
           description: |
@@ -1219,12 +1313,12 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
+                Used by caches, or in conditional requests (Will be supported in future).
               type: string
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found. Requested API does not exist.
@@ -1283,7 +1377,7 @@ parameters:
     name: documentId
     in: path
     description: |
-      **Document Identifier**
+      Document Identifier
     required: true
     type: string
 
@@ -1375,8 +1469,8 @@ parameters:
     name: Accept
     in: header
     description: |
-      Media types acceptable for the response. Default is JSON.
-    default: JSON
+      Media types acceptable for the response. Default is application/json.
+    default: application/json
     type: string
 
 # The HTTP Content-Type header
@@ -1384,8 +1478,8 @@ parameters:
     name: Content-Type
     in: header
     description: |
-      Media type of the entity in the body. Default is JSON.
-    default: JSON
+      Media type of the entity in the body. Default is application/json.
+    default: application/json
     required: true
     type : string
 
@@ -1989,7 +2083,7 @@ definitions:
 # The Error List Item resource
 #-----------------------------------------------------
   ErrorListItem:
-    title: Description of individual errors that may have occurred during a request.
+    title: Description of Individual errors that may have occurred during a request.
     required:
       - code
       - message
@@ -1999,7 +2093,7 @@ definitions:
       message:
         type: string
         description: |
-          Description about individual errors occurred
+          Description about Individual errors occurred
 
 #-----------------------------------------------------
 # The Token resource
