@@ -165,11 +165,11 @@ var getWorkflowCookieBySAMLToken = function () {
         var workflowCookieLastUpdatedTime = session.get("workflowCookieLastUpdatedTime");
         if (((timeNow - workflowCookieLastUpdatedTime) > DEFAULT_COOKIE_REFRESH_INTERVAL) ||
                 (session.get("workflowCookie") == null)) {
-            try {
-                var sessionCookie = getAuthCookieBySAMLToken(workFlowServerURL);
+            var sessionCookie = getAuthCookieBySAMLToken(workFlowServerURL);
+            if (sessionCookie != null) {
                 session.put("workflowCookie", sessionCookie);
                 session.put("workflowCookieLastUpdatedTime", timeNow);
-            } catch (e) {
+            } else {
                 log.error("Error occurred while getting workflow cookie by exchanging the SAML token.");
             }
         }
@@ -206,11 +206,16 @@ var getAuthCookieBySAMLToken = function (serverUrl) {
         xhr.setRequestHeader('SOAPAction', 'urn:login');
         xhr.setRequestHeader('Content-Type', 'application/soap+xml');
         xhr.send(payload);
-        return xhr.getResponseHeader("Set-Cookie");
+        if (xhr.status == 200) {
+            return xhr.getResponseHeader("Set-Cookie");
+        } else {
+            log.error("Error occurred while getting a cookie for  user :  " + user +
+                    " Received Response : " + xhr.responseText);
+        }
     } catch (e) {
         log.error("Error while getting a cookie for  user :  " + user + "\n" + e.message);
-        throw "Error while getting a cookie for  user :  " + user;
     }
+    return null;
 };
 
 var checkWorkflowServerStatus = function (serverUrl) {
