@@ -152,6 +152,7 @@ var getWorkflowCookie = function (username, password) {
  * This method will return the workflow cookie using the SAML2 Token
  */
 var getWorkflowCookieBySAMLToken = function () {
+    var log = new Log();
     var site = require("/site/conf/site.json");
     var workFlowServerURL = site.workflows.workFlowServerURL;
     var bpsRuning = checkWorkflowServerStatus(workFlowServerURL);
@@ -164,9 +165,13 @@ var getWorkflowCookieBySAMLToken = function () {
         var workflowCookieLastUpdatedTime = session.get("workflowCookieLastUpdatedTime");
         if (((timeNow - workflowCookieLastUpdatedTime) > DEFAULT_COOKIE_REFRESH_INTERVAL) ||
                 (session.get("workflowCookie") == null)) {
-            var sessionCookie = getAuthCookieBySAMLToken(workFlowServerURL);
-            session.put("workflowCookie", sessionCookie);
-            session.put("workflowCookieLastUpdatedTime", timeNow);
+            try {
+                var sessionCookie = getAuthCookieBySAMLToken(workFlowServerURL);
+                session.put("workflowCookie", sessionCookie);
+                session.put("workflowCookieLastUpdatedTime", timeNow);
+            } catch (e) {
+                log.error("Error occurred while getting workflow cookie by exchanging the SAML token.");
+            }
         }
     }
 };
@@ -203,8 +208,8 @@ var getAuthCookieBySAMLToken = function (serverUrl) {
         xhr.send(payload);
         return xhr.getResponseHeader("Set-Cookie");
     } catch (e) {
-        log.error("Error while updating admin cookie for  user :  " + user + "\n" + e.message);
-        throw "Error while updating admin cookie for  user :  " + user
+        log.error("Error while getting a cookie for  user :  " + user + "\n" + e.message);
+        throw "Error while getting a cookie for  user :  " + user;
     }
 };
 
