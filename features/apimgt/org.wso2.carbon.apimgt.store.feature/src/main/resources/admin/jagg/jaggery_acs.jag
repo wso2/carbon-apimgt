@@ -29,19 +29,19 @@
             }
 
             // validating the signature
-            if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-		var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);			
-			if(fullUserName != null && fullUserName.indexOf("@")!=-1){
-				var domainName = fullUserName.split("@")[1];
-				jagg.module("manager").loadTenantRegistry(domainName);	
-		}
+            if (site.ssoConfiguration.responseSigningEnabled === 'true') {
+                var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+                if (fullUserName != null && fullUserName.indexOf("@") != -1) {
+                    var domainName = fullUserName.split("@")[1];
+                    jagg.module("manager").loadTenantRegistry(domainName);
+                }
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
                 if (!Boolean(isSignatureValid)) {
                     log.error("SAML response signature is verification failed.");
                     response.sendRedirect("../site/pages/error-pages/401.html");
                     return;
                 }
-            }      
+            }
             ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
             session.put("showLogin", "false");
             var api = jagg.module("api");
@@ -53,7 +53,7 @@
             }
             var isCreatePermitted = api.hasCreatePermission();
             var isPublishPermitted = api.hasPublishPermission();
-	    var hasTierPermission = api.hasManageTierPermission();
+            var hasTierPermission = api.hasManageTierPermission();
             jagg.setCreatePermitted(isCreatePermitted);
             jagg.setPublishPermitted(isPublishPermitted);
             jagg.setManageTierPermitted(hasTierPermission);
