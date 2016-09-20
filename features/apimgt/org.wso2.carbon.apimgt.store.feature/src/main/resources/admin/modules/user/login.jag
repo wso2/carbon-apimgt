@@ -1,5 +1,7 @@
 <%
 
+include("/jagg/constants.jag");
+
 var login = function (username, password, tenantMode) {
     var result, isSuperTenant, message,
             log = new Log();
@@ -128,16 +130,10 @@ var getWorkflowCookie = function (username, password) {
     try {
         var xhr = new XMLHttpRequest();
         var site = require("/site/conf/site.json");
-        var endpoint = site.workflows.workFlowServerURL + "AuthenticationAdmin";
-        try {
-            var httpClient = new Packages.org.apache.http.impl.client.DefaultHttpClient();
-            var httpPost = new Packages.org.apache.http.client.methods.HttpPost(endpoint);
-            httpClient.execute(httpPost);
-            bpsRuning = true;
-        } catch (e) {
-            log.warn("Not Retrieving Pending Tasks. Check BPS Connectivity");
-        }
+        var workFlowServerURL = site.workflows.workFlowServerURL;
+        bpsRuning = checkWorkflowServerStatus(workFlowServerURL);
         if (bpsRuning) {
+            var endpoint = workFlowServerURL + "AuthenticationAdmin";
             xhr.open("POST", endpoint);
             var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' + username + '</aut:username><aut:password>' + password + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
             xhr.send(payload);
@@ -149,6 +145,80 @@ var getWorkflowCookie = function (username, password) {
     } catch (e) {
         log.error(e.message);
 
+    }
+};
+
+/**
+ * This method will return the workflow cookie using the SAML2 Token
+ */
+var getWorkflowCookieBySAMLToken = function () {
+    var site = require("/site/conf/site.json");
+    var workFlowServerURL = site.workflows.workFlowServerURL;
+    var bpsRuning = checkWorkflowServerStatus(workFlowServerURL);
+    if (bpsRuning) {
+        var clock = new Date();
+        var timeNow = clock.getTime();
+        if (session.get("workflowCookieLastUpdatedTime") == null) {
+            session.put("workflowCookieLastUpdatedTime", timeNow);
+        }
+        var workflowCookieLastUpdatedTime = session.get("workflowCookieLastUpdatedTime");
+        if (((timeNow - workflowCookieLastUpdatedTime) > DEFAULT_COOKIE_REFRESH_INTERVAL) ||
+                (session.get("workflowCookie") == null)) {
+            var sessionCookie = getAuthCookieBySAMLToken(workFlowServerURL);
+            session.put("workflowCookie", sessionCookie);
+            session.put("workflowCookieLastUpdatedTime", timeNow);
+        }
+    }
+};
+
+/**
+ * Returns an authenticated cookie, for the given Server by exchanging the SAML2 SSO token
+ * @param serverUrl
+ */
+var getAuthCookieBySAMLToken = function (serverUrl) {
+    var log = new Log();
+    var user = jagg.getUser().username;
+    try {
+        var site = require("/site/conf/site.json");
+        var security = require("sso");
+        var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
+        var encodedToken = ssoRelyingParty.getSAMLToken(session.getId());
+        var xhr = new XMLHttpRequest();
+        var endPoint = serverUrl + "SAML2SSOAuthenticationService";
+        xhr.open("POST", endPoint);
+
+        var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:sso="http://sso.saml2.authenticator.identity.carbon.wso2.org" xmlns:xsd="http://dto.sso.saml2.authenticator.identity.carbon.wso2.org/xsd">' +
+                        '<soap:Header/>' +
+                        '<soap:Body>' +
+                            '<sso:login>' +
+                                '<sso:authDto>' +
+                                    '<xsd:response>' + encodedToken + '</xsd:response>' +
+                                '</sso:authDto>' +
+                            '</sso:login>' +
+                        '</soap:Body>' +
+                      '</soap:Envelope>';
+
+        xhr.setRequestHeader('SOAPAction', 'urn:login');
+        xhr.setRequestHeader('Content-Type', 'application/soap+xml');
+        xhr.send(payload);
+        return xhr.getResponseHeader("Set-Cookie");
+    } catch (e) {
+        log.error("Error while updating admin cookie for  user :  " + user + "\n" + e.message);
+        throw "Error while updating admin cookie for  user :  " + user
+    }
+};
+
+var checkWorkflowServerStatus = function (serverUrl) {
+    var log = new Log();
+    var endpoint = serverUrl + "AuthenticationAdmin";
+    try {
+        var httpClient = new Packages.org.apache.http.impl.client.DefaultHttpClient();
+        var httpPost = new Packages.org.apache.http.client.methods.HttpPost(endpoint);
+        httpClient.execute(httpPost);
+        return true;
+    } catch (e) {
+        log.warn("Not Retrieving Pending Tasks. Check BPS Connectivity. " + e.message);
+        return false;
     }
 };
 

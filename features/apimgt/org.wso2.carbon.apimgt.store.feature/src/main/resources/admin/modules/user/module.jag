@@ -9,7 +9,11 @@ jagg.module("user", {
         return jagg.require(jagg.getModulesDir() + "user/login.jag").loginWithSAMLToken.apply(this, arguments);
     },
 
-    logout: function () {
+    getWorkflowCookieBySAMLToken:function () {
+        return jagg.require(jagg.getModulesDir() + "user/login.jag").getWorkflowCookieBySAMLToken.apply(this, arguments);
+    },
+
+    logout:function () {
         return jagg.require(jagg.getModulesDir() + "user/logout.jag").logout.apply(this, arguments);
     }
 });

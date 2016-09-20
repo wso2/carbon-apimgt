@@ -16,8 +16,11 @@
     "identityProviderURL": "https://localhost:9443/samlsso",
     "keyStorePassword": "",
     "identityAlias": "",
-    "responseSigningEnabled": "true",
-    "keyStoreName": ""
+    "keyStoreName": "",
+    "verifyAssertionValidityPeriod":"true",
+    "audienceRestrictionsEnabled":"true",
+    "responseSigningEnabled":"true",
+    "assertionSigningEnabled":"true"
   },
   "reverseProxy": {
     "enabled": false,
