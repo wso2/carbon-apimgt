@@ -65,7 +65,7 @@ public class WorkflowConstants {
     
     public static final String API_STATE_CHANGE = "APIStateChange";
     
-    public static final String API_WF_SCOPE = "api:api_view"; /////////////////////change
+    public static final String API_WF_SCOPE = "apim:api_view"; /////////////////////change
 
     public static final String REGISTER_USER_WS_ACTION = "http://workflow.registeruser.apimgt.carbon.wso2.org/initiate";
 

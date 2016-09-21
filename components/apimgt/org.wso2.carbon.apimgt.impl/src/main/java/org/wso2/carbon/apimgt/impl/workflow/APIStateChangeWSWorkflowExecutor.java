@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -58,9 +59,8 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     private String username;
     private String password;
     private String processDefinitionKey;
-    
+
     private final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
-    
 
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
 
@@ -161,9 +161,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             throw new WorkflowException("Error while connecting to the external service", e);
         } finally {
             httpPost.reset();
-        }
-        super.execute(workflowDTO);
-        super.publishEvents(workflowDTO);
+        }       
+
+        super.execute(workflowDTO);       
         return new GeneralWorkflowResponse();
     }
 
@@ -248,8 +248,8 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         JSONObject payload = new JSONObject();
         payload.put("processDefinitionKey", processDefinitionKey);
         payload.put("tenantId", apiStateWorkFlowDTO.getTenantId());
-        //set workflowreferencid to business key so we can later query the process instance using this value
-        //if we want to delete the instance
+        // set workflowreferencid to business key so we can later query the process instance using this value
+        // if we want to delete the instance
         payload.put("businessKey", apiStateWorkFlowDTO.getExternalWorkflowReference());
         payload.put("variables", variables);
 
@@ -279,8 +279,10 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         String providerName = workflowDTO.getAttributes().get("apiProvider");
         String version = workflowDTO.getAttributes().get("apiVersion");
         String invoker = workflowDTO.getAttributes().get("invoker");
+        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState"); 
+        
         int tenantId = workflowDTO.getTenantId();
-
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             // tenant flow is already started from the rest api service impl. no need to start from here
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
@@ -288,12 +290,21 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                apiArtifact.setAttribute(APIConstants.API_WORKFLOW_STATE_ATTR, WorkflowStatus.APPROVED.toString());
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(invoker);
-                apiProvider.changeLifeCycleStatus(apiIdentifier, action);
-            } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
-                apiArtifact.setAttribute(APIConstants.API_WORKFLOW_STATE_ATTR, WorkflowStatus.REJECTED.toString());
+                String targetStatus = "";
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+                targetStatus = apiArtifact.getLifecycleState();
+                if(!currentStatus.equals(targetStatus)){
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
+                            targetStatus.toUpperCase(), invoker, tenantId);
+                }
+                if (log.isDebugEnabled()) {
+                    String logMessage =
+                            "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
+                            apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                    log.debug(logMessage);
+                }
             }
+
 
         } catch (RegistryException e) {
             log.error("Could not complete api state change workflow", e);
@@ -301,10 +312,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         } catch (APIManagementException e) {
             log.error("Could not complete api state change workflow", e);
             throw new WorkflowException("Could not complete api state change workflow", e);
-        } catch (FaultGatewaysException e) {
-            log.error("Could not complete api state change workflow", e);
-            throw new WorkflowException("Could not complete api state change workflow", e);
-        }
+        } 
 
         return new GeneralWorkflowResponse();
     }
@@ -312,62 +320,60 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
         // TODO implement what should happen when api is deleted
-        
-        //two steps.
-        
-        //get the process id 
-        //GET https://172.16.225.128:9443/bpmn/runtime/process-instances?businessKey=workflowExtRef
-        //    Authorization Basic YWRtaW46YWRtaW4=
-        
-        //resp 
-        
+
+        // two steps.
+
+        // get the process id
+        // GET https://172.16.225.128:9443/bpmn/runtime/process-instances?businessKey=workflowExtRef
+        // Authorization Basic YWRtaW46YWRtaW4=
+
+        // resp
+
         /*
          * {
-                "order": "asc",
-                "start": 0,
-                "sort": "id",
-                "total": 2,
-                "data": [
-                    {
-                        "suspended": false,
-                        "url": "https://localhost:9443/bpmn/runtime/process-instances/37",
-                        "tenantId": "-1234",
-                        "variables": [],
-                        "activityId": "usertask1",
-                        "processDefinitionId": "myProcess:1:4",
-                        "businessKey": "ssssssssssss",
-                        "ended": false,
-                        "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:4",
-                        "completed": false,
-                        "id": "37"
-                    },
-                    {
-                        "suspended": false,
-                        "url": "https://localhost:9443/bpmn/runtime/process-instances/47",
-                        "tenantId": "1",
-                        "variables": [],
-                        "activityId": "usertask1",
-                        "processDefinitionId": "myProcess:1:46",
-                        "businessKey": "ssssssssssss",
-                        "ended": false,
-                        "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:46",
-                        "completed": false,
-                        "id": "47"
-                    }
-                ],
-                "message": null,
-                "size": 2
-            }
+         * "order": "asc",
+         * "start": 0,
+         * "sort": "id",
+         * "total": 2,
+         * "data": [
+         * {
+         * "suspended": false,
+         * "url": "https://localhost:9443/bpmn/runtime/process-instances/37",
+         * "tenantId": "-1234",
+         * "variables": [],
+         * "activityId": "usertask1",
+         * "processDefinitionId": "myProcess:1:4",
+         * "businessKey": "ssssssssssss",
+         * "ended": false,
+         * "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:4",
+         * "completed": false,
+         * "id": "37"
+         * },
+         * {
+         * "suspended": false,
+         * "url": "https://localhost:9443/bpmn/runtime/process-instances/47",
+         * "tenantId": "1",
+         * "variables": [],
+         * "activityId": "usertask1",
+         * "processDefinitionId": "myProcess:1:46",
+         * "businessKey": "ssssssssssss",
+         * "ended": false,
+         * "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:46",
+         * "completed": false,
+         * "id": "47"
+         * }
+         * ],
+         * "message": null,
+         * "size": 2
+         * }
          */
-        
-        //based on tenant id , get the id 
-        
-        
-        //step two
-        //DELETE https://172.16.225.128:9443/bpmn/runtime/process-instances/id
-        
-        
-        super.cleanUpPendingTask(workflowExtRef);
+
+        // based on tenant id , get the id
+
+        // step two
+        // DELETE https://172.16.225.128:9443/bpmn/runtime/process-instances/id
+        //-------Change the registry state 
+   
     }
 
 }

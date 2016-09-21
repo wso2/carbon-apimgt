@@ -57,4 +57,18 @@
          <Property name="password">admin</Property>
          <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
     </ApplicationDeletion-->
+    
+    <!-- Publisher related workflows -->
+    <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor" />
+    <!-- <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeWSWorkflowExecutor">
+ 		<Property name="serviceEndpoint">https://localhost:9445/bpmn</Property>  
+        <Property name="callbackURL">https://localhost:9443/api/am/publisher/v0.10/workflows/update-workflow-status</Property>
+        <Property name="tokenAPI">https://localhost:8243/token</Property>
+        <Property name="clientId">xxxxxxxxxxxxxxxxxxxxxxxx</Property>
+        <Property name="clientSecret">xxxxxxxxxxxxxxxxxxxxxxxx</Property>
+        <Property name="processDefinitionKey">APIStateChangeApprovalProcess</Property>
+    </APIStateChange>-->
+
+    
+    
 </WorkFlowExtensions>
