@@ -50,49 +50,15 @@ public class APIStateChangeSimpleWorkflowExecutor extends WorkflowExecutor {
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
-        WorkflowResponse workflowResponse = complete(workflowDTO);
-        super.publishEvents(workflowDTO);
+        WorkflowResponse workflowResponse = complete(workflowDTO);       
         return workflowResponse;
     }
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
-        boolean transactionCommitted = false;
-        Registry registry = null;
-        try {
-            // starting of tenant flow is not needed. tenant flow is already started before calling this
-            registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceUserRegistry(apiStateWorkFlowDTO.getInvoker(), apiStateWorkFlowDTO.getTenantId());
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            APIIdentifier apiIdentifier = new APIIdentifier(apiStateWorkFlowDTO.getApiProvider(),
-                    apiStateWorkFlowDTO.getApiName(), apiStateWorkFlowDTO.getApiVersion());
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
-            registry.beginTransaction();
-            apiArtifact.setAttribute(APIConstants.API_WORKFLOW_STATE_ATTR, WorkflowStatus.APPROVED.toString());
-            artifactManager.updateGenericArtifact(apiArtifact);
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (RegistryException e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error here would mask the original exception
-                log.error("Error while rolling back the transaction ", re);
-            }
-        } catch (APIManagementException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                //////////////////////////////////////////////////////////////////////////
-            }
-        }
-
+        super.complete(workflowDTO);
         return new GeneralWorkflowResponse();
     }
+    
+   
 }

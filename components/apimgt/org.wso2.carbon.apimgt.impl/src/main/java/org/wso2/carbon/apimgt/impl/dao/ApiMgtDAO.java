@@ -5576,6 +5576,44 @@ public class ApiMgtDAO {
         }
         return workflowDTO;
     }
+    
+    /**
+     * Returns a workflow object for a given internal workflow reference.
+     *
+     * @param workflowReference
+     * @return
+     * @throws APIManagementException
+     */
+    public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        WorkflowDTO workflowDTO = null;
+
+        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, workflowReference);
+
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
+                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
+                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving workflow details for " + workflowReference, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return workflowDTO;
+    }
 
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
             throws APIManagementException {
