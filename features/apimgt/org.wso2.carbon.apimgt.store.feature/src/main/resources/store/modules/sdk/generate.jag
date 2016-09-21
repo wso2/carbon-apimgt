@@ -1,0 +1,70 @@
+<%
+var generateClientSDK = function (language, userName, apiName, apiVersion, apiProvider){
+    var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
+    var generator = new sdkGen();
+    var object = null;
+    var log = new Log();
+
+    try {
+        var result = Packages.java.utils.Map;
+        result = generator.generateSDK(language, userName, apiName, apiVersion, apiProvider);
+        if(result!=null){
+            var fileName = result.get("fileName");
+            var path =  result.get("path");
+            return {
+                fileName:fileName,
+                path:path,
+                error:false
+            };
+        }
+        else{
+            return {
+                message:"SDK generation failed.",
+                error:true
+            };
+        }
+
+    } catch (e) {
+        log.error(e.message);
+        if (e.javaException instanceof org.wso2.carbon.apimgt.impl.APIClientGenerationException){
+            return {
+                error:true,
+                message:e.javaException.getErrorMessage()
+            };
+        } else {
+            return {
+                error:true,
+                message:"Problem generating the SDK."
+            };
+        }
+    }
+
+};
+
+var getSupportedLanguages = function()  {
+    var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
+    var generator = new sdkGen();
+    var log = new Log();
+    try {
+        var langs = generator.getSupportedSDKLanguages();
+        if(langs != null && "null" != langs)   {
+            return  {
+                langs:langs,
+                error:false
+            };
+        } else  {
+            return  {
+                message:"No Supported Languages Configured",
+                error:true
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return  {
+            error:true,
+            message:"Error occurred while getting supported Languages"
+        }
+    }
+
+};
+%>

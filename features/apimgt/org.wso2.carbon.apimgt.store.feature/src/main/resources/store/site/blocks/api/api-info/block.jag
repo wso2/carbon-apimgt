@@ -35,7 +35,7 @@ jagg.block("api/api-info", {
         var isGlobalCEPEnabled;
         var mod = jagg.module("manager");
         var isForumEnabled = mod.isForumEnabled();
-        var supportedLangs = jagg.module("subscription").getSupportedLanguages();
+        var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;

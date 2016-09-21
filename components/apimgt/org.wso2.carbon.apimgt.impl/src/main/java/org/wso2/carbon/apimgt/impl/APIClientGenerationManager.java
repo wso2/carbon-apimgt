@@ -26,14 +26,20 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FileDeleteStrategy;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -94,52 +100,68 @@ public class APIClientGenerationManager {
                                            String apiProvider)
             throws APIClientGenerationException {
 
-        if (sdkLanguage == null || userName == null || apiName == null || apiVersion == null || apiProvider == null) {
-            log.error("SDK Language, Username,API Name, API Version or API Provider should not be null.");
-            throw new APIClientGenerationException("SDK Language, Username,API Name, API Version or API Provider " +
-                    "should not be null.");
+        if (StringUtils.isBlank(sdkLanguage) || StringUtils.isBlank(userName) || StringUtils.isBlank(apiName) ||
+                StringUtils.isBlank(apiVersion) || StringUtils.isBlank(apiProvider)) {
+            String errorMessage = "SDK Language, Username,API Name, API Version or API Provider should not be null.";
+            log.error(errorMessage);
+            throw new APIClientGenerationException(errorMessage);
         }
+
+
+        //String apiTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
 
         APIConsumerImpl consumerImplInstance;
+        APIProviderImpl apiProviderImpl;
+
+
+
+
         try {
-            consumerImplInstance = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
+            //consumerImplInstance = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
+            consumerImplInstance = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer();
+
+            apiProviderImpl = new APIProviderImpl(apiProvider);
+
+
+
         } catch (APIManagementException e) {
-            log.error("Error while getting API Consumer Impl instance for user : " + userName, e);
-            throw new APIClientGenerationException("Error while getting API Consumer Impl instance for user : "
-                    + userName, e);
+            String errorMessage = "Error while getting API Consumer Impl instance for user : " + userName;
+            log.error(errorMessage, e);
+            throw new APIClientGenerationException(errorMessage, e);
         }
-
-        boolean isResourceExists;
-        String registryResourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProvider);
-        String swaggerResourceAbsolutePath = registryResourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
-
-        try {
-            isResourceExists = consumerImplInstance.registry.resourceExists(swaggerResourceAbsolutePath);
-        } catch (RegistryException e) {
-            log.error("Error while checking the existence of the resource at : " + swaggerResourceAbsolutePath, e);
-            throw new APIClientGenerationException("Error while checking the existence of the resource at : " +
-                    swaggerResourceAbsolutePath, e);
-        }
+//
+//        boolean isResourceExists;
+//        String registryResourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProvider);
+//        String swaggerResourceAbsolutePath = registryResourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME;
+//
+//        try {
+//            //todo: check for tenant registry
+//            isResourceExists = consumerImplInstance.registry.resourceExists(swaggerResourceAbsolutePath);
+//        } catch (RegistryException e) {
+//            log.error("Error while checking the existence of the resource at : " + swaggerResourceAbsolutePath, e);
+//            throw new APIClientGenerationException("Error while checking the existence of the resource at : " +
+//                    swaggerResourceAbsolutePath, e);
+//        }
 
         Swagger swaggerDoc;
-        if (isResourceExists) {
-            String swaggerAPIDefinition;
-            try {
-                APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
-                swaggerAPIDefinition = consumerImplInstance.getSwagger20Definition(apiIdentifier);
-            } catch (APIManagementException e) {
-                log.error("Error loading swagger file for API " + apiName + "from registry : " +
-                        swaggerResourceAbsolutePath, e);
-                throw new APIClientGenerationException("Error loading swagger file for API " + apiName +
-                        "from registry : " + swaggerResourceAbsolutePath, e);
-            }
-            swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
-        } else {
-            log.error("Resource does not exists in : " + swaggerResourceAbsolutePath);
-            throw new APIClientGenerationException("Resource does not exists in : " + swaggerResourceAbsolutePath);
+        //if (isResourceExists) {
+        String swaggerAPIDefinition = null;
+        try {
+            APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
+            //swaggerAPIDefinition = consumerImplInstance.getSwagger20Definition(apiIdentifier);
+            swaggerAPIDefinition = apiProviderImpl.getSwagger20Definition(apiIdentifier);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error loading swagger file for API " + apiName + "from registry.";
+            log.error(errorMessage, e);
+            throw new APIClientGenerationException(errorMessage, e);
         }
+        swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
+//        } else {
+//            log.error("Resource does not exists in : " + swaggerResourceAbsolutePath);
+//            throw new APIClientGenerationException("Resource does not exists in : " + swaggerResourceAbsolutePath);
+//        }
 
-        //format the swagger definition before writing to the file
+        //format the swagger definition as a string before writing to the file
         String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
         //create a temporary file with a random file name to store the swagger definition of the API
         String specLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + UUID.randomUUID().toString() +
@@ -150,18 +172,18 @@ public class APIClientGenerationManager {
         try {
             boolean isSpecFileCreated = swaggerSpecFile.createNewFile();
             if (!isSpecFileCreated) {
-                log.error("Unable to create the swagger spec file for API : " + apiName +
-                        " in " + specLocation);
-                throw new APIClientGenerationException("Unable to create the swagger spec file for API : " +
-                        apiName + " in " + specLocation);
+                String errorMessage = "Unable to create the swagger spec file for API : " + apiName +
+                        " in " + specLocation;
+                log.error(errorMessage);
+                throw new APIClientGenerationException(errorMessage);
             }
             fileWriter = new FileWriter(swaggerSpecFile.getAbsoluteFile());
             bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(formattedSwaggerAPIDefinition);
         } catch (IOException e) {
-            log.error("Error while storing the temporary swagger file in : " + specLocation, e);
-            throw new APIClientGenerationException("Error while storing the temporary swagger file in : " +
-                    specLocation, e);
+            String errorMessage = "Error while storing the temporary swagger file in : " + specLocation;
+            log.error(errorMessage, e);
+            throw new APIClientGenerationException(errorMessage, e);
         } finally {
             IOUtils.closeQuietly(bufferedWriter);
             IOUtils.closeQuietly(fileWriter);
@@ -181,9 +203,16 @@ public class APIClientGenerationManager {
             // This issue is not encountered on Linux however. Hence we are not going to delete the directory using
             // FileUtils.deleteDirectory. Reference :  APIMANAGER-4981
             // FileUtils.deleteDirectory(new File(temporaryOutputPath));
+            //FileUtils.deleteDirectory(new File(temporaryOutputPath));
+
+//todo - file delete to a java method
+            //FileDeleteStrategy.FORCE.delete(new File(temporaryOutputPath));
+
+
         } catch (IOException e) {
-            log.error("Error while generating .zip archive for the generated SDK.", e);
-            throw new APIClientGenerationException("Error while generating .zip archive for the generated SDK.", e);
+            String errorMessage = "Error while generating .zip archive for the generated SDK.";
+            log.error(errorMessage, e);
+            throw new APIClientGenerationException(errorMessage, e);
         }
         //The below file object is closed and deleted by the caller, so it should left open until the SDK is downloaded.
         File sdkArchive = new File(temporaryZipFilePath);
