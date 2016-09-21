@@ -9,8 +9,6 @@ for(var i=0;i < outputs.tiers.length; i++){
      app_tier = outputs.tiers[i]; 
   }
 }
-
-var supportedLangs = jagg.module("subscription").getSupportedLanguages();
 %>
 <div class="page-header" id="Message">
     <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
@@ -23,9 +21,6 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
       <li role="presentation"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
       <li role="presentation"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
       <li role="presentation"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
-      <% if (supportedLangs.langs != null) { %>
-      <li role="presentation"><a title="<%=i18n.localize("SDKs")%>"  href="#sdks" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("SDKs")%></a></li>
-      <% } %>
       <% } %>
     </ul>
 
@@ -107,59 +102,6 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
       </div>      
       <div role="tabpanel" class="tab-pane fade" id="subscription">      
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
-      </div>
-
-      <div role="tabpanel" class="tab-pane fade" id="sdks">
-            <%  var supportedLangs = jagg.module("subscription").getSupportedLanguages();
-        var langsArray = supportedLangs.langs.split(",");
-        var subscribedAPIList = jagg.module("subscription").getAPISubscriptionsForApplication(jagg.getUser().username, application.name);
-        if (supportedLangs.langs != null && langsArray.length > 0) {
-            if (subscribedAPIList != null && subscribedAPIList.subscriptions.length > 0) { %>
-                        <div class="row">
-                            <div class="col-md-12"><%= i18n.localize("Download client-side SDK for your subscriptions.")%></div>
-                        </div>
-                        <br>
-
-                        <div id="sdk-table-wrap">
-                            <table id="sdk-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0" data-app="<%=encode.forHtml(outputs.application.name)%>" data-appid="<%=encode.forHtml(outputs.application.id)%>">
-                                <thead>
-                                    <tr>
-                                        <th><%= i18n.localize("API Name") %></th>
-                                        <th><%= i18n.localize("Available SDKs") %></th>
-                                    </tr>
-                                </thead>
-                                <% for (var i = 0 ; i < subscribedAPIList.subscriptions.length ; i++) { %>
-                                    <tr>
-                                        <td>
-                                            <a href="/store/site/pages/item-info.jag?name=<%=subscribedAPIList.subscriptions[i].apiName%>&version=<%=subscribedAPIList.subscriptions[i].apiVersion%>&provider=<%=subscribedAPIList.subscriptions[i].apiProvider%>">
-                                                <%=subscribedAPIList.subscriptions[i].apiName%> - <%=subscribedAPIList.subscriptions[i].apiVersion%>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <% for (var j = 0 ; j < langsArray.length ; j++ ) { %>
-                                                <a href="/store/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSDK&selectedApp=<%=application.name%>&language=<%=langsArray[j]%>&apiName=<%=subscribedAPIList.subscriptions[i].apiName%>&apiVersion=<%=subscribedAPIList.subscriptions[i].apiVersion%>&apiProvider=<%=subscribedAPIList.subscriptions[i].apiProvider%>"
-                                                    class="btn btn-primary " type="button" title="sdk generation">
-                                                    <%= i18n.localize(langsArray[j],langsArray[j])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
-                                                </a>
-                                            <% } %>
-                                        </td>
-                                    </tr>
-                                <% } %>
-                            </table>
-                        </div>
-                    <% } else { %>
-                        <div class="message message-info">
-                            <h4><i class="icon fw fw-info"></i><%= i18n.localize("No Subscriptions")%></h4>
-                            <p><%= i18n.localize("Application should have at least one subscription to download SDKs.")%></p>
-                        </div>
-                        <br>
-                    <% } %>
-                <% } else { %>
-                        <div class="row">
-                            <div class="col-md-12"><%= i18n.localize("SDK generation is not configured")%>
-                        </div>
-                        <br>
-                <% }%>
       </div>
       <% } %>      
     </div>

@@ -97,7 +97,7 @@
     "Download": "Download",
     "Download Document": "Download Document",
     "Download WSDL": "Download WSDL",
-    "Download client-side SDK for your subscriptions.": "Download client-side SDK for your subscriptions.",
+    "Download client-side SDKs for this API.": "Download client-side SDKs for this API.",
     "Available SDKs": "Available SDKs",
     "Application should have at least one subscription to download SDKs.": "Application should have at least one subscription to download SDKs.",
     "Edit": "Edit",
