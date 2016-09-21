@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
@@ -3662,10 +3663,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);                
                 String currentStatus = apiArtifact.getLifecycleState();
-                String apiWFState = apiArtifact.getAttribute(APIConstants.API_WORKFLOW_STATE_ATTR);   
+                WorkflowStatus apiWFState = null;
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiIdentifier.toString());
+                if(wfDTO != null){
+                    apiWFState = wfDTO.getStatus();
+                }
                 
                 //if the workflow has started, then executor should not fire again
-                if(!WorkflowStatus.CREATED.toString().equals(apiWFState)){
+                if(!WorkflowStatus.CREATED.equals(apiWFState)){
 
                     try {
 
@@ -3696,11 +3701,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     
                     //get the workflow state once the executor is executed. 
-                    apiWFState = apiArtifact.getAttribute(APIConstants.API_WORKFLOW_STATE_ATTR);
+                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiIdentifier.toString());
+                    if(wfDTO != null){
+                        apiWFState = wfDTO.getStatus();
+                    }                   
                 } 
                 
                 //only change the lifecycle if approved
-                if(WorkflowStatus.APPROVED.toString().equals(apiWFState)){
+                if(WorkflowStatus.APPROVED.equals(apiWFState)){
                     targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();
