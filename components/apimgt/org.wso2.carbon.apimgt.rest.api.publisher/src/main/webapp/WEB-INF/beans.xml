@@ -16,6 +16,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.TiersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
