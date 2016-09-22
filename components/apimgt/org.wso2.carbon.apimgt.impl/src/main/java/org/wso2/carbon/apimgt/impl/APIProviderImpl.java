@@ -3663,8 +3663,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);                
                 String currentStatus = apiArtifact.getLifecycleState();
+                
+                int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+                
                 WorkflowStatus apiWFState = null;
-                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiIdentifier.toString());
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId));
                 if(wfDTO != null){
                     apiWFState = wfDTO.getStatus();
                 }
@@ -3690,7 +3693,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
                         apiStateWorkflow.setStatus(WorkflowStatus.CREATED);
                         apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
-                        apiStateWorkflow.setWorkflowReference(apiIdentifier.toString());
+                        apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
                         apiStateWorkflow.setInvoker(this.username);
 
                         ////////////// handle exception
@@ -3701,7 +3704,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     
                     //get the workflow state once the executor is executed. 
-                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiIdentifier.toString());
+                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId));
                     if(wfDTO != null){
                         apiWFState = wfDTO.getStatus();
                     }                   
