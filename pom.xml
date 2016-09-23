@@ -4,7 +4,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.0.5-SNAPSHOT</version>
+    <version>6.0.6-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -606,12 +606,6 @@
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.throttle.core</artifactId>
-                <version>${carbon.throttle.module.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.api</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
@@ -1062,7 +1056,7 @@
 
         <!-- APIM Component Version -->
 
-        <carbon.apimgt.version>6.0.5-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.0.6-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
