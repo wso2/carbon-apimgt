@@ -7,6 +7,7 @@ if(outputs.isPublishPermitted){
         var publishedInExternalStores = outputs.publishedInExternalStores;
         var i,resCount,rowNums = [];
         var lcStatus = outputs.lcStatus;
+        var wfStatus = outputs.wfStatus;
 
  %>
 
@@ -137,6 +138,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                 <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
              </div>
 		</div>
+  <%  if(wfStatus.status == 'CREATED') {%> 
+     <div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
+     </div>  
+  <% }else {%>   
     </div>
 
                  <%for (var j=0;j<lcData.items.length;j++){
@@ -224,7 +230,8 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 </form>
         <div id="lifecycle-rendering-area" class="lifecycle-rendering-area add-margin-top-4x add-margin-bottom-4x">
             <svg width=900 height=600 ><g/></svg>
-        </div>
+        </div> 
+        <% } %>
         <div class="page-header">
             <h4 class="lead"><%=i18n.localize("Lifecycle History")%></h4>
         </div>

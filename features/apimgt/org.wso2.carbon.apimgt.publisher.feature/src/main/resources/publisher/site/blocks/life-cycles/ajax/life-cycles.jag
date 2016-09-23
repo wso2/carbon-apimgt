@@ -64,6 +64,11 @@ if(jagg.isCSRFTokenValid())
         var result=mod.updateAPIStatus(apiData);
         var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),
         															version:request.getParameter("version")}).lcs;
+        var wfdto = mod.getAPILCWorkflowStatus(apiData);
+        var apiWFStatus = null;
+        if(wfdto != null && wfdto.status != null){
+            apiWFStatus = wfdto.status;
+        }      
 
      	if (result.error == true) {
             obj = {
@@ -73,7 +78,8 @@ if(jagg.isCSRFTokenValid())
         } else {
             obj = {
                 error:false,
-                lcs:lcs
+                lcs:lcs,
+                wfstatus:apiWFStatus
             }
         }
         print(obj);

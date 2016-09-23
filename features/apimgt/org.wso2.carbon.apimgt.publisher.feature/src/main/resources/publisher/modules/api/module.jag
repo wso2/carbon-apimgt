@@ -158,6 +158,9 @@ jagg.module("api", {
     },
     uploadSequenceFile:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").uploadSequenceFile.apply(this, arguments);
+    },
+    getAPILCWorkflowStatus:function () {
+        return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").getAPILCWorkflowStatus.apply(this, arguments);
     }
 });
 %>
