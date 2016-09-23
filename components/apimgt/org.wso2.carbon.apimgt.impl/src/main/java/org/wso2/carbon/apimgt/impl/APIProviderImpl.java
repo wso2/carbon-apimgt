@@ -3644,21 +3644,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);        
             String targetStatus;
             if (apiArtifact != null) {
-                
-                /**
-                 * wfstate;
-                 * if wfstate is not created
-                 *      execute wf
-                 *      update wfstate
-                 * 
-                 * if wfstate is approved
-                 *      execute action
-                 *      
-                 * 
-                 * 
-                 * 
-                 */
-                
+                           
                 String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);                
@@ -3667,17 +3653,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
                 
                 WorkflowStatus apiWFState = null;
-                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId));
-                if(wfDTO != null){
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                        WorkflowConstants.WF_TYPE_AM_API_STATE);
+                if (wfDTO != null) {
                     apiWFState = wfDTO.getStatus();
                 }
-                
-                //if the workflow has started, then executor should not fire again
-                if(!WorkflowStatus.CREATED.equals(apiWFState)){
+
+                // if the workflow has started, then executor should not fire again
+                if (!WorkflowStatus.CREATED.equals(apiWFState)) {
 
                     try {
 
-                        ////////////// handle exception
                         WorkflowExecutor apiStateWFExecutor = WorkflowExecutorFactory.getInstance()
                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
                         APIStateWorkflowDTO apiStateWorkflow = new APIStateWorkflowDTO();
@@ -3695,34 +3681,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
                         apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
                         apiStateWorkflow.setInvoker(this.username);
-
-                        ////////////// handle exception
+                        String workflowDescription = "Waiting approval for state change action: " + action;
+                        apiStateWorkflow.setWorkflowDescription(workflowDescription);
 
                         apiStateWFExecutor.execute(apiStateWorkflow);
                     } catch (Exception e) {
-
+                        handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(),
+                                e);
                     }
-                    
-                    //get the workflow state once the executor is executed. 
-                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId));
-                    if(wfDTO != null){
+
+                    // get the workflow state once the executor is executed.
+                    wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                            WorkflowConstants.WF_TYPE_AM_API_STATE);
+                    if (wfDTO != null) {
                         apiWFState = wfDTO.getStatus();
-                    }                   
-                } 
+                    }
+                }
                 
-                //only change the lifecycle if approved
-                if(WorkflowStatus.APPROVED.equals(apiWFState)){
+                // only change the lifecycle if approved
+                if (WorkflowStatus.APPROVED.equals(apiWFState)) {
                     targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();
-                    if(!currentStatus.equals(targetStatus)){
+                    if (!currentStatus.equals(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
                     if (log.isDebugEnabled()) {
-                        String logMessage =
-                                "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
-                                apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                        String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
+                                + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
                         log.debug(logMessage);
                     }
                     return true;
@@ -4641,5 +4628,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    /**
+     * Get the workflow status information for the given api for the given workflow type
+     * 
+     * @param apiIdentifier Api identifier
+     * @param workflowType workflow type
+     * @return WorkflowDTO
+     * @throws APIManagementException
+     */
+    public WorkflowDTO getAPIWorkflowStatus(APIIdentifier apiIdentifier, String workflowType)
+            throws APIManagementException {
+        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);        
+        
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        
+        return wfDTO;
+    }
 
 }

@@ -1533,8 +1533,8 @@ public class SQLConstants {
     public static final String GET_ALL_WORKFLOW_ENTRY_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
     
-    public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_SQL =
-            "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=?";
+    public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
+            "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +

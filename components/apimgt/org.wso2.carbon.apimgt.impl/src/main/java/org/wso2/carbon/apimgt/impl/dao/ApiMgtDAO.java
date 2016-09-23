@@ -5578,23 +5578,26 @@ public class ApiMgtDAO {
     }
     
     /**
-     * Returns a workflow object for a given internal workflow reference.
+     * Returns a workflow object for a given internal workflow reference and the workflow type.
      *
      * @param workflowReference
+     * @param workflowType
      * @return
      * @throws APIManagementException
      */
-    public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference) throws APIManagementException {
+    public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference, String workflowType)
+            throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         WorkflowDTO workflowDTO = null;
 
-        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_SQL;
+        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, workflowReference);
+            prepStmt.setString(2, workflowType);
 
             rs = prepStmt.executeQuery();
             while (rs.next()) {
