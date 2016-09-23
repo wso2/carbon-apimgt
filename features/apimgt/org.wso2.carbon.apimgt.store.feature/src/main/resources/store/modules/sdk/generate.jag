@@ -1,5 +1,5 @@
 <%
-var generateClientSDK = function (language, userName, apiName, apiVersion, apiProvider){
+var generateClientSDK = function (language, apiName, apiVersion, apiProvider){
     var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
     var generator = new sdkGen();
     var object = null;
@@ -7,13 +7,15 @@ var generateClientSDK = function (language, userName, apiName, apiVersion, apiPr
 
     try {
         var result = Packages.java.utils.Map;
-        result = generator.generateSDK(language, userName, apiName, apiVersion, apiProvider);
+        result = generator.generateSDK(language, apiName, apiVersion, apiProvider);
         if(result!=null){
-            var fileName = result.get("fileName");
-            var path =  result.get("path");
+            var zipFileName = result.get("zipFileName");
+            var zipFilePath =  result.get("zipFilePath");
+            var tempDirectoryPath = result.get("tempDirectoryPath");
             return {
-                fileName:fileName,
-                path:path,
+                zipFileName:zipFileName,
+                zipFilePath:zipFilePath,
+                tempDirectoryPath:tempDirectoryPath,
                 error:false
             };
         }
@@ -66,5 +68,20 @@ var getSupportedLanguages = function()  {
         }
     }
 
+};
+
+var cleanTempDirectory = function(tempDirectoryPath)  {
+    var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
+    var generator = new sdkGen();
+    var log = new Log();
+    try {
+        generator.cleanTempDirectory(tempDirectoryPath);
+    } catch (e) {
+        log.error(e.message);
+        return  {
+            error:true,
+            message:"Error occurred while cleaning temp directory."
+        }
+    }
 };
 %>

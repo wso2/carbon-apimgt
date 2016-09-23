@@ -5,6 +5,9 @@ jagg.module("sdk", {
     },
     getSupportedLanguages:function(){
         return jagg.require(jagg.getModulesDir()+"sdk/generate.jag").getSupportedLanguages.apply(this, arguments);
+    },
+    cleanTempDirectory:function(){
+        return jagg.require(jagg.getModulesDir()+"sdk/generate.jag").cleanTempDirectory.apply(this, arguments);
     }
 });
 %>

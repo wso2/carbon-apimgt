@@ -62,7 +62,7 @@ include("/jagg/jagg.jag");
         }
 
         mod = jagg.module("sdk");
-        result = mod.generateClientSDK(language, user.username, apiName, apiVersion, apiProvider);
+        result = mod.generateClientSDK(language, apiName, apiVersion, apiProvider);
 
         if (result.error) {
             if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
@@ -81,14 +81,13 @@ include("/jagg/jagg.jag");
                 };
             }
         } else {
-            var file = new File("file:///" + result.path);
+            var file = new File("file://" + result.zipFilePath);
             file.open("r");
             response.contentType = "application/force-download";
-            response.addHeader("Content-Disposition","attachment; filename = \"" + result.fileName + "\"");
+            response.addHeader("Content-Disposition","attachment; filename = \"" + result.zipFileName + "\"");
             print(file.getStream());
             file.close();
-            file.del();
-        }
+            mod.cleanTempDirectory(result.tempDirectoryPath);
         print(obj);
     } else {
         print({
