@@ -100,6 +100,13 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
 
+    public static final String API_TENANT_CONF_DEFAULT_ROLES = "DefaultRoles";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_ROLENAME = "RoleName";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATE_ON_TENANT_LOAD = "CreateOnTenantLoad";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_PUBLISHER_ROLE = "PublisherRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
+    public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
+    
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
     public static final String API_CATEGORY_FREE = "Free";
@@ -397,6 +404,10 @@ public final class APIConstants {
         public static final String API_WORKFLOWADMIN = "/permission/admin/manage/workflowadmin";
         public static final String APIM_ADMIN = "/permission/admin/manage/apim_admin";
         public static final String MANAGE_TIERS = "/permission/admin/manage/manage_tiers";
+
+        public static final String LOGIN = "/permission/admin/login";
+        public static final String CONFIGURE_GOVERNANCE = "/permission/admin/configure/governance";
+        public static final String RESOURCE_GOVERN = "/permission/admin/manage/resources/govern";
         private Permissions(){
             
         }
