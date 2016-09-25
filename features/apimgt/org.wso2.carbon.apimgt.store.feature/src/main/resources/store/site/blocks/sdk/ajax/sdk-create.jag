@@ -70,7 +70,7 @@ include("/jagg/jagg.jag");
                 message:result.message
             };
         } else {
-            var file = new File("file://" + result.zipFilePath);
+            var file = new File("file:///" + result.zipFilePath);
             file.open("r");
             response.contentType = "application/force-download";
             response.addHeader("Content-Disposition","attachment; filename = \"" + result.zipFileName + "\"");
