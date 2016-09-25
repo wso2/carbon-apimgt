@@ -76,6 +76,7 @@ include("/jagg/jagg.jag");
             response.addHeader("Content-Disposition","attachment; filename = \"" + result.zipFileName + "\"");
             print(file.getStream());
             file.close();
+            file.del();
             mod.cleanTempDirectory(result.tempDirectoryPath);
             obj = {
                 error:false,
