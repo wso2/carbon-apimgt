@@ -11,7 +11,7 @@
     encode = new encode.Encode();
 
 	var requestURI;
-	var requestedPage = encode.forUriComponent(request.getParameter("requestedPage"));
+	var requestedPage = request.getParameter("requestedPage");
 	if(requestedPage!=null && requestedPage != 'null'){
 	requestURI = requestedPage;
 	}else{

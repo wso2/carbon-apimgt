@@ -1,0 +1,6 @@
+<%
+
+//Default refresh interval for the cookies
+var DEFAULT_COOKIE_REFRESH_INTERVAL = 300000;
+
+%>
