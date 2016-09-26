@@ -230,7 +230,16 @@ public class APIManagerComponent {
                     contextCache.put(context, Boolean.TRUE);
                 }
             }
-            APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
+
+            try {
+                APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
+            } catch (APIManagementException e) {
+                log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
+            } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
+                log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID,
+                        e);
+            }
+
             //Adding default throttle policies
             boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
             if(advancedThrottlingEnabled) {

@@ -57,5 +57,18 @@
 
     }]
   }
-  ]
+  ],
+  "DefaultRoles" : {
+    "PublisherRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/publisher"
+    },
+    "CreatorRole" : {
+      "CreateOnTenantLoad" : true,
+      "RoleName" : "Internal/creator"
+    },
+    "SubscriberRole" : {
+      "CreateOnTenantLoad" : true
+    }
+  }
 }
