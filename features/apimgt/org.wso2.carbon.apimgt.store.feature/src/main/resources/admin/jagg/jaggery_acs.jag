@@ -14,11 +14,28 @@
     var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
     var isLogoutResponse = false;
     var isLogoutRequest = false;
+    var isAsssertionEncryptionEnabled = site.ssoConfiguration.assertionEncryptionEnabled;
 
     // if saml response is not a log out response
     if (samlResponse != null) {
         isLogoutResponse = ssoRelyingParty.isLogoutResponse(samlResponse);
         if (!Boolean(isLogoutResponse)) {
+            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+            //Validate the saml response schema-check the number of response elements is 1 and check the number of assertions
+            //is equal to 1  and check the assertion validity period and check audience restrictions
+            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse, isAsssertionEncryptionEnabled);
+            if (!Boolean(isResponseValid)) {
+                log.error("SAML response schema verification is failed.");
+                response.sendRedirect("../site/pages/error-pages/401.html");
+                return;
+            }
+
+            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse, isAsssertionEncryptionEnabled);
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var domainName = null;
+            if (fullUserName != null) {
+                domainName = MultitenantUtils.getTenantDomain(fullUserName);
+            }
             // relay state value should be a valid value, this value is mapped with request uri.
             var relayState = request.getParameter("RelayState");
             var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
@@ -29,39 +46,64 @@
             }
 
             // validating the signature
-            if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-		var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);			
-			if(fullUserName != null && fullUserName.indexOf("@")!=-1){
-				var domainName = fullUserName.split("@")[1];
-				jagg.module("manager").loadTenantRegistry(domainName);	
-		}
+            if (site.ssoConfiguration.responseSigningEnabled === 'true') {
+
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+                    jagg.module("manager").loadTenantRegistry(String(domainName));
+                }
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
                 if (!Boolean(isSignatureValid)) {
                     log.error("SAML response signature is verification failed.");
                     response.sendRedirect("../site/pages/error-pages/401.html");
                     return;
                 }
-            }      
+            }
+
+            // validating the saml assertion signature
+            if (site.ssoConfiguration.assertionSigningEnabled === 'true') {
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
+                    jagg.module("manager").loadTenantRegistry(String(domainName));
+                }
+                var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse, isAsssertionEncryptionEnabled);
+                if (!Boolean(isAssertionSignatureValid)) {
+                    log.error("SAML assertion signature is verification failed.");
+                    response.sendRedirect("../site/pages/error-pages/401.html");
+                    return;
+                }
+            }
+
             ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
             session.put("showLogin", "false");
-            var api = jagg.module("api");
-            var isUserCreatePermitted = api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
-            //First check whether user is having sufficent permissions [create/publish]
-            if (isUserCreatePermitted.permitted) {
-                jagg.setUser({username: ssoRelyingParty.getLoggedInUser(sessionId), cookie: null});
-                session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
+            session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
+
+            var userModule = jagg.module("user");
+            var isAllowed = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil.hasPermission(fullUserName,
+                    site.allowedPermission);
+
+            var isSuperTenant = false;
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME == domainName) {
+                isSuperTenant = true;
             }
-            var isCreatePermitted = api.hasCreatePermission();
-            var isPublishPermitted = api.hasPublishPermission();
-	    var hasTierPermission = api.hasManageTierPermission();
-            jagg.setCreatePermitted(isCreatePermitted);
-            jagg.setPublishPermitted(isPublishPermitted);
-            jagg.setManageTierPermitted(hasTierPermission);
-            response.sendRedirect(requestedURI);
+            if (isAllowed) {
+                jagg.setUser({
+                    username: fullUserName,
+                    isSuperTenant: isSuperTenant,
+                    cookie: null,
+                    userDomain: String(domainName)
+                });
+                userModule.getWorkflowCookieBySAMLToken();
+                response.sendRedirect(requestedURI);
+            } else {
+                response.sendRedirect("../site/pages/error-pages/401.html");
+                return;
+            }
         } else {
             // if the saml response is log out request from IDP, we log out from web app.
-            ssoRelyingParty.invalidateSessionBySessionId(sessionId);
-            session.invalidate();
+            try {
+                ssoRelyingParty.invalidateSessionBySessionId(sessionId);
+            } catch (e) {
+                log.error("Session has already been invalidated");
+            }
             response.sendRedirect("../");
             return;
         }
@@ -72,8 +114,11 @@
     if (samlRequest != null) {
         isLogoutRequest = ssoRelyingParty.isLogoutRequest(samlRequest);
         if (Boolean(isLogoutRequest)) {
-            ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
-            session.invalidate();
+            try {
+                ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
+            } catch (e) {
+                log.error("Session has already been invalidated");
+            }
         }
     }
 
