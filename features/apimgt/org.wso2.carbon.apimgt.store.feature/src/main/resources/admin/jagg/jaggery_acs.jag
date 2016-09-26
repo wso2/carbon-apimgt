@@ -14,69 +14,43 @@
     var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
     var isLogoutResponse = false;
     var isLogoutRequest = false;
+    var isAsssertionEncryptionEnabled = site.ssoConfiguration.assertionEncryptionEnabled;
 
     // if saml response is not a log out response
     if (samlResponse != null) {
         isLogoutResponse = ssoRelyingParty.isLogoutResponse(samlResponse);
         if (!Boolean(isLogoutResponse)) {
-            // relay state value should be a valid value, this value is mapped with request uri.
-            var relayState = request.getParameter("RelayState");
-
-            var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
-            if (requestedURI == null) {
-                log.error("Relaystate value is invalid.");
-                response.sendRedirect("../error.jag");
-                return;
-            }
-
+            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
             //Validate the saml response schema-check the number of response elements is 1 and check the number of assertions
-            //is equal to 1
-            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse);
+            //is equal to 1  and check the assertion validity period and check audience restrictions
+            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse, isAsssertionEncryptionEnabled);
             if (!Boolean(isResponseValid)) {
                 log.error("SAML response schema verification is failed.");
                 response.sendRedirect("../site/pages/error-pages/401.html");
                 return;
             }
 
-            // validating the assertion validity period
-            if (site.ssoConfiguration.verifyAssertionValidityPeriod === 'true') {
-                var timestampSkew = site.ssoConfiguration.timestampSkewInSeconds;
-                if (timestampSkew == undefined) {
-                    timestampSkew = "300";
-                }
-                ssoRelyingParty.setProperty("timestampSkewInSeconds", timestampSkew);
-                var isAssertionValidityPeriodValid = ssoRelyingParty.validateAssertionValidityPeriod(samlResponse);
-                if (!Boolean(isAssertionValidityPeriodValid)) {
-                    log.error("SAML response assertion validity period verification is failed.");
-                    response.sendRedirect("../site/pages/error-pages/401.html");
-                    return;
-                }
-            }
-
-            // validating the audience restrictions
-            var isAudienceRestrictionEnabled = site.ssoConfiguration.audienceRestrictionsEnabled;
-            if (isAudienceRestrictionEnabled === 'true') {
-                var isAudienceRestrictionsValid = ssoRelyingParty.validateAudienceRestrictions(samlResponse);
-                if (!Boolean(isAudienceRestrictionsValid)) {
-                    log.error("SAML response audience restrictions verification is failed.");
-                    response.sendRedirect("../site/pages/error-pages/401.html");
-                    return;
-                }
-            }
-            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse, isAsssertionEncryptionEnabled);
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
             var domainName = null;
             if (fullUserName != null) {
                 domainName = MultitenantUtils.getTenantDomain(fullUserName);
             }
+            // relay state value should be a valid value, this value is mapped with request uri.
+            var relayState = request.getParameter("RelayState");
+            var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
+            if (requestedURI == null) {
+                log.error("Relaystate value is invalid.");
+                response.sendRedirect("../site/pages/error-pages/401.html");
+                return;
+            }
 
             // validating the signature
             if (site.ssoConfiguration.responseSigningEnabled === 'true') {
+
                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                     jagg.module("manager").loadTenantRegistry(String(domainName));
                 }
-
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
                 if (!Boolean(isSignatureValid)) {
                     log.error("SAML response signature is verification failed.");
@@ -84,12 +58,13 @@
                     return;
                 }
             }
+
             // validating the saml assertion signature
             if (site.ssoConfiguration.assertionSigningEnabled === 'true') {
                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                     jagg.module("manager").loadTenantRegistry(String(domainName));
                 }
-                var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse);
+                var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse, isAsssertionEncryptionEnabled);
                 if (!Boolean(isAssertionSignatureValid)) {
                     log.error("SAML assertion signature is verification failed.");
                     response.sendRedirect("../site/pages/error-pages/401.html");

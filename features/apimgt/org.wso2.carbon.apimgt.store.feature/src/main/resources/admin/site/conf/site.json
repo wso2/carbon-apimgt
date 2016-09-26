@@ -17,10 +17,11 @@
     "keyStorePassword": "",
     "identityAlias": "",
     "keyStoreName": "",
-    "verifyAssertionValidityPeriod":"true",
-    "audienceRestrictionsEnabled":"true",
-    "responseSigningEnabled":"true",
-    "assertionSigningEnabled":"true"
+    "verifyAssertionValidityPeriod": "true",
+    "audienceRestrictionsEnabled": "true",
+    "responseSigningEnabled": "true",
+    "assertionSigningEnabled": "true",
+    "assertionEncryptionEnabled": "false"
   },
   "reverseProxy": {
     "enabled": false,
