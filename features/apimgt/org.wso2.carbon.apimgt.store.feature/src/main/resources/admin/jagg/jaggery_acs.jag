@@ -72,7 +72,7 @@
                 }
             }
 
-            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session, isAsssertionEncryptionEnabled);
             session.put("showLogin", "false");
             session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
 
