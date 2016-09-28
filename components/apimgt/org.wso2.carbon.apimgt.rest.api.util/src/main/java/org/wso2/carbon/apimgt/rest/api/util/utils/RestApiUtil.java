@@ -748,6 +748,21 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for APIProducts API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query search query value
+     * @return constructed paginated url
+     */
+    public static String getAPIProductPaginatedURL(Integer offset, Integer limit, String query) {
+        String paginatedURL = RestApiConstants.API_PRODUCTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
     /** Returns the paginated url for Applications API
      *
      * @param offset starting index

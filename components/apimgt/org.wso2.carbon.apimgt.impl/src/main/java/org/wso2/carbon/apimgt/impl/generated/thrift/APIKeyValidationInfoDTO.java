@@ -54,6 +54,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final org.apache.thrift.protocol.TField SUBSCRIBER_TENANT_DOMAIN_FIELD_DESC = new org.apache.thrift.protocol.TField("subscriberTenantDomain", org.apache.thrift.protocol.TType.STRING, (short)22);
   private static final org.apache.thrift.protocol.TField SPIKE_ARREST_UNIT_FIELD_DESC = new org.apache.thrift.protocol.TField("spikeArrestUnit", org.apache.thrift.protocol.TType.STRING, (short)23);
   private static final org.apache.thrift.protocol.TField STOP_ON_QUOTA_REACH_FIELD_DESC = new org.apache.thrift.protocol.TField("stopOnQuotaReach", org.apache.thrift.protocol.TType.BOOL, (short)24);
+  private static final org.apache.thrift.protocol.TField PRODUCT_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("productId", org.apache.thrift.protocol.TType.STRING, (short)25);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -85,6 +86,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   public String subscriberTenantDomain; // optional
   public String spikeArrestUnit; // optional
   public boolean stopOnQuotaReach; // optional
+  public String productId; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -111,7 +113,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     SPIKE_ARREST_LIMIT((short)21, "spikeArrestLimit"),
     SUBSCRIBER_TENANT_DOMAIN((short)22, "subscriberTenantDomain"),
     SPIKE_ARREST_UNIT((short)23, "spikeArrestUnit"),
-    STOP_ON_QUOTA_REACH((short)24, "stopOnQuotaReach");
+    STOP_ON_QUOTA_REACH((short)24, "stopOnQuotaReach"),
+    PRODUCT_ID((short)25, "productId");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -174,6 +177,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           return SPIKE_ARREST_UNIT;
         case 24: // STOP_ON_QUOTA_REACH
           return STOP_ON_QUOTA_REACH;
+        case 25: // PRODUCT_ID
+          return PRODUCT_ID;
         default:
           return null;
       }
@@ -222,7 +227,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final int __SPIKEARRESTLIMIT_ISSET_ID = 5;
   private static final int __STOPONQUOTAREACH_ISSET_ID = 6;
   private BitSet __isset_bit_vector = new BitSet(7);
-  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME,_Fields.IS_CONTENT_AWARE,_Fields.API_TIER,_Fields.THROTTLING_DATA_LIST,_Fields.SPIKE_ARREST_LIMIT,_Fields.SUBSCRIBER_TENANT_DOMAIN,_Fields.SPIKE_ARREST_UNIT,_Fields.STOP_ON_QUOTA_REACH};
+  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME,_Fields.IS_CONTENT_AWARE,_Fields.API_TIER,_Fields.THROTTLING_DATA_LIST,_Fields.SPIKE_ARREST_LIMIT,_Fields.SUBSCRIBER_TENANT_DOMAIN,_Fields.SPIKE_ARREST_UNIT,_Fields.STOP_ON_QUOTA_REACH,_Fields.PRODUCT_ID};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -277,6 +282,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.STOP_ON_QUOTA_REACH, new org.apache.thrift.meta_data.FieldMetaData("stopOnQuotaReach", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
+    tmpMap.put(_Fields.PRODUCT_ID, new org.apache.thrift.meta_data.FieldMetaData("productId", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(APIKeyValidationInfoDTO.class, metaDataMap);
   }
@@ -360,6 +367,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       this.spikeArrestUnit = other.spikeArrestUnit;
     }
     this.stopOnQuotaReach = other.stopOnQuotaReach;
+    if (other.isSetProductId()) {
+      this.productId = other.productId;
+    }
   }
 
   public APIKeyValidationInfoDTO deepCopy() {
@@ -399,6 +409,7 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     this.spikeArrestUnit = null;
     setStopOnQuotaReachIsSet(false);
     this.stopOnQuotaReach = false;
+    this.productId = null;
   }
 
   public boolean isAuthorized() {
@@ -1015,6 +1026,30 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     __isset_bit_vector.set(__STOPONQUOTAREACH_ISSET_ID, value);
   }
 
+  public String getProductId() {
+    return this.productId;
+  }
+
+  public APIKeyValidationInfoDTO setProductId(String productId) {
+    this.productId = productId;
+    return this;
+  }
+
+  public void unsetProductId() {
+    this.productId = null;
+  }
+
+  /** Returns true if field productId is set (has been assigned a value) and false otherwise */
+  public boolean isSetProductId() {
+    return this.productId != null;
+  }
+
+  public void setProductIdIsSet(boolean value) {
+    if (!value) {
+      this.productId = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case AUTHORIZED:
@@ -1209,6 +1244,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       break;
 
+    case PRODUCT_ID:
+      if (value == null) {
+        unsetProductId();
+      } else {
+        setProductId((String)value);
+      }
+      break;
+
     }
   }
 
@@ -1286,6 +1329,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     case STOP_ON_QUOTA_REACH:
       return Boolean.valueOf(isStopOnQuotaReach());
 
+    case PRODUCT_ID:
+      return getProductId();
+
     }
     throw new IllegalStateException();
   }
@@ -1345,6 +1391,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       return isSetSpikeArrestUnit();
     case STOP_ON_QUOTA_REACH:
       return isSetStopOnQuotaReach();
+    case PRODUCT_ID:
+      return isSetProductId();
     }
     throw new IllegalStateException();
   }
@@ -1575,6 +1623,15 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!(this_present_stopOnQuotaReach && that_present_stopOnQuotaReach))
         return false;
       if (this.stopOnQuotaReach != that.stopOnQuotaReach)
+        return false;
+    }
+
+    boolean this_present_productId = true && this.isSetProductId();
+    boolean that_present_productId = true && that.isSetProductId();
+    if (this_present_productId || that_present_productId) {
+      if (!(this_present_productId && that_present_productId))
+        return false;
+      if (!this.productId.equals(that.productId))
         return false;
     }
 
@@ -1834,6 +1891,16 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetProductId()).compareTo(typedOther.isSetProductId());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetProductId()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.productId, typedOther.productId);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -2063,6 +2130,16 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!first) sb.append(", ");
       sb.append("stopOnQuotaReach:");
       sb.append(this.stopOnQuotaReach);
+      first = false;
+    }
+    if (isSetProductId()) {
+      if (!first) sb.append(", ");
+      sb.append("productId:");
+      if (this.productId == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.productId);
+      }
       first = false;
     }
     sb.append(")");
@@ -2331,6 +2408,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 25: // PRODUCT_ID
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.productId = iprot.readString();
+              struct.setProductIdIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -2521,6 +2606,13 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         oprot.writeBool(struct.stopOnQuotaReach);
         oprot.writeFieldEnd();
       }
+      if (struct.productId != null) {
+        if (struct.isSetProductId()) {
+          oprot.writeFieldBegin(PRODUCT_ID_FIELD_DESC);
+          oprot.writeString(struct.productId);
+          oprot.writeFieldEnd();
+        }
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -2611,7 +2703,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetStopOnQuotaReach()) {
         optionals.set(23);
       }
-      oprot.writeBitSet(optionals, 24);
+      if (struct.isSetProductId()) {
+        optionals.set(24);
+      }
+      oprot.writeBitSet(optionals, 25);
       if (struct.isSetAuthorized()) {
         oprot.writeBool(struct.authorized);
       }
@@ -2702,12 +2797,15 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetStopOnQuotaReach()) {
         oprot.writeBool(struct.stopOnQuotaReach);
       }
+      if (struct.isSetProductId()) {
+        oprot.writeString(struct.productId);
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, APIKeyValidationInfoDTO struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(24);
+      BitSet incoming = iprot.readBitSet(25);
       if (incoming.get(0)) {
         struct.authorized = iprot.readBool();
         struct.setAuthorizedIsSet(true);
@@ -2830,6 +2928,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (incoming.get(23)) {
         struct.stopOnQuotaReach = iprot.readBool();
         struct.setStopOnQuotaReachIsSet(true);
+      }
+      if (incoming.get(24)) {
+        struct.productId = iprot.readString();
+        struct.setProductIdIsSet(true);
       }
     }
   }

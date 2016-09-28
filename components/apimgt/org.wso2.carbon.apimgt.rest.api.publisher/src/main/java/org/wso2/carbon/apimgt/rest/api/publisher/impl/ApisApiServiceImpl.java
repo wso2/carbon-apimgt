@@ -905,7 +905,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             apiProvider.updateAPI(api);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
+            String uriString = RestApiConstants.RESOURCE_PATH_API_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
