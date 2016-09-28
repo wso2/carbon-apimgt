@@ -17,6 +17,18 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:product_publish",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:product_create",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:product_view",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:subscribe",
         "Roles": "Internal/subscriber"
       },

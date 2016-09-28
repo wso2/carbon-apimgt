@@ -1,7 +1,7 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2125="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2127="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2131="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2132="http://dto.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2125="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2127="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2130="http://dto.api.apimgt.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2133="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
    <wsdl:documentation>APIKeyValidationService</wsdl:documentation>
    <wsdl:types>
-      <xs:schema xmlns:ax2133="http://dto.api.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
+      <xs:schema xmlns:ax2131="http://dto.api.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
          <xs:import namespace="http://dto.api.apimgt.carbon.wso2.org/xsd"/>
          <xs:complexType name="URITemplate">
             <xs:sequence>
@@ -11,7 +11,7 @@
                <xs:element minOccurs="0" name="authType" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="authTypeAsString" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="authTypes" nillable="true" type="xs:string"/>
-               <xs:element maxOccurs="unbounded" minOccurs="0" name="conditionGroups" nillable="true" type="ax2133:ConditionGroupDTO"/>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="conditionGroups" nillable="true" type="ax2130:ConditionGroupDTO"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="httpVerbs" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="mediationScript" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="methodsAsString" nillable="true" type="xs:string"/>
@@ -20,8 +20,8 @@
                <xs:element minOccurs="0" name="resourceSandboxURIExist" type="xs:boolean"/>
                <xs:element minOccurs="0" name="resourceURI" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resourceURIExist" type="xs:boolean"/>
-               <xs:element minOccurs="0" name="scope" nillable="true" type="ax2131:Scope"/>
-               <xs:element minOccurs="0" name="scopes" nillable="true" type="ax2131:Scope"/>
+               <xs:element minOccurs="0" name="scope" nillable="true" type="ax2129:Scope"/>
+               <xs:element minOccurs="0" name="scopes" nillable="true" type="ax2129:Scope"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="throttlingConditions" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingConditionsAsString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingTier" nillable="true" type="xs:string"/>
@@ -40,11 +40,11 @@
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
-      <xs:schema xmlns:ax2134="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2126="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2130="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax2128="http://api.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+      <xs:schema xmlns:ax2126="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2128="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2132="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2134="http://dto.impl.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
          <xs:import namespace="http://keymgt.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
-         <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://model.api.apimgt.carbon.wso2.org/xsd"/>
+         <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
          <xs:element name="APIKeyValidationServiceAPIKeyMgtException">
             <xs:complexType>
                <xs:sequence>
@@ -56,6 +56,21 @@
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax2127:APIManagementException"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getAllURITemplates">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getAllURITemplatesResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2129:URITemplate"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -75,22 +90,7 @@
          <xs:element name="validateKeyResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2129:APIKeyValidationInfoDTO"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="getAllURITemplates">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
-                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="getAllURITemplatesResponse">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2134:URITemplate"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2133:APIKeyValidationInfoDTO"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -98,22 +98,6 @@
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://keymgt.apimgt.carbon.wso2.org/xsd">
          <xs:complexType name="APIKeyMgtException">
             <xs:sequence/>
-         </xs:complexType>
-      </xs:schema>
-      <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.api.apimgt.carbon.wso2.org/xsd">
-         <xs:complexType name="ConditionGroupDTO">
-            <xs:sequence>
-               <xs:element minOccurs="0" name="conditionGroupId" nillable="true" type="xs:string"/>
-               <xs:element maxOccurs="unbounded" minOccurs="0" name="conditions" nillable="true" type="ax2132:ConditionDTO"/>
-            </xs:sequence>
-         </xs:complexType>
-         <xs:complexType name="ConditionDTO">
-            <xs:sequence>
-               <xs:element minOccurs="0" name="conditionName" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="conditionType" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="conditionValue" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="inverted" type="xs:boolean"/>
-            </xs:sequence>
          </xs:complexType>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
@@ -132,6 +116,7 @@
                <xs:element minOccurs="0" name="endUserName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
+               <xs:element minOccurs="0" name="productID" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="spikeArrestLimit" type="xs:int"/>
                <xs:element minOccurs="0" name="spikeArrestUnit" nillable="true" type="xs:string"/>
@@ -144,6 +129,22 @@
                <xs:element minOccurs="0" name="userType" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="validationStatus" type="xs:int"/>
                <xs:element minOccurs="0" name="validityPeriod" type="xs:long"/>
+            </xs:sequence>
+         </xs:complexType>
+      </xs:schema>
+      <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.api.apimgt.carbon.wso2.org/xsd">
+         <xs:complexType name="ConditionGroupDTO">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="conditionGroupId" nillable="true" type="xs:string"/>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="conditions" nillable="true" type="ax2130:ConditionDTO"/>
+            </xs:sequence>
+         </xs:complexType>
+         <xs:complexType name="ConditionDTO">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="conditionName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="conditionType" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="conditionValue" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="inverted" type="xs:boolean"/>
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
@@ -195,11 +196,11 @@
          <wsdl:output>
             <soap:body use="literal"/>
          </wsdl:output>
-         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
-            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
-         </wsdl:fault>
          <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
             <soap:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
          </wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="validateKey">
@@ -210,11 +211,11 @@
          <wsdl:output>
             <soap:body use="literal"/>
          </wsdl:output>
-         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
-            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
-         </wsdl:fault>
          <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
             <soap:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
          </wsdl:fault>
       </wsdl:operation>
    </wsdl:binding>
@@ -228,11 +229,11 @@
          <wsdl:output>
             <soap12:body use="literal"/>
          </wsdl:output>
-         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
-            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
-         </wsdl:fault>
          <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
             <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
          </wsdl:fault>
       </wsdl:operation>
       <wsdl:operation name="validateKey">
@@ -243,11 +244,11 @@
          <wsdl:output>
             <soap12:body use="literal"/>
          </wsdl:output>
-         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
-            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
-         </wsdl:fault>
          <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
             <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
          </wsdl:fault>
       </wsdl:operation>
    </wsdl:binding>
@@ -274,13 +275,13 @@
    </wsdl:binding>
    <wsdl:service name="APIKeyValidationService">
       <wsdl:port name="APIKeyValidationServiceHttpsSoap11Endpoint" binding="tns:APIKeyValidationServiceSoap11Binding">
-         <soap:address location="https://Amilas-MacBook-Pro.local:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"/>
+         <soap:address location="https://sanjeewa-ThinkPad-X1-Carbon-3rd:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"/>
       </wsdl:port>
       <wsdl:port name="APIKeyValidationServiceHttpsSoap12Endpoint" binding="tns:APIKeyValidationServiceSoap12Binding">
-         <soap12:address location="https://Amilas-MacBook-Pro.local:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"/>
+         <soap12:address location="https://sanjeewa-ThinkPad-X1-Carbon-3rd:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"/>
       </wsdl:port>
       <wsdl:port name="APIKeyValidationServiceHttpsEndpoint" binding="tns:APIKeyValidationServiceHttpBinding">
-         <http:address location="https://Amilas-MacBook-Pro.local:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"/>
+         <http:address location="https://sanjeewa-ThinkPad-X1-Carbon-3rd:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>

@@ -29,8 +29,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
 
     public APIGatewayAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
-        //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
-        //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
+        //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiProductName() + ":v" + apiId.getVersion();
+        //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiProductName();
         //String providerDomain = apiId.getProviderName();
         //providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
         apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");

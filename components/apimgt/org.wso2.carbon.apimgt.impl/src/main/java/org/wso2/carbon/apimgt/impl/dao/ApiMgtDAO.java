@@ -28,25 +28,7 @@ import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -791,10 +773,11 @@ public class ApiMgtDAO {
         boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
         if(!isAdvancedThrottleEnabled) {
             if (defaultVersionInvoked) {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL_API_PRODUCT;
             } else {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL_API_PRODUCT;
             }
+            //TODO this need to fix with API PRoduct fixes.
         } else {
             if (defaultVersionInvoked) {
                 sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
@@ -855,6 +838,10 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
+
+                //TODO when we implemented API_Product concept completely product id should be retrieved as part of
+                //key validation process that need to implemented here
+                infoDTO.setProductID(rs.getString("API_PRODUCT_ID"));
 
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
@@ -1173,6 +1160,59 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
         }
         return subscriptionId;
+    }
+
+    /**
+     * TODO Refactor this class according to given requirements. Need to move db query to constants and handle
+     * iterations etc.
+     * @param apiProduct
+     * @param applicationId
+     * @param status
+     * @param subscriber
+     * @throws APIManagementException
+     */
+    public void addSubscriptionForAPIProduct(APIProduct apiProduct, int applicationId, String status,
+                                             String subscriber) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForInsert = null;
+        ResultSet rs = null;
+        int subscriptionId = -1;
+        int apiId;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String query = "select API.API_PROVIDER, API.API_NAME, API.CONTEXT, API.API_VERSION from " +
+                    "AM_API API, AM_API_PRODUCT_MAPPING PRODUCT_MAPPING" +
+                    " where PRODUCT_MAPPING.API_PRODUCT_ID = " + apiProduct.getApiProductId() + " AND " +
+                    // "PRODUCT_MAPPING.API_PRODUCT_VERSION = " + apiProduct.getProductVersion() + " AND "+
+                    " PRODUCT_MAPPING.API_ID=API.API_ID;";
+            ps = conn.prepareStatement(query);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                String apiProvider = resultSet.getString("API_PROVIDER");
+                String apiName = resultSet.getString("API_NAME");
+                String apiContext = resultSet.getString("CONTEXT");
+                String apiVersion = resultSet.getString("API_VERSION");
+                APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
+                addSubscription(apiIdentifier, apiContext, applicationId, status, subscriber);
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add subscription ", e1);
+                }
+            }
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
+        }
     }
 
     /**
@@ -5385,6 +5425,40 @@ public class ApiMgtDAO {
         }
     }
 
+
+    public void addAPIProduct(APIProduct apiProduct, int tenantId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        APIProductIdentifier productId = apiProduct.getId();
+
+        String query = SQLConstants.ADD_API_PRODUCT_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(query, new String[]{"api_product_id"});
+            prepStmt.setString(1, productId.getProviderName());
+            prepStmt.setString(2, productId.getApiProductName());
+            prepStmt.setString(3, productId.getVersion());
+            prepStmt.setString(4, apiProduct.getApiProductTier());
+            prepStmt.setString(5, apiProduct.getCreatedUser());
+            prepStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(7, apiProduct.getUpdatedUser());
+            prepStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            prepStmt.execute();
+            connection.commit();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the APIProduct: " + productId.getProviderName()+ "-"+
+                                productId.getApiProductName() + "-" + productId.getVersion() +
+                                " to the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+    }
+
+
+
     public void addAPI(API api, int tenantId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -6247,6 +6321,47 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+        return id;
+    }
+
+    public int getAPIProductID(APIProductIdentifier apiProductId, Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        int id = -1;
+        String getAPIProductQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+
+        try {
+            if (connection == null) {
+
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+
+            prepStmt = connection.prepareStatement(getAPIProductQuery);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductId.getProviderName()));
+            prepStmt.setString(2, apiProductId.getApiProductName());
+            prepStmt.setString(3, apiProductId.getVersion());
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("API_PRODUCT_ID");
+            }
+            if (id == -1) {
+                String msg = "Unable to find the API Product: " + apiProductId + " in the database";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+        } catch (SQLException e) {
+            handleException("Error while locating API Product: " + apiProductId + " from the database", e);
         } finally {
             if (created) {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -10938,6 +11053,29 @@ public class ApiMgtDAO {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }
          return apiLevelTier;
+    }
+
+    public String getAPIProductLevelTier(int id) throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        String apiProductLevelTier = null;
+        try {
+            String query = SQLConstants.GET_API_PRODUCT_DETAILS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query + " WHERE API_PRODUCT_ID = ?");
+            selectPreparedStatement.setInt(1, id);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                apiProductLevelTier = resultSet.getString("API_PRODUCT_TIER");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get APIProduct Details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return apiProductLevelTier;
     }
 
     private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection

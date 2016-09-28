@@ -819,4 +819,33 @@ public interface APIProvider extends APIManager {
      */
     String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
 
+    /**
+     * Search API Product
+     *
+     * @param searchContent  Search Content
+     * @param searchType  Search Type
+     * @return   Set of APIs
+     * @throws APIManagementException
+     */
+    List<APIProduct> searchAPIProducts(String searchContent, String searchType, String providerId)
+            throws APIManagementException;
+
+    /**
+     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
+     * only the latest version will
+     * be included in this list.
+     *
+     * @param providerId , provider id
+     * @return set of API
+     * @throws APIManagementException if failed to get set of API
+     */
+    List<APIProduct> getAPIProductsByProvider(String providerId) throws APIManagementException;
+
+    /**
+     * Adds a new APIProduct to the Store
+     *
+     * @param apiProduct APIProduct
+     * @throws APIManagementException if failed to add APIProduct
+     */
+    void addAPIProduct(APIProduct apiProduct) throws APIManagementException;
 }
