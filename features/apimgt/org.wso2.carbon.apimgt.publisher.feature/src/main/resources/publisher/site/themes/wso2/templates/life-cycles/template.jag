@@ -48,9 +48,48 @@ function updateStatus(status){
 var apiName=$("#name").val();
 var version=$("#apiVersion").val();
 var provider=$("#provider").val();
+var isSetDeprecation=$("#itemDiv1").val();
 $(".modal-footer").html("");
 if(status=='Deprecate'){
 var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
+var messageTitle = i18n.t("Change Lifecycle status");
+jagg.message({
+        content: messageContent,
+        type:"confirm",
+        title: messageTitle,
+        anotherDialog:true,
+        okCallback:function(){
+                       $('#messageModal').modal({backdrop: 'static', keyboard: false });
+                                  $(".modal-header .close").hide();
+                                  $(".modal-footer").html("");
+                                  $(".modal-title").html(i18n.t("Please wait"));
+                                  $(".modal-body").addClass("loadingButton");
+                                  $(".modal-body").css({"margin-left":25}); //todo param_string
+                                  $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version );
+                      jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
+                          function (result) {
+                              if (!result.error) {
+                                 $('#statusUpdateMsg').show();
+                                 setTimeout(function(){
+                						location = ''
+              					 },1000)
+                              } else {
+                                    if (result.message == "AuthenticateError") {
+                                       jagg.showLogin();
+                                    } else {
+                                           jagg.message({content:result.message,type:"error"});
+                                    }
+                              }
+                          }, "json");
+
+    },
+    cancelCallback:function(){
+    $('#messageModal').modal('hide');
+         $(".modal-footer").html("");
+    }
+    });
+}else if(isSetDeprecation === 'true'){
+var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
 var messageTitle = i18n.t("Change Lifecycle status");
 jagg.message({
         content: messageContent,
