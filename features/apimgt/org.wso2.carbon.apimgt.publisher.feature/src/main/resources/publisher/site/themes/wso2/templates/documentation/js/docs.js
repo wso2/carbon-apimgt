@@ -45,12 +45,20 @@ $(document).ready(function() {
         null,
         { "bSortable": false }
         ];
-    } else {
+    } else if (docTableColCount == 4){
         docTableColumnStructure = [
         null,
         null,
         null,
         { "bSortable": false }
+        ];
+    } else if (docTableColCount == 5){
+        docTableColumnStructure = [
+            null,
+            null,
+            null,
+            null,
+            { "bSortable": false }
         ];
     }
 
@@ -269,7 +277,7 @@ var saveDoc=function(){
 
         if (sourceType == 'file') {
 
-            var fileExtension = getExtension($("#docName").val());
+            var fileExtension = getExtension($("#fileName").val());
 
             var mimeType = getMimeType(fileExtension);
 
