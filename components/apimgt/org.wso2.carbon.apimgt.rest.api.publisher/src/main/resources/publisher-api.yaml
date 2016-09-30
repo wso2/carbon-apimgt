@@ -83,6 +83,10 @@ x-wso2-security:
         roles: admin
         name: apim:subscription_block
         key: apim:subscription_block
+      - description: ""
+        roles: admin
+        name: apim:api_workflow
+        key: apim:api_workflow
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2035,11 +2039,9 @@ paths:
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v0.10/environments\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v0.10/environments
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-scope: apim:api_workflow
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n\"status\" : \"APPROVED\", \n\"attributes\" : {\n  \"apiCurrentState\": \"Created\",\n  \"apiLCAction\": \"Publish\",\n  \"apiName\":\"APIname\",\n  \"apiVersion\" : \"1.0.0\",\n  \"apiProvider\" : \"admin\",\n  \"invoker\": \"admin\"\n	}\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
       summary: Update workflow status
       description: |
@@ -2270,7 +2272,7 @@ parameters:
     type: string
     
 
-# Tier Name
+# Workflow reference ID
 # Specified as part of the path expression
   workflowReferenceId-Q:
     name: workflowReferenceId
