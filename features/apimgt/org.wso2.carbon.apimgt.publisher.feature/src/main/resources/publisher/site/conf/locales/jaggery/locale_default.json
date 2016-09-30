@@ -306,6 +306,7 @@
     "Parameters": "Parameters",
     "Password": "Password",
     "Please select at least one Subscription Tier.": "Please select at least one Subscription Tier.",
+    "Please select at least one Transport.":"Please select at least one Transport.",
     "Please specify a production or sandbox endpoint.": "Please specify a production or sandbox endpoint.",
     "Please use a valid wsdl endpoint": "Please use a valid wsdl endpoint",
     "Policy": "Policy",
