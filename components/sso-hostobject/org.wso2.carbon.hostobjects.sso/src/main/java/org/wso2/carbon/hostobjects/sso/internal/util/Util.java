@@ -26,18 +26,26 @@ import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
+import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
+import org.opensaml.xml.encryption.EncryptedKey;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
@@ -58,6 +66,7 @@ import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.crypto.SecretKey;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -320,6 +329,36 @@ public class Util {
             throw new SignatureVerificationException(e.getMessage(), e);
         }
     }
+
+    public static Assertion getDecryptedAssertion(EncryptedAssertion encryptedAssertion, String keyStoreName,
+            String keyStorePassword, String alias, int tenantId, String tenantDomain) throws Exception {
+
+        try {
+            KeyStore keyStore = null;
+
+            java.security.cert.X509Certificate cert = null;
+
+            SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential = new SSOAgentCarbonX509Credential(tenantId,
+                    tenantDomain);
+
+            KeyInfoCredentialResolver keyResolver = new StaticKeyInfoCredentialResolver(
+                    new X509CredentialImpl(ssoAgentCarbonX509Credential));
+
+            EncryptedKey key = encryptedAssertion.getEncryptedData().
+                    getKeyInfo().getEncryptedKeys().get(0);
+            Decrypter decrypter = new Decrypter(null, keyResolver, null);
+            SecretKey dkey = (SecretKey) decrypter.decryptKey(key, encryptedAssertion.getEncryptedData().
+                    getEncryptionMethod().getAlgorithm());
+            Credential shared = SecurityHelper.getSimpleCredential(dkey);
+            decrypter = new Decrypter(new StaticKeyInfoCredentialResolver(shared), null, null);
+            decrypter.setRootInNewDocument(true);
+            return decrypter.decrypt(encryptedAssertion);
+        } catch (Exception e) {
+            throw new Exception("Decrypted assertion error", e);
+
+        }
+    }
+
 
     public static String getDomainName(XMLObject samlObject) {
         NodeList list = samlObject.getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "NameID");

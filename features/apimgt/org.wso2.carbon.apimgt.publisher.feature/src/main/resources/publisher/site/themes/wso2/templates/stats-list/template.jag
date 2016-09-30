@@ -74,6 +74,13 @@
 				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("API Usage")%>"></i>
 				<%=i18n.localize("API Usage")%></a></li>
+
+			<li><a class="substats" title="<%=i18n.localize("Top API Users")%>"
+				href="<%=allStatsMappedUrl%>?page=api-top-users&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=page=api-top-users&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-table" title="<%=i18n.localize("Top API Users")%>"></i>
+				<%=i18n.localize("Top API Users")%></a></li>
+
 			<!--li><a class="substats" title="<%=i18n.localize("API Response Times")%>"
 				href="<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">

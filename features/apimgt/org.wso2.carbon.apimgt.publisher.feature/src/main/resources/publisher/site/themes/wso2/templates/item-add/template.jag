@@ -99,7 +99,7 @@
 		<div class="panel panel-default">
 			<div class="panel-heading" role="tab" id="headingThree" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse3" aria-expanded="true" aria-controls="accordion1-collapse3">
 				<h4 class="panel-title">
-					<label class="radio">
+					<label class="radio" id="create-new-api">
                                     <input class="create-api" type="radio" name="create-api" />
                                     <span class="helper"></span>
                     </label>

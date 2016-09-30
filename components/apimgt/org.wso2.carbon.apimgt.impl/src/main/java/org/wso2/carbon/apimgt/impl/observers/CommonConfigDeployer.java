@@ -123,5 +123,13 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
             log.error("Exception when loading " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         }
+
+        try {
+            APIUtil.createDefaultRoles(tenantId);
+        } catch (APIManagementException e) {
+            log.error("Failed create default roles for tenant " + tenantDomain, e);
+        } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
+            log.error("Exception when creating default roles for tenant " + tenantDomain, e);
+        }
     }
 }

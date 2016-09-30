@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -100,6 +101,9 @@ import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
+import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
@@ -1176,12 +1180,10 @@ public final class APIUtil {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(key, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, key);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
+                    log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
                             ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
                             ", Tenant domain set in PrivilegedCarbonContext: " +
                             PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-                }
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
@@ -2189,6 +2191,43 @@ public final class APIUtil {
     }
 
     /**
+     * Get user profiles of user
+     *
+     * @param username username
+     * @return default user profile of user
+     * @throws APIManagementException
+     */
+    public static UserProfileDTO getUserDefaultProfile(String username) throws APIManagementException {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String url = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
+        String errorMsg = "Error while getting profile of user ";
+        try {
+            UserProfileMgtServiceStub stub = new UserProfileMgtServiceStub(
+                    ServiceReferenceHolder.getContextService().getClientConfigContext(),
+                    url + APIConstants.USER_PROFILE_MGT_SERVICE);
+            ServiceClient gatewayServiceClient = stub._getServiceClient();
+            CarbonUtils.setBasicAccessSecurityHeaders(
+                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME),
+                    apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD),
+                    gatewayServiceClient);
+            UserProfileDTO[] profiles = stub.getUserProfiles(username);
+            for (UserProfileDTO dto : profiles) {
+                if (APIConstants.USER_DEFAULT_PROFILE.equals(dto.getProfileName())) {
+                    return dto;
+                }
+            }
+        } catch (AxisFault axisFault) {
+            handleException(errorMsg + username, axisFault);
+        } catch (RemoteException e) {
+            handleException(errorMsg + username, e);
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
+            handleException(errorMsg + username, e);
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the role list of a user
      *
      * @param username A username
@@ -2933,13 +2972,11 @@ public final class APIUtil {
                 factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
                 DocumentBuilder parser = factory.newDocumentBuilder();
                 Document dc = parser.parse(content);
-                boolean enableSignup = Boolean.parseBoolean(dc
-                        .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ENABLED).item(0).getFirstChild()
-                        .getNodeValue());
+                boolean enableSubscriberRoleCreation = isSubscriberRoleCreationEnabled(tenantId);
                 String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
                         .getFirstChild().getNodeValue();
 
-                if (enableSignup) {
+                if (enableSubscriberRoleCreation) {
                     int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
                             .getLength();
 
@@ -2975,6 +3012,73 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while getting Self signup role information from the registry", e);
         }
+    }
+
+    /**
+     * Returns whether subscriber role creation enabled for the given tenant in tenant-conf.json
+     * 
+     * @param tenantId id of the tenant
+     * @return true if subscriber role creation enabled in tenant-conf.json
+     */
+    public static boolean isSubscriberRoleCreationEnabled(int tenantId) throws APIManagementException {
+        String tenantDomain = getTenantDomainFromTenantId(tenantId);
+        JSONObject defaultRoles = getTenantDefaultRoles(tenantDomain);
+        JSONObject subscriberRoleConfig = (JSONObject) defaultRoles
+                .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
+        return isRoleCreationEnabled(subscriberRoleConfig);
+    }
+    
+    /**
+     * Create default roles specified in APIM per-tenant configuration file
+     * 
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createDefaultRoles(int tenantId) throws APIManagementException {
+        String tenantDomain = getTenantDomainFromTenantId(tenantId);
+        JSONObject defaultRoles = getTenantDefaultRoles(tenantDomain);
+
+        if (defaultRoles != null) {
+            // create publisher role if it's creation is enabled in tenant-conf.json
+            JSONObject publisherRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_PUBLISHER_ROLE);
+            if (isRoleCreationEnabled(publisherRoleConfig)) {
+                String publisherRoleName = String.valueOf(publisherRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(publisherRoleName)) {
+                    createPublisherRole(publisherRoleName, tenantId);
+                }
+            }
+
+            // create creator role if it's creation is enabled in tenant-conf.json
+            JSONObject creatorRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE);
+            if (isRoleCreationEnabled(creatorRoleConfig)) {
+                String creatorRoleName = String.valueOf(creatorRoleConfig
+                        .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_ROLENAME));
+                if (!StringUtils.isBlank(creatorRoleName)) {
+                    createCreatorRole(creatorRoleName, tenantId);
+                }
+            }
+            
+            createSelfSignUpRoles(tenantId);
+        }
+    }
+
+    /**
+     * Returns whether role creation enabled for the provided role config
+     * 
+     * @param roleConfig role config in tenat-conf.json
+     * @return true if role creation enabled for the provided role config
+     */
+    private static boolean isRoleCreationEnabled (JSONObject roleConfig) {
+        boolean roleCreationEnabled = false;
+        if (roleConfig != null && roleConfig.get(
+                APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATE_ON_TENANT_LOAD) != null && (Boolean) (roleConfig.get(
+                APIConstants.API_TENANT_CONF_DEFAULT_ROLES_CREATE_ON_TENANT_LOAD))) {
+            roleCreationEnabled = true;
+        }
+        return roleCreationEnabled;
     }
 
     public static boolean isAnalyticsEnabled() {
@@ -3166,7 +3270,60 @@ public final class APIUtil {
         return modifiedName;
     }
 
+    /**
+     * Create APIM Subscriber role with the given name in specified tenant
+     * 
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
     public static void createSubscriberRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] subscriberPermissions = new Permission[] {
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
+        createRole (roleName, subscriberPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM Publisher roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createPublisherRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] publisherPermissions = new Permission[] {
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION) };
+        createRole (roleName, publisherPermissions, tenantId);
+    }
+
+    /**
+     * Create APIM Creator roles with the given name in specified tenant
+     *
+     * @param roleName role name
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createCreatorRole(String roleName, int tenantId) throws APIManagementException {
+        Permission[] creatorPermissions = new Permission[] {
+                new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.CONFIGURE_GOVERNANCE, UserMgtConstants.EXECUTE_ACTION),
+                new Permission(APIConstants.Permissions.RESOURCE_GOVERN, UserMgtConstants.EXECUTE_ACTION)};
+        createRole (roleName, creatorPermissions, tenantId);
+    }
+
+    /**
+     * Creates a role with a given set of permissions for the specified tenant
+     * 
+     * @param roleName role name
+     * @param permissions a set of permissions to be associated with the role
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createRole(String roleName, Permission[] permissions, int tenantId)
+            throws APIManagementException {
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserRealm realm;
@@ -3182,19 +3339,15 @@ public final class APIUtil {
             }
             if (!manager.isExistingRole(roleName)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Creating subscriber role: " + roleName);
+                    log.debug("Creating role: " + roleName);
                 }
-                Permission[] subscriberPermissions = new Permission[] {
-                        new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
                 String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
                 String[] userList = new String[] { tenantAdminName };
-                manager.addRole(roleName, userList, subscriberPermissions);
+                manager.addRole(roleName, userList, permissions);
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + roleName + " - "
-                    + "Self registration might not function properly.", e);
+            throw new APIManagementException("Error while creating role: " + roleName, e);
         }
     }
 
@@ -5128,6 +5281,44 @@ public final class APIUtil {
     }
 
     /**
+     * @param tenantDomain Tenant domain to be used to get default role configurations
+     * @return JSON object which contains configuration for default roles
+     * @throws APIManagementException
+     */
+    public static JSONObject getTenantDefaultRoles(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig;
+        JSONObject defaultRolesConfigJSON = null;
+        try {
+            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES);
+                    if (value != null) {
+                        defaultRolesConfigJSON = (JSONObject) value;
+                    } else {
+                        throw new APIManagementException(
+                                APIConstants.API_TENANT_CONF_DEFAULT_ROLES + " config does not exist for tenant "
+                                        + tenantDomain);
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while retrieving user realm for tenant " + tenantDomain, e);
+        } catch (RegistryException e) {
+            handleException("Error while retrieving tenant configuration file for tenant " + tenantDomain, e);
+        } catch (ParseException e) {
+            handleException(
+                    "Error while parsing tenant configuration file while retrieving default roles for tenant "
+                            + tenantDomain, e);
+        }
+        return defaultRolesConfigJSON;
+    }
+
+    /**
      * @param config JSON configuration object with scopes and associated roles
      * @return Map of scopes which contains scope names and associated role list
      */
@@ -5777,6 +5968,13 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+
+                //If the policy is a subscription policy
+                if(policy instanceof SubscriptionPolicy){
+                    SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy)policy;
+                    setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
+                }
+
                 if(limit instanceof RequestCountLimit) {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
@@ -5803,6 +6001,41 @@ public final class APIUtil {
             tierMap.remove(APIConstants.UNAUTHENTICATED_TIER);
         }
         return tierMap;
+    }
+
+    /**
+     * Extract custom attributes and billing plan from subscription policy and set to tier.
+     * @param subscriptionPolicy - The SubscriptionPolicy object to extract details from
+     * @param tier - The Tier to set information into
+     */
+    public static void setBillingPlanAndCustomAttributesToTier(SubscriptionPolicy subscriptionPolicy, Tier tier){
+
+        //set the billing plan.
+        tier.setTierPlan(subscriptionPolicy.getBillingPlan());
+
+        //If the tier has custom attributes
+        if(subscriptionPolicy.getCustomAttributes() != null &&
+                subscriptionPolicy.getCustomAttributes().length > 0){
+
+            Map<String, Object> tierAttributes = new HashMap<String, Object>();
+            try {
+                String customAttr = new String(subscriptionPolicy.getCustomAttributes(), "UTF-8");
+                JSONParser parser = new JSONParser();
+                JSONArray jsonArr = (JSONArray) parser.parse(customAttr);
+                Iterator jsonArrIterator = jsonArr.iterator();
+                while(jsonArrIterator.hasNext()){
+                    JSONObject json = (JSONObject)jsonArrIterator.next();
+                    tierAttributes.put(String.valueOf(json.get("name")), json.get("value"));
+                }
+                tier.setTierAttributes(tierAttributes);
+            } catch (ParseException e) {
+                log.error("Unable to convert String to Json", e);
+                tier.setTierAttributes(null);
+            } catch (UnsupportedEncodingException e) {
+                log.error("Custom attribute byte array does not use UTF-8 character set", e);
+                tier.setTierAttributes(null);
+            }
+        }
     }
 
     public static Set<Tier> getAvailableTiers(Map<String, Tier> definedTiers, String tiers, String apiName) {
