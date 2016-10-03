@@ -58,7 +58,12 @@
 	                    if(environmenturls[urltype] != ""){ %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
 	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
-	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
+	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a>
+                            <%if(api.ws != "true"){%>
+                            <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
+                                <%}else{%>
+                                    ws://127.0.0.1:9099<%=encode.forHtml(api.context)%>
+                                    <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
