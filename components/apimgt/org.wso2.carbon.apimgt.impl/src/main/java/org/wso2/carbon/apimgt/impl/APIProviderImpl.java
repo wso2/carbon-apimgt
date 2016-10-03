@@ -1221,7 +1221,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     } else { // API Status : RETIRED or CREATED
                         Map<String, String> failedToRemoveEnvironments = removeFromGateway(api);
-                        if(APIStatus.CREATED.equals(status)){
+                        if(!APIStatus.CREATED.equals(status)){
                             apiMgtDAO.removeAllSubscriptions(api.getId());
                         }
                         if (!failedToRemoveEnvironments.isEmpty()) {

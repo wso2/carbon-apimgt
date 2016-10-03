@@ -13,7 +13,7 @@ var enableVersion = false;
 var d = new Date();
 var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(),d.getSeconds());
 var to = new Date();
-var from = new Date(to.getTime() - 1000 * 60 * 60 * 24);
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 $( document ).ready(function() {
    populateAPIList();
     width = $("#chartContainer").width();

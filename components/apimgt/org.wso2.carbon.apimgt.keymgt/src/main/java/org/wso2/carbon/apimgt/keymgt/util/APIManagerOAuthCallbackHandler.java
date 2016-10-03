@@ -50,6 +50,14 @@ public class APIManagerOAuthCallbackHandler extends AbstractOAuthCallbackHandler
             }
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_AUTHZ.equals(
                     oauthCallback.getCallbackType())){
+                String[] scopes = oauthCallback.getRequestedScope();
+                //If no scopes have been requested.
+                if(scopes == null || scopes.length == 0){
+                    //Issue a default scope. The default scope can only be used to access resources which are
+                    // not associated to a scope
+                    scopes = new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE};
+                }
+                oauthCallback.setApprovedScope(scopes);
                 oauthCallback.setValidScope(true);
             }
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_TOKEN.equals(

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.0.5-SNAPSHOT</version>
+        <version>6.0.6-SNAPSHOT</version>
 	    <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,10 +43,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.throttle.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

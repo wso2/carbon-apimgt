@@ -388,7 +388,13 @@ var drawChart = function (from, to) {
                     y.tickFormat = '1d';
                     chart.addMeasureAxis("z", "Hits");
                     s=chart.addSeries("API", dimple.plot.bubble);
-
+                    s.getTooltipText = function (e) {
+                        return []; //removes the default tooltip text
+                    };
+                    s.addEventHandler("mousedown", function (e){
+                        var apiName = e.xValue;
+                        window.location = "all-statistics.jag?page=api-top-users&stat=all-stat&apiName=" + apiName;
+                    });
                     var div = d3.select("body").append("div").attr("class", "toolTip");
                     var filterValues = dimple.getUniqueValues(data, "API");
                     var state_array = [];
@@ -518,8 +524,10 @@ var drawChart = function (from, to) {
 
                         var circle=d3.select("#"+d.aggField+"_"+d.aggField+"__");
 
-                            circle.on("click", function(d){
-                            //circle on click
+                            circle.on("mouseenter", function(d){
+                            //circle on mouse enter
+                            $(this).css('cursor', 'pointer');
+                            
                             for ( var i = 0; i < parsedResponse.length; i++) {
                                 var count = 0;
                                 var app ='';
@@ -543,9 +551,8 @@ var drawChart = function (from, to) {
                                 div.style("left", d3.event.pageX+10+"px");
                                 div.style("top", d3.event.pageY-25+"px");
                                 div.style("display", "inline-block");
-
-                                div.html('<div style="color:#555; text-align:left">'+ i18n.t('API') + ' : ' +app +'</div><div style="color:#666;margin-top:5px;text-align:left">'+ i18n.t('Subscription Count') + ' : '+data[i].SubscriberCount+'</div><table class="table" id="tooltipTable"><thead><tr><th>'+ i18n.t('Version') + '</th><th>'+ i18n.t('Hits') + '</th></tr></thead><tbody></tbody></table>');
-                                    for (var l=0;l<versionCount.length;l++){
+                                div.html('<table class="table"><tbody><tr><td><div style="color:#555; text-align:left">'+ i18n.t("API") + '</td><td>' + app + '</td></tr><tr><td><div style="color:#555; text-align:left">'+ i18n.t('Subscriptions') + '</td><td>' + data[i].SubscriberCount + '</td></tr><tr><td><div style="color:#555; text-align:left">'+ i18n.t('Total Hits') + '</td><td>' + data[i].Hits + '</td></tr></tbody></table><table class="table" id="tooltipTable"><thead><tr><th>'+ i18n.t('Version') + '</th><th>'+ i18n.t('Hits') + '</th></tr></thead><tbody></tbody></table>');
+                                   for (var l=0;l<versionCount.length;l++){
                                         var versionName=versionCount[l].version;
                                         var version_Count=versionCount[l].count;
                                         $('#tooltipTable tbody').append('<tr><td>'+versionName+'</td><td>'+version_Count+'</td></tr>');
