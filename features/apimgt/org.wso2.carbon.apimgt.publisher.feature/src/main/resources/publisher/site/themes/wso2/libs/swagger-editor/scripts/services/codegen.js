@@ -40,7 +40,11 @@ SwaggerEditor.service('Codegen', function Codegen($http, defaults, Storage,
           }
           $http.post(url, {spec: spec}).then(function redirect(resp) {
             if (angular.isObject(resp.data) && resp.data.link) {
-              window.location = resp.data.link;
+              var httpLink = resp.data.link;
+              //Replace HTTP host and port with the corresponding values for HTTPS
+              //This is required because "Generate Server" in swagger editor should send HTTPS request
+              var httpsLink = httpLink.replace("http:", "https:").replace(":80", ":443");
+              window.location = httpsLink;
               rsolve();
             } else {
               reject('Bad response from server: ' + JSON.stringify(resp));
