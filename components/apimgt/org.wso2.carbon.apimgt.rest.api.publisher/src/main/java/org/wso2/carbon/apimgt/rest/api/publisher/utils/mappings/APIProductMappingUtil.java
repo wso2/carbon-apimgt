@@ -150,7 +150,7 @@ public class APIProductMappingUtil {
 
         model.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
         if (dto.getVisibleRoles() != null) {
-            String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
+            Set<String> visibleRoles = new LinkedHashSet<>(dto.getVisibleRoles());
             model.setVisibleRoles(visibleRoles);
         }
 
@@ -163,8 +163,6 @@ public class APIProductMappingUtil {
         if (apiBusinessInformationDTO != null) {
             model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
             model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
-            model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
-            model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
 
         return model;
@@ -187,7 +185,7 @@ public class APIProductMappingUtil {
             dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
         }
 
-        dto.setStatus(model.getStatus().getStatus());
+        //dto.setStatus(model.getStatus().getStatus());
 
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -198,22 +196,26 @@ public class APIProductMappingUtil {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
 
+        /*
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
+        */
 
+        /*
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
             tiersToReturn.add(tier.getName());
         }
         dto.setThrottlingTiers(tiersToReturn);
+        */
 
         dto.setVisibility(mapVisibilityFromAPIProductToDTO(model.getVisibility()));
 
         if (model.getVisibleRoles() != null) {
-            dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
+            dto.setVisibleRoles(new ArrayList<>(model.getVisibleRoles()));
         }
 
         if (model.getVisibleTenants() != null) {
@@ -223,8 +225,6 @@ public class APIProductMappingUtil {
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
         apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
-        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
-        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
 
         return dto;

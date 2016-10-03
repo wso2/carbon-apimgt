@@ -28,7 +28,6 @@ public class APIProduct {
     private String uuid;
 
     private String description;
-    private String productTiers;
     private Date createdTime;
     private String createdUser;
     private Date updatedTime;
@@ -42,11 +41,9 @@ public class APIProduct {
     private Set<String> tags = new LinkedHashSet<String>();
 
     private String visibility;
-    private String visibleRoles;
+    private Set<String> visibleRoles = new LinkedHashSet<String>();
     private String visibleTenants;
 
-    private String technicalOwner;
-    private String technicalOwnerEmail;
     private String businessOwner;
     private String businessOwnerEmail;
 
@@ -69,16 +66,6 @@ public class APIProduct {
 
     private String apiProductId;
 
-    public String getApiProductTier() {
-        return apiProductTier;
-    }
-
-    public void setApiProductTier(String apiProductTier) {
-        this.apiProductTier = apiProductTier;
-    }
-
-    private String apiProductTier;
-
     public String getUUID() {
         return uuid;
     }
@@ -93,14 +80,6 @@ public class APIProduct {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getProductTiers() {
-        return productTiers;
-    }
-
-    public void setProductTiers(String productTiers) {
-        this.productTiers = productTiers;
     }
 
     public Date getCreatedTime() {
@@ -135,7 +114,6 @@ public class APIProduct {
         this.updatedUser = updatedUser;
     }
 
-
     public APIProductStatus getStatus() {
         return status;
     }
@@ -150,22 +128,6 @@ public class APIProduct {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
-    }
-
-    public String getTechnicalOwner() {
-        return technicalOwner;
-    }
-
-    public void setTechnicalOwner(String technicalOwner) {
-        this.technicalOwner = technicalOwner;
-    }
-
-    public String getTechnicalOwnerEmail() {
-        return technicalOwnerEmail;
-    }
-
-    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-        this.technicalOwnerEmail = technicalOwnerEmail;
     }
 
     public String getBusinessOwner() {
@@ -267,11 +229,11 @@ public class APIProduct {
         this.visibility = visibility;
     }
 
-    public String getVisibleRoles() {
+    public Set<String> getVisibleRoles() {
         return visibleRoles;
     }
 
-    public void setVisibleRoles(String visibleRoles) {
+    public void setVisibleRoles(Set<String> visibleRoles) {
         this.visibleRoles = visibleRoles;
     }
 
