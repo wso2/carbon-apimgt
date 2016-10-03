@@ -67,6 +67,7 @@
         <Property name="clientId">xxxxxxxxxxxxxxxxxxxxxxxx</Property>
         <Property name="clientSecret">xxxxxxxxxxxxxxxxxxxxxxxx</Property>
         <Property name="processDefinitionKey">APIStateChangeApprovalProcess</Property>
+        <Property name="stateList">Created:Publish,Published:Block</Property>        
     </APIStateChange>-->
 
     

@@ -20,8 +20,11 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
@@ -59,6 +62,15 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     private String username;
     private String password;
     private String processDefinitionKey;
+    private String stateList;
+
+    public String getStateList() {
+        return stateList;
+    }
+
+    public void setStateList(String stateList) {
+        this.stateList = stateList;
+    }
 
     private final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
 
@@ -136,34 +148,52 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             log.debug("Executing API State change Workflow..");
         }
 
-        APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
+        if (stateList != null) {
+            Map<String, List<String>> stateActionMap = getSelectedStatesToApprove();
+            APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
 
-        setOAuthApplicationInfo(apiStateWorkFlowDTO);
-        // build request payload
+            if (stateActionMap.containsKey(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
+                    && stateActionMap.get(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
+                            .contains(apiStateWorkFlowDTO.getApiLCAction())) {
+                setOAuthApplicationInfo(apiStateWorkFlowDTO);
+                // build request payload
 
-        String jsonPayload = buildPayloadForBPMNProcess(apiStateWorkFlowDTO);
+                String jsonPayload = buildPayloadForBPMNProcess(apiStateWorkFlowDTO);
 
-        URL serviceEndpointURL = new URL(serviceEndpoint);
-        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpPost httpPost = new HttpPost(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH);
-        String authHeader = getBasicAuthHeader();
-        httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-        StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
+                URL serviceEndpointURL = new URL(serviceEndpoint);
+                HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
+                        serviceEndpointURL.getProtocol());
+                HttpPost httpPost = new HttpPost(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH);
+                String authHeader = getBasicAuthHeader();
+                httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+                StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
 
-        httpPost.setEntity(requestEntity);
-        try {
-            httpClient.execute(httpPost);
-        } catch (ClientProtocolException e) {
-            log.error("Error while creating the http client", e);
-            throw new WorkflowException("Error while creating the http client", e);
-        } catch (IOException e) {
-            log.error("Error while connecting to the external service", e);
-            throw new WorkflowException("Error while connecting to the external service", e);
-        } finally {
-            httpPost.reset();
-        }       
+                httpPost.setEntity(requestEntity);
+                try {
+                    httpClient.execute(httpPost);
+                } catch (ClientProtocolException e) {
+                    log.error("Error while creating the http client", e);
+                    throw new WorkflowException("Error while creating the http client", e);
+                } catch (IOException e) {
+                    log.error("Error while connecting to the external service", e);
+                    throw new WorkflowException("Error while connecting to the external service", e);
+                } finally {
+                    httpPost.reset();
+                }
 
-        super.execute(workflowDTO);       
+                super.execute(workflowDTO);
+            } else {
+                // For any other states, act as simpleworkflow executor.
+                workflowDTO.setStatus(WorkflowStatus.APPROVED);
+                // calling super.complete() instead of complete() to act as the simpleworkflow executor
+                super.complete(workflowDTO);
+            }
+        } else {
+            String msg = "State change list is not provided. Please check <stateList> element in ";
+            log.error(msg);
+            new WorkflowException(msg);
+        }
+
         return new GeneralWorkflowResponse();
     }
 
@@ -279,8 +309,8 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         String providerName = workflowDTO.getAttributes().get("apiProvider");
         String version = workflowDTO.getAttributes().get("apiVersion");
         String invoker = workflowDTO.getAttributes().get("invoker");
-        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState"); 
-        
+        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState");
+
         int tenantId = workflowDTO.getTenantId();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
@@ -293,18 +323,16 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 String targetStatus = "";
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                 targetStatus = apiArtifact.getLifecycleState();
-                if(!currentStatus.equals(targetStatus)){
+                if (!currentStatus.equals(targetStatus)) {
                     apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
                             targetStatus.toUpperCase(), invoker, tenantId);
                 }
                 if (log.isDebugEnabled()) {
-                    String logMessage =
-                            "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
-                            apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                    String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
+                            + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
                     log.debug(logMessage);
                 }
             }
-
 
         } catch (RegistryException e) {
             log.error("Could not complete api state change workflow", e);
@@ -312,7 +340,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         } catch (APIManagementException e) {
             log.error("Could not complete api state change workflow", e);
             throw new WorkflowException("Could not complete api state change workflow", e);
-        } 
+        }
 
         return new GeneralWorkflowResponse();
     }
@@ -372,8 +400,31 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
         // step two
         // DELETE https://172.16.225.128:9443/bpmn/runtime/process-instances/id
-        //-------Change the registry state 
-   
+        // -------Change the registry state
+
+    }
+
+    private Map<String, List<String>> getSelectedStatesToApprove() {
+        Map<String, List<String>> stateAction = new HashMap<String, List<String>>();
+        // exract selected states from stateList and populate the map
+        if (stateList != null) {
+            // list will be something like ' Created:Publish,Created:Deploy as a Prototype,Published:Block ' String
+            // It will have State:action pairs
+            String[] statelistArray = stateList.split(",");
+            for (int i = 0; i < statelistArray.length; i++) {
+                String[] stateActionArray = statelistArray[i].split(":");
+                if (stateAction.containsKey(stateActionArray[0].toUpperCase())) {
+                    ArrayList<String> actionList = (ArrayList<String>) stateAction
+                            .get(stateActionArray[0].toUpperCase());
+                    actionList.add(stateActionArray[1]);
+                } else {
+                    ArrayList<String> actionList = new ArrayList<String>();
+                    actionList.add(stateActionArray[1]);
+                    stateAction.put(stateActionArray[0].toUpperCase(), actionList);
+                }
+            }
+        }
+        return stateAction;
     }
 
 }
