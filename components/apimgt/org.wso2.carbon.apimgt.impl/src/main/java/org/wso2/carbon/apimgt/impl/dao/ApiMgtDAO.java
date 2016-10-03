@@ -5440,13 +5440,19 @@ public class ApiMgtDAO {
             prepStmt.setString(1, productId.getProviderName());
             prepStmt.setString(2, productId.getApiProductName());
             prepStmt.setString(3, productId.getVersion());
-            prepStmt.setString(4, apiProduct.getApiProductTier());
-            prepStmt.setString(5, apiProduct.getCreatedUser());
-            prepStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-            prepStmt.setString(7, apiProduct.getUpdatedUser());
-            prepStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(4, apiProduct.getDescription());
+            prepStmt.setString(5, String.valueOf(apiProduct.getAvailableTiers()));
+            prepStmt.setString(6, apiProduct.getCreatedUser());
+            prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(8, apiProduct.getUpdatedUser());
+            prepStmt.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(10, apiProduct.getVisibility());
+            prepStmt.setString(11, apiProduct.getBusinessOwner());
+            prepStmt.setString(12, apiProduct.getBusinessOwnerEmail());
+            prepStmt.setString(13, apiProduct.getSubscriptionAvailability());
+            prepStmt.setString(14, UUID.randomUUID().toString());
+
             prepStmt.execute();
-            connection.commit();
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding the APIProduct: " + productId.getProviderName()+ "-"+
@@ -6370,6 +6376,82 @@ public class ApiMgtDAO {
             }
         }
         return id;
+    }
+
+    public APIProduct getAPIProduct(APIProductIdentifier apiProductId, Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        APIProduct apiProduct = null;
+        String getAPIProductQuery = SQLConstants.GET_API_PRODUCT_SQL;
+
+        try {
+            if (connection == null) {
+
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+
+            prepStmt = connection.prepareStatement(getAPIProductQuery);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiProductId.getProviderName()));
+            prepStmt.setString(2, apiProductId.getApiProductName());
+            prepStmt.setString(3, apiProductId.getVersion());
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                apiProduct = new APIProduct(apiProductId);
+                //set description
+                apiProduct.setDescription(rs.getString("DESCRIPTION"));
+                //set created time
+                apiProduct.setCreatedTime(rs.getTime("CREATED_TIME"));
+                //set last access time
+                apiProduct.setUpdatedTime(rs.getTime("UPDATED_TIME"));
+                //set uuid
+                apiProduct.setUUID(rs.getString("UUID"));
+                // set url
+                apiProduct.setStatus(APIUtil.getApiProductStatus(rs.getString("LIFECYCLE_STATE")));
+                apiProduct.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
+                apiProduct.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
+                apiProduct.setVisibility(rs.getString("VISIBILITY"));
+                apiProduct.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
+
+                apiProduct.setVisibleRoles(getAPIProductVisibleRoles(connection, rs.getInt("API_PRODUCT_ID")));
+
+            }
+        } catch (SQLException e) {
+            handleException("Error while locating API Product: " + apiProductId + " from the database", e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+        return apiProduct;
+    }
+
+
+    private Set<String> getAPIProductVisibleRoles(Connection connection, int productId) throws APIManagementException {
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Set<String> visibleRoles = new LinkedHashSet<String>();
+
+        try {
+            prepStmt = connection.prepareStatement(SQLConstants.GET_API_PRODUCT_ROLES_SQL);
+            prepStmt.setInt(1, productId);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                String role = rs.getString("ROLE_NAME");
+                visibleRoles.add(role);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while locating API Product Id: " + productId + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+        }
+
+        return visibleRoles;
     }
 
     /**

@@ -4662,10 +4662,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (value != null) {
                         matcher = pattern.matcher(value);
                         if (matcher.find()) {
-                            APIProduct resultAPIProduct = APIUtil.getAPIProduct(artifact, registry);
+                            /*APIProduct resultAPIProduct = APIUtil.getAPIProduct(artifact, registry);
                             if (resultAPIProduct != null) {
                                 apiProductList.add(resultAPIProduct);
-                            }
+                            }*/
                         }
                     }
                 }
@@ -4709,7 +4709,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiProductArtifactId = resource.getUUID();
                 if (apiProductArtifactId != null) {
                     GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiProductArtifactId);
-                    apiProductSortedList.add(APIUtil.getAPIProduct(apiProductArtifact, registry));
+                    //apiProductSortedList.add(APIUtil.getAPIProduct(apiProductArtifact, registry));
                 } else {
                     throw new GovernanceException("artifact id is null of " + apiProductPath);
                 }
@@ -4724,6 +4724,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    /**
+     * Get specific APIProduct
+     *
+     * @param apiProductId APIProduct
+     * @throws APIManagementException if failed to add APIProduct
+     */
+    @Override
+    public APIProduct getAPIProduct(APIProductIdentifier apiProductId) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPIProduct(apiProductId, null);
+    }
 
     /**
      * Adds a new APIProduct to the Store
@@ -4735,8 +4745,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPIProduct(APIProduct apiProduct) throws APIManagementException {
         try {
-            createAPIProduct(apiProduct);
-
             if (log.isDebugEnabled()) {
                 log.debug("API details successfully added to the registry. API Name: " +
                         apiProduct.getId().getApiProductName() + ", API Version : " + apiProduct.getId().getVersion());
@@ -4773,73 +4781,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    /**
-     * Create an Api
-     *
-     * @param apiProduct API
-     * @throws APIManagementException if failed to create API
-     */
-    private void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
 
-        boolean transactionCommitted = false;
-        try {
-            registry.beginTransaction();
-            GenericArtifact genericArtifact =
-                    artifactManager.newGovernanceArtifact(new QName(apiProduct.getId().getApiProductName()));
-            GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
-            artifactManager.addGenericArtifact(artifact);
-            //Attach the API lifecycle
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
-            //provider ------provides----> API
-            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
-            Set<String> tagSet = apiProduct.getTags();
-            if (tagSet != null) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-
-            //write Status to a separate property. This is done to support querying APIProducts using custom query (SQL)
-            //to gain performance
-            String apiStatus = apiProduct.getStatus().getStatus();
-            saveAPIStatus(artifactPath, apiStatus);
-            String visibleRolesList = apiProduct.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(),
-                    visibleRoles, artifactPath);
-            registry.commitTransaction();
-            transactionCommitted = true;
-
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Name: " + apiProduct.getId().getApiProductName() + ", APIProduct Version "
-                                + apiProduct.getId().getVersion() + " created";
-                log.debug(logMessage);
-            }
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error here would mask the original exception
-                log.error("Error while rolling back the transaction for API: " +
-                        apiProduct.getId().getApiProductName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error while rolling back the transaction for API: " +
-                                                        apiProduct.getId().getApiProductName(), ex);
-            }
-        }
-    }
 }

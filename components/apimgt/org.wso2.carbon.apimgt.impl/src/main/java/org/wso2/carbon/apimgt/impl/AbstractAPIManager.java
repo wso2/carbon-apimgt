@@ -1495,54 +1495,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
-        String apiProductPath = APIUtil.getAPIProductPath(identifier);
-        Registry registry;
-        try {
-            String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(apiTenantDomain);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(tenantId);
-            }
 
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
-                        MultitenantUtils.getTenantAwareUsername(
-                                APIUtil.replaceEmailDomainBack(identifier.getProviderName())), tenantId);
-            } else {
-                registry = this.registry;
-            }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_PRODUCT_KEY);
-            Resource apiResource = registry.get(apiProductPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiProductPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            APIProduct apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
-
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(apiProduct.getVisibility())) { //global api
-                return apiProduct;
-            }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view APIProduct : "
-                        + apiProduct.getId().getApiProductName());
-            }
-
-            return apiProduct;
-
-        } catch (RegistryException e) {
-            handleException("Failed to get API from : " + apiProductPath, e);
-            return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get API from : " + apiProductPath, e);
-            return null;
-        }
-    }
 
 }
