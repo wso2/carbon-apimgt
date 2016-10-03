@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -19,6 +21,9 @@ import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.axiom.om.OMElement;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 
@@ -26,7 +31,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
     private APIGatewayAdminStub apiGatewayAdminStub;
     private Environment environment;
-
+    private static Log log = LogFactory.getLog(APIGatewayAdminClient.class);
 
     public APIGatewayAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
         //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
@@ -477,6 +482,49 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             apiGatewayAdminStub.undeployPolicy(fileNames);
         } catch (RemoteException e) {
             throw new AxisFault("Error occured in removing policy file ", e);
+        }
+    }
+
+    public void deployWSApi(String content, String fileName) throws AxisFault {
+        File file = new File(APIConstants.SEQUENCE_FILE_FOLDER);
+        //if directory doesn't exist, make one
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        File writeFile = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileName + APIConstants.XML_EXTENSION);  //file folder+/
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(writeFile);
+            //if file doesn't exit make one
+            if (!writeFile.exists()) {
+                writeFile.createNewFile();
+            }
+            byte[] contentInBytes = content.getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+        } catch (IOException e) {
+
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+
+            }
+        }
+    }
+
+    public void undeployWSApi(String[] fileNames) {
+
+        for (int i = 0; i < fileNames.length; i++) {
+            File file = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
+            boolean deleted = file.delete();
+            if (deleted) {
+                log.info("File : " + fileNames[i] + " is deleted");
+            } else {
+                log.error("Error occurred in deleting file: " + fileNames[i]);
+            }
         }
     }
 }
