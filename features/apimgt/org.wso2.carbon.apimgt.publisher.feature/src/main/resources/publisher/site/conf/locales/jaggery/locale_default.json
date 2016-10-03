@@ -192,6 +192,7 @@
     "Error occurred while updating API": "Error occurred while updating API",
     "Execute fault sequence": "Execute fault sequence",
     "Existing API Definition will be overwritten by the imported definition.": "Existing API Definition will be overwritten by the imported definition.",
+    "Download Source": "Download Source",
     "External API Stores": "External API Stores",
     "Failed to Publish Environments": "Failed to Publish Environments",
     "Failed to UnPublish Environments": "Failed to UnPublish Environments",
