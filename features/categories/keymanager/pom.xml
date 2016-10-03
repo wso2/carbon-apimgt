@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>feature-categories</artifactId>
-        <version>6.0.5-SNAPSHOT</version>
+        <version>6.0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -61,17 +61,9 @@
                                 <importFeatureDef>org.wso2.carbon.idp.mgt:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.application.authentication.framework.server:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.logging.mgt:${carbon.commons.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.module.mgt.server:${carbon.deployment.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.security.mgt:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.server:${carbon.deployment.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.system.statistics:${carbon.commons.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.client:${carbon.identity-user-ws.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.webapp.mgt.server:${carbon.deployment.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.contentsearch:${carbon.registry.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.extensions:${carbon.governance.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.analytics.common.la.apim:${analytics.shared.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.analytics.common.data.agents.log4j:${analytics.shared.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

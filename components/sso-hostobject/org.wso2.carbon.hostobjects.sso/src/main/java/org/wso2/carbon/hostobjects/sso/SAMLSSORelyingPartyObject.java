@@ -31,19 +31,31 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.encryption.EncryptedKey;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.SSOHostObjectDataHolder;
 import org.wso2.carbon.hostobjects.sso.internal.SessionInfo;
 import org.wso2.carbon.hostobjects.sso.internal.builder.AuthReqBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.builder.LogoutRequestBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.util.Util;
+import org.wso2.carbon.hostobjects.sso.internal.util.X509CredentialImpl;
 import org.wso2.carbon.utils.xml.StringUtils;
 
+import javax.crypto.SecretKey;
 import javax.script.ScriptException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -535,7 +547,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                                 Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 1 || !(args[0] instanceof String)) {
+        if (argLength != 2 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The SAML response is missing.");
         }
 
@@ -551,11 +563,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             }
         }
 
+        String isAssertionEncryptionEnabled = (String) args[1];
+
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
+
             // Check for duplicate saml:Response
             NodeList list = samlResponse.getDOM().getElementsByTagNameNS(SAMLConstants.SAML20P_NS, "Response");
             if (list.getLength() > 0) {
@@ -569,13 +584,46 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 log.error("Invalid schema for the SAML2 response. Invalid number of assertions  detected.");
                 return false;
             }
-            List<Assertion> assertions = samlResponse.getAssertions();
-            //Validate assertion validity period
-            boolean isTimeValid = relyingPartyObject.validateAssertionValidityPeriod(samlResponse.getAssertions().get(0));
-            if (isTimeValid) {
-                // Validate the audience restrictions
-                String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
-                return relyingPartyObject.validateAudienceRestriction(assertions.get(0), issuerId);
+            Assertion assertion = null;
+
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion = null;
+                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                    encryptedAssertion = encryptedAssertions.get(0);
+                    try {
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Assertion decryption failure : ", e);
+                        }
+                        throw new Exception("Unable to decrypt the SAML2 Assertion");
+                    }
+                }
+                //Validate assertion validity period
+                boolean isTimeValid = relyingPartyObject.validateAssertionValidityPeriod(assertion);
+                if (isTimeValid) {
+                    // Validate the audience restrictions
+                    String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
+                    return relyingPartyObject.validateAudienceRestriction(assertion, issuerId);
+                }
+
+            } else {
+
+                List<Assertion> assertions = samlResponse.getAssertions();
+                //Validate assertion validity period
+                boolean isTimeValid = relyingPartyObject
+                        .validateAssertionValidityPeriod(samlResponse.getAssertions().get(0));
+                if (isTimeValid) {
+                    // Validate the audience restrictions
+                    String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
+                    return relyingPartyObject.validateAudienceRestriction(assertions.get(0), issuerId);
+                }
             }
 
         }
@@ -597,7 +645,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 1 || !(args[0] instanceof String)) {
+        if (argLength != 2 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The SAML response is missing.");
         }
 
@@ -616,24 +664,60 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
         String username = null;
+        String isAssertionEncryptionEnabled = (String) args[1];
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-            List<Assertion> assertions = samlResponse.getAssertions();
 
-            // extract the username
-            if (assertions != null && assertions.size() == 1) {
-                Subject subject = assertions.get(0).getSubject();
-                if (subject != null) {
-                    if (subject.getNameID() != null) {
-                        username = subject.getNameID().getValue();
-                        if (log.isDebugEnabled()) {
-                            log.debug("Name of authenticated user from SAML response " + username);
+            Assertion assertion = null;
+
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion = null;
+                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                    encryptedAssertion = encryptedAssertions.get(0);
+                    try {
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                        Subject subject = assertion.getSubject();
+                        if (subject != null) {
+                            if (subject.getNameID() != null) {
+                                username = subject.getNameID().getValue();
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Name of authenticated user from SAML response " + username);
+                                }
+                            }
                         }
+
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Assertion decryption failure : ", e);
+                        }
+                        throw new Exception("Unable to decrypt the SAML2 Assertion");
                     }
                 }
+
             } else {
-                log.error("SAML Response contains invalid number of assertions.");
+                List<Assertion> assertions = samlResponse.getAssertions();
+
+                // extract the username
+                if (assertions != null && assertions.size() == 1) {
+                    Subject subject = assertions.get(0).getSubject();
+                    if (subject != null) {
+                        if (subject.getNameID() != null) {
+                            username = subject.getNameID().getValue();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Name of authenticated user from SAML response " + username);
+                            }
+                        }
+                    }
+                } else {
+                    log.error("SAML Response contains invalid number of assertions.");
+                }
             }
 
         }
@@ -819,9 +903,11 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
         String sessionId = (String) args[0];
         String sessionIndex = relyingPartyObject.getSessionIndex(sessionId);
-        relyingPartyObject.handleLogout(sessionIndex);
-
-
+        if (sessionIndex != null) {
+            relyingPartyObject.handleLogout(sessionIndex);
+        } else {
+            relyingPartyObject.handleLogoutBySessionId(sessionId);
+        }
     }
 
     /**
@@ -838,7 +924,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 3 || !(args[0] instanceof String) ||
+        if (argLength != 4 || !(args[0] instanceof String) ||
                 !(args[1] instanceof String) || !(args[2] instanceof SessionHostObject)) {
             throw new ScriptException("Invalid argument. Current session id, SAML response and Session are missing.");
         }
@@ -861,27 +947,51 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String username = null;
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-            List<Assertion> assertions = samlResponse.getAssertions();
+            String isAssertionEncryptionEnabled = (String) args[3];
+            Assertion assertion = null;
 
-            // extract the session index
-            if (assertions != null && assertions.size() == 1) {
-                Assertion assertion = assertions.get(0);
-                List<AuthnStatement> authenticationStatements = assertion.getAuthnStatements();
-                AuthnStatement authnStatement = authenticationStatements.get(0);
-                if (authnStatement != null) {
-                    if (authnStatement.getSessionIndex() != null) {
-                        sessionIndex = authnStatement.getSessionIndex();
-                    }
-                }
-                Subject subject = assertion.getSubject();
-                if (subject != null) {
-                    if (subject.getNameID() != null) {
-                        username = subject.getNameID().getValue();
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion = null;
+                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                    encryptedAssertion = encryptedAssertions.get(0);
+                    try {
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Assertion decryption failure : ", e);
+                        }
+                        throw new Exception("Unable to decrypt the SAML2 Assertion");
                     }
                 }
 
             } else {
-                throw new ScriptException("SAML Response contains invalid number of assertions.");
+                List<Assertion> assertions = samlResponse.getAssertions();
+                // extract the session index
+                if (assertions != null && assertions.size() == 1) {
+                    assertion = assertions.get(0);
+                } else {
+                    throw new ScriptException("SAML Response contains invalid number of assertions.");
+                }
+
+            }
+            List<AuthnStatement> authenticationStatements = assertion.getAuthnStatements();
+            AuthnStatement authnStatement = authenticationStatements.get(0);
+            if (authnStatement != null) {
+                if (authnStatement.getSessionIndex() != null) {
+                    sessionIndex = authnStatement.getSessionIndex();
+                }
+            }
+            Subject subject = assertion.getSubject();
+            if (subject != null) {
+                if (subject.getNameID() != null) {
+                    username = subject.getNameID().getValue();
+                }
             }
 
         }
@@ -901,12 +1011,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             log.debug("Encoded SAML token that is set on session info is " + args[1]);
         }
         sessionInfo.setSamlToken((String) args[1]);//We expect an encoded SamlToken here.
+        SessionHostObject sho = (SessionHostObject) args[2];
+        sessionInfo.setSessionHostObject(sho);
         relyingPartyObject.addSessionInfo(sessionInfo);
         //relyingPartyObject.addSessionInfo(sessionIndex, SAMLSSORelyingPartyObject.sho);
 
-        SessionHostObject sho = (SessionHostObject) args[2];
-        relyingPartyObject.addSessionInfo(sessionIndex, sho);
-
+        if (sessionIndex != null) {
+            relyingPartyObject.addSessionToSessionIndexMap(sessionIndex, sho);
+        }
     }
 
     /**
@@ -1078,21 +1190,26 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     }
 
     private boolean isSessionIdExists(String sessionId) throws Exception {
-        Iterator<Map.Entry<String, Set<SessionHostObject>>> iterator = sessionIndexMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<SessionHostObject>> entry = iterator.next();
+        for (Map.Entry<String, Set<SessionHostObject>> entry : sessionIndexMap.entrySet()) {
             Set<SessionHostObject> sessions = new HashSet<SessionHostObject>(entry.getValue());
             for (SessionHostObject session : sessions) {
                 Object[] args = new Object[0];
-                if (session != null && sessionId.equals(SessionHostObject.jsFunction_getId(null, session, args, null))) {
+                if (session != null && sessionId
+                        .equals(SessionHostObject.jsFunction_getId(null, session, args, null))) {
                     if (log.isDebugEnabled()) {
                         log.debug("Session Id exists:" + SessionHostObject.jsFunction_getId(null, session, args, null));
                     }
                     return true;
                 }
             }
-            //}
         }
+        log.debug("Session Id does not exist in sessionIndexMap. Now searching in sessionIdMap.");
+        if (getSessionInfo(sessionId) != null) {
+            log.debug("Session Id exists in sessionIdMap : " + sessionId);
+            return true;
+        }
+
+        log.debug("Session Id does not exist in sessionIdMap : " + sessionId);
         return false;
     }
 
@@ -1140,17 +1257,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
-    /**
-     * Add current browser session with session index.
-     */
-    private void addSessionInfo(String sessionIndex, Set<SessionHostObject> sho) {
-        if (log.isDebugEnabled()) {
-            log.debug("Added session index:" + sessionIndex);
-        }
-        sessionIndexMap.put(sessionIndex, sho);
-    }
-
-    private void addSessionInfo(String sessionIndex, SessionHostObject sho) {
+    private void addSessionToSessionIndexMap(String sessionIndex, SessionHostObject sho) {
         if (log.isDebugEnabled()) {
             log.debug("Added session index:" + sessionIndex);
         }
@@ -1162,7 +1269,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sessionSet.add(sho);
             sessionIndexMap.put(sessionIndex, sessionSet);
         }
-
     }
 
     /**
@@ -1276,6 +1382,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
+    public void handleLogoutBySessionId(String sessionId) {
+        clearSessionDataFromSessionId(sessionId);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session id:" + sessionId + "in handle logout method");
+        }
+    }
+
     public void handleClusterLogout(String sessionIndex) {
         if (log.isDebugEnabled()) {
             log.debug("session index map value:" + sessionIndexMap);
@@ -1331,6 +1445,31 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
+    private void clearSessionDataFromSessionId(String sessionIdToClear) {
+        SessionInfo sessionInfo = getSessionInfo(sessionIdToClear);
+        if (sessionInfo != null) {
+            SessionHostObject sessionHostObject = sessionInfo.getSessionHostObject();
+            if (sessionHostObject != null) {
+                try {
+                    Object[] args = new Object[0];
+                    SessionHostObject.jsFunction_invalidate(null, sessionHostObject, args, null);
+                } catch (Exception ex) {
+                    //catches generic exception since we do not need to stop the
+                    // process due to invalidating one single session
+                    if (ex.getMessage().contains("Session already invalidated")) { // can be ignored
+                        log.info(ex.getMessage());
+                    } else {
+                        //log the error and continues since this does not brake the flow.
+                        log.error("Error while invalidating the session " + sessionIdToClear, ex);
+                    }
+                }
+            }
+        }
+        ssho.invalidateSessionBySessionId(sessionIdToClear);
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIdToClear + "in handle logout method");
+        }
+    }
 
     public void sendSessionInvalidationClusterMessage(String sessionIndex) {
 
@@ -1452,7 +1591,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                                 Function funObj) throws Exception {
 
         int argLength = args.length;
-        if (argLength != 1 || !(args[0] instanceof String)) {
+        if (argLength != 2 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. SAML response is missing.");
         }
 
@@ -1461,54 +1600,81 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         XMLObject samlObject = Util.unmarshall(decodedString);
         String tenantDomain = Util.getDomainName(samlObject);
 
+        String isAssertionEncryptionEnabled = (String) args[1];
+
         int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-            List<Assertion> assertions = samlResponse.getAssertions();
-            boolean sigValid = false;
-            // validate the assertion signature
-            if (assertions != null && assertions.size() == 1) {
-                Assertion assertion = assertions.get(0);
-                Signature assertionSignature = assertion.getSignature();
-                try {
-                    //Try and validate the signature using the super tenant key store.
 
-                    if (assertionSignature == null) {
-                        log.error("SAMLAssertion signing is enabled, but signature element not found in " +
-                                "SAML Assertion element.");
+            Assertion assertion = null;
 
-                        return false;
-                    }
-                    sigValid = Util.validateSignature(assertionSignature,
-                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
-                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                            MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-
-                } catch (SignatureVerificationFailure e) {
-                    //do nothing at this point since we want to verify signature using the tenant key-store as well.
-                    log.error("Signature verification failed with Super-Tenant Key Store", e);
-                    return false;
-                }
-                //If not success, try and validate the signature using tenant key store.
-                if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion = null;
+                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                    encryptedAssertion = encryptedAssertions.get(0);
                     try {
-                        sigValid = Util.validateSignature(assertionSignature,
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                                 relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                                 relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                tenantId, tenantDomain);
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
-                    } catch (SignatureVerificationFailure e) {
-                        log.error("Signature Verification Failed using super tenant and tenant key stores", e);
-                        return false;
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Assertion decryption failure : ", e);
+                        }
+                        throw new Exception("Unable to decrypt the SAML2 Assertion");
                     }
                 }
             } else {
-                throw new ScriptException("SAML Response contains invalid number of assertions.");
+                List<Assertion> assertions = samlResponse.getAssertions();
+                if (assertions != null && assertions.size() == 1) {
+                    assertion = assertions.get(0);
+                } else {
+                    throw new ScriptException("SAML Response contains invalid number of assertions.");
+                }
             }
+
+            boolean sigValid = false;
+            // validate the assertion signature
+            Signature assertionSignature = assertion.getSignature();
+            try {
+                //Try and validate the signature using the super tenant key store.
+
+                if (assertionSignature == null) {
+                    log.error("SAMLAssertion signing is enabled, but signature element not found in "
+                            + "SAML Assertion element.");
+
+                    return false;
+                }
+                sigValid = Util.validateSignature(assertionSignature,
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS), MultitenantConstants.SUPER_TENANT_ID,
+                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+            } catch (SignatureVerificationFailure e) {
+                //do nothing at this point since we want to verify signature using the tenant key-store as well.
+                log.error("Signature verification failed with Super-Tenant Key Store", e);
+                return false;
+            }//
+            //If not success, try and validate the signature using tenant key store.
+            if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                try {
+                    sigValid = Util.validateSignature(assertionSignature,
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS), tenantId, tenantDomain);
+
+                } catch (SignatureVerificationFailure e) {
+                    log.error("Signature Verification Failed using super tenant and tenant key stores", e);
+                    return false;
+                }
+            }
+
             return sigValid;
         }
         if (log.isWarnEnabled()) {

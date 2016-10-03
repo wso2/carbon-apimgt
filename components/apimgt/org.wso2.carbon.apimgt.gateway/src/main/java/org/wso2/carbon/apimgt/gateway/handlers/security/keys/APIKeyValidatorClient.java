@@ -190,27 +190,32 @@ public class APIKeyValidatorClient {
             org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO conditionGroup = new org.wso2.carbon.apimgt.api.dto
                     .ConditionGroupDTO();
             ConditionGroupDTO xsdConditionGroup = xsdConditionGroups[groupCounter];
-            conditionGroup.setConditionGroupId(xsdConditionGroup.getConditionGroupId());
-            ConditionDTO[] xsdConditions = xsdConditionGroup.getConditions();
 
-            if(xsdConditions != null) {
-                org.wso2.carbon.apimgt.api.dto.ConditionDTO[] conditions = new org.wso2.carbon.apimgt.api.dto
-                        .ConditionDTO[xsdConditions.length];
-                for (short conditionCounter = 0; conditionCounter < xsdConditions.length; conditionCounter++) {
+            // Have to check nullity explicitly here because, in certain cases, length becomes 1 even when there are
+            // no elements in the array.
+            if(xsdConditionGroup != null) {
+                conditionGroup.setConditionGroupId(xsdConditionGroup.getConditionGroupId());
+                ConditionDTO[] xsdConditions = xsdConditionGroup.getConditions();
 
-                    ConditionDTO xsdCondition = xsdConditions[conditionCounter];
-                    if (xsdCondition != null) {
-                        org.wso2.carbon.apimgt.api.dto.ConditionDTO condition = new org.wso2.carbon.apimgt.api.dto
-                                .ConditionDTO();
-                        condition.setConditionName(xsdCondition.getConditionName());
-                        condition.setConditionType(xsdCondition.getConditionType());
-                        condition.setConditionValue(xsdCondition.getConditionValue());
-                        conditions[conditionCounter] = condition;
+                if (xsdConditions != null) {
+                    org.wso2.carbon.apimgt.api.dto.ConditionDTO[] conditions = new org.wso2.carbon.apimgt.api.dto
+                            .ConditionDTO[xsdConditions.length];
+                    for (short conditionCounter = 0; conditionCounter < xsdConditions.length; conditionCounter++) {
+
+                        ConditionDTO xsdCondition = xsdConditions[conditionCounter];
+                        if (xsdCondition != null) {
+                            org.wso2.carbon.apimgt.api.dto.ConditionDTO condition = new org.wso2.carbon.apimgt.api.dto
+                                    .ConditionDTO();
+                            condition.setConditionName(xsdCondition.getConditionName());
+                            condition.setConditionType(xsdCondition.getConditionType());
+                            condition.setConditionValue(xsdCondition.getConditionValue());
+                            conditions[conditionCounter] = condition;
+                        }
                     }
+                    conditionGroup.setConditions(conditions);
                 }
-                conditionGroup.setConditions(conditions);
+                conditionGroups[groupCounter] = conditionGroup;
             }
-            conditionGroups[groupCounter] = conditionGroup;
         }
         template.setConditionGroups(conditionGroups);
         template.setThrottlingConditions((Arrays.asList(dto.getThrottlingConditions())));

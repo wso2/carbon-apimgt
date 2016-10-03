@@ -23,15 +23,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.throttle.core.AccessInformation;
-import org.wso2.carbon.throttle.core.AccessRateController;
-import org.wso2.carbon.throttle.core.ConcurrentAccessController;
-import org.wso2.carbon.throttle.core.RoleBasedAccessRateController;
-import org.wso2.carbon.throttle.core.Throttle;
-import org.wso2.carbon.throttle.core.ThrottleConfiguration;
-import org.wso2.carbon.throttle.core.ThrottleConstants;
-import org.wso2.carbon.throttle.core.ThrottleContext;
-import org.wso2.carbon.throttle.core.ThrottleException;
+import org.apache.synapse.commons.throttle.core.AccessInformation;
+import org.apache.synapse.commons.throttle.core.AccessRateController;
+import org.apache.synapse.commons.throttle.core.ConcurrentAccessController;
+import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
+import org.apache.synapse.commons.throttle.core.Throttle;
+import org.apache.synapse.commons.throttle.core.ThrottleConfiguration;
+import org.apache.synapse.commons.throttle.core.ThrottleConstants;
+import org.apache.synapse.commons.throttle.core.ThrottleContext;
+import org.apache.synapse.commons.throttle.core.ThrottleException;
 
 public class ThrottleManager {
 	

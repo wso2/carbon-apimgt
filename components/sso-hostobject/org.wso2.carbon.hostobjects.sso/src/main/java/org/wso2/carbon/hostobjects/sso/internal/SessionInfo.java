@@ -16,11 +16,14 @@
 
 package org.wso2.carbon.hostobjects.sso.internal;
 
+import org.jaggeryjs.hostobjects.web.SessionHostObject;
+
 public class SessionInfo {
     private String sessionId;
     private String loggedInUser;
     private String sessionIndex;
     private String samlToken;
+    private SessionHostObject sessionHostObject;
 
     public SessionInfo(String sessionId) {
         this.sessionId = sessionId;
@@ -56,5 +59,13 @@ public class SessionInfo {
 
     public void setSamlToken(String samlToken) {
         this.samlToken = samlToken;
+    }
+
+    public void setSessionHostObject(SessionHostObject sessionHostObject) {
+        this.sessionHostObject = sessionHostObject;
+    }
+
+    public SessionHostObject getSessionHostObject() {
+        return sessionHostObject;
     }
 }
