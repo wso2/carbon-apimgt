@@ -549,7 +549,7 @@
             <!-- Configure supported languages/Frameworks as comma separated values,
              Supported Languages/Frameworks : android, java, scala, csharp, cpp, dart, flash, go, groovy, javascript, jmeter,
              nodejs, perl, php, python, ruby, swift, clojure, aspNet5, asyncScala, spring, csharpDotNet2, haskell-->
-            <SupportedLanguages>java,android,ruby,php</SupportedLanguages>
+            <SupportedLanguages>java,android</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
 
