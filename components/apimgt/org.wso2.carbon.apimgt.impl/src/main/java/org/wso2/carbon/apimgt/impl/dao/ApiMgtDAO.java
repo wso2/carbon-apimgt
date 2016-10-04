@@ -5441,16 +5441,30 @@ public class ApiMgtDAO {
             prepStmt.setString(2, productId.getApiProductName());
             prepStmt.setString(3, productId.getVersion());
             prepStmt.setString(4, apiProduct.getDescription());
-            prepStmt.setString(5, String.valueOf(apiProduct.getAvailableTiers()));
+
+            Set<Tier> availableTiers = apiProduct.getAvailableTiers();
+
+            Iterator it = availableTiers.iterator();
+
+            StringBuilder tierString = new StringBuilder("");
+            while (it.hasNext()) {
+                if (!tierString.toString().equals("")) {
+                    tierString.append(',');
+                }
+                tierString.append(((Tier) it.next()).getName());
+            }
+
+            prepStmt.setString(5, tierString.toString());
             prepStmt.setString(6, apiProduct.getCreatedUser());
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, apiProduct.getUpdatedUser());
             prepStmt.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(10, apiProduct.getVisibility());
-            prepStmt.setString(11, apiProduct.getBusinessOwner());
-            prepStmt.setString(12, apiProduct.getBusinessOwnerEmail());
-            prepStmt.setString(13, apiProduct.getSubscriptionAvailability());
-            prepStmt.setString(14, UUID.randomUUID().toString());
+            prepStmt.setString(11, APIProductStatus.CREATED.toString());
+            prepStmt.setString(12, apiProduct.getBusinessOwner());
+            prepStmt.setString(13, apiProduct.getBusinessOwnerEmail());
+            prepStmt.setString(14, apiProduct.getSubscriptionAvailability());
+            prepStmt.setString(15, UUID.randomUUID().toString());
 
             prepStmt.execute();
             connection.commit();
@@ -6376,6 +6390,74 @@ public class ApiMgtDAO {
             }
         }
         return id;
+    }
+
+    public List<APIProduct> getAPIProducts(String searchTerm, String searchType, String providerId,
+                                                                Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<APIProduct> apiProductList = new ArrayList<APIProduct>();
+
+        try {
+            if (connection == null) {
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+            String whereColumn = "API_PRODUCT_NAME";
+
+            if ("Name".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_NAME";
+            } else if ("Version".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_VERSION";
+            } else if ("Description".equalsIgnoreCase(searchType)) {
+                whereColumn = "DESCRIPTION";
+            } else if ("Provider".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_PROVIDER";
+                searchTerm = searchTerm.replaceAll("@", "-AT-");
+            } else if ("Status".equalsIgnoreCase(searchType)) {
+                whereColumn = "LIFECYCLE_STATE";
+            }
+
+            String searchQuery = SQLConstants.GET_MIN_API_PRODUCT_PRE_SQL + whereColumn + " like '%" +
+                                        searchTerm +  "%'";
+
+            if (providerId != null) {
+                searchQuery = searchQuery + " AND API_PRODUCT_PROVIDER = '" + providerId + "'";
+            }
+
+            prepStmt = connection.prepareStatement(searchQuery);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String provider = rs.getString("API_PRODUCT_PROVIDER");
+                String name =  rs.getString("API_PRODUCT_NAME");
+                String version = rs.getString("API_PRODUCT_VERSION");
+
+                APIProductIdentifier productId = new APIProductIdentifier(provider, name, version);
+                APIProduct apiProduct = new APIProduct(productId);
+                apiProduct.setDescription(rs.getString("DESCRIPTION"));
+                apiProduct.setUUID(rs.getString("UUID"));
+
+                String status = rs.getString("LIFECYCLE_STATE");
+                apiProduct.setStatus(APIUtil.getApiProductStatus(status));
+
+                apiProductList.add(apiProduct);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while locating API Product for Search Type: " + searchType +
+                    " and Search Term: " + searchTerm, e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+
+        return apiProductList;
     }
 
     public APIProduct getAPIProduct(APIProductIdentifier apiProductId, Connection connection) throws APIManagementException {
