@@ -1,17 +1,19 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
@@ -35,11 +37,8 @@ public class AuthUtil {
     private static Logger log = LoggerFactory.getLogger(AuthUtil.class);
 
     public AuthUtil(){
-
         initParams();
-
         this.getGatewayKeyCache();
-
     }
 
     private boolean removeOAuthHeadersFromOutMessage=true;
@@ -48,13 +47,15 @@ public class AuthUtil {
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
             String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            if(cacheEnabled != null)
-            gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
+            if (cacheEnabled != null) {
+                gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
+            }
             String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
-            if (value != null)
+            if (value != null) {
                 removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+            }
         } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+            log.error("Did not find valid API Validation Information cache configuration. Use default configuration" + e, e);
         }
 
 
@@ -65,11 +66,15 @@ public class AuthUtil {
     }
 
 
-    //*************************************CACHING PART******************************************
-
     private  static boolean isGatewayKeyCacheInitialized = false;
     private boolean gatewayTokenCacheEnabled = false;
 
+	/**
+	 * validate access token via cache
+     * @param apiKey
+     * @param cacheKey
+     * @return APIKeyValidationInfoDTO
+     */
     public APIKeyValidationInfoDTO validateCache(String apiKey, String cacheKey){
 
             //Get the access token from the first level cache.
@@ -81,11 +86,9 @@ public class AuthUtil {
 
                 if (info != null) {
                     if (APIUtil.isAccessTokenExpired(info)) {
-                        log.info("Invalid OAuth Token : Access Token " + apiKey + " expired.");
                         info.setAuthorized(false);
                         // in cache, if token is expired  remove cache entry.
                         getGatewayKeyCache().remove(cacheKey);
-
                         //Remove from the first level token cache as well.
                         getGatewayTokenCache().remove(apiKey);
                     }
@@ -96,6 +99,13 @@ public class AuthUtil {
         return null;
     }
 
+	/**
+     * write to cache
+     *
+     * @param info
+     * @param apiKey
+     * @param cacheKey
+     */
     public void putCache(APIKeyValidationInfoDTO info, String apiKey, String cacheKey){
 
             //Get the tenant domain of the API that is being invoked.
@@ -144,9 +154,9 @@ public class AuthUtil {
         try {
             javax.cache.CacheManager manager = Caching.getCacheManager(
                     APIConstants.API_MANAGER_CACHE_MANAGER);
-        cache = manager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+            cache = manager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
         } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e, e);
         }
         return cache;
 
@@ -155,15 +165,19 @@ public class AuthUtil {
         return gatewayTokenCacheEnabled;
     }
 
-    public boolean service(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,String applicationLevelThrottleKey){
+	/**
+     * check if the request is throttled
+     * @param resourceLevelThrottleKey
+     * @param subscriptionLevelThrottleKey
+     * @param applicationLevelThrottleKey
+     * @return true if request is throttled out
+     */
+    public boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,String applicationLevelThrottleKey){
         boolean isApiLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(resourceLevelThrottleKey);
-//        ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
         boolean isSubscriptionLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                 isThrottled(subscriptionLevelThrottleKey);
-//        System.out.println(isSubscriptionLevelThrottled);
         boolean isApplicationLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                 isThrottled(applicationLevelThrottleKey);
-        System.out.println(isApiLevelThrottled +"::"+ isApplicationLevelThrottled +"::"+ isSubscriptionLevelThrottled);
         return(isApiLevelThrottled||isApplicationLevelThrottled||isSubscriptionLevelThrottled);
     }
 }

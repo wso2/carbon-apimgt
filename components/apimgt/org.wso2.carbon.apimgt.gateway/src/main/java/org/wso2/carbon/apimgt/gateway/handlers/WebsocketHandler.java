@@ -56,7 +56,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-//import org.wso2.carbon.inbound.endpoint.osgi.service.ServiceReferenceHolder;
 
 public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	private static String tenantDomain;
@@ -64,14 +63,12 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	private static volatile ThrottleDataPublisher throttleDataPublisher = null;
 	private static Logger log = LoggerFactory.getLogger(WebsocketHandler.class);
 	private static ServiceReferenceHolder serviceReferenceHolder;
-	API api;
+	private API api;
 	private String uri;
 	private APIConsumer apiConsumer;
-	private Subscriber apiSubscriber;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 
 	public WebsocketHandler() {
-		System.out.println("executed hand");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -86,12 +83,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			if (tenantDomain.equals(req.getUri())) {
 				tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 			}
-
 			if (oauthHandler(req)) {
-				System.out.println("http new");
-				System.out
-						.println(((FullHttpRequest) msg).headers().get(HttpHeaders.AUTHORIZATION));
-				System.out.println(((FullHttpRequest) msg).getUri());
 				PrivilegedCarbonContext.endTenantFlow();
 				ctx.fireChannelRead(msg);
 			} else
@@ -101,24 +93,31 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			PrivilegedCarbonContext.startTenantFlow();
 			PrivilegedCarbonContext.getThreadLocalCarbonContext()
 			                       .setTenantDomain(tenantDomain, true);
-			System.out.println("web new");
-			WebSocketFrame mess = (WebSocketFrame) msg;
-			TextWebSocketFrame tess = (TextWebSocketFrame) mess;
-			System.out.println(tess.text());
-			if (throttle2(ctx)) {
+			if (doThrottle(ctx)) {
 				ctx.fireChannelRead(msg);
 			}
 		}
 	}
 
+	/**
+	 * Authenticate request
+	 *
+	 * @param req Full Http Request
+	 * @return true if the access token is valid
+	 * @throws APIManagementException
+	 */
 	private boolean oauthHandler(FullHttpRequest req) throws APIManagementException {
+
 		PrivilegedCarbonContext.startTenantFlow();
 		PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 		api = getAPI();
 		AuthUtil util = new AuthUtil();
-
 		AccessTokenInfo tokenInfo = null;
 		APIKeyValidationInfoDTO info;
+		if (!req.headers().contains(HttpHeaders.AUTHORIZATION)){
+			log.error("No Authorization Header Present");
+			return false;
+		}
 		String[] auth = req.headers().get(HttpHeaders.AUTHORIZATION).split(" ");
 		if (auth[0].equals(APIConstants.CONSUMER_KEY_SEGMENT)) {
 			String apikey = auth[1];
@@ -143,8 +142,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 					return false;
 				}
 			} catch (APIManagementException e) {
-
-				e.printStackTrace();
+				log.error("Error in obtaining token info: " + e, e);
 			}
 			if (util.isGatewayTokenCacheEnabled()) {
 				info = new APIKeyValidationInfoDTO();
@@ -155,23 +153,25 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 				info.setValidityPeriod(tokenInfo.getValidityPeriod());
 				util.putCache(info, apikey, apikey);
 			}
-			//apiSubscriber = apiConsumer.getSubscriberById(apikey);
-
 			if (tokenInfo.isTokenValid()) {
-
 				return validateSubscriptionDetails(api.getContext(), api.getId().getVersion(),
 				                                   tokenInfo.getConsumerKey());
-
 			} else {
 				return false;
 			}
-
 		} else {
 			return false;
 		}
 	}
 
-	private boolean throttle2(ChannelHandlerContext ctx) throws APIManagementException {
+	/**
+	 * Checks if the request is throttled
+	 *
+	 * @param ctx ChannelHandlerContext
+	 * @return false if throttled
+	 * @throws APIManagementException
+	 */
+	private boolean doThrottle(ChannelHandlerContext ctx) throws APIManagementException {
 
 		AuthUtil util = new AuthUtil();
 		if (throttleDataPublisher == null) {
@@ -203,9 +203,9 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		if (remoteIP != null && remoteIP.length() > 0) {
 			jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
 		}
-		boolean isTrottled = util.service(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+		boolean isThrottled = util.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
 		                                  applicationLevelThrottleKey);
-		if (isTrottled) {
+		if (isThrottled) {
 			ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 			return false;
 		}
@@ -224,8 +224,15 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		return true;
 	}
 
-	//---------------------------------Subscription----------------------------------------------
-
+	/**
+	 * Checks if the application have subscribed to the relevant api
+	 *
+	 * @param context
+	 * @param version
+	 * @param consumerKey
+	 * @return true is application subscribed for the api
+	 * @throws APIManagementException
+	 */
 	public boolean validateSubscriptionDetails(String context, String version, String consumerKey)
 			throws APIManagementException {
 		boolean defaultVersionInvoked = false;
@@ -377,14 +384,6 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 
 		try {
 			String dbProdName = conn.getMetaData().getDatabaseProductName();
-            /*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
-				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
-				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-				sqlQuery = sqlQuery + " x";
-            }*/
 
 			ps = conn.prepareStatement(sqlQuery);
 			ps.setString(1, apiPolicy);
@@ -425,7 +424,6 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 
 	private API getAPI() throws APIManagementException {
 		apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
-		//ApiMgtDAO.getInstance().validateSubscriptionDetails();
 		List<API> list = apiConsumer.getAllAPIs();
 		for (API api : list) {
 			if (api.getContext().equalsIgnoreCase(uri)) {

@@ -39,7 +39,7 @@ public class API implements Serializable{
     private String sandboxUrl;
     private String wsdlUrl;
     private String wadlUrl;
-    private boolean isWS;
+    private boolean isWebsocketApi;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -654,12 +654,12 @@ public class API implements Serializable{
     }
 
     public boolean isWS() {
-        return isWS;
+        return isWebsocketApi;
     }
 
     public void setWS(String WS) {
-        if(WS.equalsIgnoreCase("ws")||WS.equalsIgnoreCase("true"))
-        isWS = true;
+        if("ws".equalsIgnoreCase(WS)||"true".equalsIgnoreCase(WS))
+            isWebsocketApi = true;
     }
 
 
