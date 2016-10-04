@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
@@ -4565,9 +4566,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    public List<APIProduct> searchAPIProducts(String searchContent, String searchType, String providerId)
+    public List<APIProduct> searchAPIProducts(String searchTerm, String searchType, String providerId)
                                                                                         throws APIManagementException {
-        List<APIProduct> foundApiProductList = new ArrayList<APIProduct>();
+        List<APIProduct> foundApiProductList = apiMgtDAO.getAPIProducts(searchTerm, searchType, providerId, null);
+        /*
         String regex = "(?i)[\\w.|-]*" + searchContent.trim() + "[\\w.|-]*";
         Pattern pattern;
         Matcher matcher;
@@ -4604,83 +4606,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             handleException("Failed to search APIs with type", e);
         }
+        */
         Collections.sort(foundApiProductList, new APIProductNameComparator());
         return foundApiProductList;
     }
 
-
-    /**
-     * Search APIs
-     * @param searchTerm
-     * @param searchType
-     * @return
-     * @throws APIManagementException
-     */
-
-    private List<APIProduct> searchAPIProducts(String searchTerm, String searchType) throws APIManagementException {
-        List<APIProduct> apiProductList = new ArrayList<APIProduct>();
-
-        Pattern pattern;
-        Matcher matcher;
-        String searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_NAME;
-        boolean isTenantFlowStarted = false;
-        String userName = this.username;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
-            if (artifactManager != null) {
-                if ("Name".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_NAME;
-                } else if ("Version".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_VERSION;
-                } else if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION;
-                } else if ("Provider".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_PROVIDER;
-                    searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if ("Status".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_STATUS;
-                }
-
-                String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-                pattern = Pattern.compile(regex);
-
-
-                GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return apiProductList;
-                }
-
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String value = artifact.getAttribute(searchCriteria);
-
-                    if (value != null) {
-                        matcher = pattern.matcher(value);
-                        if (matcher.find()) {
-                            APIProduct resultAPIProduct = APIUtil.getAPIProduct(artifact, registry);
-                            if (resultAPIProduct != null) {
-                                apiProductList.add(resultAPIProduct);
-                            }
-                        }
-                    }
-                }
-
-
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return apiProductList;
-    }
 
 
     /**
@@ -4709,7 +4639,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiProductArtifactId = resource.getUUID();
                 if (apiProductArtifactId != null) {
                     GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiProductArtifactId);
-                    apiProductSortedList.add(APIUtil.getAPIProduct(apiProductArtifact, registry));
+                    //apiProductSortedList.add(APIUtil.getAPIProduct(apiProductArtifact, registry));
                 } else {
                     throw new GovernanceException("artifact id is null of " + apiProductPath);
                 }
@@ -4724,6 +4654,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    /**
+     * Get specific APIProduct
+     *
+     * @param apiProductId APIProduct
+     * @throws APIManagementException if failed to add APIProduct
+     */
+    @Override
+    public APIProduct getAPIProduct(APIProductIdentifier apiProductId) throws APIManagementException {
+        return apiMgtDAO.getAPIProduct(apiProductId, null);
+    }
 
     /**
      * Adds a new APIProduct to the Store
@@ -4735,13 +4675,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPIProduct(APIProduct apiProduct) throws APIManagementException {
         try {
-            createAPIProduct(apiProduct);
-
-            if (log.isDebugEnabled()) {
-                log.debug("API details successfully added to the registry. API Name: " +
-                        apiProduct.getId().getApiProductName() + ", API Version : " + apiProduct.getId().getVersion());
-            }
-
             int tenantId;
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
@@ -4773,73 +4706,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    /**
-     * Create an Api
-     *
-     * @param apiProduct API
-     * @throws APIManagementException if failed to create API
-     */
-    private void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
 
-        boolean transactionCommitted = false;
-        try {
-            registry.beginTransaction();
-            GenericArtifact genericArtifact =
-                    artifactManager.newGovernanceArtifact(new QName(apiProduct.getId().getApiProductName()));
-            GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
-            artifactManager.addGenericArtifact(artifact);
-            //Attach the API lifecycle
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
-            //provider ------provides----> API
-            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
-            Set<String> tagSet = apiProduct.getTags();
-            if (tagSet != null) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-
-            //write Status to a separate property. This is done to support querying APIProducts using custom query (SQL)
-            //to gain performance
-            String apiStatus = apiProduct.getStatus().getStatus();
-            saveAPIStatus(artifactPath, apiStatus);
-            String visibleRolesList = apiProduct.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(),
-                    visibleRoles, artifactPath);
-            registry.commitTransaction();
-            transactionCommitted = true;
-
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Name: " + apiProduct.getId().getApiProductName() + ", APIProduct Version "
-                                + apiProduct.getId().getVersion() + " created";
-                log.debug(logMessage);
-            }
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error here would mask the original exception
-                log.error("Error while rolling back the transaction for API: " +
-                        apiProduct.getId().getApiProductName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error while rolling back the transaction for API: " +
-                                                        apiProduct.getId().getApiProductName(), ex);
-            }
-        }
-    }
 }

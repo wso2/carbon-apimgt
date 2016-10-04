@@ -681,92 +681,7 @@ public final class APIUtil {
         return api;
     }
 
-    /**
-     * This method used to get API Product from governance artifact
-     *
-     * @param artifact API Product artifact
-     * @param registry Registry
-     * @return APIProduct
-     * @throws APIManagementException if failed to get API from artifact
-     */
-    public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
-            throws APIManagementException {
 
-        APIProduct apiProduct;
-        try {
-            String providerName = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_PROVIDER);
-            String apiProductName = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_NAME);
-            String apiProductVersion = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_VERSION);
-            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, apiProductName, apiProductVersion);
-            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
-
-            if (apiProductId == -1) {
-                return null;
-            }
-            apiProduct = new APIProduct(apiProductIdentifier);
-            // set rating
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-
-
-            //set description
-            apiProduct.setDescription(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION));
-            //set created time
-            apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
-            //set last access time
-            apiProduct.setUpdatedTime(registry.get(artifactPath).getLastModified());
-            //set uuid
-            apiProduct.setUUID(artifact.getId());
-            // set url
-            apiProduct.setStatus(getApiProductStatus(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_STATUS)));
-            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_THUMBNAIL_URL));
-            apiProduct.setTechnicalOwner(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER));
-            apiProduct.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER_EMAIL));
-            apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER));
-            apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER_EMAIL));
-
-            apiProduct.setSubscriptionAvailability(artifact.getAttribute(
-                                                    APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
-            apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(
-                                                    APIConstants.API_PRODUCT_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
-            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-
-            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
-
-
-            if(isGlobalThrottlingEnabled){
-                String apiLevelTier = ApiMgtDAO.getInstance().getAPIProductLevelTier(apiProductId);
-                apiProduct.setApiProductLevelPolicy(apiLevelTier);
-            }
-
-            String tiers = artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_TIER);
-            Map<String, Tier> definedTiers = getTiers(tenantId);
-            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiProductName);
-            apiProduct.addAvailableTiers(availableTier);
-
-            apiProduct.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_PRODUCT_OVERVIEW_IS_LATEST)));
-
-            Set<String> tags = new HashSet<String>();
-            Tag[] tag = registry.getTags(artifactPath);
-            for (Tag tag1 : tag) {
-                tags.add(tag1.getTagName());
-            }
-            apiProduct.addTags(tags);
-
-        } catch (GovernanceException e) {
-            String msg = "Failed to get API for artifact ";
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get LastAccess time or Rating";
-            throw new APIManagementException(msg, e);
-        } catch (UserStoreException e) {
-            String msg = "Failed to get User Realm of API Provider";
-            throw new APIManagementException(msg, e);
-        }
-        return apiProduct;
-    }
 
 
     private static void setAPIProductTierInfo(APIProduct apiProduct, int apiProductId, GovernanceArtifact artifact)
@@ -1180,12 +1095,9 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_STATUS, apiStatus);
-            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER, apiProduct.getTechnicalOwner());
-            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_TEC_OWNER_EMAIL, apiProduct.getTechnicalOwnerEmail());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
-            artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
             artifact.setAttribute(APIConstants.API_PRODUCT_OVERVIEW_OWNER, apiProduct.getApiProductOwner());
 

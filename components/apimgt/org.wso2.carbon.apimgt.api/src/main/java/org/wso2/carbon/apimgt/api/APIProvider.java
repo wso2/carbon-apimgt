@@ -842,6 +842,14 @@ public interface APIProvider extends APIManager {
     List<APIProduct> getAPIProductsByProvider(String providerId) throws APIManagementException;
 
     /**
+     * Get specific APIProduct
+     *
+     * @param apiProductID APIProduct
+     * @throws APIManagementException if failed to add APIProduct
+     */
+    APIProduct getAPIProduct(APIProductIdentifier apiProductID) throws APIManagementException;
+
+    /**
      * Adds a new APIProduct to the Store
      *
      * @param apiProduct APIProduct
