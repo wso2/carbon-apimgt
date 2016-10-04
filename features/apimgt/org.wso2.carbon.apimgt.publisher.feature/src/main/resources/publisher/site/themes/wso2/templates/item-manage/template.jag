@@ -697,7 +697,7 @@
                                 <% if(outputs.isPermitted) {
                                    var status=outputs.lcStatus;
                                    var wfStatus = "";
-                                   if(wfStatus != null || wfStatus.status != null){
+                                   if(outputs.wfStatus != null && outputs.wfStatus.status != null){
                                      wfStatus = outputs.wfStatus.status;               
                                    }
                                 %>

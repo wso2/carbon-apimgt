@@ -138,7 +138,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                 <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
              </div>
 		</div>
-  <%  if(wfStatus.status == 'CREATED') {%> 
+  <%  if(wfStatus != null && wfStatus.status == 'CREATED') {%> 
      <div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
      </div>  
