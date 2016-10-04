@@ -47,6 +47,7 @@
         ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
         ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
         ssoRelyingParty.setProperty("nameIdPolicy", String(site.ssoConfiguration.nameIdPolicy));
+        ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
 
         var consumerUrl = "";
         //if acsURL is provided in site.json, consumerUrl will be taken from that. Otherwise not sent with the request.

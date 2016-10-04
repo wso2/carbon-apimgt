@@ -547,7 +547,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                                 Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 2 || !(args[0] instanceof String)) {
+        if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The SAML response is missing.");
         }
 
@@ -563,7 +563,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             }
         }
 
-        String isAssertionEncryptionEnabled = (String) args[1];
+        String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
+                ASSERTIONENCRYPTIONENABLED);
 
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
@@ -645,7 +646,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 2 || !(args[0] instanceof String)) {
+        if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The SAML response is missing.");
         }
 
@@ -664,7 +665,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
         String username = null;
-        String isAssertionEncryptionEnabled = (String) args[1];
+        String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
+                ASSERTIONENCRYPTIONENABLED);
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
@@ -924,7 +926,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 4 || !(args[0] instanceof String) ||
+        if (argLength != 3 || !(args[0] instanceof String) ||
                 !(args[1] instanceof String) || !(args[2] instanceof SessionHostObject)) {
             throw new ScriptException("Invalid argument. Current session id, SAML response and Session are missing.");
         }
@@ -947,7 +949,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String username = null;
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-            String isAssertionEncryptionEnabled = (String) args[3];
+            String isAssertionEncryptionEnabled =  relyingPartyObject.getSSOProperty(SSOConstants.
+                    ASSERTIONENCRYPTIONENABLED);
             Assertion assertion = null;
 
             if ("true".equals(isAssertionEncryptionEnabled)) {
@@ -1591,7 +1594,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                                 Function funObj) throws Exception {
 
         int argLength = args.length;
-        if (argLength != 2 || !(args[0] instanceof String)) {
+        if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. SAML response is missing.");
         }
 
@@ -1600,8 +1603,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         XMLObject samlObject = Util.unmarshall(decodedString);
         String tenantDomain = Util.getDomainName(samlObject);
 
-        String isAssertionEncryptionEnabled = (String) args[1];
-
         int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
 
         if (samlObject instanceof Response) {
@@ -1609,6 +1610,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
 
             Assertion assertion = null;
+            String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
+                    ASSERTIONENCRYPTIONENABLED);
 
             if ("true".equals(isAssertionEncryptionEnabled)) {
                 List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
