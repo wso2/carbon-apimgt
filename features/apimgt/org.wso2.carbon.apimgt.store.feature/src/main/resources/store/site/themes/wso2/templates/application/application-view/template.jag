@@ -16,11 +16,11 @@ for(var i=0;i < outputs.tiers.length; i++){
   <!-- Nav tabs -->
   <div class="white-wrapper">
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a title="<%=i18n.localize("Details")%>" href="#details" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Details")%></a></li>          
+      <li role="presentation" id="details-tab" class="active"><a title="<%=i18n.localize("Details")%>" href="#details" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Details")%></a></li>
       <% if(application.status == "APPROVED"){ %>
-      <li role="presentation"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
-      <li role="presentation"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
-      <li role="presentation"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
+      <li role="presentation" id="production-keys-tab"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
+      <li role="presentation" id="sandbox-keys-tab"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
+      <li role="presentation" id="subscriptions-tab"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
       <% } %>
     </ul>
 

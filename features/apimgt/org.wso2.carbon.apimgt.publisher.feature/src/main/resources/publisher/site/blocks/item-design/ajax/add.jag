@@ -80,13 +80,18 @@ if(jagg.isCSRFTokenValid())
                 }
                 var obj = loadSwaggerObj("/site/conf/soap_swagger.json");
                 swagger = stringify(obj);
+            }else if(type == "new"){
+                session.put("wsdl",null);
+                session.put("swagger",null);
             }
             if(swagger){
+                session.put("wsdl",null);
                 session.put("swagger", swagger);
-            }
-            if(wsdl){
+            }if(wsdl){
+                session.put("swagger",null);
                 session.put("wsdl", wsdl);
             }
+
             print({
                 error:false,
                 message:'imported'

@@ -127,7 +127,7 @@ function populateCustomerAttributes(attributesList){
         
     if(attributes != null){
         $.each(attributes, function( index, value ) {
-            ++ attributeCount;
+            ++attributeCount;
             addCustomAttributeInitially(tBody, attributeCount,index, value);
         });
     }

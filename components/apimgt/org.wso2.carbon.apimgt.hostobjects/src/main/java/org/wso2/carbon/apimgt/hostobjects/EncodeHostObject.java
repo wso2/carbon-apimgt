@@ -17,21 +17,15 @@
 */
 package org.wso2.carbon.apimgt.hostobjects;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jaggeryjs.scriptengine.EngineConstants;
-import org.jaggeryjs.scriptengine.engine.JaggeryContext;
-import org.jaggeryjs.scriptengine.engine.RhinoEngine;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
-import org.jaggeryjs.scriptengine.util.HostObjectUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-
-import java.lang.ClassCastException;
-import org.owasp.encoder.*;
+import org.owasp.encoder.Encode;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public class EncodeHostObject extends ScriptableObject {
 	private static final Log log = LogFactory.getLog(EncodeHostObject.class);

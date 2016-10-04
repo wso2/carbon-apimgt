@@ -14,7 +14,6 @@ response.contentType = "text/plain; charset=UTF-8";
 var action = request.getParameter("action");
 if(action == "session"){
 	var swagger = session.get("swagger");
-	session.put("swagger",null);
 	print(swagger);	
 }else{
 	var url = request.getParameter("swagger_url");

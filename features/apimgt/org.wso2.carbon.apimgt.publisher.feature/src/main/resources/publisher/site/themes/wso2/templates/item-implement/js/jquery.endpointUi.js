@@ -21,6 +21,12 @@
         return param1 + param2;
     });
 
+    Handlebars.registerHelper("contains", function( value, array, options ){
+        // fallback...
+        array = ( array instanceof Array ) ? array : [array];
+        return (array.indexOf(value) > -1) ? options.fn( this ) : "";
+    });
+
     Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
         switch (operator) {
             case '==':
@@ -98,13 +104,14 @@
             context[this.config.endpoint_type] = true;
             //if loadbalanced and failover is enables set the ep type
             context[this._get_selected_ep()] = true;
-            if(this.config.failOver == "False")
+            if(this.config.failOver == "False") {
                 context.failOver = false;
+            }
             this.element.html(template(context));
         },        
 
-        render_advance: function(){
-            var context = jQuery.extend({}, this.config);
+        render_advance: function(selectedEndpointType, selectedEndpointIndex){
+            var context = jQuery.extend({}, this.config[selectedEndpointType][selectedEndpointIndex].config);
             context[this.config.endpoint_type] = true;
             var model = this.element.find("#advance_form").html(template2(context));
             this.element.find("#advance_endpoint_config").find('.selectpicker').selectpicker();
@@ -133,11 +140,31 @@
 
         _on_failover_checked:function(e){
             if(e.target.checked && this.config.endpoint_type != "load_balance"){
+                $('#load_balance').prop('checked', false);
                 this.config.endpoint_type = "failover";
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
                 this.config.production_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
                 this.config.sandbox_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
             }else if(e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="True";
+                this.config.endpoint_type = "failover";
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
+                this.config.production_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
+                this.config.sandbox_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
             }else if(!e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="False";
             }else{
@@ -150,15 +177,25 @@
 
         _on_load_balance_checked: function(e){
             if(e.target.checked){
+                $('#failover').prop('checked', false);
                 if(this.config.endpoint_type == "failover"){
-                    this.config.failOver ="True";
+                    this.config.failOver ="False";
                 }
+
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
                 this.config.endpoint_type = "load_balance";                
                 this.config.algoCombo = "org.apache.synapse.endpoints.algorithms.RoundRobin";
                 this.config.algoClassName = "";
                 this.config.sessionManagement = "";
                 this.config.sessionTimeOut = "";
-            }else{
+            } else {
                 this.config.endpoint_type = this.element.find("#endpoint_type").val();
                 if(this.config.failOver === "True"){
                     this.config.endpoint_type = "failover";
@@ -218,7 +255,7 @@
                 this.invalid = false;
             }   
 
-            this.validate();
+            this.validate_for_endpoint_change();
         },     
 
         get_endpoint_config: function(){
@@ -261,7 +298,7 @@
         _on_advance_endpoint: function(e){
             this.selected_ep_index = parseInt($(e.currentTarget).attr("data-index"));
             this.selected_ep_type = $(e.currentTarget).attr("data-type");
-            this.render_advance();
+            this.render_advance(this.selected_ep_type,this.selected_ep_index);
         },
 
         _on_advance_endpoint_submit: function(e){
@@ -278,12 +315,16 @@
         _convert_to_object:function(arr){
             var obj = {};
             for(var i=0; i < arr.length; i++){
-                if(arr[i].value == undefined || arr[i].value == "")continue;
+                if(arr[i].value == undefined || arr[i].value == "") {
+                    continue;
+                }
+
                 if(obj[arr[i].name] != undefined ){
                     if(obj[arr[i].name] instanceof Array){
                         obj[arr[i].name].push(arr[i].value);
                     }else{
                         obj[arr[i].name] = [ obj[arr[i].name] ];
+                        obj[arr[i].name].push(arr[i].value);
                     }
                 }else{
                     obj[arr[i].name] = arr[i].value;
@@ -314,6 +355,28 @@
             }
 
             return r;            
+        },
+
+        validate_for_endpoint_change: function(){
+            this.config.invalid = {};
+            var r = true;
+            if((this.config.production_endpoints != undefined
+                && this.config.production_endpoints[0].url != "") ||
+                (this.config.sandbox_endpoints != undefined
+                && this.config.sandbox_endpoints[0].url != "")
+            ){
+                delete this.config.invalid.endpoint;
+            }else{
+                this.config.invalid.endpoint = true;
+                r = false;
+            }
+
+            //if template is given for address endpoint
+            if(this.invalid != undefined && this.invalid){
+                return false;
+            }
+
+            return r;
         },
 
         _get_selected_ep: function(){

@@ -24,12 +24,17 @@
         large-scale deployments right away.
     </p>
 
+    <p> The REST API is implemented based on REST best practices and specifications as a CXF REST web application running on WSO2 API
+        Manager. API development is started with a swagger specification with a contract-first approach.
+        Please see <a href="https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml">full swagger definition</a> which is written using swagger 2.0.
+        This can be also retrieved from the Web app itself using the URL
+        <code>https://&lt;host-name[:port]&gt;/api/am/publisher/v0.10/swagger.json</code>
+    </p>
+
     <p>
-        As part of its latest release, the REST API was developed as a CXF REST web application running on WSO2 API
-        Manager. This API comes with a pluggable security mechanism. Since API security is implemented as a CXF
+        The API comes with a pluggable security mechanism. Since API security is implemented as a CXF
         handler, if you need to plug a custom security mechanism, you can write your own handler and add it to the
-        web service. This REST API is implemented based on REST best practices and specifications. API development
-        is started with a swagger specification for Store and Publisher operations.
+        web service.
     </p>
 
     <p>

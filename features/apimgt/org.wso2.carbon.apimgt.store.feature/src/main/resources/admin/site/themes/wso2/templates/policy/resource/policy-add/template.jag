@@ -563,8 +563,8 @@
                                             </div>
                                             <div class="form-group">
                                                 <div class="col-sm-offset-3 col-sm-9">
-                                                    <button type="button" onclick="addQueryParam('{{../.
-                                                    ./executionFlow.id}}')" id="add-new-query-param-{{../../executionFlow.id}}" name="add-new-query-param-{{../../executionFlow.id}}" class="btn btn-primary has-spinner"><%=i18n.localize("Add")%></button>
+                                                    <button type="button" onclick="addQueryParam('{{../../executionFlow.id}}')" id="add-new-query-param-{{../../executionFlow.id}}"
+                                                    name="add-new-query-param-{{../../executionFlow.id}}" class="btn btn-primary has-spinner"><%=i18n.localize("Add")%></button>
                                                 </div>
                                             </div>
 

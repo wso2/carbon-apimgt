@@ -1,65 +1,86 @@
-<% jagg.template("menu/actions", function(inputs, outputs, jagg) { %>
+<% jagg.template("menu/actions", function (inputs, outputs, jagg) { %>
             <%
-                var encode = require('encode');
-                encode = new encode.Encode();
-                var tenantDomain = encode.forUriComponent(request.getParameter("tenant"));
-                var site = require("/site/conf/site.json");
-                var ssoEnabled = site.ssoConfiguration.enabled;
-                var urlPrefix = '', urlPostfix = '', isCreatePermitted, isPublishPermitted, api;
+    var encode = require('encode');
+    encode = new encode.Encode();
+    var tenantDomain = encode.forUriComponent(request.getParameter("tenant"));
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
+    var urlPrefix = '', urlPostfix = '', isCreatePermitted, isPublishPermitted, api;
 
-                if(tenantDomain!='null'){
-                	urlPrefix = "?tenant=" + tenantDomain;
-                	urlPostfix = "&tenant=" + tenantDomain;
-                }
-                
-                api = outputs.api;
-                
-                var reqUrl = jagg.getAbsoluteReqUrl(request.getRequestURI()) + urlPrefix;       
-                
-                
-                var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
-                var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;
-                
-                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;;
-                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;;
-                
-                var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag") + urlPrefix;
-                var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag") + urlPrefix;
-                
-                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;
-                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;
-                
-                var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
-                var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
-                                
-                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag") + urlPrefix;
-                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag") + urlPrefix;
-                
-                var addDesignUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
-                var addImplementUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
-                var addManageUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
-                
-                var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
-                var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+    if (tenantDomain != 'null') {
+        urlPrefix = "?tenant=" + tenantDomain;
+        urlPostfix = "&tenant=" + tenantDomain;
+    }
 
-		var allStaticUrl = jagg.getAbsoluteUrl("/site/pages/all-statistics.jag") + urlPrefix;
-		var allStaticMappedUrl = jagg.getMappedUrl("/site/pages/all-statistics.jag") + urlPrefix;
+    api = outputs.api;
 
-		var goBackStatsURL = jagg.getAbsoluteUrl("/site/pages/stats-menu-list.jag") + urlPrefix;
+    var reqUrl = jagg.getAbsoluteReqUrl(request.getRequestURI()) + urlPrefix;
 
-                isCreatePermitted = jagg.getCreatePermitted().permitted;
-                isPublishPermitted = jagg.getPublishPermitted().permitted;
-            %>
+    var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
+    var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;
 
-        <div class="navbar-wrapper">
-		<nav class="navbar navbar-default" data-spy="affix"
-			data-offset-top="80" data-offset-bottom="40">
-			<div class="container-fluid">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed"
-						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-						aria-controls="navbar">
-						<span class="sr-only"><%=i18n.localize("Toggle navigation")%></span> <span
+    var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;
+    ;
+    var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;
+    ;
+
+    var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag") + urlPrefix;
+    var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag") + urlPrefix;
+
+    var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;
+    var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;
+
+    var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
+    var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
+
+    var addUrl = jagg.getAbsoluteUrl("/site/pages/add.jag") + urlPrefix;
+    var addMappedUrl = jagg.getMappedUrl("/site/pages/add.jag") + urlPrefix;
+
+    var addDesignUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+    var addImplementUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
+    var addManageUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
+
+    var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+    var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+
+    var allStaticUrl = jagg.getAbsoluteUrl("/site/pages/all-statistics.jag") + urlPrefix;
+    var allStaticMappedUrl = jagg.getMappedUrl("/site/pages/all-statistics.jag") + urlPrefix;
+
+    var goBackStatsURL = jagg.getAbsoluteUrl("/site/pages/stats-menu-list.jag") + urlPrefix;
+
+    isCreatePermitted = jagg.getCreatePermitted().permitted;
+    isPublishPermitted = jagg.getPublishPermitted().permitted;
+
+    if(api) {
+        var provider = api.provider;
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        provider = APIUtil.replaceEmailDomain(provider);
+
+        if (provider.indexOf("@") > -1) {
+            provider = provider.replace("@", "%40");
+        }
+        if (provider.indexOf("/") > -1) {
+            provider = provider.replace("/", "-DOM-");
+        }
+
+        var swaggerAPI;
+        if (provider.contains("/")) {
+            swaggerAPI = jagg.url("/api-docs" + "?provider=" + encodeURIComponent(provider) + "&name=" + encodeURIComponent(api.name) + "&version=" + encodeURIComponent(api.version));
+        } else {
+            swaggerAPI = jagg.url("/api-docs" + "/" + provider + "/" + api.name + "/" + api.version);
+        }
+    }
+    %>
+
+<div class="navbar-wrapper">
+<nav class="navbar navbar-default" data-spy="affix"
+    data-offset-top="80" data-offset-bottom="40">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed"
+                data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                aria-controls="navbar">
+                <span class="sr-only"><%=i18n.localize("Toggle navigation")%></span> <span
 							class="icon-bar"></span> <span class="icon-bar"></span> <span
 							class="icon-bar"></span>
 					</button>
@@ -84,7 +105,7 @@
                     <ul class="nav navbar-nav">
                     	<% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.getAbsoluteUrl("/"))){ %>
 	                        <%if(isCreatePermitted) {%>
-	                        <li>
+	                        <li id="top-menu-api-add">
 	                            <a title="<%=i18n.localize("Add New API")%>" href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add New API")%>"></i>
@@ -136,6 +157,15 @@
 	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Create New Version")%>"></i>
 	                                </span>
 	                                <%=i18n.localize("Create New Version")%>
+	                            </a>
+	                        </li>
+	                        <li>
+	                            <a download="swagger.json" href="<%=swaggerAPI%>" title="<%=i18n.localize("Download Source")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-download fw-stack-1x" title="<%=i18n.localize("Download Source")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Download Source")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("Download Source")%>
 	                            </a>
 	                        </li>
 	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        

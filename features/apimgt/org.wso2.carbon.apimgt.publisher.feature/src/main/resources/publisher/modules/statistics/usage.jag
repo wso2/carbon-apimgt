@@ -984,4 +984,29 @@ function getApisList(provider, apiFilter, limit) {
         };
     }
 }
+
+function getTopApiUsers(apiName, version, tenantDomain, fromDate, toDate, start, limit) {
+    var usage;
+    try {
+        usage = usageClient.getTopApiUsers(apiName, version, tenantDomain, fromDate, toDate, start, limit);
+        if (usage == null) {
+            return {
+                error:true
+            };
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>

@@ -1,0 +1,16 @@
+<%
+jagg.block("stats/api-top-users", {
+    initializer:function (data) {
+
+    },
+    getOutputs:function () {
+        var apiName = encode.forUriComponent(request.getParameter("apiName"));
+        var version = encode.forUriComponent(request.getParameter("version"));
+        return {
+            "apiName":apiName,
+            "version":version
+        }
+    }
+
+});
+%>

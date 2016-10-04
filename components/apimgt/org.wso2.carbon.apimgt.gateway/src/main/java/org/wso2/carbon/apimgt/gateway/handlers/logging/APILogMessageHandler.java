@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.logging;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -64,8 +65,13 @@ public class APILogMessageHandler extends AbstractHandler {
         if (endUserName != null) {
             logMessage = logMessage + " , userName=" + endUserName;
         }
+        String httpMethod = String.valueOf(axisMC.getProperty(Constants.Configuration.HTTP_METHOD));
+        if (httpMethod != null) {
+            logMessage = logMessage + " , httpMethod=" + httpMethod;
+        }
         Map headers = (Map) axisMC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String logID = (String) headers.get(APIConstants.ACTIVITY_ID);
+
 
         if (DIRECTION_OUT.equals(direction) && logID == null) {
             try {
@@ -123,7 +129,7 @@ public class APILogMessageHandler extends AbstractHandler {
         if (DIRECTION_OUT.equals(direction)) {
             String statusCode = String.valueOf(axisMC.getProperty(NhttpConstants.HTTP_SC));
 
-            if (StringUtils.isEmpty(statusCode)) {
+            if (StringUtils.isNotEmpty(statusCode)) {
                 logMessage = logMessage + " , statusCode=" + statusCode;
             }
         }
