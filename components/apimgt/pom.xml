@@ -50,5 +50,6 @@
         <module>samples/org.wso2.carbon.apimgt.samples.pizzashack</module>
         <module>org.wso2.carbon.apimgt.jms.listener</module>
         <module>org.wso2.carbon.apimgt.broker.lifecycle</module>
+        <module>org.wso2.carbon.apimgt.lifecycle.manager</module>
     </modules>
 </project>
