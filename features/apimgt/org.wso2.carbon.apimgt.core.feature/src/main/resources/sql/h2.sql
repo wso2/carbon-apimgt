@@ -987,3 +987,14 @@ CREATE TABLE `AM_BLOCK_CONDITIONS` (
 );
 
 -- End of API-MGT Tables --
+
+--- Start of lifecycle tables ---
+
+CREATE TABLE IF NOT EXISTS LC_DEFINITIONS(
+            ID INTEGER NOT NULL AUTO_INCREMENT,
+            LC_NAME VARCHAR(255),
+            LC_CONTENT LONGBLOB,
+            LC_TENANT_ID INTEGER DEFAULT 0,
+            UNIQUE (ID),
+            PRIMARY KEY (LC_NAME, LC_TENANT_ID)
+);
