@@ -185,6 +185,7 @@
                                                         <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
                                                         <span class="helper"><%=i18n.localize("HTTP")%></span>
                                                 </label>
+                                                <label id="transport_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Transport.")%></label>
                                             </div>
                                         </div>
 

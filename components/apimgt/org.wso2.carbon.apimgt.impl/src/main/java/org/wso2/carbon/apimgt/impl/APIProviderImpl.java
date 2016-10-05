@@ -4566,52 +4566,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    public List<APIProduct> searchAPIProducts(String searchTerm, String searchType, String providerId)
-                                                                                        throws APIManagementException {
-        List<APIProduct> foundApiProductList = apiMgtDAO.getAPIProducts(searchTerm, searchType, providerId, null);
-        /*
-        String regex = "(?i)[\\w.|-]*" + searchContent.trim() + "[\\w.|-]*";
-        Pattern pattern;
-        Matcher matcher;
-        String apiConstant = null;
-        try {
-            if (providerId != null) {
-                List<APIProduct> apiProductList = getAPIProductsByProvider(providerId);
-                if (apiProductList == null || apiProductList.isEmpty()) {
-                    return apiProductList;
-                }
-                pattern = Pattern.compile(regex);
-                for (APIProduct apiProduct : apiProductList) {
-                    if ("Name".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getApiProductName();
-                    } else if ("Provider".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getProviderName();
-                    } else if ("Version".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getVersion();
-                    } else if ("Status".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getStatus().getStatus();
-                    } else if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getDescription();
-                    }
-                    if (apiConstant != null) {
-                        matcher = pattern.matcher(apiConstant);
-                        if (matcher.find()) {
-                            foundApiProductList.add(apiProduct);
-                        }
-                    }
-                }
-            } else {
-                foundApiProductList = searchAPIProducts(searchContent, searchType);
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        */
-        Collections.sort(foundApiProductList, new APIProductNameComparator());
-        return foundApiProductList;
-    }
-
-
 
     /**
      * Get a list of API Products published by the given provider. If a given API Product has multiple versions,
