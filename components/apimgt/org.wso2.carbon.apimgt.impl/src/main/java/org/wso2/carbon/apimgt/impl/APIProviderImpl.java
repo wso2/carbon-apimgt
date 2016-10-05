@@ -4660,5 +4660,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void createNewAPIProductVersion(APIProduct apiProduct, String newVersion) throws APIManagementException {
+
+    }
+
+    @Override
+    public void updateAPIProduct(APIProduct apiProduct) throws APIManagementException {
+
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+
+    }
+
 
 }
