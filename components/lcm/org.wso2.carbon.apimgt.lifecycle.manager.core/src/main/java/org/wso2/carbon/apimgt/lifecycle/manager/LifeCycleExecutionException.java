@@ -25,7 +25,7 @@ public class LifeCycleExecutionException extends Exception {
      *
      * @param message the detail message (which is saved for later retrieval
      *                by the {@link #getMessage()} method).
-     * @param e       the cause (which is saved for later retrieval by the
+     * @param e the cause (which is saved for later retrieval by the
      *                {@link #getCause()} method).
      */
     public LifeCycleExecutionException(String message, Throwable e) {

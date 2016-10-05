@@ -22,4 +22,6 @@ public class LifeCycleState {
         this.state = state;
     }
 
+    //TODO Add allowed check items and other information should be here.
+
 }
