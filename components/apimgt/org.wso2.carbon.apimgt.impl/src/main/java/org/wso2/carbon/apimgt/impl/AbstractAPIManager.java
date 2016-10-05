@@ -34,10 +34,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.LRUCache;
-import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -1495,6 +1492,13 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+
+    public List<APIProduct> searchAPIProducts(String searchTerm, String searchType, String providerId)
+            throws APIManagementException {
+        List<APIProduct> foundApiProductList = apiMgtDAO.getAPIProducts(searchTerm, searchType, providerId, null);
+        Collections.sort(foundApiProductList, new APIProductNameComparator());
+        return foundApiProductList;
+    }
 
 
 }
