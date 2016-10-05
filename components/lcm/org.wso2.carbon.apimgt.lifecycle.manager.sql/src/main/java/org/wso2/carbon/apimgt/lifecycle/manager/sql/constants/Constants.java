@@ -21,4 +21,6 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.constants;
 public class Constants {
     public static final String LIFECYCLE_DB_NAME = "WSO2_LIFECYCLE_DB";
     public static final String LC_DEFINITION_TABLE_NAME = "LC_DEFINITIONs";
+    public static final int SUPER_TENANT_ID = -1234;
+    public static final String SUPER_TENANT_DOMAIN = "carbon.super";
 }

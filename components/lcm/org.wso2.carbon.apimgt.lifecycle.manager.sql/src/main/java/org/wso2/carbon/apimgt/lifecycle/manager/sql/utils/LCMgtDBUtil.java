@@ -21,7 +21,12 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.JDBCPersistenceManager;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LCManagerDatabaseException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
+import org.wso2.carbon.ndatasource.core.CarbonDataSource;
+import org.wso2.carbon.ndatasource.core.DataSourceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,20 +43,12 @@ public class LCMgtDBUtil {
 
     private static final Log log = LogFactory.getLog(LCMgtDBUtil.class);
 
-    private static volatile DataSource dataSource = null;
-    private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
-
-    private static final String DATA_SOURCE_NAME = "DataSourceName";
-
     /**
      * Initializes the data source
      *
      * @throws LCManagerDatabaseException if an error occurs while loading DB configuration
      */
     public static void initialize() throws LCManagerDatabaseException {
-        if (dataSource != null) {
-            return;
-        }
 
         synchronized (LCMgtDBUtil.class) {
             JDBCPersistenceManager jdbcPersistenceManager;
@@ -73,12 +70,29 @@ public class LCMgtDBUtil {
      *
      * @return Connection
      * @throws SQLException if failed to get Connection
+     * @throws DataSourceException
      */
-    public static Connection getConnection() throws SQLException {
-        if (dataSource != null) {
-            return dataSource.getConnection();
+    public static Connection getConnection() throws SQLException, DataSourceException {
+        Connection conn;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            privilegedCarbonContext.setTenantId(Constants.SUPER_TENANT_ID);
+            privilegedCarbonContext.setTenantDomain(Constants.SUPER_TENANT_DOMAIN);
+            CarbonDataSource carbonDataSource = DataSourceManager.getInstance().getDataSourceRepository()
+                    .getDataSource(Constants.LIFECYCLE_DB_NAME);
+            DataSource dataSource = (DataSource) carbonDataSource.getDSObject();
+            conn = dataSource.getConnection();
+            return conn;
+        } catch (SQLException e) {
+            log.error("Can't create JDBC connection to the SQL Server", e);
+            throw e;
+        } catch (DataSourceException e) {
+            log.error("Can't create data source for SQL Server", e);
+            throw e;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
-        throw new SQLException("Data source is not configured properly.");
     }
 
     /**

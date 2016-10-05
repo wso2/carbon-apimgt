@@ -135,8 +135,8 @@ public class LCDatabaseCreator  {
                 executeSQL(sql.toString());
             }
         } catch (IOException e) {
-            log.error("Error occurred while executing SQL script for creating SOCIAL database", e);
-            throw new Exception("Error occurred while executing SQL script for creating SOCIAL database", e);
+            log.error("Error occurred while executing SQL script for creating Lifecycle database", e);
+            throw new Exception("Error occurred while executing SQL script for creating Lifecycle database", e);
 
         } finally {
             if (reader != null) {
@@ -173,9 +173,9 @@ public class LCDatabaseCreator  {
                     type = "informix";
                 } else {
                     String msg = "Unsupported database: " + databaseProductName +
-                            ". Database will not be created automatically by the WSO2 ES. " +
+                            ". Database will not be created automatically by the Carbon Server. " +
                             "Please create the database using appropriate database scripts for " +
-                            "the SOCIAL database.";
+                            "the Lifecycle database.";
                     throw new Exception(msg);
                 }
             }
