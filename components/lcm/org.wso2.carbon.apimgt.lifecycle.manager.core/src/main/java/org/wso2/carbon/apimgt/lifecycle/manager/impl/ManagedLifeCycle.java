@@ -14,6 +14,7 @@ public class ManagedLifeCycle {
 
     /**
      * This method will be used to get life cycle state of current onject
+     *
      * @return {@code LifeCycleState} object which holds current life cycle state data.
      */
     public LifeCycleState getCurrentLifecycleState() {
@@ -22,8 +23,9 @@ public class ManagedLifeCycle {
 
     /**
      * This method will be used to set life cycle state of current onject
+     *
      * @param currentLifecycleState {@code LifeCycleState} object which holds
-     *       current life cycle state data.
+     *                              current life cycle state data.
      */
     private void setCurrentLifecycleState(LifeCycleState currentLifecycleState) {
         this.currentLifecycleState = currentLifecycleState;
@@ -31,6 +33,7 @@ public class ManagedLifeCycle {
 
     /**
      * This method will be used to get lifecycle ID of current object.
+     *
      * @return {@code String} object that can use to uniquely identify resource.
      */
     public String getLifeCycleID() {
@@ -39,6 +42,7 @@ public class ManagedLifeCycle {
 
     /**
      * This method will be used to set lifecycle ID of current object.
+     *
      * @param lifeCycleID {@code String} object that can use to uniquely identify resource.
      */
     public void setLifeCycleID(String lifeCycleID) {
@@ -51,10 +55,24 @@ public class ManagedLifeCycle {
         //method only.
     }
 
+    /**
+     * Get current life cycle state object.
+     *
+     * @return {@code LifeCycleState} object represent current life cycle.
+     */
     public LifeCycleState getCurrentLifeCycleState() {
-        return new LifeCycleState();
+        return currentLifecycleState;
     }
 
+    /**
+     * This method need to call for each and event life cycle state changes.
+     *
+     * @param currentState {@code LifeCycleState} object represent current life cycle.
+     * @param nextState    {@code LifeCycleState} object represent next life cycle state.
+     * @param resource     {@code Object} object represent artifact to be engaged with this life cycle.
+     * @return {@code LifeCycleState} object of updated life cycle state.
+     * @throws LifeCycleExecutionException if exception occurred while execute life cycle update.
+     */
     public LifeCycleState executeLifeCycleEvent(LifeCycleState currentState, LifeCycleState nextState, Object resource)
             throws LifeCycleExecutionException {
         //If execution is initial then we just create life cycle entry and return UUID.
