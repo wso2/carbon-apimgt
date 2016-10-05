@@ -29,10 +29,18 @@ public class ManagedLifeCycle {
         this.currentLifecycleState = currentLifecycleState;
     }
 
+    /**
+     * This method will be used to get lifecycle ID of current object.
+     * @return {@code String} object that can use to uniquely identify resource.
+     */
     public String getLifeCycleID() {
         return lifeCycleID;
     }
 
+    /**
+     * This method will be used to set lifecycle ID of current object.
+     * @param lifeCycleID {@code String} object that can use to uniquely identify resource.
+     */
     public void setLifeCycleID(String lifeCycleID) {
         this.lifeCycleID = lifeCycleID;
 
