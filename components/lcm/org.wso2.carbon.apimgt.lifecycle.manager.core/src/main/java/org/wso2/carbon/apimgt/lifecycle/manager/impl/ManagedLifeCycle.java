@@ -55,13 +55,14 @@ public class ManagedLifeCycle {
         return new LifeCycleState();
     }
 
-    public String executeLifeCycleEvent(LifeCycleState currentState, LifeCycleState nextState, Object resource)
+    public LifeCycleState executeLifeCycleEvent(LifeCycleState currentState, LifeCycleState nextState, Object resource)
             throws LifeCycleExecutionException {
         //If execution is initial then we just create life cycle entry and return UUID.
         //In that case both current and next states should be null. And also lifeCycleID should be null.
 
         //
-        return "state of" + "Changed from:" + currentState + "  to:" + nextState;
+        return new LifeCycleState();
+        //return "state of" + "Changed from:" + currentState + "  to:" + nextState;
     }
 
 }
