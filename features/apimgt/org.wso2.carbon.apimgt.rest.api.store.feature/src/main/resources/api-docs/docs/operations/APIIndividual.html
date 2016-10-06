@@ -1,8 +1,6 @@
 <div class="main-content">
     <h1><a name="API (Individual)"></a>API (Individual)</h1>
 
-    
-        
             <hr/>
             <h3 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API
  <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis/{apiId}</small></h3>
@@ -10,42 +8,31 @@
 
             <p class="marked">Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
 
-`X-WSO2-Tenant` header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-            
-            
                 <p>Not required</p>
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdGet">
                 <h4 class="section-heading">
                     Request
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
 
-            
                 <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed
 </code></div>
-            
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdGet">
                 <h4 class="section-heading">
                     Response
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
-            
                 <div id="response-apisApiIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -82,14 +69,9 @@ Content-Type: application/json
    &quot;id&quot;: &quot;8848faaa-7fd1-478a-baa2-48a4ebb92c98&quot;,
    &quot;status&quot;: &quot;PUBLISHED&quot;
 }  </code></div>
-            
-            
 
             <h4 class="section-heading">Sample CURL</h4>
-            
                 <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed</code></div>
-            
-            
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -109,7 +91,6 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -130,19 +111,16 @@ Content-Type: application/json
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -161,19 +139,16 @@ Should be formatted as **provider-name-version**.
                         <td>
                             <p class="param-description marked">Media types acceptable for the response. Default is application/json.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">application/json</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -193,19 +168,16 @@ Should be formatted as **provider-name-version**.
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
 variant of the resourec.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -225,19 +197,16 @@ variant of the resourec.
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
 formerly retrieved variant of the resource.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -257,19 +226,16 @@ formerly retrieved variant of the resource.
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
   retirieved from.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -288,62 +254,44 @@ formerly retrieved variant of the resource.
                 </tr>
                 </thead>
                 <tbody>
-                
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nRequested API is returned\n</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested API is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#API">API</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nRequested API does not exist.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                 </tbody>
             </table>
-        
             <hr/>
             <h3 class="operation-heading"><a name="apisApiIdSwaggerGet"></a>Get swagger definition
  <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis/{apiId}/swagger</small></h3>
@@ -351,42 +299,31 @@ formerly retrieved variant of the resource.
 
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
 
- `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+ &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
  
 **NOTE:**
 * This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-            
-            
                 <p>Not required</p>
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdSwaggerGet">
                 <h4 class="section-heading">
                     Request
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
 
-            
                 <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
 </code></div>
-            
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdSwaggerGet">
                 <h4 class="section-heading">
                     Response
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
-            
                 <div id="response-apisApiIdSwaggerGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -409,14 +346,9 @@ Content-Type: application/json
    }
 }
 </code></div>
-            
-            
 
             <h4 class="section-heading">Sample CURL</h4>
-            
                 <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger</code></div>
-            
-            
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -436,7 +368,6 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -457,19 +388,16 @@ Content-Type: application/json
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -488,19 +416,16 @@ Should be formatted as **provider-name-version**.
                         <td>
                             <p class="param-description marked">Media types acceptable for the response. Default is application/json.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">application/json</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -520,19 +445,16 @@ Should be formatted as **provider-name-version**.
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
 variant of the resourec.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -552,19 +474,16 @@ variant of the resourec.
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
 formerly retrieved variant of the resource.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -584,19 +503,16 @@ formerly retrieved variant of the resource.
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
   retirieved from.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -615,62 +531,44 @@ formerly retrieved variant of the resource.
                 </tr>
                 </thead>
                 <tbody>
-                
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nRequested swagger document of the API is returned\n</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested swagger document of the API is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nRequested API does not exist.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                 </tbody>
             </table>
-        
             <hr/>
             <h3 class="operation-heading"><a name="apisApiIdThumbnailGet"></a>Get thumbnail image <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis/{apiId}/thumbnail</small></h3>
             <p class="marked"></p>
@@ -682,47 +580,31 @@ formerly retrieved variant of the resource.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-            
-            
                 <p>Not required</p>
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdThumbnailGet">
                 <h4 class="section-heading">
                     Request
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
 
-            
                 <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
 </code></div>
-            
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdThumbnailGet">
                 <h4 class="section-heading">
                     Response
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
-            
                 <div id="response-apisApiIdThumbnailGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: image/jpeg
 
 [image content]</code></div>
-            
-            
 
             <h4 class="section-heading">Sample CURL</h4>
-            
                 <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.10/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail &gt; image.jpg</code></div>
-            
-            
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -742,7 +624,6 @@ Content-Type: image/jpeg
                     <th>Default</th>
                 </tr>
                 </thead>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -763,19 +644,16 @@ Content-Type: image/jpeg
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -794,19 +672,16 @@ Should be formatted as **provider-name-version**.
                         <td>
                             <p class="param-description marked">Media types acceptable for the response. Default is application/json.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">application/json</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -826,19 +701,16 @@ Should be formatted as **provider-name-version**.
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
 variant of the resourec.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -858,19 +730,16 @@ variant of the resourec.
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
 formerly retrieved variant of the resource.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -889,61 +758,42 @@ formerly retrieved variant of the resource.
                 </tr>
                 </thead>
                 <tbody>
-                
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nThumbnail image returned\n</p></td>
+                        <td class="parameter"><p class="marked">OK. Thumbnail image returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nRequested Document does not exist.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                 </tbody>
             </table>
-        
-    
 </div>

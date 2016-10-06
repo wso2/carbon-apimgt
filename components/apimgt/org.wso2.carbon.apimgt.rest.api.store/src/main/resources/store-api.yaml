@@ -1387,7 +1387,7 @@ parameters:
     name: applicationId
     in: path
     description: |
-      **Application Identifier** consisting of the UUID of the Application.
+      Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
 
@@ -1397,7 +1397,7 @@ parameters:
     name: applicationId
     in: query
     description: |
-      **Application Identifier** consisting of the UUID of the Application.
+      Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
 

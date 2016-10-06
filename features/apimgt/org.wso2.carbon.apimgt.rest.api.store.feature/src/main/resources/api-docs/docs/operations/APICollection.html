@@ -1,8 +1,6 @@
 <div class="main-content">
     <h1><a name="API (Collection)"></a>API (Collection)</h1>
 
-    
-        
             <hr/>
             <h3 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
  <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis</small></h3>
@@ -12,7 +10,7 @@
 
 Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
 
-This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant associated with the access token will be used.
+This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header &#x60;X-WSO2-Tenant&#x60;. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
 * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
@@ -20,35 +18,24 @@ This operation supports retriving APIs of other tenants. The required tenant dom
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-            
-            
                 <p>Not required</p>
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
                 <h4 class="section-heading">
                     Request
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
 
-            
                 <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis
 </code></div>
-            
-            
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
                 <h4 class="section-heading">
                     Response
-                    
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
                 </h4>
             </div>
-            
                 <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -86,14 +73,9 @@ Content-Type: application/json
    &quot;count&quot;: 3,
    &quot;next&quot;: &quot;&quot;
 }</code></div>
-            
-            
 
             <h4 class="section-heading">Sample CURL</h4>
-            
                 <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.10/apis</code></div>
-            
-            
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -113,7 +95,6 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -132,19 +113,16 @@ Content-Type: application/json
                         <td>
                             <p class="param-description marked">Maximum size of resource array to return.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 Integer
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">25</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -163,19 +141,16 @@ Content-Type: application/json
                         <td>
                             <p class="param-description marked">Starting point within the complete list of items qualified.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 Integer
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">0</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -195,19 +170,16 @@ Content-Type: application/json
                             <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
   retirieved from.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -242,19 +214,16 @@ description, subcontext, doc, provider, tag**]
 If no advanced attribute modifier has been specified, search will match the
 given query string against API Name.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -273,19 +242,16 @@ given query string against API Name.
                         <td>
                             <p class="param-description marked">Media types acceptable for the response. Default is application/json.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked">application/json</p>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter">
                             
@@ -305,19 +271,16 @@ given query string against API Name.
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
 variant of the resourec.
 </p>
-                            
                         </td>
                         <td>
                             <span class="param-type">
                                 String
-                                
                             </span>
                         </td>
                         <td>
                             <p class="marked"></p>
                         </td>
                     </tr>
-                
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -336,48 +299,33 @@ variant of the resourec.
                 </tr>
                 </thead>
                 <tbody>
-                
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nList of qualifying APIs is returned.\n</p></td>
+                        <td class="parameter"><p class="marked">OK. List of qualifying APIs is returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#APIList">APIList</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
-                                
                                     
-                                
                             </span>
                         </td>
                     </tr>
-                
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                
                                     <a href="#!/models#Error">Error</a>
-                                
-                                
                             </span>
                         </td>
                     </tr>
-                
                 </tbody>
             </table>
-        
-    
 </div>
