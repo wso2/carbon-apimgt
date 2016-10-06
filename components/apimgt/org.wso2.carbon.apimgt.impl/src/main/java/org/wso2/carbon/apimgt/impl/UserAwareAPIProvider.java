@@ -130,6 +130,30 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.getSubscriptionByUUID(uuid);
     }
 
+    @Override
+    public void addAPIProduct(APIProduct apiProduct) throws APIManagementException {
+        checkProductCreatePermission();
+        super.addAPIProduct(apiProduct);
+    }
+
+    @Override
+    public void createNewAPIProductVersion(APIProduct apiProduct, String newVersion) throws APIManagementException {
+        checkProductCreatePermission();
+        super.createNewAPIProductVersion(apiProduct, newVersion);
+    }
+
+    @Override
+    public void updateAPIProduct(APIProduct apiProduct) throws APIManagementException {
+        checkProductCreatePermission();
+        super.updateAPIProduct(apiProduct);
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+        checkProductCreatePermission();
+        super.deleteAPIProduct(identifier);
+    }
+
     public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
@@ -140,6 +164,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     public void checkPublishPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
+    }
+
+    public void checkProductCreatePermission() throws APIManagementException {
+        APIUtil.checkPermission(username, APIConstants.Permissions.PRODUCT_CREATE);
     }
 
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)

@@ -4675,5 +4675,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    @Override
+    public String addProductImage(ResourceFile resourceFile) throws APIManagementException {
+        return null;
+    }
+
 
 }

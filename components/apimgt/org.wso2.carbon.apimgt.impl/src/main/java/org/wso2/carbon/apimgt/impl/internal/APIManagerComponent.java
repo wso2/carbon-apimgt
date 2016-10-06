@@ -135,6 +135,7 @@ public class APIManagerComponent {
             addRxtConfigs();
             addTierPolicies();
             addApplicationsPermissionsToRegistry();
+            addAPIProductPermissionsToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -544,6 +545,51 @@ public class APIManagerComponent {
                 tenantGovReg.put(permissionResourcePath, appRootNode);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
             }
+        } catch (org.wso2.carbon.user.core.UserStoreException e) {
+            throw new APIManagementException("Error while reading user store information.", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIManagementException("Error while creating new permission in registry", e);
+        }
+
+    }
+
+    /**
+     * This method will create new permissions related to APIProduct in registry permission.
+     */
+    private void addAPIProductPermissionsToRegistry() throws APIManagementException {
+        //Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(
+        //        RegistryType.USER_GOVERNANCE);
+
+        String productResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
+                "admin" + RegistryConstants.PATH_SEPARATOR + "manage" + RegistryConstants.PATH_SEPARATOR + "product";
+
+        String createResourcePath = productResourcePath + RegistryConstants.PATH_SEPARATOR + "create";
+
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            UserRealm realm =
+                    (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+
+            //Logged in user is not authorized to create the permission.
+            // Temporarily change the user to the admin for creating the permission
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
+                    realm.getRealmConfiguration().getAdminUserName());
+            Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext()
+                    .getRegistry(RegistryType.USER_GOVERNANCE);
+
+            if (!tenantGovReg.resourceExists(productResourcePath)) {
+                Collection productRootNode = tenantGovReg.newCollection();
+                productRootNode.setProperty("name", "Product");
+                tenantGovReg.put(productResourcePath, productRootNode);
+            }
+
+            if (!tenantGovReg.resourceExists(createResourcePath)) {
+                Collection createNode = tenantGovReg.newCollection();
+                createNode.setProperty("name", "Create");
+                tenantGovReg.put(createResourcePath, createNode);
+            }
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
             throw new APIManagementException("Error while reading user store information.", e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {

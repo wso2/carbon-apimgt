@@ -865,4 +865,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to remove the APIProduct
      */
     void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Associates the given icon image with the specified path.
+     *
+     * @param resourceFile         to be saved
+     * @return a String URL pointing to the image that was added
+     * @throws APIManagementException if an error occurs while adding the icon image
+     */
+    String addProductImage(ResourceFile resourceFile) throws APIManagementException;
 }

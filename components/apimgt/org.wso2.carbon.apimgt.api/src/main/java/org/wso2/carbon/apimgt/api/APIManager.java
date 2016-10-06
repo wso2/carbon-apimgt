@@ -464,4 +464,13 @@ public interface APIManager {
      */
     List<APIProduct> searchAPIProducts(String searchContent, String searchType, String providerId)
             throws APIManagementException;
+
+    /**
+     * Retrieves the icon image associated with a particular APIProduct as a stream.
+     *
+     * @param identifier ID representing the APIProduct
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException;
 }
