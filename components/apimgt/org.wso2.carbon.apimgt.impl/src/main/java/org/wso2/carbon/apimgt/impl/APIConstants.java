@@ -442,6 +442,7 @@ public final class APIConstants {
         public static final String LOGIN = "/permission/admin/login";
         public static final String CONFIGURE_GOVERNANCE = "/permission/admin/configure/governance";
         public static final String RESOURCE_GOVERN = "/permission/admin/manage/resources/govern";
+        public static final String PRODUCT_CREATE = "/permission/admin/manage/product/create";
         private Permissions(){
             
         }
