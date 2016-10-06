@@ -1331,14 +1331,14 @@
         "applicationId": {
             "name": "applicationId",
             "in": "path",
-            "description": "**Application Identifier** consisting of the UUID of the Application.\n",
+            "description": "Application Identifier consisting of the UUID of the Application.\n",
             "required": true,
             "type": "string"
         },
         "applicationId-Q": {
             "name": "applicationId",
             "in": "query",
-            "description": "**Application Identifier** consisting of the UUID of the Application.\n",
+            "description": "Application Identifier consisting of the UUID of the Application.\n",
             "required": true,
             "type": "string"
         },
