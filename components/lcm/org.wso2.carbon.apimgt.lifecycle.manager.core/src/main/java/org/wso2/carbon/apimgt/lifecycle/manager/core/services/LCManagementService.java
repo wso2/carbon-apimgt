@@ -18,6 +18,13 @@
 
 package org.wso2.carbon.apimgt.lifecycle.manager.core.services;
 
-public class LCManagerServiceImpl implements LCManagerService {
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifeCycleException;
 
+public interface LCManagementService {
+
+    public void createLifecycle (String lifecycleConfiguration) throws LifeCycleException;
+
+    public String[] getLifecycleList() throws LifeCycleException;
+
+    public String getLifecycleConfiguration(String lcName) throws LifeCycleException;
 }
