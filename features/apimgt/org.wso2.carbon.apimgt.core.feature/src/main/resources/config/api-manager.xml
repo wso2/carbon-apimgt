@@ -539,5 +539,12 @@
         <EnableJWTClaimConditions>false</EnableJWTClaimConditions>
         <EnableQueryParamConditions>false</EnableQueryParamConditions>
     </ThrottlingConfigurations>
+    
+    <Workflow>
+    	<BPMNServerUrl>https://localhost:9445/bpmn</BPMNServerUrl>   		
+    	<BPMNServerUser>admin</BPMNServerUser>
+    	<BPMNServerPassword>admin</BPMNServerPassword>
+    	<WorkflowCallbackAPI>https://localhost:9443/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
+    </Workflow>
 
 </APIManager>

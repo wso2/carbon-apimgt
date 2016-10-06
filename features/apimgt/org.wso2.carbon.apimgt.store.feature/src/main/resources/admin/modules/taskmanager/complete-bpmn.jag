@@ -1,0 +1,56 @@
+<%
+var carbon = require('carbon');
+var log = new Log();
+var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+var adminUserName = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUser");
+var adminPassword = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerPassword");
+var serverUrl = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUrl");
+
+
+var completeBPMNTask = function (taskId, status) {
+      var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
+
+     var basicHeader = "Basic " + getAuthorizationHeader().toString();
+     var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+     var taskUrl = serverUrl + "/runtime/tasks/" + taskId;
+
+     var payload = {};
+     payload.action = "complete"
+     payload.variables = [];
+
+     var variable = {};
+     variable.name = "approval";
+     variable.value = new String(status);
+     variable.type = "string";
+     payload.variables.push(variable);
+
+     var response = post(taskUrl, JSON.stringify(payload), headers)
+
+    if(response != null && response.data != null){
+      var errorResponse = JSON.parse(response.data);
+      log.error("Unable to complete task " + errorResponse.statusCode + " : " +  errorResponse.errorMessage);
+      return {
+                  error:true
+            };
+    } else {
+      return {
+                  error:false
+            };
+    }
+};
+
+var getAuthorizationHeader=function(){
+    var Base64Utils = Packages.org.apache.axiom.util.base64.Base64Utils;
+    var inputString = adminUserName + ":" + adminPassword;
+    var byteArray = [];
+
+    for (var i = 0; i < inputString.length; ++i) {
+        byteArray.push(inputString.charCodeAt(i));
+    }
+    var encodedString = Base64Utils.encode(byteArray);
+
+return encodedString;
+};
+%>

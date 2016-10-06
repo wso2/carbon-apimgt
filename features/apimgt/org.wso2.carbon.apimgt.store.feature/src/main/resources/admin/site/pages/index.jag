@@ -22,6 +22,8 @@ middlePage="app-registration-task";
 middlePage="theme-upload-task";
 }else if(pageName=="analytics"){
 middlePage="analytics-task";
+}else if(pageName=="apistate"){
+middlePage="apistate-task";   
 }
 
 (function () {
