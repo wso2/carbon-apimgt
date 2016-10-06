@@ -16,8 +16,25 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager.core.services;
+package org.wso2.carbon.apimgt.lifecycle.manager.sql.beans;
 
-public interface LCManagerService {
+public class LCConfigBean {
+    private String LCName;
+    private String LCContent;
 
+    public String getLCName() {
+        return LCName;
+    }
+
+    public void setLCName(String LCName) {
+        this.LCName = LCName;
+    }
+
+    public String getLCContent() {
+        return LCContent;
+    }
+
+    public void setLCContent(String LCContent) {
+        this.LCContent = LCContent;
+    }
 }

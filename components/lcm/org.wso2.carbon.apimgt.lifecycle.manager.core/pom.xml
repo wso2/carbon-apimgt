@@ -16,13 +16,16 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -37,7 +40,7 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.lifecycle.manager.core*
+                            org.wso2.carbon.apimgt.lifecycle.manager.*
                         </Export-Package>
                         <Import-Package>
                             javax.servlet;version="[2.6.0, 3.0.0)",
@@ -50,5 +53,26 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
+            <artifactId>axiom</artifactId>
+            <version>1.2.11.wso2v10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.sql</artifactId>
+            <version>6.0.6-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
