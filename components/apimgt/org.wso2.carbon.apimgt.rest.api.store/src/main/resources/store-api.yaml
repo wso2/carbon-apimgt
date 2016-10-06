@@ -1330,6 +1330,88 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+
+######################################################
+# The "APIProduct Collection" resource APIs
+######################################################
+  /products:
+
+#-----------------------------------------------------
+# Retrieve all APIProducts of a certain publisher
+#-----------------------------------------------------
+    get:
+      x-scope: apim:product_view
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/products"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/products
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [ \n            { \n         \"id\":  \"64eca60b-2e55-4c38-8603-e9e6bad7d809\", \n         \"provider\":  \"admin\", \n         \"name\":  \"ShoppingService-Premium\", \n         \"version\":  \"1.0.0\", \n         \"description\":  \"Shopping Service APIs product with premium access\", \n         \"status\":  \"PUBLISHED\"\n      }, \n            { \n         \"id\":   \"79ecb63t-3e75-6c35-9204-i5u6bjl7i714\", \n         \"provider\":  \"admin\", \n         \"name\":   \"ShoppingService-Basic\", \n         \"version\":  \"1.0.0\", \n         \"description\":  \"Shopping Service APIs product with basic access\", \n         \"status\":   \"PUBLISHED\"\n }, \n            { \n         \"id\":   \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\", \n         \"provider\":   \"admin\", \n         \"name\":  \"OrderManager\", \n         \"version\":  \"2.0.0\", \n         \"description\":  \"Order Management related APIs product\", \n         \"status\":  \"PUBLISHED\"\n      } ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
+      summary: |
+        Retrieve/Search API Products
+      description: |
+        This operation provides you a list of available API Products qualifying under a given search condition.
+
+        Each retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+
+        This operation supports retriving API Productss of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's API Productss will be retrieved. If you used an Authorization header, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * By default, this operation retrieves Published API Productss. In order to retrieve Prototyped API Productss, you need to use **query** parameter and specify **status:PROTOTYPED**.
+        * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles.
+      parameters:
+        - $ref : '#/parameters/limit'
+        - $ref : '#/parameters/offset'
+        - $ref : '#/parameters/requestedTenant'
+        - name : query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an API Product if the provider of the API Product is exactly "wso2".
+
+            Additionally you can use wildcards.
+
+            Eg.
+            "provider:wso2*" will match an API Product if the provider of the API Product starts with "wso2".
+
+            Supported attribute modifiers are [**version, context, status,
+            description, subcontext, doc, provider, tag**]
+
+            If no advanced attribute modifier has been specified, search will match the
+            given query string against API Product Name.
+          type: string
+        - $ref : "#/parameters/Accept"
+        - $ref : "#/parameters/If-None-Match"
+      tags:
+        - APIProduct (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying API Productss is returned.
+          schema:
+            $ref: '#/definitions/APIProductList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -2186,6 +2268,179 @@ definitions:
           type: string
         description: Allowed scopes for the access token
         example: ["am_application_scope","default"]
+
+#-----------------------------------------------------
+# The API Product resource
+#-----------------------------------------------------
+  APIProduct:
+    title: APIProduct
+    required:
+      - name
+      - throttlingTier
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: BankFunctions
+      version:
+        type: string
+        example: 1.0.0
+      description:
+        type: string
+        example: A collection of Banking functionality APIs to meet your banking needs
+      provider:
+        type: string
+        example: admin
+      visibility:
+        type: string
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
+          - CONTROLLED
+        example: PUBLIC
+      visibleRoles:
+        type: array
+        items:
+          type: string
+        example: []
+      visibleTenants:
+        type: array
+        items:
+          type: string
+        example: []
+      tags:
+        type: array
+        items:
+          type: string
+        example: ["finance","banking"]
+      thumbnailUri:
+        type: string
+        example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
+      throttlingTier:
+        type: array
+        items:
+          type: string
+        example: ["Unlimited","Gold"]
+      status:
+        type: string
+        example: CREATED
+      apis:
+        type: array
+        items:
+          type: string
+        example: ["3ec1e9ce-d347-4d90-a6cc-1882f0537ce1","f9da2c98-0771-45e4-8dc8-a731105003a8"]
+      businessInformation:
+        properties:
+          businessOwner:
+            type: string
+            example: businessowner
+          businessOwnerEmail:
+            type: string
+            example: businessowner@wso2.com
+          technicalOwner:
+            type: string
+            example: technicalowner
+          technicalOwnerEmail:
+            type: string
+            example: technicalowner@wso2.com
+      subscriptionAvailability:
+        type: string
+        enum:
+          - current_tenant
+          - all_tenants
+          - specific_tenants
+        example: current_tenant
+      subscriptionAvailableTenants:
+        type: array
+        items:
+          type: string
+        example: []
+
+#-----------------------------------------------------
+# The API Product List resource
+#-----------------------------------------------------
+  APIProductList:
+    title: API Product List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API Products returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/products?limit=1&offset=2&query="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/products?limit=1&offset=0&query="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIProductInfo'
+
+#-----------------------------------------------------
+# The API Product List resource
+#-----------------------------------------------------
+  APIProductList:
+    title: API Product List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API Products returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/products?limit=1&offset=2&query="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/products?limit=1&offset=0&query="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIProductInfo'
+
+#-----------------------------------------------------
+# The API Product info resource
+#-----------------------------------------------------
+  APIProductInfo:
+    title: APIProductInfo
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: BankFunctions
+      version:
+        type: string
+        example: 1.0.0
+      description:
+        type: string
+        example: A collection of Banking functionality APIs to meet your banking needs
+      provider:
+        type: string
+        example: admin
+      status:
+        type: string
+        example: CREATED
 
 #-----------------------------------------------------
 # END-OF-FILE
