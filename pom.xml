@@ -26,6 +26,7 @@
         <module>service-stubs/apimgt</module>
         <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
+        <module>components/lcm</module>
         <module>components/forum</module>
         <module>components/sso-hostobject</module>
         <module>components/oidc-authenticator</module>

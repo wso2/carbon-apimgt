@@ -750,34 +750,54 @@
 	</div>
 </div>  
 </script>
-<div  id="environmentsRetry-modal" class="modal hide fade">
-        <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3><%=i18n.localize("Gateway Failures")%></h3>
-        </div>
-        <div class="modal-body">
-        <div id="modal-published-header">
-        <%=i18n.localize("Failed to Publish Environments")%>
-        </div>
-        <div id="modal-published-content">
-        </div>
-        <div id="modal-unpublished-header">
-        <%=i18n.localize("Failed to UnPublish Environments")%>
-                </div>
-                <div id="modal-unpublished-content">
-                </div>
-                <input type="hidden" id="retryType"/>
-        </div>
-        <div class="modal-footer">
-        <div id="res" class="hide" style="color:red;float:left"></div>
-        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="<%=i18n.localize("do gateway action")%>"><%=i18n.localize("OK")%></a>
-                                   <script type="text/javascript">
-                            function doGatewayAction() {
-                               $("#environmentsRetry-modal").modal('hide');
-                              }
-                                   </script>
-        </div>
+
+<div  id="environmentsRetry-modal" class="modal fade">
+   <div class="modal-dialog">
+   <div class="modal-content">
+      <div class="modal-header">
+         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h3><%=i18n.localize("Gateway Failures")%></h3>
+      </div>
+         <div id="modal-published-header" class="modal-body">
+            <table>
+               <tbody>
+                  <tr>
+                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/warning.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("warnMsgThumb")%>"></td>
+                     <td><span class="messageText"><b><%=i18n.localize("Failed to Publish Environments")%></b></span></td>
+                  <tr>
+               </tbody>
+            </table>
+            <div id="modal-published-content" class="modal-body">
+            </div>
+         </div>
+         <div id="modal-unpublished-header" class="modal-body">
+            <table>
+               <tbody>
+                  <tr>
+                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/warning.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("warnMsgThumb")%>"></td>
+                     <td><span class="messageText"><b><%=i18n.localize("Failed to UnPublish Environments")%></b></span></td>
+                  <tr>
+               </tbody>
+            </table>
+         </div>
+         <div id="modal-unpublished-content" class="modal-body">
+         </div>
+         <input type="hidden" id="retryType"/>
+
+      <div class="modal-footer">
+         <div id="res" class="hide" style="color:red;float:left"></div>
+         <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="<%=i18n.localize("do gateway action")%>"><%=i18n.localize("OK")%></a>
+         <script type="text/javascript">
+            function doGatewayAction() {
+               $("#environmentsRetry-modal").modal('hide');
+              }
+
+         </script>
+         </div>
+      </div>
+   </div>
 </div>
+
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <fieldset class="<%= hide_impl %> implementation_method_inline implementation_method">
 <legend><%=i18n.localize("Resources")%></legend>

@@ -820,17 +820,6 @@ public interface APIProvider extends APIManager {
     String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
 
     /**
-     * Search API Product
-     *
-     * @param searchContent  Search Content
-     * @param searchType  Search Type
-     * @return   Set of APIs
-     * @throws APIManagementException
-     */
-    List<APIProduct> searchAPIProducts(String searchContent, String searchType, String providerId)
-            throws APIManagementException;
-
-    /**
      * Get a list of APIs published by the given provider. If a given API has multiple APIs,
      * only the latest version will
      * be included in this list.
@@ -842,18 +831,47 @@ public interface APIProvider extends APIManager {
     List<APIProduct> getAPIProductsByProvider(String providerId) throws APIManagementException;
 
     /**
-     * Get specific APIProduct
-     *
-     * @param apiProductID APIProduct
-     * @throws APIManagementException if failed to add APIProduct
-     */
-    APIProduct getAPIProduct(APIProductIdentifier apiProductID) throws APIManagementException;
-
-    /**
      * Adds a new APIProduct to the Store
      *
      * @param apiProduct APIProduct
      * @throws APIManagementException if failed to add APIProduct
      */
     void addAPIProduct(APIProduct apiProduct) throws APIManagementException;
+
+    /**
+     * Create a new version of the <code>apiProduct</code>, with version <code>newVersion</code>
+     *
+     * @param apiProduct        The APIProduct to be copied
+     * @param newVersion The version of the new APIProduct
+     * @throws APIManagementException If an error occurs while trying to create
+     *                                the new version of the APIProduct
+     */
+    void createNewAPIProductVersion(APIProduct apiProduct, String newVersion) throws APIManagementException;
+
+    /**
+     * Updates design and implementation of an existing APIProduct. This method must not be used to change APIProduct status.
+     * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
+     * should be carried out using the changeAPIProductStatus method of this interface.
+     *
+     * @param apiProduct APIProduct
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update APIProduct
+     */
+    void updateAPIProduct(APIProduct apiProduct) throws APIManagementException;
+
+    /**
+     * Delete an APIProduct
+     *
+     * @param identifier APIProductIdentifier
+     * @throws APIManagementException if failed to remove the APIProduct
+     */
+    void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Associates the given icon image with the specified path.
+     *
+     * @param resourceFile         to be saved
+     * @return a String URL pointing to the image that was added
+     * @throws APIManagementException if an error occurs while adding the icon image
+     */
+    String addProductImage(ResourceFile resourceFile) throws APIManagementException;
 }

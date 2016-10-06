@@ -247,7 +247,7 @@ $(document).ready(function(){
     else {
     	$(this).parent().parent().parent().next().children().next().children().hide();
     }
-
+    validate_Transports();
 });
 
 $('.js_hidden_section_title').click(function(){
@@ -293,15 +293,15 @@ function showHideResourceLevelTierSelection() {
     }
 }
 
+var transport_error = $("#transport_error").text();
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
-    $("#transport_error").remove();
     if(checkedHttpTransport || checkedHttpsTransport){
-    $( "div.checkbox" ).removeClass('error-multiselect');
+        $("#transport_error").addClass("hide");
         return true;
     }
-    $( "div.checkbox" ).addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
+    $("#transport_error").removeClass("hide").show().text(transport_error);
     return false;
 }
 

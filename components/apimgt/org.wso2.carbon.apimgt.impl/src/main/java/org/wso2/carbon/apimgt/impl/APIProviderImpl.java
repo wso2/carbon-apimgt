@@ -38,28 +38,57 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
+import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.*;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
-import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
-import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
+import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -98,7 +127,6 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -4565,123 +4593,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    public List<APIProduct> searchAPIProducts(String searchContent, String searchType, String providerId)
-                                                                                        throws APIManagementException {
-        List<APIProduct> foundApiProductList = new ArrayList<APIProduct>();
-        String regex = "(?i)[\\w.|-]*" + searchContent.trim() + "[\\w.|-]*";
-        Pattern pattern;
-        Matcher matcher;
-        String apiConstant = null;
-        try {
-            if (providerId != null) {
-                List<APIProduct> apiProductList = getAPIProductsByProvider(providerId);
-                if (apiProductList == null || apiProductList.isEmpty()) {
-                    return apiProductList;
-                }
-                pattern = Pattern.compile(regex);
-                for (APIProduct apiProduct : apiProductList) {
-                    if ("Name".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getApiProductName();
-                    } else if ("Provider".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getProviderName();
-                    } else if ("Version".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getId().getVersion();
-                    } else if ("Status".equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getStatus().getStatus();
-                    } else if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equalsIgnoreCase(searchType)) {
-                        apiConstant = apiProduct.getDescription();
-                    }
-                    if (apiConstant != null) {
-                        matcher = pattern.matcher(apiConstant);
-                        if (matcher.find()) {
-                            foundApiProductList.add(apiProduct);
-                        }
-                    }
-                }
-            } else {
-                foundApiProductList = searchAPIProducts(searchContent, searchType);
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with type", e);
-        }
-        Collections.sort(foundApiProductList, new APIProductNameComparator());
-        return foundApiProductList;
-    }
-
-
-    /**
-     * Search APIs
-     * @param searchTerm
-     * @param searchType
-     * @return
-     * @throws APIManagementException
-     */
-
-    private List<APIProduct> searchAPIProducts(String searchTerm, String searchType) throws APIManagementException {
-        List<APIProduct> apiProductList = new ArrayList<APIProduct>();
-
-        Pattern pattern;
-        Matcher matcher;
-        String searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_NAME;
-        boolean isTenantFlowStarted = false;
-        String userName = this.username;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
-            if (artifactManager != null) {
-                if ("Name".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_NAME;
-                } else if ("Version".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_VERSION;
-                } else if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_DESCRIPTION;
-                } else if ("Provider".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_PROVIDER;
-                    searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if ("Status".equalsIgnoreCase(searchType)) {
-                    searchCriteria = APIConstants.API_PRODUCT_OVERVIEW_STATUS;
-                }
-
-                String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
-                pattern = Pattern.compile(regex);
-
-
-                GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return apiProductList;
-                }
-
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String value = artifact.getAttribute(searchCriteria);
-
-                    if (value != null) {
-                        matcher = pattern.matcher(value);
-                        if (matcher.find()) {
-                            /*APIProduct resultAPIProduct = APIUtil.getAPIProduct(artifact, registry);
-                            if (resultAPIProduct != null) {
-                                apiProductList.add(resultAPIProduct);
-                            }*/
-                        }
-                    }
-                }
-
-
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return apiProductList;
-    }
-
 
     /**
      * Get a list of API Products published by the given provider. If a given API Product has multiple versions,
@@ -4695,32 +4606,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public List<APIProduct> getAPIProductsByProvider(String providerId) throws APIManagementException {
-
-        List<APIProduct> apiProductSortedList = new ArrayList<APIProduct>();
-
-        try {
-            providerId = APIUtil.replaceEmailDomain(providerId);
-            String providerPath = APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
-            Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
-            for (Association association : associations) {
-                String apiProductPath = association.getDestinationPath();
-                Resource resource = registry.get(apiProductPath);
-                String apiProductArtifactId = resource.getUUID();
-                if (apiProductArtifactId != null) {
-                    GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiProductArtifactId);
-                    //apiProductSortedList.add(APIUtil.getAPIProduct(apiProductArtifact, registry));
-                } else {
-                    throw new GovernanceException("artifact id is null of " + apiProductPath);
-                }
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to get APIs for provider : " + providerId, e);
-        }
-        Collections.sort(apiProductSortedList, new APIProductNameComparator());
-
-        return apiProductSortedList;
+        return apiMgtDAO.getAPIProductListByProvider(providerId);
 
     }
 
@@ -4732,7 +4618,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public APIProduct getAPIProduct(APIProductIdentifier apiProductId) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getAPIProduct(apiProductId, null);
+        return apiMgtDAO.getAPIProduct(apiProductId, null);
     }
 
     /**
@@ -4745,11 +4631,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPIProduct(APIProduct apiProduct) throws APIManagementException {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("API details successfully added to the registry. API Name: " +
-                        apiProduct.getId().getApiProductName() + ", API Version : " + apiProduct.getId().getVersion());
-            }
-
             int tenantId;
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
@@ -4779,6 +4660,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error in adding API :" + apiProduct.getId().getApiProductName(), e);
         }
+    }
+
+    @Override
+    public void createNewAPIProductVersion(APIProduct apiProduct, String newVersion) throws APIManagementException {
+
+        if(apiProduct == null || newVersion == null){
+            throw new IllegalArgumentException("Invalid arguments supplied to API Product or API product new version");
+        }
+
+        //Get existing API product information.
+        APIProductIdentifier apiProductIdentifier = apiProduct.getId();
+
+        APIProductIdentifier newAPIProductIdentifier = new APIProductIdentifier(apiProductIdentifier.getProviderName
+                (),apiProductIdentifier.getApiProductName(), newVersion );
+
+        APIProduct newAPIProduct  = new APIProduct(newAPIProductIdentifier);
+
+        //Add new APIProduct version
+        addAPIProduct(newAPIProduct);
+
+    }
+
+    @Override
+    public void updateAPIProduct(APIProduct apiProduct) throws APIManagementException {
+
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+
+    }
+
+    @Override
+    public String addProductImage(ResourceFile resourceFile) throws APIManagementException {
+        return null;
     }
 
 

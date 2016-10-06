@@ -400,12 +400,12 @@ function showGatewayFailure(message) {
         var divPublish = "", divUnpublished = "";
         for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
             var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
-            divPublish += splitPublished[0] + "<br>" + splitPublished[1] + "<br>";
+            divPublish += "<b>"+splitPublished[0]+"</b>" + "<br>" + splitPublished[1] + "<br>";
         }
         for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
             var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
 
-            divUnpublished += splitUnPublished[0] + "<br>" + splitUnPublished[1] + "<br>";
+            divUnpublished += "<b>"+splitUnPublished[0] +"<b>"+ "<br>" + splitUnPublished[1] + "<br>";
         }
         $("#modal-published-content").empty();
         $("#modal-unpublished-content").empty();
@@ -420,6 +420,7 @@ function showGatewayFailure(message) {
             $("#modal-unpublished-content").hide();
         }
         $("#retryType").val("manage");
+        $("#environmentsRetry-modal").removeClass('hide');
         $("#environmentsRetry-modal").modal('show');
     }
     else {

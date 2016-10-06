@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +27,28 @@ import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductStatus;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -57,8 +77,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -85,7 +103,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -108,6 +132,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
+//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -5441,16 +5468,30 @@ public class ApiMgtDAO {
             prepStmt.setString(2, productId.getApiProductName());
             prepStmt.setString(3, productId.getVersion());
             prepStmt.setString(4, apiProduct.getDescription());
-            prepStmt.setString(5, String.valueOf(apiProduct.getAvailableTiers()));
+
+            Set<Tier> availableTiers = apiProduct.getAvailableTiers();
+
+            Iterator it = availableTiers.iterator();
+
+            StringBuilder tierString = new StringBuilder("");
+            while (it.hasNext()) {
+                if (!tierString.toString().equals("")) {
+                    tierString.append(',');
+                }
+                tierString.append(((Tier) it.next()).getName());
+            }
+
+            prepStmt.setString(5, tierString.toString());
             prepStmt.setString(6, apiProduct.getCreatedUser());
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, apiProduct.getUpdatedUser());
             prepStmt.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(10, apiProduct.getVisibility());
-            prepStmt.setString(11, apiProduct.getBusinessOwner());
-            prepStmt.setString(12, apiProduct.getBusinessOwnerEmail());
-            prepStmt.setString(13, apiProduct.getSubscriptionAvailability());
-            prepStmt.setString(14, UUID.randomUUID().toString());
+            prepStmt.setString(11, APIProductStatus.CREATED.toString());
+            prepStmt.setString(12, apiProduct.getBusinessOwner());
+            prepStmt.setString(13, apiProduct.getBusinessOwnerEmail());
+            prepStmt.setString(14, apiProduct.getSubscriptionAvailability());
+            prepStmt.setString(15, UUID.randomUUID().toString());
 
             prepStmt.execute();
             connection.commit();
@@ -6376,6 +6417,74 @@ public class ApiMgtDAO {
             }
         }
         return id;
+    }
+
+    public List<APIProduct> getAPIProducts(String searchTerm, String searchType, String providerId,
+                                                                Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<APIProduct> apiProductList = new ArrayList<APIProduct>();
+
+        try {
+            if (connection == null) {
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+            String whereColumn = "API_PRODUCT_NAME";
+
+            if ("Name".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_NAME";
+            } else if ("Version".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_VERSION";
+            } else if ("Description".equalsIgnoreCase(searchType)) {
+                whereColumn = "DESCRIPTION";
+            } else if ("Provider".equalsIgnoreCase(searchType)) {
+                whereColumn = "API_PRODUCT_PROVIDER";
+                searchTerm = searchTerm.replaceAll("@", "-AT-");
+            } else if ("Status".equalsIgnoreCase(searchType)) {
+                whereColumn = "LIFECYCLE_STATE";
+            }
+
+            String searchQuery = SQLConstants.GET_MIN_API_PRODUCT_PRE_SQL + whereColumn + " like '%" +
+                                        searchTerm +  "%'";
+
+            if (providerId != null) {
+                searchQuery = searchQuery + " AND API_PRODUCT_PROVIDER = '" + providerId + "'";
+            }
+
+            prepStmt = connection.prepareStatement(searchQuery);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String provider = rs.getString("API_PRODUCT_PROVIDER");
+                String name =  rs.getString("API_PRODUCT_NAME");
+                String version = rs.getString("API_PRODUCT_VERSION");
+
+                APIProductIdentifier productId = new APIProductIdentifier(provider, name, version);
+                APIProduct apiProduct = new APIProduct(productId);
+                apiProduct.setDescription(rs.getString("DESCRIPTION"));
+                apiProduct.setUUID(rs.getString("UUID"));
+
+                String status = rs.getString("LIFECYCLE_STATE");
+                apiProduct.setStatus(APIUtil.getApiProductStatus(status));
+
+                apiProductList.add(apiProduct);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while locating API Product for Search Type: " + searchType +
+                    " and Search Term: " + searchTerm, e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+
+        return apiProductList;
     }
 
     public APIProduct getAPIProduct(APIProductIdentifier apiProductId, Connection connection) throws APIManagementException {
@@ -11266,5 +11375,46 @@ public class ApiMgtDAO {
         }
 
         return accessTokens;
+    }
+
+    /**
+     * This method Is used to get API product filtering by the Provide from database.
+     *
+     * @param providerId    provider username.
+     * @return
+     * @throws APIManagementException
+     */
+    public List<APIProduct> getAPIProductListByProvider(String providerId) throws APIManagementException {
+        List<APIProduct> apiProducts = new ArrayList<APIProduct>();
+
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            String query = SQLConstants.GET_API_PRODUCT_DETAILS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            selectPreparedStatement = connection.prepareStatement(query + " WHERE API_PRODUCT_PROVIDER = ?");
+            selectPreparedStatement.setString(1, providerId);
+            resultSet = selectPreparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+
+                APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(resultSet.getString
+                        ("API_PRODUCT_PROVIDER") + "_" + resultSet.getString("API_PRODUCT_NAME") + "_" +  resultSet
+                        .getString("API_PRODUCT_VERSION"));
+
+                APIProduct apiProduct = new APIProduct(apiProductIdentifier);
+                apiProducts.add(apiProduct);
+
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to get APIProducts Lists for provider ID : '" + providerId + "'",
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+
+        return apiProducts;
     }
 }

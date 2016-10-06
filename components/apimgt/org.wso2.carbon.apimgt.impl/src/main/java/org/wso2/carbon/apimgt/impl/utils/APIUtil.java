@@ -6125,6 +6125,13 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+
+                //If the policy is a subscription policy
+                if(policy instanceof SubscriptionPolicy){
+                    SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy)policy;
+                    setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
+                }
+
                 if(limit instanceof RequestCountLimit) {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
@@ -6151,6 +6158,41 @@ public final class APIUtil {
             tierMap.remove(APIConstants.UNAUTHENTICATED_TIER);
         }
         return tierMap;
+    }
+
+    /**
+     * Extract custom attributes and billing plan from subscription policy and set to tier.
+     * @param subscriptionPolicy - The SubscriptionPolicy object to extract details from
+     * @param tier - The Tier to set information into
+     */
+    public static void setBillingPlanAndCustomAttributesToTier(SubscriptionPolicy subscriptionPolicy, Tier tier){
+
+        //set the billing plan.
+        tier.setTierPlan(subscriptionPolicy.getBillingPlan());
+
+        //If the tier has custom attributes
+        if(subscriptionPolicy.getCustomAttributes() != null &&
+                subscriptionPolicy.getCustomAttributes().length > 0){
+
+            Map<String, Object> tierAttributes = new HashMap<String, Object>();
+            try {
+                String customAttr = new String(subscriptionPolicy.getCustomAttributes(), "UTF-8");
+                JSONParser parser = new JSONParser();
+                JSONArray jsonArr = (JSONArray) parser.parse(customAttr);
+                Iterator jsonArrIterator = jsonArr.iterator();
+                while(jsonArrIterator.hasNext()){
+                    JSONObject json = (JSONObject)jsonArrIterator.next();
+                    tierAttributes.put(String.valueOf(json.get("name")), json.get("value"));
+                }
+                tier.setTierAttributes(tierAttributes);
+            } catch (ParseException e) {
+                log.error("Unable to convert String to Json", e);
+                tier.setTierAttributes(null);
+            } catch (UnsupportedEncodingException e) {
+                log.error("Custom attribute byte array does not use UTF-8 character set", e);
+                tier.setTierAttributes(null);
+            }
+        }
     }
 
     public static Set<Tier> getAvailableTiers(Map<String, Tier> definedTiers, String tiers, String apiName) {
