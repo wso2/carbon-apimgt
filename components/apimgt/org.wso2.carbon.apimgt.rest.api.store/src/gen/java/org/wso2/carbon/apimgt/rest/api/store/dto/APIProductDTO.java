@@ -1,33 +1,32 @@
 
-
 /*
  *
- *  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *  *
- *  * WSO2 Inc. licenses this file to you under the Apache License,
- *  * Version 2.0 (the "License"); you may not use this file except
- *  * in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  * http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing,
- *  * software distributed under the License is distributed on an
- *  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  * KIND, either express or implied. See the License for the
- *  * specific language governing permissions and limitations
- *  * under the License.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  *
  */
 
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
-
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -37,63 +36,61 @@ import javax.validation.constraints.NotNull;
 
 @ApiModel(description = "")
 public class APIProductDTO  {
-  
-  
-  
+
   private String id = null;
-  
+
   @NotNull
   private String name = null;
-  
-  
+
+
   private String version = null;
-  
-  
+
+
   private String description = null;
-  
-  
+
+
   private String provider = null;
-  
+
   public enum VisibilityEnum {
-     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
-  };
-  
+    PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
+  }
+
   private VisibilityEnum visibility = null;
-  
-  
+
+
   private List<String> visibleRoles = new ArrayList<String>();
   
   
   private List<String> visibleTenants = new ArrayList<String>();
-  
-  
+
+
   private List<String> tags = new ArrayList<String>();
-  
-  
+
+
   private String thumbnailUri = null;
-  
+
   @NotNull
   private List<String> throttlingTier = new ArrayList<String>();
-  
-  
+
+
   private String status = null;
-  
-  
+
+
   private List<String> apis = new ArrayList<String>();
-  
-  
+
+
   private APIBusinessInformationDTO businessInformation = null;
-  
+
   public enum SubscriptionAvailabilityEnum {
-     current_tenant,  all_tenants,  specific_tenants, 
-  };
-  
+    current_tenant,  all_tenants,  specific_tenants,
+  }
+
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
-  
-  
+
+
   private List<String> subscriptionAvailableTenants = new ArrayList<String>();
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -105,7 +102,7 @@ public class APIProductDTO  {
     this.id = id;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -117,7 +114,7 @@ public class APIProductDTO  {
     this.name = name;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -129,7 +126,7 @@ public class APIProductDTO  {
     this.version = version;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -141,7 +138,7 @@ public class APIProductDTO  {
     this.description = description;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -153,7 +150,7 @@ public class APIProductDTO  {
     this.provider = provider;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -165,7 +162,7 @@ public class APIProductDTO  {
     this.visibility = visibility;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -177,7 +174,7 @@ public class APIProductDTO  {
     this.visibleRoles = visibleRoles;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -189,7 +186,7 @@ public class APIProductDTO  {
     this.visibleTenants = visibleTenants;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -201,7 +198,7 @@ public class APIProductDTO  {
     this.tags = tags;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -213,7 +210,7 @@ public class APIProductDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -225,7 +222,7 @@ public class APIProductDTO  {
     this.throttlingTier = throttlingTier;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -237,7 +234,7 @@ public class APIProductDTO  {
     this.status = status;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -249,7 +246,7 @@ public class APIProductDTO  {
     this.apis = apis;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -261,7 +258,7 @@ public class APIProductDTO  {
     this.businessInformation = businessInformation;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -273,7 +270,7 @@ public class APIProductDTO  {
     this.subscriptionAvailability = subscriptionAvailability;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -285,13 +282,13 @@ public class APIProductDTO  {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
   }
 
-  
+
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIProductDTO {\n");
-    
+
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  version: ").append(version).append("\n");

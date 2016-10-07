@@ -16,6 +16,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TiersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.ProductsApi"/>
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
