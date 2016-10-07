@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -2504,7 +2505,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiArtifactPath = APIUtil.getAPIPath(identifier);
 
         try {
-
+            int apiId = apiMgtDAO.getAPIID(identifier, null);
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
             if(subsCount > 0){
                 handleException("Cannot remove the API as active subscriptions exist.", null);
@@ -2639,8 +2640,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		registry.delete(apiProviderPath);
             	}
             }
+            
+            //Run cleanup task for workflow
+            WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+  
+            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                    WorkflowConstants.WF_TYPE_AM_API_STATE);
+            if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
+                apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+            }
+            
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
+        } catch (WorkflowException e) {
+            handleException("Failed to execute workflow cleanup task ", e);
         }
     }
 

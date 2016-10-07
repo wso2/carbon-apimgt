@@ -30,21 +30,26 @@ import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -170,7 +175,13 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
                 httpPost.setEntity(requestEntity);
                 try {
-                    httpClient.execute(httpPost);
+                    HttpResponse response = httpClient.execute(httpPost);
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                        String error = "Error while starting the process:  " + response.getStatusLine().getStatusCode()
+                                + " " + response.getStatusLine().getReasonPhrase();
+                        log.error(error);
+                        throw new WorkflowException(error);
+                    }
                 } catch (ClientProtocolException e) {
                     log.error("Error while creating the http client", e);
                     throw new WorkflowException("Error while creating the http client", e);
@@ -197,6 +208,124 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         return new GeneralWorkflowResponse();
     }
 
+    @Override
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
+        workflowDTO.setUpdatedTime(System.currentTimeMillis());
+        super.complete(workflowDTO);
+
+        String action = workflowDTO.getAttributes().get("apiLCAction");
+        String apiName = workflowDTO.getAttributes().get("apiName");
+        String providerName = workflowDTO.getAttributes().get("apiProvider");
+        String version = workflowDTO.getAttributes().get("apiVersion");
+        String invoker = workflowDTO.getAttributes().get("invoker");
+        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState");
+
+        int tenantId = workflowDTO.getTenantId();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        try {
+            // tenant flow is already started from the rest api service impl. no need to start from here
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceUserRegistry(invoker, tenantId);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+                String targetStatus = "";
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+                targetStatus = apiArtifact.getLifecycleState();
+                if (!currentStatus.equals(targetStatus)) {
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
+                            targetStatus.toUpperCase(), invoker, tenantId);
+                }
+                if (log.isDebugEnabled()) {
+                    String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
+                            + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                    log.debug(logMessage);
+                }
+            }
+
+        } catch (RegistryException e) {
+            log.error("Could not complete api state change workflow", e);
+            throw new WorkflowException("Could not complete api state change workflow", e);
+        } catch (APIManagementException e) {
+            log.error("Could not complete api state change workflow", e);
+            throw new WorkflowException("Could not complete api state change workflow", e);
+        }
+
+        return new GeneralWorkflowResponse();
+    }
+
+    @Override
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Starting cleanup task for APIStateChangeWSWorkflowExecutor for :" + workflowExtRef);
+        }
+        String errorMsg;
+        URL serviceEndpointURL = new URL(serviceEndpoint);
+        HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
+        HttpGet httpGet = new HttpGet(
+                serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "?businessKey=" + workflowExtRef);
+        String authHeader = getBasicAuthHeader();
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+        JSONParser parser = new JSONParser();
+
+        HttpDelete httpDelete = null;
+
+        try {
+            HttpResponse response = httpClient.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            String processId = null;
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String responseStr = EntityUtils.toString(entity);
+                if (log.isDebugEnabled()) {
+                    log.debug("Process instance details for ref : " + workflowExtRef + ": " + responseStr);
+                }
+                JSONObject obj = (JSONObject) parser.parse(responseStr);
+                JSONArray data = (JSONArray) obj.get("data");
+                if (data != null) {
+                    JSONObject instanceDetails = (JSONObject) data.get(0);
+                    processId = (String) instanceDetails.get("id");
+                }
+
+                if (processId != null) {
+                    httpDelete = new HttpDelete(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "/" + processId);
+                    httpDelete.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+                    response = httpClient.execute(httpDelete);
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
+                        errorMsg = "Error while deleting process instance details for " + workflowExtRef + " code: "
+                                + response.getStatusLine().getStatusCode();
+                        log.error(errorMsg);
+                        throw new WorkflowException(errorMsg);
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully deleted process instance for  : " + workflowExtRef);
+                    }
+                }
+
+            } else {
+                errorMsg = "Error while getting process instance details for " + workflowExtRef + " code: "
+                        + response.getStatusLine().getStatusCode();
+                log.error(errorMsg);
+                throw new WorkflowException(errorMsg);
+            }
+        } catch (ClientProtocolException e) {
+            log.error("Error while creating the http client", e);
+            throw new WorkflowException("Error while creating the http client", e);
+        } catch (IOException e) {
+            log.error("Error while connecting to the external service", e);
+            throw new WorkflowException("Error while connecting to the external service", e);
+        } catch (ParseException e) {
+            log.error("Error while parsing response from BPS server", e);
+            throw new WorkflowException("Error while parsing response from BPS server", e);
+        } finally {
+            httpGet.reset();
+            httpDelete.reset();
+        }
+    }
+
+    /**
+     * get credentials that are needed to call the rest api in BPMN engine
+     */
     private String getBasicAuthHeader() {
 
         // if credentials are not defined in the workflow-extension.xml file, then get the global credentials from the
@@ -211,6 +340,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         return "Basic " + new String(encodedAuth);
     }
 
+    /**
+     * build the payload to call the BPMN process
+     */
     private String buildPayloadForBPMNProcess(APIStateWorkflowDTO apiStateWorkFlowDTO) {
 
         JSONArray variables = new JSONArray();
@@ -286,11 +418,14 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         return payload.toJSONString();
     }
 
+    /**
+     * set information that are needed to invoke callback service
+     */
     private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) {
         // if credentials are not defined in the workflow-extension.xml file call dcr endpoint and generate a
         // oauth application and pass the client id and secret
         if (clientId == null || clientSecret == null) {
-
+            // TODO impliment dcr enpoint calling
         }
         apiStateWorkFlowDTO.setClientId(clientId);
         apiStateWorkFlowDTO.setClientSecret(clientSecret);
@@ -299,111 +434,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
     }
 
-    @Override
-    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        workflowDTO.setUpdatedTime(System.currentTimeMillis());
-        super.complete(workflowDTO);
-
-        String action = workflowDTO.getAttributes().get("apiLCAction");
-        String apiName = workflowDTO.getAttributes().get("apiName");
-        String providerName = workflowDTO.getAttributes().get("apiProvider");
-        String version = workflowDTO.getAttributes().get("apiVersion");
-        String invoker = workflowDTO.getAttributes().get("invoker");
-        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState");
-
-        int tenantId = workflowDTO.getTenantId();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        try {
-            // tenant flow is already started from the rest api service impl. no need to start from here
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceUserRegistry(invoker, tenantId);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
-            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                String targetStatus = "";
-                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
-                targetStatus = apiArtifact.getLifecycleState();
-                if (!currentStatus.equals(targetStatus)) {
-                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
-                            targetStatus.toUpperCase(), invoker, tenantId);
-                }
-                if (log.isDebugEnabled()) {
-                    String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
-                            + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
-                    log.debug(logMessage);
-                }
-            }
-
-        } catch (RegistryException e) {
-            log.error("Could not complete api state change workflow", e);
-            throw new WorkflowException("Could not complete api state change workflow", e);
-        } catch (APIManagementException e) {
-            log.error("Could not complete api state change workflow", e);
-            throw new WorkflowException("Could not complete api state change workflow", e);
-        }
-
-        return new GeneralWorkflowResponse();
-    }
-
-    @Override
-    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-        // TODO implement what should happen when api is deleted
-
-        // two steps.
-
-        // get the process id
-        // GET https://172.16.225.128:9443/bpmn/runtime/process-instances?businessKey=workflowExtRef
-        // Authorization Basic YWRtaW46YWRtaW4=
-
-        // resp
-
-        /*
-         * {
-         * "order": "asc",
-         * "start": 0,
-         * "sort": "id",
-         * "total": 2,
-         * "data": [
-         * {
-         * "suspended": false,
-         * "url": "https://localhost:9443/bpmn/runtime/process-instances/37",
-         * "tenantId": "-1234",
-         * "variables": [],
-         * "activityId": "usertask1",
-         * "processDefinitionId": "myProcess:1:4",
-         * "businessKey": "ssssssssssss",
-         * "ended": false,
-         * "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:4",
-         * "completed": false,
-         * "id": "37"
-         * },
-         * {
-         * "suspended": false,
-         * "url": "https://localhost:9443/bpmn/runtime/process-instances/47",
-         * "tenantId": "1",
-         * "variables": [],
-         * "activityId": "usertask1",
-         * "processDefinitionId": "myProcess:1:46",
-         * "businessKey": "ssssssssssss",
-         * "ended": false,
-         * "processDefinitionUrl": "https://localhost:9443/bpmn/runtime/process-definitions/myProcess:1:46",
-         * "completed": false,
-         * "id": "47"
-         * }
-         * ],
-         * "message": null,
-         * "size": 2
-         * }
-         */
-
-        // based on tenant id , get the id
-
-        // step two
-        // DELETE https://172.16.225.128:9443/bpmn/runtime/process-instances/id
-        // -------Change the registry state
-
-    }
-
+    /**
+     * Read the user provided lifecycle states for the approval task. These are provided in the workflow-extension.xml
+     */
     private Map<String, List<String>> getSelectedStatesToApprove() {
         Map<String, List<String>> stateAction = new HashMap<String, List<String>>();
         // exract selected states from stateList and populate the map
