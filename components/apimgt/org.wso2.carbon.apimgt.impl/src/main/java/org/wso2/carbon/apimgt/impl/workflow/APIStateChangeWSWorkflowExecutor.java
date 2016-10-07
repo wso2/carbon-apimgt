@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -224,6 +225,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             // tenant flow is already started from the rest api service impl. no need to start from here
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceUserRegistry(invoker, tenantId);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
