@@ -34,9 +34,9 @@ public class ErrorListItemDTO  {
 
   
   /**
-   * Description about individual errors occurred\n
+   * Description about Individual errors occurred\n
    **/
-  @ApiModelProperty(required = true, value = "Description about individual errors occurred\n")
+  @ApiModelProperty(required = true, value = "Description about Individual errors occurred\n")
   @JsonProperty("message")
   public String getMessage() {
     return message;
