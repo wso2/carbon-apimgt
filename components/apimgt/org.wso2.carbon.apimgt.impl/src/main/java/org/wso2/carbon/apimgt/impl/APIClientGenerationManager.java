@@ -62,7 +62,7 @@ public class APIClientGenerationManager {
 
     public APIClientGenerationManager() {
         langCodeGen.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
-        langCodeGen.put("android", "io.swagger.codegen.languages.JavaClientCodegen");
+        langCodeGen.put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
         langCodeGen.put("csharp", "io.swagger.codegen.languages.CSharpClientCodegen");
         langCodeGen.put("cpp", "io.swagger.codegen.languages.CppRestClientCodegen");
         langCodeGen.put("dart", "io.swagger.codegen.languages.DartClientCodegen");
