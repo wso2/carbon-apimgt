@@ -25,68 +25,7 @@ include("/jagg/jagg.jag");
             error:true,
             message: msg.error.invalidInputs(validation_errors)
         });
-    } else if (action == "generateSdk"){
-        if (!user) {
-            if(!ssoEnabled){
-                print({
-                    error:true,
-                    message:msg.error.loginRequired(action)
-                });
-            }
-            return;
-        }
-
-        if(request.getParameter('selectedApp')!=null){
-            selectedApp = request.getParameter('selectedApp');
-        }
-        //else if we have selected app in session we will use it.
-        // ** Should not use session to get selected value
-        else if(session.get('selectedApp')!=null){
-            selectedApp = session.get('selectedApp');
-        }
-        //if not pass blank string because host object is waiting for string args..
-        else{
-            selectedApp= "";
-        }
-        //which sdk user wants to generate
-        if(request.getParameter('language')!=null){
-            language = request.getParameter('language');
-        }
-        else {
-            language=null;
-        }
-
-        var groupId = session.get("groupId");
-        mod = jagg.module("subscription");
-        result = mod.generateClientSdk(selectedApp,language,user.username,groupId);
-
-        if (result.error) {
-            if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
-                obj = {
-                    "subscriptionCallbackResponse" : {
-                        "error" : "true",
-                        "message" : result.error.javaException.message
-                    }
-                };
-                response.status = 404;
-                response.contentType = "application/json";
-            } else {
-                obj = {
-                    error:result.error,
-                    message:result.message
-                };
-            }
-        } else {
-            var file = new File("file:///" + result.path);
-            file.open("r");
-            response.contentType = "application/force-download";
-            response.addHeader("Content-Disposition","attachment; filename = \"" + result.fileName + "\"");
-            print(file.getStream());
-            file.close();
-            file.del();
-        }
-        print(obj);
-    }else if (action == "getAllSubscriptions") {
+    } else if (action == "getAllSubscriptions") {
         /*
          This will be called when the user calls listAllSubscription via the Rest API.
          */

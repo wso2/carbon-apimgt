@@ -1,13 +1,16 @@
 {
   "codegen": {
-
+    "servers": "https://generator.swagger.io/api/gen/servers",
+    "clients": "https://generator.swagger.io/api/gen/clients",
+    "server": "https://generator.swagger.io/api/gen/servers/{language}",
+    "client": "https://generator.swagger.io/api/gen/clients/{language}"
   },
   "analytics": {
     "google": {
       "id": ""
     }
   },
-  "disableCodeGen": true,
+  "disableCodeGen": false,
   "examplesFolder": "spec-files/",
   "editorOptions": {
     "theme": "ace/theme/atom_dark"
