@@ -1172,6 +1172,10 @@ msgstr ""
 msgid "HTTP"
 msgstr ""
 
+#: site/themes/wso2/templates/item-manage/template.jag:188
+msgid "Please select at least one Transport."
+msgstr ""
+
 #: site/themes/wso2/templates/item-manage/template.jag:193
 #: site/themes/wso2/templates/item-edit/template.jag:149
 msgid "Response Caching"

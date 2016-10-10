@@ -1062,7 +1062,7 @@
         <analytics.shared.version>1.0.1</analytics.shared.version>
         <carbon.analytics.common.version>5.1.3</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.8</carbon.kernel.version>
+        <carbon.kernel.version>4.4.9</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.4</carbon.commons.version>
@@ -1166,8 +1166,6 @@
         <swagger-jaxrs.version>1.5.10</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <swagger.codegen.version>2.2.0.wso2v1</swagger.codegen.version>
-        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
@@ -1188,7 +1186,8 @@
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
         <event.processor.stub.version>2.1.0</event.processor.stub.version>
-        <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
+        <swagger.codegen.version>2.2.0.wso2v2</swagger.codegen.version>
+        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.10</swagger.core.version>
         <swagger.models.version>1.5.10</swagger.models.version>
         <swagger.annotations.version>1.5.10</swagger.annotations.version>

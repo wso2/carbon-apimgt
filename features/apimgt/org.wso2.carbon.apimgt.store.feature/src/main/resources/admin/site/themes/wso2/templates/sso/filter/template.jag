@@ -11,7 +11,7 @@
     encode = new encode.Encode();
 
 	var requestURI;
-	var requestedPage = encode.forUriComponent(request.getParameter("requestedPage"));
+	var requestedPage = request.getParameter("requestedPage");
 	if(requestedPage!=null && requestedPage != 'null'){
 	requestURI = requestedPage;
 	}else{
@@ -33,6 +33,7 @@
 	    ssoRelyingParty.setProperty("keyStorePassword", site.ssoConfiguration.keyStorePassword);
 	    ssoRelyingParty.setProperty("identityAlias",site.ssoConfiguration.identityAlias);
 	    ssoRelyingParty.setProperty("keyStoreName",site.ssoConfiguration.keyStoreName);
+		ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
 
 	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);

@@ -1,12 +1,16 @@
 <%
 jagg.module("user", {
 
-    login:function () {
+    login: function () {
         return jagg.require(jagg.getModulesDir() + "user/login.jag").login.apply(this, arguments);
     },
 
-    loginWithSAMLToken:function () {
+    loginWithSAMLToken: function () {
         return jagg.require(jagg.getModulesDir() + "user/login.jag").loginWithSAMLToken.apply(this, arguments);
+    },
+
+    getWorkflowCookieBySAMLToken:function () {
+        return jagg.require(jagg.getModulesDir() + "user/login.jag").getWorkflowCookieBySAMLToken.apply(this, arguments);
     },
 
     logout:function () {

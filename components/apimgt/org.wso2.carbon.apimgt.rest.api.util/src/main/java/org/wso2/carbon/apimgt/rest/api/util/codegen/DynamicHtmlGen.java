@@ -74,4 +74,15 @@ public class DynamicHtmlGen extends StaticDocCodegen {
         parameter.description = param.getDescription();
         return parameter;
     }
+
+    /* Uncomment once swagger-code-gen version updated to 2.2.0.wso2v1
+    @Override
+    public String escapeUnsafeCharacters(String input) {
+        return input;
+    }
+
+    @Override
+    public String escapeQuotationMark(String input) {
+        return input;
+    }*/
 }

@@ -97,8 +97,8 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-doc-resources</id>
-                        <phase>generate-resources</phase>
+                        <id>copy-common-doc-resources</id>
+                        <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -107,18 +107,16 @@
                             <resources>
                                 <resource>
                                     <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
-                                    <includes>
-                                        <include>assets/</include>
-                                        <include>fonts/</include>
-                                        <include>js/</include>
-                                    </includes>
+                                    <excludes>
+                                        <exclude>**/*.mustache</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-doc-guide</id>
-                        <phase>generate-resources</phase>
+                        <id>copy-specific-doc-resources</id>
+                        <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -126,9 +124,9 @@
                             <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/</directory>
+                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/documentation</directory>
                                     <includes>
-                                        <include>guide.html</include>
+                                        <include>*</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -171,17 +169,26 @@
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <phase>site</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml</inputSpec>
-                            <language>dynamic-html</language>
+                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
                             <templateDirectory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
                             <output>src/main/resources/api-docs</output>
                         </configuration>
                     </execution>
                 </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.wso2.carbon.apimgt</groupId>
+                        <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+                        <version>${carbon.apimgt.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
