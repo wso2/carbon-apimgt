@@ -35,19 +35,28 @@ var completeBPMNTask = function (taskId, status) {
     variable.type = "string";
     payload.variables.push(variable);
 
-    var response = post(taskUrl, JSON.stringify(payload), headers)
+    try {
+       var response = post(taskUrl, JSON.stringify(payload), headers)
 
-    if(response != null && response.data != null){
-      var errorResponse = JSON.parse(response.data);
-      log.error("Unable to complete task " + errorResponse.statusCode + " : " +  errorResponse.errorMessage);
-      return {
-                  error:true
-            };
-    } else {
-      return {
-                  error:false
-            };
+        if(response != null && response.data != null){
+          var errorResponse = JSON.parse(response.data);
+          log.error("Unable to complete task " + errorResponse.statusCode + " : " +  errorResponse.errorMessage);
+          return {
+                      error:true
+                };
+        } else {
+          return {
+                      error:false
+                };
+        }
+    } catch (e) {
+       log.error("Error while completing tasks " + e);
+        return {
+            error:true
+        };
     }
+
+   
 };
 
 var getAuthorizationHeader=function(){

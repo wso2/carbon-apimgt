@@ -273,6 +273,7 @@
     "tenants": "Visible to Tenants",
     "keys should be separated by colon and each attribute should start with" : "keys should be separated by colon and each attribute should start with",
     "Allowed keys" : "Allowed keys",
-    "API State Approval" : "API State Approval"
+    "API State Approval" : "API State Approval",
+    "Suspended" : "Suspended"
 
 }

@@ -44,7 +44,7 @@ else{
                  <tr>
                     <th><%=i18n.localize("ID")%></th>
                     <th><%=i18n.localize("Description")%></th>
-                    <th><%=i18n.localize("Status")%></th>
+                    <th><%=i18n.localize("Suspended")%></th>
                     <th class="date-time-col"><%=i18n.localize("Created On")%></th>
                     <th class="manage-col"></th>
                 </tr>
@@ -56,7 +56,7 @@ else{
 
 <td id="desc<%=String(i)%>"><%=tasks[i].description%></td>
 <td id="status<%=String(i)%>"><%=tasks[i].suspended%></td>
-<td><%=tasks[i].createTime%></td>
+<td><%=new Date(tasks[i].createTime)%></td>
 <td class="col-sm-3">                        
  				<div class="form-group form-inline">                      
  

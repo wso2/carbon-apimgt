@@ -13,7 +13,7 @@ var serverUrl = workflowConfigs.getServerUrl();
 var isEnabled = workflowConfigs.isEnabled();
 
 var getBPMNTasks = function (taskName) {
-
+    
     if(!isEnabled){
       return null;
     }
@@ -26,10 +26,15 @@ var getBPMNTasks = function (taskName) {
     var headers = {"Authorization": basicHeader};
     var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username;
     var taskList = [];
-    var response = get(taskUrl, {}, headers);
-    if(response != null && response.data != null){
-        taskList = JSON.parse(response.data).data;      
+    try{
+        var response = get(taskUrl, {}, headers);
+        if(response != null && response.data != null){
+            taskList = JSON.parse(response.data).data;      
+        }
+    } catch (e) {
+        log.error("Error while getting tasks " + e);
     }
+   
 
 return taskList;
 
