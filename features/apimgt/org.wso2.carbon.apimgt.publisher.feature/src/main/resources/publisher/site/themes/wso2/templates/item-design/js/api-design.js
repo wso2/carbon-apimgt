@@ -298,7 +298,7 @@ APIDesigner.prototype.get_scopes = function() {
 }
 
 APIDesigner.prototype.has_resources = function(){
-    if(Object.keys(this.api_doc.paths).length == 0) 
+    if(Object.keys(this.api_doc.paths).length == 0)
         return false;
     else
         return true;
@@ -926,7 +926,7 @@ $(document).ready(function(){
         submitHandler: function(form) {
         var designer = APIDesigner();
 
-        if(designer.has_resources() == false){
+        if(designer.has_resources() == false && !ws ){
         	$("#messageModal div.modal-footer").html("");
             jagg.message({
                 content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),

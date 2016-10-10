@@ -50,6 +50,7 @@
     var inSequencesLoaded = false;
     var outSequencesLoaded = false;
     var faultSequencesLoaded = false;
+    var ws = "<%=api.ws%>";
 </script>
 <div id="item-add">
 <%
@@ -128,9 +129,10 @@
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
-
+                  <input type="hidden" id="ws" name="ws" value="<%=api.ws%>"/>
 
                 <div class="panel-group accordion">
+                    <%if(api.ws != "true"){%>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -261,7 +263,9 @@
                             </div>
                         </div>
                     </div>
-
+<%}else{%>
+    <input type="checkbox" id="transport_http" class="hidden" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+    <%}%>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -274,7 +278,7 @@
                         <div class="panel-collapse">
                             <div class="panel-body">
 
-                                        <% if (isSynapseGateway) { %>
+                                        <% if (isSynapseGateway && api.ws != "true") { %>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("Maximum Backend Throughput")%> :
                                                          <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
@@ -347,7 +351,7 @@
                                         	</div>
 
 
-                                        <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+                                        <%  if(mod.isGlobalCEPThrottlingEnabled() || api.ws == "true"){%>
                                             <hr />
                                             <div class="form-group">
                                                 <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("Advanced Throttling Policies")%>:
@@ -359,6 +363,7 @@
                                                     </a>
                                                     <p id="api_policy_help" class="hide"><%=i18n.localize("Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available")%></p>
                                                 </label>
+                                                    <%if(api.ws != "true"){%>
                                                 <div class="controls col-sm-8">
                                                     <label class="radio">
                                                             <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
@@ -368,12 +373,27 @@
                                                             <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="resource_level" <%if(api.apiLevelPolicy == null || api.apiLevelPolicy == ""){%>checked<%}%>>
                                                             <span class="helper"><%=i18n.localize("Apply per Resource")%></span>
                                                     </label>
+                                                </div><%}else{%>
+                                                        <div class="controls col-sm-8">
+                                                    <label class="radio">
+                                                            <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" checked>
+                                                            <span class="helper"><%=i18n.localize("Apply to API")%></span>
+                                                    </label>
                                                 </div>
+                                                        
+                                                        <%}%>
                                             </div>
-                                            <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
+                                            <%if(api.ws != "true"){%>
+                                            <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/><%}else{%>
+                                                <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value="true"/>
+                                                <%}%>
                                           	<div class="form-group">
                                           		<div class="control-label col-sm-3"></div>
+                                                 <%if(api.ws != "true"){%>
                                               	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
+                                                     <%}else{%>
+                                                         <div class="col-sm-4" id="api-level-policy-section" style="display:block">
+                                                         <%}%>
                                                     <select id="apiTier" name="apiTier"  class="form-control selected required">
                                                     <%
                                                     for (var i = 0; i < resourceTiers.length; i++) {
@@ -390,6 +410,7 @@
                                                     %>
                                                     </select>
                                                 </div>
+                                                         <%if(api.ws != "true"){%>
                                                 <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
                                                     <script id="resource-policy-ui-template" language="text/x-handlebars-template">
                                                         <a class="select_adv_policy_for_resource btn btn-secondary"><%=i18n.localize("Select Policy per Resource")%></a>
@@ -437,6 +458,7 @@
                                                     <a class=" help_popup" help_data="tier_help"></a>
                                                     <p id="tier_help" class="hide"><%=i18n.localize("The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.")%></p>
                                                 </div>
+                                                             <%}%>
                                         	</div>
                                         <%  } else { %>
                                         <hr />
@@ -665,6 +687,7 @@
 
         <div class="panel-group accordion">
             <div class="panel panel-default">
+                 <%if(api.ws != "true"){%>   
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <div>
@@ -673,8 +696,10 @@
                         <div class="clearfix"></div>
                     </h4>
                 </div>
+                    <%}%>
                 <div class="panel-collapse">
                     <div class="panel-body">
+                         <%if(api.ws != "true"){%>   
                     <!-- Resources Information -->
                         <div id="api_designer">
                             <div id ="apidoc_details"></div>
@@ -682,6 +707,7 @@
                             <div id ="resource_details"></div>
                         </div>
                         <!-- Resources Information -->
+                             <%}%>
                         <hr/>
                             <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
                             <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />

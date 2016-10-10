@@ -104,8 +104,8 @@
                                     <span class="helper"></span>
                     </label>
                     <div>
-                   		<div class="heading"><%=i18n.localize("Design New API")%></div>
-                        <div class="description truncate" title="<%=i18n.localize("Design and prototype a new API.")%>"><%=i18n.localize("Design and prototype a new API.")%></div>
+                   		<div class="heading"><%=i18n.localize("Design New REST API")%></div>
+                        <div class="description truncate" title="<%=i18n.localize("Design and prototype a new REST API.")%>"><%=i18n.localize("Design and prototype a new REST API.")%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
                         </div>
@@ -122,6 +122,34 @@
 					</form>
 				</div>
 			</div>
-		</div>	
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading" role="tab" id="headingFour" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse4" aria-expanded="true" aria-controls="accordion1-collapse3">
+				<h4 class="panel-title">
+					<label class="radio">
+                                    <input class="create-api" type="radio" name="create-api" />
+                                    <span class="helper"></span>
+                    </label>
+                    <div>
+                   		<div class="heading"><%=i18n.localize("Design New Websocket API")%></div>
+                        <div class="description truncate" title="<%=i18n.localize("Design and prototype a new Websocket API.")%>"><%=i18n.localize("Design and prototype a new Websocket API.")%></div>
+                        <div class="status">
+                        	<i class="fw fw-down"></i>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+				</h4>
+			</div>
+			<div id="accordion1-collapse4" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+				<div class="panel-body">
+					<form class="form-horizontal" id="designNewWSAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="ws" type="hidden"/>
+	                        <button id="designNewWSAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>
+					</form>
+				</div>
+			</div>
+		</div>
+        </div>	
 	</div>
 <% }); %>
