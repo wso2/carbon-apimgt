@@ -96,5 +96,8 @@ public class WorkflowConstants {
                     "         <wor:workflowExternalRef>$3</wor:workflowExternalRef>\n" +
                     "         <wor:callBackURL>$4</wor:callBackURL>\n" +
                     "      </wor:UserSignupProcessRequest>";
+    
+    public static final String DEFAULT_EXECUTOR_API_STATE_CHANGE = 
+            "org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor";
 
 }
