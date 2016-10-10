@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
@@ -3677,7 +3678,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (!WorkflowStatus.CREATED.equals(apiWFState)) {
 
                     try {
-
+                        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
                         WorkflowExecutor apiStateWFExecutor = WorkflowExecutorFactory.getInstance()
                                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
                         APIStateWorkflowDTO apiStateWorkflow = new APIStateWorkflowDTO();
@@ -3686,7 +3688,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setApiName(apiName);
                         apiStateWorkflow.setApiVersion(apiVersion);
                         apiStateWorkflow.setApiProvider(providerName);
-                        apiStateWorkflow.setCallbackUrl(apiStateWFExecutor.getCallbackURL());
+                        apiStateWorkflow.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
                         apiStateWorkflow.setExternalWorkflowReference(apiStateWFExecutor.generateUUID());
                         apiStateWorkflow.setTenantId(tenantId);
                         apiStateWorkflow.setTenantDomain(this.tenantDomain);
@@ -3713,7 +3715,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 
                 // only change the lifecycle if approved
-                if (WorkflowStatus.APPROVED.equals(apiWFState)) {
+                // apiWFState is null when simple wf executor is used because wf state is not stored in the db. 
+                if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                     targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();

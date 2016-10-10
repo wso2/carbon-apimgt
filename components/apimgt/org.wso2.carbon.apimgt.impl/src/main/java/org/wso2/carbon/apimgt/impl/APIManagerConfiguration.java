@@ -450,7 +450,7 @@ public class APIManagerConfiguration {
                 workflowProperties.setServerUser(APIUtil.replaceSystemProperty(workflowServerUserElement.getText()));
             }
             OMElement workflowCallbackElement = workflowConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_URL));
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_CALLBACK));
             if (workflowCallbackElement != null) {
                 workflowProperties
                         .setWorkflowCallbackAPI(APIUtil.replaceSystemProperty(workflowCallbackElement.getText()));

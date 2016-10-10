@@ -50,13 +50,13 @@ public class APIStateChangeSimpleWorkflowExecutor extends WorkflowExecutor {
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
-        WorkflowResponse workflowResponse = complete(workflowDTO);       
+        WorkflowResponse workflowResponse = complete(workflowDTO);     
+        super.publishEvents(workflowDTO);
         return workflowResponse;
     }
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        super.complete(workflowDTO);
         return new GeneralWorkflowResponse();
     }
     

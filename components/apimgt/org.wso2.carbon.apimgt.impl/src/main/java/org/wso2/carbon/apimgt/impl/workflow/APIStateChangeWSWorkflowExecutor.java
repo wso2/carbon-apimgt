@@ -167,7 +167,13 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 // build request payload
 
                 String jsonPayload = buildPayloadForBPMNProcess(apiStateWorkFlowDTO);
-
+                if(serviceEndpoint == null){
+                    //set the bps endpoint from the global configurations
+                    WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+                    serviceEndpoint = workflowProperties.getServerUrl();
+                }
+                 
                 URL serviceEndpointURL = new URL(serviceEndpoint);
                 HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
                         serviceEndpointURL.getProtocol());
