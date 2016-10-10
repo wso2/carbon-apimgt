@@ -32,152 +32,178 @@ import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
 import java.util.concurrent.TimeUnit;
 
-
 public class AuthUtil {
-    private static Logger log = LoggerFactory.getLogger(AuthUtil.class);
+	private static Logger log = LoggerFactory.getLogger(AuthUtil.class);
+	private static boolean isGatewayKeyCacheInitialized = false;
+	private boolean removeOAuthHeadersFromOutMessage = true;
+	private boolean gatewayTokenCacheEnabled = false;
 
-    public AuthUtil(){
-        initParams();
-        this.getGatewayKeyCache();
-    }
+	public AuthUtil() {
+		initParams();
+		this.getGatewayKeyCache();
+	}
 
-    private boolean removeOAuthHeadersFromOutMessage=true;
+	protected void initParams() {
+		try {
+			APIManagerConfiguration config =
+					ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+			String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+			if (cacheEnabled != null) {
+				gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
+			}
+			String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
+			if (value != null) {
+				removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+			}
+		} catch (Exception e) {
+			log.error(
+					"Did not find valid API Validation Information cache configuration. Use default configuration" +
+					e, e);
+		}
 
-    protected void initParams() {
-        try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            if (cacheEnabled != null) {
-                gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
-            }
-            String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
-            if (value != null) {
-                removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
-            }
-        } catch (Exception e) {
-            log.error("Did not find valid API Validation Information cache configuration. Use default configuration" + e, e);
-        }
+	}
 
-
-    }
-
-    public boolean isRemoveOAuthHeadersFromOutMessage() {
-        return removeOAuthHeadersFromOutMessage;
-    }
-
-
-    private  static boolean isGatewayKeyCacheInitialized = false;
-    private boolean gatewayTokenCacheEnabled = false;
+	public boolean isRemoveOAuthHeadersFromOutMessage() {
+		return removeOAuthHeadersFromOutMessage;
+	}
 
 	/**
 	 * validate access token via cache
-     * @param apiKey
-     * @param cacheKey
-     * @return APIKeyValidationInfoDTO
-     */
-    public APIKeyValidationInfoDTO validateCache(String apiKey, String cacheKey){
+	 *
+	 * @param apiKey
+	 * @param cacheKey
+	 * @return APIKeyValidationInfoDTO
+	 */
+	public APIKeyValidationInfoDTO validateCache(String apiKey, String cacheKey) {
 
-            //Get the access token from the first level cache.
-            String cachedToken = (String) getGatewayTokenCache().get(apiKey);
+		//Get the access token from the first level cache.
+		String cachedToken = (String) getGatewayTokenCache().get(apiKey);
 
-            //If the access token exists in the first level cache.
-            if (cachedToken != null) {
-                APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
+		//If the access token exists in the first level cache.
+		if (cachedToken != null) {
+			APIKeyValidationInfoDTO info =
+					(APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
 
-                if (info != null) {
-                    if (APIUtil.isAccessTokenExpired(info)) {
-                        info.setAuthorized(false);
-                        // in cache, if token is expired  remove cache entry.
-                        getGatewayKeyCache().remove(cacheKey);
-                        //Remove from the first level token cache as well.
-                        getGatewayTokenCache().remove(apiKey);
-                    }
-                    return info;
-                }
-            }
+			if (info != null) {
+				if (APIUtil.isAccessTokenExpired(info)) {
+					info.setAuthorized(false);
+					// in cache, if token is expired  remove cache entry.
+					getGatewayKeyCache().remove(cacheKey);
+					//Remove from the first level token cache as well.
+					getGatewayTokenCache().remove(apiKey);
+				}
+				return info;
+			}
+		}
 
-        return null;
-    }
-
-	/**
-     * write to cache
-     *
-     * @param info
-     * @param apiKey
-     * @param cacheKey
-     */
-    public void putCache(APIKeyValidationInfoDTO info, String apiKey, String cacheKey){
-
-            //Get the tenant domain of the API that is being invoked.
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-            //Add to first level Token Cache.
-            getGatewayTokenCache().put(apiKey, tenantDomain);
-            //Add to Key Cache.
-            getGatewayKeyCache().put(cacheKey, info);
-
-            //If this is NOT a super-tenant API that is being invoked
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
-                //to remove the entry when the need occurs to clear this particular cache entry.
-                try {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                            setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-
-                    getGatewayTokenCache().put(apiKey, tenantDomain);
-                } finally {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }
-
-    }
-
-    protected Cache getGatewayKeyCache() {
-        String apimGWCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if(!isGatewayKeyCacheInitialized && apimGWCacheExpiry != null ) {
-            isGatewayKeyCacheInitialized = true;
-            return Caching.getCacheManager(
-                    APIConstants.API_MANAGER_CACHE_MANAGER).createCacheBuilder(APIConstants.GATEWAY_KEY_CACHE_NAME).
-                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                            Long.parseLong(apimGWCacheExpiry))).
-                    setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-                            Long.parseLong(apimGWCacheExpiry))).setStoreByValue(false).build();
-        } else {
-            return Caching.getCacheManager(
-                    APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
-        }
-    }
-    protected Cache getGatewayTokenCache() {
-        Cache cache = null;
-        try {
-            javax.cache.CacheManager manager = Caching.getCacheManager(
-                    APIConstants.API_MANAGER_CACHE_MANAGER);
-            cache = manager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
-        } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e, e);
-        }
-        return cache;
-
-    }
-    public boolean isGatewayTokenCacheEnabled() {
-        return gatewayTokenCacheEnabled;
-    }
+		return null;
+	}
 
 	/**
-     * check if the request is throttled
-     * @param resourceLevelThrottleKey
-     * @param subscriptionLevelThrottleKey
-     * @param applicationLevelThrottleKey
-     * @return true if request is throttled out
-     */
-    public boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,String applicationLevelThrottleKey){
-        boolean isApiLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(resourceLevelThrottleKey);
-        boolean isSubscriptionLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                isThrottled(subscriptionLevelThrottleKey);
-        boolean isApplicationLevelThrottled = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                isThrottled(applicationLevelThrottleKey);
-        return(isApiLevelThrottled||isApplicationLevelThrottled||isSubscriptionLevelThrottled);
-    }
+	 * write to cache
+	 *
+	 * @param info
+	 * @param apiKey
+	 * @param cacheKey
+	 */
+	public void putCache(APIKeyValidationInfoDTO info, String apiKey, String cacheKey) {
+
+		//Get the tenant domain of the API that is being invoked.
+		String tenantDomain =
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+		//Add to first level Token Cache.
+		getGatewayTokenCache().put(apiKey, tenantDomain);
+		//Add to Key Cache.
+		getGatewayKeyCache().put(cacheKey, info);
+
+		//If this is NOT a super-tenant API that is being invoked
+		if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+			//Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
+			//to remove the entry when the need occurs to clear this particular cache entry.
+			try {
+				PrivilegedCarbonContext.startTenantFlow();
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().
+						setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+
+				getGatewayTokenCache().put(apiKey, tenantDomain);
+			} finally {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
+		}
+
+	}
+
+	protected Cache getGatewayKeyCache() {
+		String apimGWCacheExpiry =
+				ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+						getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+		if (!isGatewayKeyCacheInitialized && apimGWCacheExpiry != null) {
+			isGatewayKeyCacheInitialized = true;
+			return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+			              .createCacheBuilder(APIConstants.GATEWAY_KEY_CACHE_NAME).
+					              setExpiry(CacheConfiguration.ExpiryType.MODIFIED,
+					                        new CacheConfiguration.Duration(TimeUnit.SECONDS,
+					                                                        Long.parseLong(
+							                                                        apimGWCacheExpiry)))
+			              .
+					              setExpiry(CacheConfiguration.ExpiryType.ACCESSED,
+					                        new CacheConfiguration.Duration(TimeUnit.SECONDS,
+					                                                        Long.parseLong(
+							                                                        apimGWCacheExpiry)))
+			              .setStoreByValue(false).build();
+		} else {
+			return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+			              .getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
+		}
+	}
+
+	protected Cache getGatewayTokenCache() {
+		Cache cache = null;
+		try {
+			javax.cache.CacheManager manager =
+					Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER);
+			cache = manager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+		} catch (Exception e) {
+			log.error(
+					"Did not found valid API Validation Information cache configuration. Use default configuration" +
+					e, e);
+		}
+		return cache;
+
+	}
+
+	public boolean isGatewayTokenCacheEnabled() {
+		return gatewayTokenCacheEnabled;
+	}
+
+	/**
+	 * check if the request is throttled
+	 *
+	 * @param resourceLevelThrottleKey
+	 * @param subscriptionLevelThrottleKey
+	 * @param applicationLevelThrottleKey
+	 * @return true if request is throttled out
+	 */
+	public boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,
+	                           String applicationLevelThrottleKey) {
+		boolean isApiLevelThrottled =
+				org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
+				                                                              .getThrottleDataHolder()
+				                                                              .isAPIThrottled(
+						                                                              resourceLevelThrottleKey);
+		boolean isSubscriptionLevelThrottled =
+				org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
+				                                                              .getThrottleDataHolder()
+				                                                              .
+						                                                              isThrottled(
+								                                                              subscriptionLevelThrottleKey);
+		boolean isApplicationLevelThrottled =
+				org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
+				                                                              .getThrottleDataHolder()
+				                                                              .
+						                                                              isThrottled(
+								                                                              applicationLevelThrottleKey);
+		return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
+	}
 }
