@@ -62,7 +62,7 @@
                             <%if(api.ws != "true"){%>
                             <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
                                 <%}else{%>
-                                    ws://127.0.0.1:9099<%=encode.forHtml(api.context)%>
+                                    ws://localhost:9099<%=encode.forHtml(api.context)%>
                                     <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;

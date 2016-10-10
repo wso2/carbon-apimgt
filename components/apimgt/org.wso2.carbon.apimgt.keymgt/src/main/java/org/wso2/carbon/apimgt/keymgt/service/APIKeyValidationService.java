@@ -271,54 +271,37 @@ public class APIKeyValidationService extends AbstractAdmin {
             throws APIKeyMgtException, APIManagementException {
 
         APIKeyValidationInfoDTO info = null;
+        info.setAuthorized(false);
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
         validationContext.setContext(context);
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
         validationContext.setRequiredAuthenticationLevel("Any");
-//        String cacheKey = APIUtil.getAccessTokenCacheKey(accessToken,
-//                                                         context, version, matchingResource, httpVerb, requiredAuthenticationLevel);
-//
-//        validationContext.setCacheKey(cacheKey);
-//
-//        APIKeyValidationInfoDTO infoDTO = APIKeyMgtUtil.getFromKeyManagerCache(cacheKey);
-//
-//        if (infoDTO != null) {
-//            validationContext.setCacheHit(true);
-//            log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
-//            validationContext.setValidationInfoDTO(infoDTO);
-//        }
-//
-//        log.debug("Before calling Validate Token method...");
-
-//        Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-//                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
-//        Timer.Context timerContext2 = timer2.start();
         boolean state = keyValidationHandler.validateToken(validationContext);
-//        timerContext2.stop();
-//        log.debug("State after calling validateToken ... " + state);
-
         if (state) {
-//            Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-//                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
-//            Timer.Context timerContext3 = timer3.start();
-            info = validateSubscriptionDetails(validationContext.getContext(),validationContext.getVersion(),validationContext.getTokenInfo().getConsumerKey());
-//            timerContext3.stop();
+            info.setAuthorized(true);
+            info = validateSubscriptionDetails(info, validationContext.getContext(),validationContext.getVersion(),validationContext.getTokenInfo().getConsumerKey());
         }
-        PrivilegedCarbonContext.endTenantFlow();
         return info;
     }
-    public APIKeyValidationInfoDTO validateSubscriptionDetails(String context, String version, String consumerKey) throws APIManagementException {
+
+	/**
+     * Check for the subscription of the user
+     *
+     * @param infoDTO
+     * @param context
+     * @param version
+     * @param consumerKey
+     * @return APIKeyValidationInfoDTO including data of api and application
+     * @throws APIManagementException
+     */
+    public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context, String version, String consumerKey) throws APIManagementException {
         boolean defaultVersionInvoked = false;
-        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
-        infoDTO.setAuthorized(true);
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
         if(apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(apiTenantDomain, true);
         int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         //Check if the api version has been prefixed with _default_
         if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
@@ -442,7 +425,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             try {
                 conn.setAutoCommit(false);
             } catch (SQLException e) {
-
+                log.error("Error occurred while fetching data: " + e, e);
             }
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -459,15 +442,6 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         try {
             String dbProdName = conn.getMetaData().getDatabaseProductName();
-			/*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
-				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
-				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-				sqlQuery = sqlQuery + " x";
-            }*/
-
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiPolicy);
             ps.setInt(2, subscriptionTenantId);

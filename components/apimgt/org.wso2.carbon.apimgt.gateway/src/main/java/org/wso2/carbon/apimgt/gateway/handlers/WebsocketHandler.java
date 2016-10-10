@@ -42,6 +42,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
 
+/**
+ * This is a handler which is actually embedded to the netty pipeline which does operations such as
+ * authentication and throttling for the websocket handshake and subsequent websocket frames.
+ */
 public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	private static String tenantDomain;
 	private static int port;
@@ -105,7 +109,6 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 
 		PrivilegedCarbonContext.startTenantFlow();
 		PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-		AuthUtil util = new AuthUtil();
 		version = getversionFromUrl(uri);
 		APIKeyValidationInfoDTO info;
 		if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
@@ -115,18 +118,14 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		String[] auth = req.headers().get(HttpHeaders.AUTHORIZATION).split(" ");
 		if (auth[0].equals(APIConstants.CONSUMER_KEY_SEGMENT)) {
 			String apikey = auth[1];
-			if (util.isRemoveOAuthHeadersFromOutMessage()) {
+			if (AuthUtil.isRemoveOAuthHeadersFromOutMessage()) {
 				req.headers().remove(HttpHeaders.AUTHORIZATION);
 			}
 			//If the key have already been validated
-			if (util.isGatewayTokenCacheEnabled()) {
-				info = util.validateCache(apikey, apikey);
+			if (AuthUtil.isGatewayTokenCacheEnabled()) {
+				info = AuthUtil.validateCache(apikey, apikey);
 				if (info != null) {
-					if (info.isAuthorized()) {
-						return true;
-					} else {
-						return false;
-					}
+					return info.isAuthorized();
 				}
 			}
 			String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
@@ -138,11 +137,11 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			} else {
 				return false;
 			}
-			if (!info.isAuthorized() || info == null) {
+			if (info == null || !info.isAuthorized()) {
 				return false;
 			}
-			if (util.isGatewayTokenCacheEnabled()) {
-				util.putCache(info, apikey, apikey);
+			if (AuthUtil.isGatewayTokenCacheEnabled()) {
+				AuthUtil.putCache(info, apikey, apikey);
 			}
 			return true;
 		} else {
@@ -159,7 +158,6 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	 */
 	private boolean doThrottle(ChannelHandlerContext ctx) throws APIManagementException {
 
-		AuthUtil util = new AuthUtil();
 		if (throttleDataPublisher == null) {
 			// The publisher initializes in the first request only
 			synchronized (this) {
@@ -190,7 +188,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
 		}
 		boolean isThrottled =
-				util.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+				AuthUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
 				                 applicationLevelThrottleKey);
 		if (isThrottled) {
 			ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));

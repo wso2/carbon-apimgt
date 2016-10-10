@@ -276,6 +276,13 @@ public class APIGatewayManager {
 		}
         return failedEnvironmentsMap;
     }
+
+	/**
+	 * add websoocket api to the gateway
+	 * @param api
+	 * @param client
+	 * @throws APIManagementException
+	 */
     public void deployWebsocketAPI(API api,APIGatewayAdminClient client) throws APIManagementException {
         String content = createSeqString(api);
         OMElement element;
@@ -298,6 +305,12 @@ public class APIGatewayManager {
 
     }
 
+	/**
+	 * create body of sequence
+	 *
+	 * @param api
+	 * @return
+	 */
     public String createSeqString(API api){
         try {
             JSONObject obj = new JSONObject(api.getEndpointConfig());
@@ -317,7 +330,7 @@ public class APIGatewayManager {
                 "</sequence>";
         return seq;
         } catch (JSONException e) {
-            e.printStackTrace();
+            log.error("Error in reading JSON object " + e, e);
             return null;
         }
     }

@@ -35,15 +35,15 @@ import java.util.concurrent.TimeUnit;
 public class AuthUtil {
 	private static Logger log = LoggerFactory.getLogger(AuthUtil.class);
 	private static boolean isGatewayKeyCacheInitialized = false;
-	private boolean removeOAuthHeadersFromOutMessage = true;
-	private boolean gatewayTokenCacheEnabled = false;
+	private static boolean removeOAuthHeadersFromOutMessage = true;
+	private static boolean gatewayTokenCacheEnabled = false;
 
-	public AuthUtil() {
+	static {
 		initParams();
-		this.getGatewayKeyCache();
+		getGatewayKeyCache();
 	}
 
-	protected void initParams() {
+	protected static void initParams() {
 		try {
 			APIManagerConfiguration config =
 					ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
@@ -63,7 +63,7 @@ public class AuthUtil {
 
 	}
 
-	public boolean isRemoveOAuthHeadersFromOutMessage() {
+	public static boolean isRemoveOAuthHeadersFromOutMessage() {
 		return removeOAuthHeadersFromOutMessage;
 	}
 
@@ -74,7 +74,7 @@ public class AuthUtil {
 	 * @param cacheKey
 	 * @return APIKeyValidationInfoDTO
 	 */
-	public APIKeyValidationInfoDTO validateCache(String apiKey, String cacheKey) {
+	public static APIKeyValidationInfoDTO validateCache(String apiKey, String cacheKey) {
 
 		//Get the access token from the first level cache.
 		String cachedToken = (String) getGatewayTokenCache().get(apiKey);
@@ -106,7 +106,7 @@ public class AuthUtil {
 	 * @param apiKey
 	 * @param cacheKey
 	 */
-	public void putCache(APIKeyValidationInfoDTO info, String apiKey, String cacheKey) {
+	public static void putCache(APIKeyValidationInfoDTO info, String apiKey, String cacheKey) {
 
 		//Get the tenant domain of the API that is being invoked.
 		String tenantDomain =
@@ -134,7 +134,7 @@ public class AuthUtil {
 
 	}
 
-	protected Cache getGatewayKeyCache() {
+	protected static Cache getGatewayKeyCache() {
 		String apimGWCacheExpiry =
 				ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
 						getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
@@ -158,7 +158,7 @@ public class AuthUtil {
 		}
 	}
 
-	protected Cache getGatewayTokenCache() {
+	protected static Cache getGatewayTokenCache() {
 		Cache cache = null;
 		try {
 			javax.cache.CacheManager manager =
@@ -173,7 +173,7 @@ public class AuthUtil {
 
 	}
 
-	public boolean isGatewayTokenCacheEnabled() {
+	public static boolean isGatewayTokenCacheEnabled() {
 		return gatewayTokenCacheEnabled;
 	}
 
@@ -185,7 +185,7 @@ public class AuthUtil {
 	 * @param applicationLevelThrottleKey
 	 * @return true if request is throttled out
 	 */
-	public boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,
+	public static boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,
 	                           String applicationLevelThrottleKey) {
 		boolean isApiLevelThrottled =
 				org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()

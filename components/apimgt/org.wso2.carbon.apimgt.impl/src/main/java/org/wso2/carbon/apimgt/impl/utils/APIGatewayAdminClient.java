@@ -485,6 +485,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+	/**
+     * deploy websocket api to the gateway
+     *
+     * @param content body of the sequence
+     * @param fileName file name of the sequence
+     * @throws AxisFault
+     */
     public void deployWSApi(String content, String fileName) throws AxisFault {
         File file = new File(APIConstants.SEQUENCE_FILE_FOLDER);
         //if directory doesn't exist, make one
@@ -510,18 +517,23 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                     fos.close();
                 }
             } catch (IOException e) {
-
+                log.error("Error in writing the file" + e, e);
             }
         }
     }
 
+	/**
+	 * remove websocket api from the gateway
+     *
+     * @param fileNames
+     */
     public void undeployWSApi(String[] fileNames) {
 
         for (int i = 0; i < fileNames.length; i++) {
             File file = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
             boolean deleted = file.delete();
             if (deleted) {
-                log.info("File : " + fileNames[i] + " is deleted");
+                log.debug("File : " + fileNames[i] + " is deleted");
             } else {
                 log.error("Error occurred in deleting file: " + fileNames[i]);
             }
