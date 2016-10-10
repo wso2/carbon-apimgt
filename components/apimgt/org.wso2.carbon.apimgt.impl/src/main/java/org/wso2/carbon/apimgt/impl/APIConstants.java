@@ -1224,6 +1224,8 @@ public final class APIConstants {
         public static final String WORKFLOW_CALLBACK = "WorkflowCallbackAPI";
         public static final String WORKFLOW_TOKEN_EP = "TokenEndPoint";
         public static final String WORKFLOW_DCR_EP = "DCREndPoint";
+        public static final String WORKFLOW_DCR_EP_USER = "DCREndPointUser";
+        public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
 
     } 
 

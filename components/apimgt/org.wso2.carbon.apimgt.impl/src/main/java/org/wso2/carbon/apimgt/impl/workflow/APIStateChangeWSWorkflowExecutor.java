@@ -432,18 +432,70 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     /**
      * set information that are needed to invoke callback service
      */
-    private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) {
+    private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) throws WorkflowException{
         // if credentials are not defined in the workflow-extension.xml file call dcr endpoint and generate a
         // oauth application and pass the client id and secret
+        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
         if (clientId == null || clientSecret == null) {
             // TODO impliment dcr enpoint calling
+            //temporary using api-manager.xml dcr credentials as the oauth app credentials. 
+            clientId = workflowProperties.getdCREndpointUser();
+            clientSecret = workflowProperties.getdCREndpointPassword();
+            
+            /* uncomment when dcr endpoint implementation is done
+            byte[] encodedAuth = Base64.encodeBase64((username + ":" + password).getBytes(Charset.forName("ISO-8859-1")));
+         
+            JSONObject payload = new JSONObject();
+            payload.put("clientName", "workflow_app");
+            payload.put("owner", username);
+            payload.put("saasApp", "true");
+            payload.put("grantType", "client_credentials password refresh_token");
+            URL serviceEndpointURL = new URL(workflowProperties.getdCREndPoint());
+            HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
+                    serviceEndpointURL.getProtocol());
+            HttpPost httpPost = new HttpPost(workflowProperties.getdCREndPoint());
+            String authHeader =  "Basic " + new String(encodedAuth);
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            StringEntity requestEntity = new StringEntity(payload.toJSONString(), ContentType.APPLICATION_JSON);
+
+            httpPost.setEntity(requestEntity);
+            try {
+                HttpResponse response = httpClient.execute(httpPost);
+                HttpEntity entity = response.getEntity();
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                    String error = "Error while starting the process:  " + response.getStatusLine().getStatusCode()
+                            + " " + response.getStatusLine().getReasonPhrase();
+                    log.error(error);
+                    throw new WorkflowException(error);
+                }
+                String responseStr = EntityUtils.toString(entity);
+                if (log.isDebugEnabled()) {
+                    log.debug("Workflow oauth app created: " + responseStr);
+                }
+                JSONParser parser = new JSONParser();
+                JSONObject obj = (JSONObject) parser.parse(responseStr);
+                clientId = (String) obj.get("clientId");
+                clientSecret = (String) obj.get("clientSecret");
+            } catch (ClientProtocolException e) {
+                log.error("Error while creating the http client", e);
+                throw new WorkflowException("Error while creating the http client", e);
+            } catch (IOException e) {
+                log.error("Error while connecting to dcr endpoint", e);
+                throw new WorkflowException("Error while connecting to dcr endpoint", e);
+            } catch (ParseException e) {
+                log.error("Error while parsing response from DCR endpoint", e);
+                throw new WorkflowException("Error while parsing response from DCR endpoint", e);
+            } finally {
+                httpPost.reset();
+            }
+            */
         }
         apiStateWorkFlowDTO.setClientId(clientId);
         apiStateWorkFlowDTO.setClientSecret(clientSecret);
         apiStateWorkFlowDTO.setScope(WorkflowConstants.API_WF_SCOPE);
         
-        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        
         apiStateWorkFlowDTO.setTokenAPI(workflowProperties.getTokenEndPoint());
 
     }

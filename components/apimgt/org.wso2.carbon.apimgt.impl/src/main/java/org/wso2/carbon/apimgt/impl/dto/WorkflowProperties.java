@@ -26,7 +26,21 @@ public class WorkflowProperties {
     private String workflowCallbackAPI;
     private String tokenEndPoint;
     private String dCREndPoint;
+    private String dCREndpointUser;
+    private String dCREndpointPassword;
     
+    public String getdCREndpointUser() {
+        return dCREndpointUser;
+    }
+    public void setdCREndpointUser(String dCREndpointUser) {
+        this.dCREndpointUser = dCREndpointUser;
+    }
+    public String getdCREndpointPassword() {
+        return dCREndpointPassword;
+    }
+    public void setdCREndpointPassword(String dCREndpointPassword) {
+        this.dCREndpointPassword = dCREndpointPassword;
+    }
     public String getTokenEndPoint() {
         return tokenEndPoint;
     }

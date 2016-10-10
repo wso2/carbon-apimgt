@@ -548,6 +548,8 @@
     	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
 		<TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
 		<DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.10/register</DCREndPoint>
+		<DCREndPointUser>${admin.username}</DCREndPointUser>
+		<DCREndPointPassword>${admin.password}</DCREndPointPassword>
     </WorkflowConfigurations>
 
 </APIManager>

@@ -449,6 +449,11 @@ public class APIManagerConfiguration {
             if (workflowServerUserElement != null) {
                 workflowProperties.setServerUser(APIUtil.replaceSystemProperty(workflowServerUserElement.getText()));
             }
+            OMElement workflowDCRUserElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_USER));
+            if (workflowDCRUserElement != null) {
+                workflowProperties.setdCREndpointUser(APIUtil.replaceSystemProperty(workflowDCRUserElement.getText()));
+            }
             OMElement workflowCallbackElement = workflowConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_CALLBACK));
             if (workflowCallbackElement != null) {
@@ -480,6 +485,19 @@ public class APIManagerConfiguration {
                 workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
             }
             workflowProperties.setServerPassword(workflowServerPassword);
+            
+            String dcrEPPassword;
+            String dcrEPPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
+                    + APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD;
+            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(dcrEPPasswordKey)) {
+                dcrEPPassword = secretResolver.resolve(dcrEPPasswordKey);
+            } else {
+                dcrEPPassword = workflowConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD))
+                        .getText();
+                dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
+            }
+            workflowProperties.setdCREndpointPassword(dcrEPPassword);
 
         }
     }
