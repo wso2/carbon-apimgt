@@ -40,13 +40,13 @@ import java.util.List;
 /**
  * Created by arshardh on 10/6/16.
  */
-public class thrift {
+public class WebsocketThriftClient {
 	private ThriftUtils thriftUtils = null;
 	private String sessionId = null;
 	private static final Log log = LogFactory.getLog(ThriftKeyValidatorClient.class);
 	private APIKeyValidationService.Client keyValClient = null;
 
-	public thrift() throws APISecurityException {
+	public WebsocketThriftClient() throws APISecurityException {
 		try {
 			thriftUtils = ThriftUtils.getInstance();
 			sessionId = thriftUtils.getSessionId();

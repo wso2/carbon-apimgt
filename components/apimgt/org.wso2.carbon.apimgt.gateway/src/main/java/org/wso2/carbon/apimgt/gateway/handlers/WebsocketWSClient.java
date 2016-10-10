@@ -35,7 +35,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import java.util.HashSet;
 
 
-public class auth {
+public class WebsocketWSClient {
 	private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
 	private APIKeyValidationServiceStub keyValidationServiceStub;
@@ -43,7 +43,7 @@ public class auth {
 	private String password;
 	private String cookie;
 
-	public auth() throws APISecurityException {
+	public WebsocketWSClient() throws APISecurityException {
 		APIManagerConfiguration
 				config = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
 		String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
