@@ -33,15 +33,15 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void addApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean addApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
                                 String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addApi(apiConfig, tenantDomain);
+        return restClient.addApi(apiConfig, tenantDomain);
     }
 
-    public void addApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
+    public boolean addApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addApi(apiConfig);
+        return restClient.addApi(apiConfig);
     }
 
     /**
@@ -54,28 +54,28 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void addPrototypeApiScriptImplForTenant(String apiProviderName, String apiName, String version,
+    public boolean addPrototypeApiScriptImplForTenant(String apiProviderName, String apiName, String version,
                                                    String apiConfig, String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addPrototypeApiScriptImpl(apiConfig, tenantDomain);
+        return restClient.addPrototypeApiScriptImpl(apiConfig, tenantDomain);
     }
 
-    public void addPrototypeApiScriptImpl(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean addPrototypeApiScriptImpl(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addPrototypeApiScriptImpl(apiConfig);
+        return restClient.addPrototypeApiScriptImpl(apiConfig);
     }
 
-    public void addDefaultAPIForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean addDefaultAPIForTenant(String apiProviderName, String apiName, String version, String apiConfig,
                                        String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addDefaultAPI(apiConfig, tenantDomain);
+        return restClient.addDefaultAPI(apiConfig, tenantDomain);
     }
 
-    public void addDefaultAPI(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean addDefaultAPI(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.addDefaultAPI(apiConfig);
+        return restClient.addDefaultAPI(apiConfig);
     }
 
     /**
@@ -122,15 +122,15 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void updateApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean updateApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
                                    String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateApi(apiConfig, tenantDomain);
+        return restClient.updateApi(apiConfig, tenantDomain);
     }
 
-    public void updateApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
+    public boolean updateApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateApi(apiConfig);
+        return restClient.updateApi(apiConfig);
     }
 
     /**
@@ -140,28 +140,28 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void updateApiForInlineScriptForTenant(String apiProviderName, String apiName, String version,
+    public boolean updateApiForInlineScriptForTenant(String apiProviderName, String apiName, String version,
                                                   String apiConfig, String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateApiForInlineScript(apiConfig, tenantDomain);
+        return restClient.updateApiForInlineScript(apiConfig, tenantDomain);
     }
 
-    public void updateApiForInlineScript(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean updateApiForInlineScript(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateApiForInlineScript(apiConfig);
+        return restClient.updateApiForInlineScript(apiConfig);
     }
 
-    public void updateDefaultApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean updateDefaultApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
                                           String tenantDomain) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateDefaultApi(apiConfig, tenantDomain);
+        return restClient.updateDefaultApi(apiConfig, tenantDomain);
     }
 
-    public void updateDefaultApi(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean updateDefaultApi(String apiProviderName, String apiName, String version, String apiConfig)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.updateDefaultApi(apiConfig);
+        return restClient.updateDefaultApi(apiConfig);
     }
 
 
@@ -171,27 +171,27 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void deleteApiForTenant(String apiProviderName, String apiName, String version, String tenantDomain)
+    public boolean deleteApiForTenant(String apiProviderName, String apiName, String version, String tenantDomain)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.deleteApi(tenantDomain);
+        return restClient.deleteApi(tenantDomain);
     }
 
-    public void deleteApi(String apiProviderName, String apiName, String version) throws AxisFault {
+    public boolean deleteApi(String apiProviderName, String apiName, String version) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.deleteApi();
+        return restClient.deleteApi();
     }
 
 
-    public void deleteDefaultApiForTenant(String apiProviderName, String apiName, String version, String tenantDomain)
+    public boolean deleteDefaultApiForTenant(String apiProviderName, String apiName, String version, String tenantDomain)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.deleteDefaultApi(tenantDomain);
+        return restClient.deleteDefaultApi(tenantDomain);
     }
 
-    public void deleteDefaultApi(String apiProviderName, String apiName, String version) throws AxisFault {
+    public boolean deleteDefaultApi(String apiProviderName, String apiName, String version) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
-        restClient.deleteDefaultApi();
+        return restClient.deleteDefaultApi();
     }
 
     private org.wso2.carbon.apimgt.gateway.dto.APIData convert(
@@ -262,6 +262,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     /**
      * Deploy the sequence to the gateway
+     *
      * @param sequence
      * @param tenantDomain
      * @throws AxisFault
@@ -283,7 +284,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * Undeploy the sequence from gateway
      *
      * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
-     * @param tenantDomain
      * @throws AxisFault
      */
     public void deleteSequence(String sequenceName) throws AxisFault {
@@ -299,8 +299,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * get the sequence from gateway
      *
-     * @param sequenceName -The sequence name,
-     * @param tenantDomain
+     * @param sequenceName -The sequence name
      * @throws AxisFault
      */
     public OMElement getSequence(String sequenceName) throws AxisFault {
@@ -326,7 +325,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * encrypt the plain text password
      *
-     * @param cipher        init cipher
      * @param plainTextPass plain text password
      * @return encrypted password
      * @throws APIManagementException

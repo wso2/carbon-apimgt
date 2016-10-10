@@ -277,7 +277,7 @@ var saveDoc=function(){
 
         if (sourceType == 'file') {
 
-            var fileExtension = getExtension($("#docName").val());
+            var fileExtension = getExtension($("#fileName").val());
 
             var mimeType = getMimeType(fileExtension);
 
