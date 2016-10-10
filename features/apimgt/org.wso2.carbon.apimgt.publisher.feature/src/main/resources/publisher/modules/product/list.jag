@@ -1,0 +1,35 @@
+<%
+var getAllProducts = function () {
+    var product, productArray = [], log = new Log();
+
+    try {
+
+        var provider = jagg.getUser().username;
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
+        var apiProductList = apiProvider.getAPIProductsByProvider(provider);
+
+        for (i = 0; i < apiProductList.size(); i++) {
+            product = {};
+            product.productName = apiProductList.get(i).getId().getApiProductName();
+            product.productVersion = apiProductList.get(i).getId().getVersion();
+            productArray[i] = product;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Listing Products " + " : " + stringify(productArray));
+        }
+
+        return {
+            error: false,
+            products: productArray
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e,
+            products: null
+        };
+    }
+};
+%>

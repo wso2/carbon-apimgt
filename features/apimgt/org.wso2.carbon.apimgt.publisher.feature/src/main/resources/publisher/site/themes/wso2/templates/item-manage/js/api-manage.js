@@ -135,6 +135,26 @@ $(document).ready(function(){
         }
     });
 
+    $(".product_options").click(function () {
+        if ($("input[name=product_options]:checked").val() == "bundleProduct") {
+            $('.productList').prop('selectedIndex', 0);
+            $(".newProduct").hide();
+            $(".productList").show();
+        }
+        else if ($("input[name=product_options]:checked").val() == "bundleNewProduct") {
+            $(".newProduct").show();
+            $(".productList").hide();
+        }
+        else {
+            $(".newProduct").hide();
+            $(".productList").hide();
+        }
+    });
+
+    $(".newProduct").click(function () {
+        $('#add_new_apiProduct_modal').modal('show');
+    });
+
     $("#resource_adv_policy").click(function(){
 
         return false;

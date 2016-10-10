@@ -1,0 +1,29 @@
+<%
+user = jagg.getUser();
+
+var createProduct = function (apiProduct) {
+    var log = new Log();
+
+    try {
+        var provider = jagg.getUser().username;
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
+        apiProvider.addAPIProduct(apiProduct);
+
+        if (log.isDebugEnabled()) {
+            log.debug("creating API product");
+        }
+
+        return {
+            error: false
+        };
+    } catch (e) {
+        log.error(e);
+        return {
+            error: true,
+            message: e.message.split(":")[1]
+        };
+    }
+};
+
+%>

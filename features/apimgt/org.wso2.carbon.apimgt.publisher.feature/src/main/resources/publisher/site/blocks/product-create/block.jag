@@ -1,0 +1,8 @@
+<%
+jagg.block("product-create", {
+    initializer:function (data) {
+
+    }
+
+});
+%>

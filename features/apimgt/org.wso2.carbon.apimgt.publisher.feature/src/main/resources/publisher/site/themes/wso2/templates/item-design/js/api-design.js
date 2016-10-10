@@ -466,6 +466,23 @@ APIDesigner.prototype.init_controllers = function(){
         $("#define_scope_modal").modal('show');
     });
 
+    $('.selectpicker').selectpicker({});
+
+    $('#apiProducts').on('change', function () {
+        var selected = $(this).val();
+        if (selected == "newProduct") {
+            $('#product_form').trigger("reset");
+            $("#tiers").val('').selectpicker('refresh');
+            $("#add_new_apiProduct_modal").modal('show');
+        }
+    });
+
+    $("#product_close").click(function () {
+        $('#product_form').trigger("reset");
+        $("#add_new_apiProduct_modal").modal('hide');
+        $('.selectpicker').selectpicker('refresh');
+    });
+
     $("#scope_submit").click(function(){
         if(!$("#scope_form").valid()){
             return;
@@ -533,8 +550,45 @@ APIDesigner.prototype.init_controllers = function(){
 					return;
 				}       
 
-		}, "json"); 
-	}); 
+		}, "json");
+    });
+
+    $("#product_submit").click(function () {
+        var productName = $("#productName").val();
+        var productVersion = $("#productVersion").val();
+        var roles = $("#roles").val();
+        var description = $("#productDescription").val();
+        var businessOwner = $("#businessOwner").val();
+        var businessOwnerEmail = $("#businessOwnerEmail").val();
+
+        var tierList = $('#tiers option:selected');
+        var tiers = "";
+        $(tierList).each(function (index, tierList) {
+            tiers = tiers + $(this).val() + ",";
+        });
+
+        jagg.post("/site/blocks/product-create/ajax/add.jag",
+            {
+                action: "addProduct",
+                productName: productName,
+                productVersion: productVersion,
+                roles: roles,
+                description: description,
+                tiers: tiers,
+                businessOwner: businessOwner,
+                businessOwnerEmail: businessOwnerEmail
+            },
+            function (result) {
+                if (!result.error) {
+                    $("#add_new_apiProduct_modal").modal('hide');
+                    $('.selectpicker').selectpicker('refresh');
+                    jagg.message({
+                        content: "API Product " + productName + " created successfully. ",
+                        type: "info"
+                    });
+                }
+        }, "json");
+    });
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
 

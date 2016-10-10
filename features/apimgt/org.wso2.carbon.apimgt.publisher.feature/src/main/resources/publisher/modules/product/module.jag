@@ -1,0 +1,20 @@
+<%
+jagg.module("product", {
+
+    createProduct: function () {
+        return jagg.require(jagg.getModulesDir() + "product/add.jag").createProduct.apply(this, arguments);
+    },
+    isProductExist: function () {
+        return jagg.require(jagg.getModulesDir() + "product/add.jag").isProductExist.apply(this, arguments);
+    },
+    getProduct: function () {
+        return jagg.require(jagg.getModulesDir() + "product/list.jag").getProduct.apply(this, arguments);
+    },
+    getAllPaginatedProducts: function () {
+        return jagg.require(jagg.getModulesDir() + "product/list.jag").getAllPaginatedProducts.apply(this, arguments);
+    },
+    getAllProducts: function () {
+        return jagg.require(jagg.getModulesDir() + "product/list.jag").getAllProducts.apply(this, arguments);
+    }
+});
+%>

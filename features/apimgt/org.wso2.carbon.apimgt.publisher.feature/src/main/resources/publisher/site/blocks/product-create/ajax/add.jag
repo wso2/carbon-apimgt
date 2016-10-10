@@ -1,0 +1,72 @@
+<%
+include("/jagg/jagg.jag");
+var log = new Log();
+
+if (jagg.isCSRFTokenValid())
+    (function () {
+        response.contentType = "text/plain; charset=UTF-8";
+        response.addHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        response.addHeader('Pragma', 'no-cache');
+        response.addHeader('Expires', '0');
+        var mod,
+                action = request.getParameter("action"),
+                site = require("/site/conf/site.json"),
+                msg = require("/site/conf/ui-messages.jag");
+
+        if (jagg.getUser() == null) {
+            print({
+                error: true,
+                message: 'timeout'
+            });
+        } else {
+            if (action === "addProduct") {
+
+                mod = jagg.module("product");
+                var provider = jagg.getUser().username;
+                var productName = request.getParameter("productName");
+                var productVersion = request.getParameter("productVersion");
+                var roles = request.getParameter("roles");
+                var description = request.getParameter("description");
+                var tiers = request.getParameter("tiers");
+                var image = request.getParameter("image");
+                var businessOwner = request.getParameter("businessOwner");
+                var businessOwnerEmail = request.getParameter("businessOwnerEmail");
+
+                var APIProductIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+                var apiProductIdentifier = new APIProductIdentifier(provider, productName, productVersion);
+                var APIProduct = Packages.org.wso2.carbon.apimgt.api.model.APIProduct;
+                var apiProduct = new APIProduct(apiProductIdentifier);
+
+                apiProduct.setDescription(description);
+                apiProduct.setCreatedUser(provider);
+                apiProduct.setUpdatedUser(provider);
+                apiProduct.setBusinessOwner(businessOwner);
+                apiProduct.setBusinessOwnerEmail(businessOwnerEmail);
+                //apiProduct.setVisibility("");
+                //apiProduct.setSubscriptionAvailability("");
+
+                tiers = tiers.substring(0, tiers.length - 1);
+                var tierList = tiers.split(",");
+
+                var tier;
+                var Tier = Packages.org.wso2.carbon.apimgt.api.model.Tier;
+                var set = Packages.java.util.HashSet;
+                var list = new set();
+
+                for (var i = 0; i < tierList.length; i++) {
+                    tier = new Tier(tierList[i]);
+                    list.add(tier);
+                }
+                apiProduct.addAvailableTiers(list);
+
+                var data = mod.createProduct(apiProduct);
+                print(data);
+            } else {
+                print({
+                    error: true,
+                    message: msg.error.invalidAction(action)
+                });
+            }
+        }
+    }());
+%>
