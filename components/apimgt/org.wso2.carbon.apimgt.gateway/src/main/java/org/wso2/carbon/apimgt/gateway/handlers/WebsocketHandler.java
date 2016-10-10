@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
@@ -62,10 +63,8 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	private static int port;
 	private static volatile ThrottleDataPublisher throttleDataPublisher = null;
 	private static Logger log = LoggerFactory.getLogger(WebsocketHandler.class);
-	private static ServiceReferenceHolder serviceReferenceHolder;
-	private API api;
 	private String uri;
-	private APIConsumer apiConsumer;
+	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
 
 	public WebsocketHandler() {
@@ -106,13 +105,13 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	 * @return true if the access token is valid
 	 * @throws APIManagementException
 	 */
-	private boolean oauthHandler(FullHttpRequest req) throws APIManagementException {
+	private boolean oauthHandler(FullHttpRequest req)
+			throws APIManagementException, APISecurityException {
 
 		PrivilegedCarbonContext.startTenantFlow();
 		PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-		api = getAPI();
 		AuthUtil util = new AuthUtil();
-		AccessTokenInfo tokenInfo = null;
+		version = getversionFromUrl(uri);
 		APIKeyValidationInfoDTO info;
 		if (!req.headers().contains(HttpHeaders.AUTHORIZATION)){
 			log.error("No Authorization Header Present");
@@ -129,37 +128,29 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 				info = util.validateCache(apikey, apikey);
 				if (info != null) {
 					if (info.isAuthorized()) {
-						return validateSubscriptionDetails(api.getContext(),
-						                                   api.getId().getVersion(),
-						                                   info.getConsumerKey());
-					} else
+						return true;
+					}else {
 						return false;
+					}
 				}
 			}
-			try {
-				tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(apikey);
-				if (tokenInfo == null) {
-					return false;
-				}
-			} catch (APIManagementException e) {
-				log.error("Error in obtaining token info: " + e, e);
-			}
-			if (util.isGatewayTokenCacheEnabled()) {
-				info = new APIKeyValidationInfoDTO();
-				info.setAuthorized(tokenInfo.isTokenValid());
-				info.setEndUserName(tokenInfo.getEndUserName());
-				info.setConsumerKey(tokenInfo.getConsumerKey());
-				info.setIssuedTime(tokenInfo.getIssuedTime());
-				info.setValidityPeriod(tokenInfo.getValidityPeriod());
-				util.putCache(info, apikey, apikey);
-			}
-			if (tokenInfo.isTokenValid()) {
-				return validateSubscriptionDetails(api.getContext(), api.getId().getVersion(),
-				                                   tokenInfo.getConsumerKey());
-			} else {
+			String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
+			if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
+				info = new auth().getAPIKeyData(uri, version, apikey);
+			} else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
+				info = new thrift().getAPIKeyData(uri, version, apikey);
+			}else{
 				return false;
 			}
-		} else {
+			if(!info.isAuthorized() || info == null){
+				return false;
+			}
+			if (util.isGatewayTokenCacheEnabled()) {
+				util.putCache(info, apikey, apikey);
+			}
+			return true;
+		}
+		else{
 			return false;
 		}
 	}
@@ -187,8 +178,8 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		String resourceLevelTier = apiLevelTier;
 		String authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
 		String apiName = infoDTO.getApiName();
-		String apiContext = api.getContext();
-		String apiVersion = api.getId().getVersion();
+		String apiContext = uri;
+		String apiVersion = version;
 		String appTenant = infoDTO.getSubscriberTenantDomain();
 		String apiTenant = tenantDomain;
 		String appId = infoDTO.getApplicationId();
@@ -225,211 +216,13 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	/**
-	 * Checks if the application have subscribed to the relevant api
-	 *
-	 * @param context
-	 * @param version
-	 * @param consumerKey
-	 * @return true is application subscribed for the api
-	 * @throws APIManagementException
+	 * extract the version from the request uri
+	 * @param url
+	 * @return version String
 	 */
-	public boolean validateSubscriptionDetails(String context, String version, String consumerKey)
-			throws APIManagementException {
-		boolean defaultVersionInvoked = false;
-		String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
-		if (apiTenantDomain == null) {
-			apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-		}
-		int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-		//Check if the api version has been prefixed with _default_
-		if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
-			defaultVersionInvoked = true;
-			//Remove the prefix from the version.
-			version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
-		}
-		String sql;
-		boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
-		if (!isAdvancedThrottleEnabled) {
-			if (defaultVersionInvoked) {
-				sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-			} else {
-				sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-			}
-		} else {
-			if (defaultVersionInvoked) {
-				sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-			} else {
-				sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-			}
-		}
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		try {
-			conn = APIMgtDBUtil.getConnection();
-			conn.setAutoCommit(true);
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, context);
-			ps.setString(2, consumerKey);
-			if (isAdvancedThrottleEnabled) {
-				ps.setInt(3, apiOwnerTenantId);
-				if (!defaultVersionInvoked) {
-					ps.setString(4, version);
-				}
-			} else {
-				if (!defaultVersionInvoked) {
-					ps.setString(3, version);
-				}
-			}
-
-			rs = ps.executeQuery();
-			if (rs.next()) {
-				String subscriptionStatus = rs.getString("SUB_STATUS");
-				String type = rs.getString("KEY_TYPE");
-				if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
-					infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-					infoDTO.setAuthorized(false);
-					return false;
-				} else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
-				           APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
-					infoDTO.setValidationStatus(
-							APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
-					infoDTO.setAuthorized(false);
-					return false;
-				} else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED
-						           .equals(subscriptionStatus) && !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
-					infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-					infoDTO.setType(type);
-					infoDTO.setAuthorized(false);
-					return false;
-				}
-
-				String apiProvider = rs.getString("API_PROVIDER");
-				String subTier = rs.getString("TIER_ID");
-				String appTier = rs.getString("APPLICATION_TIER");
-				infoDTO.setTier(subTier);
-				infoDTO.setSubscriber(rs.getString("USER_ID"));
-				infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
-				infoDTO.setApiName(rs.getString("API_NAME"));
-				infoDTO.setApiPublisher(apiProvider);
-				infoDTO.setApplicationName(rs.getString("NAME"));
-				infoDTO.setApplicationTier(appTier);
-				infoDTO.setType(type);
-
-				//Advanced Level Throttling Related Properties
-				if (APIUtil.isAdvanceThrottlingEnabled()) {
-					String apiTier = rs.getString("API_TIER");
-					String subscriberUserId = rs.getString("USER_ID");
-					String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-					int apiId = rs.getInt("API_ID");
-					int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-					int apiTenantId = APIUtil.getTenantId(apiProvider);
-					boolean isContentAware =
-							isAnyPolicyContentAware(conn, apiTier, appTier, subTier,
-							                        subscriberTenantId, apiTenantId, apiId);
-					infoDTO.setContentAware(isContentAware);
-
-					int spikeArrest = 0;
-					String apiLevelThrottlingKey = "api_level_throttling_key";
-					if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-						spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
-					}
-
-					String spikeArrestUnit = null;
-					if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
-						spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-					}
-					boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
-					List<String> list = new ArrayList<String>();
-					list.add(apiLevelThrottlingKey);
-					infoDTO.setSpikeArrestLimit(spikeArrest);
-					infoDTO.setSpikeArrestUnit(spikeArrestUnit);
-					infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-					infoDTO.setSubscriberTenantDomain(subscriberTenant);
-					if (apiTier != null && apiTier.trim().length() > 0) {
-						infoDTO.setApiTier(apiTier);
-					}
-					//We also need to set throttling data list associated with given API. This need to have policy id and
-					// condition id list for all throttling tiers associated with this API.
-					infoDTO.setThrottlingDataList(list);
-				}
-				return true;
-			}
-			infoDTO.setAuthorized(false);
-			infoDTO.setValidationStatus(
-					APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
-		} catch (SQLException e) {
-			handleException("Exception occurred while validating Subscription.", e);
-		} finally {
-			try {
-				conn.setAutoCommit(false);
-			} catch (SQLException e) {
-
-			}
-			APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-		}
-		return false;
+	public static String getversionFromUrl(final String url){
+		// return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
+		return url.replaceFirst(".*/([^/?]+).*", "$1");
 	}
 
-	private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
-	                                        String subPolicy, int subscriptionTenantId,
-	                                        int appTenantId, int apiId)
-			throws APIManagementException {
-		boolean isAnyContentAware = false;
-		// only check if using CEP based throttling.
-		ResultSet resultSet = null;
-		PreparedStatement ps = null;
-		String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
-
-		try {
-			String dbProdName = conn.getMetaData().getDatabaseProductName();
-
-			ps = conn.prepareStatement(sqlQuery);
-			ps.setString(1, apiPolicy);
-			ps.setInt(2, subscriptionTenantId);
-			ps.setString(3, apiPolicy);
-			ps.setInt(4, subscriptionTenantId);
-			ps.setInt(5, apiId);
-			ps.setInt(6, subscriptionTenantId);
-			ps.setInt(7, apiId);
-			ps.setInt(8, subscriptionTenantId);
-			ps.setString(9, subPolicy);
-			ps.setInt(10, subscriptionTenantId);
-			ps.setString(11, appPolicy);
-			ps.setInt(12, appTenantId);
-			resultSet = ps.executeQuery();
-			// We only expect one result if all are not content aware.
-			if (resultSet == null) {
-				throw new APIManagementException(" Result set Null");
-			}
-			int count = 0;
-			if (resultSet.next()) {
-				count = resultSet.getInt(1);
-				if (count > 0) {
-					isAnyContentAware = true;
-				}
-			}
-		} catch (SQLException e) {
-			handleException("Failed to get content awareness of the policies ", e);
-		} finally {
-			APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-		}
-		return isAnyContentAware;
-	}
-
-	private void handleException(String description, Exception e) {
-		log.error(description, e);
-	}
-
-	private API getAPI() throws APIManagementException {
-		apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
-		List<API> list = apiConsumer.getAllAPIs();
-		for (API api : list) {
-			if (api.getContext().equalsIgnoreCase(uri)) {
-				return api;
-			}
-		}
-		return null;
-	}
 }
