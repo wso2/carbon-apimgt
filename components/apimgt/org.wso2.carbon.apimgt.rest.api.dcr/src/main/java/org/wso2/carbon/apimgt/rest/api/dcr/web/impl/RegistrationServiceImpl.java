@@ -40,7 +40,6 @@ import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRe
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
-import org.wso2.carbon.identity.application.mgt.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -50,14 +49,21 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.*;
+import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_GRANT;
+import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_NAME;
+import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_USERNAME;
+import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_REDIRECT_URIS;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -65,8 +71,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private OAuthApplicationInfo retrievedApp;
-    private String appName;
-    private String errorMsg;
 
     @POST
     @Override
@@ -82,82 +86,30 @@ public class RegistrationServiceImpl implements RegistrationService {
          * "saasApp": true
          *}
          */
-//        Response response;
-//        String errorMsg;
-//        ErrorDTO errorDTO;
         Response response;
-        String errorMsg,userNameForSP,grantTypes,authUserName,applicationName = null;
+        String userNameForSP, grantTypes, authUserName, applicationName = null;
         ErrorDTO errorDTO;
         OAuthApplicationInfo oauthApplicationInfo;
         ServiceProvider appServiceProvider = null;
-//        try {
-//            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-//            OAuthAppRequest appRequest = new OAuthAppRequest();
-//            OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
-//
-//            String owner = profile.getOwner();
-//            String authUserName = RestApiUtil.getLoggedInUsername();
-//            //validates if the application owner and logged in username is same.
-//            if (authUserName != null && authUserName.equals(owner)) {
-//                if (!isUserAccessAllowed(authUserName)) {
-//                    String msg = "You do not have enough privileges to create an OAuth app";
-//                    log.error("User " + authUserName + " does not have any of subscribe/create/publish privileges "
-//                            + "to create an OAuth app");
-//                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, msg);
-//                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
-//                    return response;
-//                }
-//
-//                applicationInfo.setClientName(profile.getClientName());
-//                applicationInfo.setCallBackURL(profile.getCallbackUrl());
-//                applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
-//                applicationInfo.setClientId("");
-//                applicationInfo.setClientSecret("");
-//                applicationInfo.setIsSaasApplication(profile.isSaasApp());
-//                appRequest.setOAuthApplicationInfo(applicationInfo);
-//                OAuthApplicationInfo returnedAPP = keyManager.createApplication(appRequest);
-//                if (returnedAPP != null) {
-//                    returnedAPP.removeParameter("tokenScope");
-//                    return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
-//                }
-//
-//                //returnedAPP is null
-//                errorMsg = "OAuth app '" + profile.getClientName()
-//                        + "' creation failed. Dynamic Client Registration Service not available.";
-//                log.error(errorMsg);
-//                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500l, errorMsg);
-//                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
-//            } else {
-//                errorMsg = "Logged in user '" + authUserName + "' and application owner '" + owner
-//                        + "' should be same.";
-//                log.error(errorMsg);
-//                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, errorMsg);
-//                response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-//            }
-//        } catch (APIManagementException e) {
-//            String msg = "Error occurred while registering client '" + profile.getClientName() + "'";
-//            errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, msg);
-//            response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-//            log.error(msg, e);
-//        }
 
         try {
             OAuthAppRequest appRequest = new OAuthAppRequest();
             oauthApplicationInfo = new OAuthApplicationInfo();
             OAuthApplicationInfo returnedAPP;
             String loggedInUserTenantDomain;
-
             String owner = profile.getOwner();
             authUserName = RestApiUtil.getLoggedInUsername();
 
             //validates if the application owner and logged in username is same.
             if (authUserName != null && authUserName.equals(owner)) {
                 if (!isUserAccessAllowed(authUserName)) {
-                    errorMsg = "You do not have enough privileges to create an OAuth app";
-                    log.error("User " + authUserName + " does not have any of subscribe/create/publish privileges "
+                    String errorMsg = "You do not have enough privileges to create an OAuth app";
+                    log.error("User " + authUserName +
+                            " does not have any of subscribe/create/publish privileges "
                             + "to create an OAuth app");
-                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT,
-                            403L, errorMsg);
+                    errorDTO =
+                            RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT,
+                                    403L, errorMsg);
                     response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
                     return response;
                 }
@@ -173,56 +125,61 @@ public class RegistrationServiceImpl implements RegistrationService {
 
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
-                String userName = MultitenantUtils.getTenantAwareUsername(userId);
-                String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-                userNameForSP = userName;
-                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
-
+                userNameForSP = MultitenantUtils.getTenantAwareUsername(userId);
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" +
+                        profile.getClientName();
                 grantTypes = profile.getGrantType();
 
-                ApplicationManagementService applicationManagementService = ApplicationManagementService.getInstance();
+                ApplicationManagementService applicationManagementService =
+                        ApplicationManagementService.getInstance();
 
                 //Check if the application is already exists
                 try {
-                    appServiceProvider = applicationManagementService.getApplicationExcludingFileBasedSPs(
-                            applicationName, loggedInUserTenantDomain);
+                    appServiceProvider =
+                            applicationManagementService.getApplicationExcludingFileBasedSPs(
+                                    applicationName, loggedInUserTenantDomain);
                 } catch (IdentityApplicationManagementException e) {
-                    errorMsg = "Error occured while checking the availability of the client " + applicationName;
-                    log.error(errorMsg);
+                    String errorMsg = "Error occurred while checking the existence of the application " +
+                            applicationName;
+                    log.error(errorMsg, e);
                 }
+
+                //retrieving the existing application
                 if (appServiceProvider != null) {
-                    //retrieving the existing application
                     retrievedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
-                        returnedAPP = retrievedApp;
+                    returnedAPP = retrievedApp;
                 } else {
-                    //create a new client application if the application name doesn't exists.
-                    returnedAPP = this.createApplication(applicationName,appRequest,userNameForSP,grantTypes);
-                    if (returnedAPP != null) {
-                        return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
-                    }
+                    //create a new application if the application doesn't exists.
+                    returnedAPP = this.createApplication(applicationName, appRequest, grantTypes);
                 }
+                //returnedAPP is null
                 if (returnedAPP == null) {
-                    errorMsg = "OAuth app '" + profile.getClientName()
-                            + "' creation or updating failed. Dynamic Client Registration Service not available.";
+                    String errorMsg = "OAuth app '" + profile.getClientName()
+                            + "' creation or updating failed." +
+                            " Dynamic Client Registration Service not available.";
                     log.error(errorMsg);
-                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L,
-                            errorMsg);
-                    response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+                    errorDTO = RestApiUtil.getErrorDTO
+                            (RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L, errorMsg);
+                    response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                            entity(errorDTO).build();
                 } else {
-                    String infoMsg = "OAuth app " + profile.getClientName() + " creation successful. ";
+                    String infoMsg = "OAuth app " + profile.getClientName() + " creation successful.";
                     log.info(infoMsg);
                     response = Response.status(Response.Status.OK).entity(returnedAPP).build();
                 }
             } else {
-                errorMsg = "Logged in user '" + authUserName + "' and application owner '" + owner
+                String errorMsg = "Logged in user '" + authUserName + "' and application owner '" + owner
                         + "' should be same.";
-                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg);
+                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,
+                        400L, errorMsg);
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
-            errorMsg = "Error occured while trying to create the client application " + applicationName;
-            log.error(errorMsg);
-            errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L, errorMsg);
+            String errorMsg = "Error occurred while trying to create the client application " +
+                    applicationName;
+            log.error(errorMsg, e);
+            errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,
+                    500L, errorMsg);
             response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
         }
         return response;
@@ -279,40 +236,44 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     /**
-     * retrieve the existing client application
-     * @param applicationName client application name
-     * @param saasApp value of retrived IsSaasApp attribute.
-     * @return existing Application data
+     * retrieve the existing application of given name
+     *
+     * @param applicationName application name
+     * @param saasApp         value of IsSaasApp attribute of application.
+     * @return existing Application
      */
-    private OAuthApplicationInfo getExistingApp(String applicationName, boolean saasApp){
+    private OAuthApplicationInfo getExistingApp(String applicationName, boolean saasApp) {
 
-        OAuthApplicationInfo appToReturn=null;
+        OAuthApplicationInfo appToReturn = null;
         OAuthAdminService oAuthAdminService = new OAuthAdminService();
         try {
-            OAuthConsumerAppDTO consumerAppDTO = oAuthAdminService.getOAuthApplicationDataByAppName(applicationName);
-            Map<String, String> valueMap = new HashMap<String,String>();
+            OAuthConsumerAppDTO consumerAppDTO = oAuthAdminService.
+                    getOAuthApplicationDataByAppName(applicationName);
+            Map<String, String> valueMap = new HashMap<String, String>();
             valueMap.put(OAUTH_CLIENT_GRANT, consumerAppDTO.getGrantTypes());
 
-            appToReturn = this.settingUpdatingValues(consumerAppDTO.getOauthConsumerKey(),
-                    consumerAppDTO.getApplicationName(),consumerAppDTO.getCallbackUrl(),
-                    consumerAppDTO.getOauthConsumerSecret(),saasApp,null,valueMap);
+            appToReturn = this.fromAppDTOToApplicationInfo(consumerAppDTO.getOauthConsumerKey(),
+                    consumerAppDTO.getApplicationName(), consumerAppDTO.getCallbackUrl(),
+                    consumerAppDTO.getOauthConsumerSecret(), saasApp, null, valueMap);
 
         } catch (IdentityOAuthAdminException e) {
-            errorMsg="error occur while tryng to get OAuth Application data";
-            log.error(errorMsg);
+            String errorMsg = "error occur while tryng to get OAuth Application data";
+            log.error(errorMsg,e);
         }
         return appToReturn;
     }
 
     /**
-     *create a new client application
-     * @param appRequest Client request credentials
+     * create a new client application
+     *
+     * @param appRequest OAuthAppRequest object with client's payload content
      * @return created Application
      * @throws APIKeyMgtException
      */
-    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,String userNameForSP,
+    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
                                                    String grantType) throws APIManagementException {
         String userName;
+        String userNameForSP;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
 
         String callbackUrl = applicationInfo.getCallBackURL();
@@ -329,18 +290,17 @@ public class RegistrationServiceImpl implements RegistrationService {
         String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
 
         try {
-
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.
+                    equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
-                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.
+                    equals(domain)) {
+                userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            // Append the username before Application name to make application name unique across two users.
-            //appName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + appName;
 
             //creating the service provider
             ServiceProvider serviceprovider = new ServiceProvider();
@@ -352,14 +312,15 @@ public class RegistrationServiceImpl implements RegistrationService {
             appMgtService.createApplication(serviceprovider, tenantDomain, userName);
 
             //retrieving the created service provider
-            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs
-                    (applicationName, tenantDomain);
+            ServiceProvider createdServiceProvider =
+                    appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
             if (createdServiceProvider == null) {
-                throw new APIManagementException ("Error occured while creating Service Provider Application" + appName);
+                throw new APIManagementException("Error occurred while creating Service Provider " +
+                        "Application" + appName);
             }
-
             //creating the OAuth app
-            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp(applicationName,callbackUrl,grantType,userName);
+            OAuthConsumerAppDTO createdOauthApp =
+                    this.createOAuthApp(applicationName, callbackUrl, grantType, userName);
 
             // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
@@ -375,10 +336,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             if (oauthConsumerSecret != null && !oauthConsumerSecret.isEmpty()) {
                 Property property = new Property();
-               property.setName(ApplicationConstants.INBOUNT_AUTH_CONSUMER_SECRET);
+                property.setName(ApplicationConstants.INBOUNT_AUTH_CONSUMER_SECRET);
                 property.setValue(oauthConsumerSecret);
                 Property[] properties = {property};
-
                 inboundAuthenticationRequestConfig.setProperties(properties);
             }
 
@@ -389,19 +349,18 @@ public class RegistrationServiceImpl implements RegistrationService {
             //updating the service provider with Inbound Authentication Configs
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
 
-            Map<String, String> valueMap = new HashMap<String,String>();
+            Map<String, String> valueMap = new HashMap<String, String>();
             valueMap.put(OAUTH_REDIRECT_URIS, createdOauthApp.getCallbackUrl());
             valueMap.put(OAUTH_CLIENT_NAME, createdOauthApp.getApplicationName());
             valueMap.put(OAUTH_CLIENT_GRANT, createdOauthApp.getGrantTypes());
 
-            //adjusting values to be return in to the user
-            return this.settingUpdatingValues(createdOauthApp.getOauthConsumerKey(),
+            return this.fromAppDTOToApplicationInfo(createdOauthApp.getOauthConsumerKey(),
                     null, createdOauthApp.getCallbackUrl(), createdOauthApp.getOauthConsumerSecret(),
                     createdServiceProvider.isSaasApp(), userId, valueMap);
 
         } catch (IdentityApplicationManagementException e) {
-            errorMsg = "Error occured while creating the client application " + appName;
-            log.error(errorMsg);
+            String errorMsg = "Error occured while creating the client application " + appName;
+            log.error(errorMsg,e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
@@ -413,9 +372,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     /**
      * Method to create a OAuth App with client credentials
      *
-     * @return created client App
+     * @param appName     application name
+     * @param callbackUrl call back url
+     * @param grantTypes  grant types
+     * @param userName    username of the application
+     * @return created Oauth App
      */
-    private OAuthConsumerAppDTO createOAuthApp(String appName, String callbackUrl,String grantTypes,String userName) {
+    private OAuthConsumerAppDTO createOAuthApp(String appName, String callbackUrl, String grantTypes,
+                                               String userName) {
 
         OAuthConsumerAppDTO createdApp = null;
         OAuthAdminService oauthAdminService = new OAuthAdminService();
@@ -430,85 +394,39 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         if (!StringUtils.isBlank(callbackUrl)) {
             grantTypeString.append(ApplicationConstants.AUTHORIZATION_CODE).append(" ");
-            grantTypeString.append(ApplicationConstants.IMPLICIT).append(" ");
+            grantTypeString.append(ApplicationConstants.IMPLICIT1).append(" ");
         }
-
         oauthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
-
         try {
+            //creating the Oauth app
             oauthAdminService.registerOAuthApplicationData(oauthConsumerAppDTO);
 
             //retrieving the created OAuth application
             createdApp = oauthAdminService.getOAuthApplicationDataByAppName
                     (oauthConsumerAppDTO.getApplicationName());
         } catch (IdentityOAuthAdminException e) {
-            errorMsg = "Error occured while creating the OAuth app";
-            log.error(errorMsg);
+            String errorMsg = "Error occurred while creating the OAuth app";
+            log.error(errorMsg, e);
         }
         log.debug("created OAuth App " + appName);
         return createdApp;
     }
 
     /**
+     * creating a OAuthApplicationInfo type object to return
      *
-     * updating the existing client application if the callback url is different from client request
-     */
-    private void updateCallbackUrl(String callBackUrl,String grantTypes, String authUserName, String applicationName) {
-
-        OAuthConsumerAppDTO oAuthConsumerAppdto = new OAuthConsumerAppDTO();
-
-        oAuthConsumerAppdto.setOauthConsumerKey(retrievedApp.getClientId());
-        oAuthConsumerAppdto.setOauthConsumerSecret(retrievedApp.getClientSecret());
-        oAuthConsumerAppdto.setApplicationName(applicationName);
-        oAuthConsumerAppdto.setCallbackUrl(callBackUrl);
-        oAuthConsumerAppdto.setOAuthVersion(OAuthConstants.OAuthVersions.VERSION_2);
-        oAuthConsumerAppdto.setGrantTypes(grantTypes);
-        oAuthConsumerAppdto.setUsername(authUserName);
-
-        OAuthAdminService oAuthAdminServices = new OAuthAdminService();
-
-        //updating the existing application with current values.
-        try {
-            oAuthAdminServices.updateConsumerApplication(oAuthConsumerAppdto);
-        } catch (IdentityOAuthAdminException e) {
-            String errorMsg = " error occured whiile updating client application " +
-                    applicationName + " Callback Url";
-            log.error(errorMsg);
-        }
-    }
-
-    /**
-     *
-     * updating the existing client application if the IsSaasApp variable is different from client request
-     */
-    private void updateSaasApp(boolean isSaasApp,ServiceProvider appServiceProvider,String loggedInUserTenantDomain) {
-
-        appServiceProvider.setSaasApp(isSaasApp);
-        ApplicationDAOImpl applicationDAOImpl = new ApplicationDAOImpl();
-        try {
-            //update application
-            applicationDAOImpl.updateApplication(appServiceProvider, loggedInUserTenantDomain);
-        } catch (IdentityApplicationManagementException e) {
-            String errorMsg = "Error occur while updating client application " +
-                    retrievedApp.getClientName() + " IsSaasApp";
-            log.error(errorMsg);
-        }
-    }
-
-
-    /**
-     * @param clientId client id
-     * @param clientName client name
-     * @param callbackUrl callback url
+     * @param clientId     client id
+     * @param clientName   client name
+     * @param callbackUrl  callback url
      * @param clientSecret clientSecret
-     * @param saasApp IsSaasApp
-     * @param appOwner AppOwner
-     * @param sampleMap Map
+     * @param saasApp      IsSaasApp
+     * @param appOwner     AppOwner
+     * @param sampleMap    Map
      * @return OAuthApplicationInfo object containing parsed values.
      */
-    private OAuthApplicationInfo settingUpdatingValues(String clientId, String clientName, String callbackUrl,
-                                                       String clientSecret, boolean saasApp, String appOwner,
-                                                       Map<String, String> sampleMap) {
+    private OAuthApplicationInfo fromAppDTOToApplicationInfo
+    (String clientId, String clientName, String callbackUrl, String clientSecret, boolean saasApp,
+     String appOwner, Map<String, String> sampleMap) {
 
         OAuthApplicationInfo updatingApp = new OAuthApplicationInfo();
         updatingApp.setClientId(clientId);
