@@ -5,13 +5,18 @@ var log = new Log();
 var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-var adminUserName = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUser");
-var adminPassword = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerPassword");
-var serverUrl = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUrl");
+var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getWorkflowProperties();
 
-
+var adminUserName = workflowConfigs.getServerUser();
+var adminPassword = workflowConfigs.getServerPassword();
+var serverUrl = workflowConfigs.getServerUrl();
+var isEnabled = workflowConfigs.isEnabled();
 
 var getBPMNTasks = function (taskName) {
+
+    if(!isEnabled){
+      return null;
+    }
 
     var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
     var tenantId = APIUtil.getTenantId(session.get("logged.user").username);

@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.formula.WorkbookDependentFormula;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -52,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -333,10 +335,11 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         // if credentials are not defined in the workflow-extension.xml file, then get the global credentials from the
         // api-manager.xml configuration
         if (username == null || password == null) {
-            // ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getProperty(key);
-            // TODO implement
-            username = "admin";
-            password = "admin";
+            WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+
+            username = workflowProperties.getServerUser();
+            password = workflowProperties.getServerPassword();
         }
         byte[] encodedAuth = Base64.encodeBase64((username + ":" + password).getBytes(Charset.forName("ISO-8859-1")));
         return "Basic " + new String(encodedAuth);
@@ -432,7 +435,10 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         apiStateWorkFlowDTO.setClientId(clientId);
         apiStateWorkFlowDTO.setClientSecret(clientSecret);
         apiStateWorkFlowDTO.setScope(WorkflowConstants.API_WF_SCOPE);
-        apiStateWorkFlowDTO.setTokenAPI(tokenAPI);
+        
+        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        apiStateWorkFlowDTO.setTokenAPI(workflowProperties.getTokenEndPoint());
 
     }
 

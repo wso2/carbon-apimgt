@@ -4,29 +4,38 @@ var log = new Log();
 var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-var adminUserName = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUser");
-var adminPassword = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerPassword");
-var serverUrl = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("Workflow.BPMNServerUrl");
+var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getWorkflowProperties();
 
+var adminUserName = workflowConfigs.getServerUser();
+var adminPassword = workflowConfigs.getServerPassword();
+var serverUrl = workflowConfigs.getServerUrl();
+var isEnabled = workflowConfigs.isEnabled();
 
 var completeBPMNTask = function (taskId, status) {
-      var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
 
-     var basicHeader = "Basic " + getAuthorizationHeader().toString();
-     var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
-     var taskUrl = serverUrl + "/runtime/tasks/" + taskId;
+    if(!isEnabled){
+      return {
+                  error:true
+            }; 
+    }
+    
+    var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
 
-     var payload = {};
-     payload.action = "complete"
-     payload.variables = [];
+    var basicHeader = "Basic " + getAuthorizationHeader().toString();
+    var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+    var taskUrl = serverUrl + "/runtime/tasks/" + taskId;
 
-     var variable = {};
-     variable.name = "approval";
-     variable.value = new String(status);
-     variable.type = "string";
-     payload.variables.push(variable);
+    var payload = {};
+    payload.action = "complete"
+    payload.variables = [];
 
-     var response = post(taskUrl, JSON.stringify(payload), headers)
+    var variable = {};
+    variable.name = "approval";
+    variable.value = new String(status);
+    variable.type = "string";
+    payload.variables.push(variable);
+
+    var response = post(taskUrl, JSON.stringify(payload), headers)
 
     if(response != null && response.data != null){
       var errorResponse = JSON.parse(response.data);
