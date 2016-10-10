@@ -1381,10 +1381,10 @@ paths:
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
         1. Retrieving all subscriptions for the user's APIs.
-        `GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions`
+        `GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions`
 
         2. Retrieving subscriptions for a specific API.
-        `GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
+        `GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/limit'
