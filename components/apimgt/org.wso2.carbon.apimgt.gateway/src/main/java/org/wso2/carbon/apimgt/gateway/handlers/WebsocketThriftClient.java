@@ -37,13 +37,10 @@ import org.wso2.carbon.apimgt.impl.generated.thrift.ConditionGroupDTO;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by arshardh on 10/6/16.
- */
 public class WebsocketThriftClient {
+	private static final Log log = LogFactory.getLog(ThriftKeyValidatorClient.class);
 	private ThriftUtils thriftUtils = null;
 	private String sessionId = null;
-	private static final Log log = LogFactory.getLog(ThriftKeyValidatorClient.class);
 	private APIKeyValidationService.Client keyValClient = null;
 
 	public WebsocketThriftClient() throws APISecurityException {
@@ -51,13 +48,15 @@ public class WebsocketThriftClient {
 			thriftUtils = ThriftUtils.getInstance();
 			sessionId = thriftUtils.getSessionId();
 			//create new APIKeyValidator client
-			TSSLTransportFactory.TSSLTransportParameters param = new TSSLTransportFactory.TSSLTransportParameters();
+			TSSLTransportFactory.TSSLTransportParameters param =
+					new TSSLTransportFactory.TSSLTransportParameters();
 
-			param.setTrustStore(thriftUtils.getTrustStorePath(), thriftUtils.getTrustStorePassword());
+			param.setTrustStore(thriftUtils.getTrustStorePath(),
+			                    thriftUtils.getTrustStorePassword());
 
-			TTransport transport = TSSLTransportFactory.getClientSocket(
-					ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
-					thriftUtils.getThriftClientConnectionTimeOut(), param);
+			TTransport transport = TSSLTransportFactory
+					.getClientSocket(ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
+					                 thriftUtils.getThriftClientConnectionTimeOut(), param);
 
 			//TProtocol protocol = new TCompactProtocol(transport);
 			//TODO:needs to decide on the optimum protocol.
@@ -68,26 +67,29 @@ public class WebsocketThriftClient {
 
 		} catch (TTransportException e) {
 			log.error("Could not connect to Thrift host", e);
-			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
+			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+			                               e.getMessage(), e);
 		}
 	}
 
 	/**
 	 * Initialize thrift key validation
+	 *
 	 * @param context
 	 * @param apiVersion
 	 * @param apiKey
 	 * @return
 	 * @throws APISecurityException
 	 */
-	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey) throws
-	                                                                                               APISecurityException {
+	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey)
+			throws APISecurityException {
 
 		APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
 		org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO thriftDTO;
 
 		try {
-			thriftDTO = keyValClient.validateKeyforHandshake(context, apiVersion, apiKey, sessionId);
+			thriftDTO =
+					keyValClient.validateKeyforHandshake(context, apiVersion, apiKey, sessionId);
 
 		} catch (Exception e) {
 			try {
@@ -97,10 +99,12 @@ public class WebsocketThriftClient {
 				//we re-initialize the thrift client in case open sockets have been closed due to
 				//key manager restart.
 				reInitializeClient();
-				thriftDTO = keyValClient.validateKeyforHandshake(context, apiVersion, apiKey, sessionId);
+				thriftDTO = keyValClient
+						.validateKeyforHandshake(context, apiVersion, apiKey, sessionId);
 
 			} catch (Exception e1) {
-				throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage(), e1);
+				throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+				                               e1.getMessage(), e1);
 			}
 		}
 		//do the conversion other side
@@ -131,13 +135,14 @@ public class WebsocketThriftClient {
 		apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
 		return apiKeyValidationInfoDTO;
 	}
-	public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
-	) throws APISecurityException {
-		ArrayList<URITemplate> templates=new ArrayList<URITemplate>();
+
+	public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
+			throws APISecurityException {
+		ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
 		List<org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate> uriTemplates;
 
 		try {
-			uriTemplates = keyValClient.getAllURITemplates(context, apiVersion,sessionId);
+			uriTemplates = keyValClient.getAllURITemplates(context, apiVersion, sessionId);
 
 		} catch (Exception e) {
 			try {
@@ -150,7 +155,8 @@ public class WebsocketThriftClient {
 				uriTemplates = keyValClient.getAllURITemplates(context, apiVersion, sessionId);
 
 			} catch (Exception e1) {
-				throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage(), e1);
+				throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+				                               e1.getMessage(), e1);
 			}
 		}
 		for (org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate aDto : uriTemplates) {
@@ -160,9 +166,7 @@ public class WebsocketThriftClient {
 		return templates;
 	}
 
-
-	private URITemplate toTemplates(
-			org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate dto) {
+	private URITemplate toTemplates(org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate dto) {
 		URITemplate template = new URITemplate();
 		template.setAuthType(dto.getAuthType());
 		template.setHTTPVerb(dto.getHttpVerb());
@@ -174,21 +178,24 @@ public class WebsocketThriftClient {
 
 		// Create a URITemplate object out of the type specific to Thrift protocol.
 		if (conditionGroupsThrift != null && !conditionGroupsThrift.isEmpty()) {
-			org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[] conditionGroups = new org.wso2.carbon.apimgt.api.dto
-					.ConditionGroupDTO[conditionGroupsThrift.size()];
-			for (short groupCounter = 0; groupCounter < conditionGroupsThrift.size(); groupCounter++) {
-				org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO conditionGroup = new org.wso2.carbon.apimgt.api.dto
-						.ConditionGroupDTO();
+			org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[] conditionGroups =
+					new org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[conditionGroupsThrift
+							.size()];
+			for (short groupCounter = 0;
+			     groupCounter < conditionGroupsThrift.size(); groupCounter++) {
+				org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO conditionGroup =
+						new org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO();
 				ConditionGroupDTO conditionGroupThrift = conditionGroupsThrift.get(groupCounter);
 				conditionGroup.setConditionGroupId(conditionGroupThrift.getConditionGroupId());
-				List<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO> conditionsThrift = conditionGroupThrift
-						.getConditions();
+				List<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO> conditionsThrift =
+						conditionGroupThrift.getConditions();
 				if (conditionsThrift != null && !conditionsThrift.isEmpty()) {
 					ConditionDTO[] conditions = new ConditionDTO[conditionsThrift.size()];
-					for (short conditionCounter = 0; conditionCounter < conditionsThrift.size(); conditionCounter++) {
+					for (short conditionCounter = 0;
+					     conditionCounter < conditionsThrift.size(); conditionCounter++) {
 						ConditionDTO condition = new ConditionDTO();
-						org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO conditionThrift = conditionsThrift
-								.get(conditionCounter);
+						org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO conditionThrift =
+								conditionsThrift.get(conditionCounter);
 						condition.setConditionType(conditionThrift.getConditionType());
 						condition.setConditionName(conditionThrift.getConditionName());
 						condition.setConditionValue(conditionThrift.getConditionValue());
@@ -206,16 +213,16 @@ public class WebsocketThriftClient {
 		return template;
 	}
 
-
 	private void reInitializeClient() throws APISecurityException, TTransportException {
 		//create new APIKeyValidator client
-		TSSLTransportFactory.TSSLTransportParameters param = new TSSLTransportFactory.TSSLTransportParameters();
+		TSSLTransportFactory.TSSLTransportParameters param =
+				new TSSLTransportFactory.TSSLTransportParameters();
 
 		param.setTrustStore(thriftUtils.getTrustStorePath(), thriftUtils.getTrustStorePassword());
 
-		TTransport transport = TSSLTransportFactory.getClientSocket(
-				ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
-				thriftUtils.getThriftClientConnectionTimeOut(), param);
+		TTransport transport = TSSLTransportFactory
+				.getClientSocket(ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
+				                 thriftUtils.getThriftClientConnectionTimeOut(), param);
 
 		//TProtocol protocol = new TCompactProtocol(transport);
 		//TODO:needs to decide on the optimum protocol.

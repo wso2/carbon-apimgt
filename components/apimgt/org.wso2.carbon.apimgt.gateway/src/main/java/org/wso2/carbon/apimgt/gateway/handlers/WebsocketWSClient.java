@@ -34,7 +34,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.HashSet;
 
-
 public class WebsocketWSClient {
 	private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
@@ -44,8 +43,9 @@ public class WebsocketWSClient {
 	private String cookie;
 
 	public WebsocketWSClient() throws APISecurityException {
-		APIManagerConfiguration
-				config = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+		APIManagerConfiguration config =
+				org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
+				                                                              .getAPIManagerConfiguration();
 		String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
 		username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
 		password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
@@ -57,7 +57,8 @@ public class WebsocketWSClient {
 		try {
 			ConfigurationContext ctx = ConfigurationContextFactory
 					.createConfigurationContextFromFileSystem(null, null);
-			keyValidationServiceStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
+			keyValidationServiceStub =
+					new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
 			ServiceClient client = keyValidationServiceStub._getServiceClient();
 			Options options = client.getOptions();
 			options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -66,15 +67,16 @@ public class WebsocketWSClient {
 			options.setCallTransportCleanup(true);
 			options.setManageSession(true);
 
-
 		} catch (AxisFault axisFault) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-			                               "Error while initializing the API key validation stub", axisFault);
+			                               "Error while initializing the API key validation stub",
+			                               axisFault);
 		}
 	}
 
 	/**
 	 * create the APIKeyValidationInfoDTO
+	 *
 	 * @param generatedDto
 	 * @return
 	 */
@@ -100,8 +102,8 @@ public class WebsocketWSClient {
 		dto.setIssuedTime(generatedDto.getIssuedTime());
 		dto.setApiTier(generatedDto.getApiTier());
 		dto.setContentAware(generatedDto.getContentAware());
-		dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(
-				Arrays.asList(generatedDto.getScopes())));
+		dto.setScopes(generatedDto.getScopes() == null ? null :
+		              new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
 		dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
 		dto.setSpikeArrestLimit(generatedDto.getSpikeArrestLimit());
 		dto.setSpikeArrestUnit(generatedDto.getSpikeArrestUnit());
@@ -112,17 +114,18 @@ public class WebsocketWSClient {
 
 	/**
 	 * Initialize the WS key validation service
+	 *
 	 * @param context
 	 * @param apiVersion
 	 * @param apiKey
 	 * @return
 	 * @throws APISecurityException
 	 */
-	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey) throws
-	                                                                                               APISecurityException {
+	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey)
+			throws APISecurityException {
 
-		CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-		                                          true, keyValidationServiceStub._getServiceClient());
+		CarbonUtils.setBasicAccessSecurityHeaders(username, password, true,
+		                                          keyValidationServiceStub._getServiceClient());
 
 		try {
 			org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
@@ -130,9 +133,9 @@ public class WebsocketWSClient {
 			return toDTO(dto);
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-			                               "Error while accessing backend services for API key validation", e);
+			                               "Error while accessing backend services for API key validation",
+			                               e);
 		}
 	}
-
 
 }

@@ -54,6 +54,17 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 	public WebsocketHandler() {
 	}
 
+	/**
+	 * extract the version from the request uri
+	 *
+	 * @param url
+	 * @return version String
+	 */
+	public static String getversionFromUrl(final String url) {
+		// return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
+		return url.replaceFirst(".*/([^/?]+).*", "$1");
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -97,7 +108,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		AuthUtil util = new AuthUtil();
 		version = getversionFromUrl(uri);
 		APIKeyValidationInfoDTO info;
-		if (!req.headers().contains(HttpHeaders.AUTHORIZATION)){
+		if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
 			log.error("No Authorization Header Present");
 			return false;
 		}
@@ -113,7 +124,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 				if (info != null) {
 					if (info.isAuthorized()) {
 						return true;
-					}else {
+					} else {
 						return false;
 					}
 				}
@@ -121,20 +132,20 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
 			if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
 				info = new WebsocketWSClient().getAPIKeyData(uri, version, apikey);
-			} else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
+			} else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT
+					.equals(keyValidatorClientType)) {
 				info = new WebsocketThriftClient().getAPIKeyData(uri, version, apikey);
-			}else{
+			} else {
 				return false;
 			}
-			if(!info.isAuthorized() || info == null){
+			if (!info.isAuthorized() || info == null) {
 				return false;
 			}
 			if (util.isGatewayTokenCacheEnabled()) {
 				util.putCache(info, apikey, apikey);
 			}
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
@@ -178,8 +189,9 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 		if (remoteIP != null && remoteIP.length() > 0) {
 			jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
 		}
-		boolean isThrottled = util.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
-		                                  applicationLevelThrottleKey);
+		boolean isThrottled =
+				util.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+				                 applicationLevelThrottleKey);
 		if (isThrottled) {
 			ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 			return false;
@@ -197,16 +209,6 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 						null, objects);
 		throttleDataPublisher.getDataPublisher().tryPublish(event);
 		return true;
-	}
-
-	/**
-	 * extract the version from the request uri
-	 * @param url
-	 * @return version String
-	 */
-	public static String getversionFromUrl(final String url){
-		// return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
-		return url.replaceFirst(".*/([^/?]+).*", "$1");
 	}
 
 }
