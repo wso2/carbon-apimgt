@@ -20,8 +20,11 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.SQLConstants;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LCManagerDatabaseException;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +38,25 @@ import java.sql.Statement;
 import java.util.StringTokenizer;
 import javax.sql.DataSource;
 
+/**
+ * This class executes the sql script in dbscripts/lifecycle folder to initialize the database
+ * tables during startup.
+ */
 public class LCDatabaseCreator  {
 
+    public static final String OPENEDGE = "openedge";
+    public static final String REM = "REM";
+    public static final String HSQL = "hsql";
+    public static final String DERBY = "derby";
+    public static final String MYSQL = "mysql";
+    public static final String ORACLE = "oracle";
+    public static final String MSSQL = "mssql";
+    public static final String H2 = "h2";
+    public static final String DB2 = "db2";
+    public static final String POSTGRESQL = "postgresql";
+    public static final String OPENEDGE1 = "openedge";
+    public static final String INFORMIX = "informix";
     private static Log log = LogFactory.getLog(LCDatabaseCreator.class);
-    private static final String DB_CHECK_SQL = "select 1 from " + Constants.LC_DEFINITION_TABLE_NAME;
     private DataSource dataSource;
     private String delimiter = ";";
     Statement statement;
@@ -47,9 +65,14 @@ public class LCDatabaseCreator  {
         this.dataSource = dataSource;
     }
 
-    public void createLifecycleDatabase() throws Exception {
+    /**
+     * This method will be used to create life cycle database tables if they are not created already.
+     *
+     * @throws LCManagerDatabaseException   If error occurs during database creation.
+     */
+    public void createLifecycleDatabase() throws LCManagerDatabaseException {
         if(!isDatabaseStructureCreated()){
-            log.info("DB structure not found executing");
+            log.debug("DB structure not found for life cycles. Executing scripts");
             Connection conn = null;
             try {
                 conn = dataSource.getConnection();
@@ -62,7 +85,7 @@ public class LCDatabaseCreator  {
                 String msg = "Failed to create database tables for Lifecycles. "
                         + e.getMessage();
                 log.error(msg, e);
-                throw new Exception(msg, e);
+                throw new LCManagerDatabaseException(msg, e);
             } finally {
                 try {
                     if (conn != null) {
@@ -77,15 +100,23 @@ public class LCDatabaseCreator  {
         }
     }
 
-    private void executeSQLScript() throws Exception {
+    /**
+     * This method will execute database scripts based on the database type.
+     *
+     * @throws LCManagerDatabaseException   If sql script reading fails.
+     * @throws SQLException                 If script execution fails.
+     */
+    private void executeSQLScript() throws LCManagerDatabaseException,SQLException {
         String databaseType = LCDatabaseCreator.getDatabaseType(dataSource.getConnection());
-        log.info("Executing DB script for :" + databaseType);
+        if(log.isDebugEnabled()) {
+            log.debug("Executing DB script for :" + databaseType);
+        }
         boolean keepFormat = false;
-        if ("oracle".equals(databaseType)) {
+        if (ORACLE.equals(databaseType)) {
             delimiter = "/";
-        } else if ("db2".equals(databaseType)) {
+        } else if (DB2.equals(databaseType)) {
             delimiter = "/";
-        } else if ("openedge".equals(databaseType)) {
+        } else if (OPENEDGE.equals(databaseType)) {
             delimiter = "/";
             keepFormat = true;
         }
@@ -112,7 +143,7 @@ public class LCDatabaseCreator  {
                     StringTokenizer st = new StringTokenizer(line);
                     if (st.hasMoreTokens()) {
                         String token = st.nextToken();
-                        if ("REM".equalsIgnoreCase(token)) {
+                        if (REM.equalsIgnoreCase(token)) {
                             continue;
                         }
                     }
@@ -136,65 +167,78 @@ public class LCDatabaseCreator  {
             }
         } catch (IOException e) {
             log.error("Error occurred while executing SQL script for creating Lifecycle database", e);
-            throw new Exception("Error occurred while executing SQL script for creating Lifecycle database", e);
+            throw new LCManagerDatabaseException("Error occurred while executing SQL script for creating Lifecycle database", e);
 
         } finally {
             if (reader != null) {
-                reader.close();
+                try {
+                    reader.close();
+                } catch (IOException e){
+                    log.error("Error while closing stream");
+                }
+
             }
         }
     }
 
-    public static String getDatabaseType(Connection conn) throws Exception {
+    /**
+     * This method will be used to get database type .
+     *  @param conn     Database connection
+     *  @return database type
+     *
+     *  @throws SQLException
+     *  @throws LCManagerDatabaseException
+     */
+    private static String getDatabaseType(Connection conn) throws SQLException, LCManagerDatabaseException {
         String type = null;
-        try {
             if (conn != null && (!conn.isClosed())) {
                 DatabaseMetaData metaData = conn.getMetaData();
                 String databaseProductName = metaData.getDatabaseProductName();
                 if (databaseProductName.matches("(?i).*hsql.*")) {
-                    type = "hsql";
+                    type = HSQL;
                 } else if (databaseProductName.matches("(?i).*derby.*")) {
-                    type = "derby";
+                    type = DERBY;
                 } else if (databaseProductName.matches("(?i).*mysql.*")) {
-                    type = "mysql";
+                    type = MYSQL;
                 } else if (databaseProductName.matches("(?i).*oracle.*")) {
-                    type = "oracle";
+                    type = ORACLE;
                 } else if (databaseProductName.matches("(?i).*microsoft.*")) {
-                    type = "mssql";
+                    type = MSSQL;
                 } else if (databaseProductName.matches("(?i).*h2.*")) {
-                    type = "h2";
+                    type = H2;
                 } else if (databaseProductName.matches("(?i).*db2.*")) {
-                    type = "db2";
+                    type = DB2;
                 } else if (databaseProductName.matches("(?i).*postgresql.*")) {
-                    type = "postgresql";
+                    type = POSTGRESQL;
                 } else if (databaseProductName.matches("(?i).*openedge.*")) {
-                    type = "openedge";
+                    type = OPENEDGE1;
                 } else if (databaseProductName.matches("(?i).*informix.*")) {
-                    type = "informix";
+                    type = INFORMIX;
                 } else {
                     String msg = "Unsupported database: " + databaseProductName +
                             ". Database will not be created automatically by the Carbon Server. " +
                             "Please create the database using appropriate database scripts for " +
                             "the Lifecycle database.";
-                    throw new Exception(msg);
+                    throw new LCManagerDatabaseException(msg);
                 }
             }
-        } catch (SQLException e) {
-            String msg = "Failed to create Lifecycle database." + e.getMessage();
-            log.fatal(msg, e);
-            throw new Exception(msg, e);
-        }
         return type;
     }
 
-    protected String getDbScriptLocation(String databaseType) {
+    /**
+     * This method will provide database script for particular database type.
+     *
+     * @param databaseType
+     * @return database script location (/repository/dbscripts/lifecycle....)
+     */
+    private String getDbScriptLocation(String databaseType) {
         //String scriptName = databaseType + ".sql";
         if (log.isDebugEnabled()) {
             log.debug("Loading database script from : resource.sql");
         }
-        String carbonHome = System.getProperty("carbon.home");
-        return carbonHome +
-                "/dbscripts/lifecycle/" + databaseType + "/resource.sql";
+        String carbonHome = System.getProperty(Constants.CARBON_HOME);
+        return carbonHome + File.separator + "dbscripts" + File.separator + "lifecycle" + File.separator + databaseType
+                + File.separator + "resource.sql";
     }
 
     /**
@@ -239,9 +283,9 @@ public class LCDatabaseCreator  {
      * executes given sql
      *
      * @param sql
-     * @throws Exception
+     * @throws LCManagerDatabaseException
      */
-    private void executeSQL(String sql) throws Exception {
+    private void executeSQL(String sql) throws LCManagerDatabaseException {
         // Check and ignore empty statements
         if ("".equals(sql.trim())) {
             return;
@@ -288,7 +332,7 @@ public class LCDatabaseCreator  {
                 log.info("Table Already Exists. Hence, skipping table creation");
                 //}
             } else {
-                throw new Exception("Error occurred while executing : " + sql, e);
+                throw new LCManagerDatabaseException("Error occurred while executing : " + sql, e);
             }
         } finally {
             if (resultSet != null) {
@@ -316,7 +360,7 @@ public class LCDatabaseCreator  {
             Statement statement = null;
             try {
                 statement = conn.createStatement();
-                ResultSet rs = statement.executeQuery(DB_CHECK_SQL);
+                ResultSet rs = statement.executeQuery(SQLConstants.DB_CHECK_SQL);
                 if (rs != null) {
                     rs.close();
                 }

@@ -19,27 +19,28 @@
 package org.wso2.carbon.apimgt.lifecycle.manager.sql.beans;
 
 /**
- * This bean class holds data related to particular life cycle configuration.
+ * This bean class holds data related to particular life cycle state. This is mapped with the LC_DATA table
  */
-public class LCConfigBean {
-    private String LCName;
-    private String LCContent;
+public class LCStateBean {
+    private String stateId;
+    private String lcName;
+    private String status;
     private int tenantId;
 
-    public String getLCName() {
-        return LCName;
+    public String getStateId() {
+        return stateId;
     }
 
-    public void setLCName(String LCName) {
-        this.LCName = LCName;
+    public void setStateId(String stateId) {
+        this.stateId = stateId;
     }
 
-    public String getLCContent() {
-        return LCContent;
+    public String getStatus() {
+        return status;
     }
 
-    public void setLCContent(String LCContent) {
-        this.LCContent = LCContent;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public int getTenantId() {
@@ -48,5 +49,13 @@ public class LCConfigBean {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getLcName() {
+        return lcName;
+    }
+
+    public void setLcName(String lcName) {
+        this.lcName = lcName;
     }
 }

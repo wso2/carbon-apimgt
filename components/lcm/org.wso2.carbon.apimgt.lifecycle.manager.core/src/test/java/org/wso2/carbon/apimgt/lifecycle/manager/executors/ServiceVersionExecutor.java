@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.lifecycle.manager.core;/*
+/*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
@@ -16,6 +16,23 @@ package org.wso2.carbon.apimgt.lifecycle.manager.core;/*
  * under the License.
  */
 
-public class Test {
+package org.wso2.carbon.apimgt.lifecycle.manager.executors;
+
+import org.wso2.carbon.apimgt.lifecycle.manager.impl.interfaces.Execution;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ServiceVersionExecutor implements Execution{
+
+    private Map parameterMap = new HashMap();
+    @Override public void init(Map parameterMap) {
+        this.parameterMap = parameterMap;
+    }
+
+    @Override public boolean execute(Object resource, String currentState, String targetState) {
+        System.out.println("executed #####################################################");
+        return true;
+    }
 
 }

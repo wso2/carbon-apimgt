@@ -39,6 +39,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+/**
+ * This utility class provides methods to perform CRUD operations for lifecycle configurations.
+ */
 public class LCUtils {
 
     private static final Log log = LogFactory.getLog(LCUtils.class);
@@ -72,6 +75,10 @@ public class LCUtils {
     public static String getLifecycleConfiguration(String lcName) throws LifeCycleException{
         LCCrudManager lcCrudManager = new LCCrudManager();
         return lcCrudManager.getLifecycleConfiguration(lcName).getLCContent();
+    }
+
+    public static void initiateLCMap() throws LifeCycleException{
+        new LCCrudManager().initLifeCycleMap();
     }
 
     public static OMElement buildOMElement(String payload) throws LifeCycleException {
