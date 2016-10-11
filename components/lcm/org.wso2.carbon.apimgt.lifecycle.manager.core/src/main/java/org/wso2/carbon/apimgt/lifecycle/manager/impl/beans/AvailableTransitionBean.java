@@ -15,38 +15,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.lifecycle.manager.sql.beans;
+package org.wso2.carbon.apimgt.lifecycle.manager.impl.beans;
 
 /**
- * This bean class holds data related to particular life cycle configuration.
+ * This bean holds the data about next available states for a particular lifecycle state which are defined in
+ * lifecycle configuration.
  */
-public class LCConfigBean {
-    private String LCName;
-    private String LCContent;
-    private int tenantId;
+public class AvailableTransitionBean {
 
-    public String getLCName() {
-        return LCName;
+    private String event;
+    private String targetState;
+
+    public AvailableTransitionBean(String event, String targetState) {
+        this.event = event;
+        this.targetState = targetState;
     }
 
-    public void setLCName(String LCName) {
-        this.LCName = LCName;
+    public String getEvent() {
+        return event;
     }
 
-    public String getLCContent() {
-        return LCContent;
+    public void setEvent(String event) {
+        this.event = event;
     }
 
-    public void setLCContent(String LCContent) {
-        this.LCContent = LCContent;
+    public String getTargetState() {
+        return targetState;
     }
 
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
+    public void setTargetState(String targetState) {
+        this.targetState = targetState;
     }
 }

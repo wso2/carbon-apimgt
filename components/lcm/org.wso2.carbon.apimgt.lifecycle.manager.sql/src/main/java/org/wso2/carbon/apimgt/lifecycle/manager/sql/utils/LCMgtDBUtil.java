@@ -20,16 +20,9 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.JDBCPersistenceManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LCManagerDatabaseException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.ndatasource.common.DataSourceException;
-import org.wso2.carbon.ndatasource.core.CarbonDataSource;
-import org.wso2.carbon.ndatasource.core.DataSourceManager;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,28 +32,34 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ * This utility class provide methods to handle database connection related operations.
+ */
 public class LCMgtDBUtil {
 
     private static final Log log = LogFactory.getLog(LCMgtDBUtil.class);
+    private static volatile DataSource dataSource = null;
 
     /**
-     * Initializes the data source
+     * Initializes the data source and creates lifecycle database.
      *
      * @throws LCManagerDatabaseException if an error occurs while loading DB configuration
      */
     public static void initialize() throws LCManagerDatabaseException {
 
         synchronized (LCMgtDBUtil.class) {
-            JDBCPersistenceManager jdbcPersistenceManager;
-            try {
-                jdbcPersistenceManager = JDBCPersistenceManager
-                        .getInstance();
-                jdbcPersistenceManager.initializeDatabase();
-            } catch (Exception e) {
-                String msg = "Error in creating the Lifecycle database";
-                log.fatal(msg,e);
-                throw new LCManagerDatabaseException(msg, e);
-            }
+            String dataSourceName = Constants.LIFECYCLE_DATASOURCE;
+
+                try {
+                    Context ctx = new InitialContext();
+                    dataSource = (DataSource) ctx.lookup(dataSourceName);
+                    LCDatabaseCreator dbInitializer = new LCDatabaseCreator(dataSource);
+
+                    dbInitializer.createLifecycleDatabase();
+                } catch (NamingException e) {
+                    throw new LCManagerDatabaseException("Error while looking up the data " +
+                            "source: " + dataSourceName, e);
+                }
         }
     }
 
@@ -69,30 +68,13 @@ public class LCMgtDBUtil {
      * Utility method to get a new database connection
      *
      * @return Connection
-     * @throws SQLException if failed to get Connection
-     * @throws DataSourceException
+     * @throws java.sql.SQLException if failed to get Connection
      */
-    public static Connection getConnection() throws SQLException, DataSourceException {
-        Connection conn;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            privilegedCarbonContext.setTenantId(Constants.SUPER_TENANT_ID);
-            privilegedCarbonContext.setTenantDomain(Constants.SUPER_TENANT_DOMAIN);
-            CarbonDataSource carbonDataSource = DataSourceManager.getInstance().getDataSourceRepository()
-                    .getDataSource(Constants.LIFECYCLE_DB_NAME);
-            DataSource dataSource = (DataSource) carbonDataSource.getDSObject();
-            conn = dataSource.getConnection();
-            return conn;
-        } catch (SQLException e) {
-            log.error("Can't create JDBC connection to the SQL Server", e);
-            throw e;
-        } catch (DataSourceException e) {
-            log.error("Can't create data source for SQL Server", e);
-            throw e;
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+    public static Connection getConnection() throws SQLException {
+        if (dataSource != null) {
+            return dataSource.getConnection();
         }
+        throw new SQLException("Data source is not configured properly.");
     }
 
     /**

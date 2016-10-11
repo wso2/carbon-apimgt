@@ -21,20 +21,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.LCCrudManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifeCycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.services.LCManagementService;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.services.LCManagementServiceImpl;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.JDBCPersistenceManager;
-import org.wso2.carbon.ndatasource.core.DataSourceService;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LCUtils;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LCManagerDatabaseException;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.utils.LCMgtDBUtil;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
  *
  * @scr.component name="org.wso2.carbon.lifecycle.component" immediate="true"
- * @scr.reference name="datasources.service"
- *                interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- *                cardinality="1..1" policy="dynamic"
- *                bind="setDataSourceService" unbind="unsetDataSourceService"
+ * @scr.reference name="config.context.service"
+ * interface="org.wso2.carbon.utils.ConfigurationContextService"
+ * cardinality="1..1" policy="dynamic"  bind="setConfigurationContextService"
+ * unbind="unsetConfigurationContextService"
  **/
 
 public class LCServiceComponent {
@@ -48,70 +49,23 @@ public class LCServiceComponent {
             log.debug("Social Activity service is activated  with SQL Implementation");
         }
 
-        JDBCPersistenceManager jdbcPersistenceManager;
         try {
-            jdbcPersistenceManager = JDBCPersistenceManager.getInstance();
-            jdbcPersistenceManager.initializeDatabase();
-        } catch (Exception e) {
-            log.error("Failed to initilize database. " + e);
-        }
-        testAddinLC();
-        testGettingLCList();
-        testGetLCContent();
-    }
+            LCMgtDBUtil.initialize();
+            LCUtils.initiateLCMap();
 
-    protected void setDataSourceService(DataSourceService dataSourceService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the DataSourceService");
-        }
-        JDBCPersistenceManager.setCarbonDataSourceService(dataSourceService);
-    }
-
-    protected void unsetDataSourceService(DataSourceService dataSourceService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Unsetting the DataSourceService");
-        }
-        JDBCPersistenceManager.setCarbonDataSourceService(null);
-    }
-
-    private void testAddinLC(){
-        LCManagementService lcManagementService = new LCManagementServiceImpl();
-        String content =
-                "<aspect name=\"ServerLifecycle\" class=\"org.wso2.carbon.governance.registry.extensions.aspects.DefaultLifeCycle\">\n"
-                + "    <configuration type=\"literal\">\n" + "        <lifecycle>\n"
-                + "            <scxml xmlns=\"http://www.w3.org/2005/07/scxml\"\n"
-                + "                   version=\"1.0\"\n" + "                   initialstate=\"Active\">\n"
-                + "                <state id=\"Active\">\n"
-                + "                    <transition event=\"Deactivate\" target=\"Off\"/>\n"
-                + "                </state>\n" + "                <state id=\"Off\">\n"
-                + "                    <transition event=\"Activate\" target=\"Active\"/>\n"
-                + "                </state>\n" + "            </scxml>\n" + "        </lifecycle>\n"
-                + "    </configuration>\n" + "</aspect>";
-        try {
-            lcManagementService.createLifecycle(content);
+        } catch (LCManagerDatabaseException e) {
+            log.error("Failed to initialize database. " + e);
         } catch (LifeCycleException e) {
-            log.error(e);
+            log.error("Failed to initialize lifecycle map for all tenants. " + e);
         }
     }
 
-    private void testGettingLCList() {
-        LCManagementService lcManagementService = new LCManagementServiceImpl();
-        try {
-            lcManagementService.getLifecycleList();
-        } catch (LifeCycleException e) {
-            log.error(e);
-        }
-
+    protected void setConfigurationContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.getInstance().setContextService(contextService);
     }
 
-    private void testGetLCContent() {
-        LCManagementService lcManagementService = new LCManagementServiceImpl();
-        try {
-            lcManagementService.getLifecycleConfiguration("EndpointLifeCycleNew");
-        } catch (LifeCycleException e) {
-            log.error(e);
-        }
+    protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.getInstance().setContextService(null);
     }
-
-
 }
+

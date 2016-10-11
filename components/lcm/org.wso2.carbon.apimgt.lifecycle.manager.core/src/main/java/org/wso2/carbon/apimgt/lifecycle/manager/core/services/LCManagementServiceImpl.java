@@ -21,16 +21,38 @@ package org.wso2.carbon.apimgt.lifecycle.manager.core.services;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifeCycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LCUtils;
 
+/**
+ * Service class to perform CRUD operations related to lifecycle configurations
+ */
 public class LCManagementServiceImpl implements LCManagementService {
 
+    /**
+     * API to add new lifecycle configuration.
+     *
+     * @param lifecycleConfiguration                  Lifecycle configuration
+     * @throws LifeCycleException
+     */
     public void createLifecycle (String lifecycleConfiguration) throws LifeCycleException{
         LCUtils.addLifecycle(lifecycleConfiguration);
     }
 
+    /**
+     * Get the list of life cycles for a particular tenant.
+     *
+     * @return List of available life cycles.
+     * @throws LifeCycleException
+     */
     public String[] getLifecycleList() throws LifeCycleException{
         return LCUtils.getLifeCycleList();
     }
 
+    /**
+     * Get the lifecycle configuration with a particular name.
+     *
+     * @param lcName                Name of the lifecycle.
+     * @return                      Lifecycle configuration.
+     * @throws LifeCycleException
+     */
     public String getLifecycleConfiguration(String lcName) throws LifeCycleException{
         return LCUtils.getLifecycleConfiguration(lcName);
     }

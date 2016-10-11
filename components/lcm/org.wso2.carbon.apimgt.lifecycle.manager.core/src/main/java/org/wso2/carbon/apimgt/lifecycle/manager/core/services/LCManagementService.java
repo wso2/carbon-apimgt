@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.lifecycle.manager.core.services;
 
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifeCycleException;
 
+/**
+ * API to fetch lifecycle information .
+ */
 public interface LCManagementService {
 
     public void createLifecycle (String lifecycleConfiguration) throws LifeCycleException;

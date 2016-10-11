@@ -19,8 +19,16 @@
 package org.wso2.carbon.apimgt.lifecycle.manager.sql.constants;
 
 public class Constants {
+    public static final String LIFECYCLE_DATASOURCE = "jdbc/WSO2LifecycleDB";
     public static final String LIFECYCLE_DB_NAME = "WSO2_LIFECYCLE_DB";
-    public static final String LC_DEFINITION_TABLE_NAME = "LC_DEFINITIONs";
+    public static final String LC_DEFINITION_TABLE_NAME = "LC_DEFINITIONS";
     public static final int SUPER_TENANT_ID = -1234;
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String LIFECYCLE_LIST = "LIFECYCLE_LIST";
+    public static final String LIFECYCLE_NAME = "LIFECYCLE_NAME";
+    public static final String LIFECYCLE_DEFINITION_ID = "LIFECYCLE_DEFINITION_ID";
+    public static final String LIFECYCLE_STATUS = "LIFECYCLE_STATUS";
+    public static final String LIFECYCLE_CONTENT = "LIFECYCLE_CONTENT";
+    public static final String TENANT_ID = "TENANT_ID";
 }
