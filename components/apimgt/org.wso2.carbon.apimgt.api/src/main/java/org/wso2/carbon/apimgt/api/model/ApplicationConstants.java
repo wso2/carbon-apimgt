@@ -49,7 +49,7 @@ public final class  ApplicationConstants {
     public static final String OAUTH_CLIENT_APPLICATION = "application";
     public static final String VALIDITY_PERIOD = "validityPeriod";
     public static final String OAUTH_APP_DETAILS = "appDetails";
-    public static final String IMPLICIT = "implicit";
+    public static final String IMPLICIT_CONST = "implicit";
     public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String INBOUNT_AUTH_CONSUMER_SECRET = "oauthConsumerSecret";
 }

@@ -394,7 +394,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         if (!StringUtils.isBlank(callbackUrl)) {
             grantTypeString.append(ApplicationConstants.AUTHORIZATION_CODE).append(" ");
-            grantTypeString.append(ApplicationConstants.IMPLICIT).append(" ");
+            grantTypeString.append(ApplicationConstants.IMPLICIT_CONST).append(" ");
         }
         oauthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
         try {
