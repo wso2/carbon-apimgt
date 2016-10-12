@@ -42,7 +42,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.apache.poi.ss.formula.WorkbookDependentFormula;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -211,7 +210,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         } else {
             String msg = "State change list is not provided. Please check <stateList> element in ";
             log.error(msg);
-            new WorkflowException(msg);
+            throw new WorkflowException(msg);
         }
 
         return new GeneralWorkflowResponse();
@@ -328,8 +327,13 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             log.error("Error while parsing response from BPS server", e);
             throw new WorkflowException("Error while parsing response from BPS server", e);
         } finally {
-            httpGet.reset();
-            httpDelete.reset();
+            if(httpGet != null){
+                httpGet.reset();
+            }            
+            if(httpDelete != null){
+                httpDelete.reset();
+            }
+            
         }
     }
 
