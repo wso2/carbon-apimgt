@@ -111,6 +111,9 @@ for(var i=0;i < outputs.tiers.length; i++){
     var grant_types = <%= stringify(grant_types)%>;
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
+
+    var enjoyhint_instance = null;
+
     $(document).ready(function() {
 
       $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %>, grant_types: grant_types });
@@ -119,7 +122,16 @@ for(var i=0;i < outputs.tiers.length; i++){
       //activate a tab based on hash
       if(location.hash != undefined || location.hash !=""){
         $("a[href='"+location.hash+"']").tab("show");
-      }       
+      }
+
+        if (isEnjoyHintEnabled()) {
+            var prodKey = '<%=oauthapp.prodKey%>';
+            if(prodKey != undefined && prodKey != 'null'){
+                runEnjoyHintScript(enjoyhint_instance, re_generate_production_keys_data);
+            } else {
+                runEnjoyHintScript(enjoyhint_instance, generate_production_keys_data);
+            }
+        }
     });
   </script>
   <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>

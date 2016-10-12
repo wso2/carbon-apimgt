@@ -335,7 +335,7 @@
                                                         for (var i = 0; i < tiers.length; i++) {
                                                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
                                                         %>
-                                                        <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                                                        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
                                                                 <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
                                                                 <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
@@ -701,7 +701,7 @@
                                      <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
                                      <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
-                                     <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
+                                     <a class="btn btn-primary has-spinner" id="publish_api" onclick="runSuccessMessageHint()" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%}%>
                                 <%}%>
 
@@ -843,6 +843,27 @@
 </script>
 
 <script>
+    var setIntervalId;
+    function runSuccessMessageHint() {
+        setIntervalId = setInterval(function() {
+            runEnjoyHintScriptOnApiPublish()
+        }, 1000);
+    }
+
+    function runEnjoyHintScriptOnApiPublish() {
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_onMessage, item_manage_success_message_script_data);
+            stopSuccessMessageHint();
+        }
+    }
+
+    function stopSuccessMessageHint() {
+        clearInterval(setIntervalId);
+    }
+
+    var enjoyhint_instance_item_manage = null;
+    var enjoyhint_instance_onMessage = null;
+
     $(document).ready(function(){
         $.ajaxSetup({
             contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -1042,7 +1063,9 @@
                 $('#cacheTimeout').hide();
             }
         });
-
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_item_manage, item_manage_script_data);
+        }
     });
 
     var hideMsg=function () {

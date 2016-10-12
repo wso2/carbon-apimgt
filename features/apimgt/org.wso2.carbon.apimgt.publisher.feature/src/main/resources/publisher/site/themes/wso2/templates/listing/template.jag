@@ -1,7 +1,7 @@
 <% jagg.template("listing", function(inputs, outputs, jagg) { %>
-<div id="listing">
-	<div class="page-header">
- 		<h2><%=i18n.localize("All APIs")%></h2>
+    <div id="listing">
+        <div id="listing-title" class="page-header">
+             <h2><%=i18n.localize("All APIs")%></h2>
  	</div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -29,6 +29,8 @@
 	var username = user.username ; 
 	var siteContext = "<%=jagg.getSiteContext()%>";
 
+	var enjoyhint_instance = null;
+
    function hideMsg() {
        $('#apiInfo').hide("fast");
    }
@@ -40,6 +42,64 @@
         $.cookie('showAPIInfo', 'false',{ path: '/',expires: date });
          var t = setTimeout("hideMsg()", 3000);
 
+       }
+
+        var intervalId;
+        function runTutorialHints() {
+            intervalId = setInterval(function() {
+                runEnjoyHint_tutorial_Script()
+            }, 1000);
+        }
+
+        function runEnjoyHint_tutorial_Script() {
+            if (isEnjoyHintEnabled()) {
+                    runEnjoyHintScript(enjoyhint_instance, item_listing_script_data);
+            }
+        }
+
+       var apis = <%=outputs.apis%>;
+
+       if (null != apis) {
+            // Get the api count
+            var apiCount = apis.length;
+            // Check whether no APIs exists
+            if (apiCount == 0) {
+                localStorage.setItem("interactiveTutorialEnabled", true);
+                if (isEnjoyHintEnabled()) {
+                    $('#deploy_sample1').hide();
+                    runEnjoyHintScript(enjoyhint_instance, item_listing_script_data);
+                }
+            } else if (apiCount > 0) {
+                // Check whether the user enabled the tutorial by clicking Documentation sub-menu
+                var isEnjoyHintEnabledWithMenu = false;
+                var interactiveTutorialParamVal = <%=request.getParameter("interactiveTutorial")%>;
+                if (null != interactiveTutorialParamVal && interactiveTutorialParamVal == true) {
+                    isEnjoyHintEnabledWithMenu = true;
+                }
+                if (null != isEnjoyHintEnabledWithMenu && isEnjoyHintEnabledWithMenu == true) {
+                    localStorage.setItem("interactiveTutorialEnabled", true);
+                    // Check whether the WorldBank api exists already
+                    localStorage.setItem("worldBankApiExist", false);
+                    for (var i = 0; i < apiCount; i++) {
+                        var api = apis[i];
+                        var apiName = api.name;
+                        if (apiName.toLowerCase() === "worldbank") {
+                            localStorage.setItem("worldBankApiExist", true);
+                            if (isEnjoyHintEnabled()) {
+                                runEnjoyHintScript(enjoyhint_instance, item_listing_with_worldbank_script_data);
+                                break;
+                            }
+                        }
+                    }
+                    // When no api named worldBank exists
+                    var worldBankApiExist = localStorage.getItem("worldBankApiExist");
+                    if (null != worldBankApiExist && worldBankApiExist === "false") {
+                        if (isEnjoyHintEnabled()) {
+                                runEnjoyHintScript(enjoyhint_instance, item_listing_with_apis_script_data);
+                        }
+                    }
+                }
+            }
        }
 
        });
