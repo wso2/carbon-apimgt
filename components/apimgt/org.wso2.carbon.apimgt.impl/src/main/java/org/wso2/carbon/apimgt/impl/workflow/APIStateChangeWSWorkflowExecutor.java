@@ -55,10 +55,12 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.PayloadConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 /**
  * APIStateChangeWSWorkflowExecutor is used to provide approval process to API state change using external BPMN process.
  * This class is associated with the BPMN process provided with the APIStateChangeApprovalProcess.bar
@@ -67,7 +69,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
     private static final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
-    private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);    
+    private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
     private String clientId;
     private String clientSecret;
     private String tokenAPI;
@@ -83,7 +85,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
     public void setStateList(String stateList) {
         this.stateList = stateList;
-    }  
+    }
 
     public String getClientId() {
         return clientId;
@@ -155,6 +157,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.debug("Executing API State change Workflow.");
+            log.debug("Execute workflowDTO " + workflowDTO.toString());
         }
 
         if (stateList != null) {
@@ -168,13 +171,16 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 // build request payload
 
                 String jsonPayload = buildPayloadForBPMNProcess(apiStateWorkFlowDTO);
-                if(serviceEndpoint == null){
-                    //set the bps endpoint from the global configurations
+                if(log.isDebugEnabled()){
+                    log.debug("APIStateChange payload: " + jsonPayload);
+                }
+                if (serviceEndpoint == null) {
+                    // set the bps endpoint from the global configurations
                     WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
                     serviceEndpoint = workflowProperties.getServerUrl();
                 }
-                 
+
                 URL serviceEndpointURL = new URL(serviceEndpoint);
                 HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
                         serviceEndpointURL.getProtocol());
@@ -221,7 +227,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     }
 
     /**
-     * Complete the API state change workflow process.  
+     * Complete the API state change workflow process.
      */
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
@@ -233,12 +239,12 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
 
-        String action = workflowDTO.getAttributes().get("apiLCAction");
-        String apiName = workflowDTO.getAttributes().get("apiName");
-        String providerName = workflowDTO.getAttributes().get("apiProvider");
-        String version = workflowDTO.getAttributes().get("apiVersion");
-        String invoker = workflowDTO.getAttributes().get("invoker");
-        String currentStatus = workflowDTO.getAttributes().get("apiCurrentState");
+        String action = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_API_LC_ACTION);
+        String apiName = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APINAME);
+        String providerName = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APIPROVIDER);
+        String version = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APIVERSION);
+        String invoker = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_INVOKER);
+        String currentStatus = workflowDTO.getAttributes().get(PayloadConstants.VARIABLE_APISTATE);
 
         int tenantId = workflowDTO.getTenantId();
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -290,39 +296,38 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         String errorMsg;
         URL serviceEndpointURL = new URL(serviceEndpoint);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-       
-        //get the basic auth header value to connect to the bpmn process 
-        String authHeader = getBasicAuthHeader();        
+
+        // get the basic auth header value to connect to the bpmn process
+        String authHeader = getBasicAuthHeader();
         JSONParser parser = new JSONParser();
         HttpGet httpGet = null;
         HttpDelete httpDelete = null;
 
         try {
-            //Get the process instance details related to the given workflow reference id. If there is a process that
-            //is already started with the given wf reference as the businesskey, that process needes to be deleted
-            httpGet = new HttpGet(
-                    serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "?businessKey=" + workflowExtRef);
+            // Get the process instance details related to the given workflow reference id. If there is a process that
+            // is already started with the given wf reference as the businesskey, that process needes to be deleted
+            httpGet = new HttpGet(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "?businessKey=" + workflowExtRef);
             httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
             HttpResponse response = httpClient.execute(httpGet);
-            
+
             HttpEntity entity = response.getEntity();
             String processId = null;
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                //already exists a process related to the given workflow reference
+                // already exists a process related to the given workflow reference
                 String responseStr = EntityUtils.toString(entity);
                 if (log.isDebugEnabled()) {
                     log.debug("Process instance details for ref : " + workflowExtRef + ": " + responseStr);
                 }
                 JSONObject obj = (JSONObject) parser.parse(responseStr);
-                JSONArray data = (JSONArray) obj.get("data");
+                JSONArray data = (JSONArray) obj.get(PayloadConstants.DATA);
                 if (data != null) {
                     JSONObject instanceDetails = (JSONObject) data.get(0);
-                    //extract the id related to that process. this id is used to delete the process
-                    processId = (String) instanceDetails.get("id");
+                    // extract the id related to that process. this id is used to delete the process
+                    processId = (String) instanceDetails.get(PayloadConstants.ID);
                 }
 
                 if (processId != null) {
-                    //delete the process using the id
+                    // delete the process using the id
                     httpDelete = new HttpDelete(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "/" + processId);
                     httpDelete.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
                     response = httpClient.execute(httpDelete);
@@ -353,13 +358,13 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             log.error("Error while parsing response from BPS server", e);
             throw new WorkflowException("Error while parsing response from BPS server", e);
         } finally {
-            if(httpGet != null){
+            if (httpGet != null) {
                 httpGet.reset();
-            }            
-            if(httpDelete != null){
+            }
+            if (httpDelete != null) {
                 httpDelete.reset();
             }
-            
+
         }
     }
 
@@ -389,72 +394,72 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         JSONArray variables = new JSONArray();
 
         JSONObject clientIdObj = new JSONObject();
-        clientIdObj.put("name", "clientId");
-        clientIdObj.put("value", apiStateWorkFlowDTO.getClientId());
+        clientIdObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_CLIENTID);
+        clientIdObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getClientId());
         variables.add(clientIdObj);
 
         JSONObject clientSecretObj = new JSONObject();
-        clientSecretObj.put("name", "clientSecret");
-        clientSecretObj.put("value", apiStateWorkFlowDTO.getClientSecret());
+        clientSecretObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_CLIENTSECRET);
+        clientSecretObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getClientSecret());
         variables.add(clientSecretObj);
 
         JSONObject scopeObj = new JSONObject();
-        scopeObj.put("name", "scope");
-        scopeObj.put("value", apiStateWorkFlowDTO.getScope());
+        scopeObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_SCOPE);
+        scopeObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getScope());
         variables.add(scopeObj);
 
         JSONObject tokenAPIObj = new JSONObject();
-        tokenAPIObj.put("name", "tokenAPI");
-        tokenAPIObj.put("value", apiStateWorkFlowDTO.getTokenAPI());
+        tokenAPIObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_TOKENAPI);
+        tokenAPIObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getTokenAPI());
         variables.add(tokenAPIObj);
 
         JSONObject apiCurrentStateObj = new JSONObject();
-        apiCurrentStateObj.put("name", "apiCurrentState");
-        apiCurrentStateObj.put("value", apiStateWorkFlowDTO.getApiCurrentState());
+        apiCurrentStateObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_APISTATE);
+        apiCurrentStateObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getApiCurrentState());
         variables.add(apiCurrentStateObj);
 
         JSONObject apiLCActionObj = new JSONObject();
-        apiLCActionObj.put("name", "apiLCAction");
-        apiLCActionObj.put("value", apiStateWorkFlowDTO.getApiLCAction());
+        apiLCActionObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_API_LC_ACTION);
+        apiLCActionObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getApiLCAction());
         variables.add(apiLCActionObj);
 
         JSONObject apiNameObj = new JSONObject();
-        apiNameObj.put("name", "apiName");
-        apiNameObj.put("value", apiStateWorkFlowDTO.getApiName());
+        apiNameObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_APINAME);
+        apiNameObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getApiName());
         variables.add(apiNameObj);
 
         JSONObject apiVersionObj = new JSONObject();
-        apiVersionObj.put("name", "apiVersion");
-        apiVersionObj.put("value", apiStateWorkFlowDTO.getApiVersion());
+        apiVersionObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_APIVERSION);
+        apiVersionObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getApiVersion());
         variables.add(apiVersionObj);
 
         JSONObject apiProviderObj = new JSONObject();
-        apiProviderObj.put("name", "apiProvider");
-        apiProviderObj.put("value", apiStateWorkFlowDTO.getApiProvider());
+        apiProviderObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_APIPROVIDER);
+        apiProviderObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getApiProvider());
         variables.add(apiProviderObj);
 
         JSONObject callbackUrlObj = new JSONObject();
-        callbackUrlObj.put("name", "callbackUrl");
-        callbackUrlObj.put("value", apiStateWorkFlowDTO.getCallbackUrl());
+        callbackUrlObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_CALLBACKURL);
+        callbackUrlObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getCallbackUrl());
         variables.add(callbackUrlObj);
 
         JSONObject wfReferenceObj = new JSONObject();
-        wfReferenceObj.put("name", "wfReference");
-        wfReferenceObj.put("value", apiStateWorkFlowDTO.getExternalWorkflowReference());
+        wfReferenceObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_WFREF);
+        wfReferenceObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getExternalWorkflowReference());
         variables.add(wfReferenceObj);
 
         JSONObject invokerObj = new JSONObject();
-        invokerObj.put("name", "invoker");
-        invokerObj.put("value", apiStateWorkFlowDTO.getInvoker());
+        invokerObj.put(PayloadConstants.VARIABLE_NAME, PayloadConstants.VARIABLE_INVOKER);
+        invokerObj.put(PayloadConstants.VARIABLE_VALUE, apiStateWorkFlowDTO.getInvoker());
         variables.add(invokerObj);
 
         JSONObject payload = new JSONObject();
-        payload.put("processDefinitionKey", processDefinitionKey);
-        payload.put("tenantId", apiStateWorkFlowDTO.getTenantId());
+        payload.put(PayloadConstants.PROCESS_DEF_KEY, processDefinitionKey);
+        payload.put(PayloadConstants.TENANT_ID, apiStateWorkFlowDTO.getTenantId());
         // set workflowreferencid to business key so we can later query the process instance using this value
         // if we want to delete the instance
-        payload.put("businessKey", apiStateWorkFlowDTO.getExternalWorkflowReference());
-        payload.put("variables", variables);
+        payload.put(PayloadConstants.BUSINESS_KEY, apiStateWorkFlowDTO.getExternalWorkflowReference());
+        payload.put(PayloadConstants.VARIABLES, variables);
 
         return payload.toJSONString();
     }
@@ -462,30 +467,29 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     /**
      * set information that are needed to invoke callback service
      */
-    private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) throws WorkflowException{
+    private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) throws WorkflowException {
         // if credentials are not defined in the workflow-extension.xml file call dcr endpoint and generate a
         // oauth application and pass the client id and secret
-        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+        WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getWorkflowProperties();
         if (clientId == null || clientSecret == null) {
-            // TODO impliment dcr enpoint calling
-            //temporary using api-manager.xml dcr credentials as the oauth app credentials. 
-            clientId = workflowProperties.getdCREndpointUser();
-            clientSecret = workflowProperties.getdCREndpointPassword();
-            
-            /* uncomment when dcr endpoint implementation is done
-            byte[] encodedAuth = Base64.encodeBase64((username + ":" + password).getBytes(Charset.forName("ISO-8859-1")));
-         
+
+            String dcrUsername = workflowProperties.getdCREndpointUser();
+            String dcrPassword = workflowProperties.getdCREndpointPassword();
+
+            byte[] encodedAuth = Base64
+                    .encodeBase64((dcrUsername + ":" + dcrPassword).getBytes(Charset.forName("ISO-8859-1")));
+
             JSONObject payload = new JSONObject();
-            payload.put("clientName", "workflow_app");
-            payload.put("owner", username);
-            payload.put("saasApp", "true");
-            payload.put("grantType", "client_credentials password refresh_token");
+            payload.put(PayloadConstants.KEY_OAUTH_APPNAME, WorkflowConstants.WORKFLOW_OAUTH_APP_NAME);
+            payload.put(PayloadConstants.KEY_OAUTH_OWNER, dcrUsername);
+            payload.put(PayloadConstants.KEY_OAUTH_SAASAPP, "true");
+            payload.put(PayloadConstants.KEY_OAUTH_GRANT_TYPES, WorkflowConstants.WORKFLOW_OAUTH_APP_GRANT_TYPES);
             URL serviceEndpointURL = new URL(workflowProperties.getdCREndPoint());
             HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
                     serviceEndpointURL.getProtocol());
             HttpPost httpPost = new HttpPost(workflowProperties.getdCREndPoint());
-            String authHeader =  "Basic " + new String(encodedAuth);
+            String authHeader = "Basic " + new String(encodedAuth);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
             StringEntity requestEntity = new StringEntity(payload.toJSONString(), ContentType.APPLICATION_JSON);
 
@@ -505,27 +509,29 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 }
                 JSONParser parser = new JSONParser();
                 JSONObject obj = (JSONObject) parser.parse(responseStr);
-                clientId = (String) obj.get("clientId");
-                clientSecret = (String) obj.get("clientSecret");
+                clientId = (String) obj.get(PayloadConstants.VARIABLE_CLIENTID);
+                clientSecret = (String) obj.get(PayloadConstants.VARIABLE_CLIENTSECRET);
             } catch (ClientProtocolException e) {
-                log.error("Error while creating the http client", e);
-                throw new WorkflowException("Error while creating the http client", e);
+                String errorMsg = "Error while creating the http client";
+                log.error(errorMsg, e);
+                throw new WorkflowException(errorMsg, e);
             } catch (IOException e) {
-                log.error("Error while connecting to dcr endpoint", e);
-                throw new WorkflowException("Error while connecting to dcr endpoint", e);
+                String errorMsg = "Error while connecting to dcr endpoint";
+                log.error(errorMsg, e);
+                throw new WorkflowException(errorMsg, e);
             } catch (ParseException e) {
-                log.error("Error while parsing response from DCR endpoint", e);
-                throw new WorkflowException("Error while parsing response from DCR endpoint", e);
+                String errorMsg = "Error while parsing response from DCR endpoint";
+                log.error(errorMsg, e);
+                throw new WorkflowException(errorMsg, e);
             } finally {
                 httpPost.reset();
             }
-            */
+
         }
         apiStateWorkFlowDTO.setClientId(clientId);
         apiStateWorkFlowDTO.setClientSecret(clientSecret);
         apiStateWorkFlowDTO.setScope(WorkflowConstants.API_WF_SCOPE);
-        
-        
+
         apiStateWorkFlowDTO.setTokenAPI(workflowProperties.getTokenEndPoint());
 
     }
@@ -552,6 +558,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                     stateAction.put(stateActionArray[0].toUpperCase(), actionList);
                 }
             }
+        }
+        if(log.isDebugEnabled()){
+            log.debug("selected states: " + stateAction.toString());
         }
         return stateAction;
     }

@@ -99,5 +99,42 @@ public class WorkflowConstants {
     
     public static final String DEFAULT_EXECUTOR_API_STATE_CHANGE = 
             "org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor";
+    
+    public static final String WORKFLOW_OAUTH_APP_NAME = "workflow_app";
+    public static final String WORKFLOW_OAUTH_APP_GRANT_TYPES = "client_credentials password refresh_token";
+    
+    public static class PayloadConstants {
+        public static final String PROCESS_DEF_KEY = "processDefinitionKey";
+        public static final String TENANT_ID = "tenantId";
+        public static final String BUSINESS_KEY = "businessKey";
+        public static final String VARIABLES = "variables";
+        public static final String VARIABLE_NAME = "name";
+        public static final String VARIABLE_VALUE = "value";
+        public static final String VARIABLE_CLIENTID = "clientId";
+        public static final String VARIABLE_CLIENTSECRET = "clientSecret";
+        public static final String VARIABLE_SCOPE = "scope";
+        public static final String VARIABLE_TOKENAPI = "tokenAPI";
+        public static final String VARIABLE_APISTATE = "apiCurrentState";
+        public static final String VARIABLE_API_LC_ACTION = "apiLCAction";
+        public static final String VARIABLE_APINAME = "apiName";
+        public static final String VARIABLE_APIVERSION = "apiVersion";
+        public static final String VARIABLE_APIPROVIDER = "apiProvider";
+        public static final String VARIABLE_CALLBACKURL = "callbackUrl";
+        public static final String VARIABLE_WFREF = "wfReference";
+        public static final String VARIABLE_INVOKER = "invoker";
+        
+        public static final String DATA = "data";
+        public static final String ID = "id";
+        
+        public static final String KEY_OAUTH_APPNAME = "clientName";
+        public static final String KEY_OAUTH_OWNER = "owner";
+        public static final String KEY_OAUTH_SAASAPP = "saasApp";
+        public static final String KEY_OAUTH_GRANT_TYPES = "grantType";
+        
+        private PayloadConstants(){
+            
+        }
+        
+    }
 
 }
