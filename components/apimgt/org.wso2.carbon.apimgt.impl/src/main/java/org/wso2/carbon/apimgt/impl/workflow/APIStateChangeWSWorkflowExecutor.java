@@ -59,9 +59,15 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-
+/**
+ * APIStateChangeWSWorkflowExecutor is used to provide approval process to API state change using external BPMN process.
+ * This class is associated with the BPMN process provided with the APIStateChangeApprovalProcess.bar
+ *
+ */
 public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
+    private static final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
+    private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);    
     private String clientId;
     private String clientSecret;
     private String tokenAPI;
@@ -77,11 +83,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
 
     public void setStateList(String stateList) {
         this.stateList = stateList;
-    }
-
-    private final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
-
-    private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
+    }  
 
     public String getClientId() {
         return clientId;
@@ -152,7 +154,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Executing API State change Workflow..");
+            log.debug("Executing API State change Workflow.");
         }
 
         if (stateList != null) {
@@ -191,11 +193,13 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                         throw new WorkflowException(error);
                     }
                 } catch (ClientProtocolException e) {
-                    log.error("Error while creating the http client", e);
-                    throw new WorkflowException("Error while creating the http client", e);
+                    String errorMsg = "Error while creating the http client";
+                    log.error(errorMsg, e);
+                    throw new WorkflowException(errorMsg, e);
                 } catch (IOException e) {
-                    log.error("Error while connecting to the external service", e);
-                    throw new WorkflowException("Error while connecting to the external service", e);
+                    String errorMsg = "Error while connecting to the external service";
+                    log.error(errorMsg, e);
+                    throw new WorkflowException(errorMsg, e);
                 } finally {
                     httpPost.reset();
                 }
@@ -216,8 +220,16 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         return new GeneralWorkflowResponse();
     }
 
+    /**
+     * Complete the API state change workflow process.  
+     */
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
+        if (log.isDebugEnabled()) {
+            log.debug("Completing API State change Workflow..");
+            log.debug("response: " + workflowDTO.toString());
+        }
+
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
 
@@ -238,7 +250,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-                String targetStatus = "";
+                String targetStatus;
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                 targetStatus = apiArtifact.getLifecycleState();
                 if (!currentStatus.equals(targetStatus)) {
@@ -253,16 +265,22 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             }
 
         } catch (RegistryException e) {
-            log.error("Could not complete api state change workflow", e);
-            throw new WorkflowException("Could not complete api state change workflow", e);
+            String errorMsg = "Could not complete api state change workflow";
+            log.error(errorMsg, e);
+            throw new WorkflowException(errorMsg, e);
         } catch (APIManagementException e) {
-            log.error("Could not complete api state change workflow", e);
-            throw new WorkflowException("Could not complete api state change workflow", e);
+            String errorMsg = "Could not complete api state change workflow";
+            log.error(errorMsg, e);
+            throw new WorkflowException(errorMsg, e);
         }
 
         return new GeneralWorkflowResponse();
     }
 
+    /**
+     * Handle cleanup task for api state change workflow ws executor. This queries the BPMN process related to the given
+     * workflow reference id and delete that process
+     */
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
 
@@ -272,19 +290,25 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         String errorMsg;
         URL serviceEndpointURL = new URL(serviceEndpoint);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
-        HttpGet httpGet = new HttpGet(
-                serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "?businessKey=" + workflowExtRef);
-        String authHeader = getBasicAuthHeader();
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+       
+        //get the basic auth header value to connect to the bpmn process 
+        String authHeader = getBasicAuthHeader();        
         JSONParser parser = new JSONParser();
-
+        HttpGet httpGet = null;
         HttpDelete httpDelete = null;
 
         try {
+            //Get the process instance details related to the given workflow reference id. If there is a process that
+            //is already started with the given wf reference as the businesskey, that process needes to be deleted
+            httpGet = new HttpGet(
+                    serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "?businessKey=" + workflowExtRef);
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
             HttpResponse response = httpClient.execute(httpGet);
+            
             HttpEntity entity = response.getEntity();
             String processId = null;
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                //already exists a process related to the given workflow reference
                 String responseStr = EntityUtils.toString(entity);
                 if (log.isDebugEnabled()) {
                     log.debug("Process instance details for ref : " + workflowExtRef + ": " + responseStr);
@@ -293,10 +317,12 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 JSONArray data = (JSONArray) obj.get("data");
                 if (data != null) {
                     JSONObject instanceDetails = (JSONObject) data.get(0);
+                    //extract the id related to that process. this id is used to delete the process
                     processId = (String) instanceDetails.get("id");
                 }
 
                 if (processId != null) {
+                    //delete the process using the id
                     httpDelete = new HttpDelete(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH + "/" + processId);
                     httpDelete.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
                     response = httpClient.execute(httpDelete);

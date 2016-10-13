@@ -156,6 +156,15 @@ public class WorkflowDTO implements Serializable {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public String toString() {
+        return "WorkflowDTO [workflowReference=" + workflowReference + ", workflowType=" + workflowType + ", status="
+                + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
+                + workflowDescription + ", tenantId=" + tenantId + ", tenantDomain=" + tenantDomain
+                + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackUrl=" + callbackUrl
+                + ", attributes=" + attributes + "]";
     }    
     
 }
