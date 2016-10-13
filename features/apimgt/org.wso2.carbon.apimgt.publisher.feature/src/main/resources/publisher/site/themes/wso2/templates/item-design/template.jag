@@ -25,9 +25,9 @@
     var ws = false;
             <%  if(session.get("ws") || ( api && api.ws )){%>
                 ws=true;
-                <%if(session)
+                <%if (session)
                 var ws_session = session.get("ws");
-				if(api && api.ws){
+				if (api && api.ws){
 				ws_session = api.ws;
 				}
                                    
@@ -41,24 +41,24 @@
 
     var implement_wlabel = "";
     var manage_wlabel = "";
-    if(!api){ 
+    if (!api) {
         var design_w_link = '#'; 
         var implement_w_link = '#'; 
         var manage_w_link = '#'; 
     }
 
     var implement_wlabel = "";    
-    if(api && api.implementation != null){
+    if (api && api.implementation != null) {
         implement_wlabel = "completed"
     }
-    else{
+    else {
         implement_w_link = '#';
     }
 
     var manage_wlabel = "";
-    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+    if (api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")) {
         manage_wlabel = "completed";      
-    }else{
+    } else {
         var manage_w_link = '#';        
     }         
 %>

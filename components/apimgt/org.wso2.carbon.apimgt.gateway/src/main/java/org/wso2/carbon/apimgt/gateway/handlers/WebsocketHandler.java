@@ -116,7 +116,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			return false;
 		}
 		String[] auth = req.headers().get(HttpHeaders.AUTHORIZATION).split(" ");
-		if (auth[0].equals(APIConstants.CONSUMER_KEY_SEGMENT)) {
+		if (APIConstants.CONSUMER_KEY_SEGMENT.equals(auth[0])) {
 			String apikey = auth[1];
 			if (AuthUtil.isRemoveOAuthHeadersFromOutMessage()) {
 				req.headers().remove(HttpHeaders.AUTHORIZATION);
@@ -125,6 +125,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			if (AuthUtil.isGatewayTokenCacheEnabled()) {
 				info = AuthUtil.validateCache(apikey, apikey);
 				if (info != null) {
+					infoDTO = info;
 					return info.isAuthorized();
 				}
 			}
@@ -143,6 +144,7 @@ public class WebsocketHandler extends ChannelInboundHandlerAdapter {
 			if (AuthUtil.isGatewayTokenCacheEnabled()) {
 				AuthUtil.putCache(info, apikey, apikey);
 			}
+			infoDTO = info;
 			return true;
 		} else {
 			return false;

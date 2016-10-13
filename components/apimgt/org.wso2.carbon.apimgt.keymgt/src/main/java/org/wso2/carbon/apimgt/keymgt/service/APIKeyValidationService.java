@@ -270,7 +270,7 @@ public class APIKeyValidationService extends AbstractAdmin {
     public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version, String accessToken)
             throws APIKeyMgtException, APIManagementException {
 
-        APIKeyValidationInfoDTO info = null;
+        APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
         info.setAuthorized(false);
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);

@@ -52,7 +52,7 @@ public class API implements Serializable{
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-
+    public static final String WEB_SOCKET = "ws";
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
     private boolean apiResourcePatternsChanged;
@@ -657,10 +657,10 @@ public class API implements Serializable{
         return isWebsocketApi;
     }
 
-    public void setWS(String WS) {
-        if("ws".equalsIgnoreCase(WS)||"true".equalsIgnoreCase(WS))
+    public void setWS(String websocket) {
+        if(WEB_SOCKET.equalsIgnoreCase(websocket) || "true".equalsIgnoreCase(websocket)) {
             isWebsocketApi = true;
+        }
     }
-
 
 }

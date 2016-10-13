@@ -801,7 +801,7 @@ public class APIProviderHostObject extends ScriptableObject {
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
 //        String contextVal = (String) apiData.get("context", apiData);
         String description = (String) apiData.get("description", apiData);
-        String ws = (String) apiData.get("ws",apiData);
+        String ws = (String) apiData.get("ws", apiData);
         /* Business Information*/
         String techOwner = (String) apiData.get("techOwner", apiData);
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
@@ -924,7 +924,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String contextVal = (String) apiData.get("context", apiData);
-        String ws = (String) apiData.get("ws",apiData);
+        String ws = (String) apiData.get("ws", apiData);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
@@ -1182,7 +1182,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
-        String ws = (String) apiData.get("ws",apiData);
+        String ws = (String) apiData.get("ws", apiData);
         if (contextVal.isEmpty()) {
             handleException("Context not defined for API");
         }
@@ -1769,7 +1769,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
         String contextVal = (String) apiData.get("context", apiData);
-        String ws = (String) apiData.get("ws",apiData);
+        String ws = (String) apiData.get("ws", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && !context.contains("/t/"+ providerDomain))

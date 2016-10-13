@@ -45,8 +45,7 @@ public class AuthUtil {
 
 	protected static void initParams() {
 		try {
-			APIManagerConfiguration config =
-					ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+			APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
 			String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
 			if (cacheEnabled != null) {
 				gatewayTokenCacheEnabled = Boolean.parseBoolean(cacheEnabled);
@@ -55,10 +54,10 @@ public class AuthUtil {
 			if (value != null) {
 				removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
 			}
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			log.error(
-					"Did not find valid API Validation Information cache configuration. Use default configuration" +
-					e, e);
+					"Did not found valid API Validation Information cache configuration. "
+					+ e.getMessage(), e);
 		}
 
 	}
@@ -164,10 +163,10 @@ public class AuthUtil {
 			javax.cache.CacheManager manager =
 					Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER);
 			cache = manager.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			log.error(
-					"Did not found valid API Validation Information cache configuration. Use default configuration" +
-					e, e);
+					"Did not found valid API Validation Information cache configuration. " +
+					e.getMessage(), e);
 		}
 		return cache;
 

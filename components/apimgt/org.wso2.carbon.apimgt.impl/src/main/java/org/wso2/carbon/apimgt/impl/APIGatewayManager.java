@@ -185,8 +185,8 @@ public class APIGatewayManager {
 
                     //Deploy the custom sequences of the API.
 					deployCustomSequences(api, tenantDomain, environment);
-                    }else{
-                        deployWebsocketAPI(api,client);
+                    } else {
+                        deployWebsocketAPI(api, client);
                     }
 
 				}
@@ -244,7 +244,7 @@ public class APIGatewayManager {
 
                         setSecureVaultProperty(api, tenantDomain, environment, operation);
                     }
-                    }else{
+                    } else {
                             String fileName = api.getContext().substring(1).replace('/','-');
                             client.undeployWSApi(new String[]{fileName});
                     }
@@ -330,7 +330,7 @@ public class APIGatewayManager {
                 "</sequence>";
         return seq;
         } catch (JSONException e) {
-            log.error("Error in reading JSON object " + e, e);
+            log.error("Error in reading JSON object " + e.getMessage(), e);
             return null;
         }
     }

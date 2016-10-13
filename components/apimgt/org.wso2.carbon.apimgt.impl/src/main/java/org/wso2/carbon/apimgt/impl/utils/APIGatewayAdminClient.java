@@ -510,14 +510,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             fos.write(contentInBytes);
             fos.flush();
         } catch (IOException e) {
-
+            log.error("Error in writing the file" + e.getMessage(), e);
         } finally {
             try {
                 if (fos != null) {
                     fos.close();
                 }
             } catch (IOException e) {
-                log.error("Error in writing the file" + e, e);
+                log.error("Error in writing the file" + e.getMessage(), e);
             }
         }
     }
@@ -528,9 +528,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @param fileNames
      */
     public void undeployWSApi(String[] fileNames) {
-
+        File file;
         for (int i = 0; i < fileNames.length; i++) {
-            File file = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
+            file = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
             boolean deleted = file.delete();
             if (deleted) {
                 log.debug("File : " + fileNames[i] + " is deleted");
