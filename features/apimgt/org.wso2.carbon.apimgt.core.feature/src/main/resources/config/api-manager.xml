@@ -539,6 +539,18 @@
         <EnableJWTClaimConditions>false</EnableJWTClaimConditions>
         <EnableQueryParamConditions>false</EnableQueryParamConditions>
     </ThrottlingConfigurations>
+    
+    <WorkflowConfigurations>
+        <Enabled>false</Enabled>
+    	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>   		
+    	<ServerUser>${admin.username}</ServerUser>
+    	<ServerPassword>${admin.password}</ServerPassword>
+    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
+		<TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
+	<DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.10/register</DCREndPoint>
+	<DCREndPointUser>${admin.username}</DCREndPointUser>
+	<DCREndPointPassword>${admin.password}</DCREndPointPassword>
+    </WorkflowConfigurations>
 
     <SwaggerCodegen>
         <ClientGeneration>

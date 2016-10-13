@@ -697,8 +697,12 @@
                                 <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("Save")%></button>
                                 <% if(outputs.isPermitted) {
                                    var status=outputs.lcStatus;
+                                   var wfStatus = "";
+                                   if(outputs.wfStatus != null && outputs.wfStatus.status != null){
+                                     wfStatus = outputs.wfStatus.status;               
+                                   }
                                 %>
-                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
+                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
                                      <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
                                      <a class="btn btn-primary has-spinner" id="publish_api" onclick="runSuccessMessageHint()" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
@@ -737,6 +741,25 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+
+
+        <div id="waiting-approval" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+                <h3><%=i18n.localize("approval waiting topic")%></h3>
+              </div>
+              <div class="modal-body">
+                <p>
+                    <%=i18n.localize("approval waiting message")%>
+                </p>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
 
 
     </div>
@@ -896,15 +919,23 @@
                 success: function(responseText){
                     $("body").unbind('api_saved');
                     if (!responseText.error) {
-                        $('#publish-success').modal({
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        $('#publish-success').modal('show');
-                        $('#goToStore-btn').click(function(){
-                            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
-                            location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
-                        });
+                        if(responseText.wfstatus != null){
+                            $('#waiting-approval').modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            $('#waiting-approval').modal('show');
+                        } else {
+                            $('#publish-success').modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            $('#publish-success').modal('show');
+                            $('#goToStore-btn').click(function(){
+                                window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+                                location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
+                            });
+                        }
                     } else {
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {

@@ -1,0 +1,78 @@
+<%
+
+var carbon = require('carbon');
+var log = new Log();
+var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getWorkflowProperties();
+
+var adminUserName = workflowConfigs.getServerUser();
+var adminPassword = workflowConfigs.getServerPassword();
+var serverUrl = workflowConfigs.getServerUrl();
+var isEnabled = workflowConfigs.isEnabled();
+
+var getBPMNTasks = function (taskName) {
+    
+    if(!isEnabled){
+      return null;
+    }
+
+    var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
+    var tenantId = APIUtil.getTenantId(session.get("logged.user").username);
+
+    var basicHeader = "Basic " + getAuthorizationHeader().toString();
+
+    var headers = {"Authorization": basicHeader};
+    var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username;
+    var taskList = [];
+    try{
+        var response = get(taskUrl, {}, headers);
+        if(response != null && response.data != null){
+            taskList = JSON.parse(response.data).data;      
+        }
+    } catch (e) {
+        log.error("Error while getting tasks " + e);
+    }
+   
+
+return taskList;
+
+};
+
+
+
+var getAuthorizationHeader=function(){
+    var Base64Utils = Packages.org.apache.axiom.util.base64.Base64Utils;
+    var inputString = adminUserName + ":" + adminPassword;
+    var byteArray = [];
+
+    for (var i = 0; i < inputString.length; ++i) {
+        byteArray.push(inputString.charCodeAt(i));
+    }
+    var encodedString = Base64Utils.encode(byteArray);
+
+return encodedString;
+};
+
+//This do user group validation on the BPS side. Only return the tasks that can be claimed
+//by the provided user. (user needes to be in the same group)
+//For this method to work, bpmn engine should need to share the api manager's user store
+var getcandidateOrAssignedTaskForUser = function (taskName, username, tenantId) {
+    
+   
+    var basicHeader = "Basic " + getAuthorizationHeader().toString();
+
+    var headers = {"Authorization": basicHeader};
+    var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username;
+    var taskList = [];
+    var response = get(taskUrl, {}, headers);
+    if(response != null && response.data != null){
+        taskList = JSON.parse(response.data).data;      
+    }
+ 
+    return taskList;
+}
+
+
+%>

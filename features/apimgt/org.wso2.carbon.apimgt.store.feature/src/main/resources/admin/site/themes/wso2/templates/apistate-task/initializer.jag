@@ -1,0 +1,10 @@
+<%
+jagg.initializer("apistate-task", {
+
+    preInitialize:function () {
+        jagg.addFooterJS("apistate", "jagg", "templates/apistate-task/js/apistate.js");
+
+    }
+});
+%>
+

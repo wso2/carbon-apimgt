@@ -95,6 +95,12 @@
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-register"></i><%="Application Registration"%></a>
             </li>
+            <li <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task == "apistate"){%>
+              class="active" <% } %>><a
+              href="<%=subsMappedUrl%>?task=apistate"
+              onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=apistate',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-application"></i><%=i18n.localize("API State Approval")%></a>
+            </li>
           </ul>
         </li>
         <li class="nav-header">

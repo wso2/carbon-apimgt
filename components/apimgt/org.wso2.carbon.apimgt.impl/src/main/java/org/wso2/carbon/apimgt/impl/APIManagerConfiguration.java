@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.securevault.SecretResolver;
@@ -79,6 +80,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
+    private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
@@ -302,8 +304,10 @@ public class APIManagerConfiguration {
                     parseLoginConfig(loginOMElement);
                 }
 
-            }else if (APIConstants.AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS.equals(localName)){
+            } else if (APIConstants.AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS.equals(localName)){
                 setThrottleProperties(serverConfig);
+            } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)){
+                setWorkflowProperties(serverConfig);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -422,6 +426,81 @@ public class APIManagerConfiguration {
         }
     }
 
+    /**
+     * set workflow related configurations
+     * @param element
+     */
+    private void setWorkflowProperties(OMElement element) {
+        OMElement workflowConfigurationElement = element
+                .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW));
+        if (workflowConfigurationElement != null) {
+            OMElement enableWorkflowElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_ENABLED));
+            if (enableWorkflowElement != null) {
+                workflowProperties.setEnabled(JavaUtils.isTrueExplicitly(enableWorkflowElement.getText()));
+            }
+            OMElement workflowServerUrlElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_URL));
+            if (workflowServerUrlElement != null) {
+                workflowProperties.setServerUrl(APIUtil.replaceSystemProperty(workflowServerUrlElement.getText()));
+            }
+            OMElement workflowServerUserElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_USER));
+            if (workflowServerUserElement != null) {
+                workflowProperties.setServerUser(APIUtil.replaceSystemProperty(workflowServerUserElement.getText()));
+            }
+            OMElement workflowDCRUserElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_USER));
+            if (workflowDCRUserElement != null) {
+                workflowProperties.setdCREndpointUser(APIUtil.replaceSystemProperty(workflowDCRUserElement.getText()));
+            }
+            OMElement workflowCallbackElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_CALLBACK));
+            if (workflowCallbackElement != null) {
+                workflowProperties
+                        .setWorkflowCallbackAPI(APIUtil.replaceSystemProperty(workflowCallbackElement.getText()));
+            }
+
+            OMElement workflowDCREPElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP));
+            if (workflowDCREPElement != null) {
+                workflowProperties.setdCREndPoint(APIUtil.replaceSystemProperty(workflowDCREPElement.getText()));
+            }
+            
+            OMElement workflowTokenEpElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_TOKEN_EP));
+            if (workflowTokenEpElement != null) {
+                workflowProperties.setTokenEndPoint(APIUtil.replaceSystemProperty(workflowTokenEpElement.getText()));
+            }            
+            
+            String workflowServerPassword;
+            String workflowServerPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
+                    + APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD;
+            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(workflowServerPasswordKey)) {
+                workflowServerPassword = secretResolver.resolve(workflowServerPasswordKey);
+            } else {
+                workflowServerPassword = workflowConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD))
+                        .getText();
+                workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
+            }
+            workflowProperties.setServerPassword(workflowServerPassword);
+            
+            String dcrEPPassword;
+            String dcrEPPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
+                    + APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD;
+            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(dcrEPPasswordKey)) {
+                dcrEPPassword = secretResolver.resolve(dcrEPPasswordKey);
+            } else {
+                dcrEPPassword = workflowConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD))
+                        .getText();
+                dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
+            }
+            workflowProperties.setdCREndpointPassword(dcrEPPassword);
+
+        }
+    }
     /**
      * set the Advance Throttle Properties into Configuration
      *
@@ -907,4 +986,9 @@ public class APIManagerConfiguration {
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
+
+    public WorkflowProperties getWorkflowProperties() {
+        return workflowProperties;
+    }
+    
 }
