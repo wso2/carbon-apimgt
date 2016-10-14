@@ -23,7 +23,7 @@ var completeBPMNTask = function (taskId, status) {
     var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
 
     var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
-    if(userDomain != null){
+    if(userDomain != null && userDomain != "carbon.super"){
         var tenantBPMNserverUrl = "t/" + userDomain + "/webapps/bpmn";
         serverUrl = serverUrl.replace("bpmn", tenantBPMNserverUrl)
     }
