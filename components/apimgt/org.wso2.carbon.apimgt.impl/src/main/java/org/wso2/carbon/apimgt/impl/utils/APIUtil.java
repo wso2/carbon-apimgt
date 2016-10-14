@@ -548,6 +548,9 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+
+            String environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
+            api.setGatewayUrls(environmentConfig);
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
@@ -4799,6 +4802,21 @@ public final class APIUtil {
         }
         return environmentStringSet;
     }
+    /**
+     * This method used to get environment values of API from database.
+     *
+     * @param api API object
+     * @throws APIManagementException
+     */
+    public static String getAPIUrls(API api) throws APIManagementException {
+
+        String environmentConfig = null;
+        int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
+        if (api.getEnvironments() != null) {
+            environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
+        }
+        return environmentConfig;
+    }
 
     /**
      * This method used to set environment values to governance artifact of API .
@@ -6108,7 +6126,7 @@ public final class APIUtil {
         }
         return null;
     }
-    
+
     /**
      * Generates solr compatible search criteria synatax from user entered query criteria. 
      * Ex: From version:1.0.0, this returns version=*1.0.0*

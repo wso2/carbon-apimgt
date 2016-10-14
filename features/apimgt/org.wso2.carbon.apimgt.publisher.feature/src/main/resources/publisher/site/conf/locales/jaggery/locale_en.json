@@ -180,6 +180,7 @@
     "Enable this feature to see a graph (in the <strong>Statistics menu </strong>) of the number of requests that leave the API Gateway to destination endpoints (e.g., Load-balanced endpoints).": "Enable this feature to see a graph (in the <strong>Statistics menu </strong>) of the number of requests that leave the API Gateway to destination endpoints (e.g., Load-balanced endpoints).",
     "Enabled": "Enabled",
     "Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available": "Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available",
+    "If gateway URLs need to be changed de-select 'Use Defaults' and enter the URLs. If you do not enter a URL default URLs will be added from configurations.": "If gateway URLs need to be changed de-select 'Use Defaults' and enter the URLs. If you do not enter a URL default URLs will be added from configurations.",
     "Enabling the resource level throttling tier will apply the configured limits per resource": "Enabling the resource level throttling tier will apply the configured limits per resource",
     "Endpoint Auth Type": "Endpoint Auth Type",
     "Endpoint Security Scheme": "Endpoint Security Scheme",
@@ -188,6 +189,7 @@
     "Endpoint Type:": "Endpoint Type:",
     "Endpoints": "Endpoints",
     "Environment Name": "Environment Name",
+    "Gateway URLs": "Gateway URLs",
     "Error Codes": "Error Codes",
     "Error occurred while updating API": "Error occurred while updating API",
     "Execute fault sequence": "Execute fault sequence",
@@ -524,5 +526,7 @@
     "tenants": "Visible to Tenants",
     "tierPermissions": "tierPermissions",
     "tiers": "tiers",
-    "user": "user"
+    "user": "user",
+    "Use Defaults": "Use Defaults",
+    "Use Default Context": "Use Default Context"
 }
