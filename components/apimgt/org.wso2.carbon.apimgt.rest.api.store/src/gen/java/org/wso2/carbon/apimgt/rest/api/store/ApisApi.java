@@ -171,9 +171,9 @@ public class ApisApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API\n", notes = "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSDK generted successfully.\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSDK generated successfully.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad request.\nSDK langugage is not supported.\n"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad request.\nSDK language is not supported.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
         
