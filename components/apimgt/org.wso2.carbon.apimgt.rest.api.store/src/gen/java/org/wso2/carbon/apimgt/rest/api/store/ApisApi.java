@@ -165,6 +165,26 @@ public class ApisApi  {
     {
     return delegate.apisApiIdThumbnailGet(apiId,accept,ifNoneMatch,ifModifiedSince);
     }
+    @POST
+    @Path("/generate-sdk/")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API\n", notes = "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSDK generted successfully.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad request.\nSDK langugage is not supported.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
+
+    public Response apisGenerateSdkPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",required=true) @QueryParam("apiId") String apiId,
+    @ApiParam(value = "Programming language to generate SDK.\n",required=true) @QueryParam("language") String language,
+    @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant)
+    {
+    return delegate.apisGenerateSdkPost(apiId,language,xWSO2Tenant);
+    }
     @GET
     
     @Consumes({ "application/json" })
