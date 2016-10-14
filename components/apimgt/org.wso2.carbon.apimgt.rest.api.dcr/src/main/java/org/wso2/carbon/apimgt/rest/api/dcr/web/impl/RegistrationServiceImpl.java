@@ -214,37 +214,37 @@ public class RegistrationServiceImpl implements RegistrationService {
     private boolean isUserAccessAllowed(String username) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("checking 'subscribe' permission for user " + username);
+                log.debug("Checking 'subscribe' permission for user " + username);
             }
             APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
             return true;
         } catch (APIManagementException e) {
             if (log.isDebugEnabled()) {
-                log.debug("user " + username + " does not have subscriber permission", e);
+                log.debug("User " + username + " does not have subscriber permission", e);
             }
         }
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("checking 'api publish' permission for user " + username);
+                log.debug("Checking 'api publish' permission for user " + username);
             }
             APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
             return true;
         } catch (APIManagementException e) {
             if (log.isDebugEnabled()) {
-                log.debug("user " + username + " does not have 'api publish' permission", e);
+                log.debug("User " + username + " does not have 'api publish' permission", e);
             }
         }
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("checking 'api create' permission for user " + username);
+                log.debug("Checking 'api create' permission for user " + username);
             }
             APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
             return true;
         } catch (APIManagementException e) {
             if (log.isDebugEnabled()) {
-                log.debug("user " + username + " does not have 'api create' permission", e);
+                log.debug("User " + username + " does not have 'api create' permission", e);
             }
         }
         return false;
@@ -405,7 +405,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             log.error("Error occurred while creating the OAuth app", e);
         }
         if (log.isDebugEnabled()) {
-            log.debug("created OAuth App " + appName);
+            log.debug("Created OAuth App " + appName);
         }
         return createdApp;
     }
@@ -422,9 +422,10 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @param sampleMap    Map
      * @return OAuthApplicationInfo object containing parsed values.
      */
-    private OAuthApplicationInfo fromAppDTOToApplicationInfo
-    (String clientId, String clientName, String callbackUrl, String clientSecret, boolean saasApp,
-     String appOwner, Map<String, String> sampleMap) {
+    private OAuthApplicationInfo fromAppDTOToApplicationInfo(String clientId, String clientName,
+                                                             String callbackUrl, String clientSecret,
+                                                             boolean saasApp, String appOwner,
+                                                             Map<String, String> sampleMap) {
 
         OAuthApplicationInfo updatingApp = new OAuthApplicationInfo();
         updatingApp.setClientId(clientId);
