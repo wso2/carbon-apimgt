@@ -56,7 +56,7 @@ else{
 
 <td id="desc<%=String(i)%>"><%=tasks[i].description%></td>
 <td id="status<%=String(i)%>"><%=tasks[i].suspended%></td>
-<td><%=new Date(tasks[i].createTime)%></td>
+<td><%=new Date(tasks[i].createTime).toString()%></td>
 <td class="col-sm-3">                        
  				<div class="form-group form-inline">                      
  

@@ -8,8 +8,6 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 
 var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getWorkflowProperties();
 
-var adminUserName = workflowConfigs.getServerUser();
-var adminPassword = workflowConfigs.getServerPassword();
 var serverUrl = workflowConfigs.getServerUrl();
 var isEnabled = workflowConfigs.isEnabled();
 
@@ -24,8 +22,14 @@ var assignBPMNTask = function (taskId) {
 
 	var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username);
 
-	var basicHeader = "Basic " + getAuthorizationHeader().toString();
+    var basicHeader = "Basic " + session.get("logged.user").auth.toString();
     var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+
+    var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
+    if(userDomain != null){
+        var tenantBPMNserverUrl = "t/" + userDomain + "/webapps/bpmn";
+        serverUrl = serverUrl.replace("bpmn", tenantBPMNserverUrl)
+    }
     var taskUrl = serverUrl + "/runtime/tasks/" + taskId;
 
  	var payload = {};
@@ -55,18 +59,4 @@ var assignBPMNTask = function (taskId) {
     
 };
 
-
-
-var getAuthorizationHeader=function(){
-    var Base64Utils = Packages.org.apache.axiom.util.base64.Base64Utils;
-    var inputString = adminUserName + ":" + adminPassword;
-    var byteArray = [];
-
-    for (var i = 0; i < inputString.length; ++i) {
-        byteArray.push(inputString.charCodeAt(i));
-    }
-    var encodedString = Base64Utils.encode(byteArray);
-
-return encodedString;
-};
 %>

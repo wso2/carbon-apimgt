@@ -37,6 +37,8 @@ var login = function (username, password, tenantMode) {
         var isAllowed = isUserAllowed(username);
         if (isAllowed) {
             getWorkflowCookie(username, password);
+            var auth = getAuthorizationHeaderCredentials(username, password);
+
             if (isLogged == 'false') {
                 if (log.isDebugEnabled()) {
                     log.debug("Error while authenticating user : " + username);
@@ -56,7 +58,8 @@ var login = function (username, password, tenantMode) {
                     username: username,
                     isSuperTenant: isSuperTenant,
                     cookie: sessionCookie,
-                    userDomain: username.split("@")[1]
+                    userDomain: username.split("@")[1],
+                    auth: auth
                 });
 
 
@@ -243,4 +246,16 @@ var isUserAllowed = function (username) {
     }
 };
 
+var getAuthorizationHeaderCredentials=function(username, password){
+    var Base64Utils = Packages.org.apache.axiom.util.base64.Base64Utils;
+    var inputString = username + ":" + password;
+    var byteArray = [];
+
+    for (var i = 0; i < inputString.length; ++i) {
+        byteArray.push(inputString.charCodeAt(i));
+    }
+    var encodedString = Base64Utils.encode(byteArray);
+
+return encodedString.toString();
+}
 %>
