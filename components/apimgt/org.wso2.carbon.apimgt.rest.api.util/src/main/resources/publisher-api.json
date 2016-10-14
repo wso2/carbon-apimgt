@@ -2041,7 +2041,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK.\nEnvironment list is returned.\n",
+                        "description": "OK.\nWorkflow request information is returned.\n",
                         "schema": {
                             "$ref": "#/definitions/Workflow"
                         },
@@ -2053,7 +2053,7 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found.\nRequested API does not exist.\n",
+                        "description": "Not Found.\nWorkflow for the given reference in not found.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

@@ -2067,12 +2067,12 @@ paths:
           headers:
             Content-Type:
               description: |
-                The content type of the body.
+                Workflow request information is returned.
               type: string
         404:
           description: |
             Not Found.
-            Requested API does not exist.
+            Workflow for the given reference in not found.
           schema:
             $ref: '#/definitions/Error'
 ######################################################
