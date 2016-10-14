@@ -5453,8 +5453,7 @@ public class ApiMgtDAO {
         }
     }
     /**
-     * Persists Environment details of the API to the Database
-     *
+     * Persists Environment details of the API to the Database     *
      * @param apiIdentifier API Identifier
      * @param api API Object
      * @throws APIManagementException
@@ -5464,7 +5463,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-
         String query = SQLConstants.ADD_API_ENVIRONMENTS_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -5476,14 +5474,12 @@ public class ApiMgtDAO {
                 environments.remove("none");
 
                 if (api.getGatewayUrls() != null) {
-
                     String gatewayUrls = api.getGatewayUrls();
                     JSONParser parser = new JSONParser();
                     Object object  = parser.parse(gatewayUrls);
                     JSONObject gatewayUrlsJson = (JSONObject) object;
 
                     for (String environmentName : environments) {
-
                         prepStmt = connection.prepareStatement(query);
                         //set environment name
                         prepStmt.setString(1, environmentName);
@@ -5496,7 +5492,6 @@ public class ApiMgtDAO {
                             throw new APIManagementException(msg);
                         }
                         prepStmt.setInt(2, apiId);
-
                         //extract URLs
                         String urlsFromPublisher = (String) gatewayUrlsJson.get(environmentName);
                         JSONObject urlsFromPublisherJson = (JSONObject) parser.parse(urlsFromPublisher);
@@ -5529,11 +5524,9 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-
     }
     /**
-     * Remove persisted Environments of the API
-     *
+     * Remove persisted Environments of the API     *
      * @param apiIdentifier API Identifier
      * @throws APIManagementException
      */
@@ -5556,7 +5549,6 @@ public class ApiMgtDAO {
             }
             prepStmt.setInt(1, apiId);
             prepStmt.execute();
-
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting environments for API : " + apiIdentifier.getApiName(), e);
@@ -5564,11 +5556,8 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
-
-
     /**
-     * Retrive Environments of the API
-     *
+     * Retrive Environments of the API     *
      * @param apiIdentifier
      * @param apiId
      * @throws APIManagementException
@@ -5586,7 +5575,6 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             prepStmt.setInt(1, apiId);
-
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {

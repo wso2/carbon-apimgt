@@ -4626,7 +4626,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 boolean useDefaultContext = true;
 
                 if (api.getGatewayUrls() != null) {
-
                     String gatewayUrls = api.getGatewayUrls();
                     JSONParser parser = new JSONParser();
                     Object object  = null;
@@ -4634,7 +4633,6 @@ public class APIStoreHostObject extends ScriptableObject {
                         object = parser.parse(gatewayUrls);
                         JSONObject gatewayUrlsJson = (JSONObject) object;
                         JSONObject urlsFromPublisherJson = (JSONObject) gatewayUrlsJson.get(environmentName);
-
                         // if both http and https are default
                         if (urlsFromPublisherJson.get("https").equals("default") && urlsFromPublisherJson.get("http")
                                 .equals("default")) {
