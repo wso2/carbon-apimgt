@@ -4,7 +4,8 @@ var log = new Log();
 var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getWorkflowProperties();
+var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService')
+                                      .getAPIManagerConfiguration().getWorkflowProperties();
 
 var serverUrl = workflowConfigs.getServerUrl();
 var isEnabled = workflowConfigs.isEnabled();
@@ -18,9 +19,22 @@ var completeBPMNTask = function (taskId, status) {
     }
     
     var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
+   
+    var headers;
+    var auth = session.get("logged.user").auth;
+    var cookie = session.get("workflowCookie");
 
-    var basicHeader = "Basic " + session.get("logged.user").auth.toString();
-    var headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+    //Set the workflow cookie when Basic auth is not possible. This can be used when SSO
+    //is enabled
+    if(auth != null){
+        var basicHeader = "Basic " + auth.toString();
+        headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+    } else if(cookie != null){
+        headers = {"Cookie": cookie , "Content-Type" : "application/json"};
+    } else {
+        log.warn("No Authentication header set")
+    } 
+
 
     var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
     if(userDomain != null && userDomain != "carbon.super"){

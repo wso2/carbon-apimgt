@@ -19,16 +19,27 @@ var getBPMNTasks = function (taskName) {
 
     var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username)
     var tenantId = APIUtil.getTenantId(session.get("logged.user").username);
-
-    var basicHeader = "Basic " + session.get("logged.user").auth.toString();
-
+    
+    //In WSO2BPS for each tenant space has seperate rest api to access bpmn tasks
     var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
     if(userDomain != null && userDomain != "carbon.super"){
         var tenantBPMNserverUrl = "t/" + userDomain + "/webapps/bpmn";
         serverUrl = serverUrl.replace("bpmn", tenantBPMNserverUrl)
     }
 
-    var headers = {"Authorization": basicHeader};
+    var headers = {};
+    var auth = session.get("logged.user").auth;
+    var cookie = session.get("workflowCookie");
+
+    if(auth != null){
+        var basicHeader = "Basic " + auth.toString();
+        headers.authorization = basicHeader;
+    } else if(cookie != null){
+        headers.cookie = cookie;
+    } else {
+        log.warn("No Authentication header set")
+    }
+
     var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username;
     var taskList = [];
     try{
