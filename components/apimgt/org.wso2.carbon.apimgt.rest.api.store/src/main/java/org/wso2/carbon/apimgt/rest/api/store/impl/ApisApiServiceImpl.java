@@ -25,7 +25,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
@@ -41,8 +44,10 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -445,6 +450,67 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Generates SDK for a given API
+     *
+     * @param apiId       API Id
+     * @param language    SDK language
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return SDK for the requested API in a given language
+     */
+    @Override
+    public Response apisGenerateSdkPost(String apiId, String language, String xWSO2Tenant) {
+
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
+            String errorMessage = "API ID or SDK language should not be empty or null.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        APIIdentifier apiIdentifier = null;
+        try {
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, xWSO2Tenant);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleResourceNotFoundInTenantError(RestApiConstants.RESOURCE_API, apiId, log, xWSO2Tenant);
+        }
+        if (apiIdentifier == null) {
+            RestApiUtil.handleResourceNotFoundInTenantError(RestApiConstants.RESOURCE_API, apiId, log, xWSO2Tenant);
+        }
+        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
+        String supportedSDKLanguages = apiClientGenerationManager.getSupportedSDKLanguages();
+        //this condition is to evaluate if the supported language list is non empty
+        if (StringUtils.isNotBlank(supportedSDKLanguages)) {
+            //this boolean checks if the required language is in the supported language list for SDK generation
+            boolean isLanguageSupported = Arrays.asList(supportedSDKLanguages.split(",")).contains(language);
+            if (!isLanguageSupported) {
+                String errorMessage = "SDK generation is not supported for language : " + language;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } else {
+            String errorMessage = "No supported languages for SDK generation.";
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+
+        Map<String, String> sdkDataMap = null;
+        try {
+            sdkDataMap = apiClientGenerationManager.generateSDK(language, apiIdentifier.getApiName(),
+                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
+        } catch (APIClientGenerationException e) {
+            String errorMessage = "SDK generation failed. Error : " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+        if (sdkDataMap != null) {
+            File file = new File(sdkDataMap.get("zipFilePath"));
+            Response.ResponseBuilder response = Response.ok(file);
+            response.header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getName() + "\"");
+            response.header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_ZIP);
+            return response.build();
+        } else {
+            String errorMessage = "SDK generation failed. Unable to fetch location of the SDK.";
+            RestApiUtil.handleInternalServerError(errorMessage, log);
         }
         return null;
     }

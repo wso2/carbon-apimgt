@@ -1,8 +1,5 @@
 <%
 jagg.module("subscription", {
-    generateClientSdk:function(){
-        return jagg.require(jagg.getModulesDir()+"subscription/list.jag").generateClientSdk.apply(this, arguments);
-    },
     addAPISubscription:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addAPISubscription.apply(this, arguments);
     },
@@ -54,9 +51,6 @@ jagg.module("subscription", {
     },
     updateAccessAllowDomains :function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAccessAllowDomains .apply(this, arguments);
-    },
-    getSupportedLanguages:function(){
-        return jagg.require(jagg.getModulesDir()+"subscription/list.jag").getSupportedLanguages.apply(this, arguments);
     }
 });
 %>

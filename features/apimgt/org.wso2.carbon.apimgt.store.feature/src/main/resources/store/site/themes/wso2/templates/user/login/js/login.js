@@ -91,11 +91,14 @@ $(document).ready(function () {
 	            $('#loginRedirectForm').submit();
 	            return;
 	        }
-	
-	        //$('#messageModal').html($('#login-data').html());
-	        //$('#messageModal').modal('show');
+
+
 	        if ($(this).attr("href")) {
-	        	$.cookie("goto_url",$(this).attr("href"));
+                if($(this).attr("id") == "btn-login"){
+                    $.cookie("goto_url", window.location.href, {path: "/store"});
+                } else {
+                    $.cookie("goto_url", $(this).attr("href"));
+                }
 	        } else {
 	        	if ($('#tenant').val() && $('#tenant').val() != "null") { 
 	        		$.cookie("goto_url",siteContext + '?tenant=' + $('#tenant').val());

@@ -23,6 +23,7 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
     public abstract Response apisApiIdSwaggerGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
     public abstract Response apisApiIdThumbnailGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisGenerateSdkPost(String apiId,String language,String xWSO2Tenant);
     public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String accept,String ifNoneMatch);
 }
 

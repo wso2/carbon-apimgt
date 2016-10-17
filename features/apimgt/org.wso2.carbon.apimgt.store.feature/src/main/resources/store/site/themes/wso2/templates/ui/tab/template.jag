@@ -1,4 +1,20 @@
 <% jagg.template("ui/tab", function(inputs, outputs, jagg) { %>
+<script>
+      var enjoyhint_instance_tab = null;
+    $(document).ready(function() {
+        if (isEnjoyHintEnabled()) {
+                var storeStep = localStorage.getItem("storeStep");
+                if ( storeStep === "subscribed") {
+                        runEnjoyHintScript(enjoyhint_instance_tab, ui_tab_script_data);
+                }
+        }
+    });
+
+function setLocalStorageValue() {
+        localStorage.setItem("isApiConsoleTabClicked", true);
+};
+</script>
+
 <div class="row">
 <div class="add-margin-3x white-wrapper">
     <%
@@ -19,7 +35,7 @@
     %>
     <%if(tab.title!=undefined ||tab.title!=null){%>
         <li class="<%=clazz%>" id="<%=String(i)%>">
-            <a data-toggle="tab" title="<%=tab.title%>" href="#tab<%=String(i)%>"><%=tab.title%></a>
+            <a data-toggle="tab" title="<%=tab.title%>" href="#tab<%=String(i)%>" onclick="setLocalStorageValue()"><%=tab.title%></a>
         </li>
     <% }} %>
     </ul>

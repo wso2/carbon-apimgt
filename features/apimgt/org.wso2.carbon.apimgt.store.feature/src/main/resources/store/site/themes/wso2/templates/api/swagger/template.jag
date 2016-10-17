@@ -1,4 +1,5 @@
 <% jagg.template("api/swagger", function(inputs, outputs, jagg) {
+
 var log = new Log();
 var site = require("/site/conf/site.json");
 var host = site.hostname;
@@ -53,6 +54,22 @@ swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
 
 var api = outputs.api;%>
   <script type="text/javascript">
+
+    var setIntervalId;
+    var enjoyhint_instance_swagger = null;
+
+    function runEnjoyHintScript_swaggerUi() {
+        if (isEnjoyHintEnabled()) {
+            var isApiConsoleTabClicked = localStorage.getItem("isApiConsoleTabClicked");
+
+            if (isApiConsoleTabClicked === 'true') {
+                runEnjoyHintScript(enjoyhint_instance_swagger, swagger_script_data);
+                clearInterval(setIntervalId);
+                removeLocalStorageVariables();
+            }
+        }
+    }
+
   $(document).ready(function(){
       window.swaggerUi = new SwaggerUi({
         url: "<%=swaggerAPI%>",
@@ -60,6 +77,9 @@ var api = outputs.api;%>
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
         onComplete: function(swaggerApi, swaggerUi){
           console.log("Loaded SwaggerUI");
+          setIntervalId = setInterval(function() {
+            runEnjoyHintScript_swaggerUi();
+          }, 2000);
         },
         onFailure: function(data) {
           console.log("Unable to Load SwaggerUI");
