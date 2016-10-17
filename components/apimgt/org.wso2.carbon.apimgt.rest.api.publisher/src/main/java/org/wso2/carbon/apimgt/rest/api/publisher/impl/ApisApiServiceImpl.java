@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -128,12 +129,23 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisPost(APIDTO body,String contentType){
-
         URI createdApiUri;
         APIDTO  createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
+            boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
+
+            // validate web socket api endpoint configurations
+            if (isWSAPI) {
+                if (!RestApiPublisherUtils.isValidWSAPI(body)) {
+                    RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
+                }
+            } else {
+                if (body.getApiDefinition() == null) {
+                    RestApiUtil.handleBadRequest("Parameter: \"apiDefinition\" cannot be null", log);
+                }
+            }
 
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
@@ -187,10 +199,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(provider);
+            apiToAdd.setType(body.getType().toString());
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
+            if (!isWSAPI) {
+                apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
+            }
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
@@ -206,6 +221,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                                   body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (JSONException e) {
+            String errorMessage = "Error while validating endpoint configurations : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion() + "-" + body.getEndpointConfig();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -366,6 +385,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setProvider(apiIdentifier.getProviderName());
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
+            //// TODO: 10/14/16 Set api type
 
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
