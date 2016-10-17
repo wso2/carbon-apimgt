@@ -40,7 +40,15 @@
             }
             // relay state value should be a valid value, this value is mapped with request uri.
             var relayState = request.getParameter("RelayState");
-            var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
+
+            var requestedURI;
+            if (site.ssoConfiguration.idpInit == "true" && relayState == null) {
+                // means IDP initiated flow with no relay state, redirect to home
+                requestedURI = jagg.getHttpsUrl("/");
+            } else {
+                requestedURI =  ssoRelyingParty.getRelayStateProperty(relayState);
+            }
+
             if (requestedURI == null) {
                 log.error("Relaystate value is invalid.");
                 response.sendRedirect("../site/pages/error-pages/401.html");
