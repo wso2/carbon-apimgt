@@ -167,9 +167,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             if (stateActionMap.containsKey(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
                     && stateActionMap.get(apiStateWorkFlowDTO.getApiCurrentState().toUpperCase())
                             .contains(apiStateWorkFlowDTO.getApiLCAction())) {
+                //set the auth application related info. This will be used to call the callback service
                 setOAuthApplicationInfo(apiStateWorkFlowDTO);
                 // build request payload
-
                 String jsonPayload = buildPayloadForBPMNProcess(apiStateWorkFlowDTO);
                 if(log.isDebugEnabled()){
                     log.debug("APIStateChange payload: " + jsonPayload);
@@ -185,6 +185,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(),
                         serviceEndpointURL.getProtocol());
                 HttpPost httpPost = new HttpPost(serviceEndpoint + RUNTIME_INSTANCE_RESOURCE_PATH);
+                //Generate the basic auth header using provided user credentials
                 String authHeader = getBasicAuthHeader();
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
                 StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);

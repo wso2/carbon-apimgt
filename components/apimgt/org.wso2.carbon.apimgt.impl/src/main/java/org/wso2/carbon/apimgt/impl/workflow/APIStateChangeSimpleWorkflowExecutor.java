@@ -35,6 +35,10 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+/**
+ * Simple workflow for API state change. This is the default worklow
+ * 
+ */
 public class APIStateChangeSimpleWorkflowExecutor extends WorkflowExecutor {
     private static final Log log = LogFactory.getLog(APIStateChangeSimpleWorkflowExecutor.class);
     @Override
