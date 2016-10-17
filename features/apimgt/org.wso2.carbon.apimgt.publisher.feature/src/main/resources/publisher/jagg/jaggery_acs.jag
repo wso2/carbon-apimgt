@@ -25,14 +25,14 @@
             var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
             //Validate the saml response schema-check the number of response elements is 1 and check the number of assertions
             //is equal to 1  and check the assertion validity period and check audience restrictions
-            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse,isAsssertionEncryptionEnabled);
+            var isResponseValid = ssoRelyingParty.validateSAMLResponseSchema(samlResponse);
             if (!Boolean(isResponseValid)) {
                  log.error("SAML response schema verification is failed.");
                  response.sendRedirect("../site/pages/error-pages/401.html");
                  return;
             }
 
-            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse,isAsssertionEncryptionEnabled);
+            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             var domainName = null;
             if(fullUserName != null){
@@ -66,7 +66,7 @@
                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                    jagg.module("manager").loadTenantRegistry(String(domainName));
                }
-               var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse,isAsssertionEncryptionEnabled);
+               var isAssertionSignatureValid = ssoRelyingParty.validateAssertionSignature(samlResponse);
                if (!Boolean(isAssertionSignatureValid)) {
                log.error("SAML assertion signature is verification failed.");
                response.sendRedirect("../site/pages/error-pages/401.html");
@@ -87,7 +87,7 @@
             if (isUserCreatePermitted.permitted) {
                 jagg.setUser({username: ssoRelyingParty.getLoggedInUser(sessionId), cookie: null});
                 sessionId = session.getId();
-                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session,isAsssertionEncryptionEnabled);
+                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
                 ssoRelyingParty.addSession(session);
                 session.put("showLogin", "false");
                 session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
