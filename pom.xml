@@ -1,1209 +1,248 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ *
+  ~ * Licensed under the Apache License, Version 2.0 (the "License");
+  ~ * you may not use this file except in compliance with the License.
+  ~ * You may obtain a copy of the License at
+  ~ *
+  ~ * http://www.apache.org/licenses/LICENSE-2.0
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ */
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
-    <artifactId>carbon-apimgt</artifactId>
-    <packaging>pom</packaging>
-    <version>6.0.6-SNAPSHOT</version>
-    <name>WSO2 Carbon - API Management Aggregator POM</name>
-    <url>http://wso2.org</url>
-
 
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>5</version>
     </parent>
 
+    <groupId>org.wso2.carbon.apimgt.server</groupId>
+    <artifactId>org.wso2.carbon.apimgt.server.parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>WSO2 Carbon - Product API Management Server Parent</name>
+
     <scm>
-        <url>https://github.com/wso2/carbon-apimgt.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/carbon-apimgt.git</connection>
-        <tag>carbon-apimgt-6.0.0</tag>
+        <url>https://github.com/isudana/product-integration-server.git</url>
+        <developerConnection>scm:git:https://github.com/isudana/product-integration-server.git</developerConnection>
+        <connection>scm:git:https://github.com/isudana/product-integration-server.git</connection>
+        <tag>HEAD</tag>
     </scm>
-
-    <modules>
-        <module>service-stubs/apimgt</module>
-        <module>service-stubs/oidc-authenticator</module>
-        <module>components/apimgt</module>
-        <module>components/lcm</module>
-        <module>components/forum</module>
-        <module>components/sso-hostobject</module>
-        <module>components/oidc-authenticator</module>
-        <module>features/apimgt</module>
-        <module>features/forum</module>
-        <module>features/oidc-authenticator</module>
-        <module>features/categories</module>
-    </modules>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${maven-scr-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>${maven-bundle-plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install</preparationGoals>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                </plugin>
-                <plugin>
-                    <groupId>org.wso2.maven</groupId>
-                    <artifactId>carbon-p2-plugin</artifactId>
-                    <version>${carbon.p2.plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build-helper-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.axis2</groupId>
-                    <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
-                    <version>${axis2-java2wsdl-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>2.2</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.1</version>
-            </extension>
-        </extensions>
-    </build>
-
-    <repositories>
-        <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-
-        <repository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-
-        <repository>
-            <id>wso2.snapshots</id>
-            <name>Apache Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>wso2.snapshots</id>
-            <name>WSO2 Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
+            <id>wso2-maven2-repository-1</id>
+            <url>http://dist.wso2.org/maven2</url>
         </pluginRepository>
         <pluginRepository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
+            <id>wso2-maven2-repository-2</id>
+            <url>http://dist.wso2.org/snapshots/maven2</url>
         </pluginRepository>
     </pluginRepositories>
 
+
     <dependencyManagement>
         <dependencies>
-
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.launcher</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.kernel.feature</artifactId>
+                <version>${carbon.kernel.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.runtime.feature</artifactId>
+                <version>${carbon.kernel.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.core</artifactId>
+                <version>${carbon.gw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.core.feature</artifactId>
+				<version>${carbon.gw.version}</version>
+				 <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.inbounds</groupId>
+                <artifactId>org.wso2.carbon.gateway.inbounds.http</artifactId>
+                <version>${carbon.gw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.inbounds</groupId>
+                <artifactId>org.wso2.carbon.gateway.inbounds.http.feature</artifactId>
+                <version>${carbon.gw.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.outbounds</groupId>
+                <artifactId>org.wso2.carbon.gateway.outbounds.http</artifactId>
+                <version>${carbon.gw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.outbounds</groupId>
+                <artifactId>org.wso2.carbon.gateway.outbounds.http.feature</artifactId>
+                <version>${carbon.gw.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.mediators</groupId>
+                <artifactId>org.wso2.carbon.gateway.mediators.samplemediator</artifactId>
+                <version>${carbon.gw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway.mediators</groupId>
+                <artifactId>org.wso2.carbon.gateway.mediators.samplemediator.feature</artifactId>
+                <version>${carbon.gw.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi</artifactId>
+                <version>${equinox.osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi.services</artifactId>
+                <version>${equinox.osgi.services.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr4.runtime.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.andes</artifactId>
-                <version>${carbon.broker.version}</version>
+                <artifactId>org.wso2.carbon.messaging</artifactId>
+                <version>${carbon.messaging.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.databridge.agent</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-                <version>${carbon.identity-inbound-auth-oauth.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core.common</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core.services</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nimbusds.wso2</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>${com.nimbusds.wso2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.startup.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.throttle.service</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.authenticator.oidc</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.hostobjects.oidc</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.samples.pizzashack</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang.wso2</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-codec.wso2</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${commons-codec.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.woden.wso2</groupId>
-                <artifactId>woden</artifactId>
-                <version>${apache.woden.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.poi.wso2</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${apache.poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.synapse</groupId>
-                <artifactId>synapse-core</artifactId>
-                <version>${synapse.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.synapse</groupId>
-                <artifactId>synapse-extensions</artifactId>
-                <version>${synapse.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>rhino.wso2</groupId>
-                <artifactId>js</artifactId>
-                <version>${rhino.js.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.owasp.encoder</groupId>
-                <artifactId>encoder</artifactId>
-                <version>${owasp.encoder.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-                <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.hostobjects</groupId>
-                <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
-                <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.multitenancy</groupId>
-                <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
-                <version>${carbon.multitenancy.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2-kernel</artifactId>
-                <version>1.6.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.ui</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.utils</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.event.core</artifactId>
-                <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.user.core</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.registry.core</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
-                <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-                <version>${carbon.registry.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.scriptengine</artifactId>
-                <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.api</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.lcm</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.h2database.wso2</groupId>
-                <artifactId>h2-database-engine</artifactId>
-                <version>1.2.140.wso2v3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
-                <version>${velocity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.axis2.wso2</groupId>
-                <artifactId>axis2</artifactId>
-                <version>${orbit.version.axis2}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.axis2.wso2</groupId>
-                <artifactId>axis2-client</artifactId>
-                <version>${orbit.version.axis2}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.ws.security.wso2</groupId>
-                <artifactId>wss4j</artifactId>
-                <version>${wss4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.registry.api</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.tomcat</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.tomcat.ext</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-                <version>${carbon.mediation.version}</version>
+                <groupId>org.wso2.carbon.gateway.converters</groupId>
+                <artifactId>org.wso2.carbon.gateway.converters.xmltojson</artifactId>
+                <version>${carbon.gw.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-                <version>${carbon.mediation.version}</version>
+                <groupId>org.wso2.carbon.gateway.converters</groupId>
+                <artifactId>org.wso2.carbon.gateway.converters.xmltojson.feature</artifactId>
+                <version>${carbon.gw.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.sequences.stub</artifactId>
-                <version>${carbon.mediation.version}</version>
+                <groupId>org.wso2.carbon.gateway.converters</groupId>
+                <artifactId>org.wso2.carbon.gateway.converters.jsontoxml</artifactId>
+                <version>${carbon.gw.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.mediation.registry</artifactId>
-                <version>${carbon.mediation.version}</version>
+                <groupId>org.wso2.carbon.gateway.converters</groupId>
+                <artifactId>org.wso2.carbon.gateway.converters.jsontoxml.feature</artifactId>
+                <version>${carbon.gw.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-                <version>${carbon.mediation.version}</version>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.message.readers.jsonreader</artifactId>
+                <version>${carbon.gw.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon.mediation</groupId>
-                <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
-                <version>${carbon.mediation.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.registry</groupId>
-                <artifactId>org.wso2.carbon.registry.indexing</artifactId>
-                <version>${carbon.registry.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.core</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-                <version>${carbon.identity-inbound-auth-oauth.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-io.wso2</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.message.readers.jsonreader.feature</artifactId>
+                <version>${carbon.gw.version}</version>
                 <type>zip</type>
             </dependency>
-
             <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.gateway.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.message.readers.xmlreader</artifactId>
+                <version>${carbon.gw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.gateway</groupId>
+                <artifactId>org.wso2.carbon.gateway.message.readers.xmlreader.feature</artifactId>
+                <version>${carbon.gw.version}</version>
                 <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.startup.publisher.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.keymanager.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.jms.listener.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-                <artifactId>axiom</artifactId>
-                <version>${orbit.version.axiom}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-                <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
-                <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>${google.code.gson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.googlecode.json-simple.wso2</groupId>
-                <artifactId>json-simple</artifactId>
-                <version>${json-simple.wso2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>${httpcomponents.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-rs-service-description</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>2.0.2-beta</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents.wso2</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.2.5.wso2v1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.sf.ehcache.wso2</groupId>
-                <artifactId>ehcache</artifactId>
-                <version>1.5.0.wso2v3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>opensaml.wso2</groupId>
-                <artifactId>opensaml2</artifactId>
-                <version>${opensaml2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-core-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-jaxrs</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring-web.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jaxrs</artifactId>
-                <version>${swagger-jaxrs.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate-validator.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.identity.user.profile.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
-                <artifactId>org.wso2.carbon.um.ws.api.stub</artifactId>
-                <version>${carbon.identity-user-ws.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.uri.template</groupId>
-                <artifactId>wso2-uri-templates</artifactId>
-                <version>${wso2-uri-templates.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
-                <artifactId>pdfbox</artifactId>
-                <version>${orbit.version.pdfbox}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
-                <artifactId>fontbox</artifactId>
-                <version>${orbit.version.pdfbox}</version>
-            </dependency>
-
-            <!-- Siddhi Extensions -->
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-query-api</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-core</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.event-processing</groupId>
-                <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
-                <version>${event.processor.stub.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-parser</artifactId>
-                <version>${swagger.parser.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.io.swagger</groupId>
-                <artifactId>swagger-codegen</artifactId>
-                <version>${swagger.codegen.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-models</artifactId>
-                <version>${swagger.models.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${version.snake.yaml}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.samskivert</groupId>
-                <artifactId>jmustache</artifactId>
-                <version>1.13</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${google.guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>${javax.validation-api}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-core</artifactId>
-                <version>${swagger.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.output.adapter.sms</artifactId>
-                <version>${carbon.analytics.common.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>xerces.wso2</groupId>
-                <artifactId>xercesImpl</artifactId>
-                <version>${xercesImpl.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-scxml.wso2</groupId>
-                <artifactId>commons-scxml</artifactId>
-                <version>${commons.scxml.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.metrics</groupId>
-                <artifactId>org.wso2.carbon.metrics.manager</artifactId>
-                <version>${carbon.metrics.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.throttle.service.interceptors</artifactId>
-                <version>${carbon.apimgt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
-        <project.scm.id>scm-server</project.scm.id>
+        <!-- Maven plugins -->
+        <maven.checkstyleplugin.version>2.16</maven.checkstyleplugin.version>
+        <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
 
-        <!-- APIM Component Version -->
+        <!-- Dependencies -->
+        <carbon.kernel.version>5.1.0</carbon.kernel.version>
+        <carbon.kernel.product.version>5.1.0</carbon.kernel.product.version>
+        <carbon.kernel.package.import.version.range>[5.0.0, 6.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.apimgt.version>6.0.6-SNAPSHOT</carbon.apimgt.version>
-        <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
+        <carbon.gw.version>1.0.0-SNAPSHOT</carbon.gw.version>
+        <carbon.gw.package.export.version>1.0.0</carbon.gw.package.export.version>
 
-        <analytics.shared.version>1.0.1</analytics.shared.version>
-        <carbon.analytics.common.version>5.1.3</carbon.analytics.common.version>
-        <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.9</carbon.kernel.version>
-        <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
+        <osgi.api.version>6.0.0</osgi.api.version>
+        <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
+        <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
 
-        <carbon.commons.version>4.5.4</carbon.commons.version>
-        <carbon.registry.version>4.5.6</carbon.registry.version>
-        <carbon.mediation.version>4.6.6</carbon.mediation.version>
-
-        <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.2.0</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.1.1</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-user-ws.version>5.1.1</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.1.2</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.1.1</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>5.1.1</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.1.1</carbon.identity-outbound-auth-samlsso.version>
-
-        <carbon.governance.version>4.6.4</carbon.governance.version>
-        <carbon.deployment.version>4.7.0</carbon.deployment.version>
-        <carbon.multitenancy.version>4.6.0</carbon.multitenancy.version>
-        <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
-        <apimserver.version>1.10.0</apimserver.version>
-        <siddhi.version>3.1.2</siddhi.version>
-
-        <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
-        <carbon.commons.imp.pkg.version>[4.5.0, 4.6.0)</carbon.commons.imp.pkg.version>
-        <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
-
-        <!-- Carbon Identity import version ranges -->
-        <carbon.identity.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity.imp.pkg.version>
-        <carbon.identity-inbound-auth-oauth.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity-inbound-auth-oauth.imp.pkg.version>
-        <carbon.identity-user-ws.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
-
-        <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
-        <carbon.governance.imp.pkg.version>[4.6.0, 4.7.0)</carbon.governance.imp.pkg.version>
-        <carbon.registry.package.import.version.range>[4.4.0, 4.6.0)</carbon.registry.package.import.version.range>
-        <carbon.commons.imp.pkg.version>[4.5.0, 5.0.0)</carbon.commons.imp.pkg.version>
-
-        <!-- Carbon platform version comes here-->
-        <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
-
-        <!--lib thrift version range-->
-        <libthrift.version>0.8.0.wso2v1</libthrift.version>
-        <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
-
-        <!-- P2 Plugin Version -->
-        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
-
-        <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
-        <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
-        <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
-        <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
-
-        <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v17</axis2.wso2.version>
-        <orbit.version.axis2>1.6.1.wso2v14</orbit.version.axis2>
-        <axis2.osgi.version.range>[1.6.1.wso2v11, 1.7.0)</axis2.osgi.version.range>
-
-        <!-- Apache Axiom -->
-        <orbit.version.axiom>1.2.11.wso2v10</orbit.version.axiom>
-        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
-        <exp.pkg.version.axiom>1.2.11.wso2v10</exp.pkg.version.axiom>
-        <imp.pkg.version.axiom>[1.2.11.wso2v10, 1.3.0)</imp.pkg.version.axiom>
-        <axiom.osgi.version.range>[1.2.11, 1.3.0)</axiom.osgi.version.range>
+        <spring.framework.version>4.1.6.wso2v1</spring.framework.version>
+        <spring.framework.package.import.version.range>[4.1.6, 4.2.0)</spring.framework.package.import.version.range>
 
 
-        <!-- Servlet API -->
-        <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
-        <imp.pkg.version.javax.servlet>[2.6.0, 3.0.0)</imp.pkg.version.javax.servlet>
-        <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
+        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
+        <!--TODO: Check why we need to depend on SNAPSHOT -->
 
-        <!-- Jaggery Version -->
-        <jaggery.version>0.12.8</jaggery.version>
+        <carbon.transport.version>2.1.6</carbon.transport.version>
+        <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)</carbon.transport.package.import.version.range>
 
-        <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v7</synapse.version>
+        <carbon.messaging.version>1.0.8-SNAPSHOT</carbon.messaging.version>
 
-        <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
-        <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
-        <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
+        <carbon.messaging.package.import.version.range>[0.0.0, 2.0.0)</carbon.messaging.package.import.version.range>
 
-        <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
-        <commons-lang.version>2.6.0.wso2v1</commons-lang.version>
-        <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
-        <apache.poi.version>3.9.0.wso2v3</apache.poi.version>
-        <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
-        <owasp.encoder.version>1.2</owasp.encoder.version>
+        <osgi.framework.import.version.range>[1.8.0, 2.0.0)</osgi.framework.import.version.range>
+        <osgi.service.tracker.import.version.range>[1.5.1, 2.0.0)</osgi.service.tracker.import.version.range>
+        <carbon.p2.plugin.version>1.5.4</carbon.p2.plugin.version>
+        <carbon.feature.plugin.version>2.0.0</carbon.feature.plugin.version>
+        <!--<gateway.type-converters.version>1.0.0-SNAPSHOT</gateway.type-converters.version>-->
 
-        <httpclient.version>4.3.1.wso2v2</httpclient.version>
-        <wss4j.version>1.5.11.wso2v11</wss4j.version>
-        <commons-logging.version>1.1.1</commons-logging.version>
-        <commons-io.version>2.4.0.wso2v1</commons-io.version>
-        <google.code.gson.version>2.7</google.code.gson.version>
-        <httpcomponents.version>4.2.5</httpcomponents.version>
-        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-        <com.nimbusds.wso2.version>2.26.1.wso2v2</com.nimbusds.wso2.version>
-        <org.apache.velocity.version>1.7</org.apache.velocity.version>
-        <org.slf4j.version>1.5.10</org.slf4j.version>
-        <jackson.version>1.9.12</jackson.version>
-        <spring-web.version>4.1.6.RELEASE</spring-web.version>
-        <hibernate-validator.version>5.0.2.Final</hibernate-validator.version>
-        <swagger-jaxrs.version>1.5.10</swagger-jaxrs.version>
-        <junit.version>4.12</junit.version>
-        <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <swagger.codegen.version>2.2.0.wso2v1</swagger.codegen.version>
-        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
-
-        <!-- imp package version ranges -->
-        <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
-        <imp.pkg.version.carbon.throttle>[4.2.0, 4.3.0)</imp.pkg.version.carbon.throttle>
-        <imp.pkg.version.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.carbon.base>
-        <imp.pkg.version.google.code.gson>[2.2.4, 2.8.0)</imp.pkg.version.google.code.gson>
-        <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
-        <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
-        <imp.pkg.version.io.swagger.parser>[2.1.6, 3.0.0)</imp.pkg.version.io.swagger.parser>
-
-        <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
-
-        <!-- apache cxf version -->
-        <cxf.version>3.1.7</cxf.version>
-
-        <carbon.metrics.version>1.1.0</carbon.metrics.version>
-        <!-- apache pdfbox version -->
-        <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
-
-        <event.processor.stub.version>2.1.0</event.processor.stub.version>
-        <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
-        <swagger.core.version>1.5.10</swagger.core.version>
-        <swagger.models.version>1.5.10</swagger.models.version>
-        <swagger.annotations.version>1.5.10</swagger.annotations.version>
-        <google.guava.version>18.0</google.guava.version>
-        <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
-        <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
-        <velocity.version>1.7</velocity.version>
-        <fasterxml.jackson.version>2.8.2</fasterxml.jackson.version>
-        <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.1.6</carbon.broker.version>
-        <waffle-jna.version>1.6.wso2v2</waffle-jna.version>
-        <commons-lang3.version>3.4.0.wso2v1</commons-lang3.version>
-        <version.snake.yaml>1.17</version.snake.yaml>
+        <antlr4.runtime.version>4.5.1.wso2v1</antlr4.runtime.version>
+        <plugin.version.antlr>4.5.1</plugin.version.antlr>
     </properties>
+
+    <modules>
+        <module>samples</module>
+        <module>product</module>
+    </modules>
 </project>
-
-
