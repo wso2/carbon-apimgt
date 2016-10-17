@@ -33,5 +33,6 @@
     <url>http://wso2.org</url>
     <modules>
         <module>store-api</module>
+        <module>publisher-api</module>
     </modules>
 </project>
