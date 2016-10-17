@@ -201,7 +201,7 @@ public final class APIConstants {
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
-    public static final String API_OVERVIEW_WEBSOCKET = "overview_ws";
+    public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
@@ -1256,5 +1256,9 @@ public final class APIConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";
     }
+
+    public enum APIType {
+        HTTP, WS,
+    };
 
 }
