@@ -1112,7 +1112,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String environments = (String) apiData.get("environments", apiData);
-        String gatewayUrls = (String) apiData.get("gatewayUrls", apiData);
         String visibleRoles = "";
 
         if (name != null) {
@@ -1476,7 +1475,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-        api.setGatewayUrls(APIUtil.getAPIUrls(api));
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
