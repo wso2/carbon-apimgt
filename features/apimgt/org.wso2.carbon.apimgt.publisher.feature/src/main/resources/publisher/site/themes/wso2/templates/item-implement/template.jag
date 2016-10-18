@@ -819,6 +819,7 @@
 </script>
 
 <script>
+    var enjoyhint_instance_implement = null;
     $(document).ready(function(){
 
         var status = "<%=apiStatus%>";
@@ -855,6 +856,10 @@
             }
         }catch(e){
             console.log("Invalid endpoint config");
+        }
+
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_implement, item_implement_script_data);
         }
     });
 
