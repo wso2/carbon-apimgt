@@ -26,7 +26,6 @@ public class LifecycleStateBean {
     private String lcName;
     private String previousStatus;
     private String postStatus;
-    private int tenantId;
 
     public String getStateId() {
         return stateId;
@@ -50,14 +49,6 @@ public class LifecycleStateBean {
 
     public void setPostStatus(String postStatus) {
         this.postStatus = postStatus;
-    }
-
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String getLcName() {

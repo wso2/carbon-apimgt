@@ -46,7 +46,7 @@ public class LifecycleEventManager {
      */
     public String associateLifecycle(String lcName, String initialState, String user) throws LifecycleException {
         try {
-            return getLCMgtDAOInstance().addLifecycleState(initialState, lcName, user, tenantId);
+            return getLCMgtDAOInstance().addLifecycleState(initialState, lcName, user);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while associating lifecycle " + lcName, e);
         }
@@ -67,7 +67,6 @@ public class LifecycleEventManager {
         lifecycleStateBean.setPreviousStatus(currentState);
         lifecycleStateBean.setPostStatus(requiredState);
         lifecycleStateBean.setStateId(id);
-        lifecycleStateBean.setTenantId(tenantId);
         try {
             getLCMgtDAOInstance().changeLifecycleState(lifecycleStateBean, user);
         } catch (LifecycleManagerDatabaseException e) {
@@ -84,7 +83,7 @@ public class LifecycleEventManager {
      */
     public LifecycleStateBean getLifecycleStateData(String uuid) throws LifecycleException {
         try {
-            return getLCMgtDAOInstance().getLifecycleStateDataFromId(uuid, tenantId);
+            return getLCMgtDAOInstance().getLifecycleStateDataFromId(uuid);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("error while getting lifecycle data for id : " + uuid);
         }

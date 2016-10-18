@@ -64,10 +64,9 @@ public class LifecycleMgtDAO {
      * Add lifecycle config for a specific tenant.
      *
      * @param lifecycleConfigBean                  Contains information about name and content.
-     * @param tenantId
      * @throws LifecycleManagerDatabaseException   If failed to add lifecycle.
      */
-    public void addLifecycle(LifecycleConfigBean lifecycleConfigBean, int tenantId)
+    public void addLifecycle(LifecycleConfigBean lifecycleConfigBean)
             throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -87,7 +86,6 @@ public class LifecycleMgtDAO {
             //prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lifecycleConfigBean.getLcName());
             prepStmt.setBinaryStream(2, new ByteArrayInputStream(lifecycleConfigBean.getLcContent().getBytes()));
-            prepStmt.setInt(3, tenantId);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -107,10 +105,9 @@ public class LifecycleMgtDAO {
      * Update existing lifecycle config..
      *
      * @param lifecycleConfigBean                  Contains information about name and content.
-     * @param tenantId
      * @throws LifecycleManagerDatabaseException   If failed to add lifecycle.
      */
-    public void updateLifecycle(LifecycleConfigBean lifecycleConfigBean, int tenantId)
+    public void updateLifecycle(LifecycleConfigBean lifecycleConfigBean)
             throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -122,7 +119,6 @@ public class LifecycleMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setBinaryStream(1, new ByteArrayInputStream(lifecycleConfigBean.getLcContent().getBytes()));
             prepStmt.setString(2, lifecycleConfigBean.getLcName());
-            prepStmt.setInt(3, tenantId);
             prepStmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -142,10 +138,9 @@ public class LifecycleMgtDAO {
      * Delete existing lifecycle config. Will be called only lifecycle is not associated with any asset.
      *
      * @param lcName                                Contains information about name and content.
-     * @param tenantId
      * @throws LifecycleManagerDatabaseException    If failed to add lifecycle.
      */
-    public void deleteLifecycle(String lcName, int tenantId) throws LifecycleManagerDatabaseException {
+    public void deleteLifecycle(String lcName) throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -155,7 +150,6 @@ public class LifecycleMgtDAO {
             connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lcName);
-            prepStmt.setInt(2, tenantId);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -173,11 +167,10 @@ public class LifecycleMgtDAO {
     /**
      * Get lifecycle list of specific tenant.
      *
-     * @param tenantId
      * @return                                      Lifecycle list containing names;
      * @throws LifecycleManagerDatabaseException    If failed to get lifecycle list.
      */
-    public String[] getLifecycleList(int tenantId) throws LifecycleManagerDatabaseException {
+    public String[] getLifecycleList() throws LifecycleManagerDatabaseException {
         List<String> lifecycleList = new ArrayList<>();
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -186,14 +179,13 @@ public class LifecycleMgtDAO {
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setInt(1, tenantId);
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 lifecycleList.add(rs.getString(Constants.LIFECYCLE_LIST));
             }
 
         } catch (SQLException e) {
-            handleException("Error while getting the lifecycle list for tenant " + tenantId, e);
+            handleException("Error while getting the lifecycle list. ", e);
         } finally {
             LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -204,11 +196,10 @@ public class LifecycleMgtDAO {
      * Get lifecycle configuration.
      *
      * @param lcName                                Name of the lifecycle
-     * @param tenantId
      * @return                                      Bean with content and name
      * @throws LifecycleManagerDatabaseException    If failed to get lifecycle config.
      */
-    public LifecycleConfigBean getLifecycleConfig(String lcName, int tenantId)
+    public LifecycleConfigBean getLifecycleConfig(String lcName)
             throws LifecycleManagerDatabaseException {
         LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
         Connection connection = null;
@@ -219,7 +210,6 @@ public class LifecycleMgtDAO {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lcName);
-            prepStmt.setInt(2, tenantId);
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 lifecycleConfigBean.setLcName(rs.getString(Constants.LIFECYCLE_NAME));
@@ -244,12 +234,11 @@ public class LifecycleMgtDAO {
      * @param lcName                                Name of the lifecycle
      * @param user                                  The user who invoked the action. This will be used for
      *                                              auditing purposes.
-     * @param tenantId
      * @return                                      UUID generated by framework which is stored as reference by
      *                                              external systems.
      * @throws LifecycleManagerDatabaseException    If failed to add initial lifecycle state.
      */
-    public String addLifecycleState(String initialState, String lcName, String user, int tenantId)
+    public String addLifecycleState(String initialState, String lcName, String user)
             throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt1 = null;
@@ -264,7 +253,6 @@ public class LifecycleMgtDAO {
             connection.setAutoCommit(false);
             prepStmt1 = connection.prepareStatement(getLCIdQuery);
             prepStmt1.setString(1, lcName);
-            prepStmt1.setInt(2, tenantId);
             rs1 = prepStmt1.executeQuery();
 
             while (rs1.next()) {
@@ -278,10 +266,9 @@ public class LifecycleMgtDAO {
             prepStmt2.setString(1, uuid);
             prepStmt2.setInt(2, lcDefinitionId);
             prepStmt2.setString(3, initialState);
-            prepStmt2.setInt(4, tenantId);
             prepStmt2.execute();
             connection.commit();
-            addLifecycleHistory(uuid, null, initialState, user, tenantId);
+            addLifecycleHistory(uuid, null, initialState, user);
 
         } catch (SQLException e) {
             uuid = null;
@@ -317,11 +304,10 @@ public class LifecycleMgtDAO {
             prepStmt = connection.prepareStatement(updateLifecycleStateQuery);
             prepStmt.setString(1, lifecycleStateBean.getPostStatus());
             prepStmt.setString(2, lifecycleStateBean.getStateId());
-            prepStmt.setInt(3, lifecycleStateBean.getTenantId());
             prepStmt.executeUpdate();
             connection.commit();
             addLifecycleHistory(lifecycleStateBean.getStateId(), lifecycleStateBean.getPreviousStatus(),
-                    lifecycleStateBean.getPostStatus(), user, lifecycleStateBean.getTenantId());
+                    lifecycleStateBean.getPostStatus(), user);
 
         } catch (SQLException e) {
             try {
@@ -340,11 +326,10 @@ public class LifecycleMgtDAO {
      * Get lifecycle state data for a particular uuid.
      *
      * @param uuid                                  Reference variable that maps lc data with external system.
-     * @param tenantId
      * @return                                      Life cycle state bean with all the required information
      * @throws LifecycleManagerDatabaseException    If failed to get lifecycle state data.
      */
-    public LifecycleStateBean getLifecycleStateDataFromId(String uuid, int tenantId)
+    public LifecycleStateBean getLifecycleStateDataFromId(String uuid)
             throws LifecycleManagerDatabaseException {
         LifecycleStateBean lifecycleStateBean = new LifecycleStateBean();
         Connection connection = null;
@@ -355,13 +340,11 @@ public class LifecycleMgtDAO {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(getLifecycleNameFromIdQuery);
             prepStmt.setString(1, uuid);
-            prepStmt.setInt(2, tenantId);
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 lifecycleStateBean.setLcName(rs.getString(Constants.LIFECYCLE_NAME));
                 lifecycleStateBean.setPostStatus(rs.getString(Constants.LIFECYCLE_STATUS));
             }
-            lifecycleStateBean.setTenantId(tenantId);
             lifecycleStateBean.setStateId(uuid);
 
         } catch (SQLException e) {
@@ -393,7 +376,6 @@ public class LifecycleMgtDAO {
                 lifecycleConfigBean.setLcName(rs.getString(Constants.LIFECYCLE_NAME));
                 InputStream rawInputStream = rs.getBinaryStream(Constants.LIFECYCLE_CONTENT);
                 lifecycleConfigBean.setLcContent(IOUtils.toString(rawInputStream));
-                lifecycleConfigBean.setTenantId(rs.getInt(Constants.TENANT_ID));
                 lifecycleConfigBeanList.add(lifecycleConfigBean);
             }
 
@@ -411,11 +393,10 @@ public class LifecycleMgtDAO {
      * Check lifecycle already exist with same name.
      *
      * @param lcName                                Name of the lifecycle
-     * @param tenantId
      * @return                                      Bean with content and name
      * @throws LifecycleManagerDatabaseException
      */
-    public boolean checkLifecycleExist(String lcName, int tenantId) throws LifecycleManagerDatabaseException {
+    public boolean checkLifecycleExist(String lcName) throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -425,7 +406,6 @@ public class LifecycleMgtDAO {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lcName);
-            prepStmt.setInt(2, tenantId);
             rs = prepStmt.executeQuery();
             result = rs.next();
         } catch (SQLException e) {
@@ -443,10 +423,9 @@ public class LifecycleMgtDAO {
      * @param previousState                 Current state.
      * @param postState                     Target state.
      * @param user                          The user associated with lifecycle operation.
-     * @param tenantId
      * @throws LifecycleManagerDatabaseException
      */
-    private void addLifecycleHistory(String id, String previousState, String postState, String user, int tenantId) {
+    private void addLifecycleHistory(String id, String previousState, String postState, String user) {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         String query = SQLConstants.INSERT_LIFECYCLE_HISTORY_SQL;
@@ -466,7 +445,6 @@ public class LifecycleMgtDAO {
             prepStmt.setString(2, previousState);
             prepStmt.setString(3, postState);
             prepStmt.setString(4, user);
-            prepStmt.setInt(5, tenantId);
             prepStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             prepStmt.execute();
             connection.commit();
@@ -482,7 +460,7 @@ public class LifecycleMgtDAO {
         }
     }
 
-    public boolean isLifecycleIsInUse(String lcName, int tenantId) throws LifecycleManagerDatabaseException {
+    public boolean isLifecycleIsInUse(String lcName) throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -492,7 +470,6 @@ public class LifecycleMgtDAO {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lcName);
-            prepStmt.setInt(2, tenantId);
             rs = prepStmt.executeQuery();
             result = rs.next();
         } catch (SQLException e) {
