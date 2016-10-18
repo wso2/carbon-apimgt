@@ -14,8 +14,9 @@
     <packaging>pom</packaging>
     <name>Lifecycle Management</name>
     <modules>
-        <module>org.wso2.carbon.apimgt.lifecycle.manager.sql</module>
-        <module>org.wso2.carbon.apimgt.lifecycle.manager.core</module>
+        <module>components/org.wso2.carbon.apimgt.lifecycle.manager.sql</module>
+        <module>components/org.wso2.carbon.apimgt.lifecycle.manager.core</module>
+        <module>features/org.wso2.carbon.apimgt.lifecycle.manager.feature</module>
     </modules>
 
 
