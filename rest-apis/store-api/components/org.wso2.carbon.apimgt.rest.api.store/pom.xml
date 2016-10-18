@@ -11,6 +11,7 @@
   <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
   <version>1.0.0</version>
   <name>API Publisher Micro Service</name>
+<packaging>bundle</packaging>
 
 
   <dependencies>
