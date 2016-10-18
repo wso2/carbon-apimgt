@@ -9,8 +9,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+  <packaging>bundle</packaging>
   <name>API Publisher Micro Service</name>
-  <version>1.0.0</version>
+  <version>7.0.0-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
