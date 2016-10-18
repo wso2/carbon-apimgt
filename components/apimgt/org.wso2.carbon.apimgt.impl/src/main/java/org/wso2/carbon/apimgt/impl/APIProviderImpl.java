@@ -1063,8 +1063,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
+                boolean isWSAPI = APIConstants.APIType.WS.toString().equals(api.getType());
                 String wsdlURL;
-                if ("wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
+                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
                         ("production_endpoints")) {
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
 

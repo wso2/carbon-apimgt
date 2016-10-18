@@ -199,7 +199,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(provider);
-            apiToAdd.setType(body.getType().toString());
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
@@ -378,6 +377,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = apiInfo.getId();
+            boolean isWSAPI = APIConstants.APIType.WS == APIConstants.APIType.valueOf(apiInfo.getType());
 
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
@@ -385,7 +385,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setProvider(apiIdentifier.getProviderName());
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
-            //// TODO: 10/14/16 Set api type
+            body.setType(APIDTO.TypeEnum.valueOf(apiInfo.getType()));
 
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
@@ -401,7 +401,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             apiProvider.updateAPI(apiToUpdate);
-            apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
+
+            if (!isWSAPI) {
+                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
+            }
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();

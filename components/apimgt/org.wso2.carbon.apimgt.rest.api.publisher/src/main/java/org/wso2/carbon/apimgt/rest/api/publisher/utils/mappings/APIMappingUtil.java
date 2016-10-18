@@ -280,6 +280,8 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setWsdlUrl(dto.getWsdlUri());
+        model.setType(dto.getType().toString());
+
         if (dto.getStatus() != null) {
             model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
         }
