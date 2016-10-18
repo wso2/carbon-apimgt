@@ -9,17 +9,43 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-  <packaging>bundle</packaging>
-  <name>API Store Micro Service</name>
+  <name>API Publisher Micro Service</name>
   <version>1.0.0</version>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.wso2.maven.plugins</groupId>
+        <artifactId>swagger2msf4j-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <configuration>
+          <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.9.1</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/gen/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.wso2.carbon.apimgt.Application</mainClass>
+              <mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -27,7 +53,7 @@
     </plugins>
   </build>
   <properties>
-    <msf4j.mainClass>org.wso2.carbon.apimgt.Application</msf4j.mainClass>
+    <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
   </properties>
 </project>
 
