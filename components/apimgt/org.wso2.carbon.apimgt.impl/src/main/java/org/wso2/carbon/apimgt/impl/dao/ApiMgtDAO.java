@@ -22,6 +22,8 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -4471,11 +4473,11 @@ public class ApiMgtDAO {
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 prepStmt.setString(1, groupingId);
                 prepStmt.setString(2, subscriber.getName());
-                prepStmt.setString(3, "%"+search+"%");
+                prepStmt.setString(3, "%" + search + "%");
 
             } else {
                 prepStmt.setString(1, subscriber.getName());
-                prepStmt.setString(2, "%"+search+"%");
+                prepStmt.setString(2, "%" + search + "%");
             }
 
             resultSet = prepStmt.executeQuery();
@@ -4545,15 +4547,15 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, subscriber.getName());
                 prepStmt.setString(3, "%"+search+"%");
                 //prepStmt.setString(4, sortColumn + " " + sortOrder);
-                prepStmt.setInt(4,start);
-                prepStmt.setInt(5,offset);
+                prepStmt.setInt(4, start);
+                prepStmt.setInt(5, offset);
 
             } else {
                 prepStmt.setString(1, subscriber.getName());
                 prepStmt.setString(2, "%"+search+"%");
                 //prepStmt.setString(3, sortColumn + " " + sortOrder);
-                prepStmt.setInt(3,start);
-                prepStmt.setInt(4,offset);
+                prepStmt.setInt(3, start);
+                prepStmt.setInt(4, offset);
             }
             rs = prepStmt.executeQuery();
             ArrayList<Application> applicationsList = new ArrayList<Application>();
@@ -5430,6 +5432,11 @@ public class ApiMgtDAO {
                 addScopes(api.getScopes(), applicationId, tenantId);
             }
             addURLTemplates(applicationId, api, connection);
+            APIIdentifier apiIdentifier =
+                    new APIIdentifier(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                            api.getId().getApiName(), api.getId().getVersion());
+            //add new APIGatewayUrls
+            addAPIEnvironments(apiIdentifier, api);
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
@@ -5444,6 +5451,149 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
+    }
+    /**
+     * Persists Environment details of the API to the Database     *
+     * @param apiIdentifier API Identifier
+     * @param api API Object
+     * @throws APIManagementException
+     */
+    public void addAPIEnvironments(APIIdentifier apiIdentifier, API api) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String query = SQLConstants.ADD_API_ENVIRONMENTS_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            if(api.getEnvironments() != null) {
+                Set<String> environments =
+                        new HashSet<String>(api.getEnvironments());
+                environments.remove("none");
+
+                if (api.getGatewayUrls() != null) {
+                    String gatewayUrls = api.getGatewayUrls();
+                    JSONParser parser = new JSONParser();
+                    Object object  = parser.parse(gatewayUrls);
+                    JSONObject gatewayUrlsJson = (JSONObject) object;
+
+                    for (String environmentName : environments) {
+                        prepStmt = connection.prepareStatement(query);
+                        //set environment name
+                        prepStmt.setString(1, environmentName);
+                        //set API Id
+                        int apiId;
+                        apiId = getAPIID(apiIdentifier, connection);
+                        if (apiId == -1) {
+                            String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                            log.error(msg);
+                            throw new APIManagementException(msg);
+                        }
+                        prepStmt.setInt(2, apiId);
+                        //extract URLs
+                        String urlsFromPublisher = (String) gatewayUrlsJson.get(environmentName);
+                        JSONObject urlsFromPublisherJson = (JSONObject) parser.parse(urlsFromPublisher);
+
+                        //both http and https are default
+                        if (urlsFromPublisherJson.get("https").equals("default") && urlsFromPublisherJson.get("http")
+                                .equals("default")) {
+                            prepStmt.setString(3, "default");
+                            prepStmt.setString(4, "default");
+                        } else{ //else it should be  : both are not default
+                            prepStmt.setString(3, (String) urlsFromPublisherJson.get("http"));
+                            prepStmt.setString(4, (String) urlsFromPublisherJson.get("https"));
+                        }
+                        //set UseDefaultContext
+                        if(urlsFromPublisherJson.get("useDefaultContext").equals("true")){
+                            prepStmt.setBoolean(5, true);
+                        } else {
+                            prepStmt.setBoolean(5, false);
+                        }
+                        prepStmt.execute();
+                    }
+                }
+            }
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Error while adding the environments of the API: " + api.getId() + " to the database", e);
+        } catch (org.json.simple.parser.ParseException e) {
+            handleException("Cannot Parse the environments JSON retrieved for API :" + api.getId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+    }
+    /**
+     * Remove persisted Environments of the API     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException
+     */
+    public void RemoveAPIEnvironments(APIIdentifier apiIdentifier) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        int apiId;
+
+        String deleteEnvironments = SQLConstants.REMOVE_API_ENVIRONMENTS_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(deleteEnvironments);
+
+            apiId = getAPIID(apiIdentifier, connection);
+            if (apiId == -1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            prepStmt.setInt(1, apiId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting environments for API : " + apiIdentifier.getApiName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+    /**
+     * Retrive Environments of the API     *
+     * @param apiIdentifier
+     * @param apiId
+     * @throws APIManagementException
+     */
+    public String getAPIEnvironmentUrls(APIIdentifier apiIdentifier, int apiId) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String environmentConfig = null;
+        ResultSet rs = null;
+        String query = SQLConstants.GET_API_ENVIRONMENTS_SQL;
+        JSONObject environmentsObject = new JSONObject();
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setInt(1, apiId);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("https", rs.getString("HTTPS_URL"));
+                jsonObject.put("http", rs.getString("HTTP_URL"));
+                jsonObject.put("useDefaultContext", rs.getBoolean("APPEND_CONTEXT"));
+                environmentsObject.put(rs.getString("ENVIRONMENT_NAME"),jsonObject);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while getting the Environment Config URLs for " + apiIdentifier.getApiName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        if(environmentsObject.size()!= 0){
+            environmentConfig = environmentsObject.toString();
+        }
+        return environmentConfig;
     }
 
     public String getDefaultVersion(APIIdentifier apiId) throws APIManagementException {
@@ -6209,6 +6359,14 @@ public class ApiMgtDAO {
 
             updateScopes(api, tenantId);
             updateURLTemplates(api);
+            APIIdentifier apiIdentifier =
+                    new APIIdentifier(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                            api.getId().getApiName(), api.getId().getVersion());
+            //delete the existing environment details
+            RemoveAPIEnvironments(apiIdentifier);
+            // add new API Environment details
+            addAPIEnvironments(apiIdentifier, api);
+
         } catch (SQLException e) {
             handleException("Error while updating the API: " + api.getId() + " in the database", e);
         } finally {
