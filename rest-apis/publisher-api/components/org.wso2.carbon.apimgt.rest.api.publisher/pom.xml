@@ -1,116 +1,144 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.parent</artifactId>
+      <version>7.0.0-SNAPSHOT</version>
+      <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+  <name>API Publisher Micro Service</name>
+<packaging>bundle</packaging>
 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.wso2.msf4j</groupId>
-        <artifactId>msf4j-service</artifactId>
+
+  <dependencies>
+    <!--Uncomment the following if you want to enable metrics & monitoring -->
+    
+    <dependency>
+       <groupId>org.wso2.msf4j</groupId>
+       <artifactId>msf4j-analytics</artifactId>
         <version>2.0.0</version>
-    </parent>
-    <groupId>org.wso2.carbon</groupId>
-    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
-    <name>API Publisher Micro Service</name>
-    <packaging>bundle</packaging>
+    </dependency>
+ 
 
 
-
-    <dependencies>
-        <!--Uncomment the following if you want to enable metrics & monitoring -->
-
-        <dependency>
-            <groupId>org.wso2.msf4j</groupId>
-            <artifactId>msf4j-analytics</artifactId>
-        </dependency>
-
-        <dependency>
+ <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>3.0.3</version>
+    <version>3.0.3</version>
 
         </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.10</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.8.4</version>
-        </dependency>
+<dependency>
+    <groupId>io.swagger</groupId>
+    <artifactId>swagger-annotations</artifactId>
+    <version>1.5.10</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.8.4</version>
+</dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.8.4</version>
-        </dependency>
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.8.4</version>
+</dependency>
 
 
-        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+<!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+<dependency>
+    <groupId>org.codehaus.jackson</groupId>
+    <artifactId>jackson-mapper-asl</artifactId>
+    <version>1.9.13</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 
-        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-validator -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>5.2.4.Final</version>
-        </dependency>
+<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-validator -->
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>5.2.4.Final</version>
+</dependency>
 
     </dependencies>
-    <build>
+  <build>
 
-        <plugins>
-            <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2msf4j-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
+<plugins>
+<plugin>
+  <groupId>org.wso2.maven.plugins</groupId>
+  <artifactId>swagger2msf4j-maven-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <configuration>
+      <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
+  </configuration>
+</plugin>
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>build-helper-maven-plugin</artifactId>
+  <version>1.9.1</version>
+  <executions>
+      <execution>
+          <id>add-source</id>
+          <phase>generate-sources</phase>
+          <goals>
+              <goal>add-source</goal>
+          </goals>
+          <configuration>
+              <sources>
+                  <source>src/gen/java</source>
+              </sources>
+          </configuration>
+      </execution>
+  </executions>
+</plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    <plugin><!-- Overridden from parent pom to exclude generated sources -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>validate</id>
+                <phase>validate</phase>
                 <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
+                    <configLocation>
+                        https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
+                    </configLocation>
+                    <suppressionsLocation>
+                        https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
+                    </suppressionsLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <!--Exclude generated sources-->
+                    <excludes>**/gen/**/*</excludes>
+                    <!--skip for generated resources-->
+                    <skip>true</skip>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/gen/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
+                <goals>
+                    <goal>check</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+</plugins>
+  </build>
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</microservice.mainClass>
