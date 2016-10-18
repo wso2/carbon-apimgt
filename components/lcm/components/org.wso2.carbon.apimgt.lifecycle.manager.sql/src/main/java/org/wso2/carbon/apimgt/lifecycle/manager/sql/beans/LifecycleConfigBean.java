@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.beans;
 public class LifecycleConfigBean {
     private String lcName;
     private String lcContent;
-    private int tenantId;
 
     public String getLcName() {
         return lcName;
@@ -42,11 +41,4 @@ public class LifecycleConfigBean {
         this.lcContent = lcContent;
     }
 
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
-    }
 }

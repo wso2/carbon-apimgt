@@ -21,9 +21,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleConfigBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.dao.LifecycleMgtDAO;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,12 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LifecycleCrudManager {
 
-    private static Map<Integer, Map<String, String>> tenantLifecycleMap;
-    private int tenantId;
-
-    public LifecycleCrudManager() {
-        this.tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-    }
+    private static Map<String, String> lifecycleMap;
 
     /**
      * Add new lifecycle configuration.
@@ -52,22 +45,13 @@ public class LifecycleCrudManager {
                 LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
                 lifecycleConfigBean.setLcName(lcName);
                 lifecycleConfigBean.setLcContent(lcContent);
-                getLCMgtDAOInstance().addLifecycle(lifecycleConfigBean, tenantId);
-                if (tenantLifecycleMap != null) {
-                    Map<String, String> lifecycleMaps = tenantLifecycleMap.get(tenantId);
-                    if (lifecycleMaps != null) {
-                        lifecycleMaps.put(lcName, lcContent);
-                        tenantLifecycleMap.put(tenantId, lifecycleMaps);
-                    } else {
-                        Map<String, String> tempLifecycleMap = new HashMap<>();
-                        tempLifecycleMap.put(lcName, lcContent);
-                        tenantLifecycleMap.put(tenantId, tempLifecycleMap);
-                    }
+                getLCMgtDAOInstance().addLifecycle(lifecycleConfigBean);
+                if (lifecycleMap != null) {
+                    lifecycleMap.put(lcName, lcContent);
+
                 } else {
-                    tenantLifecycleMap = new ConcurrentHashMap<>();
-                    Map<String, String> tempLifecycleMap = new HashMap<>();
-                    tempLifecycleMap.put(lcName, lcContent);
-                    tenantLifecycleMap.put(tenantId, tempLifecycleMap);
+                    lifecycleMap = new ConcurrentHashMap<>();
+                    lifecycleMap.put(lcName, lcContent);
                 }
 
             } else {
@@ -90,15 +74,13 @@ public class LifecycleCrudManager {
             LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
             lifecycleConfigBean.setLcName(lcName);
             lifecycleConfigBean.setLcContent(lcContent);
-            getLCMgtDAOInstance().updateLifecycle(lifecycleConfigBean, tenantId);
-            if (tenantLifecycleMap != null) {
-                Map<String, String> lifecycleMaps = tenantLifecycleMap.get(tenantId);
-                if (lifecycleMaps != null) {
-                    lifecycleMaps.put(lcName, lcContent);
-                } else {
-                    lifecycleMaps = new HashMap<>();
-                    lifecycleMaps.put(lcName, lcContent);
-                }
+            getLCMgtDAOInstance().updateLifecycle(lifecycleConfigBean);
+            if (lifecycleMap != null) {
+                lifecycleMap.put(lcName, lcContent);
+            } else {
+                lifecycleMap = new ConcurrentHashMap<>();
+                lifecycleMap.put(lcName, lcContent);
+
             }
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error in adding lifecycle with name " + lcName, e);
@@ -114,9 +96,9 @@ public class LifecycleCrudManager {
     public void deleteLifecycle(String lcName) throws LifecycleException {
         try {
             if (!checkLifecycleInUse(lcName)) {
-                getLCMgtDAOInstance().deleteLifecycle(lcName, tenantId);
-                if (tenantLifecycleMap != null && tenantLifecycleMap.containsKey(tenantId)) {
-                    tenantLifecycleMap.get(tenantId).remove(lcName);
+                getLCMgtDAOInstance().deleteLifecycle(lcName);
+                if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
+                    lifecycleMap.remove(lcName);
                 }
             } else {
                 throw new LifecycleException(
@@ -128,19 +110,19 @@ public class LifecycleCrudManager {
     }
 
     /**
-     * Get the list of life cycles for a particular tenant.
+     * Get the list of life cycles.
      *
      * @return List of available life cycles.
      * @throws LifecycleException
      */
     public String[] getLifecycleList() throws LifecycleException {
         try {
-            if (tenantLifecycleMap != null && tenantLifecycleMap.containsKey(tenantId)) {
-                return tenantLifecycleMap.get(tenantId).keySet().toArray(new String[0]);
+            if (lifecycleMap != null) {
+                return lifecycleMap.keySet().toArray(new String[0]);
             }
-            return getLCMgtDAOInstance().getLifecycleList(tenantId);
+            return getLCMgtDAOInstance().getLifecycleList();
         } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error while getting Lifecycle list for tenant " + tenantId, e);
+            throw new LifecycleException("Error while getting Lifecycle list. ", e);
         }
     }
 
@@ -148,21 +130,20 @@ public class LifecycleCrudManager {
      * Get the lifecycle configuration with a particular name.
      *
      * @param lcName                Name of the lifecycle.
-     * @return                      Bean containing lifecycle configuration.
+     * @return Bean containing lifecycle configuration.
      * @throws LifecycleException
      */
     public LifecycleConfigBean getLifecycleConfiguration(String lcName) throws LifecycleException {
         try {
-            if (tenantLifecycleMap != null && tenantLifecycleMap.containsKey(tenantId) && tenantLifecycleMap
-                    .get(tenantId).containsKey(lcName)) {
+            if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
                 LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
                 lifecycleConfigBean.setLcName(lcName);
-                lifecycleConfigBean.setLcContent(tenantLifecycleMap.get(tenantId).get(lcName));
+                lifecycleConfigBean.setLcContent(lifecycleMap.get(lcName));
                 return lifecycleConfigBean;
             }
-            return getLCMgtDAOInstance().getLifecycleConfig(lcName, tenantId);
+            return getLCMgtDAOInstance().getLifecycleConfig(lcName);
         } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error while getting Lifecycle list for tenant " + tenantId, e);
+            throw new LifecycleException("Error while getting Lifecycle list.", e);
         }
     }
 
@@ -173,19 +154,11 @@ public class LifecycleCrudManager {
      * @throws LifecycleException
      */
     public void initLifecycleMap() throws LifecycleException {
-        tenantLifecycleMap = new ConcurrentHashMap<>();
+        lifecycleMap = new ConcurrentHashMap<>();
         try {
             LifecycleConfigBean[] lifecycleConfigBeen = getLCMgtDAOInstance().getAllLifecycleConfigs();
             for (LifecycleConfigBean lifecycleConfigBean : lifecycleConfigBeen) {
-                Map<String, String> lifecycleMaps = tenantLifecycleMap.get(lifecycleConfigBean.getTenantId());
-                if (lifecycleMaps != null) {
-                    lifecycleMaps.put(lifecycleConfigBean.getLcName(), lifecycleConfigBean.getLcContent());
-                    tenantLifecycleMap.put(lifecycleConfigBean.getTenantId(), lifecycleMaps);
-                } else {
-                    Map<String, String> tempLifecycleMap = new HashMap<>();
-                    tempLifecycleMap.put(lifecycleConfigBean.getLcName(), lifecycleConfigBean.getLcContent());
-                    tenantLifecycleMap.put(lifecycleConfigBean.getTenantId(), tempLifecycleMap);
-                }
+                lifecycleMap.put(lifecycleConfigBean.getLcName(), lifecycleConfigBean.getLcContent());
             }
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while getting Lifecycle list for all tenants", e);
@@ -194,15 +167,14 @@ public class LifecycleCrudManager {
     }
 
     private boolean checkLifecycleExist(String lcName) throws LifecycleManagerDatabaseException {
-        if (tenantLifecycleMap != null && tenantLifecycleMap.containsKey(tenantId) && tenantLifecycleMap.get(tenantId)
-                .containsKey(lcName)) {
+        if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
             return true;
         }
-        return getLCMgtDAOInstance().checkLifecycleExist(lcName, tenantId);
+        return getLCMgtDAOInstance().checkLifecycleExist(lcName);
     }
 
     private boolean checkLifecycleInUse(String lcName) throws LifecycleManagerDatabaseException {
-        return getLCMgtDAOInstance().isLifecycleIsInUse(lcName, tenantId);
+        return getLCMgtDAOInstance().isLifecycleIsInUse(lcName);
     }
 
     private LifecycleMgtDAO getLCMgtDAOInstance() {
