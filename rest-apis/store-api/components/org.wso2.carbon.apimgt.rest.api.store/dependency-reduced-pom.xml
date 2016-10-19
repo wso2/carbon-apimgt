@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>msf4j-service</artifactId>
-    <groupId>org.wso2.msf4j</groupId>
-    <version>2.0.0</version>
-    <relativePath>../pom.xml/pom.xml</relativePath>
+    <artifactId>org.wso2.carbon.apimgt.rest.api.store.parent</artifactId>
+    <groupId>org.wso2.carbon.apimgt</groupId>
+    <version>7.0.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-  <packaging>bundle</packaging>
-  <name>API Publisher Micro Service</name>
-  <version>7.0.0-SNAPSHOT</version>
+  <name>API Store Micro Service</name>
   <build>
     <plugins>
       <plugin>
@@ -51,10 +48,85 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer>
+                  <mainClass>${microservice.mainClass}</mainClass>
+                </transformer>
+                <transformer />
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <configLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml</configLocation>
+              <suppressionsLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml</suppressionsLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              <excludes>**/gen/**/*</excludes>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <properties>
+    <osgi.services.cm.package.import.version.range>[1.5.0, 2.0.0)</osgi.services.cm.package.import.version.range>
     <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
+    <org.osgi.core.version>6.0.0</org.osgi.core.version>
+    <osgi.framework.javax.xml.bind.package.import.version.range>[0.0.0, 1.0.0)</osgi.framework.javax.xml.bind.package.import.version.range>
+    <equinox.osgi.services.package.import.version.range>[1.0.0, 2.0.0)</equinox.osgi.services.package.import.version.range>
+    <osgi.service.tracker.package.import.version.range>[1.5.0, 2.0.0)</osgi.service.tracker.package.import.version.range>
+    <export.package>!org.wso2.carbon.apimgt.rest.api.store.internal,
+            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",</export.package>
+    <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
+    <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
+    <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
+    <import.package>org.eclipse.osgi.util,
+            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
+            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
+            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
+            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
+            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
+            com.zaxxer.hikari.*</import.package>
+    <checkstyle.skip>false</checkstyle.skip>
+    <osgi.framework.console.package.import.version.range>[1.1.0, 2.0.0)</osgi.framework.console.package.import.version.range>
+    <osgi.framework.package.import.version.range>[1.8.0, 2.0.0)</osgi.framework.package.import.version.range>
+    <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
+    <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
+    <slf4j.logging.package.import.version.range>[1.7.0, 2.0.0)</slf4j.logging.package.import.version.range>
   </properties>
 </project>
 
