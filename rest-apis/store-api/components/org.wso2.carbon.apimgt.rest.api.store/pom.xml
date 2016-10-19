@@ -12,10 +12,6 @@
     <name>API Store Micro Service</name>
     <packaging>jar</packaging>
 
-    <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-    <name>API Store Micro Service</name>
-    <packaging>bundle</packaging>
-
     <dependencies>
         <!--Uncomment the following if you want to enable metrics & monitoring -->
 
