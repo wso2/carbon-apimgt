@@ -169,4 +169,16 @@ var isForumEnabled = function() {
     return org.wso2.carbon.apimgt.impl.utils.APIUtil.isStoreForumEnabled();
 }
 
+var getAPIProviderObj = function() {
+    var user = jagg.getUser();
+    var store;
+    if (user == null) {
+        store = require('apipublisher');
+        return new store.APIProvider();
+    } else {
+        store = require('apipublisher');
+        return new store.APIProvider(user.username);
+    }
+};
+
 %>
