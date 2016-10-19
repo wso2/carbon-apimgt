@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.dao;
+package org.wso2.carbon.apimgt.rest.api.store.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
