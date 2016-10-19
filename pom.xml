@@ -30,16 +30,16 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.apimgt.parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>7.0.0-SNAPSHOT</version>
+
     <name>WSO2 Carbon - API Management Parent</name>
 
-    <!--scm>
-        <url>https://github.com/isudana/integration-bus.git</url>
-        <developerConnection>scm:git:https://github.com/isudana/integration-bus.git
-        </developerConnection>
-        <connection>scm:git:https://github.com/isudana/integration-bus.git</connection>
+    <scm>
+        <url>https://github.com/wso2/carbon-apimgt.git</url>
+        <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2/carbon-apimgt.git</connection>
         <tag>HEAD</tag>
-    </scm-->
+    </scm>
 
     <pluginRepositories>
         <pluginRepository>
@@ -55,6 +55,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -142,7 +152,7 @@
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.0.0, 6.0.0)
         </carbon.kernel.package.import.version.range>
-
+        <carbon.apimgt.version>1.0.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.gw.version>1.0.0-SNAPSHOT</carbon.gw.version>
         <carbon.gw.package.export.version>1.0.0</carbon.gw.package.export.version>
 

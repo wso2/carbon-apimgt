@@ -3,14 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.wso2.msf4j</groupId>
-    <artifactId>msf4j-service</artifactId>
-    <version>2.0.0</version>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.store.parent</artifactId>
+      <version>7.0.0-SNAPSHOT</version>
+      <relativePath>../../pom.xml</relativePath>
   </parent>
-  <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-  <version>1.0.0</version>
-  <name>API Publisher Micro Service</name>
+  <name>API Store Micro Service</name>
 <packaging>bundle</packaging>
 
 
@@ -20,6 +19,7 @@
     <dependency>
        <groupId>org.wso2.msf4j</groupId>
        <artifactId>msf4j-analytics</artifactId>
+        <version>2.0.0</version>
     </dependency>
  
 
@@ -108,7 +108,35 @@
           </archive>
         </configuration>
       </plugin>
-
+            <plugin><!-- Overridden from parent pom to exclude generated sources -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
+                            </configLocation>
+                            <suppressionsLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
+                            </suppressionsLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <!--Exclude generated sources-->
+                            <excludes>**/gen/**/*</excludes>
+                            <!--skip for generated resources-->
+                            <skip>true</skip>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 </plugins>
   </build>
 
