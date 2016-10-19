@@ -28,7 +28,7 @@ public class Application {
         new MicroservicesRunner(8080)
                 .deploy(new ApisApi()).deploy(new ApplicationsApi())
                 .start();
-        /*new MicroservicesRunner(8081)
+        /*new MicroservicesRunner()
         .deploy(new ApplicationsApi())
         .start();
         new MicroservicesRunner()
