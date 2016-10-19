@@ -23,8 +23,8 @@ var getBPMNTasks = function (taskName) {
     //In WSO2BPS for each tenant space has seperate rest api to access bpmn tasks
     var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
     if(userDomain != null && userDomain != "carbon.super"){
-        var tenantBPMNserverUrl = "t/" + userDomain + "/webapps/bpmn";
-        serverUrl = serverUrl.replace("bpmn", tenantBPMNserverUrl)
+        var tenantBPMNserverUrl = "/t/" + userDomain + "/webapps/bpmn";
+        serverUrl = serverUrl.replace("/bpmn", tenantBPMNserverUrl)
     }
 
     var headers = {};
