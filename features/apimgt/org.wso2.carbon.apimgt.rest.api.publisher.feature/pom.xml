@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.0.5-SNAPSHOT</version>
+        <version>6.0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -97,7 +97,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-doc-resources</id>
+                        <id>copy-common-doc-resources</id>
                         <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -107,17 +107,15 @@
                             <resources>
                                 <resource>
                                     <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
-                                    <includes>
-                                        <include>assets/</include>
-                                        <include>fonts/</include>
-                                        <include>js/</include>
-                                    </includes>
+                                    <excludes>
+                                        <exclude>**/*.mustache</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-doc-guide</id>
+                        <id>copy-specific-doc-resources</id>
                         <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -126,9 +124,9 @@
                             <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/</directory>
+                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/documentation</directory>
                                     <includes>
-                                        <include>guide.html</include>
+                                        <include>*</include>
                                     </includes>
                                 </resource>
                             </resources>

@@ -2,11 +2,11 @@ var inSequencesLoaded = false;
 
 ;(function ( $, window, document, undefined ) {
     Handlebars.logger.level = 0;
-    var source = $("#resource-policy-ui-template").html();    
+    var source = $("#resource-policy-ui-template").html();
     var template;
     if(source != undefined && source !="" ){
         template = Handlebars.compile(source);
-    }  
+    }
 
     Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
         switch (operator) {
@@ -29,12 +29,12 @@ var inSequencesLoaded = false;
             default:
                 return options.inverse(this);
         }
-    });    
+    });
 
     var pluginName = "resourceTierSelect";
 
     var defaults = {
-         
+
     };
 
     // The actual plugin constructor
@@ -42,22 +42,22 @@ var inSequencesLoaded = false;
         this.element = $(element);
         // do not extend the api config
         this.config = options.config;
-        this.options = $.extend( {}, defaults, options) ;        
+        this.options = $.extend( {}, defaults, options) ;
         this._name = pluginName;
         this.init();
     }
 
     Plugin.prototype = {
 
-        init: function() { 
+        init: function() {
             this.render();
             this.attach_events();
         },
 
-        attach_events: function(){            
+        attach_events: function(){
             this.element
-            .on("change",".select_resource_policy", $.proxy(this.select_resource_policy, this))
-            .on("click",".select_adv_policy_for_resource", $.proxy(this.select_adv_policy_for_resource, this));
+                .on("change",".select_resource_policy", $.proxy(this.select_resource_policy, this))
+                .on("click",".select_adv_policy_for_resource", $.proxy(this.select_adv_policy_for_resource, this));
         },
 
         select_resource_policy:function(e){
@@ -76,7 +76,7 @@ var inSequencesLoaded = false;
         render: function(){
             var designer = new APIDesigner();
             var context = { doc : designer.api_doc , tiers: this.options.tiers };
-            this.element.html(template(context));            
+            this.element.html(template(context));
         },
 
     };
@@ -86,7 +86,7 @@ var inSequencesLoaded = false;
         return this.each(function () {
             if (!$.data(this, "plugin_" + pluginName)) {
                 $.data(this, "plugin_" + pluginName,
-                new Plugin( this, options ));
+                    new Plugin( this, options ));
             }
         });
     };
@@ -99,7 +99,7 @@ function validate_tiers(){
     var selectedValues = [];
     $("input[name='tier']:checked").each(function() {
         selectedValues.push($(this).val());
-    });    
+    });
     if(selectedValues && selectedValues.length > 0 ){
         $("#tier_error").addClass("hide");
         return true;
@@ -125,7 +125,7 @@ function validateSubscription() {
 }
 
 $(document).ready(function(){
-    $(".backend_tps").click(function() {     
+    $(".backend_tps").click(function() {
         if($("input[name=backend_tps]:checked").val() == "unlimited"){
             $(".tps_boxes").hide();
         }
@@ -140,8 +140,8 @@ $(document).ready(function(){
         return false;
     });
 
-    
-    $("#resource-policy-select").resourceTierSelect({ tiers : TIERS });    
+
+    $("#resource-policy-select").resourceTierSelect({ tiers : TIERS });
 
     //$('.multiselect').multiselect();
 
@@ -150,7 +150,7 @@ $(document).ready(function(){
     $('#transport_https').change(validate_Transports);
 
     $("#manage_form").submit(function (e) {
-      e.preventDefault();
+        e.preventDefault();
     });
 
     $('#subscriptions').change(function(e){
@@ -161,7 +161,7 @@ $(document).ready(function(){
             $('#tenantsDiv').show();
         }
     });
-    
+
     $('.default_version_check').change(function(){
         if($(this).is(":checked")){
             $(default_version_checked).val($(this).val());
@@ -170,12 +170,12 @@ $(document).ready(function(){
         }
     });
 
-   validateAPITier();
+    validateAPITier();
 
     $("select[name='apiTier']").change(function(){
-    	       validateAPITier();
-    	       $('.throttling_select').hide();
-        
+        validateAPITier();
+        $('.throttling_select').hide();
+
     });
 
 
@@ -188,10 +188,10 @@ $(document).ready(function(){
         var countLength = $('#tiersCollection').length;
         if (countLength == 0) {
             $('<input>').attr('type', 'hidden')
-                    .attr('name', 'tiersCollection')
-                    .attr('id', 'tiersCollection')
-                    .attr('value', multipleValues)
-                    .appendTo('#manage_form');
+                .attr('name', 'tiersCollection')
+                .attr('id', 'tiersCollection')
+                .attr('value', multipleValues)
+                .appendTo('#manage_form');
         } else {
             $('#tiersCollection').attr('value', multipleValues);
 
@@ -200,77 +200,108 @@ $(document).ready(function(){
     });
 
     $("select[name='apiPolicy']").change(function() {
-            // multipleValues will be an array
-            var multipleValues = $(this).val() || [];
-            var countLength = $('#apiPolicyCollection').length;
-            if (countLength == 0) {
+        // multipleValues will be an array
+        var multipleValues = $(this).val() || [];
+        var countLength = $('#apiPolicyCollection').length;
+        if (countLength == 0) {
 
-                $('<input>').attr('type', 'hidden')
-                        .attr('name', 'apiPolicyCollection')
-                        .attr('id', 'apiPolicyCollection')
-                        .attr('value', multipleValues)
-                        .appendTo('#manage_form');
-            } else {
-                $('#apiPolicyCollection').attr('value', multipleValues);
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'apiPolicyCollection')
+                .attr('id', 'apiPolicyCollection')
+                .attr('value', multipleValues)
+                .appendTo('#manage_form');
+        } else {
+            $('#apiPolicyCollection').attr('value', multipleValues);
 
-            }
+        }
 
-        });
+    });
     $("select[name='subPolicy']").change(function() {
-            // multipleValues will be an array
-            var multipleValues = $(this).val() || [];
-            var countLength = $('#subPolicyCollection').length;
-            if (countLength == 0) {
+        // multipleValues will be an array
+        var multipleValues = $(this).val() || [];
+        var countLength = $('#subPolicyCollection').length;
+        if (countLength == 0) {
 
-                $('<input>').attr('type', 'hidden')
-                        .attr('name', 'subPolicyCollection')
-                        .attr('id', 'subPolicyCollection')
-                        .attr('value', multipleValues)
-                        .appendTo('#manage_form');
-            } else {
-                $('#subPolicyCollection').attr('value', multipleValues);
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'subPolicyCollection')
+                .attr('id', 'subPolicyCollection')
+                .attr('value', multipleValues)
+                .appendTo('#manage_form');
+        } else {
+            $('#subPolicyCollection').attr('value', multipleValues);
 
-            }
+        }
 
-     });
+    });
 
     if ( $("#toggleSequence").attr('checked') ) {
-	$('#toggleSequence').parent().next().show();
-    } 
-    else {
-	$('#toggleSequence').parent().next().hide();
+        $('#toggleSequence').parent().next().show();
     }
-    
-    if( $("#toggleThrottle").is(":checked")) {
-    	$(this).parent().parent().parent().next().children().next().children().show();
-    } 
     else {
-    	$(this).parent().parent().parent().next().children().next().children().hide();
+        $('#toggleSequence').parent().next().hide();
     }
 
+    if( $("#toggleThrottle").is(":checked")) {
+        $(this).parent().parent().parent().next().children().next().children().show();
+    }
+    else {
+        $(this).parent().parent().parent().next().children().next().children().hide();
+    }
+    validate_Transports();
+
+    // Hide the gateway Urls table if use default is checked
+    $(".use_defaults:checked").each(function() {
+        var useDefaultsID = $(this).attr('id');
+        var urlTableID = useDefaultsID.replace("check","urls");
+        var defContextID = useDefaultsID.replace("check", "context_checkbox");
+        $("#" + urlTableID).hide();
+        $("#" + defContextID).hide();
+
+    });
+
+    $("input:checkbox[class=default_context]").each(function () {
+
+        var defaultContextID = $(this).attr('id');
+        var contextSpanIdHttps = defaultContextID.replace("default_context","https_basic");
+        var contextSpanIdHttp = defaultContextID.replace("default_context", "http_basic");
+
+        if ( $("#"+ defaultContextID).is(":checked")) {
+
+            $("#" + contextSpanIdHttps).show();
+            $("#" + contextSpanIdHttp).show();
+
+        } else {
+            $("#" + contextSpanIdHttps).hide();
+            $("#" + contextSpanIdHttp).hide();
+        }
+    });
+
+
+
+    displayUrlsOnTransport();
 });
 
 $('.js_hidden_section_title').click(function(){
-        var $next = $(this).next();
-        var $i = $('i',this);
-        if($next.is(":visible")){
-            $next.hide();
-            $i.removeClass('glyphicon glyphicon-chevron-down');
-            $i.addClass('glyphicon glyphicon-chevron-right');
-        }else{
-            $next.show();
-            $i.removeClass('glyphicon glyphicon-chevron-right');
-            $i.addClass('glyphicon glyphicon-chevron-down');
-        }
-    });
+    var $next = $(this).next();
+    var $i = $('i',this);
+    if ($next.is(":visible")) {
+        $next.hide();
+        $i.removeClass('glyphicon glyphicon-chevron-down');
+        $i.addClass('glyphicon glyphicon-chevron-right');
+    }else {
+        $next.show();
+        $i.removeClass('glyphicon glyphicon-chevron-right');
+        $i.addClass('glyphicon glyphicon-chevron-down');
+    }
+});
 
 $("#toggleThrottle").change(function(e){
     if($(this).is(":checked")){
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
-    	$(this).parent().parent().parent().next().children().next().children().hide();
-    	$('#productionTps').val('');
-    	$('#sandboxTps').val('');
+        $(this).parent().parent().parent().next().children().next().children().hide();
+        $('#productionTps').val('');
+        $('#sandboxTps').val('');
     }
 });
 
@@ -293,26 +324,96 @@ function showHideResourceLevelTierSelection() {
     }
 }
 
+var transport_error = $("#transport_error").text();
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
-    $("#transport_error").remove();
     if(checkedHttpTransport || checkedHttpsTransport){
-    $( "div.checkbox" ).removeClass('error-multiselect');
+        $("#transport_error").addClass("hide");
         return true;
     }
-    $( "div.checkbox" ).addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
+    $("#transport_error").removeClass("hide").show().text(transport_error);
     return false;
 }
 
 function validateAPITier(){
-     var apiTier = $( "#api_level_policy").prop('checked');
-        var designer = APIDesigner();
-        if(apiTier){
-            designer.setApiLevelPolicy(true);
-            designer.render_resources();
-        }else{
-            designer.setApiLevelPolicy(false);
-            designer.render_resources();
+    var apiTier = $( "#api_level_policy").prop('checked');
+    var designer = APIDesigner();
+    if(apiTier){
+        designer.setApiLevelPolicy(true);
+        designer.render_resources();
+    }else{
+        designer.setApiLevelPolicy(false);
+        designer.render_resources();
+    }
+}
+function showHideGatewayUrls(id) {
+    var urlTableID = id.replace("check","urls");
+    var defaultContext = id.replace("check", "context_checkbox");
+    if ($("#"+id).is(":checked")) {
+        $("#" + urlTableID).hide();
+        $("#" + defaultContext).hide();
+
+    } else {
+        $("#" + urlTableID).show();
+        $("#" + defaultContext).show()
+    }
+}
+function showHideContext(id) {
+
+    var httpContext = id.replace("_default_context","_http_basic");
+    var httpsContext = id.replace("_default_context","_https_basic");
+
+    if ($("#"+id).is(":checked")) {
+        $("#" + httpContext).show();
+        $("#" + httpsContext).show();
+
+    } else {
+        $("#" + httpContext).hide();
+        $("#" + httpsContext).hide();
+    }
+
+}
+function displayUrlsOnTransport() {
+
+    var checkedHttpTransport = $('#transport_http').is(":checked");
+    var checkedHttpsTransport = $('#transport_https').is(":checked");
+    var gatewayNames = $("#gatwayNames").val();
+
+    if (gatewayNames != null) {
+        var gatewayNameArray = $("#gatwayNames").val().split(",");
+
+        if (checkedHttpTransport && !checkedHttpsTransport) { //if https is not checked
+            for (var a=0; a<gatewayNameArray.length; a++) {
+                var tableRowHttps = gatewayNameArray[a].replace(/ /g,'') + "_urls_https";
+                var tableRowHttp = gatewayNameArray[a].replace(/ /g,'') + "_urls_http";
+                $("#" + tableRowHttps).hide();
+                $("#" + tableRowHttp).show();
+            }
         }
+        if (!checkedHttpTransport && checkedHttpsTransport) { // if http is not checked
+            for (var a=0; a<gatewayNameArray.length; a++) {
+                var tableRowHttps = gatewayNameArray[a].replace(/ /g,'') + "_urls_https";
+                var tableRowHttp = gatewayNameArray[a].replace(/ /g,'') + "_urls_http";
+                $("#" + tableRowHttp).hide();
+                $("#" + tableRowHttps).show();
+            }
+        }
+        if (checkedHttpTransport && checkedHttpsTransport) { // if both http and https clicked
+            for (var a=0; a<gatewayNameArray.length; a++) {
+                var tableRowHttps = gatewayNameArray[a].replace(/ /g,'') + "_urls_https";
+                var tableRowHttp = gatewayNameArray[a].replace(/ /g,'') + "_urls_http";
+                $("#" + tableRowHttps).show();
+                $("#" + tableRowHttp).show();
+            }
+        }
+        if (!checkedHttpTransport && !checkedHttpsTransport) {
+            for (var a=0; a<gatewayNameArray.length; a++) {
+                var tableRowHttps = gatewayNameArray[a].replace(/ /g,'') + "_urls_https";
+                var tableRowHttp = gatewayNameArray[a].replace(/ /g,'') + "_urls_http";
+                $("#" + tableRowHttps).hide();
+                $("#" + tableRowHttp).hide();
+            }
+        }
+    }
 }

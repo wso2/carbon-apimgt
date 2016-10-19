@@ -9,8 +9,6 @@ for(var i=0;i < outputs.tiers.length; i++){
      app_tier = outputs.tiers[i]; 
   }
 }
-
-var supportedLangs = jagg.module("subscription").getSupportedLanguages();
 %>
 <div class="page-header" id="Message">
     <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
@@ -23,9 +21,6 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
       <li role="presentation" id="production-keys-tab"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
       <li role="presentation" id="sandbox-keys-tab"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
       <li role="presentation" id="subscriptions-tab"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
-      <% if (supportedLangs.langs != null) { %>
-      <li role="presentation"><a title="<%=i18n.localize("SDKs")%>"  href="#sdks" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("SDKs")%></a></li>
-      <% } %>
       <% } %>
     </ul>
 
@@ -108,35 +103,6 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
       <div role="tabpanel" class="tab-pane fade" id="subscription">      
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
-      <div role="tabpanel" class="tab-pane fade" id="sdks">
-
-        <%
-        var supportedLangs = jagg.module("subscription").getSupportedLanguages();
-
-        if (supportedLangs.langs != null) { %>
-
-            <div class="row">
-                  <div class="col-md-12"> <%=i18n.localize("Download client-side SDK for your applications.")%> </div>
-            </div>
-            <br>
-
-        <%  var langsArray = supportedLangs.langs.split(",");
-                for(var i = 0 ; i < langsArray.length ; i++ ) { %>
-                    <a href="/store/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSdk&selectedApp=<%=application.name%>&language=<%=langsArray[i]%>"
-                          class="btn btn-primary " type="button" title="sdk generation">
-                        <%=i18n.localize(langsArray[i],langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
-                    </a>
-        <%
-                }
-        } else  { %>
-        <div class="row">
-            <div class="col-md-12"> <%=i18n.localize("No SDK configured")%> </div>
-        </div>
-        <br>
-
-        <% }%>
-
-      </div>
       <% } %>      
     </div>
   </div>
@@ -145,6 +111,9 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
     var grant_types = <%= stringify(grant_types)%>;
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
+
+    var enjoyhint_instance = null;
+
     $(document).ready(function() {
 
       $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %>, grant_types: grant_types });
@@ -153,7 +122,16 @@ var supportedLangs = jagg.module("subscription").getSupportedLanguages();
       //activate a tab based on hash
       if(location.hash != undefined || location.hash !=""){
         $("a[href='"+location.hash+"']").tab("show");
-      }       
+      }
+
+        if (isEnjoyHintEnabled()) {
+            var prodKey = '<%=oauthapp.prodKey%>';
+            if(prodKey != undefined && prodKey != 'null'){
+                runEnjoyHintScript(enjoyhint_instance, re_generate_production_keys_data);
+            } else {
+                runEnjoyHintScript(enjoyhint_instance, generate_production_keys_data);
+            }
+        }
     });
   </script>
   <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>

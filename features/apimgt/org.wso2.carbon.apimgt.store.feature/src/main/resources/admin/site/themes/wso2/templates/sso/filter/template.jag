@@ -11,7 +11,7 @@
     encode = new encode.Encode();
 
 	var requestURI;
-	var requestedPage = encode.forUriComponent(request.getParameter("requestedPage"));
+	var requestedPage = request.getParameter("requestedPage");
 	if(requestedPage!=null && requestedPage != 'null'){
 	requestURI = requestedPage;
 	}else{
@@ -33,6 +33,15 @@
 	    ssoRelyingParty.setProperty("keyStorePassword", site.ssoConfiguration.keyStorePassword);
 	    ssoRelyingParty.setProperty("identityAlias",site.ssoConfiguration.identityAlias);
 	    ssoRelyingParty.setProperty("keyStoreName",site.ssoConfiguration.keyStoreName);
+		ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
+
+		// if it is IDP initiated SSO, we should just do a HTTP GET to IDP with SP ID and relay state optionally
+        if (site.ssoConfiguration.idpInit == "true") {
+            var relayState = ssoRelyingParty.getUUID();
+            ssoRelyingParty.setRelayStateProperty(relayState, requestURI);
+            response.sendRedirect(site.ssoConfiguration.idpInitSSOURL+"&RelayState="+ relayState);
+            return;
+        }
 
 	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);

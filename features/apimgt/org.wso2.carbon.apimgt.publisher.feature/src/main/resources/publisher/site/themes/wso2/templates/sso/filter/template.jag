@@ -44,9 +44,17 @@
         ssoRelyingParty.setProperty("keyStorePassword", String(site.ssoConfiguration.keyStorePassword));
         ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
         ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
-        ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
         ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
         ssoRelyingParty.setProperty("nameIdPolicy", String(site.ssoConfiguration.nameIdPolicy));
+        ssoRelyingParty.setProperty("assertionEncryptionEnabled", site.ssoConfiguration.assertionEncryptionEnabled);
+
+        // if it is IDP initiated SSO, we should just do a HTTP GET to IDP with SP ID and relay state optionally
+        if (site.ssoConfiguration.idpInit == "true") {
+            var relayState = ssoRelyingParty.getUUID();
+            ssoRelyingParty.setRelayStateProperty(relayState, requestURI);
+            response.sendRedirect(site.ssoConfiguration.idpInitSSOURL+"&RelayState="+ relayState);
+            return;
+        }
 
         var consumerUrl = "";
         //if acsURL is provided in site.json, consumerUrl will be taken from that. Otherwise not sent with the request.

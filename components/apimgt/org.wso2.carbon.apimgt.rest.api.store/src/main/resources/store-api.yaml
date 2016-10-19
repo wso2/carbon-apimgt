@@ -272,6 +272,55 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+#-----------------------------------------------------
+# Generate SDK for an API
+#-----------------------------------------------------
+  /apis/generate-sdk/:
+    post:
+      x-scope: apim:subscribe
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.10/apis/generate-sdk
+      x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/generate-sdk"
+      x-wso2-response: "HTTP/1.1 200 OK \n Content-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"  \n Date: Wed, 12 Oct 2016 11:10:49 GMT \n Content-Type: application/zip \n Transfer-Encoding: chunked \n Server: WSO2 Carbon Server"
+      summary: |
+        Generate SDK for an API
+      description: |
+        This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.
+      parameters:
+        - $ref: '#/parameters/apiId-Q'
+        - $ref: '#/parameters/language'
+        - $ref : '#/parameters/requestedTenant'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            SDK generated successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad request.
+            SDK language is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Document Collection" resource APIs
 ######################################################
@@ -421,6 +470,7 @@ paths:
           GET https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
         x-wso2-curl: "curl \"https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content\" > sample.pdf"
         x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
+
         summary: |
           Get the content of an API document
         description: |
@@ -1370,6 +1420,16 @@ parameters:
     required: true
     type: string
 
+# API Identifier
+# Specified as part of the path expression
+  language:
+    name: language
+    in: query
+    description: |
+      Programming language to generate SDK.
+    required: true
+    type: string
+
 
 # Document Identifier
 # Specified as part of the path expression
@@ -1387,7 +1447,7 @@ parameters:
     name: applicationId
     in: path
     description: |
-      **Application Identifier** consisting of the UUID of the Application.
+      Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
 
@@ -1397,7 +1457,7 @@ parameters:
     name: applicationId
     in: query
     description: |
-      **Application Identifier** consisting of the UUID of the Application.
+      Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
 
