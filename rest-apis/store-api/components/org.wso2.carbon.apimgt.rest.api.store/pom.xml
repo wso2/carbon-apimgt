@@ -240,25 +240,5 @@
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
-
-        <!-- OSGi Dependencies -->
-        <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
-        <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
-        <org.osgi.core.version>6.0.0</org.osgi.core.version>
-        <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
-        <checkstyle.skip>false</checkstyle.skip>
-        <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
-        <slf4j.logging.package.import.version.range>[1.7.0, 2.0.0)</slf4j.logging.package.import.version.range>
-        <osgi.framework.package.import.version.range>[1.8.0, 2.0.0)</osgi.framework.package.import.version.range>
-        <osgi.framework.console.package.import.version.range>[1.1.0, 2.0.0)
-        </osgi.framework.console.package.import.version.range>
-        <osgi.framework.javax.xml.bind.package.import.version.range>[0.0.0, 1.0.0)
-        </osgi.framework.javax.xml.bind.package.import.version.range>
-        <osgi.services.cm.package.import.version.range>[1.5.0, 2.0.0)</osgi.services.cm.package.import.version.range>
-        <equinox.osgi.services.package.import.version.range>[1.0.0, 2.0.0)
-        </equinox.osgi.services.package.import.version.range>
-        <osgi.service.tracker.package.import.version.range>[1.5.0, 2.0.0)
-        </osgi.service.tracker.package.import.version.range>
-        <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
     </properties>
 </project>
