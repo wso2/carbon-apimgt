@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt.indexing</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.indexing.parent</artifactId>
         <version>7.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
@@ -32,7 +32,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt.indexing</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.indexing.component</artifactId>
             <version>${parent.version}</version>
         </dependency>

@@ -3,31 +3,28 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.wso2.msf4j</groupId>
-        <artifactId>msf4j-service</artifactId>
-        <version>2.0.0</version>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>org.wso2.carbon.apimgt.rest.api.store.parent</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
-    <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
-    <name>API Publisher Micro Service</name>
-    <packaging>bundle</packaging>
-
+    <name>API Store Micro Service</name>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!--Uncomment the following if you want to enable metrics & monitoring -->
 
         <dependency>
             <groupId>org.wso2.msf4j</groupId>
-            <artifactId>msf4j-analytics</artifactId>
+            <artifactId>msf4j-core</artifactId>
+            <version>2.0.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>3.0.3</version>
         </dependency>
-
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -47,7 +44,41 @@
             <version>2.8.4</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-validator -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.2.4.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.datasources</groupId>
+            <artifactId>org.wso2.carbon.datasource.core</artifactId>
+            <version>${carbon.datasources.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>${equinox.osgi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi.services</artifactId>
+            <version>${equinox.osgi.services.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${org.osgi.core.version}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -94,24 +125,120 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifest>
                             <mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</mainClass>
                         </manifest>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>
+                            ${project.artifactId}
+                        </Bundle-SymbolicName>
+                        <Private-Package>
+                            org.wso2.carbon.apimgt.rest.api.store.internal
+                        </Private-Package>
+                        <Import-Package>
+                            org.eclipse.osgi.util,
+                            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+                            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
+                            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
+                            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
+                            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
+                            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
+                            com.zaxxer.hikari.*
+                        </Import-Package>
+                        <Export-Package>
+                            !org.wso2.carbon.apimgt.rest.api.store.internal,
+                            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shadeplugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>org.wso2.carbon.apimgt.rest.api.store-${carbon.apimgt.version}_standalone</finalName>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${microservice.mainClass}</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
+            <plugin><!-- Overridden from parent pom to exclude generated sources -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
+                            </configLocation>
+                            <suppressionsLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
+                            </suppressionsLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <!--Exclude generated sources-->
+                            <excludes>**/gen/**/*</excludes>
+                            <!--skip for generated resources-->
+                            <skip>true</skip>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
     </properties>
-
 </project>

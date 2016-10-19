@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>msf4j-service</artifactId>
-    <groupId>org.wso2.msf4j</groupId>
-    <version>2.0.0</version>
-    <relativePath>../pom.xml/pom.xml</relativePath>
+    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.parent</artifactId>
+    <groupId>org.wso2.carbon.apimgt</groupId>
+    <version>7.0.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-  <packaging>bundle</packaging>
   <name>API Publisher Micro Service</name>
-  <version>7.0.0-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
@@ -51,9 +48,61 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer>
+                  <mainClass>${microservice.mainClass}</mainClass>
+                </transformer>
+                <transformer />
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <configLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml</configLocation>
+              <suppressionsLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml</suppressionsLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              <excludes>**/gen/**/*</excludes>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <properties>
+    <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
     <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</microservice.mainClass>
   </properties>
 </project>

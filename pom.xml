@@ -41,6 +41,11 @@
         <tag>HEAD</tag>
     </scm>
 
+    <modules>
+        <module>indexing</module>
+        <module>rest-apis</module>
+    </modules>
+
     <pluginRepositories>
         <pluginRepository>
             <id>wso2-maven2-repository-1</id>
@@ -55,6 +60,21 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.datasources</groupId>
+                <artifactId>org.wso2.carbon.datasource.core</artifactId>
+                <version>${carbon.datasources.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -140,8 +160,10 @@
 
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
-        <carbon.kernel.package.import.version.range>[5.0.0, 6.0.0)
-        </carbon.kernel.package.import.version.range>
+        <carbon.kernel.package.import.version.range>[5.0.0, 6.0.0)</carbon.kernel.package.import.version.range>
+        <carbon.apimgt.version>7.0.0-SNAPSHOT</carbon.apimgt.version>
+
+        <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
         <carbon.gw.version>1.0.0-SNAPSHOT</carbon.gw.version>
         <carbon.gw.package.export.version>1.0.0</carbon.gw.package.export.version>
@@ -151,28 +173,29 @@
         <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
 
         <spring.framework.version>4.1.6.wso2v1</spring.framework.version>
-        <spring.framework.package.import.version.range>[4.1.6, 4.2.0)
-        </spring.framework.package.import.version.range>
+        <spring.framework.package.import.version.range>[4.1.6, 4.2.0)</spring.framework.package.import.version.range>
 
 
         <slf4j.version>1.7.5</slf4j.version>
-        <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)
-        </slf4j.logging.package.import.version.range>
+        <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
 
         <carbon.transport.version>2.1.9-SNAPSHOT</carbon.transport.version>
-        <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)
-        </carbon.transport.package.import.version.range>
+        <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)</carbon.transport.package.import.version.range>
 
         <carbon.messaging.version>1.0.8-SNAPSHOT</carbon.messaging.version>
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
 
-        <carbon.messaging.package.import.version.range>[0.0.0, 2.0.0)
-        </carbon.messaging.package.import.version.range>
+        <carbon.messaging.package.import.version.range>[0.0.0, 2.0.0)</carbon.messaging.package.import.version.range>
 
         <osgi.framework.import.version.range>[1.8.0, 2.0.0)</osgi.framework.import.version.range>
-        <osgi.service.tracker.import.version.range>[1.5.1, 2.0.0)
-        </osgi.service.tracker.import.version.range>
+        <osgi.service.tracker.import.version.range>[1.5.1, 2.0.0)</osgi.service.tracker.import.version.range>
+        <osgi.framework.package.import.version.range>[1.8.0, 2.0.0)</osgi.framework.package.import.version.range>
+        <osgi.framework.console.package.import.version.range>[1.1.0, 2.0.0)</osgi.framework.console.package.import.version.range>
+        <osgi.framework.javax.xml.bind.package.import.version.range>[0.0.0, 1.0.0)</osgi.framework.javax.xml.bind.package.import.version.range>
+        <osgi.services.cm.package.import.version.range>[1.5.0, 2.0.0)</osgi.services.cm.package.import.version.range>
+        <equinox.osgi.services.package.import.version.range>[1.0.0, 2.0.0)</equinox.osgi.services.package.import.version.range>
+        <osgi.service.tracker.package.import.version.range>[1.5.0, 2.0.0)</osgi.service.tracker.package.import.version.range>
         <carbon.p2.plugin.version>1.5.4</carbon.p2.plugin.version>
         <carbon.feature.plugin.version>2.0.0</carbon.feature.plugin.version>
 
@@ -197,11 +220,14 @@
         <testng.version>6.9.10</testng.version>
         <org.wso2.orbit.org.apache.solr.version>5.2.1.wso2v1</org.wso2.orbit.org.apache.solr.version>
         <org.wso2.orbit.org.apache.solr.import.version>[5.2.1,5.3.0)</org.wso2.orbit.org.apache.solr.import.version>
+        <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
+
+        <org.osgi.core.version>6.0.0</org.osgi.core.version>
+        <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
+        <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
+
+        <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
 
     </properties>
 
-    <modules>
-        <module>indexing</module>
-        <module>rest-apis</module>
-    </modules>
 </project>
