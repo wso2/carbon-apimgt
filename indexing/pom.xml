@@ -28,7 +28,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>WSO2 API Manager Indexing</name>
-    <groupId>org.wso2.carbon.apimgt.indexing</groupId>
     <artifactId>org.wso2.carbon.apimgt.indexing.parent</artifactId>
     <packaging>pom</packaging>
     <url>http://wso2.org</url>
