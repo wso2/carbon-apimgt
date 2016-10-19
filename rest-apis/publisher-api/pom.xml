@@ -12,6 +12,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.parent</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>components/org.wso2.carbon.apimgt.rest.api.publisher</module>
         <module>features/org.wso2.carbon.apimgt.rest.api.publisher.feature</module>

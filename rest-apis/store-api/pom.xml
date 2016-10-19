@@ -11,6 +11,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.rest.api.store.parent</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>components/org.wso2.carbon.apimgt.rest.api.store</module>
         <module>features/org.wso2.carbon.apimgt.rest.api.store.feature</module>
