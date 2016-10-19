@@ -1304,8 +1304,20 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public List<String> getNamesWithContext(String context) throws APIManagementException {
-        return apiMgtDAO.getApiNames(context);
+    public List<String> getApiNamesMatchingContextTemplate(String contextTemplate) throws APIManagementException {
+        return apiMgtDAO.getAPINamesMatchingContext(contextTemplate);
+    }
+
+    /**
+     * Returns a list of api versions that matches the given context template
+     *
+     * @param apiName api name in the payload
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    @Override
+    public List<String> getApiVersionsMatchingApiName(String apiName) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName);
     }
 
     public Policy[] getPolicies(String username, String level) throws APIManagementException {

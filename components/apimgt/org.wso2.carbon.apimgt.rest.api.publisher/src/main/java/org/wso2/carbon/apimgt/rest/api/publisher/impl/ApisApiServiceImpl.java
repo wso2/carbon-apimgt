@@ -122,20 +122,50 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Create new API
      *
-     * @param body DTO model of new API to be created
+     * @param body        DTO model of new API to be created
      * @param contentType content type of the payload
      * @return created API
      */
     @Override
-    public Response apisPost(APIDTO body,String contentType){
+    public Response apisPost(APIDTO body, String contentType) {
 
         URI createdApiUri;
-        APIDTO  createdApiDTO;
+        APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
 
-            //changed
+            if (body.getContext().endsWith("/")) {
+                RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
+            }
+
+            //Get all existing versions of  api been adding
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName());
+            if (apiVersions.size() > 0) {
+                //If any previous version exists
+                for (String version : apiVersions) {
+                    if (version.equalsIgnoreCase(body.getVersion())) {
+                        //If version already exists
+                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
+                                    "adding the API. A duplicate API already exists for "
+                                    + body.getName() + "-" + body.getVersion(), log);
+                        } else {
+                            return Response.status(Response.Status.BAD_REQUEST).
+                                    entity("Error occurred while adding API. API with name " +
+                                            body.getName() + (" already exists with different " +
+                                            "context").toString()).build();
+                        }
+                    }
+                }
+            } else {
+                //If no any previous version exists
+                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    return Response.status(Response.Status.BAD_REQUEST).
+                            entity(("Error occurred while adding the API. A duplicate API context " +
+                                    "already exists for " + body.getContext()).toString()).build();
+                }
+            }
 
             //check if the user has admin permission before applying a different provider than the current user
             String provider = body.getProvider();
@@ -143,8 +173,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                     if (log.isDebugEnabled()) {
                         log.debug("User " + username + " does not have admin permission ("
-                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
-                                + ") overridden with current user (" + username + ")");
+                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
+                                provider + ") overridden with current user (" + username + ")");
                     }
                     provider = username;
                 }
@@ -153,47 +183,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                 provider = username;
             }
 
-            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
-
-            if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
-                                .getApiName() + "-" + apiToAdd.getId().getVersion(), log);
-            }
-
-            if (body.getContext().endsWith("/")) {
-                RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
-            }
-
-            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                System.out.println("@@@@@@@@@@@@@@@@@@@@     context is "+body.getContext());
-                List<String> apiNameList = apiProvider.getNamesWithContext(body.getContext());
-
-                if(apiNameList!=null){
-                    for (String apiName:apiNameList) {
-                        System.out.println("############  api name is "+apiName);
-                    }
-                }
-//                RestApiUtil.handleResourceAlreadyExistsError(
-//                        "Error occurred while adding the API. A duplicate API context already exists for " + body
-//                                .getContext(), log);
-            }
-
-
-
-            //end of modification
-
-//            if (body.getContext().endsWith("/")) {
-//                RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
-//            }
-//            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-//                RestApiUtil.handleResourceAlreadyExistsError(
-//                        "Error occurred while adding the API. A duplicate API context already exists for " + body
-//                                .getContext(), log);
-//            }
             List<String> tiersFromDTO = body.getTiers();
             //If tiers are not defined, the api should be a PROTOTYPED one,
-            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) && 
+            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) &&
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
@@ -202,31 +194,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
             if (invalidTiers.size() > 0) {
                 RestApiUtil.handleBadRequest(
-                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) +
+                                " are invalid", log);
             }
 
-//            //check if the user has admin permission before applying a different provider than the current user
-//            String provider = body.getProvider();
-//            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-//                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
-//                    if (log.isDebugEnabled()) {
-//                        log.debug("User " + username + " does not have admin permission ("
-//                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
-//                                + ") overridden with current user (" + username + ")");
-//                    }
-//                    provider = username;
-//                }
-//            } else {
-//                //set username in case provider is null or empty
-//                provider = username;
-//            }
-//            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
-//
-//            if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
-//                RestApiUtil.handleResourceAlreadyExistsError(
-//                        "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
-//                                .getApiName() + "-" + apiToAdd.getId().getVersion(), log);
-//            }
+            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
             //Overriding some properties:
             //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
             if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
@@ -248,12 +220,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
-                                  body.getName() + "-" + body.getVersion();
+                    body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
-                                  body.getName() + "-" + body.getVersion();
+                    body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
