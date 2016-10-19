@@ -167,7 +167,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            //check if the user has admin permission before applying a different provider than the current user
+            //Check if the user has admin permission before applying a different provider than the current user
             String provider = body.getProvider();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
                 if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
@@ -179,7 +179,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     provider = username;
                 }
             } else {
-                //set username in case provider is null or empty
+                //Set username in case provider is null or empty
                 provider = username;
             }
 
@@ -189,7 +189,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
-            //check whether the added API's tiers are all valid
+            //Check whether the added API's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
             if (invalidTiers.size() > 0) {
@@ -200,15 +200,15 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
             //Overriding some properties:
-            //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
+            //Only allow CREATED as the stating state for the new api if not status is PROTOTYPED
             if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
                 apiToAdd.setStatus(APIStatus.CREATED);
             }
-            //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
+            //We are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(provider);
 
-            //adding the api
+            //Adding the api
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
             APIIdentifier createdApiId = apiToAdd.getId();
