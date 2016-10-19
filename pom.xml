@@ -41,6 +41,11 @@
         <tag>HEAD</tag>
     </scm>
 
+    <modules>
+        <module>indexing</module>
+        <module>rest-apis</module>
+    </modules>
+
     <pluginRepositories>
         <pluginRepository>
             <id>wso2-maven2-repository-1</id>
@@ -204,8 +209,4 @@
 
     </properties>
 
-    <modules>
-        <module>indexing</module>
-        <module>rest-apis</module>
-    </modules>
 </project>
