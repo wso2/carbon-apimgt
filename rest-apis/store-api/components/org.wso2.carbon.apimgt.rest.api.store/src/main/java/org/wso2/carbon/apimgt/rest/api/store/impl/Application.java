@@ -25,10 +25,10 @@ import org.wso2.msf4j.MicroservicesRunner;
  */
 public class Application {
     public static void main(String[] args) {
-        new MicroservicesRunner()
-                .deploy(new ApisApi())
+        new MicroservicesRunner(8080,8081)
+                .deploy(new ApisApi()).deploy(new ApplicationsApi())
                 .start();
-        /*new MicroservicesRunner()
+        /*new MicroservicesRunner(8081)
         .deploy(new ApplicationsApi())
         .start();
         new MicroservicesRunner()
