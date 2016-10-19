@@ -2641,8 +2641,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		registry.delete(apiProviderPath);
             	}
             }
-            
+            cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
+            /*
             WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
   
@@ -2651,7 +2652,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
                 apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
             }
-            
+            */
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
@@ -4663,4 +4664,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return wfDTO;
     }
 
+    public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
+        int apiId;
+        try {
+            apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+            cleanUpPendingAPIStateChangeTask(apiId);
+        } catch (APIManagementException e) {
+            handleException("Error while deleting the workflow task.", e);
+        } catch (WorkflowException e) {
+            handleException("Error while deleting the workflow task.", e);
+        }     
+        
+    }
+    
+    private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException{
+        //Run cleanup task for workflow
+        WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
+                getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
+            apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+        }
+    }
 }

@@ -295,6 +295,12 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             log.debug("Starting cleanup task for APIStateChangeWSWorkflowExecutor for :" + workflowExtRef);
         }
         String errorMsg;
+        if (serviceEndpoint == null) {
+            // set the bps endpoint from the global configurations
+            WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration().getWorkflowProperties();
+            serviceEndpoint = workflowProperties.getServerUrl();
+        }
         URL serviceEndpointURL = new URL(serviceEndpoint);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
 
@@ -349,6 +355,8 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                 log.error(errorMsg);
                 throw new WorkflowException(errorMsg);
             }
+            
+            
         } catch (ClientProtocolException e) {
             log.error("Error while creating the http client", e);
             throw new WorkflowException("Error while creating the http client", e);
@@ -498,7 +506,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             try {
                 HttpResponse response = httpClient.execute(httpPost);
                 HttpEntity entity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     String error = "Error while starting the process:  " + response.getStatusLine().getStatusCode()
                             + " " + response.getStatusLine().getReasonPhrase();
                     log.error(error);

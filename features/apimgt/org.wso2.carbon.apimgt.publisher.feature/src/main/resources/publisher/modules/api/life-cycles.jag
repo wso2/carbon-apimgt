@@ -176,4 +176,23 @@ var getAPILCWorkflowStatus = function(apiData) {
     }
 };
 
+var deleteWorkflowTask = function(apiData) {
+    var provider=APIUtil.replaceEmailDomain(apiData.provider);
+    var apiIdentifierObj = APIIdentifier(provider, apiData.name, apiData.version);
+
+    try{
+        var result=APIManagerFactory.getInstance().getAPIProvider(user).deleteWorkflowTask(apiIdentifierObj);
+        return {
+            error: false
+        }
+    } catch (e) {
+        log.error(e);
+        return {
+            error: true,
+            message: e.message.split(":")[1]
+        }
+    }
+    
+
+}
 %>

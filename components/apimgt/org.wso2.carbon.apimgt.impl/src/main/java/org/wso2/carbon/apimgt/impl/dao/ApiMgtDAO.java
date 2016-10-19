@@ -7002,6 +7002,34 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Remove workflow entry
+     * 
+     * @param workflowReference
+     * @param workflowType
+     * @throws APIManagementException
+     */
+    public void removeWorkflowEntry(String workflowReference, String workflowType) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String queryWorkflowDelete = SQLConstants.REMOVE_WORKFLOW_ENTRY_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(queryWorkflowDelete);
+            prepStmt.setString(1, workflowType);
+            prepStmt.setString(2, workflowReference);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting workflow entry " + workflowReference + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+    
+    /**
      * Retries the WorkflowExternalReference for a subscription.
      *
      * @param identifier APIIdentifier to find the subscribed api

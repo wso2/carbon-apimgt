@@ -1823,6 +1823,9 @@ public class SQLConstants {
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_SQL =
             "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
+    
+    public static final String REMOVE_WORKFLOW_ENTRY_SQL =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL =
             "SELECT " +

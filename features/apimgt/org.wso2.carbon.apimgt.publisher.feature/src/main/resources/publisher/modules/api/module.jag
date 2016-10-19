@@ -161,6 +161,9 @@ jagg.module("api", {
     },
     getAPILCWorkflowStatus:function () {
         return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").getAPILCWorkflowStatus.apply(this, arguments);
+    },
+    deleteWorkflowTask:function () {
+        return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").deleteWorkflowTask.apply(this, arguments);
     }
 });
 %>

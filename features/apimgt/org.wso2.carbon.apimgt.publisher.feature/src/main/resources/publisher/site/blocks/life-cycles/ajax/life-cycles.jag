@@ -138,7 +138,27 @@ if(jagg.isCSRFTokenValid())
             }
             print(obj);
 
-    }else {
+    } else if (action === "deleteTask") {
+            mod = jagg.module("api");
+            var apiData = {};
+            apiData.provider= request.getParameter("provider");
+            apiData.name = request.getParameter("name");
+            apiData.version = request.getParameter("version");
+            var log = new Log()
+            log.info("============ " + JSON.stringify(apiData))
+            result = mod.deleteWorkflowTask(apiData); 
+            
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = result;
+            }
+            print(obj);
+
+    } else {
         print({
                   error:true,
                   message:msg.error.invalidAction(action)
