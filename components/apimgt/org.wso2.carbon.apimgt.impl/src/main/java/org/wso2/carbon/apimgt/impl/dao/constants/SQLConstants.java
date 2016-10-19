@@ -1521,9 +1521,11 @@ public class SQLConstants {
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +
             " VALUES (?,?,?,?,?,?,?,?)";
+
     public static final String ADD_API_ENVIRONMENTS_SQL = " INSERT INTO AM_API_ENVIRONMENTS (ENVIRONMENT_NAME," +
             "API_ID, HTTP_URL,HTTPS_URL,APPEND_CONTEXT)" +
             " VALUES (?,?,?,?,?)";
+
     public static final String REMOVE_API_ENVIRONMENTS_SQL = "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
 
     public static final String GET_API_ENVIRONMENTS_SQL =
@@ -1664,6 +1666,7 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 
@@ -1687,9 +1690,6 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
-
-    public static final String REMOVE_FROM_API_ENVIRONMENTS_SQL =
-            "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ?";
 
     public static final String REMOVE_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
