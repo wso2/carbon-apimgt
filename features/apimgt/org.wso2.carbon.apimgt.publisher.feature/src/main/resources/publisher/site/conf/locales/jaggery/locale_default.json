@@ -527,6 +527,7 @@
     "tierPermissions": "tierPermissions",
     "tiers": "tiers",
     "user": "user",
-    "approval waiting topic":"Waiting for approval",
-    "approval waiting message":"Your request has been submitted and is now awaiting approval."
+    "approval waiting topic":"Pending lifecycle state change",
+    "approval waiting message":"Lifecycle state change request has been submitted.",
+    "Delete Task" : "Delete Task"
 }

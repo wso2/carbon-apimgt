@@ -144,8 +144,6 @@ if(jagg.isCSRFTokenValid())
             apiData.provider= request.getParameter("provider");
             apiData.name = request.getParameter("name");
             apiData.version = request.getParameter("version");
-            var log = new Log()
-            log.info("============ " + JSON.stringify(apiData))
             result = mod.deleteWorkflowTask(apiData); 
             
             if (result.error==true) {

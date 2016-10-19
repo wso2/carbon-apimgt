@@ -3698,7 +3698,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
                         apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
                         apiStateWorkflow.setInvoker(this.username);
-                        String workflowDescription = "Waiting approval for state change action: " + action;
+                        String workflowDescription = "Pending lifecycle state change action: " + action;
                         apiStateWorkflow.setWorkflowDescription(workflowDescription);
 
                         apiStateWFExecutor.execute(apiStateWorkflow);

@@ -208,9 +208,9 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                     <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
      </div>  
      <div id="deletePendingTasks">
-                <a onclick="deletePendingTasks('<%=api.name%>', '<%=api.version%>', '<%=api.provider%>')" href="#" title="<%=i18n.localize("Add New Document")%>" class="btn btn-primary  btn-sm padding-reduce-on-grid-view">
-                    <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("Add New Document")%>"></i>
-                    <%=i18n.localize("Add New Document")%>
+                <a onclick="deletePendingTasks('<%=api.name%>', '<%=api.version%>', '<%=api.provider%>')" href="#" title="<%=i18n.localize("Delete Task")%>" class="btn btn-primary  btn-sm padding-reduce-on-grid-view">
+                    <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("Delete Task")%>"></i>
+                    <%=i18n.localize("Delete Task")%>
                 </a>
     </div>
   <% }else {%>   

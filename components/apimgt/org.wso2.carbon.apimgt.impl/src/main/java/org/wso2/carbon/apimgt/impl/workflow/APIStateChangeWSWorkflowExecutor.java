@@ -347,8 +347,11 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully deleted process instance for  : " + workflowExtRef);
                     }
+                    //remove entry from the db
+                    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                    apiMgtDAO.removeWorkflowEntry(workflowExtRef, WorkflowConstants.WF_TYPE_AM_API_STATE.toString());
                 }
-
+                
             } else {
                 errorMsg = "Error while getting process instance details for " + workflowExtRef + " code: "
                         + response.getStatusLine().getStatusCode();
@@ -366,6 +369,9 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
         } catch (ParseException e) {
             log.error("Error while parsing response from BPS server", e);
             throw new WorkflowException("Error while parsing response from BPS server", e);
+        } catch (APIManagementException e) {
+            log.error("Error removing the workflow entry", e);
+            throw new WorkflowException("Error removing the workflow entry", e);            
         } finally {
             if (httpGet != null) {
                 httpGet.reset();
