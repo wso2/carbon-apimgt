@@ -10,7 +10,7 @@
   </parent>
   <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
   <name>API Publisher Micro Service</name>
-<packaging>jar</packaging>
+<packaging>bundle</packaging>
 
     <dependencies>
         <!--Uncomment the following if you want to enable metrics & monitoring -->
@@ -62,6 +62,37 @@
             <version>5.2.4.Final</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.wso2.carbon.datasources</groupId>
+            <artifactId>org.wso2.carbon.datasource.core</artifactId>
+            <version>${carbon.datasources.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>${equinox.osgi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi.services</artifactId>
+            <version>${equinox.osgi.services.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${org.osgi.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ws.wso2</groupId>
+            <artifactId>spring.framework</artifactId>
+            <version>3.2.9.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-core</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
     </dependencies>
     <build>
 
@@ -101,79 +132,85 @@
                 <manifest>
                     <mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</mainClass>
                 </manifest>
-                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
             </archive>
         </configuration>
     </plugin>
-    <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <executions>
-            <execution>
-                <id>bundle-manifest</id>
-                <phase>process-classes</phase>
-                <goals>
-                    <goal>manifest</goal>
-                </goals>
-            </execution>
-        </executions>
-        <configuration>
-            <instructions>
-                <Bundle-SymbolicName>
-                    ${project.artifactId}
-                </Bundle-SymbolicName>
-                <Private-Package>
-                    org.wso2.carbon.apimgt.rest.api.store.internal
-                </Private-Package>
-                <Import-Package>
-                    org.eclipse.osgi.util,
-                    org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-                    org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
-                    org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
-                    org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
-                    org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
-                    org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
-                    com.zaxxer.hikari.*
-                </Import-Package>
-                <Export-Package>
-                    !org.wso2.carbon.apimgt.rest.api.store.internal,
-                    org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
-                </Export-Package>
-            </instructions>
-        </configuration>
-    </plugin>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>${maven.shadeplugin.version}</version>
-        <executions>
-            <execution>
-                <phase>package</phase>
-                <goals>
-                    <goal>shade</goal>
-                </goals>
-                <configuration>
-                    <finalName>org.wso2.carbon.apimgt.rest.api.publisher-${carbon.apimgt.version}_standalone</finalName>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>${microservice.mainClass}</mainClass>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    </transformers>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
+    <!--<plugin>-->
+        <!--<groupId>org.apache.felix</groupId>-->
+        <!--<artifactId>maven-bundle-plugin</artifactId>-->
+        <!--<executions>-->
+            <!--<execution>-->
+                <!--<id>bundle-manifest</id>-->
+                <!--<phase>process-classes</phase>-->
+                <!--<goals>-->
+                    <!--<goal>manifest</goal>-->
+                <!--</goals>-->
+            <!--</execution>-->
+        <!--</executions>-->
+        <!--<configuration>-->
+            <!--<instructions>-->
+                <!--<Bundle-SymbolicName>-->
+                    <!--${project.artifactId}-->
+                <!--</Bundle-SymbolicName>-->
+                <!--<Private-Package>-->
+                    <!--org.wso2.carbon.apimgt.rest.api.store.internal-->
+                <!--</Private-Package>-->
+                <!--<Import-Package>-->
+                    <!--org.eclipse.osgi.util,-->
+                    <!--org.slf4j.*;version="${slf4j.logging.package.import.version.range}",-->
+                    <!--org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",-->
+                    <!--org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",-->
+                    <!--org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",-->
+                    <!--org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",-->
+                    <!--org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",-->
+                    <!--com.zaxxer.hikari.*,-->
+                    <!--org.wso2.msf4j.*; version="2.0.0";-->
+                    <!--*;resolution:=optional-->
+                <!--</Import-Package>-->
+                <!--<Export-Package>-->
+                    <!--!org.wso2.carbon.apimgt.rest.api.store.internal,-->
+                    <!--org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",-->
+                <!--</Export-Package>-->
+                <!--<carbon.component>-->
+                    <!--osgi.service; objectClass="org.wso2.msf4j.Microservice"-->
+                <!--</carbon.component>-->
+                <!--<DynamicImport-Package>*</DynamicImport-Package>-->
+            <!--</instructions>-->
+        <!--</configuration>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-shade-plugin</artifactId>-->
+        <!--<version>${maven.shadeplugin.version}</version>-->
+        <!--<executions>-->
+            <!--<execution>-->
+                <!--<phase>package</phase>-->
+                <!--<goals>-->
+                    <!--<goal>shade</goal>-->
+                <!--</goals>-->
+                <!--<configuration>-->
+                    <!--<finalName>org.wso2.carbon.apimgt.rest.api.publisher-${carbon.apimgt.version}_standalone</finalName>-->
+                    <!--<filters>-->
+                        <!--<filter>-->
+                            <!--<artifact>*:*</artifact>-->
+                            <!--<excludes>-->
+                                <!--<exclude>META-INF/*.SF</exclude>-->
+                                <!--<exclude>META-INF/*.DSA</exclude>-->
+                                <!--<exclude>META-INF/*.RSA</exclude>-->
+                            <!--</excludes>-->
+                        <!--</filter>-->
+                    <!--</filters>-->
+                    <!--<transformers>-->
+                        <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+                            <!--<mainClass>${microservice.mainClass}</mainClass>-->
+                        <!--</transformer>-->
+                        <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />-->
+                    <!--</transformers>-->
+                <!--</configuration>-->
+            <!--</execution>-->
+        <!--</executions>-->
+    <!--</plugin>-->
 
     <plugin><!-- Overridden from parent pom to exclude generated sources -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -209,6 +246,29 @@
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</microservice.mainClass>
+        <private.package>
+            org.wso2.carbon.apimgt.rest.api.store.internal
+        </private.package>
+        <import.package>
+            org.eclipse.osgi.util,
+            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
+            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
+            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
+            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
+            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
+            com.zaxxer.hikari.*,
+            org.wso2.msf4j.*; version="2.0.0";
+            *;resolution:=optional
+        </import.package>
+        <export.package>
+            !org.wso2.carbon.apimgt.rest.api.store.internal,
+            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
+        </export.package>
+        <carbon.component>
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"
+        </carbon.component>
+        <dynamic.import.package>*</dynamic.import.package>
     </properties>
 
 </project>
