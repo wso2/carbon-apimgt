@@ -44,6 +44,7 @@
     <modules>
         <module>indexing</module>
         <module>rest-apis</module>
+        <module>components/apimgt</module>
     </modules>
 
     <pluginRepositories>
