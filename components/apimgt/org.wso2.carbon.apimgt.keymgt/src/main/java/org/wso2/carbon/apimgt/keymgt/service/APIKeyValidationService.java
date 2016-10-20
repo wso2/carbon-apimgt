@@ -260,9 +260,10 @@ public class APIKeyValidationService extends AbstractAdmin {
 
 	/**
      * validate access token for websocket handshake
-     * @param context
-     * @param version
-     * @param accessToken
+     *
+     * @param context context of the API
+     * @param version version of the API
+     * @param accessToken access token of the request
      * @return api information
      * @throws APIKeyMgtException
      * @throws APIManagementException
@@ -281,6 +282,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         boolean state = keyValidationHandler.validateToken(validationContext);
         if (state) {
             info.setAuthorized(true);
+            info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
             info = validateSubscriptionDetails(info, validationContext.getContext(),validationContext.getVersion(),validationContext.getTokenInfo().getConsumerKey());
         }
         return info;
@@ -366,16 +368,16 @@ public class APIKeyValidationService extends AbstractAdmin {
                     return infoDTO;
                 }
 
-                String apiProvider = rs.getString("API_PROVIDER");
-                String subTier = rs.getString("TIER_ID");
-                String appTier = rs.getString("APPLICATION_TIER");
-                infoDTO.setTier(subTier);
+                final String API_PROVIDER = rs.getString("API_PROVIDER");
+                final String SUB_TIER = rs.getString("TIER_ID");
+                final String APP_TIER = rs.getString("APPLICATION_TIER");
+                infoDTO.setTier(SUB_TIER);
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
                 infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
                 infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setApiPublisher(apiProvider);
+                infoDTO.setApiPublisher(API_PROVIDER);
                 infoDTO.setApplicationName(rs.getString("NAME"));
-                infoDTO.setApplicationTier(appTier);
+                infoDTO.setApplicationTier(APP_TIER);
                 infoDTO.setType(type);
 
                 //Advanced Level Throttling Related Properties
@@ -385,9 +387,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                     String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
                     int apiId = rs.getInt("API_ID");
                     int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                    int apiTenantId = APIUtil.getTenantId(apiProvider);
+                    int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
                     //TODO isContentAware
-                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, appTier, subTier, subscriberTenantId, apiTenantId, apiId);
+                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER, subscriberTenantId, apiTenantId, apiId);
                     infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
