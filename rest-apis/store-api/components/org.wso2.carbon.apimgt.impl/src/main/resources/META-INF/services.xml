@@ -1,0 +1,35 @@
+<!--
+ ~ Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~
+ ~ WSO2 Inc. licenses this file to you under the Apache License,
+ ~ Version 2.0 (the "License"); you may not use this file except
+ ~ in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~    http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing,
+ ~ software distributed under the License is distributed on an
+ ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~ KIND, either express or implied.  See the License for the
+ ~ specific language governing permissions and limitations
+ ~ under the License.
+ -->
+<serviceGroup>
+    <service name="TierCacheService" scope="transportsession">
+        <transports><transport>https</transport></transports>
+        <description>Exposes the Tier Cache as a service</description>
+        <parameter name="ServiceClass">org.wso2.carbon.apimgt.impl.service.TierCacheService</parameter>
+        <parameter name="DoAuthentication" locked="true">true</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+    </service>
+    <service name="RegistryCacheInvalidationService" scope="transportsession">
+        <transports><transport>https</transport></transports>
+        <description>Exposes the registry cache invalidation as a service</description>
+        <parameter name="ServiceClass">org.wso2.carbon.apimgt.impl.service.RegistryCacheInvalidationService</parameter>
+        <parameter name="DoAuthentication" locked="true">true</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+    </service>
+    <parameter name="adminService" locked="true">true</parameter>
+    <parameter name="hiddenService" locked="true">true</parameter>
+</serviceGroup>
