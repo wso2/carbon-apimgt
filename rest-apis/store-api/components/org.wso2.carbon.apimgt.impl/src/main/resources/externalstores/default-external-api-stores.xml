@@ -1,0 +1,18 @@
+<ExternalAPIStores>
+
+	<!--Configuration to set the store URL of the current running APIM deployment. 
+	APIs published to external stores will be redirected to this URL-->
+	
+	<!-- <StoreURL>http://localhost:9763/store</StoreURL>
+
+        <ExternalAPIStore id="Store2" type="wso2" className="org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher">
+            <DisplayName>Store1</DisplayName>
+            <Endpoint>http://localhost:9763/store</Endpoint>
+            <Username>xxxx</Username>
+            <Password>xxxx</Password>
+        </ExternalAPIStore>
+	-->
+
+</ExternalAPIStores>
+
+
