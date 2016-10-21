@@ -30,14 +30,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>apimgt</artifactId>
+    <artifactId>apimgt-feature</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>org.wso2.carbon.apimgt.models</module>
-        <module>org.wso2.carbon.apimgt.dao</module>
-        <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
-        <module>org.wso2.carbon.apimgt.rest.api.store</module>
-        <module>org.wso2.carbon.apimgt.rest.api.util</module>
+        <module>org.wso2.carbon.apimgt.rest.api.publisher.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
     </modules>
 
 
