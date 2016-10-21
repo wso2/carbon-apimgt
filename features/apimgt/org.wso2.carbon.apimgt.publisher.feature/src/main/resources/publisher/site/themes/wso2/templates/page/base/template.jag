@@ -104,7 +104,7 @@ var user = jagg.getUser();
 	                </span>
 	                     		
 								<span class="hidden-xs">
-								Go to <%=i18n.localize("Go to APIStore")%>
+									<%=i18n.localize("Go to APIStore")%>
 								</span>
 	                     	</a>
 	                
