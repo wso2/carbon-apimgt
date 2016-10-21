@@ -28,6 +28,9 @@ import org.wso2.carbon.apimgt.dao.ApiDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Constructs DB vendor specific DAO implementations in a transparent manner.
+ */
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 
@@ -47,7 +50,7 @@ public class DAOFactory {
 
             } else if (driverName.contains("Oracle")) {
 
-            }else{
+            } else {
                 DAOUtil.handleException("Unhandled DB Type detected");
             }
         } catch (SQLException e) {

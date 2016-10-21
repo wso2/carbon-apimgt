@@ -25,14 +25,24 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.dao.APIManagementDAOException;
-import org.wso2.carbon.apimgt.dao.internal.ServiceReferenceHolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-
-class DAOUtil {
+/**
+ * Provides Utility functionality required by the DAO layer
+ */
+public class DAOUtil {
     private static final Logger log = LoggerFactory.getLogger(DAOUtil.class);
+    private static HikariDataSource dataSource;
+
+    public static synchronized void initialize(HikariDataSource dataSource) {
+        if (DAOUtil.dataSource != null) {
+            return;
+        }
+
+        DAOUtil.dataSource = dataSource;
+    }
 
     /**
      * Utility method to get a new database connection
@@ -42,8 +52,6 @@ class DAOUtil {
      */
 
     static Connection getConnection() throws SQLException {
-        HikariDataSource dataSource = ServiceReferenceHolder.getInstance().getDataSource();
-
         if (dataSource != null) {
             return dataSource.getConnection();
         }
