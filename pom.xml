@@ -42,7 +42,6 @@
     </scm>
 
     <modules>
-        <module>indexing</module>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
         <module>lcm</module>
