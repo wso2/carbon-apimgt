@@ -8352,36 +8352,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * retrieve list of API names which matches given context
-     * @param contextTemplate context template
-     * @return list of API names
-     * @throws APIManagementException
-     */
-    public List<String> getAPINamesMatchingContext(String contextTemplate) throws APIManagementException {
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        List<String> nameList=new ArrayList<String>();
-
-        String sqlQuery = SQLConstants.GET_API_NAMES_MATCHES_CONTEXT_TEMPLATE_SQL;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, contextTemplate);
-
-            resultSet = ps.executeQuery();
-            while(resultSet.next()){
-                nameList.add(resultSet.getString("API_NAME"));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get API names matches context " + contextTemplate, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return nameList;
-    }
-
-    /**
      * Retrieve list of API versions that matches given API name
      *
      * @param apiName name of the api

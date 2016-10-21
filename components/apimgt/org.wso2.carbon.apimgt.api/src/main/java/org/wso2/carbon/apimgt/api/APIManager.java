@@ -422,14 +422,6 @@ public interface APIManager {
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 
     /**
-     * get a set of API names that matches given context template
-     * @param contextTemplate context template in the payload
-     * @return list of API names matches the context
-     * @throws APIManagementException
-     */
-    List<String> getApiNamesMatchingContextTemplate(String contextTemplate) throws APIManagementException;
-
-    /**
      * Returns a list of api versions that matches the given context template
      *
      * @param apiName api name in the payload

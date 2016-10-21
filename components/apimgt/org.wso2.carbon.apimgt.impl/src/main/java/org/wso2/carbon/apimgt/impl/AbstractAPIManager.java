@@ -1303,11 +1303,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
-    @Override
-    public List<String> getApiNamesMatchingContextTemplate(String contextTemplate) throws APIManagementException {
-        return apiMgtDAO.getAPINamesMatchingContext(contextTemplate);
-    }
-
     /**
      * Returns a list of api versions that matches the given context template
      *
