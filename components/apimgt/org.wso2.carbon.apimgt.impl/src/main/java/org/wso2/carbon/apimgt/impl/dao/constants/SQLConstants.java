@@ -1685,6 +1685,9 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
+    public static final String REMOVE_FROM_API_ENVIRONMENTS_SQL =
+            "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ?";
+
     public static final String REMOVE_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
     public static final String REVOKE_ACCESS_TOKEN_SUFFIX =
