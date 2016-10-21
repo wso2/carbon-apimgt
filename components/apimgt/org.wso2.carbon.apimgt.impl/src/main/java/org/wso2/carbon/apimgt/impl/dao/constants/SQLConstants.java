@@ -45,12 +45,6 @@ public class SQLConstants {
             "   AND APP.APPLICATION_ID = SP.APPLICATION_ID " +
             "   AND SP.SUBSCRIPTION_ID = SKM.SUBSCRIPTION_ID ";
 
-    public static final String GET_API_NAMES_MATCHING_CONTEXT_SQL=
-            "SELECT API.API_NAME " +
-            "FROM AM_API API" +
-            " WHERE " +
-            "API.CONTEXT_TEMPLATE=?";
-
     public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ?";
 
