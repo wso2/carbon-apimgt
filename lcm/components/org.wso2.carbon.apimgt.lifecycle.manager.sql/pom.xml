@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>lcm</artifactId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <version>7.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.sql</artifactId>
+    <packaging>bundle</packaging>
+    <name>WSO2 Carbon - API Management - Life Cycles Database Component</name>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>findbugs</groupId>
+            <artifactId>findbugs</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <export.package>
+            org.wso2.carbon.apimgt.lifecycle.manager.sql.*
+        </export.package>
+        <import.package>
+            org.slf4j; version="1.2.0",
+            org.apache.commons.io; version="1.2.0",
+            javax.sql; version="0.0.0",
+            javax.naming; version="0.0.0"
+        </import.package>
+    </properties>
+
+
+
+
+</project>
