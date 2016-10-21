@@ -21,4 +21,7 @@
 package org.wso2.carbon.apimgt.dao;
 
 public class DAOUtil {
+    static void Initialize() {
+
+    }
 }
