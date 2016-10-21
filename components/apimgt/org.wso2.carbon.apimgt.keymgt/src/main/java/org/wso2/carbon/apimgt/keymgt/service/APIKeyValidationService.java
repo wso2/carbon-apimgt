@@ -258,7 +258,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         log.debug("OAuth token response from keyManager to gateway: " + logMessage);
     }
 
-	/**
+    /**
      * validate access token for websocket handshake
      *
      * @param context context of the API
@@ -267,8 +267,9 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @return api information
      * @throws APIKeyMgtException
      * @throws APIManagementException
-	 */
-    public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version, String accessToken)
+     */
+    public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
+                                                           String accessToken)
             throws APIKeyMgtException, APIManagementException {
 
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
@@ -283,12 +284,15 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (state) {
             info.setAuthorized(true);
             info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
-            info = validateSubscriptionDetails(info, validationContext.getContext(),validationContext.getVersion(),validationContext.getTokenInfo().getConsumerKey());
+            info.setIssuedTime(validationContext.getTokenInfo().getIssuedTime());
+            info = validateSubscriptionDetails(info, validationContext.getContext(),
+                                               validationContext.getVersion(),
+                                               validationContext.getTokenInfo().getConsumerKey());
         }
         return info;
     }
 
-	/**
+    /**
      * Check for the subscription of the user
      *
      * @param infoDTO
@@ -298,10 +302,13 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @return APIKeyValidationInfoDTO including data of api and application
      * @throws APIManagementException
      */
-    public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context, String version, String consumerKey) throws APIManagementException {
+    public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO,
+                                                               String context, String version,
+                                                               String consumerKey)
+            throws APIManagementException {
         boolean defaultVersionInvoked = false;
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
-        if(apiTenantDomain == null) {
+        if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
@@ -313,7 +320,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
         String sql;
         boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
-        if(!isAdvancedThrottleEnabled) {
+        if (!isAdvancedThrottleEnabled) {
             if (defaultVersionInvoked) {
                 sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
             } else {
@@ -336,7 +343,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
-            if(isAdvancedThrottleEnabled) {
+            if (isAdvancedThrottleEnabled) {
                 ps.setInt(3, apiOwnerTenantId);
                 if (!defaultVersionInvoked) {
                     ps.setString(4, version);
@@ -355,12 +362,14 @@ public class APIKeyValidationService extends AbstractAdmin {
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setAuthorized(false);
                     return infoDTO;
-                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) || APIConstants
-                        .SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
+                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
+                           APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
+                    infoDTO.setValidationStatus(
+                            APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
                     infoDTO.setAuthorized(false);
                     return infoDTO;
-                } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscriptionStatus) &&
+                } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED
+                                   .equals(subscriptionStatus) &&
                            !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
                     infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
                     infoDTO.setType(type);
@@ -381,7 +390,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                 infoDTO.setType(type);
 
                 //Advanced Level Throttling Related Properties
-                if(APIUtil.isAdvanceThrottlingEnabled()) {
+                if (APIUtil.isAdvanceThrottlingEnabled()) {
                     String apiTier = rs.getString("API_TIER");
                     String subscriberUserId = rs.getString("USER_ID");
                     String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
@@ -389,7 +398,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                     int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
                     int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
                     //TODO isContentAware
-                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER, subscriberTenantId, apiTenantId, apiId);
+                    boolean isContentAware =
+                            isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
+                                                    subscriberTenantId, apiTenantId, apiId);
                     infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
@@ -420,7 +431,8 @@ public class APIKeyValidationService extends AbstractAdmin {
                 return infoDTO;
             }
             infoDTO.setAuthorized(false);
-            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+            infoDTO.setValidationStatus(
+                    APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
         } finally {
@@ -435,7 +447,9 @@ public class APIKeyValidationService extends AbstractAdmin {
     }
 
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
-                                            String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+                                            String subPolicy, int subscriptionTenantId,
+                                            int appTenantId, int apiId)
+            throws APIManagementException {
         boolean isAnyContentAware = false;
         // only check if using CEP based throttling.
         ResultSet resultSet = null;
@@ -465,7 +479,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             int count = 0;
             if (resultSet.next()) {
                 count = resultSet.getInt(1);
-                if(count > 0){
+                if (count > 0) {
                     isAnyContentAware = true;
                 }
             }
@@ -476,7 +490,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
         return isAnyContentAware;
     }
-    private void handleException(String description , Exception e){
-        log.error(description,e);
+
+    private void handleException(String description, Exception e) {
+        log.error(description, e);
     }
 }
