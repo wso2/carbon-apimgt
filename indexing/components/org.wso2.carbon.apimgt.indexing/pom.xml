@@ -62,7 +62,6 @@
         <dependency>
             <groupId>org.wso2.orbit.org.apache.solr</groupId>
             <artifactId>solr</artifactId>
-            <version>${org.wso2.orbit.org.apache.solr.version}</version>
         </dependency>
     </dependencies>
 
