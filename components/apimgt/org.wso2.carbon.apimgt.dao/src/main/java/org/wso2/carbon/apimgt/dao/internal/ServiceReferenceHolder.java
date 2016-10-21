@@ -20,14 +20,26 @@
 
 package org.wso2.carbon.apimgt.dao.internal;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
+
+    private HikariDataSource dataSource;
 
     private ServiceReferenceHolder() {
     }
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
+    }
+
+    public HikariDataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

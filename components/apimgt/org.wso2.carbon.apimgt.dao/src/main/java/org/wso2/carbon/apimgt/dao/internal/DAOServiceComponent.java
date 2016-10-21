@@ -25,14 +25,9 @@ import org.osgi.service.component.annotations.*;
 import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.datasource.core.api.DataSourceService;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 @Component(
         name = "org.wso2.carbon.apimgt.dao",
@@ -47,16 +42,6 @@ public class DAOServiceComponent {
 
     }
 
-    @Reference(
-            name = "org.wso2.carbon.datasource.DataSourceService",
-            service = DataSourceService.class,
-            cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterDataSourceService"
-    )
-    protected void onDataSourceServiceReady(DataSourceService service) {
-        //this is required to enforce a dependency on datasources
-    }
 
     @Reference(
             name = "org.wso2.carbon.datasource.jndi",
@@ -66,6 +51,15 @@ public class DAOServiceComponent {
             unbind = "onJNDIUnregister"
     )
     protected void onJNDIReady(JNDIContextManager service) {
+
+        try {
+            Context ctx = service.newInitialContext();
+            ServiceReferenceHolder.getInstance().setDataSource((HikariDataSource)ctx.lookup("java:comp/env/jdbc/test"));
+        } catch (NamingException e) {
+            log.error("Error occurred while jndi lookup", e);
+        }
+
+        /*
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -98,6 +92,7 @@ public class DAOServiceComponent {
                 e.printStackTrace();
             }
         }
+        */
     }
 
 
@@ -105,8 +100,5 @@ public class DAOServiceComponent {
         log.info("Unregistering data sources sample");
     }
 
-    protected void unregisterDataSourceService(DataSourceService dataSourceService) {
-        log.info("Unregistering data sources sample");
-    }
 
 }
