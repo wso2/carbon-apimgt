@@ -176,11 +176,11 @@
                 <artifactId>org.wso2.carbon.apimgt.api</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.googlecode.json-simple.wso2</groupId>
-                <artifactId>json-simple</artifactId>
+			<dependency>
+				<groupId>com.googlecode.json-simple.wso2</groupId>
+				<artifactId>json-simple</artifactId>
 				<version>${json-simple.wso2.version}</version>
-            </dependency>
+			</dependency>
         </dependencies>
     </dependencyManagement>
 
