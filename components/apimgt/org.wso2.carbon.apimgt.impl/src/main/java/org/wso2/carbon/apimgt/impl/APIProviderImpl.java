@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -3650,8 +3651,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+    public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException{
+        
+        APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
@@ -3700,8 +3703,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setInvoker(this.username);
                         String workflowDescription = "Pending lifecycle state change action: " + action;
                         apiStateWorkflow.setWorkflowDescription(workflowDescription);
-
-                        apiStateWFExecutor.execute(apiStateWorkflow);
+                       
+                        WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
+                        response.setWorkflowResponse(workflowResponse);
                     } catch (Exception e) {
                         handleException("Failed to execute workflow for life cycle status change : " + e.getMessage(),
                                 e);
@@ -3712,6 +3716,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             WorkflowConstants.WF_TYPE_AM_API_STATE);
                     if (wfDTO != null) {
                         apiWFState = wfDTO.getStatus();
+                        response.setStateChangeStatus(apiWFState.toString());
                     }
                 }
                 
@@ -3730,7 +3735,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
                         log.debug(logMessage);
                     }
-                    return true;
+                    return response;
                 }
             }
         } catch (GovernanceException e) {
@@ -3760,12 +3765,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     handleException("Failed to change the life cycle status : " + e.getMessage(), e);
                 }
             }
-            return false;
+            return response;
         }
          finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-        return false;
+        return response;
     }
 
     @Override

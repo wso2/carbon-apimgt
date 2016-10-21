@@ -36,6 +36,87 @@ function deletePendingTasks(apiName, version, provider){
               },"json");
 };
 
+function handleWorkflowRedirection(jsonPayload, apiInfo) {
+    var jsonObj = JSON.parse(jsonPayload);
+
+    var additionalParameters = jsonObj.additionalParameters;
+
+    if (jsonObj.redirectUrl != null) {
+        if (jsonObj.redirectConfirmationMsg == null) {
+            if (additionalParameters != null && Object.keys(additionalParameters).length > 0) {
+                var params = "";
+                for (var key in additionalParameters) {
+                    if (params != "") {
+                        params = params.concat("&");
+                    }
+                    if (additionalParameters.hasOwnProperty(key)) {
+                        params = params.concat((key.concat("=")).concat(additionalParameters[key]));
+                    }
+                }
+                location.href = jsonObj.redirectUrl + "?" + params;
+            } else {
+                location.href = jsonObj.redirectUrl;
+            }
+        } else {
+            jagg.message({
+                content: jsonObj.redirectConfirmationMsg,
+                type: "confirm",
+                title: "Redirection",
+                anotherDialog: true,
+                okCallback: function() {
+
+                    if (additionalParameters != null && Object.keys(additionalParameters).length > 0) {
+                        var params = "";
+                        for (var key in additionalParameters) {
+                            if (params != "") {
+                                params = params.concat("&");
+                            }
+                            if (additionalParameters.hasOwnProperty(key)) {
+                                params = params.concat((key.concat("=")).concat(additionalParameters[key]));
+                            }
+                        }
+                        location.href = jsonObj.redirectUrl + "?" + params;
+                    } else {
+                        location.href = jsonObj.redirectUrl;
+                    }
+                },
+                cancelCallback: function() {
+                    deletePendingTasks(apiInfo.name, apiInfo.version, apiInfo.provider);
+                }
+            });
+        }
+    }
+}
+
+function showWorkflowRejectedMessage() {
+
+    jagg.message({
+        content: "Your state change request has been rejected. Please contact the API publisher for more information.",
+        type: "custom",
+        title: "Workflow State change",
+        anotherDialog: true,
+
+
+    });
+}
+
+function showWorkflowSubmittedMessage() {
+
+    jagg.message({
+        content: "Lifecycle state change request has been submitted.",
+        type: "custom",
+        title: "Workflow State change",
+        anotherDialog: true,
+        okCallback: function() {
+           
+        },
+        cancelCallback: function() {
+            deletePendingTasks(apiInfo.name, apiInfo.version, apiInfo.provider);
+        }
+
+    });
+}
+
 function setChecklistItemVal(element,order) {
     if ($(element).is(":checked") == false) {
         $(element).attr('value', false);
@@ -64,118 +145,183 @@ function setChecklistItemVal(element,order) {
               },"json");
 
 };
-function updateStatus(status){
-var apiName=$("#name").val();
-var version=$("#apiVersion").val();
-var provider=$("#provider").val();
-var isSetDeprecation=$("#itemDiv1").val();
-$(".modal-footer").html("");
-if(status=='Deprecate'){
-var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
-var messageTitle = i18n.t("Change Lifecycle status");
-jagg.message({
-        content: messageContent,
-        type:"confirm",
-        title: messageTitle,
-        anotherDialog:true,
-        okCallback:function(){
-                       $('#messageModal').modal({backdrop: 'static', keyboard: false });
-                                  $(".modal-header .close").hide();
-                                  $(".modal-footer").html("");
-                                  $(".modal-title").html(i18n.t("Please wait"));
-                                  $(".modal-body").addClass("loadingButton");
-                                  $(".modal-body").css({"margin-left":25}); //todo param_string
-                                  $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version );
-                      jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
-                          function (result) {
-                              if (!result.error) {
-                                 $('#statusUpdateMsg').show();
-                                 setTimeout(function(){
-                						location = ''
-              					 },1000)
-                              } else {
-                                    if (result.message == "AuthenticateError") {
-                                       jagg.showLogin();
-                                    } else {
-                                           jagg.message({content:result.message,type:"error"});
-                                    }
-                              }
-                          }, "json");
+function updateStatus(status) {
+    var apiName = $("#name").val();
+    var version = $("#apiVersion").val();
+    var provider = $("#provider").val();
+    var isSetDeprecation = $("#itemDiv1").val();
+    $(".modal-footer").html("");
+    if (status == 'Deprecate') {
+        var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
+        var messageTitle = i18n.t("Change Lifecycle status");
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                        action: "updateStatus",
+                        provider: provider,
+                        name: apiName,
+                        version: version,
+                        status: status
+                    },
+                    function(result) {
+                        if (!result.error) {
+                            var jsonPayload = result.status.workflowResponse.jsonPayload;
 
-    },
-    cancelCallback:function(){
-    $('#messageModal').modal('hide');
-         $(".modal-footer").html("");
-    }
-    });
-} else if (isSetDeprecation === 'true') {
+                            if (result.status.stateChangeStatus == 'REJECTED') {
+                                showWorkflowRejectedMessage();
+                            } else if (jsonPayload != null && jsonPayload != "") {
+                                var apiInfo = {};
+                                apiInfo.provider = provider;
+                                apiInfo.name = apiName;
+                                apiInfo.version = version;
+                                handleWorkflowRedirection(jsonPayload, apiInfo);
+                            } else {
+                                ///test
+                                $('#statusUpdateMsg').show();
+                                setTimeout(function() {
+                                    location = ''
+                                }, 1000)
+                            }
+                        } else {
+                            if (result.message == "AuthenticateError") {
+                                jagg.showLogin();
+                            } else {
+                                jagg.message({
+                                    content: result.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    }, "json");
 
-    var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
-    var messageTitle = i18n.t("Change Lifecycle status");
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else if (isSetDeprecation === 'true') {
 
-    jagg.message({
-        content: messageContent,
-        type:"confirm",
-        title: messageTitle,
-        anotherDialog:true,
-        okCallback:function() {
-            $('#messageModal').modal({backdrop: 'static', keyboard: false });
-            $(".modal-header .close").hide();
-            $(".modal-footer").html("");
-            $(".modal-title").html(i18n.t("Please wait"));
-            $(".modal-body").addClass("loadingButton");
-            $(".modal-body").css({"margin-left":25}); //todo param_string
-            $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version );
+        var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
+        var messageTitle = i18n.t("Change Lifecycle status");
 
-            jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
-                   action: "updateStatus",
-                   provider: provider,
-                   name: apiName,
-                   version: version,
-                   status: status
-            }, function (result) {
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                    action: "updateStatus",
+                    provider: provider,
+                    name: apiName,
+                    version: version,
+                    status: status
+                }, function(result) {
+                    if (!result.error) {
+                        var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                        if (result.status.stateChangeStatus == 'REJECTED') {
+                            showWorkflowRejectedMessage();
+                        } else if (jsonPayload != null && jsonPayload != "") {
+                            var apiInfo = {};
+                            apiInfo.provider = provider;
+                            apiInfo.name = apiName;
+                            apiInfo.version = version;
+                            handleWorkflowRedirection(jsonPayload, apiInfo);
+                        } else {
+                            ///test
+                            $('#statusUpdateMsg').show();
+                            setTimeout(function() {
+                                location = ''
+                            }, 1000)
+                        }
+                    } else {
+                        if (result.message == "AuthenticateError") {
+                            jagg.showLogin();
+                        } else {
+                            jagg.message({
+                                content: result.message,
+                                type: "error"
+                            });
+                        }
+                    }
+                }, "json");
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else {
+        jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                action: "updateStatus",
+                provider: provider,
+                name: apiName,
+                version: version,
+                status: status
+            },
+            function(result) {
                 if (!result.error) {
-                    $('#statusUpdateMsg').show();
-                    setTimeout(function(){
-                        location = ''
-                    },1000)
+                    var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                    if (result.status.stateChangeStatus == 'REJECTED') {
+                        showWorkflowRejectedMessage();
+                    } else if (jsonPayload != null && jsonPayload != "") {
+                        var apiInfo = {};
+                        apiInfo.provider = provider;
+                        apiInfo.name = apiName;
+                        apiInfo.version = version;
+                        handleWorkflowRedirection(jsonPayload, apiInfo);
+                    } else {
+                        ///test
+                        $('#statusUpdateMsg').show();
+                        setTimeout(function() {
+                            location = ''
+                        }, 1000)
+                    }
                 } else {
                     if (result.message == "AuthenticateError") {
                         jagg.showLogin();
                     } else {
-                        jagg.message({content:result.message,type:"error"});
+                        jagg.message({
+                            content: result.message,
+                            type: "error"
+                        });
                     }
-                  }
+                }
             }, "json");
-        },
-        cancelCallback:function(){
-            $('#messageModal').modal('hide');
-            $(".modal-footer").html("");
-        }
-    });
-} else {
- jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
-                           function (result) {
-                               if (!result.error) {
-                                  $('#statusUpdateMsg').show();
-                                  setTimeout(function(){
-                 						location = ''
-               					 },1000)
-                               } else {
-                                    if (result.message == "AuthenticateError") {
-                                       jagg.showLogin();
-                                    } else {
-                                           jagg.message({content:result.message,type:"error"});
-                                    }
-                                }
-                           }, "json");
-
-}
-
-
-
+    }
 };
-
 
 var initOf_state = '<%=lcStatus%>';
 // java script variable to store the status
@@ -195,14 +341,14 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
      <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
      <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
-     	  <span class="badge badge-warning">!</span> <%=i18n.localize("This API is not PUBLISHED. Please remove from external stores.")%>
+        <span class="badge badge-warning">!</span> <%=i18n.localize("This API is not PUBLISHED. Please remove from external stores.")%>
      </div>
-		<div class="form-group">
+    <div class="form-group">
             <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4><%=i18n.localize("Current State")%>:</h4></label>
             <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
                 <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
              </div>
-		</div>
+    </div>
   <%  if(wfStatus != null && wfStatus.status == 'CREATED') {%> 
      <div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
@@ -227,23 +373,23 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  <% if(isVisible=="true"){%>
                       <%if(((state!="Created") && (state!="Prototyped"))||(state=="Created" && oldExist)||(state=="Prototyped" && oldExist)){%>
                       <div class="form-group">
-                      	 <label class="control-label col-sm-3"></label>
-	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-	                        	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                        		<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
-	                     </label>
+                         <label class="control-label col-sm-3"></label>
+                       <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                            <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                              <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                       </label>
                      </div>
                     <%}else{%>
                         <%if((itemName == i18n.localize("Require Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
                                 continue;
                         }else{%>
-                        		<div class="form-group">
-                        			 <label class="control-label col-sm-3"></label>
-	                                 <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-	                                	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                                	<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
-	                            	</label>
-                            	</div>
+                            <div class="form-group">
+                               <label class="control-label col-sm-3"></label>
+                                   <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                                    <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                                    <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                                </label>
+                              </div>
                         <%}
                  <%}}}%>
 
@@ -340,11 +486,11 @@ function hideMsg() {
 
 // function to show / hide external stores message
 var checkExternalStores=function(status){
-	if(status !== 'PUBLISHED' && publishedInExternalStores==true){
-		$('#removeFromExternalStoresMsg').show();
-	}else{
-		$('#removeFromExternalStoresMsg').hide();
-	}
+  if(status !== 'PUBLISHED' && publishedInExternalStores==true){
+    $('#removeFromExternalStoresMsg').show();
+  }else{
+    $('#removeFromExternalStoresMsg').hide();
+  }
     if (status !== 'PUBLISHED') {
         $('#externalAPIStoresTab').hide();
     }else{
