@@ -42,9 +42,9 @@
     </scm>
 
     <modules>
-        <module>indexing</module>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
+        <module>lcm</module>
     </modules>
 
     <pluginRepositories>
@@ -150,6 +150,36 @@
                 <groupId>org.wso2.msf4j</groupId>
                 <artifactId>msf4j-all</artifactId>
                 <version>2.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.models</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6.0.wso2v1</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+                <version>6.0.6-SNAPSHOT</version> <!-- TODO - change the version -->
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.json-simple.wso2</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>${json-simple.wso2.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -290,6 +320,7 @@
         <carbon.deployment.version>5.0.0</carbon.deployment.version>
         <carbon.deployment.export.version>5.0.0</carbon.deployment.export.version>
         <rxjava.export.version>1.2.0.wso2v1</rxjava.export.version>
+        <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
 
         <commons.io.version>2.0</commons.io.version>
         <rx.java.version>1.2.0.wso2v1</rx.java.version>
