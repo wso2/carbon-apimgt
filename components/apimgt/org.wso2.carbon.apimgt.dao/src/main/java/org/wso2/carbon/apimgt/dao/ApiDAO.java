@@ -23,6 +23,9 @@ package org.wso2.carbon.apimgt.dao;
 import org.wso2.carbon.apimgt.models.API;
 import org.wso2.carbon.apimgt.models.APIIdentifier;
 
+/**
+ * Provides access to API data layer
+ */
 public interface ApiDAO {
     /**
      * Retrieve a given instance of an API

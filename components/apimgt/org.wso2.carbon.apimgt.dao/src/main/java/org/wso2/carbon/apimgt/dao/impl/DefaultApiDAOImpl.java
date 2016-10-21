@@ -25,6 +25,10 @@ import org.wso2.carbon.apimgt.dao.ApiDAO;
 import org.wso2.carbon.apimgt.models.API;
 import org.wso2.carbon.apimgt.models.APIIdentifier;
 
+/**
+ * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
+ * Hence is considered as the default due to its re-usability.
+ */
 public class DefaultApiDAOImpl implements ApiDAO {
 
     DefaultApiDAOImpl() {}
