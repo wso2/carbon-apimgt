@@ -156,6 +156,7 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.models</artifactId>
                 <version>${carbon.apimgt.version}</version>
+            </dependency>
 	    <dependency>
         	<groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
