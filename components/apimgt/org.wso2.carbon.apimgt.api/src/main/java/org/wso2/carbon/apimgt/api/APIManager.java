@@ -17,8 +17,16 @@
 */
 
 package org.wso2.carbon.apimgt.api;
-
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.util.List;
@@ -411,7 +419,15 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
-    
+
+    /**
+     * Returns a list of api versions that matches the given context template
+     *
+     * @param apiName api name in the payload
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    List<String> getApiVersionsMatchingApiName(String apiName) throws APIManagementException;
 
     /**
      * Get policy object for given level and user name

@@ -45,6 +45,9 @@ public class SQLConstants {
             "   AND APP.APPLICATION_ID = SP.APPLICATION_ID " +
             "   AND SP.SUBSCRIPTION_ID = SKM.SUBSCRIPTION_ID ";
 
+    public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ?";
+
     public static final String GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
@@ -1512,9 +1515,11 @@ public class SQLConstants {
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +
             " VALUES (?,?,?,?,?,?,?,?)";
+
     public static final String ADD_API_ENVIRONMENTS_SQL = " INSERT INTO AM_API_ENVIRONMENTS (ENVIRONMENT_NAME," +
             "API_ID, HTTP_URL,HTTPS_URL,APPEND_CONTEXT)" +
             " VALUES (?,?,?,?,?)";
+
     public static final String REMOVE_API_ENVIRONMENTS_SQL = "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
 
     public static final String GET_API_ENVIRONMENTS_SQL =
@@ -1655,6 +1660,7 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 

@@ -1307,7 +1307,19 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
-    
+
+    /**
+     * Returns a list of api versions that matches the given context template
+     *
+     * @param apiName api name in the payload
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    @Override
+    public List<String> getApiVersionsMatchingApiName(String apiName) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName);
+    }
+
     public Policy[] getPolicies(String username, String level) throws APIManagementException {
         Policy[] policies = null;      
 

@@ -77,8 +77,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -105,7 +103,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -128,6 +132,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
+//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -8343,6 +8350,38 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    /**
+     * Retrieve list of API versions that matches given API name
+     *
+     * @param apiName name of the api
+     * @return list of api versions
+     * @throws APIManagementException
+     */
+    public List<String> getAPIVersionsMatchingApiName(String apiName)
+            throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        List<String> versionList = new ArrayList<String>();
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiName);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                versionList.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API versions matches API name" + apiName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return versionList;
+    }
+
 
     /**
      * @param consumerKey
