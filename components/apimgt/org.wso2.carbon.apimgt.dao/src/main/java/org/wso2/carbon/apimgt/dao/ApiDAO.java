@@ -21,7 +21,13 @@
 package org.wso2.carbon.apimgt.dao;
 
 import org.wso2.carbon.apimgt.models.API;
-import org.wso2.carbon.apimgt.models.APIIdentifier;
+import org.wso2.carbon.apimgt.models.APISummaryResults;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to API data layer
@@ -29,38 +35,118 @@ import org.wso2.carbon.apimgt.models.APIIdentifier;
 public interface ApiDAO {
     /**
      * Retrieve a given instance of an API
-     * @param apiID The {@link APIIdentifier} that uniquely identifies an API
+     * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
      * @throws APIManagementDAOException
      *
      */
-    API getAPI(APIIdentifier apiID) throws APIManagementDAOException;
+    @CheckForNull API getAPI(String apiID) throws APIManagementDAOException;
 
+    /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     * doing a permission check to ensure results returned are only those that match the list of roles provided
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @param enquirerRoles The list of roles of the user making the query
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException
+     *
+     */
+    APISummaryResults getAPIs(int offset, int limit, List<String> enquirerRoles) throws APIManagementDAOException;
+
+    /**
+     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
+     * pagination as well as doing a permission check to ensure results returned are only those that match
+     * the list of roles provided
+     * @param searchAttribute The attribute of an API against which the search will be performed
+     * @param searchString The search string provided
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @param enquirerRoles The list of roles of the user making the query
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException
+     *
+     */
+    APISummaryResults searchAPIs(String searchAttribute, String searchString, int offset, int limit,
+                                                        List<String> enquirerRoles) throws APIManagementDAOException;
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
-     * @return true if addition is successful else false
+     * @return The newly added {@link API} object
      * @throws APIManagementDAOException
      *
      */
-    boolean addAPI(API api) throws APIManagementDAOException;
+    API addAPI(API api) throws APIManagementDAOException;
 
     /**
      * Update an existing API
-     * @param apiID The {@link APIIdentifier} of the API that needs to be updated
-     * @param updatedAPI The updated {@link API} object that will replace the existing API
-     * @return true if update is successful else false
+     * @param apiID The UUID of the API that needs to be updated
+     * @param valuesToBeUpdated The {@link API} object containing the updated values that will replace the existing API
+     * @return The updated {@link API} object
      * @throws APIManagementDAOException
      *
      */
-    boolean updateAPI(APIIdentifier apiID, API updatedAPI) throws APIManagementDAOException;
+    API updateAPI(String apiID, API valuesToBeUpdated) throws APIManagementDAOException;
 
     /**
      * Remove an existing API
-     * @param apiID The {@link APIIdentifier} of the API that needs to be deleted
-     * @return true if update is successful else false
+     * @param apiID The UUID of the API that needs to be deleted
      * @throws APIManagementDAOException
      *
      */
-    boolean deleteAPI(APIIdentifier apiID) throws APIManagementDAOException;
+    void deleteAPI(String apiID) throws APIManagementDAOException;
+
+    /**
+     * Get swagger definition of a given API
+     * @param apiID The UUID of the respective API
+     * @return Swagger definition stream
+     * @throws APIManagementDAOException
+     *
+     */
+    OutputStream getSwaggerDefinition(String apiID) throws APIManagementDAOException;
+
+    /**
+     * Update swagger definition of a given API
+     * @param apiID The UUID of the respective API
+     * @param swaggerDefinition Swagger definition stream
+     * @throws APIManagementDAOException
+     *
+     */
+    void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws APIManagementDAOException;
+
+    /**
+     * Get image of a given API
+     * @param apiID The UUID of the respective API
+     * @return Image stream
+     * @throws APIManagementDAOException
+     *
+     */
+    OutputStream getImage(String apiID) throws APIManagementDAOException;
+
+    /**
+     * Update swagger definition of a given API
+     * @param apiID The UUID of the respective API
+     * @param image Image stream
+     * @throws APIManagementDAOException
+     *
+     */
+    void updateImage(String apiID, InputStream image) throws APIManagementDAOException;
+
+    /**
+     * Change the lifecycle status of a given API
+     * @param apiID The UUID of the respective API
+     * @param status The lifecycle status that the API must be set to
+     * @throws APIManagementDAOException
+     *
+     */
+    void changeLifeCylceStatus(String apiID, String status)throws APIManagementDAOException;
+
+    /**
+     * Create a new version of an existing API
+     * @param apiID The UUID of the respective API
+     * @param version The new version of the API
+     * @throws APIManagementDAOException
+     *
+     */
+    void createNewAPIVersion(String apiID, String version)throws APIManagementDAOException;
 }
