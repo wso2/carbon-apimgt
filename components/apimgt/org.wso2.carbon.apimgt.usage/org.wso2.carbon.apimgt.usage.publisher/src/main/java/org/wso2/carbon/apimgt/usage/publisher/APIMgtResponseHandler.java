@@ -28,6 +28,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -130,11 +131,11 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
             responsePublisherDTO.setUsername((String) mc.getProperty(APIMgtGatewayConstants.USER_ID));
-            String tenantDomain = (responsePublisherDTO.getUsername() == null ? null :
-                    MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
-            responsePublisherDTO.setTenantDomain(tenantDomain);
+            String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+            String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
             responsePublisherDTO.setContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
-            responsePublisherDTO.setApiVersion((String) mc.getProperty(RESTConstants.SYNAPSE_REST_API));
+            String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
+            responsePublisherDTO.setApiVersion(apiVersion);
             responsePublisherDTO.setApi((String) mc.getProperty(APIMgtGatewayConstants.API));
             responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtGatewayConstants.VERSION));
             responsePublisherDTO.setResourcePath((String) mc.getProperty(APIMgtGatewayConstants.RESOURCE));
@@ -144,7 +145,12 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             responsePublisherDTO.setServiceTime(serviceTime);
             responsePublisherDTO.setBackendTime(backendTime);
             responsePublisherDTO.setHostName((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
-            responsePublisherDTO.setApiPublisher((String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER));
+            String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+            if (apiPublisher == null) {
+                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+            }
+            responsePublisherDTO.setApiPublisher(apiPublisher);
+            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
             responsePublisherDTO.setApplicationName((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_NAME));
             responsePublisherDTO.setApplicationId((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_ID));
             responsePublisherDTO.setCacheHit(cacheHit);

@@ -103,10 +103,10 @@ public class APIClientGenerationManager {
                 StringUtils.isBlank(apiProvider)) {
             handleSDKGenException("SDK Language, API Name, API Version or API Provider should not be null.");
         }
-        //we should replace the '@' sign with '-AT-' hence it is needed to retrieve the registry resource
+        //we should replace the '@' sign with '-AT-' hence it is needed to retrieve the API identifier
         String apiProviderNameWithReplacedEmailDomain = APIUtil.replaceEmailDomain(apiProvider);
         APIIdentifier apiIdentifier = new APIIdentifier(apiProviderNameWithReplacedEmailDomain, apiName, apiVersion);
-        String requestedTenant = MultitenantUtils.getTenantDomain(apiProvider);
+        String requestedTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
         int tenantId = 0;
 
         try {
@@ -185,7 +185,7 @@ public class APIClientGenerationManager {
 
         String sdkDirectoryName = apiName + "_" + apiVersion + "_" + sdkLanguage;
         String temporaryOutputPath = tempDirectoryLocation + File.separator + sdkDirectoryName;
-        generateClient(apiName, apiVersion, specFileLocation, sdkLanguage, temporaryOutputPath);
+        generateClient(apiName, specFileLocation, sdkLanguage, temporaryOutputPath);
         String temporaryZipFilePath = temporaryOutputPath + APIConstants.ZIP_FILE_EXTENSION;
         try {
             ZIPUtils zipUtils = new ZIPUtils();
@@ -238,13 +238,11 @@ public class APIClientGenerationManager {
      * This method is used to generate SDK for a API for a given language
      *
      * @param apiName             name of the API
-     * @param apiVersion          version of the API
      * @param specLocation        location of the swagger spec for the API
      * @param sdkLanguage         preferred SDK language
      * @param temporaryOutputPath temporary location where the SDK archive is saved until downloaded
      */
-    private void generateClient(String apiName, String apiVersion, String specLocation,
-                                String sdkLanguage, String temporaryOutputPath) {
+    private void generateClient(String apiName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();

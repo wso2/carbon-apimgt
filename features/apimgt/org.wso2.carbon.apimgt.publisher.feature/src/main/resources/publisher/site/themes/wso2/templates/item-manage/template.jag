@@ -135,137 +135,6 @@
                         <div class="panel-heading">
                             <h4 class="panel-title">
                                 <div>
-                                    <div class="heading no-description"><%=i18n.localize("Configurations")%></div>
-                                </div>
-                                <div class="clearfix"></div>
-                            </h4>
-                        </div>
-                        <div class="panel-collapse">
-                            <div class="panel-body">
-                                        <div class="form-group">
-                                            <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default Version:")%>
-                                                <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
-                                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                        <i class="fw fw-circle fw-stack-2x"></i>
-                                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                    </span>
-                                                </a>
-                                                <p id="default_api_help" class="hide"><%=i18n.localize("Marks one API version in a group as the default so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default, the previous default published API will still be used as the default until the new default API is published")%></p>
-                                            </label>
-                                            <div class="controls col-sm-8">
-                                                  <label class="checkbox">
-                                                    <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
-                                                    <span class="helper"></span>
-                                                </label>
-
-                                                 <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
-                                                     <p class="help-block"><%=i18n.localize("Currently set to version")%> : <%=api.currentDefaultVersion%></p>
-                                                 <%}else{%>
-                                                     <p class="help-block"><%=i18n.localize("No default version defined for the current API")%></p>
-                                                 <%}}%>
-                                            </div>
-                                             <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
-                                            </div>
-                                        <div class="form-group transport-styles">
-                                        <label class="control-label col-sm-3" for="transports"><%=i18n.localize("Transports")%>:<span class="requiredAstrix">*</span>
-                                                <a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
-                                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                            <i class="fw fw-circle fw-stack-2x"></i>
-                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                    </span>
-                                                </a>
-                                                <p id="http_help" class="hide"><%=i18n.localize("HTTP is less secure than HTTPS and makes your API vulnerable to security threats.")%></p>
-                                        </label>
-                                        <div class="controls col-sm-8">
-                                                <label class="checkbox">
-                                                        <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
-                                                        <span class="helper"><%=i18n.localize("HTTPS")%></span>
-                                                </label>
-                                                <label class="checkbox">
-                                                        <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                                                        <span class="helper"><%=i18n.localize("HTTP")%></span>
-                                                </label>
-                                                <label id="transport_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Transport.")%></label>
-                                            </div>
-                                        </div>
-
-                                         <!--Response Caching -->
-                                            <div class="form-group">
-                                                <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("Response Caching")%>:
-                                                    <a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
-                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                            <i class="fw fw-circle fw-stack-2x"></i>
-                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                        </span>
-                                                    </a>
-                                                    <p id="cache_help" class="hide"><%=i18n.localize("This option determines whether to cache the response messages of the API. Caching improves performance because the backend server does not have to process the same data multiple times. To offset the risk of stale data in the cache, set an appropriate timeout period when prompted.")%></p>
-                                                </label>
-                                                  <div class="col-sm-4 responseCacheSelect">
-                                                   <select class="select required form-control" id="responseCache" name="responseCache">
-                                                        <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Disabled")%></option>
-                                                        <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Enabled")%></option>
-                                                    </select>
-                                                 </div>
-                                            </div>
-                                            <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
-                                                <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("Cache Timeout (seconds)")%>:<span class="requiredAstrix">*</span></label>
-                                                <div class="col-sm-4">
-                                                    <input type="text" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
-                                                </div>
-                                            </div>
-
-
-                                            <% mod = jagg.module("api");
-                                                result = mod.isMultipleTenantsAvailable();
-                                                var isMultipleTenantsAvailable = result.status;
-                                                if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-                                                    <div class="form-group">
-                                                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
-                                                            <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
-                                                                <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                                    <i class="fw fw-circle fw-stack-2x"></i>
-                                                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                                </span>
-                                                            </a>
-                                                            <p id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></p>
-                                                        </label>
-                                                        <div class="col-sm-4">
-                                                            <% if(api.visibility!="public") {%>
-                                                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                                                <option value="current_tenant"  selected="selected"><%=i18n.localize("Available to current tenant only")%></option>
-                                                            </select>
-                                                            <%} else {%>
-                                                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
-                                                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
-                                                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
-                                                                    <% } %>
-                                                                </select>
-                                                            <%}%>
-                                                       </div>
-                                                       </div>
-                                                           <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                                                               <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
-                                                                   <%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
-                                                               </label>
-                                                               <div class="col-sm-4">
-                                                                   <input type="text" class="input form-control"
-                                                                   id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-                                                                   <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
-                                                               </div>
-
-                                                           </div>
-                                                    <% } %>
-                                        <!--Response Caching End -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <div>
                                     <div class="heading no-description"><%=i18n.localize("Throttling Settings")%></div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -335,7 +204,7 @@
                                                         for (var i = 0; i < tiers.length; i++) {
                                                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
                                                         %>
-                                                        <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                                                        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
                                                                 <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
                                                                 <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
@@ -525,6 +394,132 @@
 
         <div class="panel-group accordion add-margin-bottom-2x" role="tablist" aria-multiselectable="true">
             <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <div>
+                            <div class="heading no-description"><%=i18n.localize("Configurations")%></div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </h4>
+                </div>
+                <div class="panel-collapse">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default Version:")%>
+                                <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x"></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                    </span>
+                                </a>
+                                <p id="default_api_help" class="hide"><%=i18n.localize("Marks one API version in a group as the default so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default, the previous default published API will still be used as the default until the new default API is published")%></p>
+                            </label>
+                            <div class="controls col-sm-8">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
+                                    <span class="helper"></span>
+                                </label>
+
+                            <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                                <p class="help-block"><%=i18n.localize("Currently set to version")%> : <%=api.currentDefaultVersion%></p>
+                            <%}else{%>
+                                <p class="help-block"><%=i18n.localize("No default version defined for the current API")%></p>
+                            <%}}%>
+                            </div>
+                            <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+                        </div>
+                        <div class="form-group transport-styles">
+                            <label class="control-label col-sm-3" for="transports"><%=i18n.localize("Transports")%>:<span class="requiredAstrix">*</span>
+                                <a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x"></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                    </span>
+                                </a>
+                                <p id="http_help" class="hide"><%=i18n.localize("HTTP is less secure than HTTPS and makes your API vulnerable to security threats.")%></p>
+                            </label>
+                            <div class="controls col-sm-8">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%> onclick="displayUrlsOnTransport()"/>
+                                    <span class="helper"><%=i18n.localize("HTTPS")%></span>
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%> onclick="displayUrlsOnTransport()"/>
+                                    <span class="helper"><%=i18n.localize("HTTP")%></span>
+                                </label>
+                                <label id="transport_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Transport.")%>
+                                </label>
+                            </div>
+                        </div>
+                        <!--Response Caching -->
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("Response Caching")%>:
+                                <a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x"></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                    </span>
+                                </a>
+                                <p id="cache_help" class="hide"><%=i18n.localize("This option determines whether to cache the response messages of the API. Caching improves performance because the backend server does not have to process the same data multiple times. To offset the risk of stale data in the cache, set an appropriate timeout period when prompted.")%></p>
+                            </label>
+                            <div class="col-sm-4 responseCacheSelect">
+                                <select class="select required form-control" id="responseCache" name="responseCache">
+                                    <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Disabled")%></option>
+                                    <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Enabled")%></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                            <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("Cache Timeout (seconds)")%>:<span class="requiredAstrix">*</span></label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                                </div>
+                        </div>
+                        <% mod = jagg.module("api");
+                            result = mod.isMultipleTenantsAvailable();
+                            var isMultipleTenantsAvailable = result.status;
+                            if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
+                                        <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
+                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            </span>
+                                        </a>
+                                        <p id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></p>
+                                    </label>
+                                    <div class="col-sm-4">
+                                    <% if(api.visibility!="public") {%>
+                                        <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                            <option value="current_tenant"  selected="selected"><%=i18n.localize("Available to current tenant only")%></option>
+                                        </select>
+                                        <%} else {%>
+                                        <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                            <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
+                                            <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+                                            <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                            <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
+                                            <% } %>
+                                        </select>
+                                        <%}%>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                                    <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
+                                        <%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
+                                    </label>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="input form-control" id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                        <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
+                                    </div>
+                                </div>
+                                <% } %>
+                                <!--Response Caching End -->
+                            </div>
+                        </div>
+                    </div>
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
                         <h4 class="panel-title">
                             <div>
@@ -546,15 +541,222 @@
                                 <th><div class="environments_data"><%=i18n.localize("Environment Name")%></div></th>
                                 <th><div class="environments_data"><%=i18n.localize("Type")%></div></th>
                                 <th><div class="environments_data"><%=i18n.localize("Description")%></div></th>
+                                <th><div class="environments_data"><%=i18n.localize("Gateway URLs")%>
+                                        <a class="help_popup" help_data="gateway_help" data-trigger="hover" title="http_help" data-placement="bottom">
+                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            </span>
+                                        </a>
+                                        <p id="gateway_help" class="hide"><%=i18n.localize("If gateway URLs need to be changed de-select 'Use Defaults' and enter the URLs. If you do not enter a URL default URLs will be added from configurations.")%></p>
+                                    </div>
+                                </th>
+                                <th><div class="environments_data"></div></th>
                              </tr>
                          </thead>
                          <tbody>
 
-                         <%
-                         var environmentsJson=api.environments;
-                         if(environmentsJson=="none"){
-                                for(i=0 ;i<environmentsList.length;i++){
-                         %>
+                        <% var environmentsJson = api.environments; %>
+                             <input type="hidden" name="gatwayNames" id="gatwayNames" value="<%=api.environments%>" />
+                             <% var gatewayUrlsJson = JSON.parse(api.gatewayUrls);
+                             if(environmentsJson == "none") {
+                                for (i=0 ; i<environmentsList.length; i++) {
+                                    if (gatewayUrlsJson != null) {
+                                        var urlsJson = gatewayUrlsJson[environmentsList[i].name];
+                                    }%>
+                             <tr data-type="selectable">
+                                <td>
+                                    <div class="environments_checkbox" align="center">
+                                        <label class="checkbox">
+                                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
+                                            <span class="helper"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="default_url_checkbox" >
+                                        <label class="checkbox">
+                                            <input type="checkbox" id ="<%=envNameTrimmed%>_check" class="use_defaults"
+                                                name="<%=envNameTrimmed%>_check"
+                                           <%if (urlsJson != null) {
+                                                if (urlsJson.http == "default" && urlsJson.https == "default") {%>
+                                                    checked
+                                           <%}
+                                            } else {%> checked <%}%>
+                                             value="<%=environmentsList[i].gatewayEndpoints%>" onclick="showHideGatewayUrls(this.id)"/>
+                                            <span class="helper"><%=i18n.localize("Use Defaults")%></span>
+                                        </label>
+                                    </div>
+                                    <%
+                                        var defaultUrls = environmentsList[i].gatewayEndpoints.split(",");
+                                        var defaultHttps, defaultHttps;
+                                        for(var a=0; a<defaultUrls.length; a++) {
+                                            if(defaultUrls[a].indexOf("https://") !== -1){
+                                                defaultHttps = defaultUrls[a].replace("https://","");
+                                            } else if(defaultUrls[a].indexOf("http://") !== -1){
+                                                 defaultHttp = defaultUrls[a].replace("http://","");
+                                            }
+                                        }%>
+                                </td>
+                                <td id="<%=envNameTrimmed%>_context_checkbox" class="def_context">
+                                    <div class="default_context_checkbox">
+                                         <label class="checkbox">
+                                              <input type="checkbox" id ="<%=envNameTrimmed%>_default_context" class="default_context"
+                                                   name="<%=envNameTrimmed%>_default_context"
+                                                   <%if (urlsJson != null) {
+                                                   if (urlsJson.useDefaultContext == true) {%>
+                                                        checked
+                                                   <%}
+                                              } else {%> checked <%}%>
+                                              value="<%=environmentsList[i].name%>" onclick="showHideContext(this.id)"/>
+                                              <span class="helper"><%=i18n.localize("Use Default Context")%></span>
+                                         </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <table id="<%=envNameTrimmed%>_urls" class="gateway_urls" name="<%=envNameTrimmed%>_urls">
+                                        <tbody>
+                                            <tr id="<%=envNameTrimmed%>_urls_https" name="<%=envNameTrimmed%>_urls_https">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">https://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                            if (urlsJson.https != "default") {
+                                                                var url = urlsJson.https.replace("https://" ,"");
+                                                                %>"<%=encode.forHtmlAttribute(url)%>"<%}
+
+                                                            }
+                                                            else {%><%=defaultHttps%><%}%> id="<%=envNameTrimmed%>_https" name="<%=envNameTrimmed%>_https" placeholder="" class="urlBox" />
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_https_basic"><%=encode.forHtml(api.context)%></span>
+                                                        </div>
+                                                </td>
+                                            </tr>
+                                            <tr id="<%=envNameTrimmed%>_urls_http" name="<%=envNameTrimmed%>_urls_http">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">http://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                            if (urlsJson.http != "default") {
+                                                                var url = urlsJson.http.replace("http://" ,"");
+                                                                %>"<%=encode.forHtmlAttribute(url)%>"<%}
+                                                            } else {%><%=defaultHttp%><%}%> id="<%=envNameTrimmed%>_http" name="<%=envNameTrimmed%>_http" placeholder="" class="urlBox" />
+                                                        <!-- span class="input-group-addon" id="basic-addon1"><%=encode.forHtml(api.context)%></span -->
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_http_basic"><%=encode.forHtml(api.context)%></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        <%}} else {
+                            for (i=0 ;i<environmentsList.length;i++) {
+                                var envNameTrimmed = environmentsList[i].name.replace(/\s/g,'');
+                                if (gatewayUrlsJson != null) {
+                                    var urlsJson = gatewayUrlsJson[environmentsList[i].name];
+                                }
+                                if (environmentsJson.split(",").indexOf(environmentsList[i].name)>=0) {%>
+                            <tr data-type="selectable">
+                                <td>
+                                    <div class="environments_checkbox">
+                                        <label class="checkbox">
+                                            <input type="checkbox" value="<%=environmentsList[i].name%>"
+                                                checked class="env">
+                                            <span class="helper"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                <td><div class="environments_data">
+                                    <%=encode.forHtml(environmentsList[i].description)%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="default_url_checkbox" align="center">
+                                        <label class="checkbox">
+                                            <input type="checkbox"
+                                                id="<%=envNameTrimmed%>_check" class="use_defaults"
+                                                    name="<%=envNameTrimmed%>_check"
+                                            <%if (urlsJson != null) {
+                                                if (urlsJson.http == "default" && urlsJson.https == "default") {%>
+                                                  checked <%}}
+                                            else{%> checked <%}%> value="<%=environmentsList[i].gatewayEndpoints%>" onClick="showHideGatewayUrls(this.id)"/>
+                                            <span class="helper"><%=i18n.localize("Use Defaults")%></span>
+                                        </label>
+                                        <%
+                                        var defaultUrls = environmentsList[i].gatewayEndpoints.split(",");
+                                        var defaultHttps, defaultHttps;
+                                         for(var a=0; a<defaultUrls.length; a++) {
+                                             if(defaultUrls[a].indexOf("https://") !== -1){
+                                                 defaultHttps = defaultUrls[a].replace("https://","");
+                                         } else if(defaultUrls[a].indexOf("http://") !== -1){
+                                            defaultHttp = defaultUrls[a].replace("http://","");
+                                         }
+                                         }
+                                        %>
+                                </td>
+                                <td  id="<%=envNameTrimmed%>_context_checkbox" class="def_context">
+                                    <div class="default_context_checkbox">
+                                        <label class="checkbox">
+                                            <input type="checkbox" id ="<%=envNameTrimmed%>_default_context" class="default_context"
+                                                name="<%=envNameTrimmed%>_default_context"
+                                                <%if (urlsJson != null) {
+                                                    if (urlsJson.useDefaultContext == true) {%>
+                                                        checked
+                                                    <%}
+                                                    } else {%> checked <%}%>
+                                                value="<%=environmentsList[i].name%>" onclick="showHideContext(this.id)"/>
+                                            <span class="helper"><%=i18n.localize("Use Default Context")%></span>
+                                                       </label>
+                                        </div>
+                                </td>
+                                <td>
+                                    <table id="<%=envNameTrimmed%>_urls" class="gateway_urls" name="<%=envNameTrimmed%>_urls">
+                                        <tbody>
+                                            <tr id="<%=envNameTrimmed%>_urls_https" name="<%=envNameTrimmed%>_urls_https">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">https://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                                if (urlsJson.https != "default") {
+                                                                    var url = urlsJson.https.replace("https://" ,"");
+                                                                    %>"<%=encode.forHtmlAttribute(url)%>"<%}
+                                                                } else {%><%=defaultHttps%><%}%> id="<%=envNameTrimmed%>_https" name="<%=envNameTrimmed%>_https"
+                                                                placeholder="" class="urlBox" />
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_https_basic"><%=encode.forHtml(api.context)%></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                            <tr id="<%=envNameTrimmed%>_urls_http" name="<%=envNameTrimmed%>_urls_http">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">http://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                            if (urlsJson.http != "default") {
+                                                                var url = urlsJson.http.replace("http://" ,"");
+                                                                %>"<%=encode.forHtmlAttribute(url)%>"<%}
+                                                            } else {%><%=defaultHttp%><%}%> id="<%=envNameTrimmed%>_http" name="<%=envNameTrimmed%>_http" placeholder="" class="urlBox" />
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_http_basic"><%=encode.forHtml(api.context)%></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <%}else{%>
                             <tr data-type="selectable">
                                 <td>
                                     <div class="environments_checkbox">
@@ -566,43 +768,90 @@
                                 </td>
                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
-                            </tr>
-                         <%}}
-                         else{
-                             for(i=0 ;i<environmentsList.length;i++){
-                                    if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
-                                        <tr data-type="selectable">
-                                             <td>
-                                                <div class="environments_checkbox">
-                                                    <label class="checkbox">
-                                                        <input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env">
-                                                        <span class="helper"></span>
-                                                    </label>
-                                                </div>
-                                             </td>
-                                             <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
-                                             <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                             <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
-                                        </tr>
-                                  <%}else{%>
-                                        <tr data-type="selectable">
-                                             <td>
-                                                <div class="environments_checkbox">
-                                                    <label class="checkbox">
-                                                        <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
-                                                        <span class="helper"></span>
-                                                    </label>
-                                                </div>
-                                             </td>
-                                             <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
-                                             <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                             <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
-                                        </tr>
+                                <td>
+                                    <div class="environments_data">
+                                        <%=encode.forHtml(environmentsList[i].description)%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="default_url_checkbox" align="center">
+                                        <label class="checkbox">
+                                            <input type="checkbox"
+                                                id="<%=envNameTrimmed%>_check" class="use_defaults"
+                                                name="<%=envNameTrimmed%>_check"
+                                                <%if (urlsJson != null) {
+                                                    if (urlsJson.http == "default" && urlsJson.https == "default") {%>
+                                                        checked <%}} else {%> checked <%}%> value="<%=environmentsList[i].gatewayEndpoints%>"
+                                                onclick="showHideGatewayUrls(this.id)"/>
+                                            <span class="helper"><%=i18n.localize("Use Defaults")%></span>
+                                        </label>
+                                    </div>
+                                    <%
+                                        var defaultUrls = environmentsList[i].gatewayEndpoints.split(",");
+                                        var defaultHttps, defaultHttps;
+                                        for(var a=0; a<defaultUrls.length; a++) {
+                                            if(defaultUrls[a].indexOf("https://") !== -1){
+                                                defaultHttps = defaultUrls[a].replace("https://","");
+                                            } else if (defaultUrls[a].indexOf("http://") !== -1){
+                                                defaultHttp = defaultUrls[a].replace("http://","");
+                                            }
+                                        }%>
+                                </td>
+                                                                <td  id="<%=envNameTrimmed%>_context_checkbox" class="def_context">
+                                                                    <div class="default_context_checkbox">
+                                                                         <label class="checkbox">
+                                                                              <input type="checkbox" id ="<%=envNameTrimmed%>_default_context" class="default_context"
+                                                                                   name="<%=envNameTrimmed%>_default_context"
+                                                                                   <%if (urlsJson != null) {
+                                                                                       if (urlsJson.useDefaultContext == true) {%>
+                                                                                            checked
+                                                                                   <%}
+                                                                                    } else {%> checked <%}%>
+                                                                              onclick="showHideContext(this.id)"/>
+                                                                              <span class="helper"><%=i18n.localize("Use Default Context")%></span>
+                                                                         </label>
+                                                                    </div>
+                                                                </td>
+                                <td>
+                                    <table id="<%=envNameTrimmed%>_urls" class="gateway_urls" name="<%=envNameTrimmed%>_urls">
+                                        <tbody>
+                                            <tr id="<%=envNameTrimmed%>_urls_https" name="<%=envNameTrimmed%>_urls_https">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">https://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                            if (urlsJson.https != "default") {
+                                                                var url = urlsJson.https.replace("https://" ,"");
+                                                                %>"<%=encode.forHtmlAttribute(url)%>"<%}
+                                                            } else {%><%=defaultHttps%><%}%> id="<%=envNameTrimmed%>_https" name="<%=envNameTrimmed%>_https" placeholder="" class="urlBox" />
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_https_basic"><%=encode.forHtml(api.context)%></span>
+                                                    </div>
 
-                                   <%}}}%>
-                            </tbody>
-                       </table>
+                                                </td>
+                                            </tr>
+                                            <tr id="<%=envNameTrimmed%>_urls_http" name="<%=envNameTrimmed%>_urls_http">
+                                                <td>
+                                                    <div class="input-group environments_data">
+                                                        <span class="input-group-addon" id="basic-addon1">http://</span>
+                                                        <input type="text" class="form-control validGatewayUrl" aria-describedby="basic-addon1"
+                                                            value= <%if (urlsJson != null) {
+                                                            if (urlsJson.http != "default") {
+                                                                var url = urlsJson.http.replace("http://" ,"");
+                                                                %>"<%=encode.forHtmlAttribute(url)%>"<%}
+                                                            } else {%><%=defaultHttp%><%}%> id="<%=envNameTrimmed%>_http" name="<%=envNameTrimmed%>_http" placeholder="" class="urlBox" />
+                                                        <span class="input-group-addon" id="<%=envNameTrimmed%>_http_basic"><%=encode.forHtml(api.context)%></span>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <%}}}%>
+                        </tbody>
+                    </table>
                         <script>
                         $('input').on('change', function() {
                             var values = $('input:checked.env').map(function() {
@@ -701,7 +950,7 @@
                                      <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
                                      <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
-                                     <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
+                                     <a class="btn btn-primary has-spinner" id="publish_api" onclick="runSuccessMessageHint()" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%}%>
                                 <%}%>
 
@@ -843,6 +1092,27 @@
 </script>
 
 <script>
+    var setIntervalId;
+    function runSuccessMessageHint() {
+        setIntervalId = setInterval(function() {
+            runEnjoyHintScriptOnApiPublish()
+        }, 1000);
+    }
+
+    function runEnjoyHintScriptOnApiPublish() {
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_onMessage, item_manage_success_message_script_data);
+            stopSuccessMessageHint();
+        }
+    }
+
+    function stopSuccessMessageHint() {
+        clearInterval(setIntervalId);
+    }
+
+    var enjoyhint_instance_item_manage = null;
+    var enjoyhint_instance_onMessage = null;
+
     $(document).ready(function(){
         $.ajaxSetup({
             contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -1042,7 +1312,9 @@
                 $('#cacheTimeout').hide();
             }
         });
-
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_item_manage, item_manage_script_data);
+        }
     });
 
     var hideMsg=function () {

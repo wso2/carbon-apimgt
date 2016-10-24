@@ -278,6 +278,68 @@ if(jagg.isCSRFTokenValid())
             apiData.cacheTimeout= request.getParameter("cacheTimeout","UTF-8");
             apiData.destinationStats= request.getParameter("destinationStats","UTF-8");
 		    apiData.environments = request.getParameter("environments");
+
+		    var gatewaysMap = new Object(); // the outer map contains gatewayName and URLsMap
+		    log.info("environments : "+ apiData.environments);
+            if (apiData.environments != null) {
+                var environmentArray = apiData.environments.split(",");
+
+                if (apiData.transports != null) {
+                    var transportArray = apiData.transports.split(",");
+
+                    for (i=0 ;i<environmentArray.length;i++) {
+                        var urlsMap = new Object(); // inner map which contain URLs and defaultContext boolean
+                        var trimmedEnvoName = environmentArray[i].replace(/\s/g,'');
+                        var useDefaultsCheckboxId = trimmedEnvoName + "_check";
+                        var defaultContextCheckBoxId = trimmedEnvoName + "_default_context";
+
+                        if (request.getParameter(useDefaultsCheckboxId) == null) {
+
+                            if (transportArray[0] == "http" && transportArray[1] == null) { //only http
+
+                                var textboxId = trimmedEnvoName + "_http";
+                                urlsMap["http"] = "http://" + request.getParameter(textboxId).trim();
+
+                                if(request.getParameter(defaultContextCheckBoxId) == null) {
+                                        urlsMap["useDefaultContext"] = "false";
+                                } else {
+                                    urlsMap["useDefaultContext"] = "true";
+                                }
+                            } else if (transportArray[0] == "https" && transportArray[1] == null) { //only https
+
+                                var textboxId = trimmedEnvoName + "_https";
+                                urlsMap["https"] = "https://" + request.getParameter(textboxId).trim();
+
+                                if(request.getParameter(defaultContextCheckBoxId) == null) {
+                                    urlsMap["useDefaultContext"] = "false";
+                                } else {
+                                    urlsMap["useDefaultContext"] = "true";
+                                }
+                            } else if (transportArray[0] != null && transportArray[1] != null) { //both http and https
+
+                                var textboxId_https = trimmedEnvoName + "_https";
+                                var textboxId_http = trimmedEnvoName + "_http";
+
+                                urlsMap["https"] = "https://" + request.getParameter(textboxId_https).trim();
+                                urlsMap["http"] = "http://" + request.getParameter(textboxId_http).trim();
+
+                                if(request.getParameter(defaultContextCheckBoxId) == null) {
+                                    urlsMap["useDefaultContext"] = "false";
+                                } else {
+                                    urlsMap["useDefaultContext"] = "true";
+                                }
+				            }
+                        } else {
+                            urlsMap["https"] = "default";
+                            urlsMap["http"] = "default";
+                            urlsMap["useDefaultContext"] = "true";
+				        }
+                        var urlsOfGateway = JSON.stringify(urlsMap);
+                        gatewaysMap[environmentArray[i]]  = urlsOfGateway;
+                    }
+                }
+            }
+            apiData.gatewayUrls = JSON.stringify(gatewaysMap);
             apiData.productionTps = request.getParameter("productionTps");
             apiData.sandboxTps = request.getParameter("sandboxTps");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
