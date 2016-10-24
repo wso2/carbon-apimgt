@@ -11,15 +11,12 @@ import java.util.List;
 /**
  * Token
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class Token   {
-  @JsonProperty("accessToken")
   private String accessToken = null;
 
-  @JsonProperty("tokenScopes")
   private List<String> tokenScopes = new ArrayList<String>();
 
-  @JsonProperty("validityTime")
   private Long validityTime = null;
 
   public Token accessToken(String accessToken) {

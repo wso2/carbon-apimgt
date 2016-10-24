@@ -12,18 +12,14 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfo;
 /**
  * ApplicationList
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class ApplicationList   {
-  @JsonProperty("count")
   private Integer count = null;
 
-  @JsonProperty("next")
   private String next = null;
 
-  @JsonProperty("previous")
   private String previous = null;
 
-  @JsonProperty("list")
   private List<ApplicationInfo> list = new ArrayList<ApplicationInfo>();
 
   public ApplicationList count(Integer count) {

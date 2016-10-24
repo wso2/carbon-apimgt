@@ -9,12 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Tag
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public class Tag   {
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("weight")
   private Integer weight = null;
 
   public Tag name(String name) {

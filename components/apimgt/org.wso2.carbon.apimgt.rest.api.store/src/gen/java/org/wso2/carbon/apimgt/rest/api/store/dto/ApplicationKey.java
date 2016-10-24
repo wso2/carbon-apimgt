@@ -13,18 +13,14 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.Token;
 /**
  * ApplicationKey
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class ApplicationKey   {
-  @JsonProperty("consumerKey")
   private String consumerKey = null;
 
-  @JsonProperty("consumerSecret")
   private String consumerSecret = null;
 
-  @JsonProperty("supportedGrantTypes")
   private List<String> supportedGrantTypes = new ArrayList<String>();
 
-  @JsonProperty("keyState")
   private String keyState = null;
 
   /**
@@ -58,10 +54,8 @@ public class ApplicationKey   {
     }
   }
 
-  @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("token")
   private Token token = null;
 
   public ApplicationKey consumerKey(String consumerKey) {

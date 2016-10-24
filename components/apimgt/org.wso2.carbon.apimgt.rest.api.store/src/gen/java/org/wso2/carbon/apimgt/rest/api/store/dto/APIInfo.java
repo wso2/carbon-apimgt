@@ -9,27 +9,20 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIInfo
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class APIInfo   {
-  @JsonProperty("id")
   private String id = null;
 
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("context")
   private String context = null;
 
-  @JsonProperty("version")
   private String version = null;
 
-  @JsonProperty("provider")
   private String provider = null;
 
-  @JsonProperty("status")
   private String status = null;
 
   public APIInfo id(String id) {

@@ -10,18 +10,14 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Subscription
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public class Subscription   {
-  @JsonProperty("subscriptionId")
   private String subscriptionId = null;
 
-  @JsonProperty("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("apiIdentifier")
   private String apiIdentifier = null;
 
-  @JsonProperty("tier")
   private String tier = null;
 
   /**
@@ -61,7 +57,6 @@ public class Subscription   {
     }
   }
 
-  @JsonProperty("status")
   private StatusEnum status = null;
 
   public Subscription subscriptionId(String subscriptionId) {

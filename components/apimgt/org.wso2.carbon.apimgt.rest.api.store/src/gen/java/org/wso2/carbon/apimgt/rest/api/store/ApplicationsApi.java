@@ -16,6 +16,9 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 
+import org.wso2.msf4j.Microservice;
+import org.osgi.service.component.annotations.Component;
+
 import java.io.InputStream;
 
 //import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -26,12 +29,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.*;
 
+@Component(
+    name = "org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi",
+    service = Microservice.class,
+    immediate = true
+)
 @Path("/applications")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the applications API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
-public class ApplicationsApi  {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
+public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();
 
     @DELETE

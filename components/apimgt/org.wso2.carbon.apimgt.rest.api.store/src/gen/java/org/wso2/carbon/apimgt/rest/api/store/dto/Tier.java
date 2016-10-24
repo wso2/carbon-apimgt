@@ -13,12 +13,10 @@ import java.util.Map;
 /**
  * Tier
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class Tier   {
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("description")
   private String description = null;
 
   /**
@@ -52,16 +50,12 @@ public class Tier   {
     }
   }
 
-  @JsonProperty("tierLevel")
   private TierLevelEnum tierLevel = null;
 
-  @JsonProperty("attributes")
   private Map<String, String> attributes = new HashMap<String, String>();
 
-  @JsonProperty("requestCount")
   private Long requestCount = null;
 
-  @JsonProperty("unitTime")
   private Long unitTime = null;
 
   /**
@@ -95,10 +89,8 @@ public class Tier   {
     }
   }
 
-  @JsonProperty("tierPlan")
   private TierPlanEnum tierPlan = null;
 
-  @JsonProperty("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = null;
 
   public Tier name(String name) {
