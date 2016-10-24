@@ -18,9 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -28,7 +33,9 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,6 +167,26 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
 		CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
 		                                          true, userAdminStub._getServiceClient());
 		userAdminStub.deleteUser(userName);
+
+	}
+
+	/**
+	 * Method to add user to userStore
+	 * @param serverURL
+	 * @param userDTO
+	 * @throws Exception
+	 */
+	public void addUserToUserStore(String serverURL, UserDTO userDTO) throws RemoteException, UserRegistrationAdminServiceException {
+		if (log.isDebugEnabled()) {
+			log.debug("Adding to user store user :" + userDTO.getUserName());
+		}
+        UserRegistrationAdminServiceStub stub = new UserRegistrationAdminServiceStub(null, serverURL +
+                "UserRegistrationAdminService");
+        ServiceClient client = stub._getServiceClient();
+        Options option = client.getOptions();
+        option.setManageSession(true);
+
+        stub.addUser(userDTO);
 
 	}
 }
