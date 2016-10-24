@@ -9,6 +9,8 @@
     //fetch and display tiers
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
+    var module = jagg.module("product");
+    var products = module.getAllProducts().products;
     var resourceTiers = mod.getResourceTiers().tiers;
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
     for (var i = 0; i < resourceTiers.length; i++){
@@ -261,7 +263,55 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <div>
+                                    <div class="heading no-description"><%=i18n.localize("API Products")%></div>
+                                </div>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse">
+                            <div class="panel-body form-group">
+                                <label class="control-label col-sm-3"><%=i18n.localize("Select an option")%>:</label>
+                                <div class="col-sm-8">
+                                    <label class="radio" for="bundleProduct">
+                                       <input type="radio" class="product_options" id ="bundleProduct" name="product_options"
+                                       checked="checked" value="bundleProduct">
+                                       <span class="helper"><%=i18n.localize("Bundle with an existing API Product")%></span>
+                                    </label><br>
+                                    <div class="form-group productList"><br>
+                                        <label class="control-label col-xs-3"><%=i18n.localize("API Products")%>:
+                                        </label>
+                                        <div class="col-lg-5">
+                                            <select class="select form-control" id="apiProducts" name="apiProducts">
+                                                <%
+                                                for (var i = 0; i < products.length; i++) {
+                                                    %>
+                                                    <option id="<%=encode.forHtmlAttribute(String(products[i].productName) + "-" + String(products[i].productVersion))%>"<%if (i == 0) {%>select="selected"<%}%>>
+                                                    <span><%=encode.forHtml(String(products[i].productName) + "-" + String(products[i].productVersion))%></span>
+                                                    </option>
+                                                    <%
+                                                }
+                                                %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <label class="radio" for="bundleNewProduct">
+                                        <input type="radio" class="product_options" id ="bundleNewProduct" name="product_options" value="bundleNewProduct">
+                                        <span class="helper"><%=i18n.localize("Create a new API Product an bundle with it")%></span>
+                                    </label><br>
+                                    <div class="form-group newProduct" style="display: none"><br>
+                                        <a class="control-label col-sm-4"><span><%=i18n.localize("Add new API Product")%></span></a>
+                                    </div>
+                                    <label class="radio" for="onlyAPI">
+                                         <input type="radio" class="product_options" id ="onlyAPI" name="product_options" value="onlyAPI">
+                                         <span class="helper"><%=i18n.localize("Do not bundle with an API Product")%></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -1133,6 +1183,104 @@
             </script>
         </div>
       </div>
+    </div>
+</div>
+
+<div  id="add_new_apiProduct_modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3><%=i18n.localize("Add new API Product")%></h3>
+            </div>
+            <div class="modal-body">
+                <form id="product_form" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="productName"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
+                        <div class="col-sm-4">
+                        <input type="text" id="productName" name="productName" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" placeholder="<%=i18n.localize("Eg: api_product_name")%>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="productVersion"><%=i18n.localize("Version")%><span class="requiredAstrix">*</span></label>
+                        <div class="col-sm-4">
+                        <input type="text" id="productVersion" name="productVersion"  class="form-control required validateAPIVersion validInput noSpace" placeholder="<%=i18n.localize("Eg: v1.0.0")%>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="roles"><%=i18n.localize("Roles")%></label>
+                        <div class="col-sm-4">
+                        <input type="text" id="roles" class="form-control" placeholder="<%=i18n.localize("E.g.: role1,role2,role3")%>" data-role="tagsinput" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="productDescription"><%=i18n.localize("Description")%></label>
+                        <div class="col-sm-4">
+                        <textarea id="productDescription" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="tiers"><%=i18n.localize("Throttling Tiers")%><span class="requiredAstrix">*</span></label>
+                        <div class="col-sm-4">
+                            <div class="controls tierSelect">
+                                <select class="selectpicker form-control" id="tiers" name="tiers" multiple>
+                                    <%
+                                    for (var i = 0; i < tiers.length; i++) {
+                                        %>
+                                        <option id="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>">
+                                        <span><%= encode.forHtml(String(tiers[i].tierDisplayName)) %> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
+                                        </option>
+                                        <%
+                                    }
+                                    %>
+                                </select>
+                                <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Subscription Tier.")%></label>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="imageUrl"><%=i18n.localize("Thumbnail Image")%></label>
+                        <div class="col-sm-9 col-sm-offset-3">
+                            <div class="fileinput fileinput-new" data-provides="fileinput">
+                                <div class="fileinput-new thumbnail" style="width: 150px; height: 150px;">
+                                   <img id="apiEditThumb" alt="<%=i18n.localize("Default API Thumbnail")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
+                                </div>
+                                <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
+                                <div>
+                                    <span class="btn btn-secondary btn-file btn-block">
+                                        <span class="fileinput-new"><%=i18n.localize("Select image")%></span>
+                                        <span class="fileinput-exists"><%=i18n.localize("Change")%></span>
+                                        <input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb">
+                                    </span>
+                                    <a href="#" class="btn btn-secondary fileinput-exists btn-block" data-dismiss="fileinput" title="removeDoc"><%=i18n.localize("Remove")%></a>
+                                </div>
+                            </div>
+                            <p class="help-block" id="rolesHelp"><%=i18n.localize("Dimensions (max): 100 x 100 pixels")%></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h4><%=i18n.localize("Business Information")%></h4>
+                    <br>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="businessOwner"><%=i18n.localize("Business Owner")%></label>
+                        <div class="col-sm-4">
+                        <input type="text" id="businessOwner" name="businessOwner" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="businessOwnerEmail"><%=i18n.localize("Business Owner Email")%></label>
+                        <div class="col-sm-4">
+                        <input type="text" id="businessOwnerEmail" name="businessOwnerEmail" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div id="res" class="hide" style="color:red;float:left"></div>
+                <a class="btn btn-primary" id="product_submit" title="<%=i18n.localize("Save")%>">Save</a>
+                <a class="btn btn-secondary" id="product_close" title="<%=i18n.localize("Close")%>">Close</a>
+            </div>
+        </div>
     </div>
 </div>
        <script type="text/javascript">
