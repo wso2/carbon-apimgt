@@ -336,7 +336,7 @@
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
         <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
-
+    <servlet-api-version>2.5</servlet-api-version>
         <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
 
     </properties>
