@@ -18,8 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+//import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+//import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
 
