@@ -14,6 +14,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.Subscription;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
+import org.wso2.msf4j.Microservice;
+import org.osgi.service.component.annotations.Component;
+
 import java.io.InputStream;
 
 //import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -24,12 +27,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.*;
 
+@Component(
+    name = "org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApi",
+    service = Microservice.class,
+    immediate = true
+)
 @Path("/subscriptions")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
-public class SubscriptionsApi  {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
     @GET

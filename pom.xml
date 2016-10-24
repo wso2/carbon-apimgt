@@ -307,10 +307,8 @@
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
-        <carbon.gw.version>1.0.0-SNAPSHOT</carbon.gw.version>
-        <carbon.gw.package.export.version>1.0.0</carbon.gw.package.export.version>
-
         <org.wso2.msf4j.version>2.0.0</org.wso2.msf4j.version>
+        <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
         <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
@@ -372,9 +370,10 @@
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
         <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
-    <servlet-api-version>2.5</servlet-api-version>
+        <servlet-api-version>2.5</servlet-api-version>
         <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
-<com.fasterxml.jackson.datatype.version>2.4.1</com.fasterxml.jackson.datatype.version>
+        <hikari.package.import.version.range>[2.4.1, 3.0.0)</hikari.package.import.version.range>
+	<com.fasterxml.jackson.datatype.version>2.4.1</com.fasterxml.jackson.datatype.version>
     </properties>
 
 </project>
