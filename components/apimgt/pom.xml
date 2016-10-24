@@ -40,7 +40,7 @@
         <module>org.wso2.carbon.apimgt.dao</module>
         <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
         <module>org.wso2.carbon.apimgt.rest.api.store</module>
-        <!--module>org.wso2.carbon.apimgt.rest.api.util</module-->
+        <module>org.wso2.carbon.apimgt.rest.api.util</module>
         <module>org.wso2.carbon.apimgt.indexing</module>
     </modules>
 
