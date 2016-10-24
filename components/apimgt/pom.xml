@@ -33,7 +33,9 @@
     <artifactId>apimgt</artifactId>
     <packaging>pom</packaging>
     <modules>
+<!--
         <module>org.wso2.carbon.apimgt.api</module>
+-->
         <module>org.wso2.carbon.apimgt.models</module>
         <module>org.wso2.carbon.apimgt.dao</module>
         <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
