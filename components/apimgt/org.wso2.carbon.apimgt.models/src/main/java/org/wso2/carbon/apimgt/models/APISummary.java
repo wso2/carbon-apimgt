@@ -21,12 +21,11 @@
 package org.wso2.carbon.apimgt.models;
 
 
-
 /**
- * Representation of an API object
+ * Representation an API object that contains a limited number of details
  */
 
-public final class API {
+public final class APISummary {
     private String provider;
     private String version;
     private String description;
@@ -35,11 +34,12 @@ public final class API {
     private String id;
     private String status;
 
-    public API(String provider, String version, String name) {
+    public APISummary(String provider, String version, String name) {
         this.provider = provider;
         this.version = version;
         this.name = name;
     }
+
 
     public String getProvider() {
         return provider;
@@ -97,25 +97,24 @@ public final class API {
         this.status = status;
     }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            API that = (API) o;
-            return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
 
-        @Override
-        public int hashCode() {
-            int result = name.hashCode();
-            result = 31 * result + provider.hashCode();
-            result = 31 * result + version.hashCode();
-            return result;
-        }
-    
+        APISummary that = (APISummary) o;
+        return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + provider.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
+    }
 }
