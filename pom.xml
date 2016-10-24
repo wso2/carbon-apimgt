@@ -188,7 +188,7 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
+                <artifactId>javax.servlet-api</artifactId>
                 <version>${servlet-api-version}</version>
             </dependency>
             <dependency>
@@ -196,7 +196,6 @@
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${com.fasterxml.jackson.datatype.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.sql</artifactId>
@@ -216,6 +215,16 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${com.fasterxml.jackson.datatbind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${javax.ws.rs-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -370,10 +379,13 @@
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
         <carbon.apimgt.exp.pkg.version>7.0.0-SNAPSHOT</carbon.apimgt.exp.pkg.version>
-        <servlet-api-version>2.5</servlet-api-version>
+        <servlet-api-version>3.1.0</servlet-api-version>
         <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
         <hikari.package.import.version.range>[2.4.1, 3.0.0)</hikari.package.import.version.range>
-	<com.fasterxml.jackson.datatype.version>2.4.1</com.fasterxml.jackson.datatype.version>
+	    <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
+	    <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
+        <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
+
     </properties>
 
 </project>
