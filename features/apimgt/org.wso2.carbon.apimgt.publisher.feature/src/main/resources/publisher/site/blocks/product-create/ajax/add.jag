@@ -60,8 +60,6 @@ if (jagg.isCSRFTokenValid())
                 apiProduct.setUpdatedUser(provider);
                 apiProduct.setBusinessOwner(businessOwner);
                 apiProduct.setBusinessOwnerEmail(businessOwnerEmail);
-                //apiProduct.setVisibility("");
-                //apiProduct.setSubscriptionAvailability("");
 
                 tiers = tiers.substring(0, tiers.length - 1);
                 var tierList = tiers.split(",");

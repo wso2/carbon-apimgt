@@ -36,7 +36,7 @@ var createProduct = function (apiProduct) {
             error: false
         };
     } catch (e) {
-        log.error(e);
+        log.error("Unable to create API Product" + e);
         return {
             error: true,
             message: e.message.split(":")[1]

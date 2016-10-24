@@ -43,7 +43,7 @@ var getAllProducts = function () {
             products: productArray
         };
     } catch (e) {
-        log.error(e.message);
+        log.error("Unable to list API Products" + e.message);
         return {
             error: e,
             products: null
