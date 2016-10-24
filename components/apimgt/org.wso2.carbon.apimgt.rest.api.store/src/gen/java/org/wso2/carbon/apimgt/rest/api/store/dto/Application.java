@@ -12,33 +12,24 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKey;
 /**
  * Application
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class Application   {
-  @JsonProperty("applicationId")
   private String applicationId = null;
 
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("subscriber")
   private String subscriber = null;
 
-  @JsonProperty("throttlingTier")
   private String throttlingTier = null;
 
-  @JsonProperty("callbackUrl")
   private String callbackUrl = null;
 
-  @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("status")
   private String status = null;
 
-  @JsonProperty("groupId")
   private String groupId = null;
 
-  @JsonProperty("keys")
   private List<ApplicationKey> keys = new ArrayList<ApplicationKey>();
 
   public Application applicationId(String applicationId) {

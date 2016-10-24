@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
             <groupId>org.wso2.msf4j</groupId>
-            <artifactId>msf4j-all</artifactId>
+            <artifactId>msf4j-core</artifactId>
 	<version>2.0.0</version>
         </dependency>
      <dependency>
@@ -115,15 +115,9 @@
             org.wso2.carbon.apimgt.rest.api.store.internal
         </private.package>
         <import.package>
-            org.eclipse.osgi.util,
-            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
-            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
-            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
-            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
-            com.zaxxer.hikari.*,
-            org.wso2.msf4j.*; version="2.0.0";
+            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
+            org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
             *;resolution:=optional
         </import.package>
         <export.package>
@@ -131,9 +125,7 @@
             org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
         </carbon.component>
-        <dynamic.import.package>*</dynamic.import.package>
     </properties>
-
 </project>

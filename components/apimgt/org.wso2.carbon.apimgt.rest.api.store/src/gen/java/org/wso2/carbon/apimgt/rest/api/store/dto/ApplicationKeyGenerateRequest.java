@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * ApplicationKeyGenerateRequest
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:35.955+05:30")
 public class ApplicationKeyGenerateRequest   {
   /**
    * Gets or Sets keyType
@@ -45,19 +45,14 @@ public class ApplicationKeyGenerateRequest   {
     }
   }
 
-  @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("validityTime")
   private String validityTime = null;
 
-  @JsonProperty("callbackUrl")
   private String callbackUrl = null;
 
-  @JsonProperty("accessAllowDomains")
   private List<String> accessAllowDomains = new ArrayList<String>();
 
-  @JsonProperty("scopes")
   private List<String> scopes = new ArrayList<String>();
 
   public ApplicationKeyGenerateRequest keyType(KeyTypeEnum keyType) {

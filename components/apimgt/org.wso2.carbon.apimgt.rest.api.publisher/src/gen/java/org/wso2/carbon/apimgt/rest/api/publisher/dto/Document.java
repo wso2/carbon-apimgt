@@ -10,12 +10,10 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Document
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public class Document   {
-  @JsonProperty("documentId")
   private String documentId = null;
 
-  @JsonProperty("name")
   private String name = null;
 
   /**
@@ -59,10 +57,8 @@ public class Document   {
     }
   }
 
-  @JsonProperty("type")
   private TypeEnum type = null;
 
-  @JsonProperty("summary")
   private String summary = null;
 
   /**
@@ -98,13 +94,10 @@ public class Document   {
     }
   }
 
-  @JsonProperty("sourceType")
   private SourceTypeEnum sourceType = null;
 
-  @JsonProperty("sourceUrl")
   private String sourceUrl = null;
 
-  @JsonProperty("otherTypeName")
   private String otherTypeName = null;
 
   public Document documentId(String documentId) {
