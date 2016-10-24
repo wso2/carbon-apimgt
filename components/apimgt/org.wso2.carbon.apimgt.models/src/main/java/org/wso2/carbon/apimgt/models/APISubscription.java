@@ -19,21 +19,17 @@
  */
 package org.wso2.carbon.apimgt.models;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 /**
  * Subscriber's view of the API
  */
 
 public class APISubscription {
 
-    private APIIdentifier apiId;
+    private String apiId;
     private Application application;
-    private String uuid;
+    private java.lang.String uuid;
 
-    public APISubscription(Application application, APIIdentifier apiId) {
+    public APISubscription(Application application, String apiId) {
         this.application = application;
         this.apiId = apiId;
     }
@@ -42,23 +38,27 @@ public class APISubscription {
         return application;
     }
 
-    public APIIdentifier getApiId() {
+    public String getApiId() {
         return apiId;
     }
 
 
-    public void setUUID(String uuid) {
+    public void setUUID(java.lang.String uuid) {
         this.uuid = uuid;
     }
 
-    public String getUUID() {
+    public java.lang.String getUUID() {
         return uuid;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         APISubscription that = (APISubscription) o;
         return apiId.equals(that.apiId) && application.equals(that.application);

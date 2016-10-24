@@ -17,30 +17,40 @@
  *  under the License.
  *
  */
+
 package org.wso2.carbon.apimgt.models;
 
+import java.util.List;
+
 /**
- * Subscriber of API. Mapping between a particular Subscriber using a selected API is captured in
+ * Matching results related to API summary details
  */
+public class APISummaryResults {
+    private List<APISummary> apiSummaryList;
+    private boolean isMoreResultsExist;
+    private int nextOffset;
 
-public class Subscriber {
-
-    private String name;
-    private String email;
-
-    public Subscriber(String name) {
-        this.name = name;
+    public List<APISummary> getApiSummaryList() {
+        return apiSummaryList;
     }
 
-    public String getName() {
-        return name;
+    public void setApiSummaryList(List<APISummary> apiSummaryList) {
+        this.apiSummaryList = apiSummaryList;
     }
 
-    public String getEmail() {
-        return email;
+    public boolean isMoreResultsExist() {
+        return isMoreResultsExist;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setMoreResultsExist(boolean moreResultsExist) {
+        isMoreResultsExist = moreResultsExist;
+    }
+
+    public int getNextOffset() {
+        return nextOffset;
+    }
+
+    public void setNextOffset(int nextOffset) {
+        this.nextOffset = nextOffset;
     }
 }

@@ -30,7 +30,7 @@ public final class Application {
     private String name;
     private String uuid;
     private Subscriber subscriber;
-    private Set<APISubscription> APISubscriptions = new LinkedHashSet<APISubscription>();
+    private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
 
     public Application(String name, Subscriber subscriber) {
         this.name = name;
@@ -46,18 +46,21 @@ public final class Application {
     }
 
     public Set<APISubscription> getAPISubscriptions() {
-        return APISubscriptions;
+        return apiSubscriptions;
     }
 
-    public void addAPISubscriptions(Set<APISubscription> APISubscriptions) {
-        this.APISubscriptions.addAll(APISubscriptions);
+    public void addAPISubscriptions(Set<APISubscription> apiSubscriptions) {
+        this.apiSubscriptions.addAll(apiSubscriptions);
     }
 
-
-	@Override
+    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Application that = (Application) o;
         return name.equals(that.name) && subscriber.equals(that.subscriber);
