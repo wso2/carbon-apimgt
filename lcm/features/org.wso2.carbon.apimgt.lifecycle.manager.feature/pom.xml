@@ -17,12 +17,10 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.sql</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.core</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 
