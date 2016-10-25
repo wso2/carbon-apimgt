@@ -12,21 +12,16 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorListItem;
 /**
  * Error
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public class Error   {
-  @JsonProperty("code")
   private Long code = null;
 
-  @JsonProperty("message")
   private String message = null;
 
-  @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("moreInfo")
   private String moreInfo = null;
 
-  @JsonProperty("error")
   private List<ErrorListItem> error = new ArrayList<ErrorListItem>();
 
   public Error code(Long code) {

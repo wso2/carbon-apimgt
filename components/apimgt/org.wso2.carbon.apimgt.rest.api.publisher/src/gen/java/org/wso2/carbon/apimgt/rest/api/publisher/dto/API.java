@@ -12,48 +12,34 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformation;
 /**
  * API
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public class API   {
-  @JsonProperty("id")
   private String id = null;
 
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("context")
   private String context = null;
 
-  @JsonProperty("version")
   private String version = null;
 
-  @JsonProperty("provider")
   private String provider = null;
 
-  @JsonProperty("apiDefinition")
   private String apiDefinition = null;
 
-  @JsonProperty("status")
   private String status = null;
 
-  @JsonProperty("isDefaultVersion")
   private Boolean isDefaultVersion = null;
 
-  @JsonProperty("transport")
   private List<String> transport = new ArrayList<String>();
 
-  @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
 
-  @JsonProperty("tiers")
   private List<String> tiers = new ArrayList<String>();
 
-  @JsonProperty("thumbnailUrl")
   private String thumbnailUrl = null;
 
-  @JsonProperty("businessInformation")
   private APIBusinessInformation businessInformation = null;
 
   public API id(String id) {

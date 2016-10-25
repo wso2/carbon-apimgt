@@ -19,7 +19,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:47:36.442+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId ,String documentId ,String xWSO2Tenant ,String accept ,String ifNoneMatch ,String ifModifiedSince ) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId ,String documentId ,String xWSO2Tenant ,String accept ,String ifNoneMatch ,String ifModifiedSince ) throws NotFoundException;

@@ -13,21 +13,49 @@
 <packaging>bundle</packaging>
 
     <dependencies>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>${servlet-api-version}</version>
-    </dependency>
-    <dependency>
+        <dependency>
             <groupId>org.wso2.msf4j</groupId>
-            <artifactId>msf4j-all</artifactId>
-	<version>2.0.0</version>
+            <artifactId>msf4j-core</artifactId>
         </dependency>
-     <dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.datasources</groupId>
+            <artifactId>org.wso2.carbon.datasource.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.4.1</version>
-        </dependency> 
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.dao</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.models</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
 
@@ -111,25 +139,17 @@
             org.wso2.carbon.apimgt.rest.api.store.internal
         </private.package>
         <import.package>
-            org.eclipse.osgi.util,
-            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
-            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
-            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
-            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
-            com.zaxxer.hikari.*,
-            org.wso2.msf4j.*; version="2.0.0";
+            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
+            org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
             *;resolution:=optional
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.store.internal,
-            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
+            org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.exp.pkg.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
         </carbon.component>
-        <dynamic.import.package>*</dynamic.import.package>
     </properties>
-
 </project>

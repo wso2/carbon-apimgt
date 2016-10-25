@@ -10,7 +10,7 @@
     </parent>
     <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
     <name>API Store Micro Service</name>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
@@ -18,64 +18,46 @@
             <artifactId>msf4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
+            <groupId>org.wso2.carbon.datasources</groupId>
+            <artifactId>org.wso2.carbon.datasource.core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.datasources</groupId>
-            <artifactId>org.wso2.carbon.datasource.core</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang.wso2</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.dao</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.models</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
-
         <plugins>
             <plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
@@ -111,80 +93,9 @@
                         <manifest>
                             <mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</mainClass>
                         </manifest>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>bundle-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>
-                            ${project.artifactId}
-                        </Bundle-SymbolicName>
-                        <Private-Package>
-                            org.wso2.carbon.apimgt.rest.api.store.internal
-                        </Private-Package>
-                        <Import-Package>
-                            org.eclipse.osgi.util,
-                            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-                            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
-                            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
-                            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
-                            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
-                            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
-                            com.zaxxer.hikari.*
-                        </Import-Package>
-                        <Export-Package>
-                            !org.wso2.carbon.apimgt.rest.api.store.internal,
-                            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven.shadeplugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>org.wso2.carbon.apimgt.rest.api.store-${carbon.apimgt.version}_standalone</finalName>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${microservice.mainClass}</mainClass>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -219,5 +130,19 @@
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
+        <private.package>org.wso2.carbon.apimgt.rest.api.publisher.internal</private.package>
+        <import.package>
+            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
+            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
+            org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
+            *;resolution:=optional
+        </import.package>
+        <export.package>
+            !org.wso2.carbon.apimgt.rest.api.store.internal,
+            org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.exp.pkg.version}",
+        </export.package>
+        <carbon.component>
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
+        </carbon.component>
     </properties>
 </project>
