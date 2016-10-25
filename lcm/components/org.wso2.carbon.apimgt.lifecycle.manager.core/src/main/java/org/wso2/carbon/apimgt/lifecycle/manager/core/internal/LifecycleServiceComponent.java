@@ -49,7 +49,7 @@ public class LifecycleServiceComponent   {
     public void start(BundleContext bundleContext) {
         bundleContext.registerService(LifecycleManagementService.class, new LifecycleManagementServiceImpl(), null);
         if (log.isDebugEnabled()) {
-            log.debug("Social Activity service is activated  with SQL Implementation");
+            log.debug("Lifecycle service is activated.");
         }
     }
 

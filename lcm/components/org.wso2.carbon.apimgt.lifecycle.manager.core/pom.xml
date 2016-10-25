@@ -116,13 +116,19 @@
         <!--<artifactId>mysql-connector-java</artifactId>-->
         <!--<version>5.1.6</version>-->
         <!--</dependency>-->
+        <!-- Used to run unit tests pointing to postgresql database -->
+        <!--<dependency>-->
+            <!--<groupId>org.postgresql</groupId>-->
+            <!--<artifactId>postgresql</artifactId>-->
+            <!--<version>9.4.1211.jre7</version>-->
+        <!--</dependency>-->
 
         <!-- ORACLE database driver -->
-        <!--<dependency>-->
-            <!--<groupId>com.oracle</groupId>-->
-            <!--<artifactId>ojdbc6</artifactId>-->
-            <!--<version>11.2.0.3</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.3</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.datasources</groupId>
             <artifactId>org.wso2.carbon.datasource.core</artifactId>

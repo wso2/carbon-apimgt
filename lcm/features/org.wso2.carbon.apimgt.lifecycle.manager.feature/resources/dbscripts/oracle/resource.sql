@@ -1,6 +1,6 @@
 
 CREATE TABLE LC_DEFINITIONS(
-            LC_ID INTEGER ,
+            LC_ID INTEGER NOT NULL,
             LC_NAME VARCHAR(255),
             LC_CONTENT BLOB,
             UNIQUE (LC_ID),

@@ -27,9 +27,96 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean_target</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>clean-lifecyel-h2-database</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete file="resources/database/WSO2LIFECYCLE_DB.mv.db" />
+                                <delete file="resources/database/WSO2LIFECYCLE_DB.trace.db" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create-carbon-lifecycle-database</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <path id="h2.classpath">
+                                    <path refid="maven.compile.classpath" />
+                                </path>
+                                <echo message="########### Creating Carbon Lifecycle Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/WSO2LIFECYCLE_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                    <classpath>
+                                        <path refid="h2.classpath" />
+                                    </classpath>
+                                    <fileset file="${basedir}/resources/dbscripts/h2/resource.sql" />
+                                </sql>
+                                <echo message="##################### END ########################" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prefilter-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>conf/**</include>
+                                        <include>dbscripts/**</include>
+                                        <include>database/**</include>
+                                        <include>p2.inf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.wso2.carbon.maven</groupId>
                 <artifactId>carbon-feature-plugin</artifactId>
-                <version>2.0.0</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -54,11 +141,11 @@
                             <bundles>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.lifecycle.manager.sql</symbolicName>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.lifecycle.manager.core</symbolicName>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
