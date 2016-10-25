@@ -249,7 +249,8 @@ public class LifecycleDatabaseCreator {
                 executeSQL(sql.toString());
             }
         } catch (IOException e) {
-            log.error("Error occurred while executing SQL script for creating Lifecycle database", e);
+            log.error("Error occurred "
+                    + "while executing SQL script for creating Lifecycle database", e);
             throw new LifecycleManagerDatabaseException(
                     "Error occurred while executing SQL script for creating Lifecycle database", e);
 

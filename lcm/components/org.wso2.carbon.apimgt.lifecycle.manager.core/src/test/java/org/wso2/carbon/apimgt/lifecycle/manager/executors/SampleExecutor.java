@@ -36,17 +36,18 @@ public class SampleExecutor implements Executor {
 
     private Map parameterMap = new HashMap();
 
-    @Override public void init(Map parameterMap) {
+    @Override
+    public void init(Map parameterMap) {
         this.parameterMap = parameterMap;
     }
 
-    @Override public boolean execute(Object resource, String currentState, String targetState) {
+    @Override
+    public void execute(Object resource, String currentState, String targetState) {
         SampleAPI api = (SampleAPI) resource;
         for (InputBean inputBean : api.getLifecycleState().getInputBeanList()) {
             log.info(inputBean.getName() + " : " + inputBean.getValues());
         }
         log.info("executed #####################################################");
-        return true;
     }
 
 }

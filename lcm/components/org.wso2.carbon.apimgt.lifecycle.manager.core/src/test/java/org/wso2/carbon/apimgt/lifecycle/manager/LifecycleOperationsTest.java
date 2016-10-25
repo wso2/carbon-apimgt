@@ -140,6 +140,7 @@ public class LifecycleOperationsTest {
         assertNotNull(LifecycleUtils.getLifecycleConfiguration(TestConstants.SERVICE_LIFE_CYCLE));
     }
 
+    @Test(dependsOnMethods = "testAddLifecycle")
     public void testAddSameLifecycle() throws Exception {
         String payload = readLifecycleFile(
                 System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
@@ -150,6 +151,7 @@ public class LifecycleOperationsTest {
         }
     }
 
+    @Test(dependsOnMethods = "testAddLifecycle")
     public void testUpdateLifecycle() throws Exception {
         String payload = readLifecycleFile(
                 System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycleUpdated.xml");
@@ -160,6 +162,7 @@ public class LifecycleOperationsTest {
                 ("transitionPermission"));
     }
 
+    @Test(dependsOnMethods = "testAddLifecycle")
     public void testDeleteLifecycle() throws Exception {
         String payload = readLifecycleFile(System.getProperty("LCConfigPath") + File.separator + "APILifeCycle.xml");
         LifecycleUtils.addLifecycle(payload);
@@ -168,6 +171,7 @@ public class LifecycleOperationsTest {
         assertTrue(LifecycleUtils.getLifecycleList().length == 1);
     }
 
+    @Test(dependsOnMethods = "testUpdateLifecycle")
     public void testAssociateLifecycle() throws Exception {
         sampleAPI = createSampleAPI();
         sampleAPI.associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE,
@@ -176,6 +180,7 @@ public class LifecycleOperationsTest {
         assertNotNull(sampleAPI.getLifecycleState().getLifecycleId());
     }
 
+    @Test(dependsOnMethods = "testAssociateLifecycle")
     public void testCheckDeletingAssociatedLifecycle() throws Exception {
         try {
             LifecycleUtils.deleteLifecycle(TestConstants.SERVICE_LIFE_CYCLE);
@@ -184,6 +189,7 @@ public class LifecycleOperationsTest {
         }
     }
 
+    @Test(dependsOnMethods = "testAssociateLifecycle")
     public void testChangeLifecycleState() throws Exception {
         LifecycleState currentState = sampleAPI.getLifecycleState();
         String nextStateString = currentState.getAvailableTransitionBeanList().get(0)
@@ -202,6 +208,7 @@ public class LifecycleOperationsTest {
 
     }
 
+    @Test(dependsOnMethods = "testAssociateLifecycle")
     public void testDissociateLifecycle() throws Exception {
         String uuid = sampleAPI.getLifecycleState().getLifecycleId();
         sampleAPI.dissociateLifecycle(uuid);
