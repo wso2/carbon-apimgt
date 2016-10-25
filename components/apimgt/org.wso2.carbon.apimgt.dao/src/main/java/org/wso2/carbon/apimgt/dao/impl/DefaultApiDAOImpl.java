@@ -58,12 +58,12 @@ public class DefaultApiDAOImpl implements ApiDAO {
      *
      * @param offset        The number of results from the beginning that is to be ignored
      * @param limit         The maximum number of results to be returned after the offset
-     * @param enquirerRoles The list of roles of the user making the query
+     * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
      * @throws APIManagementDAOException
      */
     @Override
-    public APISummaryResults getAPIs(int offset, int limit, List<String> enquirerRoles)
+    public APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles)
                                                                             throws APIManagementDAOException {
         return null;
     }
@@ -77,13 +77,13 @@ public class DefaultApiDAOImpl implements ApiDAO {
      * @param searchString    The search string provided
      * @param offset          The number of results from the beginning that is to be ignored
      * @param limit           The maximum number of results to be returned after the offset
-     * @param enquirerRoles   The list of roles of the user making the query
+     * @param roles   The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
      * @throws APIManagementDAOException
      */
     @Override
-    public APISummaryResults searchAPIs(String searchAttribute, String searchString, int offset, int limit,
-                                                        List<String> enquirerRoles) throws APIManagementDAOException {
+    public APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
+                                                List<String> roles) throws APIManagementDAOException {
         return null;
     }
 
@@ -103,12 +103,12 @@ public class DefaultApiDAOImpl implements ApiDAO {
      * Update an existing API
      *
      * @param apiID      The {@link String} of the API that needs to be updated
-     * @param valuesToBeUpdated The updated {@link API} object that will replace the existing API
+     * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return true if update is successful else false
      * @throws APIManagementDAOException
      */
     @Override
-    public API updateAPI(String apiID, API valuesToBeUpdated) throws APIManagementDAOException {
+    public API updateAPI(String apiID, API substituteAPI) throws APIManagementDAOException {
         return null;
     }
 

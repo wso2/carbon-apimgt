@@ -23,20 +23,12 @@ package org.wso2.carbon.apimgt.models;
 import java.util.List;
 
 /**
- * Matching results related to API summary details
+ * Matching results related to API Subscription details
  */
-public final class APISummaryResults {
-    private List<APISummary> apiSummaryList;
+public final class APISubscriptionResults {
+    private List<APISubscription> apiSubscriptionList;
     private boolean isMoreResultsExist;
     private int nextOffset;
-
-    public List<APISummary> getApiSummaryList() {
-        return apiSummaryList;
-    }
-
-    public void setApiSummaryList(List<APISummary> apiSummaryList) {
-        this.apiSummaryList = apiSummaryList;
-    }
 
     public boolean isMoreResultsExist() {
         return isMoreResultsExist;
@@ -52,5 +44,13 @@ public final class APISummaryResults {
 
     public void setNextOffset(int nextOffset) {
         this.nextOffset = nextOffset;
+    }
+
+    public List<APISubscription> getApiSubscriptionList() {
+        return apiSubscriptionList;
+    }
+
+    public void setApiSubscriptionList(List<APISubscription> apiSubscriptionList) {
+        this.apiSubscriptionList = apiSubscriptionList;
     }
 }

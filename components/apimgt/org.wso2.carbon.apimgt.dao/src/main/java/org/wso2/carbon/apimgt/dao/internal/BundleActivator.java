@@ -51,7 +51,7 @@ public class BundleActivator {
     protected void start(BundleContext bundleContext) {
         try {
             Context ctx = jndiContextManager.newInitialContext();
-            DAOUtil.initialize((HikariDataSource) ctx.lookup("java:comp/env/jdbc/test"));
+            DAOUtil.initialize((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
         }

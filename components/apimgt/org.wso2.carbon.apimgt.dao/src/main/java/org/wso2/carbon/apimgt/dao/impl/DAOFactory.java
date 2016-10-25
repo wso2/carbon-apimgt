@@ -23,7 +23,9 @@ package org.wso2.carbon.apimgt.dao.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.dao.ApiDAO;
+import org.wso2.carbon.apimgt.dao.ApplicationDAO;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -58,5 +60,57 @@ public class DAOFactory {
         }
 
         return apiDAO;
+    }
+
+    public ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
+        ApplicationDAO appDAO = null;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+                appDAO = new DefaultApplicationDAOImpl();
+            } else if (driverName.contains("DB2")) {
+
+            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+
+            } else if (driverName.contains("PostgreSQL")) {
+
+            } else if (driverName.contains("Oracle")) {
+
+            } else {
+                DAOUtil.handleException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            DAOUtil.handleException("Error occurred while getting DB Connection", e);
+        }
+
+        return appDAO;
+    }
+
+    public APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
+        APISubscriptionDAO apiSubscriptionDAO = null;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+                apiSubscriptionDAO = new DefaultAPISubscriptionDAOImpl();
+            } else if (driverName.contains("DB2")) {
+
+            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+
+            } else if (driverName.contains("PostgreSQL")) {
+
+            } else if (driverName.contains("Oracle")) {
+
+            } else {
+                DAOUtil.handleException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            DAOUtil.handleException("Error occurred while getting DB Connection", e);
+        }
+
+        return apiSubscriptionDAO;
     }
 }

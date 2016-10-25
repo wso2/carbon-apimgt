@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Matching results related to Application summary details
  */
-public class ApplicationSummaryResults {
+public final class ApplicationSummaryResults {
     private List<ApplicationSummary> appSummaryList;
     private boolean isMoreResultsExist;
     private int nextOffset;
