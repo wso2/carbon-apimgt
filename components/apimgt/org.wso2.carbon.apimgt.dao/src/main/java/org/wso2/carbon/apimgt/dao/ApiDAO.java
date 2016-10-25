@@ -47,12 +47,12 @@ public interface ApiDAO {
      * doing a permission check to ensure results returned are only those that match the list of roles provided
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @param enquirerRoles The list of roles of the user making the query
+     * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
      * @throws APIManagementDAOException
      *
      */
-    APISummaryResults getAPIs(int offset, int limit, List<String> enquirerRoles) throws APIManagementDAOException;
+    APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles) throws APIManagementDAOException;
 
     /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
@@ -62,13 +62,13 @@ public interface ApiDAO {
      * @param searchString The search string provided
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @param enquirerRoles The list of roles of the user making the query
+     * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
      * @throws APIManagementDAOException
      *
      */
-    APISummaryResults searchAPIs(String searchAttribute, String searchString, int offset, int limit,
-                                                        List<String> enquirerRoles) throws APIManagementDAOException;
+    APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
+                                         List<String> roles) throws APIManagementDAOException;
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
@@ -81,12 +81,12 @@ public interface ApiDAO {
     /**
      * Update an existing API
      * @param apiID The UUID of the API that needs to be updated
-     * @param valuesToBeUpdated The {@link API} object containing the updated values that will replace the existing API
+     * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return The updated {@link API} object
      * @throws APIManagementDAOException
      *
      */
-    API updateAPI(String apiID, API valuesToBeUpdated) throws APIManagementDAOException;
+    API updateAPI(String apiID, API substituteAPI) throws APIManagementDAOException;
 
     /**
      * Remove an existing API

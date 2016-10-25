@@ -23,11 +23,11 @@ package org.wso2.carbon.apimgt.models;
  * Subscriber's view of the API
  */
 
-public class APISubscription {
+public final class APISubscription {
 
     private String apiId;
     private Application application;
-    private java.lang.String uuid;
+    private String id;
 
     public APISubscription(Application application, String apiId) {
         this.application = application;
@@ -38,17 +38,17 @@ public class APISubscription {
         return application;
     }
 
-    public String getApiId() {
+    public String getAPIID() {
         return apiId;
     }
 
 
-    public void setUUID(java.lang.String uuid) {
-        this.uuid = uuid;
+    public void setID(String id) {
+        this.id = id;
     }
 
-    public java.lang.String getUUID() {
-        return uuid;
+    public String getID() {
+        return id;
     }
 
     @Override

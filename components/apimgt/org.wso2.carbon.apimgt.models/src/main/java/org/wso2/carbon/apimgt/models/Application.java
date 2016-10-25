@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public final class Application {
     private String name;
-    private String uuid;
+    private String id;
     private Subscriber subscriber;
     private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
 
@@ -73,12 +73,12 @@ public final class Application {
         return result;
     }
 
-    public void setUUID(String uuid) {
-        this.uuid = uuid;
+    public void setID(String id) {
+        this.id = id;
     }
 
-    public String getUUID() {
-        return uuid;
+    public String getID() {
+        return id;
     }
     
 }

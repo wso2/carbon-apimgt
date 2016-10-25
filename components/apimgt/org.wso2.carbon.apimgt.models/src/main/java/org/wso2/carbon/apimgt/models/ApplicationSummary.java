@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.models;
 /**
  * Representation an Application object that contains a limited number of details
  */
-public class ApplicationSummary {
+public final class ApplicationSummary {
     private String groupID;
     private String subscriber;
     private String throttlingPolicy;
@@ -55,11 +55,11 @@ public class ApplicationSummary {
         this.throttlingPolicy = throttlingPolicy;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setID(String id) {
         this.id = id;
     }
 
