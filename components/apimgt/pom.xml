@@ -43,6 +43,12 @@
         <module>org.wso2.carbon.apimgt.rest.api.util</module>
         <module>org.wso2.carbon.apimgt.indexing</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.models</artifactId>
+        </dependency>
+    </dependencies>
 
 
 </project>
