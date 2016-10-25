@@ -167,6 +167,11 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
                 <version>${carbon.kernel.version}</version>
@@ -216,6 +221,7 @@
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
             </dependency>
+<<<<<<< 3c41617b772b9cf0235f1ce6e9cdacd674b2866e
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -227,6 +233,9 @@
                 <version>${javax.ws.rs-api.version}</version>
             </dependency>
             <dependency>
+=======
+	    <dependency>
+>>>>>>> Added impl component and dependencies. Added RestApiConstants. Updated ApisApiServiceImpl with dummy implementation.
                 <groupId>com.googlecode.json-simple.wso2</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>${json-simple.wso2.version}</version>
