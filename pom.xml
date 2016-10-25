@@ -221,7 +221,6 @@
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
             </dependency>
-<<<<<<< 3c41617b772b9cf0235f1ce6e9cdacd674b2866e
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -232,10 +231,7 @@
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
             </dependency>
-            <dependency>
-=======
 	    <dependency>
->>>>>>> Added impl component and dependencies. Added RestApiConstants. Updated ApisApiServiceImpl with dummy implementation.
                 <groupId>com.googlecode.json-simple.wso2</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>${json-simple.wso2.version}</version>
