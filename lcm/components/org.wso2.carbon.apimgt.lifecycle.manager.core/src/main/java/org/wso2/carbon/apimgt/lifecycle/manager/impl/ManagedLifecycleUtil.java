@@ -165,14 +165,7 @@ public class ManagedLifecycleUtil {
             for (CustomCodeBean customCodeBean : customCodeBeans) {
                 if (customCodeBean.getEventName().equals(action)) {
                     Executor customExecutor = (Executor) customCodeBean.getClassObject();
-
-                    if (!customExecutor.execute(resource, currentState, nextState)) {
-                        String message = "Execution failed for action : " + customCodeBean.getEventName() + "for the "
-                                + "execution class " + customCodeBean.getClassObject().getClass();
-
-                        customCodeBean.setCustomMessage(message);
-                        throw new LifecycleException(message);
-                    }
+                    customExecutor.execute(resource, currentState, nextState);
                 }
             }
         }

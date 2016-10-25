@@ -17,6 +17,8 @@
 package org.wso2.carbon.apimgt.lifecycle.manager.interfaces;
 
 
+import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+
 import java.util.Map;
 
 /**
@@ -49,8 +51,10 @@ public interface Executor {
      * the execution output by looking at the output of this method.
      *
 
-     * @param targetState The target lifecycle state.
-     * @return Returns whether the execution was successful or not.
+     * @param resource              The resource in which the lifecycle state is changed.
+     * @param currentState          Current lifecycle state.
+     * @param targetState           The target lifecycle state.
+     * @throws LifecycleException   If exception occurs while running the executor.
      * */
-    boolean execute(Object resource, String currentState, String targetState);
+    void execute(Object resource, String currentState, String targetState) throws LifecycleException;
 }

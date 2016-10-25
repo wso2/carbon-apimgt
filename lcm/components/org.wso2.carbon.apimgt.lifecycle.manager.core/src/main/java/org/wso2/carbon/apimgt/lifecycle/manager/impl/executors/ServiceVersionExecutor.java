@@ -43,9 +43,8 @@ public class ServiceVersionExecutor implements Executor {
      * @param currentState          The current state.
      * @param targetState
      */
-    @Override public boolean execute(Object resource, String currentState, String targetState) {
+    @Override public void execute(Object resource, String currentState, String targetState) {
         log.info("executed #####################################################");
-        return true;
     }
 
 }
