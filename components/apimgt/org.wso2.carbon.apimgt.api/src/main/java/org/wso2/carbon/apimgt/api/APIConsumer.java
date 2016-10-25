@@ -17,11 +17,13 @@
  *  under the License.
  *
  */
+
 package org.wso2.carbon.apimgt.api;
 
 /**
  *
  */
-public interface APIManager {
-    
+public interface APIConsumer extends APIManager {
+
 }
+
