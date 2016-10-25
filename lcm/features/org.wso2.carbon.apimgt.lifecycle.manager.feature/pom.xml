@@ -142,11 +142,11 @@
                             <bundles>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.lifecycle.manager.sql</symbolicName>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.lifecycle.manager.core</symbolicName>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
