@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public class RestApiUtil {
 
-//    public static String getLoggedInUsername() {
-//        return CarbonContext.getThreadLocalCarbonContext().getUsername();
-//    }
+    public static String getLoggedInUsername() {
+        //return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return "DUMMY_USER";
+    }
 //
 //    public static void handleAuthorizationFailure(String resource, String id, Log log)
 //            throws ForbiddenException {
@@ -46,4 +49,9 @@ public class RestApiUtil {
 //        log.error(msg, t);
 //        throw internalServerErrorException;
 //    }
+    
+    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+       // return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+        return null;
+    }
 }
