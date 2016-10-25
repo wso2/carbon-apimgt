@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -15,13 +15,22 @@
  *  KIND, either express or implied.  See the License for the
  *  specific language governing permissions and limitations
  *  under the License.
- *
+ * /
  */
-package org.wso2.carbon.apimgt.api;
+
+package org.wso2.carbon.apimgt.impl;
+
+import javax.net.ssl.KeyManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- *
+ * Mostly common features of  keyManager implementations will be handle here.
+ * This class should be extended by Key manager implementation class.
  */
-public interface APIManager {
+public abstract class AbstractKeyManager implements KeyManager {
+    private static Log log = LogFactory.getLog(AbstractKeyManager.class);
+
     
 }
