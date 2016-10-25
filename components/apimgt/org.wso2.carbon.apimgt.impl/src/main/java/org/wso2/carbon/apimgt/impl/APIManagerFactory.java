@@ -117,13 +117,13 @@ public class APIManagerFactory {
     }
 
     private void cleanupSilently(APIManager manager) {
-        if (manager != null) {
+        /*if (manager != null) {
             try {
                 manager.cleanup();
             } catch (APIManagementException ignore) {
 
             }
-        }
+        }*/
     }
 
     private class APIManagerCache<T> extends LRUCache<String,T> {
@@ -133,11 +133,11 @@ public class APIManagerFactory {
         }
 
         protected void handleRemovableEntry(Map.Entry<String,T> entry) {
-            try {
+            /*try {
                 ((APIManager) entry.getValue()).cleanup();
             } catch (APIManagementException e) {
                 log.warn("Error while cleaning up APIManager instance", e);
-            }
+            }*/
         }
     }
 }

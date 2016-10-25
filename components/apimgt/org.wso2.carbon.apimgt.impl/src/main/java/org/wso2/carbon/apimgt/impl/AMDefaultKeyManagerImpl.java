@@ -18,123 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
  * This is the default key manager supported by API Manager
  */
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
-    @Override
-    public OAuthApplicationInfo buildFromJSON(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OAuthApplicationInfo createApplication(OAuthAppRequest arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void deleteApplication(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void deleteMappedApplication(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void deleteRegisteredResourceByAPIId(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public AccessTokenInfo getAccessTokenByConsumerKey(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Set<String> getActiveTokensByConsumerKey(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public KeyManagerConfiguration getKeyManagerConfiguration() throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Map getResourceByApiId(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public AccessTokenInfo getTokenMetaData(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void loadConfiguration(KeyManagerConfiguration arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean registerNewResource(API arg0, Map arg1) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public OAuthApplicationInfo retrieveApplication(String arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OAuthApplicationInfo updateApplication(OAuthAppRequest arg0) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean updateRegisteredResource(API arg0, Map arg1) throws APIManagementException {
-        // TODO Auto-generated method stub
-        return false;
-    }
+   
 
 }

@@ -17,10 +17,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 
 /**
  * User aware APIConsumer implementation which ensures that the invoking user has the
@@ -45,58 +41,5 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         this.username = username;
     }
 
-    @Override
-    public SubscriptionResponse addSubscription(APIIdentifier identifier,
-                                String userId, int applicationId) throws APIManagementException {
-        checkSubscribePermission();
-        return super.addSubscription(identifier, userId, applicationId);
-    }
-
-    @Override
-    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
-        SubscribedAPI subscribedAPI = super.getSubscriptionByUUID(uuid);
-        checkSubscribePermission();
-        return subscribedAPI;
-    }
-
-    @Override
-    public void removeSubscription(APIIdentifier identifier, String userId,
-                                   int applicationId) throws APIManagementException {
-        checkSubscribePermission();
-        super.removeSubscription(identifier, userId, applicationId);
-    }
-
-    @Override
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        checkSubscribePermission();
-        super.removeSubscription(subscription);
-    }
-
-    @Override
-    public int addApplication(Application application, String userId) throws APIManagementException {
-        checkSubscribePermission();
-        return super.addApplication(application, userId);
-    }
-
-    @Override
-    public void updateApplication(Application application) throws APIManagementException {
-        checkSubscribePermission();
-        super.updateApplication(application);
-    }
-
-    @Override
-    public void removeApplication(Application application) throws APIManagementException {
-        checkSubscribePermission();
-        super.removeApplication(application);
-    }
-
-    @Override
-    public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
-        checkSubscribePermission();
-        super.addComment(identifier, s, user);
-    }
-
-    public void checkSubscribePermission() throws APIManagementException {
-        
-    }
+    
 }
