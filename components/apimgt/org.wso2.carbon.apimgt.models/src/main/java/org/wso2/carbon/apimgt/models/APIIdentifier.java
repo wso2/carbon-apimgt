@@ -16,18 +16,13 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.api.model;
-
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import java.io.Serializable;
+package org.wso2.carbon.apimgt.models;
 
 /**
  * An API can be uniquely identified by a combination of providerName,apiName & version.
  * This class represents this unique identifier.
  */
-@SuppressWarnings("unused")
-public class APIIdentifier implements Serializable{
+public class APIIdentifier {
 
     private final String providerName;
     private final String apiName;
@@ -57,18 +52,6 @@ public class APIIdentifier implements Serializable{
         this.version = version;
     }
 
-    public APIIdentifier(String apiId) throws APIManagementException {
-        //eg: apiId = "P1_API1_v1.0.0"
-        String[] split = apiId.split("_");
-        if (split.length == 3) {
-            this.providerName = split[0];
-            this.apiName = split[1];
-            this.version = split[2];
-        } else {
-            throw new APIManagementException("Invalid API ID : " + apiId);
-        }
-    }
-
     public String getProviderName() {
         return providerName;
     }
@@ -83,8 +66,12 @@ public class APIIdentifier implements Serializable{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         APIIdentifier that = (APIIdentifier) o;
 
@@ -99,9 +86,9 @@ public class APIIdentifier implements Serializable{
         result = 31 * result + version.hashCode();
         return result;
     }
-    
+
     @Override
     public String toString() {
-    	return this.getProviderName() + '-' + this.getApiName() + '-' + this.getVersion();
+        return this.getProviderName() + '-' + this.getApiName() + '-' + this.getVersion();
     }
 }

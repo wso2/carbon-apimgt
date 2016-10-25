@@ -67,7 +67,7 @@
                             <bundles>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.indexing.component</symbolicName>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
