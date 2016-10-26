@@ -75,14 +75,13 @@ public class RestApiUtil {
      *
      * @param resource requested resource
      * @param id id of resource
-     * @param t Throwable instance
      * @param log Log instance
      * @throws NotFoundException
      */
-    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Log log) {
+    public static void handleResourceNotFoundError(String resource, String id, Log log) {
 //            throws NotFoundException {
 //        NotFoundException notFoundException = buildNotFoundException(resource, id);
-//        log.error(notFoundException.getMessage(), t);
+//        log.error(notFoundException.getMessage());
 //        throw notFoundException;
     }
     /**
