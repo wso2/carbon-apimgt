@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Subscription
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class Subscription   {
   private String subscriptionId = null;
 
@@ -68,7 +68,7 @@ public class Subscription   {
    * Get subscriptionId
    * @return subscriptionId
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   public String getSubscriptionId() {
     return subscriptionId;
   }
@@ -86,7 +86,7 @@ public class Subscription   {
    * Get applicationId
    * @return applicationId
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   public String getApplicationId() {
     return applicationId;
   }
@@ -104,7 +104,7 @@ public class Subscription   {
    * Get apiIdentifier
    * @return apiIdentifier
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   public String getApiIdentifier() {
     return apiIdentifier;
   }
@@ -122,7 +122,7 @@ public class Subscription   {
    * Get tier
    * @return tier
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "Unlimited", required = true, value = "")
   public String getTier() {
     return tier;
   }
@@ -140,7 +140,7 @@ public class Subscription   {
    * Get status
    * @return status
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "UNBLOCKED", value = "")
   public StatusEnum getStatus() {
     return status;
   }

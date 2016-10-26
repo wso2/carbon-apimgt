@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.SubscriptionsApiServi
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionList;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.Error;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionList;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.Subscription;
 
 import java.util.List;
@@ -19,7 +19,8 @@ import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
 
-//import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 //import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.core.Context;
@@ -36,84 +37,88 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
-    @GET
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription list. The API Identifier or Application Identifier the subscriptions of which are to be returned are passed as parameters. ", response = SubscriptionList.class, tags={ "Retrieve", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.  Subscription list returned. ", response = SubscriptionList.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.  Empty body because the client has already the latest version of the requested resource. ", response = SubscriptionList.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionList.class) })
-    public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.  The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true) @QueryParam("apiId") String apiId
-,@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @QueryParam("applicationId") String applicationId
-,@ApiParam(value = "Application Group Id ") @QueryParam("groupId") String groupId
-,@ApiParam(value = "Starting point within the complete list of items qualified.   ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
-,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-)
-    throws NotFoundException {
-        return delegate.subscriptionsGet(apiId,applicationId,groupId,offset,limit,accept,ifNoneMatch);
-    }
     @POST
-    
+    @Path("/block-subscription")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new subscription ", response = Subscription.class, tags={ "Create", })
+    @io.swagger.annotations.ApiOperation(value = "Block a subscription", notes = "This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.  1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments. 2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only. ", response = void.class, tags={ "Subscription (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 201, message = "Created.  Successful response with the newly created object as entity in the body.  Location header contains URL of newly created entity. ", response = Subscription.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription was blocked successfully. ", response = void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.  Invalid request or validation error. ", response = Subscription.class),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.  The entity of the request was in a not supported format. ", response = Subscription.class) })
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) Subscription body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-)
-    throws NotFoundException {
-        return delegate.subscriptionsPost(body,contentType);
-    }
-    @DELETE
-    @Path("/{subscriptionId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Remove subscription ", response = void.class, tags={ "Delete", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.  Resource successfully deleted. ", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested subscription does not exist. ", response = void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.  Resource to be deleted does not exist. ", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.  The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
+    public Response subscriptionsBlockSubscriptionPost(@ApiParam(value = "Subscription Id ",required=true) @QueryParam("subscriptionId") String subscriptionId
+,@ApiParam(value = "Subscription block state. ",required=true, allowableValues="BLOCKED, PROD_ONLY_BLOCKED") @QueryParam("blockState") String blockState
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 )
     throws NotFoundException {
-        return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince);
+        return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,blockState,ifMatch,ifUnmodifiedSince);
+    }
+    @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving all subscriptions for the user's APIs. `GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions`  2. Retrieving subscriptions for a specific API. `GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed` ", response = SubscriptionList.class, tags={ "Subscription (Collection)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionList.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = SubscriptionList.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionList.class) })
+    public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true) @QueryParam("apiId") String apiId
+,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
+,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+)
+    throws NotFoundException {
+        return delegate.subscriptionsGet(apiId,limit,offset,accept,ifNoneMatch);
     }
     @GET
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription details ", response = Subscription.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Get details of a subscription", notes = "This operation can be used to get details of a single subscription. ", response = Subscription.class, tags={ "Subscription (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.  Subscription returned ", response = Subscription.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription returned ", response = Subscription.class),
         
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.  Empty body because the client has already the latest version of the requested resource. ", response = Subscription.class),
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Subscription.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.  Requested Subscription does not exist. ", response = Subscription.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = Subscription.class) })
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the  formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 )
     throws NotFoundException {
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince);
+    }
+    @POST
+    @Path("/unblock-subscription")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Unblock a Subscription", notes = "This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation. ", response = void.class, tags={ "Subscription (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription was unblocked successfully. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested subscription does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
+    public Response subscriptionsUnblockSubscriptionPost(@ApiParam(value = "Subscription Id ",required=true) @QueryParam("subscriptionId") String subscriptionId
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+)
+    throws NotFoundException {
+        return delegate.subscriptionsUnblockSubscriptionPost(subscriptionId,ifMatch,ifUnmodifiedSince);
     }
 }

@@ -1125,17 +1125,6 @@ paths:
 ######################################################
 parameters:
 
-# Requested Tenant domain
-# Specified as a header parameter
-  requestedTenant:
-    name: X-WSO2-Tenant
-    in: header
-    description: |
-      For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be 
-        retirieved from.
-    required: false
-    type: string
-
 # API Identifier
 # Specified as part of the path expression
   apiId:
