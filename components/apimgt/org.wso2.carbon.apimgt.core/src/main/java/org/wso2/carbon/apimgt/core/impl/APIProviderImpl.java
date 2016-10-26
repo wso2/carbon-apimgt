@@ -36,12 +36,11 @@ import java.util.Set;
 
 public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
+     * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *
      * @return Set<Provider>
      * @throws APIManagementException if failed to get Providers
      */
-    @Override
     public Set<Provider> getAllProviders() throws APIManagementException {
         return null;
     }
@@ -55,7 +54,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return set of API
      * @throws APIManagementException if failed to get set of API
      */
-    @Override
     public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
         return null;
     }
@@ -67,7 +65,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
-    @Override
     public Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException {
         return null;
     }
@@ -79,7 +76,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Provider
      * @throws APIManagementException if failed to get Provider
      */
-    @Override
     public Provider getProvider(String providerName) throws APIManagementException {
         return null;
     }
@@ -91,7 +87,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get Subscribers
      */
-    @Override
     public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException {
         return null;
     }
@@ -103,12 +98,10 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Set<APISubscriptionCount>
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
-    @Override
     public long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException {
         return 0;
     }
 
-    @Override
     public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
         return null;
     }
@@ -119,7 +112,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to add API
      */
-    @Override
     public void addAPI(API api) throws APIManagementException {
 
     }
@@ -129,7 +121,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return
      * @throws APIManagementException
      */
-    @Override
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
         return false;
     }
@@ -143,7 +134,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to update API
      */
-    @Override
     public void updateAPI(API api) throws APIManagementException {
 
     }
@@ -154,10 +144,8 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * should be carried out using the changeAPIStatus method of this interface.
      *
      * @param api API
-     * @return failed environments during gateway operation
      * @throws APIManagementException failed environments during gateway operation
      */
-    @Override
     public void manageAPI(API api) throws APIManagementException {
 
     }
@@ -171,12 +159,10 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
      * @throws APIManagementException on error
      */
-    @Override
     public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig) throws APIManagementException {
 
     }
 
-    @Override
     public boolean updateAPIStatus(APIIdentifier apiId, String status, boolean publishToGateway, boolean deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         return false;
     }
@@ -189,7 +175,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    @Override
     public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
 
     }
@@ -202,7 +187,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docName name of the document
      * @throws APIManagementException if failed to remove documentation
      */
-    @Override
     public void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException {
 
     }
@@ -214,7 +198,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    @Override
     public void removeDocumentation(APIIdentifier apiId, String docId) throws APIManagementException {
 
     }
@@ -226,7 +209,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    @Override
     public void addDocumentation(APIIdentifier apiId, DocumentInfo documentation) throws APIManagementException {
 
     }
@@ -241,7 +223,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
-    @Override
     public void addFileToDocumentation(APIIdentifier apiId, DocumentInfo documentation, String filename, InputStream
             content, String contentType) throws APIManagementException {
 
@@ -254,7 +235,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return boolean result
      * @throws APIManagementException
      */
-    @Override
     public boolean checkIfAPIExists(APIIdentifier apiId) throws APIManagementException {
         return false;
     }
@@ -266,7 +246,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param documentationName
      * @param text              @throws APIManagementException if failed to add the document as a resource to registry
      */
-    @Override
     public void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException {
 
     }
@@ -278,7 +257,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    @Override
     public void updateDocumentation(APIIdentifier apiId, DocumentInfo documentation) throws APIManagementException {
 
     }
@@ -290,7 +268,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param toVersion Version to which Documentation should be copied.
      * @throws APIManagementException if failed to copy docs
      */
-    @Override
     public void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException {
 
     }
@@ -302,7 +279,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return List of life-cycle events per given API
      * @throws APIManagementException if failed to copy docs
      */
-    @Override
     public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
         return null;
     }
@@ -313,7 +289,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param identifier APIIdentifier
      * @throws APIManagementException if failed to remove the API
      */
-    @Override
     public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
 
     }
@@ -323,11 +298,10 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param searchTerm Search Term
      * @param searchType Search Type
-     * @param providerId
+     * @param providerId Provider Id
      * @return Set of APIs
      * @throws APIManagementException
      */
-    @Override
     public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException {
         return null;
     }
@@ -337,11 +311,9 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param apiId     API Identifier
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
-     * @return int value with subscription id
+     * @param appId     Application Id
      * @throws APIManagementException If failed to update subscription status
      */
-    @Override
     public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
 
     }
@@ -353,7 +325,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param jsonText json text to be saved in the registry
      * @throws APIManagementException
      */
-    @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
 
     }
@@ -364,7 +335,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiIdentifier apiIdentifier
      * @param action        Action which need to execute from registry lifecycle
      */
-    @Override
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action) throws APIManagementException {
         return false;
     }
@@ -376,7 +346,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param checkItem      Order of the checklist item
      * @param checkItemValue Value of the checklist item
      */
-    @Override
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
         return false;
@@ -393,7 +362,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return boolean value representing success not not
      * @throws APIManagementException
      */
-    @Override
     public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName, boolean
             checkItemValue) throws APIManagementException {
         return false;
@@ -403,9 +371,8 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId APIIdentifier
-     * @return Map<String,Object> a map with lifecycle data
+     * @return Map<String, Object> a map with lifecycle data
      */
-    @Override
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         return null;
     }
@@ -419,7 +386,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
      * @throws APIManagementException
      */
-    @Override
     public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
             throws APIManagementException {
         return null;
@@ -428,12 +394,11 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Update api related information such as database entries, registry updates for state change.
      *
-     * @param identifier
+     * @param identifier Api identifier
      * @param newStatus  accepted if changes are not pushed to a gateway
      * @return boolean value representing success not not
      * @throws APIManagementException
      */
-    @Override
     public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus) throws
             APIManagementException {
         return false;
@@ -446,7 +411,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Current lifecycle status
      * @throws APIManagementException
      */
-    @Override
     public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
         return null;
     }
@@ -459,7 +423,6 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return set of API
      * @throws APIManagementException if failed to get Apis
      */
-    @Override
     public Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException {
         return null;
     }
