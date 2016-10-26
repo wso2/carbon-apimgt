@@ -167,6 +167,11 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
                 <version>${carbon.kernel.version}</version>
@@ -226,7 +231,7 @@
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
             </dependency>
-            <dependency>
+	    <dependency>
                 <groupId>com.googlecode.json-simple.wso2</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>${json-simple.wso2.version}</version>
@@ -355,7 +360,7 @@
         <equinox.osgi.services.package.import.version.range>[1.0.0, 2.0.0)</equinox.osgi.services.package.import.version.range>
         <osgi.service.tracker.package.import.version.range>[1.5.0, 2.0.0)</osgi.service.tracker.package.import.version.range>
         <carbon.p2.plugin.version>1.5.4</carbon.p2.plugin.version>
-        <carbon.feature.plugin.version>2.0.0</carbon.feature.plugin.version>
+        <carbon.feature.plugin.version>2.1.0</carbon.feature.plugin.version>
 
         <antlr4.runtime.version>4.5.1.wso2v1</antlr4.runtime.version>
         <plugin.version.antlr>4.5.1</plugin.version.antlr>
