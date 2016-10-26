@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.store.dto.Application;
+import org.wso2.carbon.apimgt.core.models.Application;
 
 /**
  *  This class contains REST API Store related utility operations

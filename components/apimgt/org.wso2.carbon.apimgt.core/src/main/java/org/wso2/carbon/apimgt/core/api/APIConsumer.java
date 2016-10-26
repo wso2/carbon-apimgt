@@ -20,10 +20,58 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Application;
+
+import java.util.Map;
+
 /**
- * This interface used to write Store specific methods
+ * This interface used to write Store specific methods.
  *
  */
 public interface APIConsumer extends APIManager {
+
+    /**
+     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
+     * only the latest version will be included
+     * in this list.
+     * 
+     * @param start starting number
+     * @param end ending number
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String status, boolean returnAPITags)
+            throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * 
+     * @param start starting number
+     * @param end ending number
+     * @param status One or more Statuses
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] status, boolean returnAPITags)
+            throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
+    void removeApplication(Application application) throws APIManagementException;
 
 }

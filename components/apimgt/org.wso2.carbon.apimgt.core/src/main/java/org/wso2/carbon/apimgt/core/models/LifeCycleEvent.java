@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.core.models;
 import java.util.Date;
 
 /**
- * todo
+ * This method contains the content of API lifecycle
  */
 public class LifeCycleEvent {
 
