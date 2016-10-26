@@ -1415,8 +1415,6 @@ definitions:
         type: array
         items:
           type: string
-      thumbnailUrl:
-        type: string
       businessInformation:
         properties:
           businessOwner:
