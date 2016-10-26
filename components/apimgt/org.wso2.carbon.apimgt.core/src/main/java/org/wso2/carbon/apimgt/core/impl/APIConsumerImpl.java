@@ -20,26 +20,26 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import java.util.Map;
-
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.models.APIManagementException;
 
+import java.util.Map;
+
 /**
- * 
+ * Implementation of API Store operations.
  *
  */
 public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
-    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String Status, boolean returnAPITags)
+    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String status, boolean returnAPITags)
             throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] Status, boolean returnAPITags)
+    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] status, boolean returnAPITags)
             throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
