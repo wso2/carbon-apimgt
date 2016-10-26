@@ -88,7 +88,7 @@
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.core.dao.internal,
-                            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.exp.pkg.version}",
+                            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}",
                         </Export-Package>
                     </instructions>
                 </configuration>
