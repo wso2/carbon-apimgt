@@ -20,10 +20,43 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import java.util.Map;
+
+import org.wso2.carbon.apimgt.core.dao.APIManagementException;
+
 /**
  * This interface used to write Store specific methods
  *
  */
 public interface APIConsumer extends APIManager {
 
+    
+    /**
+     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
+     * only the latest version will be included
+     * in this list.
+     * 
+     * @param start starting number
+     * @param end ending number
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+
+    Map<String,Object> getAllPaginatedAPIsByStatus(int start,int end, String Status,
+                                                          boolean returnAPITags) throws APIManagementException;
+    
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * 
+     * @param start starting number
+     * @param end ending number
+     * @param Status One or more Statuses
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedAPIsByStatus(int start,int end, String[] Status,
+                                                   boolean returnAPITags) throws APIManagementException;
 }
