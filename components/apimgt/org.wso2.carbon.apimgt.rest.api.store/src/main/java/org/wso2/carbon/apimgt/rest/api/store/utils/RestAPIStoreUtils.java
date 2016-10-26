@@ -41,15 +41,15 @@ public class RestAPIStoreUtils {
 
         if (application != null) {
             //if groupId is null or empty, it is not a shared app
-            if (StringUtils.isEmpty(application.getGroupId())) {
+            if (StringUtils.isEmpty(application.getGroupID())) {
                 //if the application is not shared, its subscriber and the current logged in user must be same
-                if (application.getSubscriber() != null && application.getSubscriber().equals(username)) {
+                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
                     return true;
                 }
             } else {
                 String userGroupId = "DUMMY_GROUP";//RestApiUtil.getLoggedInUserGroupId();
                 //if the application is a shared one, application's group id and the user's group id should be same
-                if (application.getGroupId().equals(userGroupId)) {
+                if (application.getGroupID().equals(userGroupId)) {
                     return true;
                 }
             }
