@@ -180,6 +180,7 @@
     "Enable API based CORS Configuration": "Enable API based CORS Configuration",
     "Enable Message Mediation": "Enable Message Mediation",
     "Enable this feature to see a graph (in the <strong>Statistics menu </strong>) of the number of requests that leave the API Gateway to destination endpoints (e.g., Load-balanced endpoints).": "Enable this feature to see a graph (in the <strong>Statistics menu </strong>) of the number of requests that leave the API Gateway to destination endpoints (e.g., Load-balanced endpoints).",
+    "Scince there aren't resources for Websocket API's , Advanced throttling policies apply to API Level":"Scince there aren't resources for Websocket API's , Advanced throttling policies apply to API Level",
     "Enabled": "Enabled",
     "Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available": "Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available",
     "If gateway URLs need to be changed de-select 'Use Defaults' and enter the URLs. If you do not enter a URL default URLs will be added from configurations.": "If gateway URLs need to be changed de-select 'Use Defaults' and enter the URLs. If you do not enter a URL default URLs will be added from configurations.",
