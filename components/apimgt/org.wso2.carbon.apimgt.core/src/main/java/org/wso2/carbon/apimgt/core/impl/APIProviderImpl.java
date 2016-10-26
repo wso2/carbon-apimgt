@@ -34,9 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Implementation of API Publisher operations
+ */
 public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
+     * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *
      * @return Set<Provider>
      * @throws APIManagementException if failed to get Providers
@@ -172,12 +175,15 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException on error
      */
     @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig) throws APIManagementException {
+    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
+            throws APIManagementException {
 
     }
 
     @Override
-    public boolean updateAPIStatus(APIIdentifier apiId, String status, boolean publishToGateway, boolean deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
+    public boolean updateAPIStatus(APIIdentifier apiId, String status, boolean publishToGateway,
+                                   boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
+            throws APIManagementException {
         return false;
     }
 
@@ -435,7 +441,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus) throws
-            APIManagementException {
+                                                                                          APIManagementException {
         return false;
     }
 

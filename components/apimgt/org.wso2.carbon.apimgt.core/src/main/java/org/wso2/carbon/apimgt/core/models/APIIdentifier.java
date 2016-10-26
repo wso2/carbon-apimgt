@@ -1,10 +1,28 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
+/*
+ *
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Identifier class which uniquely identify an API entity
+ */
 public class APIIdentifier {
     private final String providerName;
     private final String apiName;
@@ -51,7 +69,9 @@ public class APIIdentifier {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
             APIIdentifier that = (APIIdentifier) o;
-            return this.apiName.equals(that.apiName) && this.providerName.equals(that.providerName) && this.version.equals(that.version);
+            return this.apiName.equals(that.apiName)
+                   && this.providerName.equals(that.providerName)
+                   && this.version.equals(that.version);
         } else {
             return false;
         }
