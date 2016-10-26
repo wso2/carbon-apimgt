@@ -80,7 +80,7 @@ public class RestApiUtil {
      * @throws NotFoundException
      */
     public static void handleResourceNotFoundError(String resource, String id, Throwable t, Log log) {
-           // throws NotFoundException {
+//            throws NotFoundException {
 //        NotFoundException notFoundException = buildNotFoundException(resource, id);
 //        log.error(notFoundException.getMessage(), t);
 //        throw notFoundException;
