@@ -39,27 +39,41 @@ if(jagg.isCSRFTokenValid())
             var type = request.getParameter("type");
             var swagger = null;
             var wsdl = null;
+            var supportedSwaggerVersion = "2.0";
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
                 var file = request.getFile("swagger-file");
                 var import_type = request.getParameter("import-definition");
                 if(import_type == "swagger-url" && url){
                     url = url.trim();
-                    var data = { };
-                    try{
-                    var content = get(url, data);
-                    swagger = content.data;
-                    var keywords = [ /swagger/i, /info/i , /paths/i, /version/i ];
-                    var valid = true;
-                    for(var i =0 ;i< keywords.length; i++){
-                        if ((m = keywords[i].exec(content.data)) == null){
+                    var data = {};
+                    try {
+                        var content = get(url, data);
+                        swagger = content.data;
+                        var keywords = [/swagger/i, /info/i, /paths/i, /version/i];
+                        var valid = true;
+                        for (var i = 0; i < keywords.length; i++) {
+                            if ((m = keywords[i].exec(content.data)) == null) {
                                 swagger = "undefined";
+                                print({error: true, message: url + " is not a valid Swagger Definition url"});
+                                return;
+                            }
                         }
-                    }
-                    }catch (e) {
-                        print({error:true,message:url+" is not a valid Swagger Definition url"});
+                        var swaggerJSON = parse(swagger);
+                        //Validate swagger definition with mandatory swagger elements
+                        if(swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null){
+                            print({error: true, message: url + " contains invalid swagger definition"});
+                            return;
+                        }
+                        //Supported swagger version check
+                        if(swaggerJSON.swagger != supportedSwaggerVersion){
+                            print({error: true, message: "Unsupported swagger version provided. Please re-imported with swagger 2.0.0"});
+                            return;
+                        }
+                    } catch (e) {
+                        print({error: true, message: url + " is not a valid Swagger Definition url"});
                         return;
-                   }
+                    }
                 }
                 else if(import_type == "swagger-file" && file){
                     file.open("r");
