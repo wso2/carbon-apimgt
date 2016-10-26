@@ -19,6 +19,9 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Top level exception class of API Management exceptions
+ */
 public class APIManagementException extends Exception {
     public APIManagementException(String message, Throwable cause) {
         super(message, cause);
@@ -28,7 +31,8 @@ public class APIManagementException extends Exception {
         super(cause);
     }
 
-    protected APIManagementException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected APIManagementException(String message, Throwable cause, boolean enableSuppression,
+                                     boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
