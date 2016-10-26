@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.rest.api.store.dto.Application;
 
 /**
  *  This class contains REST API Store related utility operations
@@ -43,7 +43,7 @@ public class RestAPIStoreUtils {
             //if groupId is null or empty, it is not a shared app
             if (StringUtils.isEmpty(application.getGroupId())) {
                 //if the application is not shared, its subscriber and the current logged in user must be same
-                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
+                if (application.getSubscriber() != null && application.getSubscriber().equals(username)) {
                     return true;
                 }
             } else {

@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.rest.api.store.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 

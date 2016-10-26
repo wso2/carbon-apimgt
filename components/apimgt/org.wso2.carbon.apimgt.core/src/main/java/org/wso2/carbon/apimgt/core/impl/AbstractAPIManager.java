@@ -21,54 +21,46 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.models.APIManagementException;
-import org.wso2.carbon.apimgt.models.API;
-import org.wso2.carbon.apimgt.models.APIIdentifier;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIIdentifier;
 
 import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractAPIManager implements APIManager {
-    @Override
+
     public List<API> getAllAPIs() throws APIManagementException {
         return null;
     }
 
-    @Override
     public API getAPI(String apiPath) throws APIManagementException {
         return null;
     }
 
-    @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
         return null;
     }
 
-    @Override
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         return null;
     }
 
-    @Override
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
         return false;
     }
 
-    @Override
     public boolean isContextExist(String context) throws APIManagementException {
         return false;
     }
 
-    @Override
     public boolean isApiNameExist(String apiName) throws APIManagementException {
         return false;
     }
 
-    @Override
     public Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException {
         return null;
     }
 
-    @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
         return null;
     }
