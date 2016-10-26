@@ -17,7 +17,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.models;
 
 public class APIManagementException extends Exception {
     public APIManagementException(String message, Throwable cause) {
