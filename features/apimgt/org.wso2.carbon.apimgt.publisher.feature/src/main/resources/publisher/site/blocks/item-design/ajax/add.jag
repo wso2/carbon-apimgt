@@ -55,21 +55,25 @@ if(jagg.isCSRFTokenValid())
                         for (var i = 0; i < keywords.length; i++) {
                             if ((m = keywords[i].exec(content.data)) == null) {
                                 swagger = "undefined";
-                                print({error: true, message: url + " is not a valid Swagger Definition url"});
+                                print({error: true, message: url + " contains invalid swagger definition"});
                                 return;
                             }
                         }
                         var swaggerJSON = parse(swagger);
+                        //Supported swagger version check
+                        if(swaggerJSON.swagger != supportedSwaggerVersion){
+                            print({
+                                error: true,
+                                message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
+                            });
+                            return;
+                        }
                         //Validate swagger definition with mandatory swagger elements
                         if(swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null){
                             print({error: true, message: url + " contains invalid swagger definition"});
                             return;
                         }
-                        //Supported swagger version check
-                        if(swaggerJSON.swagger != supportedSwaggerVersion){
-                            print({error: true, message: "Unsupported swagger version provided. Please re-imported with swagger 2.0.0"});
-                            return;
-                        }
+
                     } catch (e) {
                         print({error: true, message: url + " is not a valid Swagger Definition url"});
                         return;
