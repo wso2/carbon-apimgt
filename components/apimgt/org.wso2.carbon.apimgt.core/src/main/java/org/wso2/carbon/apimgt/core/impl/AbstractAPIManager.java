@@ -20,14 +20,14 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIManager;
-import org.wso2.carbon.apimgt.core.dao.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APIManagementException;
 import org.wso2.carbon.apimgt.models.API;
 import org.wso2.carbon.apimgt.models.APIIdentifier;
 
 import java.util.List;
 import java.util.Set;
 
-public class AbstractAPIManager implements APIManager {
+public abstract class AbstractAPIManager implements APIManager {
     @Override
     public List<API> getAllAPIs() throws APIManagementException {
         return null;
