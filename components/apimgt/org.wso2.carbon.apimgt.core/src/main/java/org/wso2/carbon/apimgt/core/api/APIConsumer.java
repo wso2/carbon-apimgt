@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Application;
+
 import java.util.Map;
 
 /**
@@ -56,4 +58,20 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] status, boolean returnAPITags)
             throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
+    void removeApplication(Application application) throws APIManagementException;
+
 }

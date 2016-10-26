@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.util.Map;
 
@@ -43,6 +44,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        return null;
+    }
+
+    @Override public void removeApplication(Application application) throws APIManagementException {
+
     }
 
 }

@@ -33,6 +33,8 @@ public final class Application {
     private Subscriber subscriber;
     private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
 
+    private String groupId;
+
     public Application(String name, Subscriber subscriber) {
         this.name = name;
         this.subscriber = subscriber;
@@ -80,6 +82,14 @@ public final class Application {
 
     public String getID() {
         return id;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
     
 }
