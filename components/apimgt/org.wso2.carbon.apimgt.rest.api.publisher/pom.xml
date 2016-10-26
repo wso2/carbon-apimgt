@@ -46,16 +46,6 @@
             <artifactId>jackson-datatype-joda</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.dao</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.models</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     <build>
 

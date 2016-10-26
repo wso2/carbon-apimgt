@@ -137,16 +137,6 @@
                 <version>${org.wso2.msf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.models</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.dao</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.6.0.wso2v1</version>
@@ -158,17 +148,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
