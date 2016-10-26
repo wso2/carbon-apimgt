@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * todo
+ * This class contains the implementation of the common methods for Publisher and store
  */
 public abstract class AbstractAPIManager implements APIManager {
 

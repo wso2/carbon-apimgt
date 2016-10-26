@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * todo
+ * This interface mainly used to have the common methods to publisher and store
  */
 public interface APIManager {
     /**

@@ -123,7 +123,7 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
-     * todo
+     * This method used to Update the status of API
      *
      * @param apiId
      * @param status

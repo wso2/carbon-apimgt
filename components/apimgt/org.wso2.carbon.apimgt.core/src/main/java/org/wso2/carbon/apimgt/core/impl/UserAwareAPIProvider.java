@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 /**
- * todo
+ * This class used to check the permissions for users
  */
 public class UserAwareAPIProvider extends APIProviderImpl {
 
