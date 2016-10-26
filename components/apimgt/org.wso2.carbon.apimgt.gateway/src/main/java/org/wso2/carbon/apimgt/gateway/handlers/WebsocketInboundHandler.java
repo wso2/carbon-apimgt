@@ -28,14 +28,20 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -50,11 +56,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private static String tenantDomain;
 	private static int port;
 	private static volatile ThrottleDataPublisher throttleDataPublisher = null;
+	private static APIMgtUsageDataPublisher usageDataPublisher;
 	private static Logger log = LoggerFactory.getLogger(WebsocketInboundHandler.class);
 	private boolean isDefaultVersion;
 	private String uri;
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+	private io.netty.handler.codec.http.HttpHeaders headers;
 
 	public WebsocketInboundHandler() {
 
@@ -63,6 +71,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			synchronized (this) {
 				throttleDataPublisher = new ThrottleDataPublisher();
 			}
+		}
+
+		if (usageDataPublisher == null) {
+			usageDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
+			usageDataPublisher.init();
 		}
 	}
 
@@ -93,6 +106,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 				msg = req;
 			}
 			if (validateOAuthHeader(req)) {
+				headers = req.headers();
 				req.setUri(uri);
 				ctx.fireChannelRead(msg);
 			} else {
@@ -102,12 +116,15 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 				                               APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
 			}
 		} else if (msg instanceof WebSocketFrame) {
+			boolean isThrottledOut = doThrottle(ctx, (WebSocketFrame) msg);
 
-			if (doThrottle(ctx, (WebSocketFrame) msg)) {
+			if (isThrottledOut) {
 				ctx.fireChannelRead(msg);
 			} else {
 				ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 			}
+
+			publishRequestEvent(infoDTO, ctx.channel().remoteAddress().toString(), isThrottledOut);
 		}
 	}
 
@@ -249,6 +266,50 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 						null, objects);
 		throttleDataPublisher.getDataPublisher().tryPublish(event);
 		return true;
+	}
+
+	/**
+	 * Publish reuqest event to analytics server
+	 *
+	 * @param infoDTO API and Application data
+	 * @param clientIp client's IP Address
+	 * @param isThrottledOut request is throttled out or not
+	 */
+	private void publishRequestEvent(APIKeyValidationInfoDTO infoDTO, String clientIp, boolean isThrottledOut) {
+		long requestTime = System.currentTimeMillis();
+		String useragent = headers.get(APIConstants.USER_AGENT);
+		useragent = useragent != null ? useragent : "-"; // '-' is used for empty values for easiness in DAS side
+
+		try {
+			Application app = ApiMgtDAO.getInstance().getApplicationById(Integer.parseInt(infoDTO.getApplicationId()));
+			String appOwner = app.getSubscriber().getName();
+
+			RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
+			requestPublisherDTO.setApi(infoDTO.getApiName());
+			requestPublisherDTO.setApiPublisher(infoDTO.getApiPublisher());
+			requestPublisherDTO.setApiVersion(infoDTO.getApiName() + ':' + version);
+			requestPublisherDTO.setApplicationId(infoDTO.getApplicationId());
+			requestPublisherDTO.setApplicationName(infoDTO.getApplicationName());
+			requestPublisherDTO.setApplicationOwner(appOwner);
+			requestPublisherDTO.setClientIp(clientIp);
+			requestPublisherDTO.setConsumerKey(infoDTO.getConsumerKey());
+			requestPublisherDTO.setContext(uri); // TODO: 10/18/16 set correct context
+			requestPublisherDTO.setContinuedOnThrottleOut(isThrottledOut);
+			requestPublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
+			requestPublisherDTO.setMethod("-");
+			requestPublisherDTO.setRequestTime(requestTime);
+			requestPublisherDTO.setResourcePath("-");
+			requestPublisherDTO.setResourceTemplate("-");
+			requestPublisherDTO.setUserAgent(useragent);
+			requestPublisherDTO.setUsername(infoDTO.getEndUserName());
+			requestPublisherDTO.setTenantDomain(tenantDomain);
+			requestPublisherDTO.setTier(infoDTO.getTier());
+			requestPublisherDTO.setVersion(version);
+
+			usageDataPublisher.publishEvent(requestPublisherDTO);
+		} catch (Exception e) {
+			log.error("Cannot publish event. " + e.getMessage(), e); // flow should not break if event publishing failed
+		}
 	}
 
 }

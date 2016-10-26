@@ -303,6 +303,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                 info.setApiName(info.getApiName() + "*" + version);
             }
         }
+
+        info.setConsumerKey(validationContext.getTokenInfo().getConsumerKey());
+        info.setEndUserName(validationContext.getTokenInfo().getEndUserName());
         return info;
     }
 
