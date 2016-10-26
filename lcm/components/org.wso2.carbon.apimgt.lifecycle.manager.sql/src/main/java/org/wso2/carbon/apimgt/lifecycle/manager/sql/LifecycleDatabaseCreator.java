@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.sql.utils;
+package org.wso2.carbon.apimgt.lifecycle.manager.sql;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.slf4j.Logger;
