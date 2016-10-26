@@ -290,7 +290,7 @@ public class LifecycleMgtDAO {
             } catch (SQLException e1) {
                 log.error("Error while roll back operation for setting initial lifecycle state :" + initialState, e);
             }
-            handleException("Error while adding the lifecycle", e);
+            handleException("Error while associating the lifecycle " + lcName, e);
         } finally {
             LifecycleMgtDBUtil.closeAllConnections(prepStmt1, null, rs1);
             LifecycleMgtDBUtil.closeAllConnections(prepStmt2, connection, null);

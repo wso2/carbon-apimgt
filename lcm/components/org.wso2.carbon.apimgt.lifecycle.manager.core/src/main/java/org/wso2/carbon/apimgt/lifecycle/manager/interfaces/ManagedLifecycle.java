@@ -48,8 +48,7 @@ public interface ManagedLifecycle {
      *
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
-    void executeLifecycleEvent(LifecycleState nextState, String uuid, String action, String user, Object
-            resource)
+    void executeLifecycleEvent(LifecycleState nextState, String uuid, String action, String user, Object resource)
             throws LifecycleException;
 
     /**

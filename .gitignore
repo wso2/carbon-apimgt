@@ -3,7 +3,9 @@ target
 .classpath
 .settings
 .project
-*.i??
+*.iml
+*.iws
+*.ipr
 .idea
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
 *.DS_Store
@@ -18,3 +20,4 @@ features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resou
 features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/package.json
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/main.js
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/package.json
+features/org.wso2.carbon.apimgt.lifecycle.manager.feature/resources/database/

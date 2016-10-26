@@ -70,9 +70,6 @@ public class LifecycleUtils {
         }
 
         validateLifecycleContent(lcConfig);
-
-        /*LifecycleCrudManager lifecycleCrudManager = new LifecycleCrudManager();
-        lifecycleCrudManager.addLifecycle(name, lcConfig);*/
         try {
             if (!checkLifecycleExist(lcName)) {
                 LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
@@ -80,13 +77,6 @@ public class LifecycleUtils {
                 lifecycleConfigBean.setLcContent(lcConfig);
                 getLCMgtDAOInstance().addLifecycle(lifecycleConfigBean);
                 getLifecycleMapInstance().put(lcName, lcConfig);
-                /*if (lifecycleMap != null) {
-                    lifecycleMap.put(lcName, lcConfig);
-
-                } else {
-                    lifecycleMap = new ConcurrentHashMap<>();
-                    lifecycleMap.put(lcName, lcConfig);
-                }*/
 
             } else {
                 throw new LifecycleException("Lifecycle already exist with name " + lcName);
@@ -121,13 +111,7 @@ public class LifecycleUtils {
                 lifecycleConfigBean.setLcContent(newContent);
                 getLCMgtDAOInstance().updateLifecycle(lifecycleConfigBean);
                 getLifecycleMapInstance().put(newName, newContent);
-                /*if (lifecycleMap != null) {
-                    lifecycleMap.put(newName, newContent);
-                } else {
-                    lifecycleMap = new ConcurrentHashMap<>();
-                    lifecycleMap.put(newName, newContent);
 
-                }*/
             } catch (LifecycleManagerDatabaseException e) {
                 throw new LifecycleException("Error in adding lifecycle with name " + newName, e);
             }
@@ -247,6 +231,9 @@ public class LifecycleUtils {
             Source xmlFile = new StreamSource(is);
             if (validator != null) {
                 validator.validate(xmlFile);
+            } else {
+                log.error(
+                        "Lifecycle schema validator not found. Check the existence  of resources/lifecycle-config.xsd");
             }
         } catch (SAXException e) {
             log.error("Unable to parse the XML configuration. Please validate the XML configuration", e);
@@ -294,8 +281,7 @@ public class LifecycleUtils {
      * @throws LifecycleException
      */
     private static String getLifecycleSchemaLocation() {
-        return Utils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                + File.separator + "lifecycle-config.xsd";
+        return Utils.getCarbonHome() + File.separator + "resources" + File.separator + "lifecycle-config.xsd";
     }
 
     private static boolean checkLifecycleExist(String lcName) throws LifecycleManagerDatabaseException {
