@@ -18,6 +18,9 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.util.Date;
 
+/**
+ * todo
+ */
 public class LifeCycleEvent {
 
     private APIIdentifier api;
