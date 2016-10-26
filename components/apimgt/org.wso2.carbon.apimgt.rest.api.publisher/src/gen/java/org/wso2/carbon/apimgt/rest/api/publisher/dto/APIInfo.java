@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIInfo
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class APIInfo   {
   private String id = null;
 
@@ -34,7 +34,7 @@ public class APIInfo   {
    * Get id
    * @return id
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   public String getId() {
     return id;
   }
@@ -52,7 +52,7 @@ public class APIInfo   {
    * Get name
    * @return name
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
   public String getName() {
     return name;
   }
@@ -70,7 +70,7 @@ public class APIInfo   {
    * Get description
    * @return description
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "A calculator API that supports basic operations", value = "")
   public String getDescription() {
     return description;
   }
@@ -88,7 +88,7 @@ public class APIInfo   {
    * Get context
    * @return context
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
   public String getContext() {
     return context;
   }
@@ -106,7 +106,7 @@ public class APIInfo   {
    * Get version
    * @return version
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "1.0.0", value = "")
   public String getVersion() {
     return version;
   }
@@ -124,7 +124,7 @@ public class APIInfo   {
    * If the provider value is not given, the user invoking the API will be used as the provider. 
    * @return provider
   **/
-  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
+  @ApiModelProperty(example = "admin", value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
   public String getProvider() {
     return provider;
   }
@@ -142,7 +142,7 @@ public class APIInfo   {
    * Get status
    * @return status
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "CREATED", value = "")
   public String getStatus() {
     return status;
   }

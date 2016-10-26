@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Document
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class Document   {
   private String documentId = null;
 
@@ -100,6 +100,41 @@ public class Document   {
 
   private String otherTypeName = null;
 
+  /**
+   * Gets or Sets visibility
+   */
+  public enum VisibilityEnum {
+    OWNER_ONLY("OWNER_ONLY"),
+    
+    PRIVATE("PRIVATE"),
+    
+    API_LEVEL("API_LEVEL");
+
+    private String value;
+
+    VisibilityEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static VisibilityEnum fromValue(String text) {
+      for (VisibilityEnum b : VisibilityEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  private VisibilityEnum visibility = null;
+
   public Document documentId(String documentId) {
     this.documentId = documentId;
     return this;
@@ -109,7 +144,7 @@ public class Document   {
    * Get documentId
    * @return documentId
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   public String getDocumentId() {
     return documentId;
   }
@@ -127,7 +162,7 @@ public class Document   {
    * Get name
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "CalculatorDoc", required = true, value = "")
   public String getName() {
     return name;
   }
@@ -145,7 +180,7 @@ public class Document   {
    * Get type
    * @return type
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "HOWTO", required = true, value = "")
   public TypeEnum getType() {
     return type;
   }
@@ -163,7 +198,7 @@ public class Document   {
    * Get summary
    * @return summary
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Summary of Calculator Documentation", value = "")
   public String getSummary() {
     return summary;
   }
@@ -181,7 +216,7 @@ public class Document   {
    * Get sourceType
    * @return sourceType
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "INLINE", required = true, value = "")
   public SourceTypeEnum getSourceType() {
     return sourceType;
   }
@@ -199,7 +234,7 @@ public class Document   {
    * Get sourceUrl
    * @return sourceUrl
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "", value = "")
   public String getSourceUrl() {
     return sourceUrl;
   }
@@ -217,13 +252,31 @@ public class Document   {
    * Get otherTypeName
    * @return otherTypeName
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "", value = "")
   public String getOtherTypeName() {
     return otherTypeName;
   }
 
   public void setOtherTypeName(String otherTypeName) {
     this.otherTypeName = otherTypeName;
+  }
+
+  public Document visibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
+    return this;
+  }
+
+   /**
+   * Get visibility
+   * @return visibility
+  **/
+  @ApiModelProperty(example = "API_LEVEL", required = true, value = "")
+  public VisibilityEnum getVisibility() {
+    return visibility;
+  }
+
+  public void setVisibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
   }
 
 
@@ -242,12 +295,13 @@ public class Document   {
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
         Objects.equals(this.sourceUrl, document.sourceUrl) &&
-        Objects.equals(this.otherTypeName, document.otherTypeName);
+        Objects.equals(this.otherTypeName, document.otherTypeName) &&
+        Objects.equals(this.visibility, document.visibility);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, otherTypeName);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, otherTypeName, visibility);
   }
 
   @Override
@@ -262,6 +316,7 @@ public class Document   {
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
+    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("}");
     return sb.toString();
   }

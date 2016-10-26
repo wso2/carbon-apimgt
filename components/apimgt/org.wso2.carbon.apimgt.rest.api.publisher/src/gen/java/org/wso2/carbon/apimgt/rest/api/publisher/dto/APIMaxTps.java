@@ -7,48 +7,48 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * ErrorListItem
+ * APIMaxTps
  */
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
-public class ErrorListItem   {
-  private String code = null;
+public class APIMaxTps   {
+  private Long production = null;
 
-  private String message = null;
+  private Long sandbox = null;
 
-  public ErrorListItem code(String code) {
-    this.code = code;
+  public APIMaxTps production(Long production) {
+    this.production = production;
     return this;
   }
 
    /**
-   * Get code
-   * @return code
+   * Get production
+   * @return production
   **/
-  @ApiModelProperty(required = true, value = "")
-  public String getCode() {
-    return code;
+  @ApiModelProperty(example = "1000", value = "")
+  public Long getProduction() {
+    return production;
   }
 
-  public void setCode(String code) {
-    this.code = code;
+  public void setProduction(Long production) {
+    this.production = production;
   }
 
-  public ErrorListItem message(String message) {
-    this.message = message;
+  public APIMaxTps sandbox(Long sandbox) {
+    this.sandbox = sandbox;
     return this;
   }
 
    /**
-   * Description about individual errors occurred 
-   * @return message
+   * Get sandbox
+   * @return sandbox
   **/
-  @ApiModelProperty(required = true, value = "Description about individual errors occurred ")
-  public String getMessage() {
-    return message;
+  @ApiModelProperty(example = "1000", value = "")
+  public Long getSandbox() {
+    return sandbox;
   }
 
-  public void setMessage(String message) {
-    this.message = message;
+  public void setSandbox(Long sandbox) {
+    this.sandbox = sandbox;
   }
 
 
@@ -60,23 +60,23 @@ public class ErrorListItem   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ErrorListItem errorListItem = (ErrorListItem) o;
-    return Objects.equals(this.code, errorListItem.code) &&
-        Objects.equals(this.message, errorListItem.message);
+    APIMaxTps aPIMaxTps = (APIMaxTps) o;
+    return Objects.equals(this.production, aPIMaxTps.production) &&
+        Objects.equals(this.sandbox, aPIMaxTps.sandbox);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, message);
+    return Objects.hash(production, sandbox);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ErrorListItem {\n");
+    sb.append("class APIMaxTps {\n");
     
-    sb.append("    code: ").append(toIndentedString(code)).append("\n");
-    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    production: ").append(toIndentedString(production)).append("\n");
+    sb.append("    sandbox: ").append(toIndentedString(sandbox)).append("\n");
     sb.append("}");
     return sb.toString();
   }
