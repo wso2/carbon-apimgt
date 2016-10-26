@@ -58,7 +58,7 @@
   $(function(){
     jagg.post("/site/blocks/api/recently-added/ajax/list.jag", {
       <% if(jagg.getTenantDomain()){ %>
-      tenant: "<%= jagg.getTenantDomain()%>",
+      //tenant: "<%= jagg.getTenantDomain()%>",
       <% } %>
       action:"getRecentlyAddedAPIs",
       limit:5 
