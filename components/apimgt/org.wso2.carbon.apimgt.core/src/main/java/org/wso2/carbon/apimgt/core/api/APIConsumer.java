@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import java.util.Map;
 
-import org.wso2.carbon.apimgt.core.dao.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APIManagementException;
 
 /**
  * This interface used to write Store specific methods

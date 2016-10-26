@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import java.util.Map;
 
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
-import org.wso2.carbon.apimgt.core.dao.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APIManagementException;
 
 /**
  * 
