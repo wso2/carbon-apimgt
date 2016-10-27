@@ -282,7 +282,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * @param appRequest OAuthAppRequest object with client's payload content
      * @return created Application
-     * @throws APIKeyMgtException
+     * @throws APIKeyMgtException if failed to create the a new application
      */
     private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
                                                    String grantType) throws APIManagementException {
@@ -323,6 +323,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 throw new APIManagementException("Error occurred while creating Service Provider " +
                         "Application" + appName);
             }
+
             //creating the OAuth app
             OAuthConsumerAppDTO createdOauthApp =
                     this.createOAuthApp(applicationName, applicationInfo, grantType, userName);
@@ -352,7 +353,10 @@ public class RegistrationServiceImpl implements RegistrationService {
                     setInboundAuthenticationRequestConfigs(inboundAuthenticationRequestConfigs);
             createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
-            //Updating the service provider with Inbound Authentication Configs
+            //Setting the SaasApplication attribute to created service provider
+            createdServiceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
+
+            //Updating the service provider with Inbound Authentication Configs and SaasApplication
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
 
             Map<String, String> valueMap = new HashMap<String, String>();
@@ -361,11 +365,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             valueMap.put(OAUTH_CLIENT_GRANT, createdOauthApp.getGrantTypes());
 
             return this.fromAppDTOToApplicationInfo(createdOauthApp.getOauthConsumerKey(),
-                    null, createdOauthApp.getCallbackUrl(), createdOauthApp.getOauthConsumerSecret(),
+                    applicationName, createdOauthApp.getCallbackUrl(), createdOauthApp.getOauthConsumerSecret(),
                     createdServiceProvider.isSaasApp(), userId, valueMap);
 
         } catch (IdentityApplicationManagementException e) {
-            log.error("Error occurred while creating the client application " + appName, e);
+            log.error("Error occurred while creating the client application " + appName,e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
