@@ -62,4 +62,16 @@ public class APIUtils {
     public static void throwDaoException(String msg, Throwable t) throws APIManagementException {
         throw new APIManagementException(msg, t);  //todo:replace by dao exception
     }
+
+    /**
+     * Checks if debug log is enabled and logs the message
+     *
+     * @param msg Message to be logged
+     * @param log Logger to be used to log
+     */
+    public static void logDebug(String msg, Logger log) {
+        if (log.isDebugEnabled()) {
+            log.debug(msg);
+        }
+    }
 }
