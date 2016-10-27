@@ -4,22 +4,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
-import org.wso2.carbon.apimgt.core.util.Constants;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Application;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequest;
-import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {

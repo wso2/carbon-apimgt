@@ -36,7 +36,7 @@ import java.sql.SQLException;
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 
-    public ApiDAO getApiDAO() throws APIManagementDAOException {
+    public static ApiDAO getApiDAO() throws APIManagementDAOException {
         ApiDAO apiDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
