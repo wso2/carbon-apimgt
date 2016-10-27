@@ -146,6 +146,58 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(
+                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
+        log.error(description, t);
+        throw conflictException;
+    }
+
+    /**
+     * Returns a new ConflictException
+     *
+     * @param message summary of the error
+     * @param description description of the exception
+     * @return a new ConflictException with the specified details as a response DTO
+     */
+    public static ConflictException buildConflictException(String message, String description) {
+        ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
+        return new ConflictException(errorDTO);
+    }
+
+    /**
      * Returns a generic errorDTO
      *
      * @param message specifies the error message
