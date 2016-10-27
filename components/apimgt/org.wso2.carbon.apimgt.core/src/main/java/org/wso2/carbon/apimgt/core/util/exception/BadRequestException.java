@@ -23,19 +23,20 @@ import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+/**
+ * Exception class that is corresponding to 400 BadRequest response
+ */
 public class BadRequestException extends WebApplicationException {
 
     private String message;
 
-    public BadRequestException(ErrorDTO errorDTO){
-        super(Response.status(Response.Status.BAD_REQUEST)
-                .entity(errorDTO)
-                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE)
-                .build());
+    public BadRequestException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.BAD_REQUEST).entity(errorDTO)
+                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE).build());
         message = errorDTO.getDescription();
     }
 
-    public BadRequestException(){
+    public BadRequestException() {
         super(Response.Status.BAD_REQUEST);
     }
 

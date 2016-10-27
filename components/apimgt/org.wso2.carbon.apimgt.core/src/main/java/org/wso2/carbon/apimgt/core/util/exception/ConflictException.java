@@ -24,18 +24,20 @@ import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+/**
+ * Exception class that is corresponding to 409 Conflict response
+ */
 public class ConflictException extends WebApplicationException {
 
     private String message;
-    public ConflictException(ErrorDTO errorDTO){
-        super(Response.status(Response.Status.CONFLICT)
-                .entity(errorDTO)
-                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE)
-                .build());
+
+    public ConflictException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.CONFLICT).entity(errorDTO)
+                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE).build());
         message = errorDTO.getDescription();
     }
 
-    public ConflictException(){
+    public ConflictException() {
         super(Response.Status.CONFLICT);
     }
 
