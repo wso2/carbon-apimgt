@@ -25,7 +25,7 @@ import org.apache.juli.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.APIProvider;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 
 import java.util.Map;
 
