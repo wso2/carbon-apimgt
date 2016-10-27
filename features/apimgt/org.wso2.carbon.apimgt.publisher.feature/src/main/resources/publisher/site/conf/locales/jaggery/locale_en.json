@@ -522,5 +522,6 @@
     "tenants": "Visible to Tenants",
     "tierPermissions": "tierPermissions",
     "tiers": "tiers",
-    "user": "user"
+    "user": "user",
+    "Type an Email and press Enter":"Type an Email and press Enter"
 }
