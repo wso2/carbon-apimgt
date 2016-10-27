@@ -142,11 +142,6 @@
                 <version>2.6.0.wso2v1</version>
             </dependency>
             <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>1.1.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.core</artifactId>
                 <version>${carbon.apimgt.version}</version>
@@ -155,11 +150,6 @@
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
                 <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
@@ -211,15 +201,20 @@
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
             </dependency>
-	        <dependency>
-                <groupId>com.googlecode.json-simple.wso2</groupId>
-                <artifactId>json-simple</artifactId>
-                <version>${json-simple.wso2.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.media</groupId>
                 <artifactId>jersey-media-multipart</artifactId>
                 <version>2.23.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${findbugs.jsr305.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -324,7 +319,8 @@
         <org.apache.cxf.version>3.0.3</org.apache.cxf.version>
         <com.fasterxml.jackson.core.version>2.8.4</com.fasterxml.jackson.core.version>
 
-        <slf4j.version>1.7.5</slf4j.version>
+        <findbugs.jsr305.version>3.0.0</findbugs.jsr305.version>
+        <pax.logging.api.version>1.9.0</pax.logging.api.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
 
         <carbon.transport.version>2.1.9-SNAPSHOT</carbon.transport.version>
