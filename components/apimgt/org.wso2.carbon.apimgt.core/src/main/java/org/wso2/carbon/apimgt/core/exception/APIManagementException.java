@@ -17,7 +17,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.core.models;
+package org.wso2.carbon.apimgt.core.exception;
 
 /**
  * Top level exception class of API Management exceptions

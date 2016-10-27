@@ -19,15 +19,20 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIProvider;
+import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIIdentifier;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -38,6 +43,9 @@ import java.util.Set;
  * Implementation of API Publisher operations
  */
 public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+
     /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *
@@ -117,14 +125,21 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Adds a new API to the Store
+     * Adds a new API to the system
      *
-     * @param api API
+     * @param api API model object
      * @throws APIManagementException if failed to add API
      */
     @Override
     public void addAPI(API api) throws APIManagementException {
-
+        try {
+            DAOFactory.getApiDAO().addAPI(api);
+            if (log.isDebugEnabled()) {
+                log.debug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.");
+            }
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
+        }
     }
 
     /**
@@ -139,16 +154,22 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Updates design and implementation of an existing API. This method must not be used to change API status.
-     * Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
+     * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param api API
+     * @param api API model object
      * @throws APIManagementException if failed to update API
      */
     @Override
     public void updateAPI(API api) throws APIManagementException {
-
+        try {
+            DAOFactory.getApiDAO().updateAPI(api.getID(), api);
+            if (log.isDebugEnabled()) {
+                log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+            }
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
+        }
     }
 
     /**

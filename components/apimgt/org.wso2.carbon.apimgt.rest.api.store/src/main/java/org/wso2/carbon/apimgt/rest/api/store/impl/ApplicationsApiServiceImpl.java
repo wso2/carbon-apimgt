@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
