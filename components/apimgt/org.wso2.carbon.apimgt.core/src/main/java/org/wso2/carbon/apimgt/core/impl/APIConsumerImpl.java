@@ -54,4 +54,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
+    @Override public int addApplication(Application application, String userId) throws APIManagementException {
+        return 0;
+    }
+
+    @Override public Application getApplicationById(int id) throws APIManagementException {
+        return null;
+    }
+
 }
