@@ -270,5 +270,6 @@
     "roles": "Visible to Roles",
     "settings": "settings",
     "tasks": "tasks",
-    "tenants": "Visible to Tenants"
+    "tenants": "Visible to Tenants",
+    "Type an Email and press Enter":"Type an Email and press Enter"
 }
