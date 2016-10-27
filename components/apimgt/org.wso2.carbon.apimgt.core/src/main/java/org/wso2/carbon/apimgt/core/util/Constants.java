@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class Constants {
 
+    //// TODO: 27/10/16 Refactor constant classes once all constants are defined 
     public static final String PUBLISHED = "PUBLISHED";
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
@@ -30,5 +31,6 @@ public class Constants {
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
+    public static final int TIER_APPLICATION_TYPE = 2;
 
 }
