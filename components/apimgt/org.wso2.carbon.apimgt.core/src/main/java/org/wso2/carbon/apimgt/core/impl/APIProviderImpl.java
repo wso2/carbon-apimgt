@@ -134,9 +134,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addAPI(API api) throws APIManagementException {
         try {
             DAOFactory.getApiDAO().addAPI(api);
-            if (log.isDebugEnabled()) {
-                log.debug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.");
-            }
+            APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
         }
