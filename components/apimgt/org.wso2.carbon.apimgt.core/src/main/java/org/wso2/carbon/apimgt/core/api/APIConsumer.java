@@ -74,4 +74,22 @@ public interface APIConsumer extends APIManager {
      */
     void removeApplication(Application application) throws APIManagementException;
 
+    /**
+     * Adds an application
+     *
+     * @param application Application
+     * @param userId      User Id
+     * @return Id of the newly created application
+     * @throws APIManagementException if failed to add Application
+     */
+    int addApplication(Application application, String userId) throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the Id
+     * @param id Id of the Application
+     * @return it will return Application corresponds to the id.
+     * @throws APIManagementException
+     */
+    Application getApplicationById(int id) throws APIManagementException;
+
 }

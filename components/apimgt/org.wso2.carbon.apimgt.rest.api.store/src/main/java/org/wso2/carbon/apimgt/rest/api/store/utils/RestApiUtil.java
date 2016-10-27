@@ -16,9 +16,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
+
+import java.util.Collection;
 
 public class RestApiUtil {
 
@@ -145,6 +151,7 @@ public class RestApiUtil {
         return new InternalServerErrorException(errorDTO);
     }
 
+
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
      *
@@ -195,6 +202,48 @@ public class RestApiUtil {
     public static ConflictException buildConflictException(String message, String description) {
         ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
         return new ConflictException(errorDTO);
+    }
+
+    /**
+     * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
+     * resource
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
+     *   existing resource, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceAlreadyExists(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
+    }
+
+    /**
+     * Attempts to find the actual cause of the throwable 'e'
+     *
+     * @param e throwable
+     * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
+     */
+    private static Throwable getPossibleErrorCause (Throwable e) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        rootCause = rootCause == null ? e : rootCause;
+        return rootCause;
+    }
+
+    /**
+     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
+     *
+     * @param tiers    Tier Collection
+     * @param tierName Tier to find
+     * @return Matched tier with its name
+     */
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
     }
 
     /**
