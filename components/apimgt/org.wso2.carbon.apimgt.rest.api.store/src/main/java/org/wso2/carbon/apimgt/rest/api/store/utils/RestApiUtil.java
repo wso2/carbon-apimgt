@@ -15,8 +15,10 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
-
+import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.core.util.exception.*;
 
 public class RestApiUtil {
 
@@ -63,11 +65,28 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws ForbiddenException
      */
-    public static void handleAuthorizationFailure(String resource, String id, Log log) {
-            //throws ForbiddenException {
-//        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
-//        log.error(forbiddenException.getMessage());
-//        throw forbiddenException;
+    public static void handleAuthorizationFailure(String resource, String id, Log log) throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
+        log.error(forbiddenException.getMessage());
+        throw forbiddenException;
+    }
+
+    /**
+     * Returns a new ForbiddenException
+     *
+     * @param resource Resource type
+     * @param id identifier of the resource
+     * @return a new ForbiddenException with the specified details as a response DTO
+     */
+    public static ForbiddenException buildForbiddenException(String resource, String id) {
+        String description;
+        if (!StringUtils.isEmpty(id)) {
+            description = "You don't have permission to access the " + resource + " with Id " + id;
+        } else {
+            description = "You don't have permission to access the " + resource;
+        }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
+        return new ForbiddenException(errorDTO);
     }
 
     /**
@@ -78,12 +97,29 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws NotFoundException
      */
-    public static void handleResourceNotFoundError(String resource, String id, Log log) {
-//            throws NotFoundException {
-//        NotFoundException notFoundException = buildNotFoundException(resource, id);
-//        log.error(notFoundException.getMessage());
-//        throw notFoundException;
+    public static void handleResourceNotFoundError(String resource, String id, Log log) throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage());
+        throw notFoundException;
     }
+    /**
+     * Returns a new NotFoundException
+     *
+     * @param resource Resource type
+     * @param id identifier of the resource
+     * @return a new NotFoundException with the specified details as a response DTO
+     */
+    public static NotFoundException buildNotFoundException(String resource, String id) {
+        String description;
+        if (!StringUtils.isEmpty(id)) {
+            description = "Requested " + resource + " with Id '" + id + "' not found";
+        } else {
+            description = "Requested " + resource + " not found";
+        }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        return new NotFoundException(errorDTO);
+    }
+
     /**
      * Logs the error, builds a internalServerErrorException with specified details and throws it
      *
@@ -92,13 +128,37 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws InternalServerErrorException
      */
-    public static void handleInternalServerError(String msg, Throwable t, Log log) {
-//            throws InternalServerErrorException {
-//        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
-//        log.error(msg, t);
-//        throw internalServerErrorException;
+    public static void handleInternalServerError(String msg, Throwable t, Log log) throws InternalServerErrorException {
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        log.error(msg, t);
+        throw internalServerErrorException;
     }
 
+    /**
+     * Returns a new InternalServerErrorException
+     *
+     * @return a new InternalServerErrorException with default details as a response DTO
+     */
+    public static InternalServerErrorException buildInternalServerErrorException() {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
+                RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
+        return new InternalServerErrorException(errorDTO);
+    }
+
+    /**
+     * Returns a generic errorDTO
+     *
+     * @param message specifies the error message
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(String message, Long code, String description){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMoreInfo("");
+        errorDTO.setMessage(message);
+        errorDTO.setDescription(description);
+        return errorDTO;
+    }
 
 
 }

@@ -18,4 +18,11 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 public class RestApiConstants {
 
     public static final String RESOURCE_APPLICATION = "application";
+    public static final String STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT = "Internal server error";
+    public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered "
+            + "an internal error. Please contact administrator.";
+    public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
+    public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
+
+
 }
