@@ -1,0 +1,7 @@
+<%
+jagg.block("sdk", {
+    initializer:function (data) {
+
+    }
+});
+%>

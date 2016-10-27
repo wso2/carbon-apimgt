@@ -35,6 +35,7 @@ jagg.block("api/api-info", {
         var isGlobalCEPEnabled;
         var mod = jagg.module("manager");
         var isForumEnabled = mod.isForumEnabled();
+        var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
@@ -143,6 +144,23 @@ jagg.block("api/api-info", {
                             }
                         );
                     }
+
+                    if(supportedLangs.langs != null) {
+                        result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                        );
+                    }
                     return result;
                 }
                 else {
@@ -204,7 +222,7 @@ jagg.block("api/api-info", {
                 }
             } else {
                 if (showConsole) {
-                    return {
+                    var result = {
                         "api": api,
                         "deniedTiers": deniedTiers,
                         "applications": list,
@@ -252,6 +270,24 @@ jagg.block("api/api-info", {
                             ]
                         }
                     };
+
+                    if(supportedLangs.langs != null) {
+                        result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                        );
+                    }
+                    return result;
                 }
                 else {
                     return {

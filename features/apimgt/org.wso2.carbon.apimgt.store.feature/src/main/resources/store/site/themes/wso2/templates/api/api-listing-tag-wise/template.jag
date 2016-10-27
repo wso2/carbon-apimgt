@@ -55,7 +55,7 @@
 							              </a>
 						             </div>
 						             <div class="add-padding-2x app-data ">
-	                                    <h4><a href="<%=path%>" title="<%=tag.name%>"><%=tag.name%></a></h4>
+	                                    <h4><a href="<%=path%>" title="<%=tagName%>"><%=tagName%></a></h4>
 	                                   	<p><%=encode.forHtml(tag.description)%></p>
 	                                </div>
 						     </div>

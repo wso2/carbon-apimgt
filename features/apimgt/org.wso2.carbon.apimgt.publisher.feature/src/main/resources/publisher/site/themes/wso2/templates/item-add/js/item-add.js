@@ -52,6 +52,10 @@ $( document ).ready(function() {
                         jagg.message({content:responseText.message,type:"error"});
                     }
                 }                
+            }   ,error: function() {
+                $(btn).buttonLoader('stop');
+                jagg.message({content:"Error occurred while importing swagger URL",type:"error"});
+
             }, dataType: 'json'
         });
     });
