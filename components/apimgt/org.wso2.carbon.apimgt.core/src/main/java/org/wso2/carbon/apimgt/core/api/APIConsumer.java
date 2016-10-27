@@ -22,6 +22,8 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 
 import java.util.Map;
 
@@ -31,32 +33,33 @@ import java.util.Map;
  */
 public interface APIConsumer extends APIManager {
 
-    /**
-     * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
-     * only the latest version will be included
-     * in this list.
-     * 
-     * @param start starting number
-     * @param end ending number
-     * @param returnAPITags If true, tags of each API is returned
-     * @return set of API
-     * @throws APIManagementException if failed to API set
-     */
-    Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String status, boolean returnAPITags)
-            throws APIManagementException;
 
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
      * 
-     * @param start starting number
-     * @param end ending number
+     * @param offset offset
+     * @param limit limit
      * @param status One or more Statuses
      * @param returnAPITags If true, tags of each API is returned
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
-    Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] status, boolean returnAPITags)
+    Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
+            throws APIManagementException;
+    
+   
+    /**
+     * Returns a paginated list of all APIs which match the given search criteria.
+     *   
+     * @param searchContent searchContent
+     * @param searchType searchType
+     * @param offset offset
+     * @param limit limit
+     * @return APISummaryResults
+     * @throws APIManagementException
+     */
+    APISummaryResults searchAPIs(String searchContent, String searchType, int offset, int limit)
             throws APIManagementException;
 
     /**
