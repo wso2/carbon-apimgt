@@ -8,13 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIList;
-//import org.wso2.carbon.apimgt.rest.api.util.*;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 
