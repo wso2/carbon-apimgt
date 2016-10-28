@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 /**
@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
  */
 public class RestAPIStoreUtils {
 
-    private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(RestAPIStoreUtils.class);
 
     /**
      * check whether current logged in user has access to the specified application

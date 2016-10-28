@@ -1,12 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-//import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
@@ -20,8 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T10:59:23.111+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     
-    //private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
-
+    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class); 
+    
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince ) throws NotFoundException {
         // do some magic!
@@ -67,7 +65,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query;
                 } else {
-                    //RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
+                    RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
                 }
             }
             

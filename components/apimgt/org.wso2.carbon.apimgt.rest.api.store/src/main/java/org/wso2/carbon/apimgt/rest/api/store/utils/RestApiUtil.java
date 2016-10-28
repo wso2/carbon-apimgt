@@ -17,7 +17,7 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
@@ -80,7 +80,7 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws ForbiddenException
      */
-    public static void handleAuthorizationFailure(String resource, String id, Log log) throws ForbiddenException {
+    public static void handleAuthorizationFailure(String resource, String id, Logger log) throws ForbiddenException {
         ForbiddenException forbiddenException = buildForbiddenException(resource, id);
         log.error(forbiddenException.getMessage());
         throw forbiddenException;
@@ -112,7 +112,7 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws NotFoundException
      */
-    public static void handleResourceNotFoundError(String resource, String id, Log log) throws NotFoundException {
+    public static void handleResourceNotFoundError(String resource, String id, Logger log) throws NotFoundException {
         NotFoundException notFoundException = buildNotFoundException(resource, id);
         log.error(notFoundException.getMessage());
         throw notFoundException;
@@ -143,7 +143,7 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws InternalServerErrorException
      */
-    public static void handleInternalServerError(String msg, Throwable t, Log log) throws InternalServerErrorException {
+    public static void handleInternalServerError(String msg, Throwable t, Logger log) throws InternalServerErrorException {
         InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
         log.error(msg, t);
         throw internalServerErrorException;
@@ -168,7 +168,7 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws BadRequestException
      */
-    public static void handleBadRequest(String msg, Log log) throws BadRequestException {
+    public static void handleBadRequest(String msg, Logger log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
         log.error(msg);
         throw badRequestException;
@@ -193,7 +193,7 @@ public class RestApiUtil {
      * @param log Log instance
      * @throws ConflictException
      */
-    public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
+    public static void handleResourceAlreadyExistsError(String description, Throwable t, Logger log)
             throws ConflictException {
         ConflictException conflictException = buildConflictException(
                 RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
