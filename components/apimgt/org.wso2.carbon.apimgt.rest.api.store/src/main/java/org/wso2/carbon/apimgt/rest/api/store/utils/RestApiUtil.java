@@ -25,6 +25,15 @@ import org.wso2.carbon.apimgt.core.util.exception.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
 
 import java.util.Collection;
+import org.wso2.carbon.apimgt.core.api.APIConsumer;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.core.util.exception.ConflictException;
+import org.wso2.carbon.apimgt.core.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
 
 public class RestApiUtil {
 
@@ -261,5 +270,15 @@ public class RestApiUtil {
         return errorDTO;
     }
 
+    /**
+     * Returns an APIConsumer.
+     * 
+     * @param subscriberName
+     * @return
+     * @throws APIManagementException
+     */
+    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+    }
 
 }

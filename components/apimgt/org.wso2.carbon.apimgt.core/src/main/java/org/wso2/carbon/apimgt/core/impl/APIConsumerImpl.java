@@ -21,9 +21,14 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
+import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,17 +38,26 @@ import java.util.Map;
 public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
-    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String status, boolean returnAPITags)
+    public Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
             throws APIManagementException {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
     @Override
-    public Map<String, Object> getAllPaginatedAPIsByStatus(int start, int end, String[] status, boolean returnAPITags)
+    public APISummaryResults searchAPIs(String searchContent, String searchType, int offset, int limit)
             throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
+
+        APISummaryResults apiSummaryResults = null;
+        try {
+            List<String> roles = new ArrayList<>(); // TODO -- roles list
+            apiSummaryResults = DAOFactory.getApiDAO().searchAPIsForRoles(searchType, searchContent, offset, limit,
+                    roles);
+        } catch (APIManagementDAOException e) {
+            // TODO - log error
+        }
+
+        return apiSummaryResults;
     }
 
     @Override public Application getApplicationByUUID(String uuid) throws APIManagementException {

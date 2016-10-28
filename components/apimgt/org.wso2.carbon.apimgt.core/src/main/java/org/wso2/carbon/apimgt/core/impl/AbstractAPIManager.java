@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.models.APIIdentifier;
 
 import java.util.List;
 import java.util.Set;
-
 /**
  * This class contains the implementation of the common methods for Publisher and store
  */
