@@ -48,8 +48,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body) {
-        RestApiUtil.handleBadRequest(
-                "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
         boolean isTenantFlowStarted = false;

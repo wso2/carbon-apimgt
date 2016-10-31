@@ -2052,6 +2052,12 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "404": {
                         "description": "Not Found.\nWorkflow for the given reference in not found.\n",
                         "schema": {

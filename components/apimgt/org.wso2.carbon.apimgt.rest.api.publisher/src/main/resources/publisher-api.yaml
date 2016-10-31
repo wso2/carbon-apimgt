@@ -2061,14 +2061,20 @@ paths:
         200:
           description: |
             OK.
-            Environment list is returned.
+            Workflow request information is returned.
           schema:
             $ref: '#/definitions/Workflow'
           headers:
             Content-Type:
               description: |
-                Workflow request information is returned.
+                The content type of the body.
               type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
