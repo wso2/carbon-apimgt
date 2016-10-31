@@ -6,8 +6,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.EnvironmentsApiServic
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 
 import java.util.List;
 

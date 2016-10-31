@@ -24,17 +24,37 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class APIMappingUtil {
 
@@ -148,25 +168,40 @@ public class APIMappingUtil {
 
         String inSequenceName = model.getInSequence();
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
+            boolean sharedStatus = getSharedStatus(inSequenceName,type,dto);
+            String uuid = getSequenceId(inSequenceName,type,dto);
             SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
-            inSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            inSequence.setType(type);
+            inSequence.setShared(sharedStatus);
+            inSequence.setId(uuid);
             sequences.add(inSequence);
         }
 
         String outSequenceName = model.getOutSequence();
         if (outSequenceName != null && !outSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
+            boolean sharedStatus = getSharedStatus(outSequenceName,type,dto);
+            String uuid = getSequenceId(outSequenceName,type,dto);
             SequenceDTO outSequence = new SequenceDTO();
             outSequence.setName(outSequenceName);
-            outSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            outSequence.setType(type);
+            outSequence.setShared(sharedStatus);
+            outSequence.setId(uuid);
             sequences.add(outSequence);
         }
 
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
+            boolean sharedStatus = getSharedStatus(faultSequenceName,type,dto);
+            String uuid = getSequenceId(faultSequenceName,type,dto);
             SequenceDTO faultSequence = new SequenceDTO();
             faultSequence.setName(faultSequenceName);
-            faultSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            faultSequence.setType(type);
+            faultSequence.setShared(sharedStatus);
+            faultSequence.setId(uuid);
             sequences.add(faultSequence);
         }
 
@@ -240,6 +275,61 @@ public class APIMappingUtil {
         setMaxTpsFromModelToApiDTO(model, dto);
 
         return dto;
+    }
+
+    /**
+     * Returns uuid of the specified mediation sequence
+     *
+     * @param sequenceName mediation sequence name
+     * @param direction    in/out/fault
+     * @param dto          APIDTO contains details of the exporting API
+     * @return UUID of sequence or null
+     */
+    private static String getSequenceId(String sequenceName, String direction,
+                                        APIDTO dto) {
+        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
+                dto.getVersion());
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+            return APIUtil.getMediationSequenceUuid(sequenceName, tenantId, direction, apiIdentifier);
+
+        } catch (UserStoreException e) {
+            log.error("Error occurred while reading tenant information ", e);
+
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting the uuid of the mediation sequence", e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns shared status of the mediation policy
+     *
+     * @param sequenceName mediation sequence name
+     * @param sequenceType in/out/faul
+     * @param dto          APIDTO contains details of the exporting API
+     * @return true, if the mediation sequnce is a shared resource
+     */
+    private static boolean getSharedStatus(String sequenceName, String sequenceType, APIDTO dto) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
+                    dto.getVersion());
+            if (APIUtil.isPerAPISequence(sequenceName, tenantId, apiIdentifier,
+                    sequenceType)) {
+                return true;
+            }
+        } catch (UserStoreException e) {
+            log.error("Error occurred while reading tenant information ", e);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while checking the shared status of the mediation sequence", e);
+        }
+        return false;
     }
 
     public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
