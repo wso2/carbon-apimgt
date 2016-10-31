@@ -114,14 +114,14 @@ public interface APIProvider extends APIManager {
     /**
      * This method used to Update the status of API
      *
-     * @param apiId
+     * @param api
      * @param status
      * @param deprecateOldVersions
      * @param makeKeysForwardCompatible
      * @return
      * @throws APIManagementException
      */
-    boolean updateAPIStatus(String apiId, String status, boolean deprecateOldVersions,
+    boolean updateAPIStatus(API api, String status, boolean deprecateOldVersions,
                             boolean makeKeysForwardCompatible)
             throws APIManagementException;
 
@@ -324,7 +324,7 @@ public interface APIProvider extends APIManager {
      * @return boolean value representing success not not
      * @throws APIManagementException
      */
-    boolean updateAPIforStateChange(String identifier, APIStatus newStatus) throws APIManagementException;
+    boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws APIManagementException;
 
     /**
      * Get the current lifecycle status of the api

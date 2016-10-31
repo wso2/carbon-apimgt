@@ -180,7 +180,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
      * @throws APIManagementDAOException
      */
     @Override
-    public void changeLifeCylceStatus(String apiID, String status) throws APIManagementDAOException {
+    public void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException {
 
     }
 
@@ -207,6 +207,11 @@ public class DefaultApiDAOImpl implements ApiDAO {
     @Override
     public DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit)
                                                                     throws APIManagementDAOException {
+        return null;
+    }
+
+    @Override
+    public List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException {
         return null;
     }
 }

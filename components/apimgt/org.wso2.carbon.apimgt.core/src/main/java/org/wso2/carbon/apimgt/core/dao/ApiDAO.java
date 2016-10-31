@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-
 import javax.annotation.CheckForNull;
 
 /**
@@ -140,7 +139,7 @@ public interface ApiDAO {
      * @throws APIManagementDAOException
      *
      */
-    void changeLifeCylceStatus(String apiID, String status) throws APIManagementDAOException;
+    void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException;
 
     /**
      * Create a new version of an existing API
@@ -161,4 +160,12 @@ public interface ApiDAO {
      */
     DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws APIManagementDAOException;
 
+    /**
+     *
+     * @param apiName name of API
+     * @param provider provider of API
+     * @return List of APIS which contains the name and provider.
+     * @throws APIManagementDAOException
+     */
+    List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException;
 }

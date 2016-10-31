@@ -29,10 +29,12 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.models.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -190,7 +192,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void changeAPIStatus(API api, APIStatus status, String userId)
             throws APIManagementException {
         try {
-            apiDAO.changeLifeCylceStatus(api.getId(), status.getStatus());
+            apiDAO.changeLifeCycleStatus(api.getId(), status.getStatus());
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while changing the API status - " + api.getName(), e, log);
         }
@@ -199,7 +201,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * This method used to Update the status of API
      *
-     * @param apiId
+     * @param api
      * @param status
      * @param deprecateOldVersions
      * @param makeKeysForwardCompatible
@@ -207,9 +209,41 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIStatus(String apiId, String status, boolean
-            deprecateOldVersions, boolean makeKeysForwardCompatible) {
-        return false;
+    public boolean updateAPIStatus(API api, String status, boolean
+            deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
+        if (deprecateOldVersions) {
+            try {
+                List<API> apiList = apiDAO.getListOfAPIsFromIdentifier(api.getName(), api.getProvider());
+                for (API api1 : apiList) {
+                    apiDAO.changeLifeCycleStatus(api1.getId(), APIStatus.DEPRECATED.getStatus());
+                }
+                return true;
+            } catch (APIManagementDAOException e) {
+                APIUtils.logAndThrowException("Couldn't deprecate older versions of API " + api.getName(), log);
+                return false;
+            }
+        }
+        if (makeKeysForwardCompatible) {
+            try {
+                List<APISubscription> apiSubscriptionList = apiSubscriptionDAO.getAllAPISubscriptionsByAPI(api
+                                .getName(), api.getProvider(), SubscriptionStatus.UNBLOCKED, SubscriptionStatus.BLOCKED,
+                        SubscriptionStatus.PROD_ONLY_BLOCKED, SubscriptionStatus.REJECTED);
+                for (APISubscription apiSubscription : apiSubscriptionList) {
+                    apiSubscription.setApiId(api.getId());
+                    apiSubscriptionDAO.addAPISubscription(apiSubscription);
+                }
+            } catch (APIManagementDAOException e) {
+                APIUtils.logAndThrowException("Couldn't get list of Subscriptions with name" + api.getName(), log);
+                return false;
+            }
+        }
+        try {
+            apiDAO.changeLifeCycleStatus(api.getId(), status);
+            return true;
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), log);
+            return false;
+        }
     }
 
 
@@ -223,7 +257,11 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
-
+        try {
+            apiDAO.createNewAPIVersion(api.getId(), newVersion);
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), log);
+        }
     }
 
     /**
@@ -466,7 +504,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIforStateChange(String identifier, APIStatus newStatus) throws
+    public boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws
             APIManagementException {
         return false;
     }
