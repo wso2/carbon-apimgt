@@ -998,6 +998,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            
+            //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
+            //This sets the endpoint security of the APIs based on the old artifact. 
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            if (gatewayManager.isAPIPublished(api, tenantDomain)) {
+                if ((!api.isEndpointSecured() && !api.isEndpointAuthDigest())) {
+                    boolean isSecured = Boolean.parseBoolean(
+                                                 artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
+                    boolean isDigestSecured = Boolean.parseBoolean(
+                                                 artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
+                    String userName = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
+                    String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+                    
+                    //Check for APIs marked as non-secured, but username is set. 
+                    if (!isSecured && !isDigestSecured && userName != null) {
+                        String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
+                        if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
+                            api.setEndpointSecured(true);
+                            api.setEndpointAuthDigest(true);                            
+                        } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
+                            api.setEndpointSecured(true);
+                        }
+                        api.setEndpointUTUsername(userName);
+                        api.setEndpointUTPassword(password);
+                    }                   
+                    
+                }
+            }
+            
             GenericArtifact updateApiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
             org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
