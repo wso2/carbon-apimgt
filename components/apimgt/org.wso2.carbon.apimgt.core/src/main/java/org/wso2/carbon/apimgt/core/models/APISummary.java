@@ -81,6 +81,14 @@ public final class APISummary {
         this.context = context;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -110,11 +118,4 @@ public final class APISummary {
         return result;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 }

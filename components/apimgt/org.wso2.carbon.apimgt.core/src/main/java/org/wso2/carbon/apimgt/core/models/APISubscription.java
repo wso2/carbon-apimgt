@@ -39,8 +39,16 @@ public final class APISubscription {
         return application;
     }
 
-    public String getAPIID() {
+    public String getApiId() {
         return apiId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
@@ -63,11 +71,5 @@ public final class APISubscription {
         return result;
     }
 
-    public String getId() {
-        return id;
-    }
 
-    public void setId(String id) {
-        this.id = id;
-    }
 }
