@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIIdentifier;
 
 import java.util.List;
 import java.util.Set;
@@ -37,7 +36,7 @@ public interface APIManager {
      * All other fields may not be initialized. Therefore, the objects returned by this method
      * must not be used to access any metadata item related to an API, other than the ones listed
      * above. For that purpose a fully initialized API object instance should be acquired by
-     * calling the getAPI(APIIdentifier) method.
+     * calling the getAPI(String) method.
      *
      * @return a List of API objects (partially initialized), possibly empty
      * @throws APIManagementException on error
@@ -46,37 +45,19 @@ public interface APIManager {
     /**
      * Returns details of an API
      *
-     * @param apiPath APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(String apiPath) throws APIManagementException;
-    /**
-     * Returns details of an API
-     *
      * @param uuid UUID of the API's registry artifact
      * @return An API object related to the given artifact id or null
-     * @throws APIManagementException if failed get API from APIIdentifier
+     * @throws APIManagementException if failed get API from String
      */
     API getAPIbyUUID(String uuid) throws APIManagementException;
 
     /**
-     * Returns details of an API
-     *
-     * @param identifier APIIdentifier
-     * @return An API object related to the given identifier or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    API getAPI(APIIdentifier identifier) throws APIManagementException;
-
-    /**
-     * Checks the Availability of given APIIdentifier
-     *
-     * @param identifier APIIdentifier
+     * Checks the Availability of given String
+     *@api
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
      */
-    boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
+    boolean isAPIAvailable(API api) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system
@@ -109,16 +90,10 @@ public interface APIManager {
     /**
      * Returns the swagger v2.0 definition as a string
      *
-     * @param apiId id of the APIIdentifier
+     * @param api id of the String
      * @return swagger string
      * @throws APIManagementException
      */
-    String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+    String getSwagger20Definition(String api) throws APIManagementException;
 
-    /**
-     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} in the system
-     *
-     * @return Set of tiers
-     * @throws APIManagementException if failed to get the predefined tiers
-     */
 }
