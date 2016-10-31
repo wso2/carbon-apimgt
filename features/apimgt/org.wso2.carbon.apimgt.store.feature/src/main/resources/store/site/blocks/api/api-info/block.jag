@@ -35,6 +35,7 @@ jagg.block("api/api-info", {
         var isGlobalCEPEnabled;
         var mod = jagg.module("manager");
         var isForumEnabled = mod.isForumEnabled();
+        var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
@@ -181,6 +182,23 @@ jagg.block("api/api-info", {
                             }
                         );
                     }
+
+                    if(supportedLangs.langs != null) {
+                        result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                        );
+                    }
                     return result;
                 }
                 else {
@@ -242,92 +260,111 @@ jagg.block("api/api-info", {
                 }
             } else {
                 if (showConsole) {
-                    if(api.ws != "true"){
-                    return {
-                        "api": api,
-                        "deniedTiers": deniedTiers,
-                        "applications": list,
-                        "user": user,
-                        "uriTemplates": uriTemplates,
-                        "isRatingActivated": isRatingActivated,
-                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
-                        "tabs": {
-                            "tabs": [
-                                {
-                                    "title": i18n.localize("Overview"),
-                                    "body": [
-                                        {
-                                            "name": "api/overview",
-                                            "inputs": {
-                                                "api": api,
-                                                "user": user
+                    var result;
+                    if(api.ws != "true") {
+                        result = {
+                            "api": api,
+                            "deniedTiers": deniedTiers,
+                            "applications": list,
+                            "user": user,
+                            "uriTemplates": uriTemplates,
+                            "isRatingActivated": isRatingActivated,
+                            "isGlobalCEPEnabled": isGlobalCEPEnabled,
+                            "tabs": {
+                                "tabs": [
+                                    {
+                                        "title": i18n.localize("Overview"),
+                                        "body": [
+                                            {
+                                                "name": "api/overview",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "user": user
+                                                }
                                             }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("API Console"),
-                                    "body": [
-                                        {
-                                            "name": "api/swagger",
-                                            "inputs": {
-                                                "api": api,
-                                                "subscriptions": subscriptions
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("API Console"),
+                                        "body": [
+                                            {
+                                                "name": "api/swagger",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "subscriptions": subscriptions
+                                                }
                                             }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("Documentation"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("Documentation"),
+                                        "body": [
+                                            {
+                                                "name": "api/documentation",
+                                                "inputs": {
+                                                    "api": api
+                                                }
                                             }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    };}else{
-                        return {
-                        "api": api,
-                        "deniedTiers": deniedTiers,
-                        "applications": list,
-                        "user": user,
-                        "uriTemplates": uriTemplates,
-                        "isRatingActivated": isRatingActivated,
-                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
-                        "tabs": {
-                            "tabs": [
-                                {
-                                    "title": i18n.localize("Overview"),
-                                    "body": [
-                                        {
-                                            "name": "api/overview",
-                                            "inputs": {
-                                                "api": api,
-                                                "user": user
+                                        ]
+                                    }
+                                ]
+                            }
+                        };
+                    } else {
+                        result = {
+                            "api": api,
+                            "deniedTiers": deniedTiers,
+                            "applications": list,
+                            "user": user,
+                            "uriTemplates": uriTemplates,
+                            "isRatingActivated": isRatingActivated,
+                            "isGlobalCEPEnabled": isGlobalCEPEnabled,
+                            "tabs": {
+                                "tabs": [
+                                    {
+                                        "title": i18n.localize("Overview"),
+                                        "body": [
+                                            {
+                                                "name": "api/overview",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "user": user
+                                                }
                                             }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("Documentation"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("Documentation"),
+                                        "body": [
+                                            {
+                                                "name": "api/documentation",
+                                                "inputs": {
+                                                    "api": api
+                                                }
                                             }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    };
+                                        ]
+                                    }
+                                ]
+                            }
+                        };
                     }
+                    if(supportedLangs.langs != null) {
+                        result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                        );
+                    }
+                    return result;
                 }
                 else {
                     return {

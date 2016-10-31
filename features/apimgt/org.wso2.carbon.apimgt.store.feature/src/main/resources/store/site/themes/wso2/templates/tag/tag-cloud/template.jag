@@ -24,8 +24,8 @@
               }
               for (var i = result.tags.length - 1; i >= 0; i--) {
                 var tag_name = result.tags[i].name;
-                if (result.tags[i].name.split('<%=site.tagGroupKey%>').length == 1) {
-                    var tag_name = result.tags[i].name.split('<%=site.tagGroupKey%>')[0];
+                if (result.tags[i].name.split('<%=site.tagGroupKey%>').length > 1 && <%=site.tagWiseMode%> == true) {
+                    continue;
                 }
                 $("#tag-content").append('<a title="'+tag_name+'" style = "text-transform: none;"  class="truncate" href="'+path + "&tag=" + result.tags[i].name+'" rel="'+result.tags[i].count+'" >'+tag_name+'</a> ');
               };

@@ -548,6 +548,8 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            String environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
+            api.setGatewayUrls(environmentConfig);
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
@@ -631,6 +633,7 @@ public final class APIUtil {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
                 String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
                 if (tiers != null) {
                     String[] tierNames = tiers.split("\\|\\|");
                     for (String tierName : tierNames) {
@@ -639,8 +642,9 @@ public final class APIUtil {
 
                     }
 
-                    api.addAvailableTiers(availableTier);
-                    String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+                    api.addAvailableTiers(availableTier);                    
+                    api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
+                } else {
                     api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 }
             }
@@ -1601,7 +1605,7 @@ public final class APIUtil {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry();
 
-                return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+                return getAllTiers(registry, APIConstants.API_TIER_LOCATION, MultitenantConstants.SUPER_TENANT_ID);
             } catch (RegistryException e) {
                 log.error(APIConstants.MSG_TIER_RET_ERROR, e);
                 throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1627,7 +1631,7 @@ public final class APIUtil {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry(tenantId);
 
-                return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+                return getAllTiers(registry, APIConstants.API_TIER_LOCATION, tenantId);
             } catch (RegistryException e) {
                 log.error(APIConstants.MSG_TIER_RET_ERROR, e);
                 throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1652,7 +1656,7 @@ public final class APIUtil {
                 try {
                     Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry();
-                    return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                    return getTiers(registry, APIConstants.API_TIER_LOCATION, MultitenantConstants.SUPER_TENANT_ID);
                 } catch (RegistryException e) {
                     log.error(APIConstants.MSG_TIER_RET_ERROR, e);
                     throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1696,7 +1700,7 @@ public final class APIUtil {
             try {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry(tenantId);
-                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                return getTiers(registry, APIConstants.API_TIER_LOCATION, tenantId);
             } catch (RegistryException e) {
                 log.error(APIConstants.MSG_TIER_RET_ERROR, e);
                 throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1727,11 +1731,11 @@ public final class APIUtil {
                         getGovernanceSystemRegistry(tenantId);
 
                 if (tierType == APIConstants.TIER_API_TYPE) {
-                    return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                    return getTiers(registry, APIConstants.API_TIER_LOCATION, tenantId);
                 } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-                    return getTiers(registry, APIConstants.RES_TIER_LOCATION);
+                    return getTiers(registry, APIConstants.RES_TIER_LOCATION, tenantId);
                 } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-                    return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+                    return getTiers(registry, APIConstants.APP_TIER_LOCATION, tenantId);
                 } else {
                     throw new APIManagementException("No such a tier type : " + tierType);
                 }
@@ -1780,7 +1784,7 @@ public final class APIUtil {
      * @throws XMLStreamException     when xml parsing fails
      * @throws APIManagementException when fails to retrieve tier attributes
      */
-    private static Map<String, Tier> getAllTiers(Registry registry, String tierLocation)
+    private static Map<String, Tier> getAllTiers(Registry registry, String tierLocation, int tenantId)
             throws RegistryException, XMLStreamException, APIManagementException {
         // We use a treeMap here to keep the order
         Map<String, Tier> tiers = new TreeMap<String, Tier>();
@@ -1887,6 +1891,13 @@ public final class APIUtil {
             tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
             tier.setDisplayName(APIConstants.UNLIMITED_TIER);
             tier.setRequestsPerMin(Long.MAX_VALUE);
+
+            if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+            	tier.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
+            } else {
+            	tier.setTierPlan(APIConstants.BILLING_PLAN_FREE);
+            }
+
             tiers.put(tier.getName(), tier);
         }
 
@@ -1903,10 +1914,10 @@ public final class APIUtil {
      * @return map containing available tiers
      * @throws APIManagementException when fails to retrieve tier attributes
      */
-    private static Map<String, Tier> getTiers(Registry registry, String tierLocation) throws APIManagementException {
+    private static Map<String, Tier> getTiers(Registry registry, String tierLocation, int tenantId) throws APIManagementException {
         Map<String, Tier> tiers = null;
         try {
-            tiers = getAllTiers(registry, tierLocation);
+            tiers = getAllTiers(registry, tierLocation, tenantId);
             tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
         } catch (RegistryException e) {
             handleException(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -4790,7 +4801,19 @@ public final class APIUtil {
         }
         return environmentStringSet;
     }
-
+    /**
+     * This method used to get environment values of API from database.     *
+     * @param api API object
+     * @throws APIManagementException
+     */
+    public static String getAPIUrls(API api) throws APIManagementException {
+        String environmentConfig = null;
+        int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
+        if (api.getEnvironments() != null) {
+            environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
+        }
+        return environmentConfig;
+    }
     /**
      * This method used to set environment values to governance artifact of API .
      *
@@ -6099,7 +6122,7 @@ public final class APIUtil {
         }
         return null;
     }
-    
+
     /**
      * Generates solr compatible search criteria synatax from user entered query criteria. 
      * Ex: From version:1.0.0, this returns version=*1.0.0*

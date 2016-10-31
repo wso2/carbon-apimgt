@@ -338,6 +338,10 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
         
         
 <script>
+
+var enjoyhint_instance_api_info = null;
+var enjoyhint_instance_login_apistore = null;
+
 $(window).load(function(){
 	
     $(".setbgcolor").generateBgcolor({
@@ -350,6 +354,30 @@ $(window).load(function(){
             nameElement: elem
         });
     });
+    if (isEnjoyHintEnabled()) {
+        var loginUser = '<%=outputs.user%>';
+        if (loginUser === 'null') {
+            runEnjoyHintScript(enjoyhint_instance_login_apistore, login_apistore_script_data);
+        } else {
+            var select = document.getElementById('application-list');
+            if (select != null) {
+                var selectedApplication = select.options[select.selectedIndex];
+                var application, defaultAppId, applicationsList = <%=outputs.applications%>;
+                for (var i = 0; i < applicationsList.length; i++) {
+                    application = applicationsList[i];
+                    if (application.name == "DefaultApplication") {
+                        defaultAppId = application.id;
+                    }
+                }
+                if (selectedApplication.value == defaultAppId) {
+                    var storeStep = "default";
+                    localStorage.setItem("storeStep", storeStep);
+                    runEnjoyHintScript(enjoyhint_instance_api_info, api_info_script_data);
+                    setTimeout(function() {}, 2000);
+                }
+            }
+        }
+    }
 
 });
 </script>

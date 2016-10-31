@@ -4,6 +4,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -50,12 +51,18 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             faultPublisherDTO.setRequestTime(requestTime);
             faultPublisherDTO.setUsername((String) messageContext.getProperty(
                     APIMgtGatewayConstants.USER_ID));
-            faultPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
-                    faultPublisherDTO.getUsername()));
             faultPublisherDTO.setHostName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.HOST_NAME));
-            faultPublisherDTO.setApiPublisher((String) messageContext.getProperty(
-                    APIMgtGatewayConstants.API_PUBLISHER));
+            String apiPublisher=(String) messageContext.getProperty(
+                    APIMgtGatewayConstants.API_PUBLISHER);
+            if (apiPublisher == null) {
+                String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+                String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
+                String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+            }
+            faultPublisherDTO.setApiPublisher(apiPublisher);
+            faultPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
             faultPublisherDTO.setApplicationName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(

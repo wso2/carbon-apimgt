@@ -99,11 +99,6 @@ $(document).ready(function(){
 
         nv.utils.windowResize(chart.update);
         developerFilter();
-<<<<<<< HEAD
-        getDateTime(to, from);
-=======
-
->>>>>>> release-6.0.0
         return chart;
     });
 
@@ -115,26 +110,22 @@ function developerFilter(){
             "apiFilter": apiFilter
         },
         function (json) {
-        if (!json.error) {
-        var developerName = '';
-            for (var i = 0; i < json.data.length; i++) {
-                developerName += '<option>'+ json.data[i].userId+'</option>'
-            }
-            $('#developerSelect')
-               .append(developerName)
-               .selectpicker('refresh');
-            getDateTime(to, from);
-
-            $('#developerSelect').on('change', function() {
-                selectedDeveloper = this.value;//selected value
-<<<<<<< HEAD
+            if (!json.error) {
+                var developerName = '';
+                for (var i = 0; i < json.data.length; i++) {
+                    developerName += '<option>'+ json.data[i].userId+'</option>'
+                }
+                $('#developerSelect')
+                    .append(developerName)
+                    .selectpicker('refresh');
                 getDateTime(to, from);
-=======
-                drawApiTime(from, to);
->>>>>>> release-6.0.0
-            });
-        }
-        else {
+
+                $('#developerSelect').on('change', function() {
+                    selectedDeveloper = this.value;//selected value
+                    drawApiTime(from, to);
+                });
+            }
+            else {
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -177,4 +168,3 @@ function getDateTime(currentDay, fromDay){
     $('#date-range').data('daterangepicker').setEndDate(to);
     drawApiTime(from,to);
 }
-

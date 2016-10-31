@@ -13,7 +13,7 @@
         var _description = "";
         var _tags = "";        
     }
-%> 
+%>
 <script language="javascript">
     var VERBS = [ 'get' , 'post' , 'put' , 'delete', 'patch', 'head'];
     var AUTH_TYPES = [
@@ -390,7 +390,8 @@
 	
 
 
-<script>
+<script type="text/javascript">
+    var enjoyhint_instance = null;
     $(document).ready(function(){
         <% if(api != null && api.subs == 0){ %>
             var visibility = $('#visibility').find(":selected").val();
@@ -409,6 +410,27 @@
                 });
             }
         <% } %>
+        if (isEnjoyHintEnabled()) {
+            var isWorldBankApiExist = localStorage.getItem("worldBankApiExist");
+            if (isWorldBankApiExist === "true") {
+            	var storeStep = localStorage.getItem("storeStep");
+    			if (null != storeStep) {
+        			localStorage.removeItem("storeStep");
+    			}
+                runEnjoyHintScript(enjoyhint_instance, item_design_with_worldbank_api_script_data);
+            } else {
+                runEnjoyHintScript(enjoyhint_instance, item_design_script_data);
+            }
+        }
+    });
+
+    $(".col-sm-4").on('keydown', '#version', function(e) {
+        var keyCode = e.keyCode || e.which;
+
+        if (keyCode == 9 && isEnjoyHintEnabled()) {
+            e.preventDefault();
+            $("#resource_url_pattern").focus();
+        }
     });
 </script>
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
