@@ -55,7 +55,7 @@ public class APIMappingUtil {
         List<APIInfo> apiInfoList = new ArrayList<APIInfo>();
         for (APISummary apiSummary : apiSummaryList) {
             APIInfo apiInfo = new APIInfo();
-            apiInfo.setId(apiSummary.getID());
+            apiInfo.setId(apiSummary.getId());
             apiInfo.setContext(apiSummary.getContext());
             apiInfo.setDescription(apiSummary.getDescription());
             apiInfo.setName(apiSummary.getName());
