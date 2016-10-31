@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -54,6 +53,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
+import org.apache.xerces.util.SecurityManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -65,9 +65,36 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.*;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIPublisher;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -104,7 +131,11 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -117,7 +148,11 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
-import org.wso2.carbon.user.api.*;
+import org.wso2.carbon.user.api.Permission;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
@@ -129,7 +164,6 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
-import org.apache.xerces.util.SecurityManager;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -143,15 +177,38 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -267,10 +324,10 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
-            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
 
-            if(isGlobalThrottlingEnabled){
+            if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
             }
@@ -459,7 +516,7 @@ public final class APIUtil {
                     .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
-            if(isGlobalThrottlingEnabled) {
+            if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
             }
@@ -606,7 +663,7 @@ public final class APIUtil {
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
-            if(isGlobalThrottlingEnabled){
+            if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
 
@@ -664,7 +721,7 @@ public final class APIUtil {
             api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
-            
+
             ArrayList<URITemplate> urlPatternsList;
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(api.getContext(), api.getId().getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -724,7 +781,7 @@ public final class APIUtil {
             scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
         } catch (UserStoreException e) {
             String msg = "Error while retrieving Scopes";
-            log.error(msg ,e);
+            log.error(msg, e);
             handleException(msg);
         }
         return scopeSet;
@@ -848,7 +905,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
-                                  APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
+                    APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -1061,7 +1118,7 @@ public final class APIUtil {
     }
 
     //remove getSwagger12DefinitionFilePath once getSwagger20DefinitionFilePath operates
-    public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) { 
+    public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiName + '-' + apiVersion + '-' + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.API_DOC_1_2_LOCATION;
@@ -1184,10 +1241,10 @@ public final class APIUtil {
             if (GovernanceUtils.findGovernanceArtifactConfiguration(key, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, key);
             } else {
-                    log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
-                            ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
-                            ", Tenant domain set in PrivilegedCarbonContext: " +
-                            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key +
+                        ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId() +
+                        ", Tenant domain set in PrivilegedCarbonContext: " +
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
@@ -1350,16 +1407,16 @@ public final class APIUtil {
             }
             in.close();
             if (isWsdl2) {
-                WSDLReader wsdlReader20 = null;                
+                WSDLReader wsdlReader20 = null;
                 wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
-                wsdlReader20.readWSDL(url);                
+                wsdlReader20.readWSDL(url);
             }
         } catch (IOException e) {
             throw new APIManagementException("Error Reading Input from Stream from " + url, e);
         } catch (WSDLException e) {
             throw new APIManagementException("Error while reading WSDL Document from " + url, e);
         } finally {
-            if(in != null){
+            if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
@@ -1600,7 +1657,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
-        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
             try {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry();
@@ -1626,7 +1683,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
-        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
             try {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry(tenantId);
@@ -1640,7 +1697,7 @@ public final class APIUtil {
                 throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
             }
         } else {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
         }
     }
 
@@ -1652,10 +1709,11 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers() throws APIManagementException {
-            if(!APIUtil.isAdvanceThrottlingEnabled()) {
-                try {
-                    Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
+            try {
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry();
+<<<<<<< Updated upstream
                     return getTiers(registry, APIConstants.API_TIER_LOCATION, MultitenantConstants.SUPER_TENANT_ID);
                 } catch (RegistryException e) {
                     log.error(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1663,7 +1721,16 @@ public final class APIUtil {
                 }
             } else {
                 return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
+=======
+                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+>>>>>>> Stashed changes
             }
+        } else {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
+        }
     }
 
     /**
@@ -1970,7 +2037,7 @@ public final class APIUtil {
                 resource.setContent(element.toString());
                 registry.put(APIConstants.API_TIER_LOCATION, resource);
             }
-        } catch (RegistryException e) {          
+        } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(e.getMessage());
         } catch (XMLStreamException e) {
@@ -2012,7 +2079,7 @@ public final class APIUtil {
                     }
                 }
             }
-        } catch (RegistryException e) {       
+        } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         } catch (XMLStreamException e) {
@@ -2082,17 +2149,17 @@ public final class APIUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-    
-    
+
+
     /**
      * Checks whether the specified user has the specified permission.
      *
-     * @param userNameWithoutChange   A username
-     * @param permission A valid Carbon permission
+     * @param userNameWithoutChange A username
+     * @param permission            A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
     public static boolean hasPermission(String userNameWithoutChange, String permission) throws APIManagementException {
-    	boolean authorized = false;
+        boolean authorized = false;
         if (userNameWithoutChange == null) {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                     " the anonymous user");
@@ -2134,13 +2201,13 @@ public final class APIUtil {
                                 .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
                                         permission);
             }
-            
+
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-        
+
         return authorized;
     }
 
@@ -2175,7 +2242,7 @@ public final class APIUtil {
         } catch (APIManagementException ignore) {
             // Ignore the exception.
             // Logging it on debug mode so if needed we can see the exception stacktrace.
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("User does not have permission", ignore);
             }
             return false;
@@ -2188,8 +2255,8 @@ public final class APIUtil {
      * @param cookie     Cookie of the previously logged in session.
      * @param serviceUrl Url of the authentication service.
      * @return LoggedUserInfo object containing details of the logged in user.
-     * @throws ExceptionException 
-     * @throws RemoteException 
+     * @throws ExceptionException
+     * @throws RemoteException
      */
     public static LoggedUserInfo getLoggedInUserInfo(String cookie, String serviceUrl) throws RemoteException, ExceptionException {
         LoggedUserInfoAdminStub stub = new LoggedUserInfoAdminStub(null,
@@ -2356,7 +2423,7 @@ public final class APIUtil {
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
-            if(isGlobalThrottlingEnabled){
+            if (isGlobalThrottlingEnabled) {
                 String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
                 api.setApiLevelPolicy(apiLevelTier);
             }
@@ -2521,7 +2588,7 @@ public final class APIUtil {
 
     /**
      * When an input is having '@',replace it with '-AT-' [This is required to persist API data in registry,as registry
-     *  paths don't allow '@' sign.]
+     * paths don't allow '@' sign.]
      *
      * @param input inputString
      * @return String modifiedString
@@ -2694,7 +2761,7 @@ public final class APIUtil {
     }
 
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
-        
+
         String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
                 + File.separator + "default-tiers" + File.separator;
 
@@ -2721,7 +2788,7 @@ public final class APIUtil {
 
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-   
+
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(location)) {
@@ -3097,9 +3164,9 @@ public final class APIUtil {
     }
 
     /**
-     * Add all the custom sequences of given type to registry 
-     * 
-     * @param registry Registry instance
+     * Add all the custom sequences of given type to registry
+     *
+     * @param registry           Registry instance
      * @param customSequenceType Custom sequence type which is in/out or fault
      * @throws APIManagementException
      */
@@ -3163,7 +3230,7 @@ public final class APIUtil {
 
     /**
      * Adds the sequences defined in repository/resources/customsequences folder to tenant registry
-     * 
+     *
      * @param tenantID tenant Id
      * @throws APIManagementException
      */
@@ -3197,7 +3264,7 @@ public final class APIUtil {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         UserRegistry registry = null;
         try {
-   
+
             registry = registryService.getGovernanceSystemRegistry(tenantID);
         } catch (RegistryException e) {
             throw new APIManagementException("Error when create registry instance ", e);
@@ -3352,10 +3419,20 @@ public final class APIUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating role: " + roleName);
                 }
+<<<<<<< Updated upstream
                 String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
                 String[] userList = new String[] { tenantAdminName };
                 manager.addRole(roleName, userList, permissions);
+=======
+                Permission[] subscriberPermissions = new Permission[]{
+                        new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
+                String[] userList = new String[]{tenantAdminName};
+                manager.addRole(roleName, userList, subscriberPermissions);
+>>>>>>> Stashed changes
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while creating role: " + roleName, e);
@@ -3393,12 +3470,12 @@ public final class APIUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating subscriber role: " + role);
                 }
-                Permission[] subscriberPermissions = new Permission[] {
+                Permission[] subscriberPermissions = new Permission[]{
                         new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
                 String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[] { tenantAdminName };
+                String[] userList = new String[]{tenantAdminName};
                 manager.addRole(role, userList, subscriberPermissions);
             }
         } catch (UserStoreException e) {
@@ -3516,7 +3593,7 @@ public final class APIUtil {
             for (APIStore store : apiStores) {
                 for (APIStore inputStore : inputStores) {
                     if (inputStore.getName().equals(store.getName())) { // If the configured apistore already stored in
-                                                                        // db,ignore adding it again
+                        // db,ignore adding it again
                         exists = true;
                     }
                 }
@@ -3589,7 +3666,7 @@ public final class APIUtil {
 
     /**
      * Retrieves the role list of system
-     * 
+     *
      * @throws APIManagementException If an error occurs
      */
     public static String[] getRoleNames(String username) throws APIManagementException {
@@ -3695,7 +3772,7 @@ public final class APIUtil {
                 String httpVerb = template.getHTTPVerb();
                 /* For GET and DELETE Parameter name - Query Parameters */
                 if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
-                    || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
+                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
                             APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
                             APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
@@ -3722,7 +3799,7 @@ public final class APIUtil {
                 String httpVerb = template.getHTTPVerb();
                 /* For GET and DELETE Parameter name - Query Parameters */
                 if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
-                    || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
+                        || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
                             APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
                             APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
@@ -3814,8 +3891,8 @@ public final class APIUtil {
         return null;
     }
 
-    public static int getSuperTenantId(){
-    	return MultitenantConstants.SUPER_TENANT_ID;
+    public static int getSuperTenantId() {
+        return MultitenantConstants.SUPER_TENANT_ID;
     }
 
     /**
@@ -3869,7 +3946,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction,
-            APIIdentifier identifier) throws APIManagementException {
+                                              APIIdentifier identifier) throws APIManagementException {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
         try {
@@ -3928,17 +4005,18 @@ public final class APIUtil {
         }
         return null;
     }
-    
+
     /**
      * Returns true if the sequence is a per API one
+     *
      * @param sequenceName
      * @param tenantId
-     * @param identifier API identifier
+     * @param identifier   API identifier
      * @param sequenceType in/out/fault
      * @return true/false
      * @throws APIManagementException
      */
-    public static boolean isPerAPISequence(String sequenceName, int tenantId, APIIdentifier identifier, 
+    public static boolean isPerAPISequence(String sequenceName, int tenantId, APIIdentifier identifier,
                                            String sequenceType) throws APIManagementException {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
         try {
@@ -3947,10 +4025,10 @@ public final class APIUtil {
 
             // If the sequence not found the default sequences, check in custom sequences
 
-            if (registry.resourceExists(getSequencePath(identifier,sequenceType)))  {
+            if (registry.resourceExists(getSequencePath(identifier, sequenceType))) {
 
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
-                                                                                                       sequenceType));
+                        sequenceType));
                 if (seqCollection != null) {
                     String[] childPaths = seqCollection.getChildren();
 
@@ -3970,8 +4048,8 @@ public final class APIUtil {
             log.error(msg);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            String msg = "Error while processing the " + sequenceType + " sequences of " + identifier 
-                                                                                                 + " in the registry";
+            String msg = "Error while processing the " + sequenceType + " sequences of " + identifier
+                    + " in the registry";
             log.error(msg);
             throw new APIManagementException(msg, e);
         } catch (Exception e) {
@@ -3979,14 +4057,89 @@ public final class APIUtil {
         }
         return false;
     }
-    
+
+    /**
+     * Returns uuid correspond to the given sequence name and direction
+     *
+     * @param sequenceName name of the  sequence
+     * @param tenantId     logged in user's tenantId
+     * @param direction    in/out/fault
+     * @param identifier   API identifier
+     * @return uuid of the given mediation sequence or null
+     * @throws APIManagementException If failed to get the uuid of the mediation sequence
+     */
+    public static String getMediationSequenceUuid(String sequenceName, int tenantId, String direction,
+                                                  APIIdentifier identifier) throws
+            APIManagementException {
+        org.wso2.carbon.registry.api.Collection seqCollection = null;
+        String seqCollectionPath;
+
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+
+            if ("in".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION+File.separator+
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            } else if ("out".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION+File.separator+
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            } else if ("fault".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION+File.separator+
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            }
+
+            if (seqCollection == null) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
+                        (getSequencePath(identifier,
+                                direction));
+
+            }
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    String seqElmentName= seqElment.getAttributeValue(new QName("name"));
+                    if (sequenceName.equals(seqElmentName)) {
+                        return sequence.getUUID();
+                    }
+                }
+            }
+
+            // If the sequence not found the default sequences, check in custom sequences
+
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
+                    (getSequencePath(identifier,direction));
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return sequence.getUUID();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            String msg = "Issue is in accessing the Registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        }
+        return null;
+    }
 
     /**
      * Returns true if sequence is set
+     *
      * @param sequence
      * @return
      */
-    public static  boolean isSequenceDefined(String sequence){
+    public static boolean isSequenceDefined(String sequence) {
         return sequence != null && !"none".equals(sequence);
     }
 
@@ -4326,10 +4479,10 @@ public final class APIUtil {
     /**
      * Search Apis by Doc Content
      *
-     * @param registry - Registry which is searched
-     * @param tenantID - Tenant id of logged in domain
-     * @param username - Logged in username
-     * @param searchTerm - Search value for doc
+     * @param registry     - Registry which is searched
+     * @param tenantID     - Tenant id of logged in domain
+     * @param username     - Logged in username
+     * @param searchTerm   - Search value for doc
      * @param searchClient - Search client
      * @return - Documentation to APIs map
      * @throws APIManagementException - If failed to get ArtifactManager for given tenant
@@ -4391,7 +4544,7 @@ public final class APIUtil {
                         Association[] docAssociations = registry.getAssociations(documentationPath, APIConstants.DOCUMENTATION_ASSOCIATION);
                         /* There will be only one document association, for a document path which is by its owner API*/
                         if (docAssociations.length > 0) {
-                           
+
                             String apiPath = docAssociations[0].getSourcePath();
                             path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
@@ -4418,7 +4571,7 @@ public final class APIUtil {
                     if (doc != null && api != null) {
                         if (APIConstants.STORE_CLIENT.equals(searchClient)) {
                             if (api.getStatus().equals(getApiStatus(APIConstants.PUBLISHED)) ||
-                                api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
+                                    api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
                                 apiDocMap.put(doc, api);
                             }
                         } else {
@@ -4458,7 +4611,7 @@ public final class APIUtil {
                     criteria = APIConstants.API_URI_PATTERN + i;
                     listMap.put(criteria, new ArrayList<String>() {
                         {
-                           add(searchValue);
+                            add(searchValue);
                         }
                     });
                     genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
@@ -4587,6 +4740,7 @@ public final class APIUtil {
 
     /**
      * load tenant axis configurations.
+     *
      * @param tenantDomain
      */
     public static void loadTenantConfigBlockingMode(String tenantDomain) {
@@ -5106,7 +5260,7 @@ public final class APIUtil {
                 tierMap = (Map<String, Tier>) getTiersCache().get(tierName);
             } else {
                 int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                if (!APIUtil.isAdvanceThrottlingEnabled()) {
                     if (requestedTenantId == 0) {
                         tierMap = APIUtil.getTiers();
                     } else {
@@ -5147,6 +5301,7 @@ public final class APIUtil {
 
     /**
      * Util method to return the artifact from a registry resource path
+     *
      * @param apiIdentifier
      * @param registry
      * @return
@@ -5390,7 +5545,7 @@ public final class APIUtil {
         return false;
     }
 
-    public static String getServerURL() throws APIManagementException{
+    public static String getServerURL() throws APIManagementException {
         String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
 
         try {
@@ -5429,13 +5584,13 @@ public final class APIUtil {
     /**
      * Extract the provider of the API from name
      *
-     * @param apiVersion - API Name with version
+     * @param apiVersion   - API Name with version
      * @param tenantDomain - tenant domain of the API
      * @return API publisher name
      */
     public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
         int index = apiVersion.indexOf("--");
-        if(StringUtils.isEmpty(tenantDomain)){
+        if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         String apiProvider;
@@ -5561,6 +5716,7 @@ public final class APIUtil {
 
     /**
      * Used to get API name from synapse API Name
+     *
      * @param api_version API name from synapse configuration
      * @return api name according to the tenant
      */
@@ -5580,7 +5736,7 @@ public final class APIUtil {
 
     /**
      * @param stakeHolder value "publisher" for publisher value "subscriber" for subscriber value "admin-dashboard" for admin
-     * Return all alert types.
+     *                    Return all alert types.
      * @return Hashmap of alert types.
      * @throws APIManagementException
      */
@@ -5591,48 +5747,48 @@ public final class APIUtil {
     }
 
     /**
-     *
-     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param userName    user name with tenant domain ex: admin@carbon.super
      * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
      * @return map of saved values of alert types.
      * @throws APIManagementException
      */
-    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws  APIManagementException{
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws APIManagementException {
 
         List<Integer> list;
         list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, stakeHolder);
-        return  list;
+        return list;
 
     }
 
     /**
      * This util method retrieves saved email list by user and stakeHolder name
-     * @param userName user name with tenant ID.
+     *
+     * @param userName    user name with tenant ID.
      * @param stakeHolder if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
      * @return List of eamil list.
      * @throws APIManagementException
      */
-    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException{
+    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException {
 
         List<String> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,stakeHolder);
+        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName, stakeHolder);
 
         return list;
     }
 
 
-
     /**
      * check whether policy is content aware
+     *
      * @param policy
      * @return
      */
-    public static boolean isContentAwarePolicy(Policy policy){
+    public static boolean isContentAwarePolicy(Policy policy) {
         boolean status = false;
         if (policy instanceof APIPolicy) {
             APIPolicy apiPolicy = (APIPolicy) policy;
             status = isDefaultQuotaPolicyContentAware(apiPolicy);
-            if(!status){
+            if (!status) {
                 //only go and check the pipelines if default quota is not content aware
                 //check if atleast one pipeline is content aware
                 for (Pipeline pipeline : apiPolicy.getPipelines()) { // add each pipeline data to AM_CONDITION table
@@ -5654,7 +5810,7 @@ public final class APIUtil {
         return status;
     }
 
-    private static boolean isDefaultQuotaPolicyContentAware(Policy policy){
+    private static boolean isDefaultQuotaPolicyContentAware(Policy policy) {
         if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             return true;
         }
@@ -5663,16 +5819,16 @@ public final class APIUtil {
 
     public static void addDefaultSuperTenantAdvancedThrottlePolicies() throws APIManagementException {
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
-        long[] requestCount = new long[] {50, 20, 10, Integer.MAX_VALUE};
+        long[] requestCount = new long[]{50, 20, 10, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
-                                            APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
         String[] appPolicyDecs = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE_DESC, APIConstants.DEFAULT_APP_POLICY_MEDIUM_DESC,
                 APIConstants.DEFAULT_APP_POLICY_SMALL_DESC, APIConstants.DEFAULT_APP_POLICY_UNLIMITED_DESC};
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String policyName;
         //Add application level throttle policies
-        for(int i = 0; i < appPolicies.length ; i++) {
+        for (int i = 0; i < appPolicies.length; i++) {
             policyName = appPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, policyName)) {
                 ApplicationPolicy applicationPolicy = new ApplicationPolicy(policyName);
@@ -5693,12 +5849,12 @@ public final class APIUtil {
         }
 
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[] {5000, 2000, 1000, 500, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[]{5000, 2000, 1000, 500, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
-        for(int i = 0; i < subPolicies.length ; i++) {
+        for (int i = 0; i < subPolicies.length; i++) {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
                 SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
@@ -5725,8 +5881,8 @@ public final class APIUtil {
                 APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
         String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE_DESC, APIConstants.DEFAULT_API_POLICY_PLUS_DESC,
                 APIConstants.DEFAULT_API_POLICY_BASIC_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
-        long[] requestCountApiPolicies = new long[] {50000, 20000, 10000, Integer.MAX_VALUE};
-        for(int i = 0; i < apiPolicies.length ; i++) {
+        long[] requestCountApiPolicies = new long[]{50000, 20000, 10000, Integer.MAX_VALUE};
+        for (int i = 0; i < apiPolicies.length; i++) {
             policyName = apiPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {
                 APIPolicy apiPolicy = new APIPolicy(policyName);
@@ -5754,12 +5910,12 @@ public final class APIUtil {
         Map<String, Long> defualtLimits = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getThrottleProperties().getDefaultThrottleTierLimits();
         long tenPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN) ?
-                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN) : 10;
+                defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN) : 10;
         long twentyPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN) ?
-                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN) : 20;
+                defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN) : 20;
         long fiftyPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) ?
-                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) : 50;
-        long[] requestCount = new long[] {fiftyPerMinTier, twentyPerMinTier, tenPerMinTier, Integer.MAX_VALUE};
+                defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) : 50;
+        long[] requestCount = new long[]{fiftyPerMinTier, twentyPerMinTier, tenPerMinTier, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
                 APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
@@ -5768,7 +5924,7 @@ public final class APIUtil {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String policyName;
         //Add application level throttle policies
-        for(int i = 0; i < appPolicies.length ; i++) {
+        for (int i = 0; i < appPolicies.length; i++) {
             policyName = appPolicies[i];
             boolean needDeployment = false;
             ApplicationPolicy applicationPolicy = new ApplicationPolicy(policyName);
@@ -5799,9 +5955,9 @@ public final class APIUtil {
                 String policyString;
                 try {
                     policyString = policyBuilder.getThrottlePolicyForAppLevel(applicationPolicy);
-                    String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
+                    String policyFile = applicationPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
-                    if(!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    if (!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
                         deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
@@ -5821,12 +5977,12 @@ public final class APIUtil {
         long unauthenticatedTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED) : 500;
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[] {goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
-        for(int i = 0; i < subPolicies.length ; i++) {
+        for (int i = 0; i < subPolicies.length; i++) {
             policyName = subPolicies[i];
             boolean needDeployment = false;
             SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
@@ -5859,13 +6015,13 @@ public final class APIUtil {
                 String policyString;
                 try {
                     policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
-                    String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
-                                                                                "_" + subscriptionPolicy.getPolicyName();
-                    if(!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    String policyFile = subscriptionPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB +
+                            "_" + subscriptionPolicy.getPolicyName();
+                    if (!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
                         deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
-                                                                                          subscriptionPolicy.getTenantId(), true);
+                            subscriptionPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
                     throw new APIManagementException("Error while adding default application policy " + subscriptionPolicy.getPolicyName(), e);
                 }
@@ -5878,14 +6034,14 @@ public final class APIUtil {
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN) : 20000;
         long fiftyThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN) : 50000;
-        long[] requestCountAPIPolicies = new long[] {fiftyThousandPerMinTier, twentyThousandPerMinTier, tenThousandPerMinTier, Integer.MAX_VALUE};
+        long[] requestCountAPIPolicies = new long[]{fiftyThousandPerMinTier, twentyThousandPerMinTier, tenThousandPerMinTier, Integer.MAX_VALUE};
 
         //Adding Resource level policies
         String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
                 APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
         String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE_DESC, APIConstants.DEFAULT_API_POLICY_PLUS_DESC,
                 APIConstants.DEFAULT_API_POLICY_BASIC_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
-        for(int i = 0; i < apiPolicies.length ; i++) {
+        for (int i = 0; i < apiPolicies.length; i++) {
             boolean needDeployment = false;
             policyName = apiPolicies[i];
             APIPolicy apiPolicy = new APIPolicy(policyName);
@@ -5916,9 +6072,9 @@ public final class APIUtil {
                 String policyString;
                 try {
                     policyString = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
-                    String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
-                                        "_" + apiPolicy.getPolicyName() + "_default";
-                    if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_API +
+                            "_" + apiPolicy.getPolicyName() + "_default";
+                    if (!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
                         deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
@@ -5960,13 +6116,14 @@ public final class APIUtil {
 
     /**
      * Used to get subscription Spike arrest Enable
+     *
      * @return condition of Subscription Spike arrest configuration
      */
     public static boolean isEnabledSubscriptionSpikeArrest() {
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getThrottleProperties();
-       return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
+        return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
@@ -5991,6 +6148,7 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+<<<<<<< Updated upstream
 
                 //If the policy is a subscription policy
                 if(policy instanceof SubscriptionPolicy){
@@ -5999,6 +6157,9 @@ public final class APIUtil {
                 }
 
                 if(limit instanceof RequestCountLimit) {
+=======
+                if (limit instanceof RequestCountLimit) {
+>>>>>>> Stashed changes
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());
@@ -6076,9 +6237,9 @@ public final class APIUtil {
         }
         return availableTier;
     }
-    
-    public static byte[] toByteArray(InputStream is) throws IOException{
-    	return IOUtils.toByteArray(is);
+
+    public static byte[] toByteArray(InputStream is) throws IOException {
+        return IOUtils.toByteArray(is);
     }
 
     public static long ipToLong(String ipAddress) {
@@ -6101,18 +6262,19 @@ public final class APIUtil {
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
     }
-    
+
     /**
      * Composes OR based search criteria from provided array of values
+     *
      * @param values
      * @return
      */
     public static String getORBasedSearchCriteria(String[] values) {
         String criteria = "(";
         if (values != null) {
-            for (int i =0; i < values.length; i++) {
+            for (int i = 0; i < values.length; i++) {
                 criteria = criteria + values[i];
-                if (i != values.length -1) {
+                if (i != values.length - 1) {
                     criteria = criteria + " OR ";
                 } else {
                     criteria = criteria + ")";
@@ -6124,23 +6286,24 @@ public final class APIUtil {
     }
 
     /**
-     * Generates solr compatible search criteria synatax from user entered query criteria. 
+     * Generates solr compatible search criteria synatax from user entered query criteria.
      * Ex: From version:1.0.0, this returns version=*1.0.0*
+     *
      * @param criteria
-     * @return solar compatible criteria 
+     * @return solar compatible criteria
      * @throws APIManagementException
      */
-    public static String getSingleSearchCriteria(String criteria) throws APIManagementException{
+    public static String getSingleSearchCriteria(String criteria) throws APIManagementException {
         criteria = criteria.trim();
         String searchValue = criteria;
         String searchKey = APIConstants.NAME_TYPE_PREFIX;
-        
+
         if (criteria.contains(":")) {
             if (criteria.split(":").length > 1) {
                 searchKey = criteria.split(":")[0].trim();
                 searchValue = criteria.split(":")[1];
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
-                    !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                        !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
                     if (!searchValue.endsWith("*")) {
                         searchValue = searchValue + "*";
                     }
@@ -6158,11 +6321,11 @@ public final class APIUtil {
             }
             if (!searchValue.startsWith("*")) {
                 searchValue = "*" + searchValue;
-            }                            
+            }
         }
         if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchKey)) {
             searchValue = searchValue.replaceAll("@", "-AT-");
-        } 
+        }
         return searchKey + "=" + searchValue;
     }
 
@@ -6183,6 +6346,7 @@ public final class APIUtil {
 
     /**
      * Returns a secured DocumentBuilderFactory instance
+     *
      * @return DocumentBuilderFactory
      */
     public static DocumentBuilderFactory getSecuredDocumentBuilder() {
@@ -6212,23 +6376,24 @@ public final class APIUtil {
     /**
      * Logs an audit message on actions performed on entities (APIs, Applications, etc). The log is printed in the
      * following JSON format
-     *  {
-         "typ": "API",
-         "action": "update",
-         "performedBy": "admin@carbon.super",
-         "info": {
-         "name": "Twitter",
-         "context": "/twitter",
-         "version": "1.0.0",
-         "provider": "nuwan"
-         }
-         }
-     * @param entityType - The entity type. Ex: API, Application
-     * @param entityInfo - The details of the entity. Ex: API Name, Context
-     * @param action - The type of action performed. Ex: Create, Update
+     * {
+     * "typ": "API",
+     * "action": "update",
+     * "performedBy": "admin@carbon.super",
+     * "info": {
+     * "name": "Twitter",
+     * "context": "/twitter",
+     * "version": "1.0.0",
+     * "provider": "nuwan"
+     * }
+     * }
+     *
+     * @param entityType  - The entity type. Ex: API, Application
+     * @param entityInfo  - The details of the entity. Ex: API Name, Context
+     * @param action      - The type of action performed. Ex: Create, Update
      * @param performedBy - The user who performs the action.
      */
-    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy){
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("typ", entityType);
         jsonObject.put("action", action);
@@ -6240,7 +6405,7 @@ public final class APIUtil {
     public static int getPortOffset() {
         ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
         String portOffset = System.getProperty(APIConstants.PORT_OFFSET_SYSTEM_VAR,
-                                               carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
+                carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
         try {
             if ((portOffset != null)) {
                 return Integer.parseInt(portOffset.trim());
@@ -6255,7 +6420,7 @@ public final class APIUtil {
 
     public static boolean isQueryParamDataPublishingEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                                            getThrottleProperties().isEnableQueryParamConditions();
+                getThrottleProperties().isEnableQueryParamConditions();
     }
 
     public static boolean isHeaderDataPublishingEnabled() {

@@ -23,6 +23,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
 
+    public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
+
     public static final String GET_ACCESS_KEY_FOR_API_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
@@ -2116,6 +2119,12 @@ public class SQLConstants {
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE CONTEXT_TEMPLATE = ?";
+
+    public static final String GET_API_NAMES_MATCHES_CONTEXT=
+            "SELECT DISTINCT API_NAME FROM AM_API WHERE CONTEXT_TEMPLATE = ?";
+
+    public static final String GET_VERSIONS_MATCHES_CONTEXT=
+            "SELECT API_VERSION FROM AM_API WHERE CONTEXT_TEMPLATE = ? AND API_NAME = ?";
 
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
             "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY   = ?";

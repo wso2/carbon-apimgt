@@ -83,6 +83,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     return response;
                 }
 
+<<<<<<< Updated upstream
                 applicationInfo.setClientName(profile.getClientName());
                 applicationInfo.setCallBackURL(profile.getCallbackUrl());
                 applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
@@ -94,6 +95,55 @@ public class RegistrationServiceImpl implements RegistrationService {
                 if (returnedAPP != null) {
                     returnedAPP.removeParameter("tokenScope");
                     return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
+=======
+                //getting client credentials from the profile
+                oauthApplicationInfo.setClientName(profile.getClientName());
+                oauthApplicationInfo.setCallBackURL(profile.getCallbackUrl());
+                oauthApplicationInfo.addParameter(OAUTH_CLIENT_USERNAME, owner);
+                oauthApplicationInfo.setClientId("");
+                oauthApplicationInfo.setClientSecret("");
+                oauthApplicationInfo.setIsSaasApplication(profile.isSaasApp());
+                appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
+
+                loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
+                String userName = MultitenantUtils.getTenantAwareUsername(userId);
+                String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+                userNameForSP = userName;
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
+
+                grantTypes = profile.getGrantType();
+
+                ApplicationManagementService applicationManagementService = ApplicationManagementService.getInstance();
+
+                //Check if the application is already exists
+                try {
+                    appServiceProvider = applicationManagementService.getApplicationExcludingFileBasedSPs(
+                            applicationName, loggedInUserTenantDomain);
+                } catch (IdentityApplicationManagementException e) {
+                    errorMsg = "Error occured while checking the availability of the client " + applicationName;
+                    log.error(errorMsg);
+                }
+                if (appServiceProvider != null) {
+                    //retrieving the existing application
+                    retrievedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
+                        returnedAPP = retrievedApp;
+                } else {
+                    //create a new client application if the application name doesn't exists.
+                    returnedAPP = this.createApplication(applicationName,appRequest,userNameForSP,grantTypes);
+                }
+                if (returnedAPP == null) {
+                    errorMsg = "OAuth app '" + profile.getClientName()
+                            + "' creation or updating failed. Dynamic Client Registration Service not available.";
+                    log.error(errorMsg);
+                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L,
+                            errorMsg);
+                    response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+                } else {
+                    String infoMsg = "OAuth app " + profile.getClientName() + " creation successful. ";
+                    log.info(infoMsg);
+                    response = Response.status(Response.Status.OK).entity(returnedAPP).build();
+>>>>>>> Stashed changes
                 }
 
                 //returnedAPP is null

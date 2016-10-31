@@ -24,16 +24,16 @@ public class APICorsConfigurationDTO  {
   private List<String> accessControlAllowOrigins = new ArrayList<String>();
   
   
-  private List<String> accessControlAllowHeaders = new ArrayList<String>();
-  
-  
-  private List<String> accessControlAllowMethods = new ArrayList<String>();
-  
-  
   private Boolean accessControlAllowCredentials = false;
   
   
   private Boolean corsConfigurationEnabled = false;
+  
+  
+  private List<String> accessControlAllowHeaders = new ArrayList<String>();
+  
+  
+  private List<String> accessControlAllowMethods = new ArrayList<String>();
 
   
   /**
@@ -45,30 +45,6 @@ public class APICorsConfigurationDTO  {
   }
   public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
     this.accessControlAllowOrigins = accessControlAllowOrigins;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("accessControlAllowHeaders")
-  public List<String> getAccessControlAllowHeaders() {
-    return accessControlAllowHeaders;
-  }
-  public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
-    this.accessControlAllowHeaders = accessControlAllowHeaders;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("accessControlAllowMethods")
-  public List<String> getAccessControlAllowMethods() {
-    return accessControlAllowMethods;
-  }
-  public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
-    this.accessControlAllowMethods = accessControlAllowMethods;
   }
 
   
@@ -96,6 +72,30 @@ public class APICorsConfigurationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("accessControlAllowHeaders")
+  public List<String> getAccessControlAllowHeaders() {
+    return accessControlAllowHeaders;
+  }
+  public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
+    this.accessControlAllowHeaders = accessControlAllowHeaders;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("accessControlAllowMethods")
+  public List<String> getAccessControlAllowMethods() {
+    return accessControlAllowMethods;
+  }
+  public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
+    this.accessControlAllowMethods = accessControlAllowMethods;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -103,10 +103,10 @@ public class APICorsConfigurationDTO  {
     sb.append("class APICorsConfigurationDTO {\n");
     
     sb.append("  accessControlAllowOrigins: ").append(accessControlAllowOrigins).append("\n");
-    sb.append("  accessControlAllowHeaders: ").append(accessControlAllowHeaders).append("\n");
-    sb.append("  accessControlAllowMethods: ").append(accessControlAllowMethods).append("\n");
     sb.append("  accessControlAllowCredentials: ").append(accessControlAllowCredentials).append("\n");
     sb.append("  corsConfigurationEnabled: ").append(corsConfigurationEnabled).append("\n");
+    sb.append("  accessControlAllowHeaders: ").append(accessControlAllowHeaders).append("\n");
+    sb.append("  accessControlAllowMethods: ").append(accessControlAllowMethods).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

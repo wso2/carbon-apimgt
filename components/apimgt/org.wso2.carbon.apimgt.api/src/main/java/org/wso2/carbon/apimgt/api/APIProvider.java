@@ -818,5 +818,4 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
-
 }
