@@ -1232,5 +1232,10 @@ public final class APIConstants {
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
     }
+    
+    public static class APIEndpointSecurityConstants {
+        public static final String BASIC_AUTH = "BasicAuth";
+        public static final String DIGEST_AUTH = "DigestAuth";
+    }
 
 }
