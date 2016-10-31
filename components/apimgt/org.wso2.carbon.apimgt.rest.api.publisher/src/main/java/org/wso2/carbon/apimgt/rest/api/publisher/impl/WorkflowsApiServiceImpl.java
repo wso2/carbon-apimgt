@@ -38,6 +38,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Arrays;
 
 import javax.ws.rs.core.Response;
 
@@ -47,7 +48,8 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body) {
-
+        RestApiUtil.handleBadRequest(
+                "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
         boolean isTenantFlowStarted = false;
@@ -68,10 +70,26 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                         PrivilegedCarbonContext.startTenantFlow();
                         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     }
-
-                    workflowDTO.setWorkflowDescription(body.getDescription());
-                    workflowDTO.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
-                    workflowDTO.setAttributes(body.getAttributes());
+                    if(body == null){
+                        RestApiUtil.handleBadRequest(
+                                "Request payload is missing", log);
+                    }
+                    
+                    if(body.getDescription() != null) {
+                        workflowDTO.setWorkflowDescription(body.getDescription());
+                    }
+                    
+                    if(body.getStatus() == null) {
+                        RestApiUtil.handleBadRequest(
+                                "Workflow status is not defined", log);
+                    } else {
+                        workflowDTO.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
+                    }
+                    
+                    if(body.getAttributes() != null){
+                        workflowDTO.setAttributes(body.getAttributes());
+                    }
+                                               
                     String workflowType = workflowDTO.getWorkflowType();
                     WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance()
                             .getWorkflowExecutor(workflowType);
