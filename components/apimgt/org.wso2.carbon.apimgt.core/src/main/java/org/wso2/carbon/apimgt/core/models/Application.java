@@ -33,6 +33,10 @@ public final class Application {
     private Subscriber subscriber;
     private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
     private String groupID;
+    private String uuid;
+    private String description;
+    private String tier;
+    private  String status;
 
     public Application(String name, Subscriber subscriber) {
         this.name = name;
@@ -90,5 +94,36 @@ public final class Application {
     public void setGroupID(String groupId) {
         this.groupID = groupId;
     }
-    
+
+    public String getUUID() {
+        return uuid;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

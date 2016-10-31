@@ -25,6 +25,9 @@ import org.wso2.carbon.apimgt.core.util.exception.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -68,7 +71,7 @@ public class RestApiUtil {
 //        } catch (APIManagementException e) {
 //            String errorMsg = "Unable to get groupIds of user " + username;
 //            handleInternalServerError(errorMsg, e, log);
-            return null;
+            return "";
 //        }
     }
 
@@ -281,4 +284,56 @@ public class RestApiUtil {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
+    /**
+     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
+     *
+     * @param offset current starting index
+     * @param limit current max records
+     * @param size maximum index possible
+     * @return the next/previous offset/limit parameters as a hash-map
+     */
+    public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
+        Map<String, Integer> result = new HashMap<>();
+        if (offset >= size || offset < 0)
+            return result;
+
+        int start = offset;
+        int end = offset + limit - 1;
+
+        int nextStart = end + 1;
+        if (nextStart < size) {
+            result.put(RestApiConstants.PAGINATION_NEXT_OFFSET, nextStart);
+            result.put(RestApiConstants.PAGINATION_NEXT_LIMIT, limit);
+        }
+
+        int previousEnd = start - 1;
+        int previousStart = previousEnd - limit + 1;
+
+        if (previousEnd >= 0) {
+            if (previousStart < 0) {
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, 0);
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
+            } else {
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, previousStart);
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
+            }
+        }
+        return result;
+    }
+
+    /** Returns the paginated url for Applications API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param groupId groupId of the Application
+     * @return constructed paginated url
+     */
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+        groupId = groupId == null ? "" : groupId;
+        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
+        return paginatedURL;
+    }
 }

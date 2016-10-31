@@ -1,20 +1,24 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.Constants;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Application;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequest;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationList;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -63,8 +67,40 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
     @Override
     public Response applicationsGet(String groupId, String query, Integer limit, Integer offset, String accept, String ifNoneMatch ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+//        String username = RestApiUtil.getLoggedInUsername();
+//
+//        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+//        // As a improvement, we can check admin privileges of the user and honor groupId.
+//        groupId = RestApiUtil.getLoggedInUserGroupId();
+//
+//        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+//        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+//
+//        ApplicationList applicationListDTO;
+//        try {
+//            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+//            org.wso2.carbon.apimgt.core.models.Application[] allMatchedApps = new org.wso2.carbon.apimgt.core.models.Application[0];
+//            if (StringUtils.isBlank(query)) {
+//                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+//            } else {
+//                org.wso2.carbon.apimgt.core.models.Application application = apiConsumer.getApplicationsByName(username, query, groupId);
+//                if (application != null) {
+//                    allMatchedApps = new org.wso2.carbon.apimgt.core.models.Application[1];
+//                    allMatchedApps[0] = application;
+//                }
+//            }
+//
+//            //allMatchedApps are already sorted to application name
+//            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
+//            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
+//                    allMatchedApps.length);
+//
+//            return Response.ok().entity(applicationListDTO).build();
+//        } catch (APIManagementException e) {
+//            RestApiUtil
+//                    .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);
+//        }
+        return null;
     }
     @Override
     public Response applicationsPost(Application body, String contentType ) throws NotFoundException {

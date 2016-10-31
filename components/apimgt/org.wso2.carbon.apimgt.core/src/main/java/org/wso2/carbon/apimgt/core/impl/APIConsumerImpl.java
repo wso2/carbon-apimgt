@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         return null;
+    }
+
+    @Override public Application getApplicationsByName(String userId, String applicationName, String groupId)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override public Application[] getApplications(Subscriber subscriber, String groupingId)
+            throws APIManagementException {
+        return new Application[0];
     }
 
     @Override

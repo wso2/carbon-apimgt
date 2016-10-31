@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.util.Map;
 
@@ -93,5 +94,28 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Application getApplicationById(int id) throws APIManagementException;
+
+    /**
+     * This will return APIM application by giving name and subscriber
+     * @param userId APIM subscriber ID.
+     * @param applicationName APIM application name.
+     * @param groupId Group id.
+     * @return it will return Application.
+     * @throws APIManagementException
+     */
+    Application getApplicationsByName(String userId, String applicationName, String groupId)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of applications for a given subscriber
+     *
+     * @param subscriber Subscriber
+     * @param groupingId the groupId to which the applications must belong.
+     * @return Applications
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+
+    Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
+
 
 }
