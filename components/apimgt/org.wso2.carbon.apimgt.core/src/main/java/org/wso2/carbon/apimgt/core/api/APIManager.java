@@ -19,9 +19,9 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIIdentifier;
-import org.wso2.carbon.apimgt.core.models.APIManagementException;
 
 import java.util.List;
 import java.util.Set;

@@ -49,7 +49,8 @@
                             org.wso2.carbon.apimgt.indexing.*
                         </Export-Package>
                         <Import-Package>
-                            org.apache.solr.*;version="${org.wso2.orbit.org.apache.solr.import.version}"
+                            org.apache.solr.*;version="${org.wso2.orbit.org.apache.solr.import.version}",
+                            org.slf4j.*;version="${slf4j.logging.package.import.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -62,6 +63,10 @@
         <dependency>
             <groupId>org.wso2.orbit.org.apache.solr</groupId>
             <artifactId>solr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
         </dependency>
     </dependencies>
 
