@@ -71,7 +71,6 @@ public final class DocumentInfo {
         this.sourceURL = sourceURL;
     }
 
-
     public String getId() {
         return id;
     }

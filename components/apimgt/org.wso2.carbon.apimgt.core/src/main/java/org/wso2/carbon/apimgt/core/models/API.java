@@ -117,5 +117,5 @@ public final class API {
             result = 31 * result + version.hashCode();
             return result;
         }
-    
+
 }

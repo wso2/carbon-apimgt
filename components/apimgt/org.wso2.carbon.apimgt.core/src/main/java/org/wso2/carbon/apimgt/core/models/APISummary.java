@@ -117,4 +117,5 @@ public final class APISummary {
         result = 31 * result + version.hashCode();
         return result;
     }
+
 }

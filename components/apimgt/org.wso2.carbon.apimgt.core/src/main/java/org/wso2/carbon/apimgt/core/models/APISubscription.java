@@ -70,4 +70,6 @@ public final class APISubscription {
         result = 31 * result + application.hashCode();
         return result;
     }
+
+
 }
