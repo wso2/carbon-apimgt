@@ -35,4 +35,11 @@ public class Constants {
     public static final String LIFECYCLE_CONTENT = "LIFECYCLE_CONTENT";
     public static final String TENANT_ID = "TENANT_ID";
     public static final String LC_ID = "LC_ID";
+    public static final String CHECKLIST_NAME = "CHECKLIST_NAME";
+    public static final String CHECKLIST_VALUE = "CHECKLIST_VALUE";
+    public static final String ID = "ID";
+    public static final String PREV_STATE = "PREV_STATE";
+    public static final String POST_STATE = "POST_STATE";
+    public static final String USER = "USER";
+    public static final String TIME = "TIME";
 }

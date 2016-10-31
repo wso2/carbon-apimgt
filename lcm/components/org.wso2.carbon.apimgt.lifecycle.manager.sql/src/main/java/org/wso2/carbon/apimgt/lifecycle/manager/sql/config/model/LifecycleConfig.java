@@ -15,23 +15,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.lifecycle.manager.core.services;
-
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+package org.wso2.carbon.apimgt.lifecycle.manager.sql.config.model;
 
 /**
- * API to fetch lifecycle information .
+ * Configuration for Life cycles.
  */
-public interface LifecycleManagementService {
+public class LifecycleConfig {
 
-    public void createLifecycle(String lifecycleConfiguration) throws LifecycleException;
+    private boolean enableHistory;
+    private String dataSourceName;
 
-    public void updateLifecycle(String oldName, String lifecycleConfiguration) throws LifecycleException;
+    public boolean isEnableHistory() {
+        return enableHistory;
+    }
 
-    public void deleteLifecycle(String lcName) throws LifecycleException;
+    public void setEnableHistory(boolean enableHistory) {
+        this.enableHistory = enableHistory;
+    }
 
-    public String[] getLifecycleList() throws LifecycleException;
+    public String getDataSourceName() {
+        return dataSourceName;
+    }
 
-    public String getLifecycleConfiguration(String lcName) throws LifecycleException;
+    public void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
+    }
 }

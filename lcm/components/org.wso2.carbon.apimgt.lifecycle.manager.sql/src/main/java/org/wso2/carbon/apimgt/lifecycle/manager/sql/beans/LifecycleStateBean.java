@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.lifecycle.manager.sql.beans;
 
+import java.util.Map;
+
 /**
  * This bean class holds data related to particular life cycle state. This is mapped with the LC_DATA table
  */
@@ -26,6 +28,7 @@ public class LifecycleStateBean {
     private String lcName;
     private String previousStatus;
     private String postStatus;
+    private Map checkListData;
 
     public String getStateId() {
         return stateId;
@@ -57,5 +60,13 @@ public class LifecycleStateBean {
 
     public void setLcName(String lcName) {
         this.lcName = lcName;
+    }
+
+    public Map getCheckListData() {
+        return checkListData;
+    }
+
+    public void setCheckListData(Map checkListData) {
+        this.checkListData = checkListData;
     }
 }

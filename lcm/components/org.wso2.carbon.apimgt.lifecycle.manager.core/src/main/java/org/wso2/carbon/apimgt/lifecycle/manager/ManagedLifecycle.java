@@ -15,15 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.interfaces;
+package org.wso2.carbon.apimgt.lifecycle.manager;
 
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
 
 /**
  * This is the base ManageLifecycle Interface. If users need to extend life cycle management
- * feature to any of the class they created they can extend this class and implement required
- * methods.
+ * feature to any of the class they created they can implement this class and use the default implementation.
  */
 public interface ManagedLifecycle {
 
@@ -34,13 +33,14 @@ public interface ManagedLifecycle {
      * @param user                          The user who invoked the action. This will be used for auditing purposes.
      * @throws LifecycleException           If failed to get lifecycle list.
      */
-    void associateLifecycle(String lcName, String user) throws LifecycleException;
+    default LifecycleState associateLifecycle(String lcName, String user) throws LifecycleException {
+        return LifecycleOperationProvider.associateLifecycle(lcName, user);
+    }
 
     /**
      * This method need to call for each and event life cycle state changes.
      *
-     * @param action                            {@code String} lifecycle action.
-     * @param nextState                         {@code LifecycleState} object represent next life cycle state.
+     * @param targetState                       {@code String} Required target state of the lifecycle.
      * @param uuid                              {@code String} object that can use to uniquely identify resource.
      * @param user                              The user who invoked the action. This will be used for auditing
      *                                          purposes.
@@ -48,21 +48,32 @@ public interface ManagedLifecycle {
      *
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
-    void executeLifecycleEvent(LifecycleState nextState, String uuid, String action, String user, Object resource)
-            throws LifecycleException;
-
-    /**
-     * Get current life cycle state object.
-     *
-     * @param uuid {@code String} object that can use to uniquely identify resource.
-     */
-    void getCurrentLifecycleState(String uuid) throws LifecycleException;
+    default LifecycleState executeLifecycleEvent(String targetState, String uuid, String user, Object resource)
+            throws LifecycleException {
+        return LifecycleOperationProvider.executeLifecycleEvent(targetState, uuid, user, resource);
+    }
 
     /**
      * Remove the lifecycle from the asset instance.
      *
      * @param uuid {@code String} object that can use to uniquely identify asset.
      */
-    void dissociateLifecycle(String uuid) throws LifecycleException;
+    default void dissociateLifecycle(String uuid) throws LifecycleException {
+        LifecycleOperationProvider.dissociateLifecycle(uuid);
+    }
 
+    /**
+     * This method need to call for each check list item operation.
+     *
+     * @param uuid                              {@code String} object that can use to uniquely identify resource.
+     * @param currentState                      The state which the checklist item is associated with.
+     * @param checkListItemName                 Name of the check list item as specified in the lc config.
+     * @param value                             Value of the check list item. Either selected or not.
+     *
+     * @throws LifecycleException               If exception occurred while execute life cycle update.
+     */
+    default LifecycleState checkListItemEvent(String uuid, String currentState, String checkListItemName, boolean value)
+            throws LifecycleException {
+        return LifecycleOperationProvider.checkListItemEvent(uuid, currentState, checkListItemName, value);
+    }
 }

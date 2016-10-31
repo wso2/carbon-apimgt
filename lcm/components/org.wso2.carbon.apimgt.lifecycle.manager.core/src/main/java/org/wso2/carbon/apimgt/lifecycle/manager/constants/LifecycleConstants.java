@@ -30,11 +30,11 @@ public class LifecycleConstants {
     /**
      * Defines "forEvent" attribute name
      */
-    public static final String FOR_EVENT_ATTRIBUTE = "forEvent";
+    public static final String FOR_TARGET_ATTRIBUTE = "forTarget";
 
     public static final String ID_ATTRIBUTE = "id";
 
-    public static final String LIFECYCLE_SCXML_ELEMENT_PATH = "aspect/configuration/lifecycle/*[local-name()='scxml']";
+    public static final String LIFECYCLE_SCXML_ELEMENT_PATH = "aspect/configuration/lifecycle/*[local-name() ='scxml']";
 
     public static final String LIFECYCLE_STATE_ELEMENT_PATH =
             "aspect/configuration/lifecycle/*[local-name()='scxml']" + "/*[local-name()='state']";
@@ -51,6 +51,8 @@ public class LifecycleConstants {
 
     public static final String LIFECYCLE_TRANSITION_PERMISSION_ATTRIBUTE = "transitionPermission";
 
+    public static final String LIFECYCLE_CHECKLIST_ITEM_ATTRIBUTE = "checkItems";
+
     public static final String LIFECYCLE_TRANSITION_ELEMENT = "/*[local-name()='transition']";
 
     public static final String LIFECYCLE_EVENT_ATTRIBUTE = "event";
@@ -58,6 +60,11 @@ public class LifecycleConstants {
     public static final String LIFECYCLE_TARGET_ATTRIBUTE = "target";
 
     public static final String LIFECYCLE_INITIAL_STATE_ATTRIBUTE = "initialstate";
+
     public static final String LIFECYCLE_ROLES_ATTRIBUTE = "roles";
+
     public static final String ASPECT = "aspect";
+    public static final String STATE_TAG = "state";
+    public static final String TRANSITION_ATTRIBUTE = "transition";
+    public static final String TARGET_ATTRIBUTE = "target";
 }

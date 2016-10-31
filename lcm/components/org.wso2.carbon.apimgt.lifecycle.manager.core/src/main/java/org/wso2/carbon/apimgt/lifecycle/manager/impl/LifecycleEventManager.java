@@ -19,9 +19,12 @@
 package org.wso2.carbon.apimgt.lifecycle.manager.impl;
 
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.dao.LifecycleMgtDAO;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
+
+import java.util.List;
 
 /**
  * This class communicate with DAO layer to perform lifecycle operations.
@@ -62,6 +65,7 @@ public class LifecycleEventManager {
         lifecycleStateBean.setStateId(id);
         try {
             getLCMgtDAOInstance().changeLifecycleState(lifecycleStateBean, user);
+            getLCMgtDAOInstance().clearCheckListItemData(id, currentState);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while changing lifecycle state to  " + requiredState, e);
         }
@@ -93,6 +97,44 @@ public class LifecycleEventManager {
             return getLCMgtDAOInstance().getLifecycleStateDataFromId(uuid);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while getting lifecycle data for id : " + uuid);
+        }
+    }
+
+    public void changeCheckListItemData(String uuid, String currentState, String checkListItemName, boolean value)
+            throws LifecycleException {
+        try {
+            getLCMgtDAOInstance().changeCheckListItemData(uuid, currentState, checkListItemName, value);
+        } catch (LifecycleManagerDatabaseException e) {
+            throw new LifecycleException("Error while adding checklist data for item " + checkListItemName, e);
+        }
+    }
+
+    /**
+     * This method provides set of operations performed to a particular lifecycle id.
+     *
+     * @param uuid                  Lifecycle Id which requires history.
+     * @return                      List of lifecycle history objects.
+     * @throws LifecycleException
+     */
+    public List<LifecycleHistoryBean> getLifecycleHistoryFromId(String uuid) throws LifecycleException {
+        try {
+           return getLCMgtDAOInstance().getLifecycleHistoryFromId(uuid);
+        } catch (LifecycleManagerDatabaseException e) {
+            throw new LifecycleException("Error while getting lifecycle data from uuid : " + uuid, e);
+        }
+    }
+
+    /**
+     * This method provides set of lifecycle ids in a particular state.
+     * @param state`
+     * @return  List of lifecycle ids in the given state.
+     * @throws LifecycleException
+     */
+    public List<String> getLifecycleIds (String state) throws LifecycleException {
+        try {
+            return getLCMgtDAOInstance().getLifecycleIdsFromState(state);
+        } catch (LifecycleManagerDatabaseException e) {
+            throw new LifecycleException("Error while getting lifecycle ids in state : " + state, e);
         }
     }
 
