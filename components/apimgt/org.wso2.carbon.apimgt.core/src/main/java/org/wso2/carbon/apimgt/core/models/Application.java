@@ -75,12 +75,12 @@ public final class Application {
         return result;
     }
 
-    public void setID(String id) {
-        this.id = id;
+    public String getId() {
+        return id;
     }
 
-    public String getID() {
-        return id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getGroupID() {
