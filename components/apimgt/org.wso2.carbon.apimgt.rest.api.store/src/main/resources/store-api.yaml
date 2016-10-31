@@ -432,7 +432,6 @@ paths:
       description: |
         Get a list of applications
       parameters:
-        - $ref: '#/parameters/groupId'
         - name : query
           in: query
           description: |
