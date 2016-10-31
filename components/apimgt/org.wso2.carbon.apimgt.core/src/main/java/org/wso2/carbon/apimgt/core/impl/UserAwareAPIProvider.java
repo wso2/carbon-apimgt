@@ -17,9 +17,17 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+
 /**
  * This class used to check the permissions for users
  */
 public class UserAwareAPIProvider extends APIProviderImpl {
 
+    public UserAwareAPIProvider(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+    }
 }

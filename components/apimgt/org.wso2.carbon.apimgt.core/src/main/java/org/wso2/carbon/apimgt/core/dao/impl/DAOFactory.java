@@ -62,7 +62,7 @@ public class DAOFactory {
         return apiDAO;
     }
 
-    public ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
+    public static ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
         ApplicationDAO appDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -88,7 +88,7 @@ public class DAOFactory {
         return appDAO;
     }
 
-    public APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
+    public static APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
         APISubscriptionDAO apiSubscriptionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {

@@ -20,10 +20,19 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+
 /**
  * 
  *
  */
 public class UserAwareAPIConsumer extends APIConsumerImpl {
 
+
+    public UserAwareAPIConsumer(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+    }
 }

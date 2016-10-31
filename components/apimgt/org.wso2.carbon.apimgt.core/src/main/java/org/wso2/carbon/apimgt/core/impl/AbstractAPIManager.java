@@ -20,6 +20,9 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 
@@ -29,6 +32,19 @@ import java.util.Set;
  * This class contains the implementation of the common methods for Publisher and store
  */
 public abstract class AbstractAPIManager implements APIManager {
+
+    protected ApiDAO apiDAO;
+    protected ApplicationDAO applicationDAO;
+    protected APISubscriptionDAO apiSubscriptionDAO;
+    protected String username;
+
+    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO)  {
+        this.username = username;
+        this.apiDAO = apiDAO;
+        this.applicationDAO = applicationDAO;
+        this.apiSubscriptionDAO = apiSubscriptionDAO;
+    }
 
     /**
      * Returns a list of all existing APIs by all providers. The API objects returned by this

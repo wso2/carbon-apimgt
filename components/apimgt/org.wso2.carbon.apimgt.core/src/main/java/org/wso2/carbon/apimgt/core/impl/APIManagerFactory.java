@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.APIProvider;
+import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.Map;
 
@@ -54,7 +57,12 @@ public class APIManagerFactory {
     }
 
     private APIProvider newProvider(String username) throws APIManagementException {
-        //return new UserAwareAPIProvider(username);
+        try {
+            return new UserAwareAPIProvider(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+                    DAOFactory.getAPISubscriptionDAO());
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Couldn't Create API Provider", log);
+        }
         return null;
     }
 
