@@ -184,6 +184,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
@@ -1713,7 +1714,6 @@ public final class APIUtil {
             try {
                 Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getGovernanceSystemRegistry();
-<<<<<<< Updated upstream
                     return getTiers(registry, APIConstants.API_TIER_LOCATION, MultitenantConstants.SUPER_TENANT_ID);
                 } catch (RegistryException e) {
                     log.error(APIConstants.MSG_TIER_RET_ERROR, e);
@@ -1721,17 +1721,9 @@ public final class APIUtil {
                 }
             } else {
                 return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
-=======
-                return getTiers(registry, APIConstants.API_TIER_LOCATION);
-            } catch (RegistryException e) {
-                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
->>>>>>> Stashed changes
             }
-        } else {
-            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
         }
-    }
+
 
     /**
      * Returns a map of API availability tiers as defined in the underlying governance
@@ -1842,7 +1834,7 @@ public final class APIUtil {
     /**
      * Retrieves unfiltered list of all available tiers from registry.
      * Result will contains all the tiers including unauthenticated tier which is
-     * filtered out in {@link #getTiers(Registry, String)}  getTiers}
+     * filtered out in   getTiers}
      *
      * @param registry     registry to access tiers config
      * @param tierLocation registry location of tiers config
@@ -1973,7 +1965,7 @@ public final class APIUtil {
 
     /**
      * Retrieves filtered list of available tiers from registry. This method will not return Unauthenticated
-     * tier in the list. Use {@link #getAllTiers(Registry, String) getAllTiers} to retrieve all tiers without
+     * tier in the list. Use  to retrieve all tiers without
      * any filtering.
      *
      * @param registry     registry to access tiers config
@@ -3419,20 +3411,10 @@ public final class APIUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating role: " + roleName);
                 }
-<<<<<<< Updated upstream
                 String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
                 String[] userList = new String[] { tenantAdminName };
                 manager.addRole(roleName, userList, permissions);
-=======
-                Permission[] subscriberPermissions = new Permission[]{
-                        new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
-                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{tenantAdminName};
-                manager.addRole(roleName, userList, subscriberPermissions);
->>>>>>> Stashed changes
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while creating role: " + roleName, e);
@@ -6148,7 +6130,6 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
-<<<<<<< Updated upstream
 
                 //If the policy is a subscription policy
                 if(policy instanceof SubscriptionPolicy){
@@ -6157,9 +6138,7 @@ public final class APIUtil {
                 }
 
                 if(limit instanceof RequestCountLimit) {
-=======
-                if (limit instanceof RequestCountLimit) {
->>>>>>> Stashed changes
+
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());

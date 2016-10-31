@@ -933,8 +933,6 @@
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
                 "summary": "Get a document of an API",
                 "description": "This operation can be used to retrieve a particular document's metadata associated with an API.\n",
-<<<<<<< Updated upstream
-=======
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1199,7 +1197,6 @@
                 "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}",
                 "summary": "Upload the content of an API document",
                 "description": "Thid operation can be used to upload a file or add inline content to an API document.\n\n**IMPORTANT:**\n* Either **file** or **inlineContent** form data parameters should be specified at one time.\n* Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.\n* Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n",
->>>>>>> Stashed changes
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1509,11 +1506,7 @@
                     }
                 ],
                 "tags": [
-<<<<<<< Updated upstream
-                    "Document (Individual)"
-=======
                     "API (Individual)"
->>>>>>> Stashed changes
                 ],
                 "responses": {
                     "200": {
@@ -1522,32 +1515,9 @@
                     "403": {
                         "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
                         "schema": {
-<<<<<<< Updated upstream
-                            "$ref": "#/definitions/Document"
-                        },
-                        "headers": {
-                            "Content-Type": {
-                                "description": "The content type of the body.\n",
-                                "type": "string"
-                            },
-                            "ETag": {
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-                                "type": "string"
-                            },
-                            "Last-Modified": {
-                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
-                    },
-=======
                             "$ref": "#/definitions/Error"
                         }
                     },
->>>>>>> Stashed changes
                     "404": {
                         "description": "Not Found.\nResource to be deleted does not exist.\n",
                         "schema": {
@@ -1564,19 +1534,11 @@
             },
             "put": {
                 "x-scope": "apim:api_create",
-<<<<<<< Updated upstream
-                "x-wso2-curl": "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\"",
-                "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
-                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
-                "summary": "Update a document of an API",
-                "description": "This operation can be used to update metadata of an API's document.\n",
-=======
                 "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/apis/7a2298c4-c905-403f-8fac-38c73301631f",
                 "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/apis/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"status\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\",\"chicken\"],\r\n   \"tiers\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"thumbnailUri\": null,\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"status\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"tiers\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"thumbnailUri\": null,\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
                 "summary": "Update an mediation policy",
                 "description": "This operation can be used to update an existing API.\nBut the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.\n",
->>>>>>> Stashed changes
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1604,11 +1566,7 @@
                     }
                 ],
                 "tags": [
-<<<<<<< Updated upstream
-                    "Document (Individual)"
-=======
                     "API (Individual)"
->>>>>>> Stashed changes
                 ],
                 "responses": {
                     "200": {
@@ -1626,11 +1584,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-<<<<<<< Updated upstream
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-=======
                                 "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
->>>>>>> Stashed changes
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -1664,16 +1618,6 @@
                         }
                     }
                 }
-<<<<<<< Updated upstream
-            },
-            "delete": {
-                "x-scope": "apim:api_create",
-                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058",
-                "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-                "x-wso2-response": "HTTP/1.1 200 OK",
-                "summary": "Delete a document of an API",
-                "description": "This operation can be used to delete a document associated with an API.\n",
-=======
             }
         },
         "/apis/{apiId}/wsdl": {
@@ -1684,7 +1628,6 @@
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
                 "summary": "Get a wsdl correspond to a API",
                 "description": "This operation can be used to retrieve a particular global mediation policy.\n",
->>>>>>> Stashed changes
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1700,11 +1643,7 @@
                     }
                 ],
                 "tags": [
-<<<<<<< Updated upstream
-                    "Document (Individual)"
-=======
                     "Wsdl (Individual)"
->>>>>>> Stashed changes
                 ],
                 "responses": {
                     "200": {
@@ -1740,18 +1679,6 @@
                         }
                     }
                 }
-<<<<<<< Updated upstream
-            }
-        },
-        "/apis/{apiId}/documents/{documentId}/content": {
-            "get": {
-                "x-scope": "apim:api_view",
-                "x-wso2-curl": "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf",
-                "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\n",
-                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF",
-                "summary": "Get the content of an API document",
-                "description": "This operation can be used to retrive the content of an API's document.\n\nThe document can be of 3 types. In each cases responses are different.\n\n1. **Inline type**:\n   The content of the document will be retrieved in `text/plain` content type\n2. **FILE type**: \n   The file will be downloaded with the related content type (eg. `application/pdf`)\n3. **URL type**:\n    The client will recieve the URL of the document as the Location header with the response with - `303 See Other`\n",
-=======
             },
             "post": {
                 "consumes": [
@@ -1763,7 +1690,6 @@
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
                 "summary": "Add wsdl",
                 "description": "This operation can be used to add a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinision`.\n",
->>>>>>> Stashed changes
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1786,11 +1712,7 @@
                     }
                 ],
                 "tags": [
-<<<<<<< Updated upstream
-                    "Document (Individual)"
-=======
                     "Wsdl (Individual)"
->>>>>>> Stashed changes
                 ],
                 "responses": {
                     "200": {
@@ -1805,11 +1727,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-<<<<<<< Updated upstream
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-=======
                                 "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
->>>>>>> Stashed changes
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -1824,16 +1742,11 @@
                             "$ref": "#/definitions/Error"
                         }
                     },
-<<<<<<< Updated upstream
-                    "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
-=======
                     "403": {
                         "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
->>>>>>> Stashed changes
                     },
                     "404": {
                         "description": "Not Found.\nThe resource to be updated does not exist.\n",
@@ -1854,19 +1767,11 @@
                     "multipart/form-data"
                 ],
                 "x-scope": "apim:api_create",
-<<<<<<< Updated upstream
-                "x-wso2-curl": "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\"",
-                "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nAuthorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Length: 8004\nContent-Type: multipart/form-data; boundary=------------------------7b9a53f1ffa452b9\n\n--------------------------7b9a53f1ffa452b9\nContent-Disposition: form-data; name=\"file\"; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\n\n[file content]\n\n--------------------------7b9a53f1ffa452b9--\n",
-                "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}",
-                "summary": "Upload the content of an API document",
-                "description": "Thid operation can be used to upload a file or add inline content to an API document.\n\n**IMPORTANT:**\n* Either **file** or **inlineContent** form data parameters should be specified at one time.\n* Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.\n* Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n",
-=======
                 "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
                 "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-tier\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
                 "summary": "update wsdl",
                 "description": "This operation can be used to update a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinision`.\n",
->>>>>>> Stashed changes
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -1889,11 +1794,7 @@
                     }
                 ],
                 "tags": [
-<<<<<<< Updated upstream
-                    "Document (Individual)"
-=======
                     "Wsdl (Individual)"
->>>>>>> Stashed changes
                 ],
                 "responses": {
                     "200": {
@@ -1908,11 +1809,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-<<<<<<< Updated upstream
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-=======
                                 "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
->>>>>>> Stashed changes
                                 "type": "string"
                             },
                             "Last-Modified": {
