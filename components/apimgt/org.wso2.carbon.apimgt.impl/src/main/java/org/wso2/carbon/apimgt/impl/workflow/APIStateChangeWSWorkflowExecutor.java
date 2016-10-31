@@ -512,7 +512,8 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             try {
                 HttpResponse response = httpClient.execute(httpPost);
                 HttpEntity entity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK
+                        || response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
                     String error = "Error while starting the process:  " + response.getStatusLine().getStatusCode()
                             + " " + response.getStatusLine().getReasonPhrase();
                     log.error(error);
