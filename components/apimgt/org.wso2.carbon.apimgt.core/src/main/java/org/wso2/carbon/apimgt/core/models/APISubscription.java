@@ -43,15 +43,6 @@ public final class APISubscription {
         return apiId;
     }
 
-
-    public void setID(String id) {
-        this.id = id;
-    }
-
-    public String getID() {
-        return id;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,5 +61,13 @@ public final class APISubscription {
         int result = apiId.hashCode();
         result = 31 * result + application.hashCode();
         return result;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

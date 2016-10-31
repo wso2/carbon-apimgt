@@ -26,6 +26,14 @@ package org.wso2.carbon.apimgt.core.models;
 
 public final class DocumentInfo {
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     /**
      *Document Types
      */
@@ -69,14 +77,6 @@ public final class DocumentInfo {
 
     public void setSourceURL(String sourceURL) {
         this.sourceURL = sourceURL;
-    }
-
-    public String getID() {
-        return id;
-    }
-
-    public void setID(String id) {
-        this.id = id;
     }
 
     public String getOtherType() {

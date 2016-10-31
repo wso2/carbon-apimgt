@@ -92,7 +92,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-        applicationInfoDTO.setGroupId(application.getGroupID());
+        applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         return applicationInfoDTO;
     }

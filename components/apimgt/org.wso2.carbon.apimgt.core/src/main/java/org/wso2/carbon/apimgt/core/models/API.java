@@ -81,14 +81,6 @@ public final class API {
         this.context = context;
     }
 
-    public String getID() {
-        return id;
-    }
-
-    public void setID(String id) {
-        this.id = id;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -117,5 +109,12 @@ public final class API {
             result = 31 * result + version.hashCode();
             return result;
         }
-    
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
