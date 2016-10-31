@@ -512,21 +512,25 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             try {
                 HttpResponse response = httpClient.execute(httpPost);
                 HttpEntity entity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK
-                        || response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK
+                        || response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                    String responseStr = EntityUtils.toString(entity);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Workflow oauth app created: " + responseStr);
+                    }
+                    JSONParser parser = new JSONParser();
+                    JSONObject obj = (JSONObject) parser.parse(responseStr);
+                    clientId = (String) obj.get(PayloadConstants.VARIABLE_CLIENTID);
+                    clientSecret = (String) obj.get(PayloadConstants.VARIABLE_CLIENTSECRET);
+
+                } else {
                     String error = "Error while starting the process:  " + response.getStatusLine().getStatusCode()
                             + " " + response.getStatusLine().getReasonPhrase();
                     log.error(error);
                     throw new WorkflowException(error);
-                }
-                String responseStr = EntityUtils.toString(entity);
-                if (log.isDebugEnabled()) {
-                    log.debug("Workflow oauth app created: " + responseStr);
-                }
-                JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(responseStr);
-                clientId = (String) obj.get(PayloadConstants.VARIABLE_CLIENTID);
-                clientSecret = (String) obj.get(PayloadConstants.VARIABLE_CLIENTSECRET);
+                }              
+       
             } catch (ClientProtocolException e) {
                 String errorMsg = "Error while creating the http client";
                 log.error(errorMsg, e);
