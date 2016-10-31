@@ -22,8 +22,10 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ErrorCode;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
 import java.io.InputStream;
@@ -38,6 +40,22 @@ import javax.annotation.CheckForNull;
  */
 public class DefaultApiDAOImpl implements ApiDAO {
 
+    private static final String IS_API_EXISTS_QUERY = "SELECT API_ID FROM AM_API WHERE " +
+                                                        "PROVIDER = ? AND NAME = ? AND VERSION = ?";
+
+    public static final String ADD_API_SQL = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
+                    "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
+                    "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, CREATED_BY, " +
+                    "CREATED_TIME, LAST_UPDATED_TIME)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String GET_API_SQL = "SELECT PROVIDER, NAME, CONTEXT, VERSION, " +
+            "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
+            "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, CREATED_BY, " +
+            "CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
+
+    public static final String DELETE_API_SQL = "DELETE FROM AM_API WHERE UUID = ?";
+
     DefaultApiDAOImpl() {}
 
     /**
@@ -50,7 +68,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws APIManagementDAOException {
-        return null;
+        return CommonDataAccessHandler.getAPI(apiID, GET_API_SQL);
     }
 
     /**
@@ -97,7 +115,13 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public API addAPI(API api) throws APIManagementDAOException {
-        return null;
+        if (CommonDataAccessHandler.isAPIExists(api, IS_API_EXISTS_QUERY)) {
+            DAOUtil.handleException(ErrorCode.DUPLICATE_API_ADDED, "API " + api.getProvider() + "-" +
+                    api.getName() + "-" + api.getVersion() + " already exists");
+        }
+
+        CommonDataAccessHandler.addAPI(api, ADD_API_SQL);
+        return api;
     }
 
     /**
@@ -122,6 +146,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteAPI(String apiID) throws APIManagementDAOException {
+        CommonDataAccessHandler.deleteAPI(apiID, DELETE_API_SQL);
     }
 
     /**
@@ -207,6 +232,17 @@ public class DefaultApiDAOImpl implements ApiDAO {
     @Override
     public DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit)
                                                                     throws APIManagementDAOException {
+        return null;
+    }
+
+    /**
+     * @param apiID The UUID of the respective API
+     * @param docID The UUID of the respective Document
+     * @return {@link DocumentInfo} Document Info object
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public DocumentInfo getDocumentInfo(String apiID, String docID) throws APIManagementDAOException {
         return null;
     }
 }

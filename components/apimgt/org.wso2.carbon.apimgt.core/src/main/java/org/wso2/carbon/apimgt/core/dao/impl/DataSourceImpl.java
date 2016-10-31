@@ -18,28 +18,31 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.dao.impl;
+
+import com.zaxxer.hikari.HikariDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * This is the custom exception class for API management.
+ * Concrete implementation of DataSource interface
  */
-public class APIManagementDAOException extends Exception {
-    private ErrorCode errorCode;
+public class DataSourceImpl implements DataSource {
+    HikariDataSource dataSource;
 
-    public APIManagementDAOException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
+    public DataSourceImpl(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    public APIManagementDAOException(ErrorCode errorCode, String msg, Throwable e) {
-        super(msg, e);
-        this.errorCode = errorCode;
-    }
 
-    public APIManagementDAOException(ErrorCode errorCode, Throwable throwable) {
-        super(throwable);
-        this.errorCode = errorCode;
+    /**
+     * Get a {@link Connection} object
+     *
+     * @return {@link Connection} from given DataSource
+     */
+    @Override
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
-
-    public ErrorCode getErroCode() { return errorCode; }
 }

@@ -21,10 +21,10 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.ErrorCode;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -34,9 +34,9 @@ import java.sql.SQLException;
  */
 public class DAOUtil {
     private static final Logger log = LoggerFactory.getLogger(DAOUtil.class);
-    private static HikariDataSource dataSource;
+    private static DataSource dataSource;
 
-    public static synchronized void initialize(HikariDataSource dataSource) {
+    public static synchronized void initialize(DataSource dataSource) {
         if (DAOUtil.dataSource != null) {
             return;
         }
@@ -59,14 +59,14 @@ public class DAOUtil {
         throw new SQLException("Data source is not configured properly.");
     }
 
-    static void handleException(String msg) throws APIManagementDAOException {
+    static void handleException(ErrorCode errorCode, String msg) throws APIManagementDAOException {
         log.error(msg);
-        throw new APIManagementDAOException(msg);
+        throw new APIManagementDAOException(errorCode, msg);
     }
 
-    public static void handleException(String msg, Throwable t) throws APIManagementDAOException {
+    public static void handleException(ErrorCode errorCode, String msg, Throwable t) throws APIManagementDAOException {
         log.error(msg, t);
-        throw new APIManagementDAOException(msg, t);
+        throw new APIManagementDAOException(errorCode, msg, t);
     }
 }
 

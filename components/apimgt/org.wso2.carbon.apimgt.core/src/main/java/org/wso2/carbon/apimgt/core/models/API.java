@@ -21,12 +21,19 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Representation of an API object
  */
 
 public final class API {
+    public enum VisibilityEnum {
+        PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
+    };
+
     private String provider;
     private String version;
     private String description;
@@ -34,11 +41,202 @@ public final class API {
     private String context;
     private String id;
     private String status;
+    private String apiDefinition;
+    private String wsdlUri;
+    private boolean isResponseCachingEnabled;
+    private int cacheTimeout;
+    private boolean isDestinationStatsEnabled;
+    private boolean isDefaultVersion;
+    private List<String> transport = new ArrayList<>();
+    private List<String> tags = new ArrayList<>();
+    private List<String> policies = new ArrayList<>();
+    private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
+    private List<String> visibleRoles = new ArrayList<>();
+    private List<Endpoint> endpoints = new ArrayList<>();
+    private List<Environment> gatewayEnvironments;
+
+    private String businessOwnerEmail;
+    private String technicalOwnerEmail;
+    private String technicalOwner;
+    private String businessOwner;
+    private Date createdTime;
+    private String createdBy;
+    private Date lastUpdatedTime;
+
+    private CorsConfiguration corsConfiguration;
 
     public API(String provider, String version, String name) {
         this.provider = provider;
         this.version = version;
         this.name = name;
+    }
+
+    public Date getCreatedTime() {
+        return new Date(createdTime.getTime());
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = new Date(createdTime.getTime());
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getLastUpdatedTime() {
+        return new Date(lastUpdatedTime.getTime());
+    }
+
+    public void setLastUpdatedTime(Date lastUpdatedTime) {
+        this.lastUpdatedTime = new Date(lastUpdatedTime.getTime());
+    }
+
+    public VisibilityEnum getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(VisibilityEnum visibility) {
+        this.visibility = visibility;
+    }
+
+    public List<String> getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(List<String> visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
+    }
+
+    public void setEndpoints(List<Endpoint> endpoints) {
+        this.endpoints = endpoints;
+    }
+
+    public List<Environment> getGatewayEnvironments() {
+        return gatewayEnvironments;
+    }
+
+    public void setGatewayEnvironments(List<Environment> gatewayEnvironments) {
+        this.gatewayEnvironments = gatewayEnvironments;
+    }
+
+    public String getBusinessOwnerEmail() {
+        return businessOwnerEmail;
+    }
+
+    public void setBusinessOwnerEmail(String businessOwnerEmail) {
+        this.businessOwnerEmail = businessOwnerEmail;
+    }
+
+    public String getTechnicalOwnerEmail() {
+        return technicalOwnerEmail;
+    }
+
+    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+        this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    public String getTechnicalOwner() {
+        return technicalOwner;
+    }
+
+    public void setTechnicalOwner(String technicalOwner) {
+        this.technicalOwner = technicalOwner;
+    }
+
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+
+    public void setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+    }
+
+    public CorsConfiguration getCorsConfiguration() {
+        return corsConfiguration;
+    }
+
+    public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
+    }
+
+    public List<String> getTransport() {
+        return transport;
+    }
+
+    public void setTransport(List<String> transport) {
+        this.transport = transport;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public List<String> getPolicies() {
+        return policies;
+    }
+
+    public void setPolicies(List<String> policies) {
+        this.policies = policies;
+    }
+
+    public String getApiDefinition() {
+        return apiDefinition;
+    }
+
+    public void setApiDefinition(String apiDefinition) {
+        this.apiDefinition = apiDefinition;
+    }
+
+    public String getWsdlUri() {
+        return wsdlUri;
+    }
+
+    public void setWsdlUri(String wsdlUri) {
+        this.wsdlUri = wsdlUri;
+    }
+
+    public boolean isResponseCachingEnabled() {
+        return isResponseCachingEnabled;
+    }
+
+    public void setResponseCachingEnabled(boolean responseCachingEnabled) {
+        isResponseCachingEnabled = responseCachingEnabled;
+    }
+
+    public int getCacheTimeout() {
+        return cacheTimeout;
+    }
+
+    public void setCacheTimeout(int cacheTimeout) {
+        this.cacheTimeout = cacheTimeout;
+    }
+
+    public boolean isDestinationStatsEnabled() {
+        return isDestinationStatsEnabled;
+    }
+
+    public void setDestinationStatsEnabled(boolean destinationStatsEnabled) {
+        isDestinationStatsEnabled = destinationStatsEnabled;
+    }
+
+    public boolean isDefaultVersion() {
+        return isDefaultVersion;
+    }
+
+    public void setDefaultVersion(boolean defaultVersion) {
+        isDefaultVersion = defaultVersion;
     }
 
     public String getProvider() {
@@ -97,25 +295,25 @@ public final class API {
         this.status = status;
     }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            API that = (API) o;
-            return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
 
-        @Override
-        public int hashCode() {
-            int result = name.hashCode();
-            result = 31 * result + provider.hashCode();
-            result = 31 * result + version.hashCode();
-            return result;
-        }
+        API that = (API) o;
+        return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + provider.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
+    }
     
 }

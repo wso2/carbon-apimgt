@@ -18,28 +18,20 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.dao.impl;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * This is the custom exception class for API management.
+ * Internal interface to actual DataSource implementation to remove a direct dependency with any specific DataSource
+ * implementation. This also enables DAO logic to be testable with an alternative DataSource implementation. This is
+ * only used by the respective DAO implementations.
  */
-public class APIManagementDAOException extends Exception {
-    private ErrorCode errorCode;
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg, Throwable e) {
-        super(msg, e);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, Throwable throwable) {
-        super(throwable);
-        this.errorCode = errorCode;
-    }
-
-    public ErrorCode getErroCode() { return errorCode; }
+public interface DataSource {
+    /**
+     * Get a {@link Connection} object
+     * @return {@link Connection} from given DataSource
+     */
+    Connection getConnection() throws SQLException;
 }

@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
 import java.io.InputStream;
@@ -38,7 +39,7 @@ public interface ApiDAO {
      * Retrieve a given instance of an API
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     @CheckForNull API getAPI(String apiID) throws APIManagementDAOException;
@@ -50,7 +51,7 @@ public interface ApiDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles) throws APIManagementDAOException;
@@ -65,7 +66,7 @@ public interface ApiDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
@@ -74,7 +75,7 @@ public interface ApiDAO {
      * Add a new instance of an API
      * @param api The {@link API} object to be added
      * @return The newly added {@link API} object
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     API addAPI(API api) throws APIManagementDAOException;
@@ -84,7 +85,7 @@ public interface ApiDAO {
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return The updated {@link API} object
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     API updateAPI(String apiID, API substituteAPI) throws APIManagementDAOException;
@@ -92,7 +93,7 @@ public interface ApiDAO {
     /**
      * Remove an existing API
      * @param apiID The UUID of the API that needs to be deleted
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     void deleteAPI(String apiID) throws APIManagementDAOException;
@@ -101,7 +102,7 @@ public interface ApiDAO {
      * Get swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @return Swagger definition stream
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     OutputStream getSwaggerDefinition(String apiID) throws APIManagementDAOException;
@@ -110,7 +111,7 @@ public interface ApiDAO {
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @param swaggerDefinition Swagger definition stream
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws APIManagementDAOException;
@@ -119,7 +120,7 @@ public interface ApiDAO {
      * Get image of a given API
      * @param apiID The UUID of the respective API
      * @return Image stream
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     OutputStream getImage(String apiID) throws APIManagementDAOException;
@@ -128,7 +129,7 @@ public interface ApiDAO {
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @param image Image stream
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     void updateImage(String apiID, InputStream image) throws APIManagementDAOException;
@@ -137,7 +138,7 @@ public interface ApiDAO {
      * Change the lifecycle status of a given API
      * @param apiID The UUID of the respective API
      * @param status The lifecycle status that the API must be set to
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException  if error occurs while accessing data layer
      *
      */
     void changeLifeCylceStatus(String apiID, String status) throws APIManagementDAOException;
@@ -146,7 +147,7 @@ public interface ApiDAO {
      * Create a new version of an existing API
      * @param apiID The UUID of the respective API
      * @param version The new version of the API
-     * @throws APIManagementDAOException
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     void createNewAPIVersion(String apiID, String version) throws APIManagementDAOException;
@@ -156,9 +157,19 @@ public interface ApiDAO {
      * @param apiID The UUID of the respective API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @throws APIManagementDAOException
+     * @return {@link DocumentInfoResults} matching results
+     * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
     DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws APIManagementDAOException;
+
+    /**
+     *
+     * @param apiID The UUID of the respective API
+     * @param docID The UUID of the respective Document
+     * @return {@link DocumentInfo} Document Info object
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    DocumentInfo getDocumentInfo(String apiID, String docID) throws APIManagementDAOException;
 
 }

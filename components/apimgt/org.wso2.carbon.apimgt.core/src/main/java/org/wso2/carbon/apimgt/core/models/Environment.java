@@ -18,28 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.models;
 
-/**
- * This is the custom exception class for API management.
- */
-public class APIManagementDAOException extends Exception {
-    private ErrorCode errorCode;
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg, Throwable e) {
-        super(msg, e);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, Throwable throwable) {
-        super(throwable);
-        this.errorCode = errorCode;
-    }
-
-    public ErrorCode getErroCode() { return errorCode; }
+public class Environment {
 }
