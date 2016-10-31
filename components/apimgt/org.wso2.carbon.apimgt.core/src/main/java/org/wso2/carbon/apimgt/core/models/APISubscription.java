@@ -71,5 +71,7 @@ public final class APISubscription {
         return result;
     }
 
-
+    public void setApiId(String apiId) {
+        this.apiId = apiId;
+    }
 }
