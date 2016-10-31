@@ -23,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIProvider;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
@@ -44,6 +46,11 @@ import java.util.Set;
 public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+
+    public APIProviderImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+    }
 
     /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
@@ -133,7 +140,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPI(API api) throws APIManagementException {
         try {
-            DAOFactory.getApiDAO().addAPI(api);
+            apiDAO.addAPI(api);
             APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
@@ -161,7 +168,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void updateAPI(API api) throws APIManagementException {
         try {
-            DAOFactory.getApiDAO().updateAPI(api.getId(), api);
+            apiDAO.updateAPI(api.getId(), api);
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
@@ -183,7 +190,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void changeAPIStatus(API api, APIStatus status, String userId)
             throws APIManagementException {
         try {
-            DAOFactory.getApiDAO().changeLifeCylceStatus(api.getId(), status.getStatus());
+            apiDAO.changeLifeCylceStatus(api.getId(), status.getStatus());
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while changing the API status - " + api.getName(), e, log);
         }
