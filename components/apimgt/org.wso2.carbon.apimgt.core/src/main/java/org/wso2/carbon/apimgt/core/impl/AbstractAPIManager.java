@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIIdentifier;
 
 import java.util.List;
 import java.util.Set;
@@ -31,39 +30,94 @@ import java.util.Set;
  */
 public abstract class AbstractAPIManager implements APIManager {
 
+    /**
+     * Returns a list of all existing APIs by all providers. The API objects returned by this
+     * method may be partially initialized (due to performance reasons). Each API instance
+     * is guaranteed to have the API name, version, provider name, context, status and icon URL.
+     * All other fields may not be initialized. Therefore, the objects returned by this method
+     * must not be used to access any metadata item related to an API, other than the ones listed
+     * above. For that purpose a fully initialized API object instance should be acquired by
+     * calling the getAPI(String) method.
+     *
+     * @return a List of API objects (partially initialized), possibly empty
+     * @throws APIManagementException on error
+     */
+    @Override
     public List<API> getAllAPIs() throws APIManagementException {
         return null;
     }
 
-    public API getAPI(String apiPath) throws APIManagementException {
-        return null;
-    }
-
+    /**
+     * Returns details of an API
+     *
+     * @param uuid UUID of the API's registry artifact
+     * @return An API object related to the given artifact id or null
+     * @throws APIManagementException if failed get API from String
+     */
+    @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
         return null;
     }
 
-    public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        return null;
-    }
-
-    public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
+    /**
+     * Checks the Availability of given String
+     *
+     * @param api
+     * @return true, if already exists. False, otherwise
+     * @throws APIManagementException if failed to get API availability
+     * @api
+     */
+    @Override
+    public boolean isAPIAvailable(API api) throws APIManagementException {
         return false;
     }
 
+    /**
+     * Checks whether the given API context is already registered in the system
+     *
+     * @param context A String representing an API context
+     * @return true if the context already exists and false otherwise
+     * @throws APIManagementException if failed to check the context availability
+     */
+    @Override
     public boolean isContextExist(String context) throws APIManagementException {
         return false;
     }
 
+    /**
+     * Checks whether the given API name is already registered in the system
+     *
+     * @param apiName A String representing an API name
+     * @return true if the api name already exists and false otherwise
+     * @throws APIManagementException if failed to check the context availability
+     */
+    @Override
     public boolean isApiNameExist(String apiName) throws APIManagementException {
         return false;
     }
 
+    /**
+     * Returns a set of API versions for the given provider and API name
+     *
+     * @param providerName name of the provider (common)
+     * @param apiName      name of the api
+     * @return Set of version strings (possibly empty)
+     * @throws APIManagementException if failed to get version for api
+     */
+    @Override
     public Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException {
         return null;
     }
 
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+    /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param api id of the String
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    @Override
+    public String getSwagger20Definition(String api) throws APIManagementException {
         return null;
     }
 }

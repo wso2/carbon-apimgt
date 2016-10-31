@@ -23,18 +23,19 @@ import java.util.Date;
  */
 public class LifeCycleEvent {
 
-    private APIIdentifier api;
+    private String id;
     private String oldStatus;
     private String newStatus;
     private String userId;
     private Date date = new Date();
 
-    public APIIdentifier getApi() {
-        return api;
+
+    public String getId() {
+        return id;
     }
 
-    public void setApi(APIIdentifier api) {
-        this.api = api;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getOldStatus() {

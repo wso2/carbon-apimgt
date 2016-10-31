@@ -20,8 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.APIProvider;
@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class APIManagerFactory {
 
-    private static final Log log = LogFactory.getLog(APIManagerFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(APIManagerFactory.class);
 
     private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
