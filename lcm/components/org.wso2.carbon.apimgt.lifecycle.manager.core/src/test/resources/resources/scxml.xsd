@@ -80,7 +80,7 @@
                                                                                     </xs:element>
                                                                                 </xs:sequence>
                                                                                 <xs:attribute type="xs:string"
-                                                                                              name="forEvent"
+                                                                                              name="forTarget"
                                                                                               use="required"/>
                                                                                 <xs:attribute type="xs:string"
                                                                                               name="class"
@@ -92,7 +92,7 @@
                                                             </xs:element>
                                                         </xs:sequence>
                                                         <xs:attribute type="xs:string" name="name" use="optional"/>
-                                                        <xs:attribute type="xs:string" name="forEvent" use="optional"/>
+                                                        <xs:attribute type="xs:string" name="forTarget" use="optional"/>
                                                     </xs:complexType>
                                                 </xs:element>
                                                 <xs:element name="execution" maxOccurs="unbounded" minOccurs="0">
@@ -111,7 +111,7 @@
                                                                 </xs:complexType>
 							    </xs:element>
                                                         </xs:sequence>
-                                                        <xs:attribute type="xs:string" name="forEvent" use="optional"/>
+                                                        <xs:attribute type="xs:string" name="forTarget" use="optional"/>
                                                         <xs:attribute type="xs:string" name="class" use="optional"/>
                                                     </xs:complexType>
                                                 </xs:element>
@@ -119,7 +119,7 @@
                                                     <xs:complexType>
                                                         <xs:simpleContent>
                                                             <xs:extension base="xs:string">
-                                                                <xs:attribute type="xs:string" name="forEvent"
+                                                                <xs:attribute type="xs:string" name="forTarget"
                                                                               use="optional"/>
                                                                 <xs:attribute type="xs:string" name="href"
                                                                               use="optional"/>
@@ -147,14 +147,14 @@
                                                                 </xs:complexType>
                                                             </xs:element>
                                                         </xs:sequence>
-                                                        <xs:attribute type="xs:string" name="forEvent" use="required"/>
+                                                        <xs:attribute type="xs:string" name="forTarget" use="required"/>
                                                     </xs:complexType>
                                                 </xs:element>
                                                 <xs:element name="approval" minOccurs="0" maxOccurs="unbounded">
                                                     <xs:complexType>
                                                         <xs:simpleContent>
                                                             <xs:extension base="xs:string">
-                                                                <xs:attribute type="xs:string" name="forEvent"
+                                                                <xs:attribute type="xs:string" name="forTarget"
                                                                               use="required"/>
                                                                 <xs:attribute type="xs:string" name="roles"
                                                                               use="optional"/>
@@ -170,7 +170,7 @@
                                                             <xs:extension base="xs:string">
                                                                 <xs:attribute type="xs:string" name="roles"
                                                                               use="required"/>
-                                                                <xs:attribute type="xs:string" name="forEvent"
+                                                                <xs:attribute type="xs:string" name="forTarget"
                                                                               use="required"/>
                                                             </xs:extension>
                                                         </xs:simpleContent>
@@ -193,7 +193,7 @@
                                                                 </xs:complexType>
                                                             </xs:element>
                                                         </xs:sequence>
-                                                        <xs:attribute type="xs:string" name="forEvent" use="required"/>
+                                                        <xs:attribute type="xs:string" name="forTarget" use="required"/>
                                                         <xs:attribute type="xs:string" name="class" use="required"/>
                                                     </xs:complexType>
                                                 </xs:element>
@@ -234,7 +234,7 @@
                                                                 </xs:complexType>
                                                             </xs:element>
                                                         </xs:sequence>
-                                                        <xs:attribute type="xs:string" name="forEvent" use="required"/>
+                                                        <xs:attribute type="xs:string" name="forTarget" use="required"/>
                                                     </xs:complexType>
                                                 </xs:element>
                                             </xs:sequence>

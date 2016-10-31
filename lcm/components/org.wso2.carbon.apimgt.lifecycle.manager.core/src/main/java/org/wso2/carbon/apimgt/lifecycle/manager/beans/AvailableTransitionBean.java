@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.impl.beans;
+package org.wso2.carbon.apimgt.lifecycle.manager.beans;
 
 /**
  * This bean holds the data about next available states for a particular lifecycle state which are defined in

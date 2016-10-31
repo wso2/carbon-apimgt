@@ -22,7 +22,9 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleConfigBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.LifecycleConfigBuilder;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.SQLConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
@@ -38,8 +40,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
 
 /**
  * This class represent the DAO layer for lifecycle related operations.
@@ -84,7 +89,6 @@ public class LifecycleMgtDAO {
             } else {
                 prepStmt = connection.prepareStatement(query);
             }
-            //prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, lifecycleConfigBean.getLcName());
             prepStmt.setBinaryStream(2, new ByteArrayInputStream(lifecycleConfigBean.getLcContent().getBytes(
                     StandardCharsets.UTF_8)));
@@ -255,14 +259,12 @@ public class LifecycleMgtDAO {
         PreparedStatement prepStmt1 = null;
         PreparedStatement prepStmt2 = null;
         ResultSet rs1 = null;
-        String getLCIdQuery = SQLConstants.GET_LIFECYCLE_DEFINITION_ID_FROM_NAME_SQL;
-        String addLCStateQuery = SQLConstants.ADD_LIFECYCLE_STATE_SQL;
         String uuid = null;
         int lcDefinitionId = -1;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            prepStmt1 = connection.prepareStatement(getLCIdQuery);
+            prepStmt1 = connection.prepareStatement(SQLConstants.GET_LIFECYCLE_DEFINITION_ID_FROM_NAME_SQL);
             prepStmt1.setString(1, lcName);
             rs1 = prepStmt1.executeQuery();
 
@@ -273,7 +275,7 @@ public class LifecycleMgtDAO {
                 throw new LifecycleManagerDatabaseException("There is no lifecycle configuration with name " + lcName);
             }
             uuid = generateUUID();
-            prepStmt2 = connection.prepareStatement(addLCStateQuery);
+            prepStmt2 = connection.prepareStatement(SQLConstants.ADD_LIFECYCLE_STATE_SQL);
             prepStmt2.setString(1, uuid);
             prepStmt2.setInt(2, lcDefinitionId);
             prepStmt2.setString(3, initialState);
@@ -310,11 +312,10 @@ public class LifecycleMgtDAO {
             throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String updateLifecycleStateQuery = SQLConstants.UPDATE_LIFECYCLE_STATE_SQL;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(updateLifecycleStateQuery);
+            prepStmt = connection.prepareStatement(SQLConstants.UPDATE_LIFECYCLE_STATE_SQL);
             prepStmt.setString(1, lifecycleStateBean.getPostStatus());
             prepStmt.setString(2, lifecycleStateBean.getStateId());
             prepStmt.executeUpdate();
@@ -344,30 +345,42 @@ public class LifecycleMgtDAO {
      * @return                                      Life cycle state bean with all the required information
      * @throws LifecycleManagerDatabaseException    If failed to get lifecycle state data.
      */
-    public LifecycleStateBean getLifecycleStateDataFromId(String uuid)
-            throws LifecycleManagerDatabaseException {
+    public LifecycleStateBean getLifecycleStateDataFromId(String uuid) throws LifecycleManagerDatabaseException {
         LifecycleStateBean lifecycleStateBean = new LifecycleStateBean();
         Connection connection = null;
         PreparedStatement prepStmt = null;
+        PreparedStatement prepStmt2 = null;
         ResultSet rs = null;
-        String getLifecycleNameFromIdQuery = SQLConstants.GET_LIFECYCLE_NAME_FROM_ID_SQL;
+        ResultSet rs2 = null;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(getLifecycleNameFromIdQuery);
+            prepStmt = connection.prepareStatement(SQLConstants.GET_LIFECYCLE_NAME_FROM_ID_SQL);
             prepStmt.setString(1, uuid);
             rs = prepStmt.executeQuery();
             if (rs.next()) {
                 lifecycleStateBean.setLcName(rs.getString(Constants.LIFECYCLE_NAME));
-                lifecycleStateBean.setPostStatus(rs.getString(Constants.LIFECYCLE_STATUS));
+                String lcState = rs.getString(Constants.LIFECYCLE_STATUS);
+                lifecycleStateBean.setPostStatus(lcState);
                 lifecycleStateBean.setStateId(uuid);
+
+                prepStmt2 = connection.prepareStatement(SQLConstants.GET_CHECKLIST_DATA);
+                prepStmt2.setString(1, uuid);
+                prepStmt2.setString(2, lcState);
+                rs2 = prepStmt2.executeQuery();
+                Map<String, Boolean> checkListData = new HashMap<>();
+                while (rs2.next()) {
+                    checkListData
+                            .put(rs2.getString(Constants.CHECKLIST_NAME), rs2.getBoolean(Constants.CHECKLIST_VALUE));
+                }
+                lifecycleStateBean.setCheckListData(checkListData);
             } else {
                 throw new LifecycleManagerDatabaseException("No state data associated with lifecycle id :" + uuid);
             }
 
-
         } catch (SQLException e) {
             handleException("Error while getting the lifecycle state data for id" + uuid, e);
         } finally {
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt2, null, rs2);
             LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return lifecycleStateBean;
@@ -384,10 +397,9 @@ public class LifecycleMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String query = SQLConstants.GET_ALL_LIFECYCLE_CONFIGS_SQL;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
+            prepStmt = connection.prepareStatement(SQLConstants.GET_ALL_LIFECYCLE_CONFIGS_SQL);
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
@@ -418,11 +430,10 @@ public class LifecycleMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String query = SQLConstants.CHECK_LIFECYCLE_EXIST_SQL;
         boolean result = false;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
+            prepStmt = connection.prepareStatement(SQLConstants.CHECK_LIFECYCLE_EXIST_SQL);
             prepStmt.setString(1, lcName);
             rs = prepStmt.executeQuery();
             result = rs.next();
@@ -444,19 +455,21 @@ public class LifecycleMgtDAO {
      * @throws LifecycleManagerDatabaseException
      */
     private void addLifecycleHistory(String id, String previousState, String postState, String user) {
+        if (!LifecycleConfigBuilder.getLifecycleConfig().isEnableHistory()) {
+            return;
+        }
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.INSERT_LIFECYCLE_HISTORY_SQL;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             String dbProductName = connection.getMetaData().getDatabaseProductName();
             boolean returnsGeneratedKeys = LifecycleMgtDBUtil.canReturnGeneratedKeys(dbProductName);
             if (returnsGeneratedKeys) {
-                prepStmt = connection.prepareStatement(query, new String[] {
+                prepStmt = connection.prepareStatement(SQLConstants.INSERT_LIFECYCLE_HISTORY_SQL, new String[] {
                         LifecycleMgtDBUtil.getConvertedAutoGeneratedColumnName(dbProductName, Constants.LC_ID) });
             } else {
-                prepStmt = connection.prepareStatement(query);
+                prepStmt = connection.prepareStatement(SQLConstants.INSERT_LIFECYCLE_HISTORY_SQL);
             }
             //prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, id);
@@ -481,6 +494,40 @@ public class LifecycleMgtDAO {
     }
 
     /**
+     * Method used to get lifecycle history related to particular uuid.
+     *
+     * @param uuid                                  UUID of the lifecycle state. (Associates with asset)
+     * @return                                      List of state transitions for given uuid.
+     *
+     * @throws LifecycleManagerDatabaseException
+     */
+    public List<LifecycleHistoryBean> getLifecycleHistoryFromId(String uuid) throws LifecycleManagerDatabaseException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<LifecycleHistoryBean> lifecycleHistoryBeanList = new ArrayList<>();
+        try {
+            connection = LifecycleMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(SQLConstants.GET_LIFECYCLE_HISTORY_OF_UUID);
+            prepStmt.setString(1, uuid);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                LifecycleHistoryBean lifecycleHistoryBean = new LifecycleHistoryBean();
+                lifecycleHistoryBean.setPreviousState(rs.getString(Constants.PREV_STATE));
+                lifecycleHistoryBean.setPostState(rs.getString(Constants.POST_STATE));
+                lifecycleHistoryBean.setUser(rs.getString(Constants.USER));
+                lifecycleHistoryBean.setUpdatedTime(rs.getTimestamp(Constants.TIME));
+                lifecycleHistoryBeanList.add(lifecycleHistoryBean);
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting lifecycle history for id : " + uuid, e);
+        } finally {
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return lifecycleHistoryBeanList;
+    }
+
+    /**
      * Method used to check if the lifecycle is attached to a particular asset.
      *
      * @param lcName                                UUID of the lifecycle state. (Associates with asset)
@@ -492,10 +539,9 @@ public class LifecycleMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         boolean result = false;
-        String query = SQLConstants.CHECK_LIFECYCLE_IN_USE;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
+            prepStmt = connection.prepareStatement(SQLConstants.CHECK_LIFECYCLE_IN_USE);
             prepStmt.setString(1, lcName);
             rs = prepStmt.executeQuery();
             result = rs.next();
@@ -516,11 +562,10 @@ public class LifecycleMgtDAO {
     public void removeLifecycleState (String uuid) throws LifecycleManagerDatabaseException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.REMOVE_LIFECYCLE_STATE;
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(query);
+            prepStmt = connection.prepareStatement(SQLConstants.REMOVE_LIFECYCLE_STATE);
             prepStmt.setString(1, uuid);
             prepStmt.execute();
             connection.commit();
@@ -536,6 +581,126 @@ public class LifecycleMgtDAO {
         } finally {
             LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
+    }
+
+    /**
+     * Method used to update data related to check list item operation.
+     *
+     * @param uuid                                  UUID of the lifecycle state. (Associates with asset)
+     * @param lcState                               State in which the checklist is associated with.
+     * @param checkListName                         Name of the check list in which operation was performed
+     * @param value                                 Value of the check list item. (Selected or not selected)
+     *
+     * @throws LifecycleManagerDatabaseException
+     */
+    public void changeCheckListItemData(String uuid, String lcState, String checkListName, boolean value)
+            throws LifecycleManagerDatabaseException {
+        Connection connection = null;
+        PreparedStatement prepStmt1 = null;
+        PreparedStatement prepStmt2 = null;
+        PreparedStatement prepStmt3 = null;
+        ResultSet rs = null;
+        try {
+            connection = LifecycleMgtDBUtil.getConnection();
+            prepStmt1 = connection.prepareStatement(SQLConstants.CHECK_LIST_ITEM_EXIST);
+            prepStmt1.setString(1, uuid);
+            prepStmt1.setString(2, lcState);
+            prepStmt1.setString(3, checkListName);
+            rs = prepStmt1.executeQuery();
+            connection.setAutoCommit(false);
+            if (rs.next()) {
+                prepStmt2 = connection.prepareStatement(SQLConstants.UPDATE_CHECK_LIST_ITEM_DATA);
+                prepStmt2.setBoolean(1, value);
+                prepStmt2.setString(2, uuid);
+                prepStmt2.setString(3, lcState);
+                prepStmt2.setString(4, checkListName);
+                prepStmt2.executeUpdate();
+            } else {
+                prepStmt3 = connection.prepareStatement(SQLConstants.ADD_CHECK_LIST_ITEM_DATA);
+                prepStmt3.setString(1, uuid);
+                prepStmt3.setString(2, lcState);
+                prepStmt3.setString(3, checkListName);
+                prepStmt3.setBoolean(4, value);
+                prepStmt3.execute();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e1) {
+                log.error("Error while roll back operation for adding check list item data ", e);
+            }
+            handleException("Error while adding  checklist data for id " + uuid, e);
+        } finally {
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt1, null, rs);
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt2, null, null);
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt3, connection, null);
+        }
+
+    }
+
+    /**
+     * Method used to clear check list item data related to previous state when performing lifecycle state change
+     * operation.
+     *
+     * @param uuid                                  UUID of the lifecycle state.
+     * @param lcState                               State in which the checklist is associated with.
+     *
+     * @throws LifecycleManagerDatabaseException
+     */
+    public void clearCheckListItemData(String uuid, String lcState) throws LifecycleManagerDatabaseException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        try {
+            connection = LifecycleMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(SQLConstants.CLEAR_CHECK_LIST_DATA);
+            prepStmt.setBoolean(1, false);
+            prepStmt.setString(2, uuid);
+            prepStmt.setString(3, lcState);
+            prepStmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e1) {
+                log.error("Error while roll back operation for clearing checklist item data ", e);
+            }
+            handleException("Error while clearing  checklist data for id " + uuid + "and state " + lcState, e);
+        } finally {
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * This method provides set of lifecycle ids in a particular state.
+     * @param state`
+     * @return  List of lifecycle ids in the given state.
+     * @throws LifecycleManagerDatabaseException
+     */
+    public List<String> getLifecycleIdsFromState(String state) throws LifecycleManagerDatabaseException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<String> lifecycleIdList = new ArrayList<>();
+        try {
+            connection = LifecycleMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(SQLConstants.GET_LIFECYCLE_IDS_IN_STATE);
+            prepStmt.setString(1, state);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                lifecycleIdList.add(rs.getString(Constants.ID));
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting list of lifecycle ids in state" + state, e);
+        } finally {
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return lifecycleIdList;
     }
 
     private void handleException(String msg, Throwable t) throws LifecycleManagerDatabaseException {

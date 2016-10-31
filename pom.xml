@@ -301,7 +301,7 @@
 
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
-        <carbon.kernel.package.import.version.range>[5.0.0, 6.0.0)</carbon.kernel.package.import.version.range>
+        <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
         <carbon.apimgt.version>7.0.0-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
@@ -380,6 +380,9 @@
 	    <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
 	    <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
+
+        <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
+        <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
 
     </properties>
 

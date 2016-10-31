@@ -17,11 +17,8 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.constants.TestConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.ManagedLifecycleUtil;
-import org.wso2.carbon.apimgt.lifecycle.manager.interfaces.ManagedLifecycle;
 
 /**
  * This is a mock api class which implements ManagedLifecycle interface.
@@ -60,26 +57,26 @@ public class SampleAPI implements ManagedLifecycle {
         this.lifecycleState = lifecycleState;
     }
 
-    @Override
+    /*@Override
     public void associateLifecycle(String lcName, String user) throws LifecycleException {
-        this.lifecycleState = ManagedLifecycleUtil
+        this.lifecycleState = LifecycleOperationProvider
                 .associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN);
     }
 
     @Override
     public void executeLifecycleEvent(LifecycleState nextState, String uuid, String action, String user,
             Object resource) throws LifecycleException {
-        this.lifecycleState = ManagedLifecycleUtil.executeLifecycleEvent(nextState, uuid, action, user, this);
+        this.lifecycleState = LifecycleOperationProvider.executeLifecycleEvent(nextState, uuid, action, user, this);
     }
 
     @Override
-    public void getCurrentLifecycleState(String uuid) throws LifecycleException {
-        this.lifecycleState = ManagedLifecycleUtil.getCurrentLifecycleState(uuid);
-    }
+    public void setCurrentLifecycleState(String uuid) throws LifecycleException {
+        this.lifecycleState = LifecycleOperationProvider.getCurrentLifecycleState(uuid);
+    }*/
 
     @Override
     public void dissociateLifecycle(String uuid) throws LifecycleException {
-        ManagedLifecycleUtil.dissociateLifecycle(uuid);
+        ManagedLifecycle.super.dissociateLifecycle(uuid);
         this.lifecycleState = null;
     }
 

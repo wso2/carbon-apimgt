@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.core.internal;
+package org.wso2.carbon.apimgt.lifecycle.manager.internal;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -26,12 +26,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.services.LifecycleManagementService;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.services.LifecycleManagementServiceImpl;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleUtils;
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.LifecycleConfigBuilder;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.model.LifecycleConfig;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.utils.LifecycleMgtDBUtil;
+import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleUtils;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 
 /**
@@ -47,7 +46,7 @@ public class LifecycleServiceComponent   {
 
     @Activate
     public void start(BundleContext bundleContext) {
-        bundleContext.registerService(LifecycleManagementService.class, new LifecycleManagementServiceImpl(), null);
+        LifecycleUtils.initiateLCMap();
         if (log.isDebugEnabled()) {
             log.debug("Lifecycle service is activated.");
         }
@@ -73,13 +72,12 @@ public class LifecycleServiceComponent   {
     )
     protected void onJNDIReady(JNDIContextManager service) {
         try {
+            LifecycleConfigBuilder.build(LifecycleConfig::new);
             LifecycleMgtDBUtil.initialize();
-            LifecycleUtils.initiateLCMap();
+
 
         } catch (LifecycleManagerDatabaseException e) {
             log.error("Failed to initialize database. " + e);
-        } catch (LifecycleException e) {
-            log.error("Failed to initialize lifecycle map for all tenants. " + e);
         }
     }
 

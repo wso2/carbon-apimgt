@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager.interfaces;
+package org.wso2.carbon.apimgt.lifecycle.manager;
 
 
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;

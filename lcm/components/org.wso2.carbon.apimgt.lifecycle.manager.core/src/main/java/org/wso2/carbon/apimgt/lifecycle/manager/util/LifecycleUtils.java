@@ -15,12 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.core.util;
+package org.wso2.carbon.apimgt.lifecycle.manager.util;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.LifecycleConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleConfigBean;
@@ -31,10 +36,13 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.XMLConstants;
@@ -45,6 +53,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * This utility class provides methods to perform CRUD operations for lifecycle configurations.
@@ -70,6 +83,7 @@ public class LifecycleUtils {
         }
 
         validateLifecycleContent(lcConfig);
+        validateSCXMLDataModel(getLifecycleElement(lcConfig));
         try {
             if (!checkLifecycleExist(lcName)) {
                 LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
@@ -176,20 +190,64 @@ public class LifecycleUtils {
     }
 
     /**
-     * Initiates the static tenant specific lifecycle map during startup.
+     * Initiates the static lifecycle map during startup.
      *
      * @throws LifecycleException
      */
-    public static void initiateLCMap() throws LifecycleException {
+    public static void initiateLCMap() {
         lifecycleMap = new ConcurrentHashMap<>();
-        try {
-            LifecycleConfigBean[] lifecycleConfigBeen = getLCMgtDAOInstance().getAllLifecycleConfigs();
-            for (LifecycleConfigBean lifecycleConfigBean : lifecycleConfigBeen) {
-                lifecycleMap.put(lifecycleConfigBean.getLcName(), lifecycleConfigBean.getLcContent());
-            }
-        } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error while getting Lifecycle list for all tenants", e);
+        String defaultLifecycleConfigLocation = getDefaltLifecycleConfigLocation();
+        File defaultLifecycleConfigDirectory = new File(defaultLifecycleConfigLocation);
+        if (!defaultLifecycleConfigDirectory.exists()) {
+            return;
         }
+
+        final FilenameFilter filenameFilter = (dir, name) -> name.endsWith(".xml");
+
+        File[] lifecycleConfigFiles = defaultLifecycleConfigDirectory.listFiles(filenameFilter);
+        if (lifecycleConfigFiles == null || lifecycleConfigFiles.length == 0) {
+            return;
+        }
+
+        for (File lifecycleConfigFile : lifecycleConfigFiles) {
+            String fileName = FilenameUtils.removeExtension(lifecycleConfigFile.getName());
+            //here configuration file name should be same as aspect name
+            String fileContent = null;
+
+            try {
+                fileContent = FileUtils.readFileToString(lifecycleConfigFile);
+            } catch (IOException e) {
+                String msg = String.format("Error while reading lifecycle config file %s ", fileName);
+                log.error(msg, e);
+                    /* The exception is not thrown, because if we throw the error, the for loop will be broken and
+                    other files won't be read */
+            }
+            if ((fileContent != null) && !fileContent.isEmpty()) {
+                try {
+                    Document lcConfig = getLifecycleElement(fileContent);
+                    Element element = (Element) lcConfig
+                            .getElementsByTagName(LifecycleConstants.ASPECT).item(0);
+                    String lcName = element.getAttribute("name");
+                    if (fileName.equalsIgnoreCase(lcName)) {
+                        validateLifecycleContent(fileContent);
+                        validateSCXMLDataModel(lcConfig);
+                        getLifecycleMapInstance().put(lcName, fileContent);
+                    } else {
+                        String msg = String
+                                .format("Configuration file name %s not matched with lifecycle name %s ", fileName,
+                                        lcName);
+                        log.error(msg);
+                            /* The error is not thrown, because if we throw the error, the for loop will be broken and
+                            other files won't be read */
+                    }
+                } catch (LifecycleException e) {
+                    String msg = String.format("Error while adding lifecycle %s ", fileName);
+                    log.error(msg, e);
+
+                }
+            }
+        }
+
     }
 
     /**
@@ -248,8 +306,46 @@ public class LifecycleUtils {
         return true;
     }
 
+    private static void validateSCXMLDataModel(Document lcConfig) throws LifecycleException {
+        NodeList stateList = lcConfig.getElementsByTagName(LifecycleConstants.STATE_TAG);
+
+        for (int i = 0; i < stateList.getLength(); i++) {
+            List<String> targetValues = new ArrayList<>();
+            if (stateList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element state = (Element) stateList.item(i);
+                String stateName = state.getAttribute("id");
+                NodeList targetList = state.getElementsByTagName(LifecycleConstants.TRANSITION_ATTRIBUTE);
+                for (int targetCount = 0; targetCount < targetList.getLength(); targetCount++) {
+                    if (targetList.item(targetCount).getNodeType() == Node.ELEMENT_NODE) {
+                        Element target = (Element) targetList.item(targetCount);
+                        targetValues.add(target.getAttribute(LifecycleConstants.TARGET_ATTRIBUTE));
+                    }
+                }
+                XPath xPathInstance = XPathFactory.newInstance().newXPath();
+                String xpathQuery = "//state[@id='" + stateName + "']//@forTarget";
+                try {
+                    XPathExpression exp = xPathInstance.compile(xpathQuery);
+                    NodeList forTargetNodeList = (NodeList) exp.evaluate(state, XPathConstants.NODESET);
+                    for (int forTargetCount = 0; forTargetCount < forTargetNodeList.getLength(); forTargetCount++) {
+                        if (forTargetNodeList.item(forTargetCount).getNodeType() == Node.ATTRIBUTE_NODE) {
+                            Attr attr = (Attr) forTargetNodeList.item(forTargetCount);
+                            if (!"".equals(attr.getValue()) && !targetValues.contains(attr.getValue())) {
+                                throw new LifecycleException("forTarget attribute value " + attr.getValue()
+                                        + " does not included as target state in the state object " + stateName);
+                            }
+                        }
+                    }
+                } catch (XPathExpressionException e) {
+                    throw new LifecycleException("Error while reading for target attributes ", e);
+                }
+
+            }
+        }
+
+    }
+
     /**
-     * Method used to get schema validaor object for lifecycle configurations.
+     * Method used to get schema validator object for lifecycle configurations.
      * @param schemaPath               Schema path in the server extracted directory.
      * @throws LifecycleException
      */
@@ -297,5 +393,9 @@ public class LifecycleUtils {
 
     private static LifecycleMgtDAO getLCMgtDAOInstance() {
         return LifecycleMgtDAO.getInstance();
+    }
+
+    private static String getDefaltLifecycleConfigLocation() {
+        return Utils.getCarbonHome() + File.separator + "resources" + File.separator + "lifecycles";
     }
 }

@@ -16,20 +16,23 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager.impl.util;
+package org.wso2.carbon.apimgt.lifecycle.manager.util;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.carbon.apimgt.lifecycle.manager.Executor;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.AvailableTransitionBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.PermissionBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.LifecycleConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleEventManager;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.beans.AvailableTransitionBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.beans.CustomCodeBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.beans.InputBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.beans.PermissionBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.interfaces.Executor;
+import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
 import org.xml.sax.SAXException;
 
@@ -61,11 +64,10 @@ public class LifecycleOperationUtil {
      * @param lcName                        LC name which associates with the resource.
      * @param initialState                  Initial lifecycle state to be set.
      * @param user                          The user who invoked the action. This will be used for auditing purposes.
-     * @return                              Object of added life cycle state.
+     * @return Object of added life cycle state.
      * @throws LifecycleException  If failed to associate life cycle with asset.
      */
-    public static String associateLifecycle (String lcName, String initialState, String user) throws
-            LifecycleException {
+    public static String associateLifecycle(String lcName, String initialState, String user) throws LifecycleException {
         LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
         return lifecycleEventManager.associateLifecycle(lcName, initialState, user);
     }
@@ -80,8 +82,8 @@ public class LifecycleOperationUtil {
      *                                  auditing purposes.
      * @throws LifecycleException       If exception occurred while execute life cycle state change.
      */
-    public static void changeLifecycleState (String currentState, String requiredState, String id, String
-            user) throws LifecycleException {
+    public static void changeLifecycleState(String currentState, String requiredState, String id, String user)
+            throws LifecycleException {
         LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
         lifecycleEventManager.changeLifecycleState(currentState, requiredState, id, user);
     }
@@ -98,10 +100,29 @@ public class LifecycleOperationUtil {
     }
 
     /**
+     * Get current life cycle state object.
+     *
+     * @return {@code LifecycleState} object represent current life cycle.
+     */
+    public static LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException {
+        LifecycleState currentLifecycleState = new LifecycleState();
+        LifecycleStateBean lifecycleStateBean = getLCStateDataFromID(uuid);
+        String lcName = lifecycleStateBean.getLcName();
+        String lcContent;
+        lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        currentLifecycleState.setLcName(lcName);
+        currentLifecycleState.setLifecycleId(uuid);
+        currentLifecycleState.setState(lifecycleStateBean.getPostStatus());
+        populateItems(currentLifecycleState, lcContent);
+        setCheckListItemData(currentLifecycleState, lifecycleStateBean.getCheckListData());
+        return currentLifecycleState;
+    }
+
+    /**
      * This method need to call for each and event life cycle state changes.
      *
      * @param uuid                              State uuid which maps with the asset.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException      If exception occurred while life cycle state change.
      */
     public static LifecycleStateBean getLCStateDataFromID(String uuid) throws LifecycleException {
@@ -109,12 +130,87 @@ public class LifecycleOperationUtil {
         return lifecycleEventManager.getLifecycleStateData(uuid);
     }
 
+    public static void changeCheckListItem(String uuid, String currentState, String checkListItemName, boolean value)
+            throws LifecycleException {
+        new LifecycleEventManager().changeCheckListItemData(uuid, currentState, checkListItemName, value);
+    }
+
+    /**
+     * This method provides set of operations performed to a particular lifecycle id.
+     *
+     * @param uuid  Lifecycle Id which requires history.
+     * @return  List of lifecycle history objects.
+     * @throws LifecycleException
+     */
+    public static List<LifecycleHistoryBean> getLifecycleHistoryFromId(String uuid) throws LifecycleException {
+        LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
+        return lifecycleEventManager.getLifecycleHistoryFromId(uuid);
+    }
+
+    /**
+     * This method provides set of lifecycle ids in a particular state.
+     * @param state`
+     * @return  List of lifecycle ids in the given state.
+     * @throws LifecycleException
+     */
+    public static List<String> getLifecycleIds(String state) throws LifecycleException {
+        LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
+        return lifecycleEventManager.getLifecycleIds(state);
+    }
+
+    /**
+     * This method add state data like, transition inputs, custom executors etc to the lifecycle state object.
+     *
+     * @param lifecycleState                lc state object which is being populated.
+     * @param lcConfig                      lc configuration.
+     * @throws LifecycleException           If failed to get lifecycle list.
+     */
+    public static void populateItems(LifecycleState lifecycleState, String lcConfig) throws LifecycleException {
+
+        String lcState = lifecycleState.getState();
+        Document document = getLifecycleElement(lcConfig);
+        lifecycleState.setInputBeanList(populateTransitionInputs(document, lcState));
+        lifecycleState.setCustomCodeBeanList(populateTransitionExecutors(document, lcState));
+        lifecycleState.setAvailableTransitionBeanList(populateAvailableStates(document, lcState));
+        lifecycleState.setPermissionBeanList(populateTransitionPermission(document, lcState));
+        lifecycleState.setCheckItemBeanList(populateCheckItems(document, lcState));
+
+    }
+
+    public static List<CheckItemBean> populateCheckItems(Document lcConfig, String lcState) throws LifecycleException {
+        List<CheckItemBean> checkItemBeanList = new ArrayList<>();
+        try {
+            XPath xPathInstance = XPathFactory.newInstance().newXPath();
+            String xpathQuery = buildXPathQuery(lcState, LifecycleConstants.LIFECYCLE_CHECKLIST_ITEM_ATTRIBUTE);
+            XPathExpression exp = xPathInstance.compile(xpathQuery);
+
+            NodeList nodeList = (NodeList) exp.evaluate(lcConfig, XPathConstants.NODESET);
+            if (nodeList.getLength() > 0) {
+                NodeList checkItemsNodeList = nodeList.item(0).getChildNodes();
+                for (int i = 0; i < checkItemsNodeList.getLength(); i++) {
+                    Node checkItemNode = checkItemsNodeList.item(i);
+                    if (checkItemNode.getNodeType() == Node.ELEMENT_NODE) {
+                        CheckItemBean checkItemBean = new CheckItemBean();
+                        Element checkItemElement = (Element) checkItemNode;
+                        checkItemBean.setName(checkItemElement.getAttribute(LifecycleConstants.NAME));
+                        checkItemBean.setEvents(Arrays.asList(
+                                (checkItemElement.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE)).split(",")));
+                        checkItemBeanList.add(checkItemBean);
+                    }
+                }
+            }
+        } catch (XPathExpressionException e) {
+            throw new LifecycleException("Error while populating checl list items for lifecycle state : " + lcState, e);
+        }
+        return checkItemBeanList;
+    }
+
     /**
      * This method is used to read lifecycle config and provide input element details for a particular state..
      *
      * @param lcConfig                          Lifecycle config document element.
      * @param lcState                           State which requires information.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static List<InputBean> populateTransitionInputs(Document lcConfig, String lcState)
@@ -139,7 +235,7 @@ public class LifecycleOperationUtil {
                                         Boolean.parseBoolean(("required")), inputNode.getAttribute("label"),
                                         inputNode.getAttribute("placeHolder"), inputNode.getAttribute("tooltip"),
                                         inputNode.getAttribute("regex"), inputNode.getAttribute("values"),
-                                        ((Element) inputsNode).getAttribute(LifecycleConstants.FOR_EVENT_ATTRIBUTE));
+                                        ((Element) inputsNode).getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                                 inputBeans.add(inputBean);
 
                             }
@@ -148,8 +244,8 @@ public class LifecycleOperationUtil {
                 }
             }
         } catch (XPathExpressionException e) {
-            throw new LifecycleException(
-                    "Error while populating transition inputs for lifecycle state : " + lcState, e);
+            throw new LifecycleException("Error while populating transition inputs for lifecycle state : " + lcState,
+                    e);
         }
         return inputBeans;
     }
@@ -159,7 +255,7 @@ public class LifecycleOperationUtil {
      *
      * @param lcConfig                          Lifecycle config document element.
      * @param lcState                           State which requires information.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static List<CustomCodeBean> populateTransitionExecutors(Document lcConfig, String lcState)
@@ -191,15 +287,15 @@ public class LifecycleOperationUtil {
                         }
                         customCodeBean.setClassObject(
                                 loadCustomExecutors(executionNode.getAttribute("class"), paramNameValues));
-                        customCodeBean.setEventName(executionNode.getAttribute(LifecycleConstants.FOR_EVENT_ATTRIBUTE));
+                        customCodeBean
+                                .setEventName(executionNode.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                         customCodeBeansList.add(customCodeBean);
                     }
                 }
             }
 
         } catch (XPathExpressionException e) {
-            throw new LifecycleException(
-                    "Error while reading transition executors for lifecycle state: " + lcState, e);
+            throw new LifecycleException("Error while reading transition executors for lifecycle state: " + lcState, e);
         }
         return customCodeBeansList;
     }
@@ -209,7 +305,7 @@ public class LifecycleOperationUtil {
      *
      * @param lcConfig                          Lifecycle config document element.
      * @param lcName                            Name of lifecycle.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static String getInitialState(Document lcConfig, String lcName) throws LifecycleException {
@@ -220,8 +316,7 @@ public class LifecycleOperationUtil {
             NodeList nodeList = (NodeList) exp.evaluate(lcConfig, XPathConstants.NODESET);
             return ((Element) nodeList.item(0)).getAttribute(LifecycleConstants.LIFECYCLE_INITIAL_STATE_ATTRIBUTE);
         } catch (XPathExpressionException e) {
-            throw new LifecycleException("Error while getting first state for lifecycle state:" + " " + lcName,
-                    e);
+            throw new LifecycleException("Error while getting first state for lifecycle state:" + " " + lcName, e);
         }
     }
 
@@ -230,7 +325,7 @@ public class LifecycleOperationUtil {
      *
      * @param lcConfig                          Lifecycle config document element.
      * @param lcState                           State which requires information.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static List<AvailableTransitionBean> populateAvailableStates(Document lcConfig, String lcState)
@@ -256,8 +351,7 @@ public class LifecycleOperationUtil {
             }
 
         } catch (XPathExpressionException e) {
-            throw new LifecycleException(
-                    "Error while reading transition executors for lifecycle state: " + lcState, e);
+            throw new LifecycleException("Error while reading transition executors for lifecycle state: " + lcState, e);
         }
         return availableTransitionBeanList;
     }
@@ -267,7 +361,7 @@ public class LifecycleOperationUtil {
      *
      * @param lcConfig                          Lifecycle config document element.
      * @param lcState                           State which requires information.
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static List<PermissionBean> populateTransitionPermission(Document lcConfig, String lcState)
@@ -286,7 +380,7 @@ public class LifecycleOperationUtil {
                         PermissionBean permissionBean = new PermissionBean();
                         Element permissionElement = (Element) permissionNodeList.item(i);
                         permissionBean
-                                .setForEvent(permissionElement.getAttribute(LifecycleConstants.FOR_EVENT_ATTRIBUTE));
+                                .setForEvent(permissionElement.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                         if (!"".equals(permissionElement.getAttribute(LifecycleConstants.LIFECYCLE_ROLES_ATTRIBUTE))) {
                             permissionBean.setRoles(Arrays.asList(
                                     permissionElement.getAttribute(LifecycleConstants.LIFECYCLE_ROLES_ATTRIBUTE)
@@ -298,8 +392,8 @@ public class LifecycleOperationUtil {
                 }
             }
         } catch (XPathExpressionException e) {
-            throw new LifecycleException(
-                    "Error while reading transition permissions for lifecycle state: " + lcState, e);
+            throw new LifecycleException("Error while reading transition permissions for lifecycle state: " + lcState,
+                    e);
         }
         return permissionBeanList;
     }
@@ -309,7 +403,7 @@ public class LifecycleOperationUtil {
      *
      * @param lcState                           State which requires information.
      * @param dataElementName                   Data element (for ex : data name="transitionExecution")
-     * @return                                  Lifecycle state bean with state data.
+     * @return Lifecycle state bean with state data.
      * @throws LifecycleException
      */
     public static String buildXPathQuery(String lcState, String dataElementName) {
@@ -322,7 +416,7 @@ public class LifecycleOperationUtil {
      *
      * @param className                         Custom executor class provided in lifecycle config for state change.
      * @param parameterMap                      Parameters provided to executor class.
-     * @return                                  Execution class object.
+     * @return Execution class object.
      * @throws LifecycleException
      */
     public static Executor loadCustomExecutors(String className, Map parameterMap) throws LifecycleException {
@@ -343,7 +437,7 @@ public class LifecycleOperationUtil {
      * This method is used to read lifecycle config and provide permission details associated with each state change.
      *
      * @param lcConfig                          Lifecycle configuration element.
-     * @return                                  Document element for the lifecycle confi
+     * @return Document element for the lifecycle confi
      * @throws LifecycleException
      */
     public static Document getLifecycleElement(String lcConfig) throws LifecycleException {
@@ -356,6 +450,14 @@ public class LifecycleOperationUtil {
             return document;
         } catch (SAXException | IOException | ParserConfigurationException e) {
             throw new LifecycleException("Error while building lifecycle config document element", e);
+        }
+    }
+
+    public static void setCheckListItemData(LifecycleState lifecycleState, Map<String, Boolean> checkListItemData) {
+        for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
+            if (checkListItemData.containsKey(checkItemBean.getName())) {
+                checkItemBean.setValue(checkListItemData.get(checkItemBean.getName()));
+            }
         }
     }
 }
