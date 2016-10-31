@@ -161,7 +161,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void updateAPI(API api) throws APIManagementException {
         try {
-            DAOFactory.getApiDAO().updateAPI(api.getID(), api);
+            DAOFactory.getApiDAO().updateAPI(api.getId(), api);
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
@@ -183,7 +183,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void changeAPIStatus(API api, APIStatus status, String userId)
             throws APIManagementException {
         try {
-            DAOFactory.getApiDAO().changeLifeCylceStatus(api.getID(), status.getStatus());
+            DAOFactory.getApiDAO().changeLifeCylceStatus(api.getId(), status.getStatus());
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while changing the API status - " + api.getName(), e, log);
         }

@@ -39,17 +39,16 @@ public final class APISubscription {
         return application;
     }
 
-    public String getAPIID() {
+    public String getApiId() {
         return apiId;
     }
 
-
-    public void setID(String id) {
-        this.id = id;
+    public String getId() {
+        return id;
     }
 
-    public String getID() {
-        return id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
