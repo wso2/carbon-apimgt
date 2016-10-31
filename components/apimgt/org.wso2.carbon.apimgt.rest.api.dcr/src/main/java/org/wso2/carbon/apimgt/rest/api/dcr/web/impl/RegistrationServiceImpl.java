@@ -146,11 +146,14 @@ public class RegistrationServiceImpl implements RegistrationService {
                             applicationName, e);
                 }
                 //Retrieving the existing application
+                boolean isNewlyCreated;
                 if (appServiceProvider != null) {
                     returnedAPP = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
+                    isNewlyCreated = false;
                 } else {
                     //create a new application if the application doesn't exists.
                     returnedAPP = this.createApplication(applicationName, appRequest, grantTypes);
+                    isNewlyCreated = true;
                 }
                 //ReturnedAPP is null
                 if (returnedAPP == null) {
@@ -166,7 +169,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                     if (log.isDebugEnabled()) {
                         log.debug("OAuth app " + profile.getClientName() + " creation successful.");
                     }
-                    response = Response.status(Response.Status.OK).entity(returnedAPP).build();
+                    if(isNewlyCreated){
+                        response = Response.status(Response.Status.CREATED).entity(returnedAPP).build();
+                    } else {
+                        response = Response.status(Response.Status.OK).entity(returnedAPP).build();
+                    }
                 }
             } else {
                 String errorMsg = "Logged in user '" + authUserName + "' and application owner '" +
