@@ -29,12 +29,10 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
-import org.wso2.carbon.apimgt.core.models.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -181,24 +179,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
 
     /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api    The API whose status to be updated
-     * @param status New status of the API
-     * @param userId User performing the API state change
-     * @throws APIManagementException on error
-     */
-    @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId)
-            throws APIManagementException {
-        try {
-            getApiDAO().changeLifeCycleStatus(api.getId(), status.getStatus());
-        } catch (APIManagementDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while changing the API status - " + api.getName(), e, log);
-        }
-    }
-
-    /**
      * This method used to Update the status of API
      *
      * @param api
@@ -211,34 +191,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public boolean updateAPIStatus(API api, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
-        if (deprecateOldVersions) {
-            try {
-                List<API> apiList = getApiDAO().getListOfAPIsFromIdentifier(api.getName(), api.getProvider());
-                for (API api1 : apiList) {
-                    getApiDAO().changeLifeCycleStatus(api1.getId(), APIStatus.DEPRECATED.getStatus());
-                }
-                return true;
-            } catch (APIManagementDAOException e) {
-                APIUtils.logAndThrowException("Couldn't deprecate older versions of API " + api.getName(), log);
-                return false;
-            }
-        }
-        if (makeKeysForwardCompatible) {
-            try {
-                List<APISubscription> apiSubscriptionList = getApiSubscriptionDAO().getAllAPISubscriptionsByAPI(api
-                                .getName(), api.getProvider(), SubscriptionStatus.UNBLOCKED, SubscriptionStatus.BLOCKED,
-                        SubscriptionStatus.PROD_ONLY_BLOCKED, SubscriptionStatus.REJECTED);
-                for (APISubscription apiSubscription : apiSubscriptionList) {
-                    apiSubscription.setApiId(api.getId());
-                    getApiSubscriptionDAO().addAPISubscription(apiSubscription);
-                }
-            } catch (APIManagementDAOException e) {
-                APIUtils.logAndThrowException("Couldn't get list of Subscriptions with name" + api.getName(), log);
-                return false;
-            }
-        }
         try {
-            getApiDAO().changeLifeCycleStatus(api.getId(), status);
+            getApiDAO().changeLifeCycleStatus(api.getId(), status, deprecateOldVersions, makeKeysForwardCompatible);
             return true;
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), log);
