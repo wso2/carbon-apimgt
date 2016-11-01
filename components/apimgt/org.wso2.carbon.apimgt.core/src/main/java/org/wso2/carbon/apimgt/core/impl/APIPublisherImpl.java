@@ -339,7 +339,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void deleteAPI(String identifier) throws APIManagementException {
-
+        try {
+            apiDAO.deleteAPI(identifier);
+            APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
+        }
     }
 
     /**
@@ -361,7 +366,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId     API Identifier
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
+     * @param appId     Application Id
      * @return int value with subscription id
      * @throws APIManagementException If failed to update subscription status
      */

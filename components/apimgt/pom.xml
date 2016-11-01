@@ -33,7 +33,7 @@
     <artifactId>apimgt</artifactId>
     <packaging>pom</packaging>
     <modules>
-		<module>org.wso2.carbon.apimgt.core</module>
+	<module>org.wso2.carbon.apimgt.core</module>
         <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
         <module>org.wso2.carbon.apimgt.rest.api.store</module>
         <module>org.wso2.carbon.apimgt.indexing</module>        
