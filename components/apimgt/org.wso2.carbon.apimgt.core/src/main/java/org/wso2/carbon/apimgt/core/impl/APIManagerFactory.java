@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * 
- *  Creates API Producers and API Consumers.
+ * Creates API Producers and API Consumers.
  *
  */
 public class APIManagerFactory {
@@ -67,10 +67,15 @@ public class APIManagerFactory {
     }
 
     private APIConsumer newConsumer(String username) throws APIManagementException {
-//        if (username.equals(ANONYMOUS_USER)) {
-//            username = null;
-//        }
-//        return new UserAwareAPIConsumer(username, new APIMRegistryServiceImpl());
+        // if (username.equals(ANONYMOUS_USER)) {
+        // username = null;
+        // }
+        try {
+            return new UserAwareAPIConsumer(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+                    DAOFactory.getAPISubscriptionDAO());
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Couldn't Create API Consumer", log);
+        }
         return null;
 
     }
@@ -134,13 +139,13 @@ public class APIManagerFactory {
     }
 
     private void cleanupSilently(APIManager manager) {
-//        if (manager != null) {
-//            try {
-//                manager.cleanup();
-//            } catch (APIManagementException ignore) {
-//
-//            }
-//        }
+        // if (manager != null) {
+        // try {
+        // manager.cleanup();
+        // } catch (APIManagementException ignore) {
+        //
+        // }
+        // }
     }
 
     private static class APIManagerCache<T> extends LRUCache<String, T> {
@@ -153,11 +158,11 @@ public class APIManagerFactory {
 
         protected void handleRemovableEntry(Map.Entry<String, T> entry) {
             log.warn(" To be implemented ");
-//            try {
-//                ((APIManager) entry.getValue()).cleanup();
-//            } catch (APIManagementException e) {
-//                log.warn("Error while cleaning up APIManager instance", e);
-//            }
+            // try {
+            // ((APIManager) entry.getValue()).cleanup();
+            // } catch (APIManagementException e) {
+            // log.warn("Error while cleaning up APIManager instance", e);
+            // }
         }
     }
 }

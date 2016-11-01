@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
@@ -39,9 +40,9 @@ public class APIMappingUtil {
     public static APIListDTO toAPIListDTO(APISummaryResults apisResult) {
         APIListDTO apiListDTO = new APIListDTO();
         apiListDTO.setCount(apisResult.getApiSummaryList().size());
-        //apiListDTO.setNext(next);
-        //apiListDTO.setPrevious(previous);
-        apiListDTO.setList(toAPIInfo(apisResult.getApiSummaryList()));        
+        // apiListDTO.setNext(next);
+        // apiListDTO.setPrevious(previous);
+        apiListDTO.setList(toAPIInfo(apisResult.getApiSummaryList()));
         return apiListDTO;
     }
 
@@ -62,10 +63,28 @@ public class APIMappingUtil {
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setStatus(apiSummary.getStatus());
             apiInfo.setVersion(apiSummary.getVersion());
-            apiInfoList.add(apiInfo);            
+            apiInfoList.add(apiInfo);
         }
         return apiInfoList;
     }
 
-       
+    /**
+     * Converts {@link API} to a {@link org.wso2.carbon.apimgt.rest.api.store.dto.API}.
+     * 
+     * @param api
+     * @return API DTO
+     */
+    public static org.wso2.carbon.apimgt.rest.api.store.dto.API toAPIDTO(API api) {
+        org.wso2.carbon.apimgt.rest.api.store.dto.API apiDTO = new org.wso2.carbon.apimgt.rest.api.store.dto.API();
+        apiDTO.setId(api.getId());
+        apiDTO.setName(api.getName());
+        apiDTO.setProvider(api.getProvider());
+        apiDTO.setStatus(api.getStatus());
+        apiDTO.setVersion(api.getVersion());
+        apiDTO.setContext(api.getContext());
+        apiDTO.setDescription(api.getDescription());
+
+        return apiDTO;
+    }
+
 }
