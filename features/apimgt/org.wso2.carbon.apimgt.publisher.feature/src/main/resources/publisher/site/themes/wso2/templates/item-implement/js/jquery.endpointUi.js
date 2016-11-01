@@ -79,10 +79,12 @@
 
     Plugin.prototype = {
 
-        init: function() {  
+        init: function() {
             this.render();
             if(this._get_production_endpoint_type())
                 this._set_selected_ep(this._get_production_endpoint_type());
+            if(ws)
+                this._set_selected_ep("ws");
             this.attach_events();
         },        
 
@@ -190,7 +192,7 @@
                     this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
                 }
 
-                this.config.endpoint_type = "load_balance";                
+                this.config.endpoint_type = "load_balance";
                 this.config.algoCombo = "org.apache.synapse.endpoints.algorithms.RoundRobin";
                 this.config.algoClassName = "";
                 this.config.sessionManagement = "";
@@ -259,6 +261,8 @@
         },     
 
         get_endpoint_config: function(){
+            if(ws=="true")
+                this.config.endpoint_type = "ws";
             var config = jQuery.extend({}, this.config);
             //sanitize
             delete config.invalid;

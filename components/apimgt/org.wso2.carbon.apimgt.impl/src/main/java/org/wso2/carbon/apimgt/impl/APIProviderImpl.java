@@ -2548,7 +2548,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-
+            String isWs = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET);
+            String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
             //Delete the dependencies associated  with the api artifact
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
 
@@ -2582,13 +2583,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = new API(identifier);
             api.setAsDefaultVersion(Boolean.parseBoolean(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-
+            api.setWS(isWs);
+            api.setContext(context_val);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
 
                 api.setInSequence(inSequence); // need to remove the custom sequences
                 api.setOutSequence(outSequence);
+
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
                 removeFromGateway(api);
                 if (api.isDefaultVersion()) {

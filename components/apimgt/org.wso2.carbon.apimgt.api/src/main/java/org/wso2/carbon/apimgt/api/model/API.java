@@ -39,6 +39,7 @@ public class API implements Serializable{
     private String sandboxUrl;
     private String wsdlUrl;
     private String wadlUrl;
+    private boolean isWebsocketApi;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -51,7 +52,7 @@ public class API implements Serializable{
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-
+    public static final String WEB_SOCKET = "ws";
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
     private boolean apiResourcePatternsChanged;
@@ -88,12 +89,12 @@ public class API implements Serializable{
     private boolean advertiseOnly;
     private String apiOwner;
     private String redirectURL;
-    
+
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
-    
+
     private String responseCache;
     private int cacheTimeout;
 
@@ -194,7 +195,7 @@ public class API implements Serializable{
     public void setApiOwner(String apiOwner) {
         this.apiOwner = apiOwner;
     }
-    
+
     public String getRedirectURL() {
         return redirectURL;
     }
@@ -210,7 +211,7 @@ public class API implements Serializable{
     public APIIdentifier getId() {
         return id;
     }
-    
+
 	public String getTransports() {
         return transports;
     }
@@ -250,7 +251,7 @@ public class API implements Serializable{
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
         this.businessOwnerEmail = businessOwnerEmail;
     }
-   
+
 
     public String getDescription() {
         return description;
@@ -362,7 +363,7 @@ public class API implements Serializable{
     public void removeAllTiers(){
         availableTiers.clear();
     }
-    
+
     /**
      * Removes all Policies from the API object.
      */
@@ -440,11 +441,11 @@ public class API implements Serializable{
     public void setVisibleRoles(String visibleRoles) {
         this.visibleRoles = visibleRoles;
     }
-    
+
     public String getVisibleTenants() {
     	return visibleTenants;
     }
-    
+
     public void setVisibleTenants(String visibleTenants) {
     	this.visibleTenants = visibleTenants;
     }
@@ -464,7 +465,7 @@ public class API implements Serializable{
     public void setApiResourcePatternsChanged(boolean apiResourcePatternsChanged) {
         this.apiResourcePatternsChanged = apiResourcePatternsChanged;
     }
-    
+
     /**
   	 * @return the endpointUTUsername
   	 */
@@ -492,7 +493,7 @@ public class API implements Serializable{
   	public void setEndpointUTPassword(String endpointUTPassword) {
   		this.endpointUTPassword = endpointUTPassword;
   	}
-  	
+
  	/**
  	 * @return the endpointSecured
  	 */
@@ -516,13 +517,13 @@ public class API implements Serializable{
      * @param endpointAuthDigest the endpointAuthDigest to set
      */
     public void setEndpointAuthDigest(boolean endpointAuthDigest) { this.endpointAuthDigest = endpointAuthDigest; }
- 	
+
     public String getInSequence() {
  		return inSequence;
  	}
 
     /**
-     * 
+     *
      * @param inSeq  insequence for the API
      */
  	public void setInSequence(String inSeq) {
@@ -534,13 +535,13 @@ public class API implements Serializable{
   	}
 
      /**
-      * 
+      *
       * @param outSeq outSequence for the API
       */
   	public void setOutSequence(String outSeq) {
   		this.outSequence = outSeq;
   	}
-  	
+
   	/**
   	 * remove custom sequences from api object
   	 */
@@ -581,7 +582,7 @@ public class API implements Serializable{
 	public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
 		this.subscriptionAvailableTenants = subscriptionAvailableTenants;
 	}
-    
+
     public String getEndpointConfig() {
         return endpointConfig;
     }
@@ -666,5 +667,13 @@ public class API implements Serializable{
         this.apiLevelPolicy = apiLevelPolicy;
     }
 
+    public boolean isWS() {
+        return isWebsocketApi;
+    }
 
+    public void setWS(String websocket) {
+        if(WEB_SOCKET.equalsIgnoreCase(websocket) || "true".equalsIgnoreCase(websocket)) {
+            isWebsocketApi = true;
+        }
+    }
 }

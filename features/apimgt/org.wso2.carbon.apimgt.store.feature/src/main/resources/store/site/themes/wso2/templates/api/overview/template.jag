@@ -70,6 +70,11 @@
 	    	            data-clipboard-text="<%=environmenturls[urltype]%><% if (useDefaultContext == true) { %><%=encode.forHtmlAttribute(api.context)%><%}%>"
 	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=encode.forHtml(environmenturls[urltype])%>
 	    	                <% if (useDefaultContext == true) { %><%=encode.forHtml(api.context)%><%}%>
+	    	                <%if(api.ws != "true"){%>
+                                <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
+                            <%}else{%>
+                                ws://localhost:9099<%=encode.forHtml(api.context)%>
+                            <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");

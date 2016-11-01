@@ -1,4 +1,4 @@
-<% jagg.template("item-design", function(inputs, outputs, jagg) { 
+<% jagg.template("item-design", function(inputs, outputs, jagg) {
     var api = outputs.api;
     var site = require("/site/conf/site.json");
     var enableRestrictByRoles = site.enableRestrictByRoles;
@@ -22,6 +22,16 @@
       { "value": "<%=i18n.localize("Application User")%>", "text":"<%=i18n.localize("Application User")%>"},
       { "value": "<%=i18n.localize("Application & Application User")%>", "text":"<%=i18n.localize("Application & Application User")%>"}
     ];    
+    var ws = false;
+            <%  if(session.get("ws") || ( api && api.ws )){%>
+                ws=true;
+                <%if (session)
+                var ws_session = session.get("ws");
+				if (api && api.ws){
+				ws_session = api.ws;
+				}
+                                   
+            }%>
 </script>  
 <div id="item-add">
 <%
@@ -31,24 +41,24 @@
 
     var implement_wlabel = "";
     var manage_wlabel = "";
-    if(!api){ 
+    if (!api) {
         var design_w_link = '#'; 
         var implement_w_link = '#'; 
         var manage_w_link = '#'; 
     }
 
     var implement_wlabel = "";    
-    if(api && api.implementation != null){
+    if (api && api.implementation != null) {
         implement_wlabel = "completed"
     }
-    else{
+    else {
         implement_w_link = '#';
     }
 
     var manage_wlabel = "";
-    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+    if (api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")) {
         manage_wlabel = "completed";      
-    }else{
+    } else {
         var manage_w_link = '#';        
     }         
 %>
@@ -98,6 +108,7 @@
 					<form class="form-horizontal apim-form" method="POST"
 					  id="design_form"
 					  enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
+                          <input type="hidden" name="ws" value="<%= encode.forHtmlAttribute(ws_session) %>" />
 					<div class="panel-group accordion">
                     	<div class="panel panel-default">
 							<div class="panel-heading">
@@ -294,6 +305,7 @@
 								</div>
 							</div>
 						</div>
+                        <%if(!ws_session && !( api && api.ws )){%>
 							<div class="panel panel-default">
 								<div class="panel-heading">
 									<h4 class="panel-title">
@@ -354,11 +366,13 @@
 											<input type = "hidden" name = "techOwner" value = "<%=encode.forHtmlAttribute(api.techOwner)%>" />
 											<input type = "hidden" name = "techOwnerMail" value = "<%=encode.forHtmlAttribute(api.techOwnerMail)%>" />
 										<%}%>
-										<input type="hidden" name="action" value="design" />
 										<input type="hidden" id="swagger" name="swagger" value="" />
+                                            <% } %>
+                                                <input type="hidden" name="action" value="design" />
 										<div class="form-actions" style="display:none" id="saveMessage">
 											<div class="btn loadingButton"><%=i18n.localize("Saving API. Please wait..")%></div>
 										</div>
+                                            <input type="hidden" class="form-control validInput" id="ws" name="ws"  value="ws" />
 										<div class="form-actions" id="saveButtons">
 											<button type="submit" class="btn btn-secondary has-spinner" id="saveBtn"><%=i18n.localize("Save")%></button>
 											<input type="hidden" value="Save" action="design"/>

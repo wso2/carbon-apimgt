@@ -16,15 +16,21 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -162,7 +168,7 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="add";
-
+                    if(!api.isWS()){
                     //Add the API
                     if(APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())){
                         client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
@@ -181,6 +187,10 @@ public class APIGatewayManager {
 
                     //Deploy the custom sequences of the API.
 					deployCustomSequences(api, tenantDomain, environment);
+                    } else {
+                        deployWebsocketAPI(api, client);
+                    }
+
 				}
 			}
             } catch (AxisFault axisFault) {
@@ -223,16 +233,22 @@ public class APIGatewayManager {
                         continue;
                     }
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-
+                    if(!api.isWS()) {
                     if (client.getApi(tenantDomain, api.getId()) != null) {
                         if (debugEnabled) {
                             log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                       environment.getName());
                         }
                         String operation = "delete";
-                        client.deleteApi(tenantDomain, api.getId());
-                        undeployCustomSequences(api, tenantDomain, environment);
+
+                            client.deleteApi(tenantDomain, api.getId());
+                            undeployCustomSequences(api, tenantDomain, environment);
+
                         setSecureVaultProperty(api, tenantDomain, environment, operation);
+                    }
+                    } else {
+                            String fileName = api.getContext().substring(1).replace('/','-');
+                            client.undeployWSApi(new String[]{fileName});
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -262,6 +278,66 @@ public class APIGatewayManager {
 		}
         return failedEnvironmentsMap;
     }
+
+	/**
+	 * add websoocket api to the gateway
+	 * @param api
+	 * @param client
+	 * @throws APIManagementException
+	 */
+    public void deployWebsocketAPI(API api,APIGatewayAdminClient client) throws APIManagementException {
+        String content = createSeqString(api);
+        OMElement element;
+        try {
+            element = AXIOMUtil.stringToOM(content);
+            String fileName = element.getAttributeValue(new QName("name"));
+
+                client.deployWSApi(content, fileName);
+
+
+        } catch (XMLStreamException e) {
+            String msg = "Error while parsing the policy to get the eligibility query: ";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        } catch (IOException e) {
+            String msg = "Error while deploying the policy in gateway manager: ";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        }
+
+    }
+
+	/**
+	 * create body of sequence
+	 *
+	 * @param api
+	 * @return
+	 */
+    public String createSeqString(API api){
+        try {
+            JSONObject obj = new JSONObject(api.getEndpointConfig());
+            String url = obj.getJSONObject("production_endpoints").getString("url");
+            String context = api.getContext();
+            if(context.startsWith("/")){
+                context = context.substring(1);
+            }
+        String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\""+context.replace('/','-')+"\">\n" +
+                "   <send>\n" +
+                "      <endpoint>\n" +
+                "         <http method=\"GET\"\n" +
+                "               uri-template=\""+url+"\"/>\n" +
+                "      </endpoint>\n" +
+                "   </send>\n" +
+                "</sequence>";
+        return seq;
+        } catch (JSONException e) {
+            log.error("Error in reading JSON object " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+
 
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);

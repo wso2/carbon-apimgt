@@ -94,6 +94,22 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="validateKeyforHandshake">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="validateKeyforHandshakeResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2129:APIKeyValidationInfoDTO"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://keymgt.apimgt.carbon.wso2.org/xsd">
          <xs:complexType name="APIKeyMgtException">
@@ -168,8 +184,14 @@
    <wsdl:message name="validateKeyRequest">
       <wsdl:part name="parameters" element="ns1:validateKey"/>
    </wsdl:message>
+   <wsdl:message name="validateKeyforHandshakeRequest">
+      <wsdl:part name="parameters" element="ns1:validateKeyforHandshake"/>
+   </wsdl:message>
    <wsdl:message name="validateKeyResponse">
       <wsdl:part name="parameters" element="ns1:validateKeyResponse"/>
+   </wsdl:message>
+   <wsdl:message name="validateKeyforHandshakeResponse">
+      <wsdl:part name="parameters" element="ns1:validateKeyforHandshakeResponse"/>
    </wsdl:message>
    <wsdl:portType name="APIKeyValidationServicePortType">
       <wsdl:operation name="getAllURITemplates">
@@ -181,6 +203,12 @@
       <wsdl:operation name="validateKey">
          <wsdl:input message="tns:validateKeyRequest" wsaw:Action="urn:validateKey"/>
          <wsdl:output message="tns:validateKeyResponse" wsaw:Action="urn:validateKeyResponse"/>
+         <wsdl:fault message="tns:APIKeyValidationServiceAPIKeyMgtException" name="APIKeyValidationServiceAPIKeyMgtException" wsaw:Action="urn:validateKeyAPIKeyValidationServiceAPIKeyMgtException"/>
+         <wsdl:fault message="tns:APIKeyValidationServiceAPIManagementException" name="APIKeyValidationServiceAPIManagementException" wsaw:Action="urn:validateKeyAPIKeyValidationServiceAPIManagementException"/>
+      </wsdl:operation>
+      <wsdl:operation name="validateKeyforHandshake">
+         <wsdl:input message="tns:validateKeyforHandshakeRequest" wsaw:Action="urn:validateKeyforHandshake"/>
+         <wsdl:output message="tns:validateKeyforHandshakeResponse" wsaw:Action="urn:validateKeyforHandshakeResponse"/>
          <wsdl:fault message="tns:APIKeyValidationServiceAPIKeyMgtException" name="APIKeyValidationServiceAPIKeyMgtException" wsaw:Action="urn:validateKeyAPIKeyValidationServiceAPIKeyMgtException"/>
          <wsdl:fault message="tns:APIKeyValidationServiceAPIManagementException" name="APIKeyValidationServiceAPIManagementException" wsaw:Action="urn:validateKeyAPIKeyValidationServiceAPIManagementException"/>
       </wsdl:operation>
@@ -204,6 +232,21 @@
       </wsdl:operation>
       <wsdl:operation name="validateKey">
          <soap:operation soapAction="urn:validateKey" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="validateKeyforHandshake">
+         <soap:operation soapAction="urn:validateKeyforHandshake" style="document"/>
          <wsdl:input>
             <soap:body use="literal"/>
          </wsdl:input>
@@ -250,6 +293,21 @@
             <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
          </wsdl:fault>
       </wsdl:operation>
+      <wsdl:operation name="validateKeyforHandshake">
+         <soap12:operation soapAction="urn:validateKeyforHandshake" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:binding name="APIKeyValidationServiceHttpBinding" type="tns:APIKeyValidationServicePortType">
       <http:binding verb="POST"/>
@@ -264,6 +322,15 @@
       </wsdl:operation>
       <wsdl:operation name="validateKey">
          <http:operation location="validateKey"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="validateKeyforHandshake">
+         <http:operation location="validateKeyforHandshake"/>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:input>
