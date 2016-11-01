@@ -100,16 +100,6 @@ public interface APIProvider extends APIManager {
     void updateAPI(API api) throws APIManagementException;
 
 
-    /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api                 The API whose status to be updated
-     * @param status              New status of the API
-     * @param userId              User performing the API state change
-     * @throws APIManagementException on error
-     */
-    void changeAPIStatus(API api, APIStatus status, String userId)
-            throws APIManagementException;
 
     /**
      * This method used to Update the status of API
