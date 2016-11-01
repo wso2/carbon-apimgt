@@ -24,9 +24,6 @@ import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
-import org.wso2.carbon.apimgt.core.models.SubscriptionStatus;
-
-import java.util.List;
 
 /**
  * Default implementation of the APISubscriptionDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -136,19 +133,4 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
 
     }
 
-    /**
-     * Get List Of subscribed APPs by API Name
-     *
-     * @param apiName     name of the  api
-     * @param apiProvider provider of the api
-     * @param status      Status of the subscription
-     * @return List of subscribed apps.
-     * @throws APIManagementDAOException
-     */
-    @Override
-    public List<APISubscription> getAllAPISubscriptionsByAPI(String apiName, String apiProvider,
-                                                             SubscriptionStatus... status) throws
-            APIManagementDAOException {
-        return null;
-    }
 }
