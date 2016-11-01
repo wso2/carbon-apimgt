@@ -2229,7 +2229,10 @@ public final class APIUtil {
                 }
             }
         } catch (AxisFault axisFault) {
-            handleException(errorMsg + username, axisFault);
+            //here we are going to log the error message and return because in this case, current user cannot fetch
+            //profile of another user (due to cross tenant isolation, not allowed to access user details etc.)
+            log.error("Cannot access user profile of : " + username);
+            return null;
         } catch (RemoteException e) {
             handleException(errorMsg + username, e);
         } catch (UserProfileMgtServiceUserProfileExceptionException e) {
