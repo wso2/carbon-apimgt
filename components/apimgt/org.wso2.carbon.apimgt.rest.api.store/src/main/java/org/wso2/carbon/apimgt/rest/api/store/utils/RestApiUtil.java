@@ -18,39 +18,27 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.core.util.exception.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.core.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.core.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RestApiUtil {
 
@@ -75,7 +63,7 @@ public class RestApiUtil {
 //        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 //        JSONObject loginInfoJsonObj = new JSONObject();
 //        try {
-//            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+//            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
 //            loginInfoJsonObj.put("user", username);
 //            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 //                loginInfoJsonObj.put("isSuperTenant", true);
@@ -312,13 +300,13 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns an APIConsumer.
+     * Returns an APIStore.
      * 
      * @param subscriberName
      * @return
      * @throws APIManagementException
      */
-    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+    public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 

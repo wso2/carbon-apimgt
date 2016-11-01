@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 
@@ -31,13 +31,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
- * Test class for APIConsumer
+ * Test class for APIStore
  *
  */
 @PrepareForTest(DAOFactory.class)
 public class APIConsumerImplTestCase {
     
-    private APIConsumer apiConsumer = mock(APIConsumerImpl.class);
+    private APIStore apiStore = mock(APIConsumerImpl.class);
 
     @Test
     public void testSearchAPIs() {
@@ -45,9 +45,9 @@ public class APIConsumerImplTestCase {
             
       PowerMockito.mockStatic(DAOFactory.class);
       
-      //apiConsumer = new APIConsumerImpl();
+      //apiStore = new APIStoreImpl();
       
-      apiConsumer.searchAPIs("", "", 1, 1);
+      apiStore.searchAPIs("", "", 1, 1);
       assertTrue(true); 
         } catch (APIManagementException e) {
            

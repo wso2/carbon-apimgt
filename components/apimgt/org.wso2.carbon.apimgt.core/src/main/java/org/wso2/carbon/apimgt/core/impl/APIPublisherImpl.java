@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIProvider;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -45,11 +45,11 @@ import java.util.Set;
 /**
  * Implementation of API Publisher operations
  */
-public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
+public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    public APIProviderImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+    public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
     }

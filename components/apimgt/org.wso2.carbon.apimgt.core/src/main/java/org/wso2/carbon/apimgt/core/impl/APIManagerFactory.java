@@ -22,9 +22,9 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.api.APIManager;
-import org.wso2.carbon.apimgt.core.api.APIProvider;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -45,8 +45,8 @@ public class APIManagerFactory {
 
     private static final APIManagerFactory instance = new APIManagerFactory();
 
-    private APIManagerCache<APIProvider> providers = new APIManagerCache<APIProvider>(50);
-    private APIManagerCache<APIConsumer> consumers = new APIManagerCache<APIConsumer>(500);
+    private APIManagerCache<APIPublisher> providers = new APIManagerCache<APIPublisher>(50);
+    private APIManagerCache<APIStore> consumers = new APIManagerCache<APIStore>(500);
 
     private APIManagerFactory() {
 
@@ -56,9 +56,9 @@ public class APIManagerFactory {
         return instance;
     }
 
-    private APIProvider newProvider(String username) throws APIManagementException {
+    private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            return new UserAwareAPIProvider(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Provider", log);
@@ -66,12 +66,12 @@ public class APIManagerFactory {
         return null;
     }
 
-    private APIConsumer newConsumer(String username) throws APIManagementException {
+    private APIStore newConsumer(String username) throws APIManagementException {
         // if (username.equals(ANONYMOUS_USER)) {
         // username = null;
         // }
         try {
-            return new UserAwareAPIConsumer(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Consumer", log);
@@ -80,8 +80,8 @@ public class APIManagerFactory {
 
     }
 
-    public APIProvider getAPIProvider(String username) throws APIManagementException {
-        APIProvider provider = providers.get(username);
+    public APIPublisher getAPIProvider(String username) throws APIManagementException {
+        APIPublisher provider = providers.get(username);
         if (provider == null) {
             synchronized (username.intern()) {
                 provider = providers.get(username);
@@ -96,12 +96,12 @@ public class APIManagerFactory {
         return provider;
     }
 
-    public APIConsumer getAPIConsumer() throws APIManagementException {
+    public APIStore getAPIConsumer() throws APIManagementException {
         return getAPIConsumer(ANONYMOUS_USER);
     }
 
-    public APIConsumer getAPIConsumer(String username) throws APIManagementException {
-        APIConsumer consumer = consumers.get(username);
+    public APIStore getAPIConsumer(String username) throws APIManagementException {
+        APIStore consumer = consumers.get(username);
         if (consumer == null) {
             synchronized (username.intern()) {
                 consumer = consumers.get(username);
@@ -119,7 +119,7 @@ public class APIManagerFactory {
     public void clearAll() {
         consumers.exclusiveLock();
         try {
-            for (APIConsumer consumer : consumers.values()) {
+            for (APIStore consumer : consumers.values()) {
                 cleanupSilently(consumer);
             }
             consumers.clear();
@@ -129,7 +129,7 @@ public class APIManagerFactory {
 
         providers.exclusiveLock();
         try {
-            for (APIProvider provider : providers.values()) {
+            for (APIPublisher provider : providers.values()) {
                 cleanupSilently(provider);
             }
             providers.clear();

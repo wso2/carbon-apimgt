@@ -28,10 +28,10 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
  * 
  *
  */
-public class UserAwareAPIConsumer extends APIConsumerImpl {
+public class UserAwareAPIStore extends APIStoreImpl {
 
 
-    public UserAwareAPIConsumer(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
     }
