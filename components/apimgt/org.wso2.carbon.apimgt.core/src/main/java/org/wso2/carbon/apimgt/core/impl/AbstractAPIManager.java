@@ -19,12 +19,17 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -33,10 +38,12 @@ import java.util.Set;
  */
 public abstract class AbstractAPIManager implements APIManager {
 
-    protected ApiDAO apiDAO;
-    protected ApplicationDAO applicationDAO;
-    protected APISubscriptionDAO apiSubscriptionDAO;
-    protected String username;
+    private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
+
+    private ApiDAO apiDAO;
+    private ApplicationDAO applicationDAO;
+    private APISubscriptionDAO apiSubscriptionDAO;
+    private String username;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO)  {
@@ -64,7 +71,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns details of an API
+     * Returns details of an API.
      *
      * @param uuid UUID of the API's registry artifact
      * @return An API object related to the given artifact id or null
@@ -72,7 +79,13 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
-        return null;
+        API api = null;
+        try {
+            api = apiDAO.getAPI(uuid);
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Error occurred while retrieving API with id " + uuid, e, log);
+        }
+        return api;
     }
 
     /**
@@ -136,4 +149,38 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getSwagger20Definition(String api) throws APIManagementException {
         return null;
     }
+
+    protected ApiDAO getApiDAO() {
+        return apiDAO;
+    }
+
+    protected void setApiDAO(ApiDAO apiDAO) {
+        this.apiDAO = apiDAO;
+    }
+
+    protected ApplicationDAO getApplicationDAO() {
+        return applicationDAO;
+    }
+
+    protected void setApplicationDAO(ApplicationDAO applicationDAO) {
+        this.applicationDAO = applicationDAO;
+    }
+
+    protected APISubscriptionDAO getApiSubscriptionDAO() {
+        return apiSubscriptionDAO;
+    }
+
+    protected void setApiSubscriptionDAO(APISubscriptionDAO apiSubscriptionDAO) {
+        this.apiSubscriptionDAO = apiSubscriptionDAO;
+    }
+
+    protected String getUsername() {
+        return username;
+    }
+
+    protected void setUsername(String username) {
+        this.username = username;
+    }
+    
+    
 }

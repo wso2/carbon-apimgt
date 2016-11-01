@@ -20,16 +20,18 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,8 @@ import java.util.Map;
  *
  */
 public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
 
     public APIConsumerImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
@@ -70,10 +74,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APISummaryResults apiSummaryResults = null;
         try {
             List<String> roles = new ArrayList<>(); // TODO -- roles list
-            apiSummaryResults = DAOFactory.getApiDAO().searchAPIsForRoles(searchType, searchContent, offset, limit,
+            apiSummaryResults = getApiDAO().searchAPIsForRoles(searchType, searchContent, offset, limit,
                     roles);
         } catch (APIManagementDAOException e) {
-            // TODO - log error
+            APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + searchContent, e, log);
         }
 
         return apiSummaryResults;
