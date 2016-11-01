@@ -77,7 +77,6 @@ paths:
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
-        - $ref : '#/parameters/requestedTenant'
         - name : query
           in: query
           description: |
@@ -87,9 +86,9 @@ paths:
 
             Eg.
             "provider:wso2" will match an API if the provider of the API is exactly "wso2".
-            
+
             Additionally you can use wildcards.
-            
+
             Eg.
             "provider:wso2*" will match an API if the provider of the API starts with "wso2".
 
@@ -107,7 +106,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             List of qualifying APIs is returned.
           schema:
             $ref: '#/definitions/APIList'
@@ -121,11 +120,11 @@ paths:
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -146,14 +145,13 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/requestedTenant'
       tags:
         - API (individual)
         - Retrieve
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Requested API is returned
           headers:
             Content-Type:
@@ -166,24 +164,24 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
           schema:
             $ref: '#/definitions/API'
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -201,14 +199,13 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/requestedTenant'
       tags:
         - API (individual)
         - Retrieve
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Requested swagger document of the API is returned
           headers:
             Content-Type:
@@ -221,22 +218,22 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -256,7 +253,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -265,7 +261,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Document list is returned.
           schema:
             $ref: '#/definitions/DocumentList'
@@ -280,17 +276,17 @@ paths:
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -309,7 +305,6 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
-        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -319,7 +314,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Document returned.
           schema:
             $ref: '#/definitions/Document'
@@ -335,22 +330,22 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested Document does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -371,7 +366,6 @@ paths:
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
-          - $ref: '#/parameters/requestedTenant'
           - $ref: '#/parameters/Accept'
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
@@ -381,7 +375,7 @@ paths:
         responses:
           200:
             description: |
-              OK. 
+              OK.
               File or inline content returned.
             headers:
               Content-Type:
@@ -395,7 +389,7 @@ paths:
                 type: string
               Last-Modified:
                 description: |
-                  Date and time the resource has been modifed the last time. 
+                  Date and time the resource has been modifed the last time.
                   Used by caches, or in conditional reuquests.
                 type: string
           303:
@@ -413,13 +407,13 @@ paths:
               Empty body because the client has already the latest version of the requested resource.
           404:
             description: |
-              Not Found. 
+              Not Found.
               Requested Document does not exist.
             schema:
               $ref: '#/definitions/Error'
           406:
             description: |
-              Not Acceptable. 
+              Not Acceptable.
               The requested media type is not supported
             schema:
               $ref: '#/definitions/Error'
@@ -438,7 +432,6 @@ paths:
       description: |
         Get a list of applications
       parameters:
-        - $ref: '#/parameters/groupId'
         - name : query
           in: query
           description: |
@@ -461,7 +454,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Application list returned.
           schema:
             $ref: '#/definitions/ApplicationList'
@@ -472,22 +465,22 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. 
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported.
           schema:
             $ref: '#/definitions/Error'
@@ -514,8 +507,8 @@ paths:
       responses:
         201:
           description: |
-            Created. 
-            Successful response with the newly created object as entity in the body. 
+            Created.
+            Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Application'
@@ -529,24 +522,24 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         409:
           description: |
-            Conflict. 
+            Conflict.
             Application already exists.
           schema:
             $ref: '#/definitions/Error'
         415:
           description: |
-            Unsupported media type. 
+            Unsupported media type.
             The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
@@ -574,7 +567,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Application returned.
           schema:
             $ref: '#/definitions/Application'
@@ -584,17 +577,17 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
@@ -604,7 +597,7 @@ paths:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -634,7 +627,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Application updated.
           schema:
             $ref: '#/definitions/Application'
@@ -648,29 +641,29 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -692,17 +685,17 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Resource successfully deleted.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Resource to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -737,7 +730,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Keys are generated.
           schema:
             $ref: '#/definitions/ApplicationKey'
@@ -747,30 +740,30 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.‚
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -792,7 +785,6 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
-        - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
@@ -803,7 +795,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription list returned.
           schema:
             $ref: '#/definitions/SubscriptionList'
@@ -813,13 +805,13 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
@@ -849,8 +841,8 @@ paths:
       responses:
         201:
           description: |
-            Created. 
-            Successful response with the newly created object as entity in the body. 
+            Created.
+            Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Subscription'
@@ -864,18 +856,18 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         415:
           description: |
-            Unsupported media type. 
+            Unsupported media type.
             The entity of the request was in a not supported format.
 
 ######################################################
@@ -901,7 +893,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription returned
           schema:
             $ref: '#/definitions/Subscription'
@@ -917,11 +909,11 @@ paths:
               type: string
         '304':
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         '404':
           description: |
-            Not Found. 
+            Not Found.
             Requested Subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
@@ -943,17 +935,17 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Resource successfully deleted.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Resource to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -973,7 +965,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -982,7 +973,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             List of tiers returned.
           schema:
             type: array
@@ -993,17 +984,17 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -1022,7 +1013,6 @@ paths:
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1032,7 +1022,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Tier returned
           schema:
             $ref: '#/definitions/Tier'
@@ -1042,28 +1032,28 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested Tier does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported.
           schema:
             $ref: '#/definitions/Error'
@@ -1082,7 +1072,6 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1091,7 +1080,7 @@ paths:
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Tag list is returned.
           schema:
             $ref: '#/definitions/TagList'
@@ -1101,13 +1090,13 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
@@ -1131,7 +1120,7 @@ parameters:
     name: apiId
     in: path
     description: |
-      **API ID** consisting of the **UUID** of the API. 
+      **API ID** consisting of the **UUID** of the API.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1143,7 +1132,7 @@ parameters:
     name: apiId
     in: query
     description: |
-      **API ID** consisting of the **UUID** of the API. 
+      **API ID** consisting of the **UUID** of the API.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1239,7 +1228,7 @@ parameters:
     name: offset
     in: query
     description: |
-      Starting point within the complete list of items qualified.  
+      Starting point within the complete list of items qualified.
     default: 0
     type: integer
 
@@ -1278,7 +1267,7 @@ parameters:
     name: If-Modified-Since
     in: header
     description: |
-      Validator for conditional requests; based on Last Modified header of the 
+      Validator for conditional requests; based on Last Modified header of the
       formerly retrieved variant of the resource.
     type: string
 
@@ -1318,12 +1307,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1428,12 +1417,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1471,7 +1460,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
-  
+
 #-----------------------------------------------------
 # The Application Info resource
 #-----------------------------------------------------
@@ -1506,12 +1495,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1568,12 +1557,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1619,12 +1608,12 @@ definitions:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-        enum: 
+        enum:
           - FREE
           - COMMERCIAL
       stopOnQuotaReach:
         description: |
-          If this attribute is set to false, you are capabale of sending requests 
+          If this attribute is set to false, you are capabale of sending requests
           even if the request count exceeded within a unit time
         type: boolean
 
@@ -1641,12 +1630,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1707,12 +1696,12 @@ definitions:
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
       list:
         type: array
@@ -1744,8 +1733,8 @@ definitions:
           Preferably an url with more details about the error.
       error:
         type: array
-        description: | 
-          If there are more than one error list them out. 
+        description: |
+          If there are more than one error list them out.
           For example, list out validation errors by each field.
         items:
           $ref: '#/definitions/ErrorListItem'
@@ -1777,14 +1766,14 @@ definitions:
         description: Access token
       tokenScopes:
         type: array
-        items: 
+        items:
           type: string
         description: Valid scopes for the access token
       validityTime:
         type: integer
         format: int64
         description: Maximum validity time for the access token
-  
+
 #-----------------------------------------------------
 # The Application Key resource
 #-----------------------------------------------------
@@ -1799,7 +1788,7 @@ definitions:
         description: Consumer secret of the application
       supportedGrantTypes:
         type: array
-        items: 
+        items:
           type: string
         description: Supported grant types for the application
       keyState:
@@ -1812,7 +1801,6 @@ definitions:
           - PRODUCTION
           - SANDBOX
       token:
-        description: Token details object
         $ref: '#/definitions/Token'
   
 #-----------------------------------------------------

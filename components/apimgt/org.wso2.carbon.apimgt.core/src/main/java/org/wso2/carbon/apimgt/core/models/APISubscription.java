@@ -70,4 +70,8 @@ public final class APISubscription {
         result = 31 * result + application.hashCode();
         return result;
     }
+
+    public void setApiId(String apiId) {
+        this.apiId = apiId;
+    }
 }

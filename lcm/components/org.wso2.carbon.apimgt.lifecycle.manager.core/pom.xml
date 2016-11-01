@@ -140,15 +140,16 @@
         </dependency>
     </dependencies>
     <properties>
-        <private.package>org.wso2.carbon.apimgt.lifecycle.manager.core.internal.*,</private.package>
+        <private.package>org.wso2.carbon.apimgt.lifecycle.manager.internal.*,</private.package>
         <export.package>
-            !org.wso2.carbon.apimgt.lifecycle.manager.core.internal.*,
+            !org.wso2.carbon.apimgt.lifecycle.manager.internal.*,
             org.wso2.carbon.apimgt.lifecycle.manager.*,
         </export.package>
         <import.package>
             org.osgi.framework.*;version="${osgi.framework.import.version.range}",
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.osgi.service.jndi; version="[1.0.0,2.0.0)",
+            org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
             javax.xml;
             javax.xml.xpath; version=0.0.0,
             javax.xml.namespace; version=0.0.0,
@@ -161,6 +162,7 @@
             javax.naming*; version=0.0.0,
             javax.sql; version=0.0.0,
             org.xml.sax; version=0.0.0,
+            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
             *;
         </import.package>
     </properties>

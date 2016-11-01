@@ -22,10 +22,14 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +41,26 @@ import java.util.Map;
  */
 public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
+    public APIConsumerImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+    }
+
     @Override
     public Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
             throws APIManagementException {
 
         return null;
+    }
+
+    @Override public Application getApplicationsByName(String userId, String applicationName, String groupId)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override public Application[] getApplications(Subscriber subscriber, String groupingId)
+            throws APIManagementException {
+        return new Application[0];
     }
 
     @Override
