@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 
@@ -69,13 +70,13 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts {@link API} to a {@link org.wso2.carbon.apimgt.rest.api.store.dto.API}.
+     * Converts {@link APIDTO} to a {@link API}.
      * 
      * @param api
      * @return API DTO
      */
-    public static org.wso2.carbon.apimgt.rest.api.store.dto.API toAPIDTO(API api) {
-        org.wso2.carbon.apimgt.rest.api.store.dto.API apiDTO = new org.wso2.carbon.apimgt.rest.api.store.dto.API();
+    public static APIDTO toAPIDTO(API api) {
+        APIDTO apiDTO = new APIDTO();
         apiDTO.setId(api.getId());
         apiDTO.setName(api.getName());
         apiDTO.setProvider(api.getProvider());

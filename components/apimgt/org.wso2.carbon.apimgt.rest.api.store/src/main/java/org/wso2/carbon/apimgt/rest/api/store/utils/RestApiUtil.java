@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
 
 import java.util.Collection;

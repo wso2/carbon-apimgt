@@ -11,12 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIProviderImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIList;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
@@ -30,6 +31,9 @@ import javax.ws.rs.core.SecurityContext;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
+    
+    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
 , String documentId
@@ -77,9 +81,8 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
 
-        org.wso2.carbon.apimgt.rest.api.store.dto.API apiToReturn = null;
+        APIDTO apiToReturn = null;
         
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name            
@@ -129,7 +132,7 @@ public class ApisApiServiceImpl extends ApisApiService {
  ) throws NotFoundException {
         
         APISummaryResults apisResult = null;
-        APIList apiListDTO = null;
+        APIListDTO apiListDTO = null;
         
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
