@@ -205,7 +205,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
      * @throws APIManagementDAOException
      */
     @Override
-    public void changeLifeCylceStatus(String apiID, String status) throws APIManagementDAOException {
+    public void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException {
 
     }
 

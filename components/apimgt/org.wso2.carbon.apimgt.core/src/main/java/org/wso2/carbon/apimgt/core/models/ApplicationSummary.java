@@ -24,20 +24,13 @@ package org.wso2.carbon.apimgt.core.models;
  * Representation an Application object that contains a limited number of details
  */
 public final class ApplicationSummary {
-    private String groupID;
+    private String groupId;
     private String subscriber;
     private String throttlingPolicy;
     private String id;
     private String description;
     private String name;
 
-    public String getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
 
     public String getSubscriber() {
         return subscriber;
@@ -55,14 +48,6 @@ public final class ApplicationSummary {
         this.throttlingPolicy = throttlingPolicy;
     }
 
-    public String getID() {
-        return id;
-    }
-
-    public void setID(String id) {
-        this.id = id;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -77,5 +62,21 @@ public final class ApplicationSummary {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

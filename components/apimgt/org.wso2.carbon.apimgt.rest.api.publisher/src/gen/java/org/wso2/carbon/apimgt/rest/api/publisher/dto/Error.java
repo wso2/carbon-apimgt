@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorListItem;
 /**
  * Error
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class Error   {
   private Long code = null;
 
@@ -107,10 +107,10 @@ public class Error   {
   }
 
    /**
-   * If there are more than one error list them out.  For example, list out validation errors by each field. 
+   * If there are more than one error list them out. For example, list out validation errors by each field. 
    * @return error
   **/
-  @ApiModelProperty(value = "If there are more than one error list them out.  For example, list out validation errors by each field. ")
+  @ApiModelProperty(value = "If there are more than one error list them out. For example, list out validation errors by each field. ")
   public List<ErrorListItem> getError() {
     return error;
   }

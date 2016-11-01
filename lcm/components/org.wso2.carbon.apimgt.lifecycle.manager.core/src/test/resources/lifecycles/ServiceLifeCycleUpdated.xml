@@ -24,23 +24,23 @@
                 <state id="Development">
                     <datamodel>
                         <data name="checkItems">
-                            <item name="Code Completed" forEvent="">
+                            <item name="Code Completed" forTarget="Testing">
                                 <!--<permissions>
                                     <permission roles=""/>
                                 </permissions>
                                 <validations>
-                                    <validation forEvent="" class="">
+                                    <validation forTarget="" class="">
                                         <parameter name="" value=""/>
                                     </validation>
                                 </validations>-->
                             </item>
-                            <item name="WSDL, Schema Created" forEvent="">
+                            <item name="WSDL, Schema Created" forTarget="">
                             </item>
-                            <item name="QoS Created" forEvent="">
+                            <item name="QoS Created" forTarget="">
                             </item>
                         </data>
                         <data name="transitionExecution">
-                            <execution forEvent="Promote" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
+                            <execution forTarget="Testing" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
                                 <parameter name="currentEnvironment" value="/_system/governance/trunk/{@resourcePath}/{@resourceName}"/>
                                 <parameter name="targetEnvironment" value="/_system/governance/branches/testing/{@resourcePath}/{@version}/{@resourceName}"/>
                                 <parameter name="service.mediatype" value="application/vnd.wso2-service+xml"/>
@@ -49,29 +49,29 @@
                             </execution>
                         </data>
                         <data name="transitionUI">
-                            <ui forEvent="Promote" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/trunk/"/>
+                            <ui forTarget="Testing" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/trunk/"/>
                         </data>
                         <data name="transitionPermission">
-                            <permission forEvent="Promote" roles="admin"/>
-                            <permission forEvent="Promote" roles="admin,internal/everyone"/>
+                            <permission forTarget="Testing" roles="admin"/>
+                            <permission forTarget="Testing" roles="admin,internal/everyone"/>
                         </data>
                         <data name="transitionInput">
-                            <inputs forEvent="Promote">
+                            <inputs forTarget="Testing">
                                 <input name="name1" label="Field One" tooltip="Field One"/>
                                 <input name="name2" label="Field Two" tooltip="Field Two"/>
                                 <input name="name3" label="Field Three" tooltip="Field Three"/>
                             </inputs>
                         </data>
                         <!--<data name="transitionValidation">
-                            <validation forEvent="" class="">
+                            <validation forTarget="" class="">
                                 <parameter name="" value=""/>
                             </validation>
                         </data>
                         <data name="transitionPermission">
-                            <permission forEvent="" roles=""/>
+                            <permission forTarget="" roles=""/>
                         </data>
                         <data name="transitionScripts">
-                            <js forEvent="">
+                            <js forTarget="">
                                 <console function="">
                                     <script type="text/javascript">
                                     </script>
@@ -87,26 +87,26 @@
                 <state id="Testing">
                     <datamodel>
                         <data name="checkItems">
-                            <item name="Effective Inspection Completed" forEvent="">
+                            <item name="Effective Inspection Completed" forTarget="">
                             </item>
-                            <item name="Test Cases Passed" forEvent="">
+                            <item name="Test Cases Passed" forTarget="">
                             </item>
-                            <item name="Smoke Test Passed" forEvent="">
+                            <item name="Smoke Test Passed" forTarget="">
                             </item>
                         </data>
                         <data name="transitionExecution">
-                            <execution forEvent="Promote" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
+                            <execution forTarget="Production" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
                                 <parameter name="currentEnvironment" value="/_system/governance/branches/testing/{@resourcePath}/{@version}/{@resourceName}"/>
                                 <parameter name="targetEnvironment" value="/_system/governance/branches/production/{@resourcePath}/{@version}/{@resourceName}"/>
                                 <parameter name="service.mediatype" value="application/vnd.wso2-service+xml"/>
                                 <parameter name="wsdl.mediatype" value="application/wsdl+xml"/>
                                 <parameter name="endpoint.mediatype" value="application/vnd.wso2.endpoint"/>
                             </execution>
-                            <execution forEvent="Demote" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
+                            <execution forTarget="Development" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
                             </execution>
                         </data>
                         <data name="transitionUI">
-                            <ui forEvent="Promote" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/branches/testing/"/>
+                            <ui forTarget="Production" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/branches/testing/"/>
                         </data>
                     </datamodel>
                     <transition event="Promote" target="Production"/>
@@ -115,9 +115,9 @@
                 <state id="Production">
                     <datamodel>
                         <data name="transitionExecution">
-                            <execution forEvent="Demote" class="org.wso2.carbon.governance.registry.extensions.executors.DemoteActionExecutor">
+                            <execution forTarget="Testing" class="org.wso2.carbon.governance.registry.extensions.executors.DemoteActionExecutor">
                             </execution>
-                            <execution forEvent="Publish" class="org.wso2.carbon.governance.registry.extensions.executors.apistore.ApiStoreExecutor">
+                            <execution forTarget="Published.to.APIStore" class="org.wso2.carbon.governance.registry.extensions.executors.apistore.ApiStoreExecutor">
                             </execution>
                         </data>
                     </datamodel>

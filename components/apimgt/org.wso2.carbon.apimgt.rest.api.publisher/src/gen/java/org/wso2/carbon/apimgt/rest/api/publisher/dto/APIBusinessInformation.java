@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIBusinessInformation
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class APIBusinessInformation   {
   private String businessOwner = null;
 
@@ -28,7 +28,7 @@ public class APIBusinessInformation   {
    * Get businessOwner
    * @return businessOwner
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "businessowner", value = "")
   public String getBusinessOwner() {
     return businessOwner;
   }
@@ -46,7 +46,7 @@ public class APIBusinessInformation   {
    * Get businessOwnerEmail
    * @return businessOwnerEmail
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "businessowner@wso2.com", value = "")
   public String getBusinessOwnerEmail() {
     return businessOwnerEmail;
   }
@@ -64,7 +64,7 @@ public class APIBusinessInformation   {
    * Get technicalOwner
    * @return technicalOwner
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "technicalowner", value = "")
   public String getTechnicalOwner() {
     return technicalOwner;
   }
@@ -82,7 +82,7 @@ public class APIBusinessInformation   {
    * Get technicalOwnerEmail
    * @return technicalOwnerEmail
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "technicalowner@wso2.com", value = "")
   public String getTechnicalOwnerEmail() {
     return technicalOwnerEmail;
   }

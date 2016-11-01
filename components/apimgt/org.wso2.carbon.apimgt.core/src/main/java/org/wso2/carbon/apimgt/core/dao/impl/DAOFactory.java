@@ -33,7 +33,7 @@ import java.sql.SQLException;
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 
-    public ApiDAO getApiDAO() throws APIManagementDAOException {
+    public static ApiDAO getApiDAO() throws APIManagementDAOException {
         ApiDAO apiDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -59,7 +59,7 @@ public class DAOFactory {
         return apiDAO;
     }
 
-    public ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
+    public static ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
         ApplicationDAO appDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -85,7 +85,7 @@ public class DAOFactory {
         return appDAO;
     }
 
-    public APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
+    public static APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
         APISubscriptionDAO apiSubscriptionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {

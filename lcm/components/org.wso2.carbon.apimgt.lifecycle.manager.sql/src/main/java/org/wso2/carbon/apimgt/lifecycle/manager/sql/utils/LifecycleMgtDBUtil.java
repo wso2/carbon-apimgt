@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.lifecycle.manager.sql.utils;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.LifecycleDatabaseCreator;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.LifecycleConfigBuilder;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
 
@@ -49,7 +51,10 @@ public class LifecycleMgtDBUtil {
     public static void initialize() throws LifecycleManagerDatabaseException {
 
         synchronized (LifecycleMgtDBUtil.class) {
-            String dataSourceName = Constants.LIFECYCLE_DATASOURCE;
+            String dataSourceName = LifecycleConfigBuilder.getLifecycleConfig().getDataSourceName();
+            if (dataSourceName == null) {
+                dataSourceName = Constants.LIFECYCLE_DATASOURCE;
+            }
 
             try {
 

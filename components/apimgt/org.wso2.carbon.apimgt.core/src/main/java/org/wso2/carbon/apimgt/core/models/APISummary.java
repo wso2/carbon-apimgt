@@ -81,11 +81,11 @@ public final class APISummary {
         this.context = context;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 
-    public void setID(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -117,4 +117,5 @@ public final class APISummary {
         result = 31 * result + version.hashCode();
         return result;
     }
+
 }

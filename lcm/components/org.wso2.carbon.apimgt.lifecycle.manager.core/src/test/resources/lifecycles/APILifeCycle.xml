@@ -26,17 +26,17 @@
                     <datamodel>
 
                         <data name="checkItems">
-                            <item name="Deprecate old versions after publish the API" forEvent="">
+                            <item name="Deprecate old versions after publish the API" forTarget="">
                             </item>
-                            <item name="Require re-subscription when publish the API" forEvent="">
+                            <item name="Require re-subscription when publish the API" forTarget="">
                             </item>
                         </data>
 
                         <data name="transitionExecution">
-                            <execution forEvent="Deploy as a Prototype"
+                            <execution forTarget="Prototyped"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Publish"
+                            <execution forTarget="Published"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                         </data>
@@ -49,17 +49,17 @@
                 <state id="Prototyped">
                     <datamodel>
                         <data name="checkItems">
-                            <item name="Deprecate old versions after publish the API" forEvent="">
+                            <item name="Deprecate old versions after publish the API" forTarget="">
                             </item>
-                            <item name="Require re-subscription when publish the API" forEvent="">
+                            <item name="Require re-subscription when publish the API" forTarget="">
                             </item>
                         </data>
 
                         <data name="transitionExecution">
-                            <execution forEvent="Publish"
+                            <execution forTarget="Published"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Demote to Created"
+                            <execution forTarget="Created"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                         </data>
@@ -75,16 +75,16 @@
                     <datamodel>
 
                         <data name="transitionExecution">
-                            <execution forEvent="Block"
+                            <execution forTarget="Blocked"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Deprecate"
+                            <execution forTarget="Deprecated"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Demote to Created"
+                            <execution forTarget="Created"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Deploy as a Prototype"
+                            <execution forTarget="Prototyped"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
 
@@ -100,10 +100,10 @@
                 <state id="Blocked">
                     <datamodel>
                         <data name="transitionExecution">
-                            <execution forEvent="Re-Publish"
+                            <execution forTarget="Published"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Deprecate"
+                            <execution forTarget="Deprecated"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                         </data>
@@ -115,7 +115,7 @@
                 <state id="Deprecated">
                     <datamodel>
                         <data name="transitionExecution">
-                            <execution forEvent="Retire"
+                            <execution forTarget="Retired"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                         </data>

@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.Subscription;
 /**
  * SubscriptionList
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class SubscriptionList   {
   private Integer count = null;
 
@@ -31,7 +31,7 @@ public class SubscriptionList   {
    * Number of Subscriptions returned. 
    * @return count
   **/
-  @ApiModelProperty(value = "Number of Subscriptions returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Subscriptions returned. ")
   public Integer getCount() {
     return count;
   }
@@ -46,10 +46,10 @@ public class SubscriptionList   {
   }
 
    /**
-   * Link to the next subset of resources qualified.  Empty if no more resources are to be returned. 
+   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    * @return next
   **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.  Empty if no more resources are to be returned. ")
+  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;2&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   public String getNext() {
     return next;
   }
@@ -64,10 +64,10 @@ public class SubscriptionList   {
   }
 
    /**
-   * Link to the previous subset of resources qualified.  Empty if current subset is the first subset returned. 
+   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    * @return previous
   **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.  Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;0&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   public String getPrevious() {
     return previous;
   }

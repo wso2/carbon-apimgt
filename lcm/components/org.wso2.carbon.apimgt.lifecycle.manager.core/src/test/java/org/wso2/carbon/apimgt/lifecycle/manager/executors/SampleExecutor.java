@@ -20,9 +20,9 @@ package org.wso2.carbon.apimgt.lifecycle.manager.executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.lifecycle.manager.Executor;
 import org.wso2.carbon.apimgt.lifecycle.manager.SampleAPI;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.beans.InputBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.interfaces.Executor;
+import org.wso2.carbon.apimgt.lifecycle.manager.beans.InputBean;
 
 import java.util.HashMap;
 import java.util.Map;

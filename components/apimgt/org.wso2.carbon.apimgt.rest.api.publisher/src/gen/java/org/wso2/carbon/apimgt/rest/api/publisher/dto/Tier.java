@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Tier
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-24T13:00:17.095+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-10-26T15:09:45.077+05:30")
 public class Tier   {
   private String name = null;
 
@@ -25,7 +25,9 @@ public class Tier   {
   public enum TierLevelEnum {
     API("api"),
     
-    APPLICATION("application");
+    APPLICATION("application"),
+    
+    RESOURCE("resource");
 
     private String value;
 
@@ -57,6 +59,8 @@ public class Tier   {
   private Long requestCount = null;
 
   private Long unitTime = null;
+
+  private String timeUnit = null;
 
   /**
    * This attribute declares whether this tier is available under commercial or free 
@@ -102,7 +106,7 @@ public class Tier   {
    * Get name
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "Platinum", required = true, value = "")
   public String getName() {
     return name;
   }
@@ -120,7 +124,7 @@ public class Tier   {
    * Get description
    * @return description
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Allows 50 request(s) per minute.", value = "")
   public String getDescription() {
     return description;
   }
@@ -138,7 +142,7 @@ public class Tier   {
    * Get tierLevel
    * @return tierLevel
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "api", value = "")
   public TierLevelEnum getTierLevel() {
     return tierLevel;
   }
@@ -179,7 +183,7 @@ public class Tier   {
    * Maximum number of requests which can be sent within a provided unit time 
    * @return requestCount
   **/
-  @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
+  @ApiModelProperty(example = "50", required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
   public Long getRequestCount() {
     return requestCount;
   }
@@ -197,13 +201,31 @@ public class Tier   {
    * Get unitTime
    * @return unitTime
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "60000", required = true, value = "")
   public Long getUnitTime() {
     return unitTime;
   }
 
   public void setUnitTime(Long unitTime) {
     this.unitTime = unitTime;
+  }
+
+  public Tier timeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+    return this;
+  }
+
+   /**
+   * Get timeUnit
+   * @return timeUnit
+  **/
+  @ApiModelProperty(example = "min", value = "")
+  public String getTimeUnit() {
+    return timeUnit;
+  }
+
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
   }
 
   public Tier tierPlan(TierPlanEnum tierPlan) {
@@ -215,7 +237,7 @@ public class Tier   {
    * This attribute declares whether this tier is available under commercial or free 
    * @return tierPlan
   **/
-  @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free ")
+  @ApiModelProperty(example = "FREE", required = true, value = "This attribute declares whether this tier is available under commercial or free ")
   public TierPlanEnum getTierPlan() {
     return tierPlan;
   }
@@ -230,10 +252,10 @@ public class Tier   {
   }
 
    /**
-   * If this attribute is set to false, you are capabale of sending requests  even if the request count exceeded within a unit time 
+   * By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time 
    * @return stopOnQuotaReach
   **/
-  @ApiModelProperty(required = true, value = "If this attribute is set to false, you are capabale of sending requests  even if the request count exceeded within a unit time ")
+  @ApiModelProperty(example = "true", required = true, value = "By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time ")
   public Boolean getStopOnQuotaReach() {
     return stopOnQuotaReach;
   }
@@ -258,13 +280,14 @@ public class Tier   {
         Objects.equals(this.attributes, tier.attributes) &&
         Objects.equals(this.requestCount, tier.requestCount) &&
         Objects.equals(this.unitTime, tier.unitTime) &&
+        Objects.equals(this.timeUnit, tier.timeUnit) &&
         Objects.equals(this.tierPlan, tier.tierPlan) &&
         Objects.equals(this.stopOnQuotaReach, tier.stopOnQuotaReach);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, tierLevel, attributes, requestCount, unitTime, tierPlan, stopOnQuotaReach);
+    return Objects.hash(name, description, tierLevel, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
   }
 
   @Override
@@ -278,6 +301,7 @@ public class Tier   {
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
+    sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
     sb.append("    tierPlan: ").append(toIndentedString(tierPlan)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
     sb.append("}");

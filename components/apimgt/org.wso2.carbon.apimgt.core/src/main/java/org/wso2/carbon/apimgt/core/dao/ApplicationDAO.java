@@ -36,7 +36,8 @@ public interface ApplicationDAO {
      * @throws APIManagementDAOException
      *
      */
-    @CheckForNull Application getApplication(String appID) throws APIManagementDAOException;
+    @CheckForNull
+    Application getApplication(String appID) throws APIManagementDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and

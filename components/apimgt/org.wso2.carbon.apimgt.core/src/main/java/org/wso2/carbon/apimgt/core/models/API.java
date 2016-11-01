@@ -21,9 +21,6 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Representation of an API object
@@ -279,11 +276,11 @@ public final class API {
         this.context = context;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 
-    public void setID(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 

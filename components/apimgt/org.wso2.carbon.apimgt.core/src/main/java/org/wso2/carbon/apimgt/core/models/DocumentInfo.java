@@ -71,11 +71,11 @@ public final class DocumentInfo {
         this.sourceURL = sourceURL;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 
-    public void setID(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -21,4 +21,6 @@ public class TestConstants {
 
     public static final String SERVICE_LIFE_CYCLE = "ServiceLifeCycle";
     public static final String ADMIN = "admin";
+    public static final String DEVELOPMENT = "Development";
+    public static final String TESTING = "Testing";
 }

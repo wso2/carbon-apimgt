@@ -141,7 +141,7 @@ public interface ApiDAO {
      * @throws APIManagementDAOException  if error occurs while accessing data layer
      *
      */
-    void changeLifeCylceStatus(String apiID, String status) throws APIManagementDAOException;
+    void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException;
 
     /**
      * Create a new version of an existing API
@@ -172,4 +172,12 @@ public interface ApiDAO {
      */
     DocumentInfo getDocumentInfo(String apiID, String docID) throws APIManagementDAOException;
 
+    /**
+     *
+     * @param apiName name of API
+     * @param provider provider of API
+     * @return List of APIS which contains the name and provider.
+     * @throws APIManagementDAOException
+     */
+    List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException;
 }
