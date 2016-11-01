@@ -517,7 +517,7 @@ public class UsageClient {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 query += " where CONTEXT not like '/t/%' and ";
             } else {
-                query += " where CONTEXT like '/t/%' and ";
+                query += " where CONTEXT like '/t/"+tenantDomain+"%' and ";
             }
             if (!"All".equals(apiCreator)) {
                 query += " CREATED_BY= ? and ";

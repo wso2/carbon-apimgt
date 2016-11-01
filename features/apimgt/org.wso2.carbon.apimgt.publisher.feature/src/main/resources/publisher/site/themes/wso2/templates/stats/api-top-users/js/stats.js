@@ -183,6 +183,11 @@ var drawTopAPIUsersTable = function () {
                         }
                     }
                     $("#userProfileModel").modal();
+                } else {
+                    jagg.message({
+                        content: json.message,
+                        type: "info"
+                    });
                 }
             }
         );
