@@ -35,9 +35,9 @@ import static org.mockito.Mockito.mock;
  *
  */
 @PrepareForTest(DAOFactory.class)
-public class APIConsumerImplTestCase {
+public class APIStoreImplTestCase {
     
-    private APIStore apiStore = mock(APIConsumerImpl.class);
+    private APIStore apiStore = mock(APIStoreImpl.class);
 
     @Test
     public void testSearchAPIs() {
