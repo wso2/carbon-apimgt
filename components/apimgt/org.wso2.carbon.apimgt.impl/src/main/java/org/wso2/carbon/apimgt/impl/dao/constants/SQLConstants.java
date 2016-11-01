@@ -1539,6 +1539,9 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_ENTRY_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
+    
+    public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
+            "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +
@@ -1829,6 +1832,9 @@ public class SQLConstants {
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_SQL =
             "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
+    
+    public static final String REMOVE_WORKFLOW_ENTRY_SQL =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_EXTERNAL_REFERENCE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL =
             "SELECT " +

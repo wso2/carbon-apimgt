@@ -12,6 +12,15 @@ jagg.module("taskmanager", {
     },
     completeTask:function () {
             return jagg.require(jagg.getModulesDir() + "taskmanager/complete.jag").completeTask.apply(this, arguments);
+    },
+    getBPMNTasks:function () {
+            return jagg.require(jagg.getModulesDir() + "taskmanager/get-bpmn.jag").getBPMNTasks.apply(this, arguments);
+    },
+    assignBPMNTask:function () {
+            return jagg.require(jagg.getModulesDir() + "taskmanager/assign-bpmn.jag").assignBPMNTask.apply(this, arguments);
+    },
+    completeBPMNTask:function () {
+            return jagg.require(jagg.getModulesDir() + "taskmanager/complete-bpmn.jag").completeBPMNTask.apply(this, arguments);
     }
 
 

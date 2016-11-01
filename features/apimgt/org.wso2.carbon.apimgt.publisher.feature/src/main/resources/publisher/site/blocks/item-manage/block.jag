@@ -23,6 +23,7 @@ jagg.block("item-manage", {
     apiData.name = name;
     apiData.version = version;
     var lcStatus = mod.getAPILCStatus(apiData);
+    var apiWFstatus = mod.getAPILCWorkflowStatus(apiData);
 
     result = mod.isSynapseGateway();
     isSynapseGateway = result.isSynapseGateway;
@@ -38,7 +39,8 @@ jagg.block("item-manage", {
             "tenant":tenant,
             "isSynapseGateway":isSynapseGateway,
             "isDataPublishingEnabled":isDataPublishingEnabled,
-            "lcStatus":lcStatus
+            "lcStatus":lcStatus,
+            "wfStatus":apiWFstatus
         }
     }
 
