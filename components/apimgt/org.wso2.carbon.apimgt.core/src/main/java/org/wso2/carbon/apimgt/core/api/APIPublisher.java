@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * This interface used to write Publisher specific methods
  */
-public interface APIProvider extends APIManager {
+public interface APIPublisher extends APIManager {
     /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *

@@ -1,38 +1,30 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.*;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 
 
-import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIProviderImpl;
+import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     
-    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
@@ -85,8 +77,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIDTO apiToReturn = null;
         
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name            
-            API api = apiConsumer.getAPIbyUUID(apiId);
+            APIStore apiStore = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
+            API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -135,7 +127,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIListDTO apiListDTO = null;
         
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
+            APIStore apiStore = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
             
             String searchType = "API" /*APIConstants.API_NAME*/; // TODO -- move to a constant file
             String searchContent = "*";
@@ -152,7 +144,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
             
-            apisResult = apiConsumer.searchAPIs(searchContent, searchType, offset, limit);
+            apisResult = apiStore.searchAPIs(searchContent, searchType, offset, limit);
             
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);           

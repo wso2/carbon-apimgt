@@ -31,7 +31,7 @@ import java.util.Map;
  * This interface used to write Store specific methods.
  *
  */
-public interface APIConsumer extends APIManager {
+public interface APIStore extends APIManager {
 
 
     /**
