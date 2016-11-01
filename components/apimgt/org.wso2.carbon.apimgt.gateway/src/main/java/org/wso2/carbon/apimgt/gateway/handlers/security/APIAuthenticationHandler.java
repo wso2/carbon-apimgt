@@ -294,7 +294,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-
+        //if publisher is null,extract the publisher from the api_version
+        if (apiPublisher == null) {
+            int ind = apiVersion.indexOf("--");
+            apiPublisher = apiVersion.substring(0, ind);
+            if (apiPublisher.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiPublisher = apiPublisher
+                        .replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT, APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+        }
         int index = apiVersion.indexOf("--");
 
         if (index != -1) {
@@ -303,18 +311,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         String api = apiVersion.split(":")[0];
         String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-
-        String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-
-        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
-
-        if(StringUtils.isEmpty(tenantDomain)){
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        if (apiPublisher == null) {
-            apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);
-        }
-
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));

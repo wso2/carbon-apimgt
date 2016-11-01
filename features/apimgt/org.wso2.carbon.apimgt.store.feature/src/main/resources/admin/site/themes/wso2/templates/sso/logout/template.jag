@@ -10,8 +10,7 @@
 	if(site.ssoConfiguration.externalLogoutPage != null && site.ssoConfiguration.externalLogoutPage != 'null'
 			&& site.ssoConfiguration.externalLogoutPage != ""){
 		ssoRelyingParty.invalidateSessionBySessionId(session.getId());
-		session.invalidate();
-		
+
 		response.sendRedirect(site.ssoConfiguration.externalLogoutPage);
 		return;
 	} else {

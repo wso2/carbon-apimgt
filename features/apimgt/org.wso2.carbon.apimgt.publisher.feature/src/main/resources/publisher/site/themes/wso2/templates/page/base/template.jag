@@ -78,6 +78,21 @@ var user = jagg.getUser();
 		</div>
 		<%if(user) { %>
 			<ul class="nav navbar-right float-remove-xs text-center-xs">
+				<li class="visible-inline-block">
+
+	                     <!--Links to Access APIStore-->
+	                     	<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>?interactiveTutorial=true"  target="_self" title="<%=i18n.localize("API Walkthrough")%>">
+	                     		<span class="icon fw-stack fw-lg">
+	                   <i class="fw fw-circle fw-stack-2x" title="walkthrough"></i>
+	                   <i class="fw fw-deploy fw-stack-1x fw-inverse" title="walkthrough"></i>
+	                </span>
+
+								<span class="hidden-xs">
+								<%=i18n.localize("API Walkthrough")%>
+								</span>
+	                     	</a>
+
+				</li>
 			<%if(jagg.getShowStoreURL()){%>
 				<li class="visible-inline-block">
 					
@@ -89,7 +104,7 @@ var user = jagg.getUser();
 	                </span>
 	                     		
 								<span class="hidden-xs">
-								Go to <%=i18n.localize("Go to APIStore")%>
+									<%=i18n.localize("Go to APIStore")%>
 								</span>
 	                     	</a>
 	                

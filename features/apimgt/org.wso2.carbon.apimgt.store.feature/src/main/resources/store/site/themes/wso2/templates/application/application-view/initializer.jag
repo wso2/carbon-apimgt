@@ -7,7 +7,6 @@ jagg.initializer("application/application-view", {
         jagg.addFooterJS("application/view", "CodeMirror", "libs/codemirror-5.14.2/lib/codemirror.js");
         jagg.addFooterJS("application/view", "CodeMirrorShell", "libs/codemirror-5.14.2/mode/shell/shell.js");
         jagg.addFooterJS("application/view", "applications", "js/applications.js");
-        jagg.addFooterJS("application/view", "generateSdk", "templates/application/application-view/js/generateSdk.js");
     }
 });
 %>

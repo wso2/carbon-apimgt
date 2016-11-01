@@ -1070,6 +1070,12 @@ public final class APIConstants {
     public static final String CLIENT_CODEGEN_API_PACKAGE = "SwaggerCodegen.ClientGeneration.ApiPackage";
     public static final String CLIENT_CODEGEN_SUPPORTED_LANGUAGES = "SwaggerCodegen.ClientGeneration.SupportedLanguages";
 
+    public static final String TEMP_DIRECTORY_NAME = "tmp";
+    public static final String SWAGGER_CODEGEN_DIRECTORY = "swaggerCodegen";
+    public static final String JSON_FILE_EXTENSION = ".json";
+    public static final String ZIP_FILE_EXTENSION = ".zip";
+
+
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";
     public static final String CPS_SERVER_USERNAME = "CPSServerUsername";
@@ -1225,6 +1231,11 @@ public final class APIConstants {
         public static final String API_NAME = "api_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
+    }
+    
+    public static class APIEndpointSecurityConstants {
+        public static final String BASIC_AUTH = "BasicAuth";
+        public static final String DIGEST_AUTH = "DigestAuth";
     }
 
 }

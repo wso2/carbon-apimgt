@@ -323,6 +323,25 @@ public class RestApiUtil {
     /**
      * Returns a new NotFoundException
      *
+     * @param resource resource type
+     * @param id       identifier of the resource
+     * @param tenant   tenant for which the resource has been searched
+     * @return a new NotFoundException with the specified details
+     */
+    public static NotFoundException buildNotFoundException(String resource, String id, String tenant) {
+        String description;
+        if (!StringUtils.isEmpty(id)) {
+            description = "Requested " + resource + " with Id '" + id + "' not found in tenant " + tenant;
+        } else {
+            description = "Requested " + resource + " not found in tenant " + tenant;
+        }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        return new NotFoundException(errorDTO);
+    }
+
+    /**
+     * Returns a new NotFoundException
+     *
      * @param description description of the error
      * @return a new NotFoundException with the specified details as a response DTO
      */
@@ -515,6 +534,22 @@ public class RestApiUtil {
         ForbiddenException forbiddenException = buildForbiddenException(description);
         log.error(description, t);
         throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param resource requested resource
+     * @param id       id of resource
+     * @param log      Log instance
+     * @param tenant   tenant where the resource should be searched
+     * @throws NotFoundException if the resource does not exist in the given tenant
+     */
+    public static void handleResourceNotFoundInTenantError(String resource, String id, Log log, String tenant)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id, tenant);
+        log.error(notFoundException.getMessage());
+        throw notFoundException;
     }
 
     /**

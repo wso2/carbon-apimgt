@@ -229,6 +229,59 @@
                 }
             }
         },
+        "/apis/generate-sdk/": {
+            "post": {
+                "x-scope": "apim:subscribe",
+                "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.10/apis/generate-sdk\n",
+                "x-wso2-curl": "curl https://127.0.0.1:9443/api/am/store/v0.10/apis/generate-sdk",
+                "x-wso2-response": "HTTP/1.1 200 OK \n Content-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"  \n Date: Wed, 12 Oct 2016 11:10:49 GMT \n Content-Type: application/zip \n Transfer-Encoding: chunked \n Server: WSO2 Carbon Server",
+                "summary": "Generate SDK for an API\n",
+                "description": "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId-Q"
+                    },
+                    {
+                        "$ref": "#/parameters/language"
+                    },
+                    {
+                        "$ref": "#/parameters/requestedTenant"
+                    }
+                ],
+                "tags": [
+                    "API (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nSDK generated successfully.\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request.\nSDK language is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested API does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/apis/{apiId}/documents": {
             "get": {
                 "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents\n",
@@ -1318,6 +1371,13 @@
             "name": "apiId",
             "in": "query",
             "description": "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+            "required": true,
+            "type": "string"
+        },
+        "language": {
+            "name": "language",
+            "in": "query",
+            "description": "Programming language to generate SDK.\n",
             "required": true,
             "type": "string"
         },
