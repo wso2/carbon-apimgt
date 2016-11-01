@@ -20,24 +20,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfo;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIList;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class APIMappingUtil {
 
     /**
-     * Converts {@link APISummaryResults} to {@link APIList} DTO.
+     * Converts {@link APISummaryResults} to {@link APIListDTO} DTO.
      * 
      * @param apisResult
      * @return
      */
-    public static APIList toAPIListDTO(APISummaryResults apisResult) {
-        APIList apiListDTO = new APIList();
+    public static APIListDTO toAPIListDTO(APISummaryResults apisResult) {
+        APIListDTO apiListDTO = new APIListDTO();
         apiListDTO.setCount(apisResult.getApiSummaryList().size());
         //apiListDTO.setNext(next);
         //apiListDTO.setPrevious(previous);
@@ -46,15 +46,15 @@ public class APIMappingUtil {
     }
 
     /**
-     * Converts {@link APISummary} List to an {@link APIInfo} List.
+     * Converts {@link APISummary} List to an {@link APIInfoDTO} List.
      * 
      * @param apiSummaryList
      * @return
      */
-    private static List<APIInfo> toAPIInfo(List<APISummary> apiSummaryList) {
-        List<APIInfo> apiInfoList = new ArrayList<APIInfo>();
+    private static List<APIInfoDTO> toAPIInfo(List<APISummary> apiSummaryList) {
+        List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
         for (APISummary apiSummary : apiSummaryList) {
-            APIInfo apiInfo = new APIInfo();
+            APIInfoDTO apiInfo = new APIInfoDTO();
             apiInfo.setId(apiSummary.getId());
             apiInfo.setContext(apiSummary.getContext());
             apiInfo.setDescription(apiSummary.getDescription());

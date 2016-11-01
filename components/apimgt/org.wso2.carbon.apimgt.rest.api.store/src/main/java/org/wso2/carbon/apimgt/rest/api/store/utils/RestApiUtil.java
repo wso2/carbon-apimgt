@@ -18,18 +18,10 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.core.util.exception.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
@@ -37,6 +29,11 @@ import org.wso2.carbon.apimgt.core.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.core.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RestApiUtil {
 
@@ -249,8 +246,8 @@ public class RestApiUtil {
      * @param tierName Tier to find
      * @return Matched tier with its name
      */
-    public static Tier findTier(Collection<Tier> tiers, String tierName) {
-        for (Tier tier : tiers) {
+    public static TierDTO findTier(Collection<TierDTO> tiers, String tierName) {
+        for (TierDTO tier : tiers) {
             if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
                 return tier;
             }
