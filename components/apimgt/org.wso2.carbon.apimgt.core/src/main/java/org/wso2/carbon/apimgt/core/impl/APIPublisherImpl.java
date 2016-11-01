@@ -340,7 +340,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteAPI(String identifier) throws APIManagementException {
         try {
-            apiDAO.deleteAPI(identifier);
+            getApiDAO().deleteAPI(identifier);
             APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
