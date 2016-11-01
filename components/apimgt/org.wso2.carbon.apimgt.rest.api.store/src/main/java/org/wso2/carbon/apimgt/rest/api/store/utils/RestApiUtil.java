@@ -18,18 +18,23 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
+import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.wso2.carbon.apimgt.core.api.APIConsumer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
@@ -39,6 +44,8 @@ import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
 
 public class RestApiUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class); 
 
     public static String getLoggedInUsername() {
         return "DUMMY_LOGGEDUSER";
@@ -229,7 +236,29 @@ public class RestApiUtil {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
     }
+    
+    /**
+     * Check if the specified throwable e is happened as the required resource cannot be found
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceNotFound(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtResourceNotFoundException;
+    }
 
+    /**
+     * Check if the specified throwable e is due to an authorization failure
+     * @param e throwable to check
+     * @return true if the specified throwable e is due to an authorization failure, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAuthorizationFailure(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtAuthorizationFailedException;
+    }
+    
     /**
      * Attempts to find the actual cause of the throwable 'e'
      *
@@ -336,4 +365,5 @@ public class RestApiUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }
+
 }
