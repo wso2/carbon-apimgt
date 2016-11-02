@@ -227,11 +227,6 @@
                 <version>${mockito.version}</version>
             </dependency>
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-api-mockito</artifactId>
                 <version>${powermock.version}</version>
@@ -256,6 +251,8 @@
                         <xmlOutput>true</xmlOutput>
                         <findbugsXmlOutputDirectory>${project.build.directory}/findbugs
                         </findbugsXmlOutputDirectory>
+                        <excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>
+                        <!--Exclude generated sources-->
                     </configuration>
                     <version>${maven.findbugsplugin.version}</version>
                     <executions>
@@ -405,6 +402,7 @@
         <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
         <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
+
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
 

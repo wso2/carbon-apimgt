@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import java.util.Map;
 
 /**
- * This is the interface that is used to write custom executors to lifecycles
+ * This is the interface that is used to write custom executors to resources.lifecycles
  * Executors are code segments that will run once a transition happens
  * */
 public interface Executor {

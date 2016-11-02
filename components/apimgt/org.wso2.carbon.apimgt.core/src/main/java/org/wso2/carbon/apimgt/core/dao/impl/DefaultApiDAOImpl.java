@@ -20,10 +20,12 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
 import java.io.InputStream;
@@ -38,7 +40,11 @@ import javax.annotation.CheckForNull;
  */
 public class DefaultApiDAOImpl implements ApiDAO {
 
-    DefaultApiDAOImpl() {}
+    private final SQLStatements sqlStatements;
+
+    DefaultApiDAOImpl(SQLStatements sqlStatements) {
+        this.sqlStatements = sqlStatements;
+    }
 
     /**
      * Retrieve a given instance of an API
@@ -50,7 +56,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws APIManagementDAOException {
-        return null;
+        return CommonDataAccessHandler.getAPI(apiID, sqlStatements);
     }
 
     /**
@@ -97,7 +103,13 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public API addAPI(API api) throws APIManagementDAOException {
-        return null;
+        if (CommonDataAccessHandler.isAPIExists(api, sqlStatements)) {
+            DAOUtil.handleException(ErrorCode.DUPLICATE_API_ADDED, "API " + api.getProvider() + "-" +
+                    api.getName() + "-" + api.getVersion() + " already exists");
+        }
+
+        CommonDataAccessHandler.addAPI(api, sqlStatements);
+        return api;
     }
 
     /**
@@ -122,6 +134,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteAPI(String apiID) throws APIManagementDAOException {
+        CommonDataAccessHandler.deleteAPI(apiID, sqlStatements);
     }
 
     /**
@@ -213,4 +226,14 @@ public class DefaultApiDAOImpl implements ApiDAO {
         return null;
     }
 
+    /**
+     * @param apiID The UUID of the respective API
+     * @param docID The UUID of the respective Document
+     * @return {@link DocumentInfo} Document Info object
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public DocumentInfo getDocumentInfo(String apiID, String docID) throws APIManagementDAOException {
+        return null;
+    }
 }

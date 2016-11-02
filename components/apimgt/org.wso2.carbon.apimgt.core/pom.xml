@@ -75,13 +75,19 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.9.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>com.h2database.wso2</groupId>
+            <artifactId>h2-database-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -119,8 +125,7 @@
                             org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
                             org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
                             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
-                            org.wso2.carbon.datasource.core.*;
-                            version="${datasources.core.package.import.version.range}",
+                            org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
                             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
                             org.wso2.carbon.apimgt.rest.api.common.*;
                         </Import-Package>

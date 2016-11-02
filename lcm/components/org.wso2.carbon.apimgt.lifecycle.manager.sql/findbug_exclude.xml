@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,DM_CONVERT_CASE"/>
+    </Match>
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.lifecycle.manager.sql"/>
+    </Match>
+</FindBugsFilter>

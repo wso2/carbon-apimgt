@@ -28,9 +28,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.LifecycleConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleConfigBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.dao.LifecycleMgtDAO;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
 import org.wso2.carbon.kernel.utils.Utils;
 import org.xml.sax.SAXException;
 
@@ -65,111 +62,8 @@ import javax.xml.xpath.XPathFactory;
 public class LifecycleUtils {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleUtils.class);
-    private static Map<String, String> lifecycleMap;
+    private static Map<String, Document> lifecycleMap;
     private static Validator lifecycleSchemaValidator;
-
-    /**
-     * Method used to add new lifecycle configuration.
-     *
-     * @param lcConfig                  Lifecycle configuration
-     * @throws LifecycleException
-     */
-    public static void addLifecycle(String lcConfig) throws LifecycleException {
-        Element element = (Element) getLifecycleElement(lcConfig).getElementsByTagName(LifecycleConstants.ASPECT)
-                .item(0);
-        String lcName = element.getAttribute("name");
-        if ("".equals(lcName)) {
-            throw new LifecycleException("Lifecycle name can not be empty in the configuration");
-        }
-
-        validateLifecycleContent(lcConfig);
-        validateSCXMLDataModel(getLifecycleElement(lcConfig));
-        try {
-            if (!checkLifecycleExist(lcName)) {
-                LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
-                lifecycleConfigBean.setLcName(lcName);
-                lifecycleConfigBean.setLcContent(lcConfig);
-                getLCMgtDAOInstance().addLifecycle(lifecycleConfigBean);
-                getLifecycleMapInstance().put(lcName, lcConfig);
-
-            } else {
-                throw new LifecycleException("Lifecycle already exist with name " + lcName);
-            }
-        } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error in adding lifecycle with name " + lcName, e);
-        }
-    }
-
-    /**
-     * Method used to update existing lifecycle configuration.
-     *
-     * @param oldName                       Name of the existing lifecycle.
-     * @param newContent                    Lifecycle configuration
-     * @throws LifecycleException
-     */
-    public static void updateLifecycle(String oldName, String newContent) throws LifecycleException {
-        Element element = (Element) getLifecycleElement(newContent).getElementsByTagName(LifecycleConstants.ASPECT)
-                .item(0);
-        String newName = element.getAttribute("name");
-        if ("".equals(newName)) {
-            throw new LifecycleException("Lifecycle name can not be empty in the configuration");
-        }
-        // adding new lifecycle. Not update operation
-        if (!newName.equals(oldName)) {
-            addLifecycle(newContent);
-        } else {
-            validateLifecycleContent(newContent);
-            try {
-                LifecycleConfigBean lifecycleConfigBean = new LifecycleConfigBean();
-                lifecycleConfigBean.setLcName(newName);
-                lifecycleConfigBean.setLcContent(newContent);
-                getLCMgtDAOInstance().updateLifecycle(lifecycleConfigBean);
-                getLifecycleMapInstance().put(newName, newContent);
-
-            } catch (LifecycleManagerDatabaseException e) {
-                throw new LifecycleException("Error in adding lifecycle with name " + newName, e);
-            }
-        }
-    }
-
-    /**
-     * Method used to delete exiting lifecycle.
-     *
-     * @param lcName                  Lifecycle to be deleted.
-     * @throws LifecycleException
-     */
-    public static void deleteLifecycle(String lcName) throws LifecycleException {
-        try {
-            if (!checkLifecycleInUse(lcName)) {
-                getLCMgtDAOInstance().deleteLifecycle(lcName);
-                if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
-                    lifecycleMap.remove(lcName);
-                }
-            } else {
-                throw new LifecycleException(
-                        lcName + " is associated with assets. Delete operation can not be " + "allowed");
-            }
-        } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error in deleting lifecycle with name " + lcName, e);
-        }
-    }
-
-    /**
-     * Get the list of life cycles for a particular tenant.
-     *
-     * @return List of available life cycles.
-     * @throws LifecycleException
-     */
-    public static String[] getLifecycleList() throws LifecycleException {
-        try {
-            if (lifecycleMap != null) {
-                return lifecycleMap.keySet().toArray(new String[0]);
-            }
-            return getLCMgtDAOInstance().getLifecycleList();
-        } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error while getting Lifecycle list. ", e);
-        }
-    }
 
     /**
      * Get the lifecycle configuration with a particular name.
@@ -178,15 +72,11 @@ public class LifecycleUtils {
      * @return                      Lifecycle configuration.
      * @throws LifecycleException
      */
-    public static String getLifecycleConfiguration(String lcName) throws LifecycleException {
-        try {
-            if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
-                return lifecycleMap.get(lcName);
-            }
-            return getLCMgtDAOInstance().getLifecycleConfig(lcName).getLcContent();
-        } catch (LifecycleManagerDatabaseException e) {
-            throw new LifecycleException("Error while getting Lifecycle list.", e);
+    public static Document getLifecycleConfiguration(String lcName) throws LifecycleException {
+        if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
+            return lifecycleMap.get(lcName);
         }
+        throw new LifecycleException("Lifecycle configuration does not exist with name " + lcName);
     }
 
     /**
@@ -231,7 +121,7 @@ public class LifecycleUtils {
                     if (fileName.equalsIgnoreCase(lcName)) {
                         validateLifecycleContent(fileContent);
                         validateSCXMLDataModel(lcConfig);
-                        getLifecycleMapInstance().put(lcName, fileContent);
+                        getLifecycleMapInstance().put(lcName, lcConfig);
                     } else {
                         String msg = String
                                 .format("Configuration file name %s not matched with lifecycle name %s ", fileName,
@@ -363,7 +253,7 @@ public class LifecycleUtils {
         return lifecycleSchemaValidator;
     }
 
-    private static synchronized  Map<String, String> getLifecycleMapInstance() {
+    private static synchronized  Map<String, Document> getLifecycleMapInstance() {
         if (lifecycleMap == null) {
             lifecycleMap = new ConcurrentHashMap<>();
         }
@@ -378,21 +268,6 @@ public class LifecycleUtils {
      */
     private static String getLifecycleSchemaLocation() {
         return Utils.getCarbonHome() + File.separator + "resources" + File.separator + "lifecycle-config.xsd";
-    }
-
-    private static boolean checkLifecycleExist(String lcName) throws LifecycleManagerDatabaseException {
-        if (lifecycleMap != null && lifecycleMap.containsKey(lcName)) {
-            return true;
-        }
-        return getLCMgtDAOInstance().checkLifecycleExist(lcName);
-    }
-
-    private static boolean checkLifecycleInUse(String lcName) throws LifecycleManagerDatabaseException {
-        return getLCMgtDAOInstance().isLifecycleIsInUse(lcName);
-    }
-
-    private static LifecycleMgtDAO getLCMgtDAOInstance() {
-        return LifecycleMgtDAO.getInstance();
     }
 
     private static String getDefaltLifecycleConfigLocation() {
