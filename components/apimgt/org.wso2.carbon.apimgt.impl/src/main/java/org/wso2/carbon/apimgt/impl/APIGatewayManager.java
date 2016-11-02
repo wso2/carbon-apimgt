@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -328,12 +329,16 @@ public class APIGatewayManager {
                 client = new APIGatewayAdminClient(api.getId(), environment);
                 gatewayManager.deployWebsocketAPI(api, client);
             }
-        } catch (Exception ex) {
+        } catch (APIManagementException ex) {
                     /*
                 didn't throw this exception to handle multiple gateway publishing
                 if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                 therefore this didn't break the gateway unpublisihing if one gateway unreachable
                  */
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } catch (AxisFault ex) {
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } catch (GovernanceException ex) {
             log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
         }
     }

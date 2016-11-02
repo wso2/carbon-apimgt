@@ -447,7 +447,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             try {
                 conn.setAutoCommit(false);
             } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e, e);
+                log.error("Error occurred while fetching data: " + e.getMessage(), e);
             }
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -523,12 +523,12 @@ public class APIKeyValidationService extends AbstractAdmin {
                 apiProvider = rs.getString("API_PROVIDER");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error occurred while fetching data: " + e.getMessage(), e);
         } finally {
             try {
                 conn.setAutoCommit(false);
             } catch (SQLException e) {
-                log.error("Error occurred while fetching data: " + e, e);
+                log.error("Error occurred while fetching data: " + e.getMessage(), e);
             }
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
