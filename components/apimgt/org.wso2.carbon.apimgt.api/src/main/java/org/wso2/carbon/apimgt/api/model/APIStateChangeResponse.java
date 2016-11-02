@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 public class APIStateChangeResponse {
     private String stateChangeStatus = null;
     private WorkflowResponse workflowResponse = null;
+
     public String getStateChangeStatus() {
         return stateChangeStatus;
     }
+
     public void setStateChangeStatus(String stateChangeStatus) {
         this.stateChangeStatus = stateChangeStatus;
     }
+
     public WorkflowResponse getWorkflowResponse() {
         return workflowResponse;
     }
+
     public void setWorkflowResponse(WorkflowResponse workflowResponse) {
         this.workflowResponse = workflowResponse;
     }

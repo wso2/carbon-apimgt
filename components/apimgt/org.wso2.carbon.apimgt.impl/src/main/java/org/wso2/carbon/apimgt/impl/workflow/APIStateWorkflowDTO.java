@@ -22,9 +22,9 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
 public class APIStateWorkflowDTO extends WorkflowDTO{
 	
-	private String apiCurrentState;
-	private String apiLCAction;
-	private String scope;
+    private String apiCurrentState;
+    private String apiLCAction;
+    private String scope;
     private String tokenAPI;
     private String clientId;
     private String clientSecret;
