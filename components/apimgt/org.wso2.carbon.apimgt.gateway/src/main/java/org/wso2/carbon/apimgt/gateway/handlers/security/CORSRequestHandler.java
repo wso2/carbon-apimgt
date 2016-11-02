@@ -41,7 +41,10 @@ import java.util.*;
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
-	private String apiImplementationType;
+	private String accessControlMaxAge;
+    // default to 15 minutes
+    private Integer accessControlMaxAgeComputed = 15 * 60;
+    private String apiImplementationType;
 	private String allowHeaders;
 	private String allowCredentials;
 	private Set<String> allowedOrigins;
@@ -78,7 +81,17 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		if (allowedMethods == null) {
 			allowedMethods = APIUtil.getAllowedMethods();
 		}
-
+        if (accessControlMaxAge != null && accessControlMaxAge.trim().length() != 0) {
+            try {
+				accessControlMaxAgeComputed = Integer.parseInt(accessControlMaxAge);
+                if (accessControlMaxAgeComputed <= 0) {
+                    accessControlMaxAgeComputed = null;
+                }
+            } catch (final NumberFormatException nfe) {
+				log.warn("could not parse Access-Control-Max-Age configuration value (" + accessControlMaxAge +
+                        "), this configuration will be ignored");
+			}
+		}
 		initializeHeaderValues =  true;
 	}
 
@@ -275,6 +288,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, APIUtil.isCORSEnabled());
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
+		if (this.accessControlMaxAgeComputed != null) {
+			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_MAX_AGE, this.accessControlMaxAgeComputed);
+		}
 	}
 
 
@@ -299,6 +315,14 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     public void setAllowedOrigins(String allowedOrigins) {
         this.allowedOrigins = new HashSet<String>(Arrays.asList(allowedOrigins.split(",")));
     }
+
+	public String getAccessControlMaxAge() {
+		return this.accessControlMaxAge;
+	}
+
+	public void setAccessControlMaxAge(String accessControlMaxAge) {
+		this.accessControlMaxAge = accessControlMaxAge;
+	}
 
 	public String getApiImplementationType() {
 		return apiImplementationType;
