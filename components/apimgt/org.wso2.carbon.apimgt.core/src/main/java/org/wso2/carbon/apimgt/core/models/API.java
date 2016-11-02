@@ -34,6 +34,8 @@ public final class API {
     private String context;
     private String id;
     private String status;
+    private String endpointConfig;
+    private BusinessInformation businessInformation;
 
     public API(String provider, String version, String name) {
         this.provider = provider;
@@ -118,4 +120,19 @@ public final class API {
             return result;
         }
 
+    public String getEndpointConfig() {
+        return endpointConfig;
+    }
+
+    public void setEndpointConfig(String endpointConfig) {
+        this.endpointConfig = endpointConfig;
+    }
+
+    public BusinessInformation getBusinessInformation() {
+        return businessInformation;
+    }
+
+    public void setBusinessInformation(BusinessInformation businessInformation) {
+        this.businessInformation = businessInformation;
+    }
 }
