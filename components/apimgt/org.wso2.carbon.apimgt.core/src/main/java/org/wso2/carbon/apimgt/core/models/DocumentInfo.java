@@ -46,6 +46,32 @@ public final class DocumentInfo {
         }
     }
 
+    /**
+     * Gets or Sets visibility
+     */
+    public enum Visibility {
+        OWNER_ONLY("OWNER_ONLY"),
+
+        PRIVATE("PRIVATE"),
+
+        API_LEVEL("API_LEVEL");
+
+        private String value;
+
+        Visibility(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     private SourceType sourceType;
     private String sourceURL;
     private String otherType;
@@ -53,6 +79,7 @@ public final class DocumentInfo {
     private String summary;
     private String name;
     private String type;
+    private Visibility visibility;
 
 
     public SourceType getSourceType() {
@@ -109,5 +136,13 @@ public final class DocumentInfo {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Visibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 }

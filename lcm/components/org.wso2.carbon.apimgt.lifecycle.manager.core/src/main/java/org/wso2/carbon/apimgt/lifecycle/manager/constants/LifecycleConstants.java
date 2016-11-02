@@ -32,18 +32,11 @@ public class LifecycleConstants {
      */
     public static final String FOR_TARGET_ATTRIBUTE = "forTarget";
 
-    public static final String ID_ATTRIBUTE = "id";
+    public static final String LIFECYCLE_SCXML_ELEMENT_PATH = "//scxml";
 
-    public static final String LIFECYCLE_SCXML_ELEMENT_PATH = "aspect/configuration/lifecycle/*[local-name() ='scxml']";
+    public static final String LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH = "//state[@id='";
 
-    public static final String LIFECYCLE_STATE_ELEMENT_PATH =
-            "aspect/configuration/lifecycle/*[local-name()='scxml']" + "/*[local-name()='state']";
-
-    public static final String LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH =
-            "aspect/configuration/lifecycle/*[local-name" + "()='scxml']/*[local-name()='state' and @id='";
-
-    public static final String LIFECYCLE_DATA_ELEMENT_PATH =
-            "/*[local-name()='datamodel']/*[local-name()='data' and " + "@name='";
+    public static final String LIFECYCLE_DATA_ELEMENT_PATH = "//datamodel//data[@name='";
 
     public static final String LIFECYCLE_TRANSITION_INPUT_ATTRIBUTE = "transitionInput";
 
@@ -53,7 +46,7 @@ public class LifecycleConstants {
 
     public static final String LIFECYCLE_CHECKLIST_ITEM_ATTRIBUTE = "checkItems";
 
-    public static final String LIFECYCLE_TRANSITION_ELEMENT = "/*[local-name()='transition']";
+    public static final String LIFECYCLE_TRANSITION_ELEMENT = "//transition";
 
     public static final String LIFECYCLE_EVENT_ATTRIBUTE = "event";
 
@@ -64,7 +57,26 @@ public class LifecycleConstants {
     public static final String LIFECYCLE_ROLES_ATTRIBUTE = "roles";
 
     public static final String ASPECT = "aspect";
+
     public static final String STATE_TAG = "state";
+
     public static final String TRANSITION_ATTRIBUTE = "transition";
+
     public static final String TARGET_ATTRIBUTE = "target";
+
+    public static final String VALUE_ATTRIBUTE = "value";
+
+    public static final String CLASS_ATTRIBUTE = "class";
+
+    public static final String REQUIRED = "required";
+
+    public static final String LABEL = "label";
+
+    public static final String PLACE_HOLDER = "placeHolder";
+
+    public static final String REGEX = "regex";
+
+    public static final String TOOLTIP = "tooltip";
+
+    public static final String VALUES = "values";
 }

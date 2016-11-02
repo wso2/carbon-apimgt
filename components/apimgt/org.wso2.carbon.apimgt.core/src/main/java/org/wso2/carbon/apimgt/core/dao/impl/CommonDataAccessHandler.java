@@ -20,8 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
-import org.wso2.carbon.apimgt.core.dao.ErrorCode;
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 import org.wso2.carbon.apimgt.core.models.API;
 
 import java.sql.Connection;

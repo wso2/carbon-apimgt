@@ -126,13 +126,15 @@ public class LifecycleEventManager {
 
     /**
      * This method provides set of lifecycle ids in a particular state.
-     * @param state`
-     * @return  List of lifecycle ids in the given state.
+     *
+     * @param state                 Filtering state.
+     * @param lcName                Name of the relevant lifecycle.
+     * @return                      {@code List<LifecycleHistoryBean>} List of lifecycle ids in the given state.
      * @throws LifecycleException
      */
-    public List<String> getLifecycleIds (String state) throws LifecycleException {
+    public List<String> getLifecycleIds (String state, String lcName) throws LifecycleException {
         try {
-            return getLCMgtDAOInstance().getLifecycleIdsFromState(state);
+            return getLCMgtDAOInstance().getLifecycleIdsFromState(state, lcName);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while getting lifecycle ids in state : " + state, e);
         }

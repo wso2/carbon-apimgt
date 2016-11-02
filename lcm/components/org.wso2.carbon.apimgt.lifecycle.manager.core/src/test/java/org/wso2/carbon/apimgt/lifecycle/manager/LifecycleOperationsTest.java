@@ -69,6 +69,7 @@ public class LifecycleOperationsTest {
         String dbConfigPath = System.getProperty("LCManagerDBConfigurationPath");
         setupInitialContext(dbConfigPath);
         LifecycleConfigBuilder.build(LifecycleConfig::new);
+        LifecycleUtils.initiateLCMap();
         LifecycleMgtDBUtil.initialize();
         lifecycleMgtDAO = LifecycleMgtDAO.getInstance();
     }
@@ -137,7 +138,7 @@ public class LifecycleOperationsTest {
         }
     }
 
-    public void testAddLifecycle() throws Exception {
+    /*public void testAddLifecycle() throws Exception {
         String payload = readLifecycleFile(
                 System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
         LifecycleUtils.addLifecycle(payload);
@@ -159,7 +160,7 @@ public class LifecycleOperationsTest {
     @Test(dependsOnMethods = "testAddLifecycle")
     public void testUpdateLifecycle() throws Exception {
         String payload = readLifecycleFile(
-                System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycleUpdated.xml");
+                System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
         LifecycleUtils.updateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, payload);
         assertTrue(LifecycleUtils.getLifecycleList().length == 1);
         assertNotNull(LifecycleUtils.getLifecycleConfiguration(TestConstants.SERVICE_LIFE_CYCLE));
@@ -192,6 +193,14 @@ public class LifecycleOperationsTest {
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("is associated with assets"));
         }
+    }*/
+    @Test
+    public void testAssociateLifecycle() throws Exception {
+        sampleAPI = createSampleAPI();
+        sampleAPI
+                .setLifecycleState(sampleAPI.associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN));
+        assertNotNull(sampleAPI.getLifecycleState().getState());
+        assertNotNull(sampleAPI.getLifecycleState().getLifecycleId());
     }
 
     @Test(dependsOnMethods = "testAssociateLifecycle")
@@ -225,21 +234,22 @@ public class LifecycleOperationsTest {
         assertTrue(TestConstants.TESTING.equals(lifecycleHistoryBeanList.get(1).getPostState()));
     }
 
-    //@Test(dependsOnMethods = "testAssociateLifecycle")
-    /*public void testDissociateLifecycle() throws Exception {
+    @Test(dependsOnMethods = "testChangeLifecycleState")
+    public void testGetLifecycleIdsFromState() throws Exception {
+        List<String> stateList = LifecycleDataProvider
+                .getIdsFromState(TestConstants.TESTING, TestConstants.SERVICE_LIFE_CYCLE);
+        assertTrue(stateList.size() == 1);
+    }
+
+    @Test(dependsOnMethods = "testGetLifecycleIdsFromState")
+    public void testDissociateLifecycle() throws Exception {
         String uuid = sampleAPI.getLifecycleState().getLifecycleId();
         sampleAPI.dissociateLifecycle(uuid);
         try {
-            sampleAPI.setCurrentLifecycleState(uuid);
+            LifecycleDataProvider.getCurrentLifecycleState(uuid);
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Error while getting lifecycle data for id"));
         }
-    }*/
-
-    @Test(dependsOnMethods = "testChangeLifecycleState")
-    public void testGetLifecycleIdsFromState() throws Exception {
-        List<String> stateList = LifecycleDataProvider.getIdsFromState(TestConstants.TESTING);
-        assertTrue(stateList.size() == 1);
     }
 
     private String readLifecycleFile(String path) throws IOException {

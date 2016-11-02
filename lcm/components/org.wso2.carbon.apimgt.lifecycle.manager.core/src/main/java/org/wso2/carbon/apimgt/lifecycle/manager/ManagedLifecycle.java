@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
 public interface ManagedLifecycle {
 
     /**
-     * This method add state data like, transition inputs, custom executors etc to the lifecycle state object.
+     * This method is used to attach a lifecycle to any eternal object (Ex: API)
      *
      * @param lcName                        Lc name which associates with the resource.
      * @param user                          The user who invoked the action. This will be used for auditing purposes.
@@ -38,7 +38,7 @@ public interface ManagedLifecycle {
     }
 
     /**
-     * This method need to call for each and event life cycle state changes.
+     * This method need to call for each life cycle state change.
      *
      * @param targetState                       {@code String} Required target state of the lifecycle.
      * @param uuid                              {@code String} object that can use to uniquely identify resource.

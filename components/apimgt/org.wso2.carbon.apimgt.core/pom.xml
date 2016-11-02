@@ -83,7 +83,16 @@
         <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
-            <!--version>1.2.140.wso2v3</version-->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

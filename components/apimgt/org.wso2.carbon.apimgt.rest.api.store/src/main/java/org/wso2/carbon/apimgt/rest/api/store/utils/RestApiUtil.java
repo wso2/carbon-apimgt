@@ -18,20 +18,22 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
+import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.core.util.exception.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.Tier;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.core.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.core.util.exception.ForbiddenException;
@@ -39,6 +41,8 @@ import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
 
 public class RestApiUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class); 
 
     public static String getLoggedInUsername() {
         return "DUMMY_LOGGEDUSER";
@@ -59,7 +63,7 @@ public class RestApiUtil {
 //        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 //        JSONObject loginInfoJsonObj = new JSONObject();
 //        try {
-//            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+//            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
 //            loginInfoJsonObj.put("user", username);
 //            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 //                loginInfoJsonObj.put("isSuperTenant", true);
@@ -229,7 +233,29 @@ public class RestApiUtil {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
     }
+    
+    /**
+     * Check if the specified throwable e is happened as the required resource cannot be found
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceNotFound(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtResourceNotFoundException;
+    }
 
+    /**
+     * Check if the specified throwable e is due to an authorization failure
+     * @param e throwable to check
+     * @return true if the specified throwable e is due to an authorization failure, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAuthorizationFailure(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtAuthorizationFailedException;
+    }
+    
     /**
      * Attempts to find the actual cause of the throwable 'e'
      *
@@ -249,8 +275,8 @@ public class RestApiUtil {
      * @param tierName Tier to find
      * @return Matched tier with its name
      */
-    public static Tier findTier(Collection<Tier> tiers, String tierName) {
-        for (Tier tier : tiers) {
+    public static TierDTO findTier(Collection<TierDTO> tiers, String tierName) {
+        for (TierDTO tier : tiers) {
             if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
                 return tier;
             }
@@ -274,13 +300,13 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns an APIConsumer.
+     * Returns an APIStore.
      * 
      * @param subscriberName
      * @return
      * @throws APIManagementException
      */
-    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+    public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
@@ -336,4 +362,5 @@ public class RestApiUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }
+
 }

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -28,7 +29,6 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-
 import javax.annotation.CheckForNull;
 
 /**
@@ -137,11 +137,14 @@ public interface ApiDAO {
     /**
      * Change the lifecycle status of a given API
      * @param apiID The UUID of the respective API
+     *              @param deprecateOldVersions  if true for deprecate older versions
+     *              @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @param status The lifecycle status that the API must be set to
      * @throws APIManagementDAOException  if error occurs while accessing data layer
      *
      */
-    void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException;
+    void changeLifeCycleStatus(String apiID, String status, boolean
+            deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementDAOException;
 
     /**
      * Create a new version of an existing API

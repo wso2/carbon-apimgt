@@ -20,9 +20,9 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ErrorCode;
+import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -188,12 +188,15 @@ public class DefaultApiDAOImpl implements ApiDAO {
     /**
      * Change the lifecycle status of a given API
      *
-     * @param apiID  The UUID of the respective API
-     * @param status The lifecycle status that the API must be set to
+     * @param apiID                     The UUID of the respective API
+     * @param status                    The lifecycle status that the API must be set to
+     * @param deprecateOldVersions      if true for deprecate older versions
+     * @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @throws APIManagementDAOException
      */
     @Override
-    public void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException {
+    public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
+            makeKeysForwardCompatible) throws APIManagementDAOException {
 
     }
 

@@ -17,8 +17,8 @@ package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
 
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfo;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationList;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 
@@ -35,9 +35,9 @@ public class ApplicationMappingUtil {
      * @param offset starting index
      * @return ApplicationListDTO object corresponding to Application[] array
      */
-    public static ApplicationList fromApplicationsToDTO(Application[] applications, int limit, int offset) {
-        ApplicationList applicationListDTO = new ApplicationList();
-        List<ApplicationInfo> applicationInfoDTOs = applicationListDTO.getList();
+    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
+        ApplicationListDTO applicationListDTO = new ApplicationListDTO();
+        List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
         if (applicationInfoDTOs == null) {
             applicationInfoDTOs = new ArrayList<>();
             applicationListDTO.setList(applicationInfoDTOs);
@@ -62,7 +62,7 @@ public class ApplicationMappingUtil {
      * @param offset starting index
      * @param size max offset
      */
-    public static void setPaginationParams(ApplicationList applicationListDTO, String groupId, int limit, int offset,
+    public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
             int size) {
 
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
@@ -85,8 +85,8 @@ public class ApplicationMappingUtil {
         applicationListDTO.setPrevious(paginatedPrevious);
     }
 
-    public static ApplicationInfo fromApplicationToInfoDTO (Application application) {
-        ApplicationInfo applicationInfoDTO = new ApplicationInfo();
+    public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
+        ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
         applicationInfoDTO.setApplicationId(application.getUUID());
         applicationInfoDTO.setThrottlingTier(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());

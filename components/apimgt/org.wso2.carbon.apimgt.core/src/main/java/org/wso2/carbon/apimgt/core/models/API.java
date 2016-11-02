@@ -30,6 +30,14 @@ import java.util.List;
  */
 
 public final class API {
+    public String getEndpointConfig() {
+        return endpointConfig;
+    }
+
+    public void setEndpointConfig(String endpointConfig) {
+        this.endpointConfig = endpointConfig;
+    }
+
     /**
      * Visibility options
      */
@@ -58,10 +66,13 @@ public final class API {
     private List<Endpoint> endpoints = new ArrayList<>();
     private List<Environment> gatewayEnvironments;
 
+    private String endpointConfig;
     private String businessOwnerEmail;
     private String technicalOwnerEmail;
     private String technicalOwner;
     private String businessOwner;
+    private BusinessInformation businessInformation;
+
     private Date createdTime;
     private String createdBy;
     private Date lastUpdatedTime;
@@ -299,6 +310,14 @@ public final class API {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BusinessInformation getBusinessInformation() {
+        return businessInformation;
+    }
+
+    public void setBusinessInformation(BusinessInformation businessInformation) {
+        this.businessInformation = businessInformation;
     }
 
     @Override
