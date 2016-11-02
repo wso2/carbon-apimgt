@@ -1,0 +1,76 @@
+<%
+include("/jagg/jagg.jag");
+
+var carbon = require('carbon');
+var log = new Log();
+var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+var workflowConfigs = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService')
+                                    .getAPIManagerConfiguration().getWorkflowProperties();
+
+var serverUrl = workflowConfigs.getServerUrl();
+var isEnabled = workflowConfigs.isEnabled();
+
+
+var assignBPMNTask = function (taskId) {
+
+    if(!isEnabled){
+      return {
+                  error:true
+            }; 
+    }
+
+	var username = MultitenantUtils.getTenantAwareUsername(session.get("logged.user").username);
+
+    var headers;
+    var auth = session.get("logged.user").auth;
+    var cookie = session.get("workflowCookie");
+
+    //Set the workflow cookie when Basic auth is not possible. This can be used when SSO
+    //is enabled
+    if(auth != null){
+        var basicHeader = "Basic " + auth.toString();
+        headers = {"Authorization": basicHeader , "Content-Type" : "application/json"};
+    } else if(cookie != null){
+        headers = {"Cookie": cookie , "Content-Type" : "application/json"};
+    } else {
+        log.warn("No Authentication header set")
+    } 
+
+    //In WSO2BPS for each tenant space has seperate rest api to access bpmn tasks
+    var userDomain = MultitenantUtils.getTenantDomain(session.get("logged.user").username);
+    if(userDomain != null && userDomain != "carbon.super"){
+        var tenantBPMNserverUrl = "/t/" + userDomain + "/webapps/bpmn";
+        serverUrl = serverUrl.replace("/bpmn", tenantBPMNserverUrl)
+    }
+    var taskUrl = serverUrl + "/runtime/tasks/" + taskId;
+
+ 	var payload = {};
+ 	payload.assignee = new String(username);
+ 	payload.action = "claim"
+
+    try{
+        var response = post(taskUrl, JSON.stringify(payload), headers);
+
+        if(response != null && response.data != null){
+            var errorResponse = JSON.parse(response.data);
+            log.error("Unable to claim task " + errorResponse.statusCode + " : " +  errorResponse.errorMessage);
+            return {
+                error:true
+            };
+        } else {
+            return {
+                error:false
+            };
+        }
+    } catch (e) {
+        log.error("Error while claiming tasks " + e);
+        return {
+            error:true
+        };
+    }
+    
+};
+
+%>

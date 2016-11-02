@@ -27,7 +27,8 @@ jagg.block("life-cycles", {
     var result = modApi.getLifeCyclesEvents(apiData);
     var lcs = result.lcs;
     var lcStatus = modApi.getAPILCStatus(apiData);
-
+    var apiWFstatus = modApi.getAPILCWorkflowStatus(apiData);
+    
     // jaggary code which check for published in external stores
     var publishedInExternalStores = false;
     if(api.apiStores != null && api.apiStores != undefined){
@@ -46,7 +47,8 @@ jagg.block("life-cycles", {
             "oldExist":oldExist,
             "isPublishPermitted":permitted,
             "publishedInExternalStores":publishedInExternalStores,
-            "lcStatus":lcStatus
+            "lcStatus":lcStatus,
+            "wfStatus":apiWFstatus
            
         }
     },

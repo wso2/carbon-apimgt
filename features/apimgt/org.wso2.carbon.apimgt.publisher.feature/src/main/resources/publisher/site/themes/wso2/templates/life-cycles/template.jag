@@ -7,6 +7,7 @@ if(outputs.isPublishPermitted){
         var publishedInExternalStores = outputs.publishedInExternalStores;
         var i,resCount,rowNums = [];
         var lcStatus = outputs.lcStatus;
+        var wfStatus = outputs.wfStatus;
 
  %>
 
@@ -15,6 +16,7 @@ $(document).ready(function() {
 // call when page load to display message if the API is published to external stores and status is not published
 checkExternalStores('<%=lcStatus%>');
 });
+
 
 function setChecklistItemVal(element,order) {
     if ($(element).is(":checked") == false) {
@@ -44,118 +46,183 @@ function setChecklistItemVal(element,order) {
               },"json");
 
 };
-function updateStatus(status){
-var apiName=$("#name").val();
-var version=$("#apiVersion").val();
-var provider=$("#provider").val();
-var isSetDeprecation=$("#itemDiv1").val();
-$(".modal-footer").html("");
-if(status=='Deprecate'){
-var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
-var messageTitle = i18n.t("Change Lifecycle status");
-jagg.message({
-        content: messageContent,
-        type:"confirm",
-        title: messageTitle,
-        anotherDialog:true,
-        okCallback:function(){
-                       $('#messageModal').modal({backdrop: 'static', keyboard: false });
-                                  $(".modal-header .close").hide();
-                                  $(".modal-footer").html("");
-                                  $(".modal-title").html(i18n.t("Please wait"));
-                                  $(".modal-body").addClass("loadingButton");
-                                  $(".modal-body").css({"margin-left":25}); //todo param_string
-                                  $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version );
-                      jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
-                          function (result) {
-                              if (!result.error) {
-                                 $('#statusUpdateMsg').show();
-                                 setTimeout(function(){
-                						location = ''
-              					 },1000)
-                              } else {
-                                    if (result.message == "AuthenticateError") {
-                                       jagg.showLogin();
-                                    } else {
-                                           jagg.message({content:result.message,type:"error"});
-                                    }
-                              }
-                          }, "json");
+function updateStatus(status) {
+    var apiName = $("#name").val();
+    var version = $("#apiVersion").val();
+    var provider = $("#provider").val();
+    var isSetDeprecation = $("#itemDiv1").val();
+    $(".modal-footer").html("");
+    if (status == 'Deprecate') {
+        var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
+        var messageTitle = i18n.t("Change Lifecycle status");
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                        action: "updateStatus",
+                        provider: provider,
+                        name: apiName,
+                        version: version,
+                        status: status
+                    },
+                    function(result) {
+                        if (!result.error) {
+                            var jsonPayload = result.status.workflowResponse.jsonPayload;
 
-    },
-    cancelCallback:function(){
-    $('#messageModal').modal('hide');
-         $(".modal-footer").html("");
-    }
-    });
-} else if (isSetDeprecation === 'true') {
+                            if (result.status.stateChangeStatus == 'REJECTED') {
+                                showWorkflowRejectedMessage();
+                            } else if (jsonPayload != null && jsonPayload != "") {
+                                var apiInfo = {};
+                                apiInfo.provider = provider;
+                                apiInfo.name = apiName;
+                                apiInfo.version = version;
+                                handleWorkflowRedirection(jsonPayload, apiInfo);
+                            } else {
+                                ///test
+                                $('#statusUpdateMsg').show();
+                                setTimeout(function() {
+                                    location = ''
+                                }, 1000)
+                            }
+                        } else {
+                            if (result.message == "AuthenticateError") {
+                                jagg.showLogin();
+                            } else {
+                                jagg.message({
+                                    content: result.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    }, "json");
 
-    var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
-    var messageTitle = i18n.t("Change Lifecycle status");
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else if (isSetDeprecation === 'true') {
 
-    jagg.message({
-        content: messageContent,
-        type:"confirm",
-        title: messageTitle,
-        anotherDialog:true,
-        okCallback:function() {
-            $('#messageModal').modal({backdrop: 'static', keyboard: false });
-            $(".modal-header .close").hide();
-            $(".modal-footer").html("");
-            $(".modal-title").html(i18n.t("Please wait"));
-            $(".modal-body").addClass("loadingButton");
-            $(".modal-body").css({"margin-left":25}); //todo param_string
-            $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version );
+        var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
+        var messageTitle = i18n.t("Change Lifecycle status");
 
-            jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
-                   action: "updateStatus",
-                   provider: provider,
-                   name: apiName,
-                   version: version,
-                   status: status
-            }, function (result) {
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                    action: "updateStatus",
+                    provider: provider,
+                    name: apiName,
+                    version: version,
+                    status: status
+                }, function(result) {
+                    if (!result.error) {
+                        var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                        if (result.status.stateChangeStatus == 'REJECTED') {
+                            showWorkflowRejectedMessage();
+                        } else if (jsonPayload != null && jsonPayload != "") {
+                            var apiInfo = {};
+                            apiInfo.provider = provider;
+                            apiInfo.name = apiName;
+                            apiInfo.version = version;
+                            handleWorkflowRedirection(jsonPayload, apiInfo);
+                        } else {
+                            ///test
+                            $('#statusUpdateMsg').show();
+                            setTimeout(function() {
+                                location = ''
+                            }, 1000)
+                        }
+                    } else {
+                        if (result.message == "AuthenticateError") {
+                            jagg.showLogin();
+                        } else {
+                            jagg.message({
+                                content: result.message,
+                                type: "error"
+                            });
+                        }
+                    }
+                }, "json");
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else {
+        jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                action: "updateStatus",
+                provider: provider,
+                name: apiName,
+                version: version,
+                status: status
+            },
+            function(result) {
                 if (!result.error) {
-                    $('#statusUpdateMsg').show();
-                    setTimeout(function(){
-                        location = ''
-                    },1000)
+                    var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                    if (result.status.stateChangeStatus == 'REJECTED') {
+                        showWorkflowRejectedMessage();
+                    } else if (jsonPayload != null && jsonPayload != "") {
+                        var apiInfo = {};
+                        apiInfo.provider = provider;
+                        apiInfo.name = apiName;
+                        apiInfo.version = version;
+                        handleWorkflowRedirection(jsonPayload, apiInfo);
+                    } else {
+                        ///test
+                        $('#statusUpdateMsg').show();
+                        setTimeout(function() {
+                            location = ''
+                        }, 1000)
+                    }
                 } else {
                     if (result.message == "AuthenticateError") {
                         jagg.showLogin();
                     } else {
-                        jagg.message({content:result.message,type:"error"});
+                        jagg.message({
+                            content: result.message,
+                            type: "error"
+                        });
                     }
-                  }
+                }
             }, "json");
-        },
-        cancelCallback:function(){
-            $('#messageModal').modal('hide');
-            $(".modal-footer").html("");
-        }
-    });
-} else {
- jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
-                           function (result) {
-                               if (!result.error) {
-                                  $('#statusUpdateMsg').show();
-                                  setTimeout(function(){
-                 						location = ''
-               					 },1000)
-                               } else {
-                                    if (result.message == "AuthenticateError") {
-                                       jagg.showLogin();
-                                    } else {
-                                           jagg.message({content:result.message,type:"error"});
-                                    }
-                                }
-                           }, "json");
-
-}
-
-
-
+    }
 };
-
 
 var initOf_state = '<%=lcStatus%>';
 // java script variable to store the status
@@ -175,14 +242,25 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
      <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
      <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
-     	  <span class="badge badge-warning">!</span> <%=i18n.localize("This API is not PUBLISHED. Please remove from external stores.")%>
+        <span class="badge badge-warning">!</span> <%=i18n.localize("This API is not PUBLISHED. Please remove from external stores.")%>
      </div>
-		<div class="form-group">
+    <div class="form-group">
             <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4><%=i18n.localize("Current State")%>:</h4></label>
             <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
                 <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
              </div>
-		</div>
+    </div>
+  <%  if(wfStatus != null && wfStatus.status == 'CREATED') {%> 
+     <div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
+     </div>  
+     <div id="deletePendingTasks">
+                <a onclick="deletePendingTasks('<%=api.name%>', '<%=api.version%>', '<%=api.provider%>')" href="#" title="<%=i18n.localize("Delete Task")%>" class="btn btn-primary  btn-sm padding-reduce-on-grid-view">
+                    <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("Delete Task")%>"></i>
+                    <%=i18n.localize("Delete Task")%>
+                </a>
+    </div>
+  <% }else {%>   
     </div>
 
                  <%for (var j=0;j<lcData.items.length;j++){
@@ -196,23 +274,23 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  <% if(isVisible=="true"){%>
                       <%if(((state!="Created") && (state!="Prototyped"))||(state=="Created" && oldExist)||(state=="Prototyped" && oldExist)){%>
                       <div class="form-group">
-                      	 <label class="control-label col-sm-3"></label>
-	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-	                        	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                        		<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
-	                     </label>
+                         <label class="control-label col-sm-3"></label>
+                       <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                            <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                              <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                       </label>
                      </div>
                     <%}else{%>
                         <%if((itemName == i18n.localize("Require Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
                                 continue;
                         }else{%>
-                        		<div class="form-group">
-                        			 <label class="control-label col-sm-3"></label>
-	                                 <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-	                                	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                                	<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
-	                            	</label>
-                            	</div>
+                            <div class="form-group">
+                               <label class="control-label col-sm-3"></label>
+                                   <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                                    <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                                    <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                                </label>
+                              </div>
                         <%}
                  <%}}}%>
 
@@ -270,7 +348,8 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 </form>
         <div id="lifecycle-rendering-area" class="lifecycle-rendering-area add-margin-top-4x add-margin-bottom-4x">
             <svg width=900 height=600 ><g/></svg>
-        </div>
+        </div> 
+        <% } %>
         <div class="page-header">
             <h4 class="lead"><%=i18n.localize("Lifecycle History")%></h4>
         </div>
@@ -308,11 +387,11 @@ function hideMsg() {
 
 // function to show / hide external stores message
 var checkExternalStores=function(status){
-	if(status !== 'PUBLISHED' && publishedInExternalStores==true){
-		$('#removeFromExternalStoresMsg').show();
-	}else{
-		$('#removeFromExternalStoresMsg').hide();
-	}
+  if(status !== 'PUBLISHED' && publishedInExternalStores==true){
+    $('#removeFromExternalStoresMsg').show();
+  }else{
+    $('#removeFromExternalStoresMsg').hide();
+  }
     if (status !== 'PUBLISHED') {
         $('#externalAPIStoresTab').hide();
     }else{

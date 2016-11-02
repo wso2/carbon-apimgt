@@ -5726,6 +5726,47 @@ public class ApiMgtDAO {
         }
         return workflowDTO;
     }
+    
+    /**
+     * Returns a workflow object for a given internal workflow reference and the workflow type.
+     *
+     * @param workflowReference
+     * @param workflowType
+     * @return
+     * @throws APIManagementException
+     */
+    public WorkflowDTO retrieveWorkflowFromInternalReference(String workflowReference, String workflowType)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        WorkflowDTO workflowDTO = null;
+
+        String query = SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, workflowReference);
+            prepStmt.setString(2, workflowType);
+
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
+                workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
+                workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving workflow details for " + workflowReference, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return workflowDTO;
+    }
 
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
             throws APIManagementException {
@@ -7118,6 +7159,34 @@ public class ApiMgtDAO {
         return workflowExtRef;
     }
 
+    /**
+     * Remove workflow entry
+     * 
+     * @param workflowReference
+     * @param workflowType
+     * @throws APIManagementException
+     */
+    public void removeWorkflowEntry(String workflowReference, String workflowType) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String queryWorkflowDelete = SQLConstants.REMOVE_WORKFLOW_ENTRY_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(queryWorkflowDelete);
+            prepStmt.setString(1, workflowType);
+            prepStmt.setString(2, workflowReference);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting workflow entry " + workflowReference + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+    
     /**
      * Retries the WorkflowExternalReference for a subscription.
      *
