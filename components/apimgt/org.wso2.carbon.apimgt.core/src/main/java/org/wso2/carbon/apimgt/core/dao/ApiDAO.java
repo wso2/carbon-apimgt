@@ -171,13 +171,4 @@ public interface ApiDAO {
      * @throws APIManagementDAOException if error occurs while accessing data layer
      */
     DocumentInfo getDocumentInfo(String apiID, String docID) throws APIManagementDAOException;
-
-    /**
-     *
-     * @param apiName name of API
-     * @param provider provider of API
-     * @return List of APIS which contains the name and provider.
-     * @throws APIManagementDAOException
-     */
-    List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException;
 }

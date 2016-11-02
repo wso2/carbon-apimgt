@@ -231,7 +231,7 @@
                         <xmlOutput>true</xmlOutput>
                         <findbugsXmlOutputDirectory>${project.build.directory}/findbugs
                         </findbugsXmlOutputDirectory>
-                        <excludeFilterFile>${maven.findbugsplugin.version.exclude}</excludeFilterFile>
+                        <excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>
                         <!--Exclude generated sources-->
                     </configuration>
                     <version>${maven.findbugsplugin.version}</version>

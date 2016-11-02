@@ -34,16 +34,17 @@ import java.util.UUID;
 
 class CommonDataAccessHandler {
 
-    static API getAPI(String apiID, final String query) throws APIManagementDAOException {
+    static API getAPI(String apiID, SQLStatements sqlStatements) throws APIManagementDAOException {
         API api = null;
+
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(sqlStatements.getGetApi())) {
             statement.setString(1, apiID);
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     api = new API(rs.getString("PROVIDER"), rs.getString("VERSION"), rs.getString("NAME"));
-                    api.setID(rs.getString("UUID"));
+                    api.setId(rs.getString("UUID"));
                 }
             }
         } catch (SQLException e) {
@@ -54,9 +55,10 @@ class CommonDataAccessHandler {
     }
 
 
-    static void addAPI(API api, final String query) throws APIManagementDAOException {
+    static void addAPI(API api, SQLStatements sqlStatements) throws APIManagementDAOException {
+
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(sqlStatements.getAddApi())) {
             statement.setString(1, api.getProvider());
             statement.setString(2, api.getName());
             statement.setString(3, api.getContext());
@@ -66,8 +68,8 @@ class CommonDataAccessHandler {
             statement.setString(7, api.getVisibility().toString());
             statement.setBoolean(8, api.isResponseCachingEnabled());
             statement.setInt(9, api.getCacheTimeout());
-            api.setID(UUID.randomUUID().toString());
-            statement.setString(10, api.getID());
+            api.setId(UUID.randomUUID().toString());
+            statement.setString(10, api.getId());
             statement.setString(11, api.getTechnicalOwner());
             statement.setString(12, api.getTechnicalOwnerEmail());
             statement.setString(13, api.getBusinessOwner());
@@ -86,9 +88,9 @@ class CommonDataAccessHandler {
         }
     }
 
-    static boolean isAPIExists(API api, final String query) throws APIManagementDAOException {
+    static boolean isAPIExists(API api, SQLStatements sqlStatements) throws APIManagementDAOException {
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(sqlStatements.getIsApiExists())) {
             statement.setString(1, api.getProvider());
             statement.setString(2, api.getName());
             statement.setString(3, api.getVersion());
@@ -105,9 +107,9 @@ class CommonDataAccessHandler {
         return false;
     }
 
-    static void deleteAPI(String apiID, final String query) throws APIManagementDAOException {
+    static void deleteAPI(String apiID, SQLStatements sqlStatements) throws APIManagementDAOException {
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(sqlStatements.getDeleteApi())) {
             statement.setString(1, apiID);
             statement.execute();
         } catch (SQLException e) {

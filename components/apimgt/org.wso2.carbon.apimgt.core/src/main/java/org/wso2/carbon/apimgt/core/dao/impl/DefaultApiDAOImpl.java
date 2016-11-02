@@ -40,23 +40,11 @@ import javax.annotation.CheckForNull;
  */
 public class DefaultApiDAOImpl implements ApiDAO {
 
-    private static final String IS_API_EXISTS_QUERY = "SELECT API_ID FROM AM_API WHERE " +
-                                                        "PROVIDER = ? AND NAME = ? AND VERSION = ?";
+    private final SQLStatements sqlStatements;
 
-    public static final String ADD_API_SQL = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
-                    "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
-                    "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, CREATED_BY, " +
-                    "CREATED_TIME, LAST_UPDATED_TIME)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-    public static final String GET_API_SQL = "SELECT PROVIDER, NAME, CONTEXT, VERSION, " +
-            "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
-            "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, CREATED_BY, " +
-            "CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
-
-    public static final String DELETE_API_SQL = "DELETE FROM AM_API WHERE UUID = ?";
-
-    DefaultApiDAOImpl() {}
+    DefaultApiDAOImpl(SQLStatements sqlStatements) {
+        this.sqlStatements = sqlStatements;
+    }
 
     /**
      * Retrieve a given instance of an API
@@ -68,7 +56,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws APIManagementDAOException {
-        return CommonDataAccessHandler.getAPI(apiID, GET_API_SQL);
+        return CommonDataAccessHandler.getAPI(apiID, sqlStatements);
     }
 
     /**
@@ -115,12 +103,12 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public API addAPI(API api) throws APIManagementDAOException {
-        if (CommonDataAccessHandler.isAPIExists(api, IS_API_EXISTS_QUERY)) {
+        if (CommonDataAccessHandler.isAPIExists(api, sqlStatements)) {
             DAOUtil.handleException(ErrorCode.DUPLICATE_API_ADDED, "API " + api.getProvider() + "-" +
                     api.getName() + "-" + api.getVersion() + " already exists");
         }
 
-        CommonDataAccessHandler.addAPI(api, ADD_API_SQL);
+        CommonDataAccessHandler.addAPI(api, sqlStatements);
         return api;
     }
 
@@ -146,7 +134,7 @@ public class DefaultApiDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteAPI(String apiID) throws APIManagementDAOException {
-        CommonDataAccessHandler.deleteAPI(apiID, DELETE_API_SQL);
+        CommonDataAccessHandler.deleteAPI(apiID, sqlStatements);
     }
 
     /**

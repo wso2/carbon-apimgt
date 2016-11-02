@@ -20,5 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Environment specific information
+ */
 public class Environment {
 }

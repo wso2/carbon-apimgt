@@ -21,12 +21,18 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Representation of an API object
  */
 
 public final class API {
+    /**
+     * Visibility options
+     */
     public enum VisibilityEnum {
         PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
     };
@@ -66,6 +72,9 @@ public final class API {
         this.provider = provider;
         this.version = version;
         this.name = name;
+
+        createdTime = new Date();
+        lastUpdatedTime = new Date();
     }
 
     public Date getCreatedTime() {

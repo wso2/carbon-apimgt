@@ -51,12 +51,12 @@ public class DefaultApiDAOImplTest {
 
     @org.testng.annotations.AfterClass
     public void tempDBCleanup() throws SQLException, IOException {
-        ((InMemoryDataSource)dataSource).resetDB();
+        ((InMemoryDataSource) dataSource).resetDB();
     }
 
     @Test
     public void testAddDeleteGetAPI() throws Exception {
-        ApiDAO apiDAO = new DefaultApiDAOImpl();
+        ApiDAO apiDAO = new DefaultApiDAOImpl(new H2MySQLStatements());
         API api = new API("admin", "1.0.0", "WeatherAPI");
 
         API createdAPI = apiDAO.addAPI(api);
@@ -65,17 +65,17 @@ public class DefaultApiDAOImplTest {
         Assert.assertEquals(createdAPI.getVersion(), api.getVersion());
         Assert.assertEquals(createdAPI.getName(), api.getName());
 
-        API apiFromDB = apiDAO.getAPI(createdAPI.getID());
+        API apiFromDB = apiDAO.getAPI(createdAPI.getId());
 
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB.getProvider(), createdAPI.getProvider());
         Assert.assertEquals(apiFromDB.getVersion(), createdAPI.getVersion());
         Assert.assertEquals(apiFromDB.getName(), createdAPI.getName());
-        Assert.assertEquals(apiFromDB.getID(), createdAPI.getID());
+        Assert.assertEquals(apiFromDB.getId(), createdAPI.getId());
 
-        apiDAO.deleteAPI(apiFromDB.getID());
+        apiDAO.deleteAPI(apiFromDB.getId());
 
-        API deletedAPI = apiDAO.getAPI(apiFromDB.getID());
+        API deletedAPI = apiDAO.getAPI(apiFromDB.getId());
         Assert.assertNull(deletedAPI);
     }
 
@@ -140,7 +140,5 @@ public class DefaultApiDAOImplTest {
     public void testGetDocumentInfo() throws Exception {
 
     }
-
-
 
 }

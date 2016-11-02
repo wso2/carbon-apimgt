@@ -20,5 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Endpoint specific information
+ */
 public class Endpoint {
 }

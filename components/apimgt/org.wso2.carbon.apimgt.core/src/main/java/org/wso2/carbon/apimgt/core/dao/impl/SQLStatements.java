@@ -18,30 +18,15 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.dao.impl;
 
 /**
- * This is the custom exception class for API management.
+ *  Interface for getting SQL Statement strings. Implementation of the interface could return different values based
+ *  on DB vendor type being used
  */
-public class APIManagementDAOException extends Exception {
-    private ErrorCode errorCode;
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, String msg, Throwable e) {
-        super(msg, e);
-        this.errorCode = errorCode;
-    }
-
-    public APIManagementDAOException(ErrorCode errorCode, Throwable throwable) {
-        super(throwable);
-        this.errorCode = errorCode;
-    }
-
-    public ErrorCode getErroCode() {
-        return errorCode;
-    }
+public interface SQLStatements {
+    String getIsApiExists();
+    String getAddApi();
+    String getGetApi();
+    String getDeleteApi();
 }

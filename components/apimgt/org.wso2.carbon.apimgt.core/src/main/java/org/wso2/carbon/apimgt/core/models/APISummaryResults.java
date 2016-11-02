@@ -20,8 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import org.wso2.carbon.apimgt.core.models.APISummary;
-
 import java.util.List;
 
 /**

@@ -20,5 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * CORS Config related information
+ */
 public class CorsConfiguration {
 }

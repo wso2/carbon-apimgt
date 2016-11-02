@@ -22,7 +22,12 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.dao.*;
+
+import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.ErrorCode;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,7 +45,7 @@ public class DAOFactory {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                apiDAO = new DefaultApiDAOImpl();
+                apiDAO = new DefaultApiDAOImpl(new H2MySQLStatements());
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {

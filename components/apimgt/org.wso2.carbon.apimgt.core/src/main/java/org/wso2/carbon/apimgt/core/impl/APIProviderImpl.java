@@ -29,12 +29,10 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
-import org.wso2.carbon.apimgt.core.models.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -211,39 +209,7 @@ public class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean updateAPIStatus(API api, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
-        if (deprecateOldVersions) {
-            try {
-                List<API> apiList = apiDAO.getListOfAPIsFromIdentifier(api.getName(), api.getProvider());
-                for (API api1 : apiList) {
-                    apiDAO.changeLifeCycleStatus(api1.getId(), APIStatus.DEPRECATED.getStatus());
-                }
-                return true;
-            } catch (APIManagementDAOException e) {
-                APIUtils.logAndThrowException("Couldn't deprecate older versions of API " + api.getName(), log);
-                return false;
-            }
-        }
-        if (makeKeysForwardCompatible) {
-            try {
-                List<APISubscription> apiSubscriptionList = apiSubscriptionDAO.getAllAPISubscriptionsByAPI(api
-                                .getName(), api.getProvider(), SubscriptionStatus.UNBLOCKED, SubscriptionStatus.BLOCKED,
-                        SubscriptionStatus.PROD_ONLY_BLOCKED, SubscriptionStatus.REJECTED);
-                for (APISubscription apiSubscription : apiSubscriptionList) {
-                    apiSubscription.setApiId(api.getId());
-                    apiSubscriptionDAO.addAPISubscription(apiSubscription);
-                }
-            } catch (APIManagementDAOException e) {
-                APIUtils.logAndThrowException("Couldn't get list of Subscriptions with name" + api.getName(), log);
-                return false;
-            }
-        }
-        try {
-            apiDAO.changeLifeCycleStatus(api.getId(), status);
-            return true;
-        } catch (APIManagementDAOException e) {
-            APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), log);
-            return false;
-        }
+        return false;
     }
 
 

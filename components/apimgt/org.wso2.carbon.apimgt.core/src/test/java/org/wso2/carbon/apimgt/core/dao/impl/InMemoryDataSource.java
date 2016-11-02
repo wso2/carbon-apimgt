@@ -20,11 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.apache.commons.io.FileUtils;
-import org.h2.jdbcx.JdbcDataSource;
 
-import java.io.File;
-import java.io.IOException;
+import org.h2.jdbcx.JdbcDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -56,23 +53,5 @@ public class InMemoryDataSource implements DataSource {
              Statement statement = connection.createStatement()) {
             statement.execute("DROP ALL OBJECTS DELETE FILES");
         }
-    }
-
-    public void removeDBFile() throws IOException, SQLException {
-        /*
-        String dbPath = "src" + File.separator + "test" +
-                File.separator + "resources" + File.separator;
-        File h2File =  new File(dbPath + "amdb.h2.db");
-
-        if (h2File.exists()) {
-            FileUtils.forceDelete(h2File);
-        }
-
-        File traceFile =  new File(dbPath + "amdb.trace.db");
-
-        if (traceFile.exists()) {
-            FileUtils.forceDelete(traceFile);
-        }
-        */
     }
 }

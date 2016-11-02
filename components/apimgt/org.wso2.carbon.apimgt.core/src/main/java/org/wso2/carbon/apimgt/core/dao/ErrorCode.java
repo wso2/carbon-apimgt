@@ -20,6 +20,9 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
+/**
+ * Error codes returned with APIManagementDAOException
+ */
 public enum ErrorCode {
     UNSUPPORTED_DB,
     SQL_EXCEPTION,
