@@ -309,11 +309,18 @@ public class APIGatewayManager {
 
     }
 
+    /**
+     * add new api version at the API Gateway
+     *
+     * @param artifact
+     * @param api
+     */
     public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
-        try{
+        try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIGatewayAdminClient client;
-            Set<String> environments = APIUtil.extractEnvironmentsForAPI(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
+            Set<String> environments = APIUtil.extractEnvironmentsForAPI(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             for (String environmentName : environments) {
