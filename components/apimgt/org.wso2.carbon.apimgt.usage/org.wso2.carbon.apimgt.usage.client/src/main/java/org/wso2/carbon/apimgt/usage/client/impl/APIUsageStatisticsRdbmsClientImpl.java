@@ -141,7 +141,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 if(dataSource == null){
                     Context ctx = new InitialContext();
                     dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
-                }                
+                }
             }
         } catch (NamingException e) {
             throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
@@ -416,7 +416,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             int start, int limit) throws APIMgtUsageQueryServiceClientException {
         List<ApiTopUsersDTO> allTopUsersDTOs = getTopApiUsers(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
                 apiName, version, fromDate, toDate);
-        
+
         //filter out other tenants' data
         List<ApiTopUsersDTO> tenantFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
         for (ApiTopUsersDTO dto : allTopUsersDTOs) {
@@ -424,7 +424,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 tenantFilteredTopUsersDTOs.add(dto);
             }
         }
-        
+
         //filter based on pagination
         List<ApiTopUsersDTO> paginationFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
         ApiTopUsersListDTO apiTopUsersListDTO = new ApiTopUsersListDTO();
@@ -497,7 +497,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     apiTopUsersDTO.setToDate(toDate);
                     apiTopUsersDTO.setVersion(version);
                     apiTopUsersDTO.setProvider(resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER));
-                    
+
                     //remove @carbon.super from super tenant users
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(MultitenantUtils
                             .getTenantDomain(userId))) {
@@ -858,7 +858,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * up to now. This method does not distinguish between different API versions. That is all
      * versions of a single API are treated as one, and their individual request counts are summed
      * up to calculate a grand total per each API.
-     * 
+     *
      * @param providerName Name of the API provider
      * @return a List of APIUsageDTO objects - possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs
@@ -1711,9 +1711,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * Retrieves total request count for the given period of time for particular API and Version. If version provided 
+     * Retrieves total request count for the given period of time for particular API and Version. If version provided
      * as FOR_ALL_API_VERSIONS it will get total aggregated request count for all api versions
-     * 
+     *
      * @param tableName tableName
      * @param apiName API name
      * @param apiVersion API version
@@ -2680,8 +2680,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
-                    "FROM ");
+            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country ");
+            if (!"ALL".equals(drillDown)) {
+                query.append(",city " );
+            }
+            query.append("FROM ");
             String tableName = APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY;
             query.append(tableName).append(" WHERE ");
             query.append("api='" + apiName).append("'");
@@ -2715,10 +2718,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
                     int count = rs.getInt("count");
                     String country1 = rs.getString("country");
-                    String city = rs.getString("city");
                     List<String> facetValues = new ArrayList<String>();
                     facetValues.add(country1);
-                    facetValues.add(city);
+                    if (!"ALL".equals(drillDown)) {
+                        String city = rs.getString("city");
+                        facetValues.add(city);
+                    }
                     PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount(count,
                             facetValues);
                     result1.setValues(perGeoLocationUsageCount);
@@ -2732,6 +2737,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                                 " does not exist.");
             }
         } catch (SQLException e) {
+            log.error("SQLException occurred when accessing the database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);

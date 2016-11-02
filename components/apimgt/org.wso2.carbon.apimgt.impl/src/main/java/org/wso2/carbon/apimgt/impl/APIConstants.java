@@ -1248,5 +1248,9 @@ public final class APIConstants {
         public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
 
     } 
+    public static class APIEndpointSecurityConstants {
+        public static final String BASIC_AUTH = "BasicAuth";
+        public static final String DIGEST_AUTH = "DigestAuth";
+    }
 
 }
