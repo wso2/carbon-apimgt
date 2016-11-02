@@ -31,6 +31,8 @@ import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
+import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
+import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -52,7 +54,8 @@ public class BundleActivator {
     protected void start(BundleContext bundleContext) {
         try {
             Context ctx = jndiContextManager.newInitialContext();
-            DAOUtil.initialize((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
+            DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
+            DAOUtil.initialize(dataSource);
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
         }

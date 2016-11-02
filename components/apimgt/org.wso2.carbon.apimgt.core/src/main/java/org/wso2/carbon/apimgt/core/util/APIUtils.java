@@ -20,8 +20,9 @@
 package org.wso2.carbon.apimgt.core.util;
 
 import org.slf4j.Logger;
-import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 
 /**
  * Class for all utility methods
@@ -60,8 +61,8 @@ public class APIUtils {
      * @param t Exception to be thrown
      * @throws APIManagementDAOException
      */
-    public static void throwDaoException(String msg, Throwable t) throws APIManagementDAOException {
-        throw new APIManagementDAOException(msg, t);
+    public static void throwDaoException(ErrorCode errorCode, String msg, Throwable t) throws APIManagementDAOException {
+        throw new APIManagementDAOException(errorCode, msg, t);
     }
 
     /**

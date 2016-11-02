@@ -18,22 +18,10 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao;
+package org.wso2.carbon.apimgt.core.models;
 
 /**
- * This is the custom exception class for API management.
+ * Endpoint specific information
  */
-public class APIManagementDAOException extends Exception {
-
-    public APIManagementDAOException(String msg) {
-        super(msg);
-    }
-
-    public APIManagementDAOException(String msg, Throwable e) {
-        super(msg, e);
-    }
-
-    public APIManagementDAOException(Throwable throwable) {
-        super(throwable);
-    }
+public class Endpoint {
 }
