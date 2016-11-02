@@ -57,6 +57,10 @@ public class DocumentDTO   {
       }
       return null;
     }
+
+    public String getValue() {
+      return value;
+    }
   }
 
   @JsonProperty("type")
@@ -95,6 +99,10 @@ public class DocumentDTO   {
         }
       }
       return null;
+    }
+
+    public String getValue() {
+      return value;
     }
   }
 
@@ -137,6 +145,10 @@ public class DocumentDTO   {
         }
       }
       return null;
+    }
+
+    public String getValue() {
+      return value;
     }
   }
 
