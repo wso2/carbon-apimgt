@@ -61,7 +61,8 @@ public class APIUtils {
      * @param t Exception to be thrown
      * @throws APIManagementDAOException
      */
-    public static void throwDaoException(ErrorCode errorCode, String msg, Throwable t) throws APIManagementDAOException {
+    public static void throwDaoException(ErrorCode errorCode, String msg, Throwable t)
+            throws APIManagementDAOException {
         throw new APIManagementDAOException(errorCode, msg, t);
     }
 
