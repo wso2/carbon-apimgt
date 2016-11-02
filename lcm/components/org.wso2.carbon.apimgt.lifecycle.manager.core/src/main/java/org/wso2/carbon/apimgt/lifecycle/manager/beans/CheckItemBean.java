@@ -28,23 +28,23 @@ public class CheckItemBean {
     private List<PermissionBean> permissionsBeans;
     private String name;
     private List<CustomCodeBean> validationBeans;
-    private List<String> events;
+    private List<String> targets;
     private boolean value;
 
     public CheckItemBean() {
         this.permissionsBeans = new ArrayList<PermissionBean>();
         this.name = "";
         this.validationBeans = new ArrayList<CustomCodeBean>();
-        this.events = new ArrayList<String>();
+        this.targets = new ArrayList<String>();
         this.value = false;
     }
 
-    public List<String> getEvents() {
-        return events;
+    public List<String> getTargets() {
+        return targets;
     }
 
-    public void setEvents(List<String> events) {
-        this.events = events;
+    public void setTargets(List<String> targets) {
+        this.targets = targets;
     }
 
     public List<CustomCodeBean> getValidationBeans() {

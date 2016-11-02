@@ -52,11 +52,13 @@ public class LifecycleDataProvider {
 
     /**
      * This method provides set of lifecycle ids in a particular state.
-     * @param state`
-     * @return {@code List<LifecycleHistoryBean>} List of lifecycle ids in the given state.
+     *
+     * @param state                 Filtering state.
+     * @param lcName                Name of the relevant lifecycle.
+     * @return                      {@code List<LifecycleHistoryBean>} List of lifecycle ids in the given state.
      * @throws LifecycleException
      */
-    public static List<String> getIdsFromState(String state) throws LifecycleException {
-        return LifecycleOperationUtil.getLifecycleIds(state);
+    public static List<String> getIdsFromState(String state, String lcName) throws LifecycleException {
+        return LifecycleOperationUtil.getLifecycleIds(state, lcName);
     }
 }

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is the main configuration file for lifecycles
+# This is the main configuration file for resources.lifecycles
 
 # Enable lifecycle history
 enableHistory: true

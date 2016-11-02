@@ -17,11 +17,9 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager.sql;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.SQLConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
 
 import java.io.BufferedReader;
@@ -44,7 +42,6 @@ import javax.sql.DataSource;
  * This class executes the sql script in dbscripts/lifecycle folder to initialize the database
  * tables during startup.
  */
-@SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
 public class LifecycleDatabaseCreator {
 
     public static final String OPENEDGE = "openedge";
@@ -288,7 +285,6 @@ public class LifecycleDatabaseCreator {
      * @param sql
      * @throws LifecycleManagerDatabaseException
      */
-    @SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
     private void executeSQL(String sql) throws LifecycleManagerDatabaseException {
         // Check and ignore empty statements
         if ("".equals(sql.trim())) {
@@ -376,9 +372,10 @@ public class LifecycleDatabaseCreator {
             Connection conn = dataSource.getConnection();
             Statement statement = null;
             ResultSet rs = null;
+            final String dbCheckSql = "select 1 from LC_DEFINITIONS";
             try {
                 statement = conn.createStatement();
-                rs = statement.executeQuery(SQLConstants.DB_CHECK_SQL);
+                rs = statement.executeQuery(dbCheckSql);
             } finally {
                 try {
                     try {

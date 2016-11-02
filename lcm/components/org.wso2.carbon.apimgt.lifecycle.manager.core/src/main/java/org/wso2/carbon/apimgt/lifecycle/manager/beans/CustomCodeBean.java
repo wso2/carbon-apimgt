@@ -24,7 +24,7 @@ package org.wso2.carbon.apimgt.lifecycle.manager.beans;
 public class CustomCodeBean {
 
     private Object classObject;
-    private String eventName;
+    private String targetName;
     private String customMessage;
 
     public Object getClassObject() {
@@ -35,12 +35,12 @@ public class CustomCodeBean {
         this.classObject = classObject;
     }
 
-    public String getEventName() {
-        return eventName;
+    public String getTargetName() {
+        return targetName;
     }
 
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
     }
 
     public String getCustomMessage() {

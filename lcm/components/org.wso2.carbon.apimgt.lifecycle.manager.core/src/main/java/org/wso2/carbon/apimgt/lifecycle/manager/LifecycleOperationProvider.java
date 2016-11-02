@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.lifecycle.manager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
@@ -45,8 +46,7 @@ public class LifecycleOperationProvider {
                             + currentState.getState() + " to " + targetState);
         }
         String lcName = currentState.getLcName();
-        String lcContent;
-        lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
         runCustomExecutorsCode(resource, currentState.getCustomCodeBeanList(), currentState.getState(), targetState);
         populateItems(nextState, lcContent);
         nextState.setState(targetState);
@@ -80,6 +80,9 @@ public class LifecycleOperationProvider {
                 checkItemBean.setValue(value);
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Check list item " + checkListItemName + " is set to " + value);
+        }
         return currentStateObject;
     }
 
@@ -94,10 +97,10 @@ public class LifecycleOperationProvider {
      */
     protected static LifecycleState associateLifecycle(String lcName, String user) throws LifecycleException {
         LifecycleState lifecycleState;
-        String lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
         lifecycleState = new LifecycleState();
 
-        String initialState = getInitialState(LifecycleOperationUtil.getLifecycleElement(lcContent), lcName);
+        String initialState = getInitialState(lcContent, lcName);
         lifecycleState.setLcName(lcName);
         lifecycleState.setState(initialState);
         populateItems(lifecycleState, lcContent);
@@ -133,7 +136,7 @@ public class LifecycleOperationProvider {
             String currentState, String nextState) throws LifecycleException {
         if (customCodeBeans != null) {
             for (CustomCodeBean customCodeBean : customCodeBeans) {
-                if (customCodeBean.getEventName().equals(nextState)) {
+                if (customCodeBean.getTargetName().equals(nextState)) {
                     Executor customExecutor = (Executor) customCodeBean.getClassObject();
                     customExecutor.execute(resource, currentState, nextState);
                 }
@@ -144,7 +147,7 @@ public class LifecycleOperationProvider {
 
     private static boolean validateCheckListItemSelected(LifecycleState lifecycleState, String nextState) {
         for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
-            if (checkItemBean.getEvents().contains(nextState) && !checkItemBean.isValue()) {
+            if (checkItemBean.getTargets().contains(nextState) && !checkItemBean.isValue()) {
                 return false;
             }
         }
