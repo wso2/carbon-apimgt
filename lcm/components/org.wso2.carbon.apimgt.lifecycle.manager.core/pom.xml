@@ -60,7 +60,7 @@
                         </property>
                         <property>
                             <name>LCConfigPath</name>
-                            <value>${basedir}/src/test/resources/lifecycles</value>
+                            <value>${basedir}/src/test/resources/resources.lifecycles</value>
                         </property>
                         <property>
                             <name>carbon.home</name>

@@ -37,10 +37,10 @@ public class InputBean {
 
     private String values;
 
-    private String forEvent;
+    private String forTarget;
 
     public InputBean(String name, boolean isRequired, String label, String placeHolder, String tooltip, String regex,
-            String values, String forEvent) {
+            String values, String forTarget) {
         this.name = name;
         this.isRequired = isRequired;
         this.label = label;
@@ -48,7 +48,7 @@ public class InputBean {
         this.tooltip = tooltip;
         this.regex = regex;
         this.values = values;
-        this.forEvent = forEvent;
+        this.forTarget = forTarget;
     }
 
     public String getName() {
@@ -107,12 +107,12 @@ public class InputBean {
         this.values = values;
     }
 
-    public String getForEvent() {
-        return forEvent;
+    public String getForTarget() {
+        return forTarget;
     }
 
-    public void setForEvent(String forEvent) {
-        this.forEvent = forEvent;
+    public void setForTarget(String forTarget) {
+        this.forTarget = forTarget;
     }
 
 }

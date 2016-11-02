@@ -175,12 +175,15 @@ public class DefaultApiDAOImpl implements ApiDAO {
     /**
      * Change the lifecycle status of a given API
      *
-     * @param apiID  The UUID of the respective API
-     * @param status The lifecycle status that the API must be set to
+     * @param apiID                     The UUID of the respective API
+     * @param status                    The lifecycle status that the API must be set to
+     * @param deprecateOldVersions      if true for deprecate older versions
+     * @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @throws APIManagementDAOException
      */
     @Override
-    public void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException {
+    public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
+            makeKeysForwardCompatible) throws APIManagementDAOException {
 
     }
 
@@ -210,8 +213,4 @@ public class DefaultApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    @Override
-    public List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException {
-        return null;
-    }
 }

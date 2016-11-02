@@ -39,7 +39,7 @@
                             <item name="QoS Created" forTarget="">
                             </item>
                         </data>
-			<data name="transitionExecution">
+                        <data name="transitionExecution">
                             <execution forTarget="Testing" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
                                 <parameter name="currentEnvironment" value="/_system/governance/trunk/{@resourcePath}/{@resourceName}"/>
                                 <parameter name="targetEnvironment" value="/_system/governance/branches/testing/{@resourcePath}/{@version}/{@resourceName}"/>
@@ -48,13 +48,27 @@
                                 <parameter name="endpoint.mediatype" value="application/vnd.wso2.endpoint"/>
                             </execution>
                         </data>
-			<data name="transitionUI">
-                            <ui forTarget="Testing" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/trunk/"/>
+                        <data name="transitionUI">
+                            <ui forTarget="Testing" href="../resources.lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/trunk/"/>
+                        </data>
+                        <data name="transitionPermission">
+                            <permission forTarget="Testing" roles="admin"/>
+                            <permission forTarget="Testing" roles="admin,internal/everyone"/>
+                        </data>
+                        <data name="transitionInput">
+                            <inputs forTarget="Testing">
+                                <input name="name1" label="Field One" tooltip="Field One"/>
+                                <input name="name2" label="Field Two" tooltip="Field Two"/>
+                                <input name="name3" label="Field Three" tooltip="Field Three"/>
+                            </inputs>
                         </data>
                         <!--<data name="transitionValidation">
                             <validation forTarget="" class="">
                                 <parameter name="" value=""/>
                             </validation>
+                        </data>
+                        <data name="transitionPermission">
+                            <permission forTarget="" roles=""/>
                         </data>
                         <data name="transitionScripts">
                             <js forTarget="">
@@ -68,7 +82,7 @@
                             </js>
                         </data>-->
                     </datamodel>
-                    <transition event="Promote" target="Testing"/>                  
+                    <transition event="Promote" target="Testing"/>
                 </state>
                 <state id="Testing">
                     <datamodel>
@@ -88,11 +102,11 @@
                                 <parameter name="wsdl.mediatype" value="application/wsdl+xml"/>
                                 <parameter name="endpoint.mediatype" value="application/vnd.wso2.endpoint"/>
                             </execution>
-			    <execution forTarget="Development" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
+                            <execution forTarget="Development" class="org.wso2.carbon.apimgt.lifecycle.manager.executors.SampleExecutor">
                             </execution>
                         </data>
-			<data name="transitionUI">
-                            <ui forTarget="Production" href="../lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/branches/testing/"/>
+                        <data name="transitionUI">
+                            <ui forTarget="Production" href="../resources.lifecycles/pre_invoke_aspect_ajaxprocessor.jsp?currentEnvironment=/_system/governance/branches/testing/"/>
                         </data>
                     </datamodel>
                     <transition event="Promote" target="Production"/>
@@ -111,7 +125,7 @@
                     <transition event="Demote" target="Testing"/>
                 </state>
                 <state id="Published.to.APIStore">
-                </state>                
+                </state>
             </scxml>
         </lifecycle>
     </configuration>

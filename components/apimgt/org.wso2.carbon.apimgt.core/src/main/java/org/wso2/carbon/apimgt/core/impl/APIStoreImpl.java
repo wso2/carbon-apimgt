@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIConsumer;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -41,11 +41,11 @@ import java.util.Map;
  * Implementation of API Store operations.
  *
  */
-public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
+public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
-    private static final Logger log = LoggerFactory.getLogger(APIProviderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    public APIConsumerImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+    public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
     }

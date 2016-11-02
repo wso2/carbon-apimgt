@@ -135,11 +135,14 @@ public interface ApiDAO {
     /**
      * Change the lifecycle status of a given API
      * @param apiID The UUID of the respective API
+     *              @param deprecateOldVersions  if true for deprecate older versions
+     *              @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @param status The lifecycle status that the API must be set to
      * @throws APIManagementDAOException
      *
      */
-    void changeLifeCycleStatus(String apiID, String status) throws APIManagementDAOException;
+    void changeLifeCycleStatus(String apiID, String status, boolean
+            deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementDAOException;
 
     /**
      * Create a new version of an existing API
@@ -160,12 +163,5 @@ public interface ApiDAO {
      */
     DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws APIManagementDAOException;
 
-    /**
-     *
-     * @param apiName name of API
-     * @param provider provider of API
-     * @return List of APIS which contains the name and provider.
-     * @throws APIManagementDAOException
-     */
-    List<API> getListOfAPIsFromIdentifier(String apiName, String provider) throws APIManagementDAOException;
+
 }
