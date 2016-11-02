@@ -69,6 +69,12 @@
                     "roles": "admin",
                     "name": "apim:subscription_block",
                     "key": "apim:subscription_block"
+                },
+                {
+                    "description": "",
+                    "roles": "admin",
+                    "name": "apim:api_workflow",
+                    "key": "apim:api_workflow"
                 }
             ]
         }
@@ -2007,6 +2013,59 @@
                     }
                 }
             }
+        },
+        "/workflows/update-workflow-status": {
+            "post": {
+                "x-scope": "apim:api_workflow",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\"",
+                "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n\"status\" : \"APPROVED\", \n\"attributes\" : {\n  \"apiCurrentState\": \"Created\",\n  \"apiLCAction\": \"Publish\",\n  \"apiName\":\"APIname\",\n  \"apiVersion\" : \"1.0.0\",\n  \"apiProvider\" : \"admin\",\n  \"invoker\": \"admin\"\n\t}\n}",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}",
+                "summary": "Update workflow status",
+                "description": "This operation can be used to approve or reject a workflow task. .\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/workflowReferenceId-Q"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Workflow event that need to be updated\n",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Workflow"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Workflows (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nWorkflow request information is returned.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Workflow"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nWorkflow for the given reference in not found.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "parameters": {
@@ -2141,6 +2200,13 @@
             "name": "If-Unmodified-Since",
             "in": "header",
             "description": "Validator for conditional requests; based on Last Modified header.\n",
+            "type": "string"
+        },
+        "workflowReferenceId-Q": {
+            "name": "workflowReferenceId",
+            "in": "query",
+            "description": "Workflow reference id\n",
+            "required": true,
             "type": "string"
         }
     },
@@ -2892,6 +2958,35 @@
                     "type": "string",
                     "description": "media-type of the file",
                     "example": "image/jpeg"
+                }
+            }
+        },
+        "Workflow": {
+            "title": "workflow",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "This attribute declares whether this workflow task is approved or rejected.\n",
+                    "type": "string",
+                    "enum": [
+                        "APPROVED",
+                        "REJECTED"
+                    ],
+                    "example": "APPROVED"
+                },
+                "attributes": {
+                    "description": "Custom attributes to complete the workflow task\n",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {}
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Approve workflow request."
                 }
             }
         }
