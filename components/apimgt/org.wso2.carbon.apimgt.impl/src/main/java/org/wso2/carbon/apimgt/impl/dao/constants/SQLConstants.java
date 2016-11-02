@@ -23,6 +23,14 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
 
+    public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
+            " SELECT " +
+            "   API.API_NAME," +
+            "   API.API_PROVIDER" +
+            " FROM " +
+            "   AM_API API" +
+            " WHERE " +
+            "   API.CONTEXT_TEMPLATE = ? ";
     public static final String GET_ACCESS_KEY_FOR_API_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +

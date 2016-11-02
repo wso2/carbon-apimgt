@@ -27,6 +27,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -311,13 +312,15 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
-        //Check if the api version has been prefixed with _default_
-        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+
+        String temp_version = isDefaultVersionInvoked(context);
+        if (temp_version != null) {
             defaultVersionInvoked = true;
-            //Remove the prefix from the version.
-            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+            version = temp_version;
+            context += "/" + temp_version;
         }
+
+        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         String sql;
         boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
         if (!isAdvancedThrottleEnabled) {
@@ -388,6 +391,11 @@ public class APIKeyValidationService extends AbstractAdmin {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(APP_TIER);
                 infoDTO.setType(type);
+
+                //this is done to support default websocket apis
+                if (defaultVersionInvoked) {
+                    infoDTO.setApiName(rs.getString("API_NAME") + "*" + version);
+                }
 
                 //Advanced Level Throttling Related Properties
                 if (APIUtil.isAdvanceThrottlingEnabled()) {
@@ -493,5 +501,42 @@ public class APIKeyValidationService extends AbstractAdmin {
 
     private void handleException(String description, Exception e) {
         log.error(description, e);
+    }
+
+    private String isDefaultVersionInvoked(String context) throws APIManagementException {
+
+        String apiName = "";
+        String apiProvider = "";
+        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, context);
+
+            rs = ps.executeQuery();
+            if (rs.first()) {
+                apiName = rs.getString("API_NAME");
+                apiProvider = rs.getString("API_PROVIDER");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(false);
+            } catch (SQLException e) {
+                log.error("Error occurred while fetching data: " + e, e);
+            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        if (!(apiName.equalsIgnoreCase("") || apiProvider.equalsIgnoreCase(""))) {
+            ApiMgtDAO dao = ApiMgtDAO.getInstance();
+            return dao.getDefaultVersion(new APIIdentifier(apiProvider, apiName, ""));
+        }
+        return null;
     }
 }
