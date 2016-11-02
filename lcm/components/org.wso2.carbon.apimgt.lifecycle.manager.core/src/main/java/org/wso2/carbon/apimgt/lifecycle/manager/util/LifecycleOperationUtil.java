@@ -58,6 +58,8 @@ import javax.xml.xpath.XPathFactory;
  */
 public class LifecycleOperationUtil {
 
+    public static final String CLOSE_ATTRIBUTE_BRACKET = "']";
+
     /**
      * This method is used to associate a lifecycle with an asset.
      *
@@ -108,8 +110,7 @@ public class LifecycleOperationUtil {
         LifecycleState currentLifecycleState = new LifecycleState();
         LifecycleStateBean lifecycleStateBean = getLCStateDataFromID(uuid);
         String lcName = lifecycleStateBean.getLcName();
-        String lcContent;
-        lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
         currentLifecycleState.setLcName(lcName);
         currentLifecycleState.setLifecycleId(uuid);
         currentLifecycleState.setState(lifecycleStateBean.getPostStatus());
@@ -149,13 +150,15 @@ public class LifecycleOperationUtil {
 
     /**
      * This method provides set of lifecycle ids in a particular state.
-     * @param state`
-     * @return  List of lifecycle ids in the given state.
+     *
+     * @param state                 Filtering state.
+     * @param lcName                Name of the relevant lifecycle.
+     * @return                      {@code List<LifecycleHistoryBean>} List of lifecycle ids in the given state.
      * @throws LifecycleException
      */
-    public static List<String> getLifecycleIds(String state) throws LifecycleException {
+    public static List<String> getLifecycleIds(String state, String lcName) throws LifecycleException {
         LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
-        return lifecycleEventManager.getLifecycleIds(state);
+        return lifecycleEventManager.getLifecycleIds(state, lcName);
     }
 
     /**
@@ -165,15 +168,14 @@ public class LifecycleOperationUtil {
      * @param lcConfig                      lc configuration.
      * @throws LifecycleException           If failed to get lifecycle list.
      */
-    public static void populateItems(LifecycleState lifecycleState, String lcConfig) throws LifecycleException {
+    public static void populateItems(LifecycleState lifecycleState, Document lcConfig) throws LifecycleException {
 
         String lcState = lifecycleState.getState();
-        Document document = getLifecycleElement(lcConfig);
-        lifecycleState.setInputBeanList(populateTransitionInputs(document, lcState));
-        lifecycleState.setCustomCodeBeanList(populateTransitionExecutors(document, lcState));
-        lifecycleState.setAvailableTransitionBeanList(populateAvailableStates(document, lcState));
-        lifecycleState.setPermissionBeanList(populateTransitionPermission(document, lcState));
-        lifecycleState.setCheckItemBeanList(populateCheckItems(document, lcState));
+        lifecycleState.setInputBeanList(populateTransitionInputs(lcConfig, lcState));
+        lifecycleState.setCustomCodeBeanList(populateTransitionExecutors(lcConfig, lcState));
+        lifecycleState.setAvailableTransitionBeanList(populateAvailableStates(lcConfig, lcState));
+        lifecycleState.setPermissionBeanList(populateTransitionPermission(lcConfig, lcState));
+        lifecycleState.setCheckItemBeanList(populateCheckItems(lcConfig, lcState));
 
     }
 
@@ -193,7 +195,7 @@ public class LifecycleOperationUtil {
                         CheckItemBean checkItemBean = new CheckItemBean();
                         Element checkItemElement = (Element) checkItemNode;
                         checkItemBean.setName(checkItemElement.getAttribute(LifecycleConstants.NAME));
-                        checkItemBean.setEvents(Arrays.asList(
+                        checkItemBean.setTargets(Arrays.asList(
                                 (checkItemElement.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE)).split(",")));
                         checkItemBeanList.add(checkItemBean);
                     }
@@ -231,10 +233,13 @@ public class LifecycleOperationUtil {
                         for (int j = 0; j < inputNodeList.getLength(); j++) {
                             if (inputNodeList.item(j).getNodeType() == Node.ELEMENT_NODE) {
                                 Element inputNode = (Element) inputNodeList.item(j);
-                                InputBean inputBean = new InputBean(inputNode.getAttribute("name"),
-                                        Boolean.parseBoolean(("required")), inputNode.getAttribute("label"),
-                                        inputNode.getAttribute("placeHolder"), inputNode.getAttribute("tooltip"),
-                                        inputNode.getAttribute("regex"), inputNode.getAttribute("values"),
+                                InputBean inputBean = new InputBean(inputNode.getAttribute(LifecycleConstants.NAME),
+                                        Boolean.parseBoolean(LifecycleConstants.REQUIRED),
+                                        inputNode.getAttribute(LifecycleConstants.LABEL),
+                                        inputNode.getAttribute(LifecycleConstants.PLACE_HOLDER),
+                                        inputNode.getAttribute(LifecycleConstants.TOOLTIP),
+                                        inputNode.getAttribute(LifecycleConstants.REGEX),
+                                        inputNode.getAttribute(LifecycleConstants.VALUES),
                                         ((Element) inputsNode).getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                                 inputBeans.add(inputBean);
 
@@ -280,15 +285,16 @@ public class LifecycleOperationUtil {
 
                             if (parameterNodeList.item(j).getNodeType() == Node.ELEMENT_NODE) {
                                 Element parameterNode = (Element) parameterNodeList.item(j);
-                                paramNameValues
-                                        .put(parameterNode.getAttribute("name"), parameterNode.getAttribute("value"));
+                                paramNameValues.put(parameterNode.getAttribute(LifecycleConstants.NAME),
+                                        parameterNode.getAttribute(LifecycleConstants.VALUE_ATTRIBUTE));
 
                             }
                         }
                         customCodeBean.setClassObject(
-                                loadCustomExecutors(executionNode.getAttribute("class"), paramNameValues));
+                                loadCustomExecutors(executionNode.getAttribute(LifecycleConstants.CLASS_ATTRIBUTE),
+                                        paramNameValues));
                         customCodeBean
-                                .setEventName(executionNode.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
+                                .setTargetName(executionNode.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                         customCodeBeansList.add(customCodeBean);
                     }
                 }
@@ -333,8 +339,9 @@ public class LifecycleOperationUtil {
         List<AvailableTransitionBean> availableTransitionBeanList = new ArrayList<>();
         try {
             XPath xPathInstance = XPathFactory.newInstance().newXPath();
-            String xpathQuery = LifecycleConstants.LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH + lcState + "']"
-                    + LifecycleConstants.LIFECYCLE_TRANSITION_ELEMENT;
+            String xpathQuery =
+                    LifecycleConstants.LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH + lcState + CLOSE_ATTRIBUTE_BRACKET
+                            + LifecycleConstants.LIFECYCLE_TRANSITION_ELEMENT;
             XPathExpression exp = xPathInstance.compile(xpathQuery);
 
             NodeList transitionNodeList = (NodeList) exp.evaluate(lcConfig, XPathConstants.NODESET);
@@ -380,7 +387,7 @@ public class LifecycleOperationUtil {
                         PermissionBean permissionBean = new PermissionBean();
                         Element permissionElement = (Element) permissionNodeList.item(i);
                         permissionBean
-                                .setForEvent(permissionElement.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
+                                .setForTarget(permissionElement.getAttribute(LifecycleConstants.FOR_TARGET_ATTRIBUTE));
                         if (!"".equals(permissionElement.getAttribute(LifecycleConstants.LIFECYCLE_ROLES_ATTRIBUTE))) {
                             permissionBean.setRoles(Arrays.asList(
                                     permissionElement.getAttribute(LifecycleConstants.LIFECYCLE_ROLES_ATTRIBUTE)
@@ -407,8 +414,8 @@ public class LifecycleOperationUtil {
      * @throws LifecycleException
      */
     public static String buildXPathQuery(String lcState, String dataElementName) {
-        return LifecycleConstants.LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH + lcState + "']"
-                + LifecycleConstants.LIFECYCLE_DATA_ELEMENT_PATH + dataElementName + "']";
+        return LifecycleConstants.LIFECYCLE_STATE_ELEMENT_WITH_NAME_PATH + lcState + CLOSE_ATTRIBUTE_BRACKET
+                + LifecycleConstants.LIFECYCLE_DATA_ELEMENT_PATH + dataElementName + CLOSE_ATTRIBUTE_BRACKET;
     }
 
     /**

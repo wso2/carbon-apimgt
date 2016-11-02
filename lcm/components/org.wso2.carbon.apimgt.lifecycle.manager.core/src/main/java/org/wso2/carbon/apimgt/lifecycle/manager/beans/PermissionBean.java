@@ -26,19 +26,19 @@ import java.util.List;
 public class PermissionBean {
 
     private List<String> roles;
-    private String forEvent;
+    private String forTarget;
 
     public PermissionBean() {
         this.roles = new ArrayList<String>();
-        this.forEvent = "";
+        this.forTarget = "";
     }
 
-    public String getForEvent() {
-        return forEvent;
+    public String getForTarget() {
+        return forTarget;
     }
 
-    public void setForEvent(String forEvent) {
-        this.forEvent = forEvent;
+    public void setForTarget(String forTarget) {
+        this.forTarget = forTarget;
     }
 
     public List<String> getRoles() {
