@@ -36,6 +36,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -68,6 +72,10 @@
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.rest.api.store</symbolicName>
                                     <version>${carbon.apimgt.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>json-simple</symbolicName>
+                                    <version>${json-simple.wso2.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

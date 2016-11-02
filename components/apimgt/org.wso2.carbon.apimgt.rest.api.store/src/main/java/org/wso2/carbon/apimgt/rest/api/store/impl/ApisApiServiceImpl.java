@@ -15,9 +15,9 @@ import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 
 import javax.ws.rs.core.Response;
 

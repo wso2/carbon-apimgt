@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,29 +15,30 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.core.util.exception;
+package org.wso2.carbon.apimgt.rest.api.common.exception;
 
-import org.wso2.carbon.apimgt.core.util.Constants;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
+
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 /**
- * Exception class that is corresponding to 400 BadRequest response
+ * Exception class that is corresponding to 409 Conflict response
  */
-public class BadRequestException extends WebApplicationException {
+public class ConflictException extends WebApplicationException {
 
     private String message;
 
-    public BadRequestException(ErrorDTO errorDTO) {
-        super(Response.status(Response.Status.BAD_REQUEST).entity(errorDTO)
-                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE).build());
+    public ConflictException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.CONFLICT).entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE).build());
         message = errorDTO.getDescription();
     }
 
-    public BadRequestException() {
-        super(Response.Status.BAD_REQUEST);
+    public ConflictException() {
+        super(Response.Status.CONFLICT);
     }
 
     @Override

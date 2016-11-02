@@ -13,24 +13,36 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.core.util;
+package org.wso2.carbon.apimgt.rest.api.common;
 
 /**
- * Class that lists constants used in this package.
+ * Represents Constants related to an API.
  */
-public class Constants {
+public class APIConstants {
 
-    //// TODO: 27/10/16 Refactor constant classes once all constants are defined 
     public static final String PUBLISHED = "PUBLISHED";
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
-    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    /**
+     * Represents Frontend Constants related to an API.
+     */
+    public static class FrontEndParameterNames {
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String CLIENT_DETAILS = "appDetails";
+        public static final String CALLBACK_URL = "callbackUrl";
+        public static final String KEY_STATE = "keyState";
+    }
 
-    public static final int TIER_APPLICATION_TYPE = 2;
-
+    /**
+     * Represents Access Token Constants related to an API.
+     */
+    public static class AccessTokenConstants {
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String VALIDITY_TIME = "validityTime";
+        public static final String TOKEN_SCOPES = "tokenScope";
+    }
 }

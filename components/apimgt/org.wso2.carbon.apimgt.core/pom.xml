@@ -119,9 +119,10 @@
                             org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
                             org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
                             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
-                            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
+                            org.wso2.carbon.datasource.core.*;
+                            version="${datasources.core.package.import.version.range}",
                             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
-                            javax.ws.rs.*; version="${javax.ws.rs.import.version.range}"
+                            org.wso2.carbon.apimgt.rest.api.common.*;
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.core.dao.internal,
