@@ -67,6 +67,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return new Application[0];
     }
 
+    @Override public void updateApplication(Application application) throws APIManagementException {
+
+    }
+
+    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+            String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenScope, String groupingId, String jsonString) throws APIManagementException {
+        return null;
+    }
+
     @Override
     public APISummaryResults searchAPIs(String searchContent, String searchType, int offset, int limit)
             throws APIManagementException {

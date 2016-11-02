@@ -13,28 +13,30 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.core.util.exception;
+package org.wso2.carbon.apimgt.rest.api.common.exception;
 
-import org.wso2.carbon.apimgt.core.util.Constants;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
+
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 /**
- * Exception class that is corresponding to 401 Forbidden response
+ * Exception class that is corresponding to 404 NotFound response
  */
-public class ForbiddenException extends WebApplicationException {
+public class NotFoundException extends WebApplicationException {
 
     private String message;
-
-    public ForbiddenException() {
-        super(Response.status(Response.Status.FORBIDDEN).build());
+    public NotFoundException() {
+        super(Response.Status.NOT_FOUND);
     }
 
-    public ForbiddenException(ErrorDTO errorDTO) {
-        super(Response.status(Response.Status.FORBIDDEN).entity(errorDTO)
-                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE).build());
+    public NotFoundException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.NOT_FOUND)
+                .entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
         message = errorDTO.getDescription();
     }
 

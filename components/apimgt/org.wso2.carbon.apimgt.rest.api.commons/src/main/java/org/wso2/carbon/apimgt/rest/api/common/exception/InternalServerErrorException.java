@@ -15,10 +15,10 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.core.util.exception;
+package org.wso2.carbon.apimgt.rest.api.common.exception;
 
-import org.wso2.carbon.apimgt.core.util.Constants;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -49,7 +49,7 @@ public class InternalServerErrorException extends WebApplicationException {
     public InternalServerErrorException(ErrorDTO errorDTO) {
         super(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(errorDTO)
-                .header(Constants.HEADER_CONTENT_TYPE, Constants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
                 .build());
     }
 }
