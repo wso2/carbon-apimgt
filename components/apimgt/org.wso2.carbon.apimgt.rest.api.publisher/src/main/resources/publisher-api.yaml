@@ -2826,9 +2826,6 @@ definitions:
       name:
         type: string
         example: log_in_message
-      config:
-        type: string
-        example: ""
       type:
         type: string
         example: in
