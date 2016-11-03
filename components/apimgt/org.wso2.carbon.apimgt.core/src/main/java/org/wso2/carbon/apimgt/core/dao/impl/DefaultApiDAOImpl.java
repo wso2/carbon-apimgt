@@ -77,6 +77,19 @@ public class DefaultApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     *
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit  The maximum number of results to be returned after the offset
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummaryResults getAPIs(int offset, int limit) throws APIManagementDAOException {
+        return null;
+    }
+
+    /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided
