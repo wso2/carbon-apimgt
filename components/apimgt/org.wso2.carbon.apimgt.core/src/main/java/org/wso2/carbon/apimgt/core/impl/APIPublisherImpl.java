@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -366,7 +365,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         APISummaryResults apiSummaryResults = null;
         try {
-            apiSummaryResults = getApiDAO().searchAPIs(APIUtils.createSearchCriteriaMap(query),offset,limit);
+            if (query != null && !query.isEmpty()) {
+
+                apiSummaryResults = getApiDAO().searchAPIs(APIUtils.createSearchCriteriaMap(query), offset, limit);
+            } else {
+                apiSummaryResults = getApiDAO().getAPIs(offset, limit);
+            }
         } catch (APIManagementDAOException e) {
             APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
         }
