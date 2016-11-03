@@ -464,7 +464,7 @@
                                             			</span>
                                                     </a>
 
-                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Scince there aren't resources for Websocket API's , Advanced throttling policies apply to API Level")%></p>
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Since there aren't resources for Websocket API's , Advanced throttling policies apply to API Level")%></p>
                                                 </label>
                                                         <div class="controls col-sm-8">
                                                     <label class="radio hide">
