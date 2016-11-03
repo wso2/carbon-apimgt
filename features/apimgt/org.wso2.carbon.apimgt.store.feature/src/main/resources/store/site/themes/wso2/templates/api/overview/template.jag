@@ -51,31 +51,20 @@
     	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
 
     	        <%
-    	            var useDefaultContext;
-    	            for (var urltype in environmenturls ) {
-    	                if(urltype == "useDefaultContext"){
-    	                    if (environmenturls[urltype] == false) {
-    	                        useDefaultContext = false;
-    	                    } else {
-    	                        useDefaultContext = true;
-    	                    }
-    	                }
-    	            }
                 // since we are using context versioning, we remove the api.version from the URL.
                 // The reason is that the context will have the version now
     	        for (var urltype in environmenturls ) {
-                    if(urltype != "showInConsole" && urltype != "useDefaultContext") {
+                    if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
-	    	            data-clipboard-text="<%=environmenturls[urltype]%><% if (useDefaultContext == true) { %><%=encode.forHtmlAttribute(api.context)%><%}%>"
-	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=encode.forHtml(environmenturls[urltype])%>
-	    	                <% if (useDefaultContext == true) { %><%=encode.forHtml(api.context)%><%}%>
+	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
+	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%><br/>
-	                            <%=encode.forHtml(environmenturls[urltype])%><% if (useDefaultContext == true) { %><%=encode.forHtml(apiContext)%>
-	                        <%}}%>
+	                            <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
+	                        <%}%>
 	                    </div>
 
 	    	            <%}

@@ -282,29 +282,3 @@ body.modal-open {
 .icon-implement{
     padding:13px 0 0 10px;
 }
-.selectTransports{
-    color: red;
-    font-size: 12px;
-}
-.invalid_url_message{
-    color: red;
-    font-size: 12px;
-}
-.urlBox{
-    margin-bottom: 5px;
-}
-.default_check{
-    margin-right: 10px;
-}
-.error{
-    line-height: 1.5em;
-    color: white;
-    background-color: #e74c3c;
-    width: 100%;
-    padding: 5px 10px;
-    border-left: 5px solid #942F25;
-    font-weight: 500;
-}
-#requiredField{
-    width:50%;
-}

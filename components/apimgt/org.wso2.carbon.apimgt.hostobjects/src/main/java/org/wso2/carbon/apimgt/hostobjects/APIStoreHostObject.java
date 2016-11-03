@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -4664,43 +4663,13 @@ public class APIStoreHostObject extends ScriptableObject {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
                 JSONObject jsonObject = new JSONObject();
-                List<String> environmentUrls = new ArrayList<String>();
-                boolean useDefaultContext = true;
-
-                if (api.getGatewayUrls() != null) {
-                    String gatewayUrls = api.getGatewayUrls();
-                    JSONParser parser = new JSONParser();
-                    Object object  = null;
-                    try {
-                        object = parser.parse(gatewayUrls);
-                        JSONObject gatewayUrlsJson = (JSONObject) object;
-                        JSONObject urlsFromPublisherJson = (JSONObject) gatewayUrlsJson.get(environmentName);
-                        // if both http and https are default
-                        if (urlsFromPublisherJson.get("https").equals("default") && urlsFromPublisherJson.get("http")
-                                .equals("default")) {
-                            environmentUrls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
-                        } else { //if both are not default
-                            environmentUrls.add((String) urlsFromPublisherJson.get("https"));
-                            environmentUrls.add((String) urlsFromPublisherJson.get("http"));
-                        }
-                        if (urlsFromPublisherJson.get("useDefaultContext").toString().equals("true")) {
-                            useDefaultContext = true;
-                        } else {
-                            useDefaultContext = false;
-                        }
-                    } catch (ParseException e) {
-                        log.error("Cannot Parse the gatewayUrls to JSON for API", e);
-                    }
-                } else {
-                    environmentUrls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
-                    useDefaultContext = true;
-                }
+                List<String> environmenturls = new ArrayList<String>();
+                environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
                 List<String> transports = new ArrayList<String>();
                 transports.addAll(Arrays.asList((api.getTransports().split(","))));
-                jsonObject.put("http", filterUrlsByTransport(environmentUrls, transports, "http"));
-                jsonObject.put("https", filterUrlsByTransport(environmentUrls, transports, "https"));
+                jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+                jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
                 jsonObject.put("showInConsole", environment.isShowInConsole());
-                jsonObject.put("useDefaultContext", useDefaultContext);
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     productionEnvironmentObject.put(environment.getName(), jsonObject);
                 } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
