@@ -1,30 +1,18 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApplicationsApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-
-import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApplicationsApiServiceFactory;
+import org.wso2.msf4j.Microservice;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Context;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApi",
