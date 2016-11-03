@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -222,15 +223,14 @@ public interface APIPublisher extends APIManager {
     void deleteAPI(String identifier) throws APIManagementException;
 
     /**
-     * Search API
      *
-     * @param searchTerm Search Term
-     * @param searchType Search Type
-     * @param providerId
-     * @return Set of APIs
+     * @param limit
+     * @param offset
+     * @param query
+     * @return
      * @throws APIManagementException
      */
-    List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException;
+    APISummaryResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
 
     /**
      * Update the subscription status

@@ -26,10 +26,11 @@ import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
+import javax.annotation.CheckForNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import javax.annotation.CheckForNull;
+import java.util.Map;
 
 /**
  * Provides access to API data layer
@@ -60,8 +61,7 @@ public interface ApiDAO {
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided
-     * @param searchAttribute The attribute of an API against which the search will be performed
-     * @param searchString The search string provided
+     * @param searchCriteria The attribute of an API against which the search will be performed
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
@@ -69,8 +69,21 @@ public interface ApiDAO {
      * @throws APIManagementDAOException if error occurs while accessing data layer
      *
      */
-    APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
+    APISummaryResults searchAPIsForRoles(Map searchCriteria, int offset, int limit,
                                          List<String> roles) throws APIManagementDAOException;
+
+    /**
+     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
+     * pagination as well as doing a permission check to ensure results returned are only those that match
+     * the list of roles provided
+     *
+     * @param searchCriteria The attribute of an API against which the search will be performed
+     * @param offset          The number of results from the beginning that is to be ignored
+     * @param limit           The maximum number of results to be returned after the offset
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    APISummaryResults searchAPIs(Map searchCriteria, int offset, int limit) throws APIManagementDAOException;
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
