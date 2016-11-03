@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 

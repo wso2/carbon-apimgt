@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.core.util.dto;
+package org.wso2.carbon.apimgt.rest.api.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;

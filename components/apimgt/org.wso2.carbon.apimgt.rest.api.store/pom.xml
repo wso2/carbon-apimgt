@@ -57,7 +57,15 @@
         <dependency>
             <groupId>org.wso2.carbon.security.caas</groupId>
             <artifactId>org.wso2.carbon.security.caas</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-m1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -143,7 +151,7 @@
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.store.internal,
-            org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.exp.pkg.version}",
+            org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
         <carbon.component>
             osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"

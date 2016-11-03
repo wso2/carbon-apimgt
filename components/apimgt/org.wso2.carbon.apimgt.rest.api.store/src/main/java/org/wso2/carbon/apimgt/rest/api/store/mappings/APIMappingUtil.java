@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;

@@ -23,10 +23,10 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.dao.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -65,6 +65,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public Application[] getApplications(Subscriber subscriber, String groupingId)
             throws APIManagementException {
         return new Application[0];
+    }
+
+    @Override public void updateApplication(Application application) throws APIManagementException {
+
+    }
+
+    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+            String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenScope, String groupingId, String jsonString) throws APIManagementException {
+        return null;
     }
 
     @Override
