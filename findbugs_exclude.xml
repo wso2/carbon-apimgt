@@ -24,4 +24,10 @@
         <Class name="org.wso2.carbon.apimgt.core.dao.impl.CommonDataAccessHandler"/>
         <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
     </Match>
+    <Match>
+        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,DM_CONVERT_CASE"/>
+    </Match>
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.lifecycle.manager.sql"/>
+    </Match>
 </FindBugsFilter>
