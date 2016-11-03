@@ -47,7 +47,7 @@ public class APIStoreImplTestCase {
       
       //apiStore = new APIStoreImpl();
       
-      apiStore.searchAPIs("", "", 1, 1);
+      apiStore.searchAPIs("",0,0);
             Assert.assertTrue(true);
         } catch (APIManagementException e) {
            
