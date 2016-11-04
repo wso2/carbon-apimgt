@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -347,6 +348,7 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
+    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
     private boolean isAPIExists(API api) throws SQLException {
         final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE " +
                 "PROVIDER = ? AND NAME = ? AND VERSION = ?";

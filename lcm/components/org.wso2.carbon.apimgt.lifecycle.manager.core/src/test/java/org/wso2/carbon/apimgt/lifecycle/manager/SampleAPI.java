@@ -17,8 +17,10 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is a mock api class which implements ManagedLifecycle interface.
@@ -28,6 +30,7 @@ public class SampleAPI implements ManagedLifecycle {
     private String name;
     private String version;
     private LifecycleState lifecycleState;
+    private Map<String, String> lifecycleIdMap = new HashMap<>();
 
     public SampleAPI() {
         lifecycleState = new LifecycleState();
@@ -58,26 +61,38 @@ public class SampleAPI implements ManagedLifecycle {
     }
 
     /*@Override
-    public void associateLifecycle(String lcName, String user) throws LifecycleException {
-        this.lifecycleState = LifecycleOperationProvider
-                .associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN);
+    public void creatLifecycleEntry(String lcName, String user) throws LifecycleException {
+        this.lifecycleState = LifecycleOperationManager
+                .creatLifecycleEntry(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN);
     }
 
     @Override
     public void executeLifecycleEvent(LifecycleState nextState, String uuid, String action, String user,
             Object resource) throws LifecycleException {
-        this.lifecycleState = LifecycleOperationProvider.executeLifecycleEvent(nextState, uuid, action, user, this);
+        this.lifecycleState = LifecycleOperationManager.executeLifecycleEvent(nextState, uuid, action, user, this);
     }
 
     @Override
     public void setCurrentLifecycleState(String uuid) throws LifecycleException {
-        this.lifecycleState = LifecycleOperationProvider.getCurrentLifecycleState(uuid);
+        this.lifecycleState = LifecycleOperationManager.getCurrentLifecycleState(uuid);
     }*/
 
     @Override
-    public void dissociateLifecycle(String uuid) throws LifecycleException {
-        ManagedLifecycle.super.dissociateLifecycle(uuid);
+    public void dissociateLifecycle() {
         this.lifecycleState = null;
+        // Implement logic to remove persisted lifecycle id in API side.
+    }
+
+    @Override
+    public void associateLifecycle (LifecycleState lifecycleState) {
+        setLifecycleState(lifecycleState);
+        lifecycleIdMap.put(lifecycleState.getLcName(), lifecycleState.getLifecycleId());
+        // Implement logic to persist lifecycle id in API side as well
+    }
+
+    @Override
+    public String getLifecycleId(String lcName) {
+        return lifecycleIdMap.get(lcName);
     }
 
 }

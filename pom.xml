@@ -246,6 +246,11 @@
                 <artifactId>jackson-jaxrs-base</artifactId>
                 <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${findbug.exclude.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -261,7 +266,7 @@
                         <xmlOutput>true</xmlOutput>
                         <findbugsXmlOutputDirectory>${project.build.directory}/findbugs
                         </findbugsXmlOutputDirectory>
-                        <excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>
+                        <!--<excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>-->
                         <!--Exclude generated sources-->
                     </configuration>
                     <version>${maven.findbugsplugin.version}</version>
@@ -435,6 +440,8 @@
 
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
+
+        <findbug.exclude.version>3.0.0</findbug.exclude.version>
 
     </properties>
 
