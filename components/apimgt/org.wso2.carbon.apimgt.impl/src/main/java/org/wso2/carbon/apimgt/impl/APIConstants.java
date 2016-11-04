@@ -1237,6 +1237,21 @@ public final class APIConstants {
         public static final String APPLICATION_ID = "application_id";
     }
     
+    public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";
+ 
+    public static class WorkflowConfigConstants {
+        public static final String WORKFLOW = "WorkflowConfigurations";
+        public static final String WORKFLOW_ENABLED = "Enabled";
+        public static final String WORKFLOW_SERVER_URL = "ServerUrl";
+        public static final String WORKFLOW_SERVER_USER = "ServerUser";
+        public static final String WORKFLOW_SERVER_PASSWORD = "ServerPassword";
+        public static final String WORKFLOW_CALLBACK = "WorkflowCallbackAPI";
+        public static final String WORKFLOW_TOKEN_EP = "TokenEndPoint";
+        public static final String WORKFLOW_DCR_EP = "DCREndPoint";
+        public static final String WORKFLOW_DCR_EP_USER = "DCREndPointUser";
+        public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
+
+    } 
     public static class APIEndpointSecurityConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";

@@ -375,7 +375,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
-        String gatewayUrls  = (String) apiData.get("gatewayUrls", apiData);
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -422,7 +421,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
-        api.setGatewayUrls(gatewayUrls);
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
@@ -2691,8 +2689,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 myn.put(50, myn, checkValue(policiesSet.toString()));
                 myn.put(51, myn, checkValue(api.getApiLevelPolicy()));
-                myn.put(52, myn, api.getGatewayUrls());
-                myn.put(53, myn, checkValue(Boolean.toString(api.isWS())));
+                myn.put(52, myn, checkValue(Boolean.toString(api.isWS())));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
@@ -4940,7 +4937,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
                 row.put("serverURL", row, environment.getServerURL());
-                row.put("gatewayEndpoints", row, environment.getApiGatewayEndpoint());
                 row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;

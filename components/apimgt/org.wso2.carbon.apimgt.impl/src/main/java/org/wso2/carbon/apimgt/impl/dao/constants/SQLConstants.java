@@ -1519,13 +1519,6 @@ public class SQLConstants {
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +
             " VALUES (?,?,?,?,?,?,?,?)";
-    public static final String ADD_API_ENVIRONMENTS_SQL = " INSERT INTO AM_API_ENVIRONMENTS (ENVIRONMENT_NAME," +
-            "API_ID, HTTP_URL,HTTPS_URL,APPEND_CONTEXT)" +
-            " VALUES (?,?,?,?,?)";
-    public static final String REMOVE_API_ENVIRONMENTS_SQL = "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
-
-    public static final String GET_API_ENVIRONMENTS_SQL =
-            "SELECT ENVIRONMENT_NAME,HTTP_URL,HTTPS_URL,APPEND_CONTEXT FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1546,6 +1539,9 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_ENTRY_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
+    
+    public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
+            "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +
@@ -1662,6 +1658,7 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 
@@ -1685,9 +1682,6 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
-
-    public static final String REMOVE_FROM_API_ENVIRONMENTS_SQL =
-            "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ?";
 
     public static final String REMOVE_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
@@ -1836,6 +1830,9 @@ public class SQLConstants {
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_SQL =
             "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
+    
+    public static final String REMOVE_WORKFLOW_ENTRY_SQL =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_EXTERNAL_REFERENCE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL =
             "SELECT " +
