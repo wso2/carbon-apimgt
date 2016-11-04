@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentEndpointsDTO;
 /**
  * EnvironmentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
 public class EnvironmentDTO   {
   @JsonProperty("name")
   private String name = null;
