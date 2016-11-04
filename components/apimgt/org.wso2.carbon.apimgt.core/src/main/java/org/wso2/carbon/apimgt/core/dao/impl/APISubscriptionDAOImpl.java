@@ -21,24 +21,25 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
+
+import java.sql.SQLException;
 
 /**
  * Default implementation of the APISubscriptionDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
  * Hence is considered as the default due to its re-usability.
  */
-public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
+public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Retrieve a given instance of an API Subscription
      *
      * @param subscriptionID The UUID that uniquely identifies a Subscription
      * @return valid {@link APISubscription} object or null
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public APISubscription getAPISubscription(String subscriptionID) throws APIManagementDAOException {
+    public APISubscription getAPISubscription(String subscriptionID) throws SQLException {
         return null;
     }
 
@@ -50,11 +51,11 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName)
-                                                                            throws APIManagementDAOException {
+                                                                            throws SQLException {
         return null;
     }
 
@@ -66,11 +67,11 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public APISubscriptionResults getAPISubscriptionsForGroup(int offset, int limit, String groupID)
-                                                                            throws APIManagementDAOException {
+                                                                            throws SQLException {
         return null;
     }
 
@@ -84,11 +85,11 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param userName        The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public APISubscriptionResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                        int limit, String userName) throws APIManagementDAOException {
+                                                        int limit, String userName) throws SQLException {
         return null;
     }
 
@@ -102,11 +103,11 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param groupID         The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public APISubscriptionResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
-                                                          int limit, String groupID) throws APIManagementDAOException {
+                                                          int limit, String groupID) throws SQLException {
         return null;
     }
 
@@ -115,10 +116,10 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subscription The {@link APISubscription} object to be added
      * @return The newly added {@link APISubscription} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public APISubscription addAPISubscription(APISubscription subscription) throws APIManagementDAOException {
+    public APISubscription addAPISubscription(APISubscription subscription) throws SQLException {
         return null;
     }
 
@@ -126,10 +127,10 @@ public class DefaultAPISubscriptionDAOImpl implements APISubscriptionDAO {
      * Remove an existing API Subscription
      *
      * @param subscriptionID The UUID of the API Subscription that needs to be deleted
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public void deleteAPISubscription(String subscriptionID) throws APIManagementDAOException {
+    public void deleteAPISubscription(String subscriptionID) throws SQLException {
 
     }
 

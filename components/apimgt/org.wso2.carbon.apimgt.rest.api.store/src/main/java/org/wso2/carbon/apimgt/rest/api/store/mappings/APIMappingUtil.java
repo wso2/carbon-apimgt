@@ -80,7 +80,7 @@ public class APIMappingUtil {
         apiDTO.setId(api.getId());
         apiDTO.setName(api.getName());
         apiDTO.setProvider(api.getProvider());
-        apiDTO.setStatus(api.getStatus());
+        apiDTO.setStatus(api.getLifeCycleStatus());
         apiDTO.setVersion(api.getVersion());
         apiDTO.setContext(api.getContext());
         apiDTO.setDescription(api.getDescription());
