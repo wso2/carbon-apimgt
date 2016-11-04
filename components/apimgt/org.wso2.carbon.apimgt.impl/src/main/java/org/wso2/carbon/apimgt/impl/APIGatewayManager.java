@@ -56,6 +56,10 @@ public class APIGatewayManager {
 
 	private boolean debugEnabled = log.isDebugEnabled();
 
+    private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
+
+    private final String ENDPOINT_SANDBOX = "_SANDBOX_";
+
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
 		                                                       .getAPIManagerConfigurationService()
@@ -80,7 +84,8 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain)
+            throws JSONException {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
@@ -253,8 +258,8 @@ public class APIGatewayManager {
                     } else {
                         String fileName = api.getContext().substring(1).replace('/', '-');
                         String[] fileNames = new String[2];
-                        fileNames[0] = "_PRODUCTION_" + fileName;
-                        fileNames[1] = "_SANDBOX_" + fileName;
+                        fileNames[0] = ENDPOINT_PRODUCTION + fileName;
+                        fileNames[1] = ENDPOINT_SANDBOX + fileName;
                         client.undeployWSApi(fileNames);
                     }
 
@@ -295,7 +300,7 @@ public class APIGatewayManager {
      * @throws APIManagementException
      */
     public void deployWebsocketAPI(API api, APIGatewayAdminClient client)
-            throws APIManagementException {
+            throws APIManagementException, JSONException {
         try {
             JSONObject obj = new JSONObject(api.getEndpointConfig());
             String production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
@@ -305,14 +310,14 @@ public class APIGatewayManager {
             context = api.getContext();
             try {
                 if (production_endpoint != null) {
-                    api.setContext("_PRODUCTION_" + context);
+                    api.setContext(ENDPOINT_PRODUCTION + context);
                     String content = createSeqString(api, production_endpoint);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
                     client.deployWSApi(content, fileName);
                 }
                 if (sandbox_endpoint != null) {
-                    api.setContext("_SANDBOX_" + context);
+                    api.setContext(ENDPOINT_SANDBOX + context);
                     String content = createSeqString(api, sandbox_endpoint);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
@@ -329,7 +334,9 @@ public class APIGatewayManager {
                 throw new APIManagementException(msg);
             }
         } catch (JSONException e) {
-            log.error("Error in reading JSON object " + e.getMessage(), e);
+            String msg = "Error in reading JSON object " + e.getMessage();
+            log.error(msg, e);
+            throw new JSONException(msg);
         }
     }
 
@@ -339,7 +346,8 @@ public class APIGatewayManager {
      * @param artifact
      * @param api
      */
-    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
+    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api)
+            throws JSONException {
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIGatewayAdminClient client;
