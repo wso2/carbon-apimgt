@@ -260,19 +260,20 @@ public class APIGatewayManager {
                         }
                     }
                 } catch (AxisFault axisFault) {
-                 /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
-                    log.error("Error occurred when removing from gateway " + environmentName, axisFault);
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
+                    log.error("Error occurred when removing from gateway " + environmentName,
+                              axisFault);
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 } catch (APIManagementException ex) {
                     /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
                     failedEnvironmentsMap.put(environmentName, ex.getMessage());
                 }
@@ -330,11 +331,11 @@ public class APIGatewayManager {
                 gatewayManager.deployWebsocketAPI(api, client);
             }
         } catch (APIManagementException ex) {
-                    /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
+            /*
+            didn't throw this exception to handle multiple gateway publishing
+            if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+            therefore this didn't break the gateway unpublisihing if one gateway unreachable
+            */
             log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
         } catch (AxisFault ex) {
             log.error("Error in deploying to gateway :" + ex.getMessage(), ex);

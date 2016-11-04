@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
-
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
             " SELECT " +
             "   API.API_NAME," +
