@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.beans;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.beans;
 
 import java.util.ArrayList;
 import java.util.List;

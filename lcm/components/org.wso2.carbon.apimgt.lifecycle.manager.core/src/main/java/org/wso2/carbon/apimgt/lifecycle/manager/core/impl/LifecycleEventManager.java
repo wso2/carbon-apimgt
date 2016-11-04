@@ -16,9 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager.impl;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.impl;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.dao.LifecycleMgtDAO;
