@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.CheckForNull;
 
@@ -76,12 +77,24 @@ public class DefaultApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     *
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit  The maximum number of results to be returned after the offset
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummaryResults getAPIs(int offset, int limit) throws APIManagementDAOException {
+        return null;
+    }
+
+    /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided
      *
-     * @param searchAttribute The attribute of an API against which the search will be performed
-     * @param searchString    The search string provided
+     * @param searchCriteria The attribute of an API against which the search will be performed
      * @param offset          The number of results from the beginning that is to be ignored
      * @param limit           The maximum number of results to be returned after the offset
      * @param roles   The list of roles of the user making the query
@@ -89,8 +102,24 @@ public class DefaultApiDAOImpl implements ApiDAO {
      * @throws APIManagementDAOException
      */
     @Override
-    public APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
+    public APISummaryResults searchAPIsForRoles(Map searchCriteria, int offset, int limit,
                                                 List<String> roles) throws APIManagementDAOException {
+        return null;
+    }
+
+    /**
+     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
+     * pagination as well as doing a permission check to ensure results returned are only those that match
+     * the list of roles provided
+     *
+     * @param searchCriteria The attribute of an API against which the search will be performed
+     * @param offset         The number of results from the beginning that is to be ignored
+     * @param limit          The maximum number of results to be returned after the offset
+     * @return {@link APISummaryResults} matching results
+     * @throws APIManagementDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummaryResults searchAPIs(Map searchCriteria, int offset, int limit) throws APIManagementDAOException {
         return null;
     }
 
