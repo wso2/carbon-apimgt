@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager.sql;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.constants.Constants;
@@ -187,6 +188,7 @@ public class LifecycleDatabaseCreator {
      * @throws LifecycleManagerDatabaseException   If sql script reading fails.
      * @throws SQLException                 If script execution fails.
      */
+    @SuppressFBWarnings ("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
     private void executeSQLScript() throws LifecycleManagerDatabaseException, SQLException {
         String databaseType = LifecycleDatabaseCreator.getDatabaseType(dataSource.getConnection());
         if (log.isDebugEnabled()) {
@@ -285,6 +287,7 @@ public class LifecycleDatabaseCreator {
      * @param sql
      * @throws LifecycleManagerDatabaseException
      */
+    @SuppressFBWarnings ("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
     private void executeSQL(String sql) throws LifecycleManagerDatabaseException {
         // Check and ignore empty statements
         if ("".equals(sql.trim())) {

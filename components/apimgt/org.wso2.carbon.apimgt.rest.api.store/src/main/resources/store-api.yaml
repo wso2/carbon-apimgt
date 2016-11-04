@@ -92,7 +92,7 @@ paths:
             Eg.
             "provider:wso2*" will match an API if the provider of the API starts with "wso2".
 
-            Supported attribute modifiers are [**version, context, status,
+            Supported attribute modifiers are [**version, context, lifeCycleStatus,
             description, subcontext, doc, provider, tag **]
 
             If no advanced attribute modifier has been specified, search will match the
@@ -1339,7 +1339,7 @@ definitions:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
-      status:
+      lifeCycleStatus:
         type: string
 
 #-----------------------------------------------------
@@ -1352,7 +1352,7 @@ definitions:
       - context
       - version
       - provider
-      - status
+      - lifeCycleStatus
       - apiDefinition
     properties:
       id:
@@ -1375,7 +1375,7 @@ definitions:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
-      status:
+      lifeCycleStatus:
         type: string
       isDefaultVersion:
         type: boolean
@@ -1452,7 +1452,7 @@ definitions:
         type: string
       description:
         type: string
-      status:
+      lifeCycleStatus:
         type: string
       groupId:
         type: string
@@ -1477,7 +1477,7 @@ definitions:
         type: string
       description:
         type: string
-      status:
+      lifeCycleStatus:
         type: string
       groupId:
         type: string
@@ -1660,7 +1660,7 @@ definitions:
         type: string
       tier:
         type: string
-      status:
+      lifeCycleStatus:
         type: string
         enum:
           - BLOCKED
@@ -1712,7 +1712,7 @@ definitions:
 # The Error resource
 #-----------------------------------------------------
   Error:
-    title: Error object returned with 4XX HTTP status
+    title: Error object returned with 4XX HTTP lifeCycleStatus
     required:
       - code
       - message

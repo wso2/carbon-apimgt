@@ -65,7 +65,6 @@ public class LifecycleEventManager {
         lifecycleStateBean.setStateId(id);
         try {
             getLCMgtDAOInstance().changeLifecycleState(lifecycleStateBean, user);
-            getLCMgtDAOInstance().clearCheckListItemData(id, currentState);
         } catch (LifecycleManagerDatabaseException e) {
             throw new LifecycleException("Error while changing lifecycle state to  " + requiredState, e);
         }

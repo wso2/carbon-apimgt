@@ -16,7 +16,6 @@
     <name>WSO2 Carbon - API Management - Life Cycles Database Component</name>
 
 
-
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
@@ -34,6 +33,10 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
         </dependency>
     </dependencies>
 

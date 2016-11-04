@@ -20,11 +20,11 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 
 import javax.annotation.CheckForNull;
+import java.sql.SQLException;
 
 /**
  * Provides access to API Subscription data layer
@@ -35,11 +35,11 @@ public interface APISubscriptionDAO {
      * Retrieve a given instance of an API Subscription
      * @param subscriptionID The UUID that uniquely identifies a Subscription
      * @return valid {@link APISubscription} object or null
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     @CheckForNull
-    APISubscription getAPISubscription(String subscriptionID) throws APIManagementDAOException;
+    APISubscription getAPISubscription(String subscriptionID) throws SQLException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results
@@ -48,11 +48,11 @@ public interface APISubscriptionDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName)
-                                                                            throws APIManagementDAOException;
+                                                                            throws SQLException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and
@@ -61,11 +61,11 @@ public interface APISubscriptionDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     APISubscriptionResults getAPISubscriptionsForGroup(int offset, int limit, String groupID)
-            throws APIManagementDAOException;
+            throws SQLException;
 
     /**
      * Retrieves all available API Subscriptions that match the given search criteria. This method supports
@@ -76,11 +76,11 @@ public interface APISubscriptionDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     APISubscriptionResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                        int limit, String userName) throws APIManagementDAOException;
+                                                        int limit, String userName) throws SQLException;
 
     /**
      * Retrieves all available API Subscriptions that match the given search criteria. This method supports
@@ -91,28 +91,28 @@ public interface APISubscriptionDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     APISubscriptionResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
-                                                         int limit, String groupID) throws APIManagementDAOException;
+                                                         int limit, String groupID) throws SQLException;
 
     /**
      * Create a new Subscription
      * @param subscription The {@link APISubscription} object to be added
      * @return The newly added {@link APISubscription} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
-    APISubscription addAPISubscription(APISubscription subscription) throws APIManagementDAOException;
+    APISubscription addAPISubscription(APISubscription subscription) throws SQLException;
 
     /**
      * Remove an existing API Subscription
      * @param subscriptionID The UUID of the API Subscription that needs to be deleted
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
-    void deleteAPISubscription(String subscriptionID) throws APIManagementDAOException;
+    void deleteAPISubscription(String subscriptionID) throws SQLException;
 
 
 }
