@@ -19,6 +19,12 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 
+/**
+ * This is a handler which is actually embedded to the netty pipeline which does response path mediation
+ */
 public class WebsocketOutboundHandler extends ChannelOutboundHandlerAdapter {
-
+    /*
+    This path is left blank so that if any response path mediation needs to be done, a super class
+    method can be overridden.
+    */
 }
