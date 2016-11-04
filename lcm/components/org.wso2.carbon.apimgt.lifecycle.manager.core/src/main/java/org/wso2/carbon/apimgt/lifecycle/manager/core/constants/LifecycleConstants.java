@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.constants;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.constants;
 
 /**
  * This class contains constants related to element specified in lifecycle configuration.
