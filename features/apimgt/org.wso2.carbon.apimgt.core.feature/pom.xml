@@ -36,6 +36,26 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-base</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -68,6 +88,26 @@
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.core</symbolicName>
                                     <version>${carbon.apimgt.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-annotations</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-core</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-databind</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

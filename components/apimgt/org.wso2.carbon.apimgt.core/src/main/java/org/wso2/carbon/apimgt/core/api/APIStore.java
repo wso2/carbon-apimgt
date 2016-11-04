@@ -52,14 +52,12 @@ public interface APIStore extends APIManager {
     /**
      * Returns a paginated list of all APIs which match the given search criteria.
      *   
-     * @param searchContent searchContent
-     * @param searchType searchType
-     * @param offset offset
+     * @param query searchType
      * @param limit limit
      * @return APISummaryResults
      * @throws APIManagementException
      */
-    APISummaryResults searchAPIs(String searchContent, String searchType, int offset, int limit)
+    APISummaryResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException;
 
     /**

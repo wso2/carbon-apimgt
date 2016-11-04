@@ -174,7 +174,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
-                <version>${com.fasterxml.jackson.datatype.version}</version>
+                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -199,7 +199,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${com.fasterxml.jackson.datatbind.version}</version>
+                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>
@@ -235,6 +235,16 @@
                 <groupId>com.googlecode.json-simple.wso2</groupId>
                 <artifactId>json-simple</artifactId>
                 <version>${json-simple.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${com.fasterxml.jackson.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-base</artifactId>
+                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -326,7 +336,7 @@
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
-        <org.wso2.msf4j.version>2.0.0</org.wso2.msf4j.version>
+        <org.wso2.msf4j.version>2.1.0</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
@@ -337,7 +347,7 @@
         <spring.framework.package.import.version.range>[4.1.6, 4.2.0)</spring.framework.package.import.version.range>
 
         <org.apache.cxf.version>3.0.3</org.apache.cxf.version>
-        <com.fasterxml.jackson.core.version>2.8.4</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.core.version>2.7.4</com.fasterxml.jackson.core.version>
 
         <findbugs.jsr305.version>3.0.0</findbugs.jsr305.version>
         <pax.logging.api.version>1.9.0</pax.logging.api.version>

@@ -1,22 +1,19 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-
-
-import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
-import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
+import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 
 import javax.ws.rs.core.Response;
@@ -128,23 +125,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         
         try {
             APIStore apiStore = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
-            
-            String searchType = "API" /*APIConstants.API_NAME*/; // TODO -- move to a constant file
-            String searchContent = "*";
-            if (!StringUtils.isBlank(query)) {
-                String[] querySplit = query.split(":");
-                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
-                        .isNotBlank(querySplit[1])) {
-                    searchType = querySplit[0];
-                    searchContent = querySplit[1];
-                } else if (querySplit.length == 1) {
-                    searchContent = query;
-                } else {
-                    RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
-                }
-            }
-            
-            apisResult = apiStore.searchAPIs(searchContent, searchType, offset, limit);
+
+            apisResult = apiStore.searchAPIs(query, offset, limit);
             
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);           

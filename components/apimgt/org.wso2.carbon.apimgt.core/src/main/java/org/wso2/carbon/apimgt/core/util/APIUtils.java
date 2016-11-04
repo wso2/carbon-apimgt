@@ -24,6 +24,9 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Class for all utility methods
  */
@@ -76,5 +79,22 @@ public class APIUtils {
         if (log.isDebugEnabled()) {
             log.debug(msg);
         }
+    }
+
+    /**
+     * This method converts the Search String into map
+     * @param query
+     * @return
+     */
+    public static Map createSearchCriteriaMap(String query){
+        Map<String,String> searchCriteriaMap = new HashMap<>();
+        String[] queryArray =  query.split(",");
+        for (String criteria1 : queryArray){
+            String[] criteria = criteria1.split(":");
+            if (criteria.length >1){
+                searchCriteriaMap.put(criteria[0],criteria[1]);
+            }
+        }
+        return searchCriteriaMap;
     }
 }

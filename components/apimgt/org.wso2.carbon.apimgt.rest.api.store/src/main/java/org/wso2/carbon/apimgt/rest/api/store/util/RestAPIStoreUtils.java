@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.util;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
