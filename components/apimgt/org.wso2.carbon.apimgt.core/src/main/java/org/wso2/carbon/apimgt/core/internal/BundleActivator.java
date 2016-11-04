@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
+import org.wso2.carbon.datasource.core.api.DataSourceService;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -61,6 +62,16 @@ public class BundleActivator {
         }
     }
 
+    @Reference (
+            name = "org.wso2.carbon.datasource.DataSourceService",
+            service = DataSourceService.class,
+            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unregisterDataSourceService"
+    )
+    protected void onDataSourceServiceReady(DataSourceService service) {
+        //this is required to enforce a dependency on datasources
+    }
 
     @Reference(
             name = "org.wso2.carbon.datasource.jndi",
@@ -79,5 +90,8 @@ public class BundleActivator {
         this.jndiContextManager = null;
     }
 
+    protected void unregisterDataSourceService(DataSourceService dataSourceService) {
+        log.debug("Un registering apim data source");
+    }
 
 }
