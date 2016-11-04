@@ -29,8 +29,8 @@
 			<artifactId>org.wso2.carbon.apimgt.core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang.wso2</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -69,7 +69,10 @@
 	</build>
 	<properties>
 		<import.package>
-			javax.ws.rs.*; version="${javax.ws.rs.import.version.range}"
+			org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+			javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
+			org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
+			org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}"
 		</import.package>
 		<export.package>
 			org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",
