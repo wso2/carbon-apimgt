@@ -21,27 +21,28 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
+
+import java.sql.SQLException;
 
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
  * Hence is considered as the default due to its re-usability.
  */
-public class DefaultApplicationDAOImpl implements ApplicationDAO {
+public class ApplicationDAOImpl implements ApplicationDAO {
 
-    DefaultApplicationDAOImpl() {}
+    ApplicationDAOImpl() {}
 
     /**
      * Retrieve a given instance of an Application
      *
      * @param appID The UUID that uniquely identifies an Application
      * @return valid {@link Application} object or null
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public Application getApplication(String appID) throws APIManagementDAOException {
+    public Application getApplication(String appID) throws SQLException {
         return null;
     }
 
@@ -52,12 +53,12 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     @Override
     public ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
-                                                                            throws APIManagementDAOException {
+                                                                            throws SQLException {
         return null;
     }
 
@@ -69,11 +70,11 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public ApplicationSummaryResults getApplicationsForGroup(int offset, int limit, String groupID)
-                                                                            throws APIManagementDAOException {
+                                                                            throws SQLException {
         return null;
     }
 
@@ -86,12 +87,12 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     @Override
     public ApplicationSummaryResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                         int limit, String userName) throws APIManagementDAOException {
+                                                         int limit, String userName) throws SQLException {
         return null;
     }
 
@@ -105,11 +106,11 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param groupID         The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public ApplicationSummaryResults searchApplicationsForGroup(String searchAttribute, String searchString,
-                                              int offset, int limit, String groupID) throws APIManagementDAOException {
+                                              int offset, int limit, String groupID) throws SQLException {
         return null;
     }
 
@@ -118,10 +119,10 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      *
      * @param application The {@link Application} object to be added
      * @return The newly added {@link Application} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public Application addApplication(Application application) throws APIManagementDAOException {
+    public Application addApplication(Application application) throws SQLException {
         return null;
     }
 
@@ -131,11 +132,11 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * @param appID                 The UUID of the Application that needs to be updated
      * @param substituteApplication Substitute {@link Application} object that will replace the existing Application
      * @return The updated {@link Application} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
     public Application updateApplication(String appID, Application substituteApplication)
-                                                                        throws APIManagementDAOException {
+                                                                        throws SQLException {
         return null;
     }
 
@@ -143,10 +144,10 @@ public class DefaultApplicationDAOImpl implements ApplicationDAO {
      * Remove an existing Application
      *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws APIManagementDAOException
+     * @throws SQLException
      */
     @Override
-    public void deleteApplication(String appID) throws APIManagementDAOException {
+    public void deleteApplication(String appID) throws SQLException {
 
     }
 }

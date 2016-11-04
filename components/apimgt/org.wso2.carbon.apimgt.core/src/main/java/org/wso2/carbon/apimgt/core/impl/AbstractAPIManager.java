@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIManager;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -31,6 +30,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 /**
@@ -82,7 +82,7 @@ public abstract class AbstractAPIManager implements APIManager {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
-        } catch (APIManagementDAOException e) {
+        } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving API with id " + uuid, e, log);
         }
         return api;

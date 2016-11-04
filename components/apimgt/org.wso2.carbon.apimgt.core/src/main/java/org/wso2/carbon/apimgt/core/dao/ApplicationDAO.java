@@ -20,11 +20,11 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 
 import javax.annotation.CheckForNull;
+import java.sql.SQLException;
 
 /**
  * Provides access to Application data layer
@@ -34,11 +34,11 @@ public interface ApplicationDAO {
      * Retrieve a given instance of an Application
      * @param appID The UUID that uniquely identifies an Application
      * @return valid {@link Application} object or null
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     @CheckForNull
-    Application getApplication(String appID) throws APIManagementDAOException;
+    Application getApplication(String appID) throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
@@ -47,11 +47,11 @@ public interface ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
-                                                                                throws APIManagementDAOException;
+                                                                                throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
@@ -60,11 +60,11 @@ public interface ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     ApplicationSummaryResults getApplicationsForGroup(int offset, int limit, String groupID)
-            throws APIManagementDAOException;
+            throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
@@ -75,11 +75,11 @@ public interface ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     ApplicationSummaryResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                        int limit, String userName) throws APIManagementDAOException;
+                                                        int limit, String userName) throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
@@ -90,36 +90,36 @@ public interface ApplicationDAO {
      * @param limit The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
     ApplicationSummaryResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
-                                                        int limit, String groupID) throws APIManagementDAOException;
+                                                        int limit, String groupID) throws SQLException;
 
     /**
      * Add a new instance of an Application
      * @param application The {@link Application} object to be added
      * @return The newly added {@link Application} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
-    Application addApplication(Application application) throws APIManagementDAOException;
+    Application addApplication(Application application) throws SQLException;
 
     /**
      * Update an existing Application
      * @param appID The UUID of the Application that needs to be updated
      * @param substituteApplication Substitute {@link Application} object that will replace the existing Application
      * @return The updated {@link Application} object
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
-    Application updateApplication(String appID, Application substituteApplication) throws APIManagementDAOException;
+    Application updateApplication(String appID, Application substituteApplication) throws SQLException;
 
     /**
      * Remove an existing Application
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws APIManagementDAOException
+     * @throws SQLException
      *
      */
-    void deleteApplication(String appID) throws APIManagementDAOException;
+    void deleteApplication(String appID) throws SQLException;
 }

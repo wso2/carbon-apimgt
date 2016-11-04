@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -36,6 +35,7 @@ import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,7 +142,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().addAPI(api);
             APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
-        } catch (APIManagementDAOException e) {
+        } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
         }
     }
@@ -172,7 +172,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
-        } catch (APIManagementDAOException e) {
+        } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
         }
     }
@@ -194,8 +194,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().changeLifeCycleStatus(api.getId(), status, deprecateOldVersions, makeKeysForwardCompatible);
             return true;
-        } catch (APIManagementDAOException e) {
-            APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), log);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), e, log);
             return false;
         }
     }
@@ -213,8 +213,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
         try {
             getApiDAO().createNewAPIVersion(api.getId(), newVersion);
-        } catch (APIManagementDAOException e) {
-            APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), log);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), e, log);
         }
     }
 
@@ -342,7 +342,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().deleteAPI(identifier);
             APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
-        } catch (APIManagementDAOException e) {
+        } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
         }
     }

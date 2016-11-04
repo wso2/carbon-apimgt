@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -33,6 +32,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +76,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             List<String> roles = new ArrayList<>(); // TODO -- roles list
             apiSummaryResults = getApiDAO().searchAPIsForRoles(searchType, searchContent, offset, limit,
                     roles);
-        } catch (APIManagementDAOException e) {
+        } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + searchContent, e, log);
         }
 

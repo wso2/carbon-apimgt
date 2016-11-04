@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
-import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,14 +36,15 @@ import java.sql.SQLException;
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 
-    public static ApiDAO getApiDAO() throws APIManagementDAOException {
+    public static ApiDAO getApiDAO() throws SQLException {
         ApiDAO apiDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                apiDAO = new DefaultApiDAOImpl(new H2MySQLStatements());
+                apiDAO = new ApiDAOImpl(new H2MySQLStatements(),
+                                                    LoggerFactory.getLogger(ApiDAOImpl.class));
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
@@ -55,23 +54,21 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                DAOUtil.handleException(ErrorCode.UNSUPPORTED_DB, "Unhandled DB Type detected");
+                throw new SQLException("Unhandled DB Type detected");
             }
-        } catch (SQLException e) {
-            DAOUtil.handleException(ErrorCode.SQL_EXCEPTION, "Error occurred while getting DB Connection", e);
         }
 
         return apiDAO;
     }
 
-    public static ApplicationDAO getApplicationDAO() throws APIManagementDAOException {
+    public static ApplicationDAO getApplicationDAO() throws SQLException {
         ApplicationDAO appDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                appDAO = new DefaultApplicationDAOImpl();
+                appDAO = new ApplicationDAOImpl();
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
@@ -81,23 +78,21 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                DAOUtil.handleException(ErrorCode.UNSUPPORTED_DB, "Unhandled DB Type detected");
+                throw new SQLException("Unhandled DB Type detected");
             }
-        } catch (SQLException e) {
-            DAOUtil.handleException(ErrorCode.SQL_EXCEPTION, "Error occurred while getting DB Connection", e);
         }
 
         return appDAO;
     }
 
-    public static APISubscriptionDAO getAPISubscriptionDAO() throws APIManagementDAOException {
+    public static APISubscriptionDAO getAPISubscriptionDAO() throws SQLException {
         APISubscriptionDAO apiSubscriptionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                apiSubscriptionDAO = new DefaultAPISubscriptionDAOImpl();
+                apiSubscriptionDAO = new APISubscriptionDAOImpl();
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
@@ -107,10 +102,8 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                DAOUtil.handleException(ErrorCode.UNSUPPORTED_DB, "Unhandled DB Type detected");
+                throw new SQLException("Unhandled DB Type detected");
             }
-        } catch (SQLException e) {
-            DAOUtil.handleException(ErrorCode.SQL_EXCEPTION, "Error occurred while getting DB Connection", e);
         }
 
         return apiSubscriptionDAO;

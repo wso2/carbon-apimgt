@@ -52,7 +52,6 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
-        apidto.setEndpointConfig(api.getEndpointConfig());
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -74,7 +73,6 @@ public class MappingUtil {
         api.setId(apidto.getId());
         api.setContext(apidto.getContext());
         api.setDescription(apidto.getDescription());
-        api.setEndpointConfig(apidto.getEndpointConfig());
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
         businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
