@@ -107,7 +107,6 @@ public class API implements Serializable{
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
 
-    private String gatewayUrls;
     private Set<String> environments;
 
     public Set<String> getEnvironments() {
@@ -118,19 +117,6 @@ public class API implements Serializable{
         this.environments = environments;
     }
 
-    /**
-     * @param gatewayUrls Custom environments given by the Publisher of the API
-     */
-    public void setGatewayUrls(String gatewayUrls) {
-        this.gatewayUrls = gatewayUrls;
-    }
-    /**
-     * Contains Custom Environments given by the Publisher of the API
-     * @return
-     */
-    public String getGatewayUrls() {
-        return gatewayUrls;
-    }
     /**
      * Contains flag indicating whether dummy backend or not
      * @return

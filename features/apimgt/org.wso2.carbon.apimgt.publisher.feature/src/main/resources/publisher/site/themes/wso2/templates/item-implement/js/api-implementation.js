@@ -206,7 +206,24 @@ $(document).ready(function(){
                     },
                     success: function(responseText){
                         if (!responseText.error) {
-                             $("#prototype-success").modal('show');
+
+                            var jsonObj = JSON.stringify(responseText);                        
+                            var jsonPayload = responseText.status.workflowResponse.jsonPayload;
+                            if (responseText.status.stateChangeStatus == 'REJECTED') {
+                                    showWorkflowRejectedMessage();
+                            } else if (responseText.status.stateChangeStatus == 'CREATED') {
+                                    showWorkflowSubmittedMessage();
+                            } else if (jsonPayload != null && jsonPayload != "") {
+                                var apiInfo = {};
+                                    apiInfo.provider = "<%=api.provider%>";
+                                    apiInfo.name = "<%=api.name%>";
+                                    apiInfo.version = "<%=api.version%>";
+                                    handleWorkflowRedirection(jsonPayload, apiInfo);
+
+                            } else {
+                               $("#prototype-success").modal('show');
+                            }
+                           
                         }else{
                              if (responseText.message == "timeout") {
                                  if (ssoEnabled) {
@@ -638,7 +655,6 @@ function loadFaultSequences() {
                   }
               }, "json");
 }
-
 
 
 $("#toggleSequence").change(function(e){
