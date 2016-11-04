@@ -1,0 +1,43 @@
+<header class="header header-default">
+    <div class="container-fluid">
+        <div class="pull-left brand float-remove-xs text-center-xs">
+            {{defineZone "dashboardLabel"}}
+        </div>
+        <div class="pull-right auth float-remove-xs text-center-xs">
+            {{#if user}}
+                <span class="hidden-xs add-padding-left-2x">
+                <a href="#" class="dropdown add-padding-left-2x add-padding-right-2x display-inline-block" data-toggle="dropdown">
+                    <span class="icon fw-stack fw-lg">
+                       <i class="fw fw-circle fw-stack-2x"></i>
+                       <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+                    </span>
+                    <span>{{user.username}} <span class="caret"></span></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li class="dropdown-header visible-xs">{{user.username}} <span class="caret"></span></li>
+                    <li><a href="<%=urlPrefix%>logout?destination=<%=dest%>">Logout</a></li>
+                </ul>
+            </span>
+                <div class="visible-xs auth-xs">
+                    <a href="#" class="collapsed" data-toggle="collapse" data-target="#auth-menu-items" aria-expanded="false">
+                    <span class="icon fw-stack fw">
+                        <i class="fw fw-user fw-stack-1x"></i>
+                    </span>
+                        <span class="caret"></span>
+                    </a>
+                    <div id="auth-menu-items" class="collapse">
+                        <ul >
+                            <li>{{user.username}}</li>
+                            <li><a href="<%=urlPrefix%>logout?destination=<%=dest%>">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            {{else}}
+                <a href="<%=urlPrefix%>login?destination=<%=dest%>" class="dropdown" data-toggle="dropdown">
+                    Login
+                </a>
+            {{/if}}
+
+        </div>
+    </div>
+</header>
