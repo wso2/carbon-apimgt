@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil;
 import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleUtils;
 
@@ -21,9 +22,9 @@ import static org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUt
  * This is the class provides all the logic related to lifecycle operations. (Associate, Dissociate, State change
  * event and Check list item event)
  */
-public class LifecycleOperationProvider {
+public class LifecycleOperationManager {
 
-    private static Logger log = LoggerFactory.getLogger(LifecycleOperationProvider.class);
+    private static Logger log = LoggerFactory.getLogger(LifecycleOperationManager.class);
 
     /**
      * This method need to call for each and event life cycle state changes.
@@ -122,6 +123,24 @@ public class LifecycleOperationProvider {
      */
     protected static void dissociateLifecycle(String uuid) throws LifecycleException {
         removeLifecycleStateData(uuid);
+    }
+
+    /**
+     * Get current life cycle state object.
+     *
+     * @return {@code LifecycleState} object represent current life cycle.
+     */
+    public static LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException {
+        LifecycleState currentLifecycleState = new LifecycleState();
+        LifecycleStateBean lifecycleStateBean = LifecycleOperationUtil.getLCStateDataFromID(uuid);
+        String lcName = lifecycleStateBean.getLcName();
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        currentLifecycleState.setLcName(lcName);
+        currentLifecycleState.setLifecycleId(uuid);
+        currentLifecycleState.setState(lifecycleStateBean.getPostStatus());
+        populateItems(currentLifecycleState, lcContent);
+        LifecycleOperationUtil.setCheckListItemData(currentLifecycleState, lifecycleStateBean.getCheckListData());
+        return currentLifecycleState;
     }
 
 

@@ -125,6 +125,7 @@ public class LifecycleMgtDAO {
             prepStmt.setString(1, lifecycleStateBean.getPostStatus());
             prepStmt.setString(2, lifecycleStateBean.getStateId());
             prepStmt.executeUpdate();
+            clearCheckListItemData(connection, lifecycleStateBean.getStateId(), lifecycleStateBean.getPreviousStatus());
             connection.commit();
             addLifecycleHistory(lifecycleStateBean.getStateId(), lifecycleStateBean.getPreviousStatus(),
                     lifecycleStateBean.getPostStatus(), user);
@@ -261,9 +262,9 @@ public class LifecycleMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         List<LifecycleHistoryBean> lifecycleHistoryBeanList = new ArrayList<>();
-        final String getLifecycleHistoryOfUuid = "SELECT PREVIOUS_STATE AS PREV_STATE, POST_STATE AS "
-                + "POST_STATE, USERNAME AS USER, UPDATED_TIME AS TIME FROM LC_HISTORY WHERE LC_STATE_ID=? "
-                + "ORDER BY UPDATED_TIME ASC";
+        final String getLifecycleHistoryOfUuid = "SELECT HISTORY.PREVIOUS_STATE AS PREV_STATE, HISTORY.POST_STATE AS "
+                + "POST_STATE, HISTORY.USERNAME AS USERNAME, HISTORY.UPDATED_TIME AS UPDATE_TIME FROM LC_HISTORY "
+                + "HISTORY WHERE LC_STATE_ID = ? ORDER BY UPDATED_TIME ASC";
         try {
             connection = LifecycleMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(getLifecycleHistoryOfUuid);
@@ -391,31 +392,19 @@ public class LifecycleMgtDAO {
      *
      * @throws LifecycleManagerDatabaseException
      */
-    public void clearCheckListItemData(String uuid, String lcState) throws LifecycleManagerDatabaseException {
-        Connection connection = null;
+    private void clearCheckListItemData(Connection connection, String uuid, String lcState) throws
+            SQLException {
         PreparedStatement prepStmt = null;
         final String clearCheckListData = "UPDATE LC_CHECKLIST_DATA SET CHECKLIST_VALUE=? WHERE "
                 + "LC_STATE_ID=? AND LC_STATE=?";
         try {
-            connection = LifecycleMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(clearCheckListData);
             prepStmt.setBoolean(1, false);
             prepStmt.setString(2, uuid);
             prepStmt.setString(3, lcState);
             prepStmt.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e1) {
-                log.error("Error while roll back operation for clearing checklist item data ", e);
-            }
-            handleException("Error while clearing  checklist data for id " + uuid + "and state " + lcState, e);
         } finally {
-            LifecycleMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+            LifecycleMgtDBUtil.closeAllConnections(prepStmt, null, null);
         }
     }
 

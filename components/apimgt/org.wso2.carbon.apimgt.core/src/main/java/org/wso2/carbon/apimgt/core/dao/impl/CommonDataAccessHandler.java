@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.exception.ErrorCode;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -31,7 +32,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.UUID;
 
-
+@SuppressFBWarnings ("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
 class CommonDataAccessHandler {
 
     static API getAPI(String apiID, SQLStatements sqlStatements) throws APIManagementDAOException {
