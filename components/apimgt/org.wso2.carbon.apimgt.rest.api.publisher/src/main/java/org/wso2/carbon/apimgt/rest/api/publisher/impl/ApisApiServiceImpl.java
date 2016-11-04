@@ -1,10 +1,18 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
 
 import javax.ws.rs.core.Response;
@@ -12,14 +20,28 @@ import java.io.InputStream;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
+    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
     @Override
     public Response apisApiIdDelete(String apiId
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
+        String username = "";
+        try {
+            RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+//Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;        }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
 , String documentId
@@ -154,8 +176,34 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        String checklistArray[] = lifecycleChecklist.split(",");
+        boolean deprecarteOlderVersion = true;
+        boolean requireResubscriptions = false;
+        if (checklistArray.length == 2) {
+            for (String checkList : checklistArray) {
+                if (checkList.contains("attribute1")) {
+                    deprecarteOlderVersion = Boolean.valueOf(checkList.split(":")[1]);
+                } else {
+                    requireResubscriptions = Boolean.valueOf(checkList.split(":")[1]);
+                }
+            }
+        }
+
+        try {
+            RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, deprecarteOlderVersion,
+                    requireResubscriptions);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisCopyApiPost(String newVersion
@@ -171,8 +219,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String accept
 , String ifNoneMatch
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        APIListDTO apiListDTO = null;
+        try {
+            apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs
+                    (limit,offset,query));
+            return Response.ok().entity(apiListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
     @Override
     public Response apisPost(APIDTO body

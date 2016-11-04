@@ -23,7 +23,14 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+
 public class RestAPIPublisherUtil {
 
+    public static APIPublisher getApiPublisher (String username) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIProvider(username);
+    }
 
 }

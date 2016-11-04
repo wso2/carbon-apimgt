@@ -183,7 +183,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to Update the status of API
      *
-     * @param api
+     * @param apiId
      * @param status
      * @param deprecateOldVersions
      * @param makeKeysForwardCompatible
@@ -191,13 +191,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIStatus(API api, String status, boolean
+    public boolean updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         try {
-            getApiDAO().changeLifeCycleStatus(api.getId(), status, deprecateOldVersions, makeKeysForwardCompatible);
+            getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
             return true;
         } catch (APIManagementDAOException e) {
-            APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), log);
+            APIUtils.logAndThrowException("Couldn't change the status of api" + apiId, log);
             return false;
         }
     }
