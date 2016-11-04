@@ -60,7 +60,7 @@
                             <a data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
                             class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
                             </a>
-	    	                <%if(api.ws != "true"){%>
+	    	                <%if(api.type.toUpperCase() != "WS"){%>
                                 <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
                             <%}else{%>
                                 ws://localhost:9099<%=encode.forHtml(api.context)%>

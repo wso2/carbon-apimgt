@@ -1063,8 +1063,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
+                boolean isWSAPI = APIConstants.APIType.WS.toString().equals(api.getType());
                 String wsdlURL;
-                if ("wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
+                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
                         ("production_endpoints")) {
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
 
@@ -2561,7 +2562,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-            String isWs = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET);
+            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
             //Delete the dependencies associated  with the api artifact
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
@@ -2596,7 +2597,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = new API(identifier);
             api.setAsDefaultVersion(Boolean.parseBoolean(isDefaultVersion));
             api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-            api.setWS(isWs);
+            api.setType(type);
             api.setContext(context_val);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse

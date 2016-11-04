@@ -11,6 +11,8 @@
     var tiers = mod.getTiers().tiers;
     var resourceTiers = mod.getResourceTiers().tiers;
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
+    var isWSAPI = api.type.toUpperCase() == "WS";
+
     for (var i = 0; i < resourceTiers.length; i++){
         if(resourceTiers[i].defaultTier){
             default_tier = resourceTiers[i].tierName;
@@ -50,7 +52,7 @@
     var inSequencesLoaded = false;
     var outSequencesLoaded = false;
     var faultSequencesLoaded = false;
-    var ws = "<%=api.ws%>";
+    var ws = "<%=isWSAPI%>";
 </script>
 <div id="item-add">
 <%
@@ -129,10 +131,10 @@
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
-                  <input type="hidden" id="ws" name="ws" value="<%=api.ws%>"/>
+                  <input type="hidden" id="type" name="type" value="<%=api.type%>"/>
 
                 <div class="panel-group accordion">
-                    <%if(api.ws != "true"){%>
+                    <%if(!isWSAPI){%>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -489,7 +491,7 @@
                         <div class="panel-collapse">
                             <div class="panel-body">
 
-                                        <% if (isSynapseGateway && api.ws != "true") { %>
+                                        <% if (isSynapseGateway && !isWSAPI) { %>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("Maximum Backend Throughput")%> :
                                                          <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
@@ -562,11 +564,11 @@
                                         	</div>
 
 
-                                        <%  if(mod.isGlobalCEPThrottlingEnabled() || api.ws == "true"){%>
+                                        <%  if(mod.isGlobalCEPThrottlingEnabled() || isWSAPI){%>
                                             <hr />
                                             <div class="form-group">
                                                 <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("Advanced Throttling Policies")%>:
-                                                    <%if(api.ws != "true"){%>
+                                                    <%if(!isWSAPI){%>
                                                     <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
                                                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
                                             				<i class="fw fw-circle fw-stack-2x"></i>
@@ -575,7 +577,6 @@
                                                     </a>
                                                     <p id="api_policy_help" class="hide"><%=i18n.localize("Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available")%></p>
                                                 </label>
-
                                                 <div class="controls col-sm-8">
                                                     <label class="radio">
                                                             <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
@@ -604,13 +605,13 @@
                                                         
                                                         <%}%>
                                             </div>
-                                            <%if(api.ws != "true"){%>
+                                            <%if(!isWSAPI){%>
                                             <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/><%}else{%>
                                                 <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value="true"/>
                                                 <%}%>
                                           	<div class="form-group">
                                           		<div class="control-label col-sm-3"></div>
-                                                 <%if(api.ws != "true"){%>
+                                                 <%if(!isWSAPI){%>
                                               	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
                                                      <%}else{%>
                                                          <div class="col-sm-4" id="api-level-policy-section" style="display:block">
@@ -631,7 +632,7 @@
                                                     %>
                                                     </select>
                                                 </div>
-                                                         <%if(api.ws != "true"){%>
+                                                         <%if(!isWSAPI){%>
                                                 <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
                                                     <script id="resource-policy-ui-template" language="text/x-handlebars-template">
                                                         <a class="select_adv_policy_for_resource btn btn-secondary"><%=i18n.localize("Select Policy per Resource")%></a>
@@ -908,7 +909,7 @@
 
         <div class="panel-group accordion">
             <div class="panel panel-default">
-                 <%if(api.ws != "true"){%>   
+                 <%if(!isWSAPI){%>
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <div>
@@ -920,7 +921,7 @@
                     <%}%>
                 <div class="panel-collapse">
                     <div class="panel-body">
-                         <%if(api.ws != "true"){%>   
+                         <%if(isWSAPI){%>
                     <!-- Resources Information -->
                         <div id="api_designer">
                             <div id ="apidoc_details"></div>

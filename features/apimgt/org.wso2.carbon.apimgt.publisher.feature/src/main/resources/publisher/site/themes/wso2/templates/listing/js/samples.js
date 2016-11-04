@@ -115,7 +115,7 @@ APISamples.prototype.deploySampleApi = function (gatewayURL) {
 APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApiLevelTier) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
     var addAPIData = {action: 'sampleDesign', name: 'PizzaShackAPI', provider: username,
-        version: '1.0.0', description: 'This is a simple API for Pizza Shack online pizza delivery store.', tags: 'pizza',
+        version: '1.0.0', type: 'http', description: 'This is a simple API for Pizza Shack online pizza delivery store.', tags: 'pizza',
         visibility: 'public', context: 'pizzashack',
         swagger: this.sample_swagger, apiThumb: '/site/themes/wso2/images/pizzaShackAPIImage.jpg'};
 

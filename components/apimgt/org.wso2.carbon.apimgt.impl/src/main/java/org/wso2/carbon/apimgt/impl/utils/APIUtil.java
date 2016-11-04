@@ -423,7 +423,7 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-            api.setWS(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
 
@@ -447,7 +447,7 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-            api.setWS(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
 
@@ -593,7 +593,7 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
-            api.setWS(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -793,7 +793,7 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
-                artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSOCKET, Boolean.toString(api.isWS()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
 

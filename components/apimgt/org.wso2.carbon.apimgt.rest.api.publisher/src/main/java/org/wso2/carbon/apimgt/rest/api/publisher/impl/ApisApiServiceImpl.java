@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -128,12 +129,23 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisPost(APIDTO body,String contentType){
-
         URI createdApiUri;
         APIDTO  createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
+            boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
+
+            // validate web socket api endpoint configurations
+            if (isWSAPI) {
+                if (!RestApiPublisherUtils.isValidWSAPI(body)) {
+                    RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
+                }
+            } else {
+                if (body.getApiDefinition() == null) {
+                    RestApiUtil.handleBadRequest("Parameter: \"apiDefinition\" cannot be null", log);
+                }
+            }
 
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
@@ -190,7 +202,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
+            if (!isWSAPI) {
+                apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
+            }
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
@@ -206,6 +220,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                                   body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (JSONException e) {
+            String errorMessage = "Error while validating endpoint configurations : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion() + "-" + body.getEndpointConfig();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -359,6 +377,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = apiInfo.getId();
+            boolean isWSAPI = APIConstants.APIType.WS == APIConstants.APIType.valueOf(apiInfo.getType());
 
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
@@ -366,6 +385,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setProvider(apiIdentifier.getProviderName());
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
+            body.setType(APIDTO.TypeEnum.valueOf(apiInfo.getType()));
 
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
@@ -381,7 +401,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             apiProvider.updateAPI(apiToUpdate);
-            apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
+
+            if (!isWSAPI) {
+                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
+            }
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
