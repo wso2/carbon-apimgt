@@ -22,16 +22,14 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.CombinedChannelDuplexHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-public class WebsocketHandler
-        extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
+public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
 
     public WebsocketHandler() {
         super(new WebsocketInboundHandler(), new WebsocketOutboundHandler());
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
-            throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
         if (msg instanceof WebSocketFrame) {
             if (inboundHandler().doThrottle(ctx, (WebSocketFrame) msg)) {

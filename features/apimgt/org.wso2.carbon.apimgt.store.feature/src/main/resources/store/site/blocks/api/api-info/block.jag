@@ -79,91 +79,92 @@ jagg.block("api/api-info", {
         if (!isAdvertiseOnly) {
             if (tenantDomain == "carbon.super" || tenantDomain == null) {
                 if (showConsole) {
-                    if(api.type.toUpperCase() != "WS"){
-                    var result = {
-                        "api": api,
-                        "deniedTiers": deniedTiers,
-                        "applications": list,
-                        "user": user,
-                        "uriTemplates": uriTemplates,
-                        "isRatingActivated": isRatingActivated,
-                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
-                        "tabs": {
-                            "tabs": [
-                                {
-                                    "title": i18n.localize("Overview"),
-                                    "body": [
-                                        {
-                                            "name": "api/overview",
-                                            "inputs": {
-                                                "api": api,
-                                                "user": user
+                    if(api == null || api.type.toUpperCase() != "WS") {
+                        var result = {
+                            "api": api,
+                            "deniedTiers": deniedTiers,
+                            "applications": list,
+                            "user": user,
+                            "uriTemplates": uriTemplates,
+                            "isRatingActivated": isRatingActivated,
+                            "isGlobalCEPEnabled": isGlobalCEPEnabled,
+                            "tabs": {
+                                "tabs": [
+                                    {
+                                        "title": i18n.localize("Overview"),
+                                        "body": [
+                                            {
+                                                "name": "api/overview",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "user": user
+                                                }
                                             }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("API Console"),
-                                    "body": [
-                                        {
-                                            "name": "api/swagger",
-                                            "inputs": {
-                                                "api": api,
-                                                "subscriptions": subscriptions
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("API Console"),
+                                        "body": [
+                                            {
+                                                "name": "api/swagger",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "subscriptions": subscriptions
+                                                }
                                             }
-                                        }
-                                    ]
-                                },                                
-                                {
-                                    "title": i18n.localize("Documentation"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("Documentation"),
+                                        "body": [
+                                            {
+                                                "name": "api/documentation",
+                                                "inputs": {
+                                                    "api": api
+                                                }
                                             }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    };}else{
-                      var result = {
-                        "api": api,
-                        "deniedTiers": deniedTiers,
-                        "applications": list,
-                        "user": user,
-                        "uriTemplates": uriTemplates,
-                        "isRatingActivated": isRatingActivated,
-                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
-                        "tabs": {
-                            "tabs": [
-                                {
-                                    "title": i18n.localize("Overview"),
-                                    "body": [
-                                        {
-                                            "name": "api/overview",
-                                            "inputs": {
-                                                "api": api,
-                                                "user": user
+                                        ]
+                                    }
+                                ]
+                            }
+                        };
+                    } else {
+                        var result = {
+                            "api": api,
+                            "deniedTiers": deniedTiers,
+                            "applications": list,
+                            "user": user,
+                            "uriTemplates": uriTemplates,
+                            "isRatingActivated": isRatingActivated,
+                            "isGlobalCEPEnabled": isGlobalCEPEnabled,
+                            "tabs": {
+                                "tabs": [
+                                    {
+                                        "title": i18n.localize("Overview"),
+                                        "body": [
+                                            {
+                                                "name": "api/overview",
+                                                "inputs": {
+                                                    "api": api,
+                                                    "user": user
+                                                }
                                             }
-                                        }
-                                    ]
-                                },                               
-                                {
-                                    "title": i18n.localize("Documentation"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
+                                        ]
+                                    },
+                                    {
+                                        "title": i18n.localize("Documentation"),
+                                        "body": [
+                                            {
+                                                "name": "api/documentation",
+                                                "inputs": {
+                                                    "api": api
+                                                }
                                             }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    };  
+                                        ]
+                                    }
+                                ]
+                            }
+                        };
                     }
 
                     if(isForumEnabled) {
@@ -261,7 +262,7 @@ jagg.block("api/api-info", {
             } else {
                 if (showConsole) {
                     var result;
-                    if(api.type.toUpperCase() != "WS"){
+                    if(api == null || api.type.toUpperCase() != "WS") {
                         result = {
                             "api": api,
                             "deniedTiers": deniedTiers,
