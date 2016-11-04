@@ -163,6 +163,7 @@
             javax.sql; version=0.0.0,
             org.xml.sax; version=0.0.0,
             org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
+            org.wso2.carbon.apimgt.lifecycle.manager.sql.*;version="${carbon.apimgt.version}",
             *;
         </import.package>
     </properties>

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -29,16 +30,17 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
+
+import static org.mockito.Mockito.mock;
 
 
-public class DefaultApiDAOImplTest {
-
-    // Reuse same connection in test since we are creating an in memory DB
-    DataSource dataSource;
+public class ApiDAOImplIT {
+    private DataSource dataSource;
     private static final String sqlFilePath = "src" + File.separator + "main" +
             File.separator + "resources" + File.separator + "h2.sql";
 
-    @org.testng.annotations.BeforeClass
+    @org.testng.annotations.BeforeMethod
     public void setUp() throws Exception {
         dataSource = new InMemoryDataSource();
         DAOUtil.initialize(dataSource);
@@ -49,14 +51,14 @@ public class DefaultApiDAOImplTest {
     }
 
 
-    @org.testng.annotations.AfterClass
+    @org.testng.annotations.AfterMethod
     public void tempDBCleanup() throws SQLException, IOException {
         ((InMemoryDataSource) dataSource).resetDB();
     }
 
     @Test
-    public void testAddDeleteGetAPI() throws Exception {
-        ApiDAO apiDAO = new DefaultApiDAOImpl(new H2MySQLStatements());
+    public void testAddAPI() throws Exception {
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
         API api = new API("admin", "1.0.0", "WeatherAPI");
 
         API createdAPI = apiDAO.addAPI(api);
@@ -64,18 +66,36 @@ public class DefaultApiDAOImplTest {
         Assert.assertEquals(createdAPI.getProvider(), api.getProvider());
         Assert.assertEquals(createdAPI.getVersion(), api.getVersion());
         Assert.assertEquals(createdAPI.getName(), api.getName());
+    }
 
-        API apiFromDB = apiDAO.getAPI(createdAPI.getId());
+    @Test
+    public void testGetAPI() throws Exception {
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
+        API api = new API("admin", "1.0.0", "WeatherAPI");
+        api.setId(UUID.randomUUID().toString());
+
+        apiDAO.addAPI(api);
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getProvider(), createdAPI.getProvider());
-        Assert.assertEquals(apiFromDB.getVersion(), createdAPI.getVersion());
-        Assert.assertEquals(apiFromDB.getName(), createdAPI.getName());
-        Assert.assertEquals(apiFromDB.getId(), createdAPI.getId());
+        Assert.assertEquals(apiFromDB.getProvider(), api.getProvider());
+        Assert.assertEquals(apiFromDB.getVersion(), api.getVersion());
+        Assert.assertEquals(apiFromDB.getName(), api.getName());
+        Assert.assertEquals(apiFromDB.getId(), api.getId());
+    }
 
-        apiDAO.deleteAPI(apiFromDB.getId());
 
-        API deletedAPI = apiDAO.getAPI(apiFromDB.getId());
+    @Test
+    public void testDeleteAPI() throws Exception {
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
+        API api = new API("admin", "1.0.0", "WeatherAPI");
+
+        apiDAO.addAPI(api);
+
+        apiDAO.deleteAPI(api.getId());
+
+        API deletedAPI = apiDAO.getAPI(api.getId());
         Assert.assertNull(deletedAPI);
     }
 
@@ -93,11 +113,6 @@ public class DefaultApiDAOImplTest {
 
     @Test
     public void testUpdateAPI() throws Exception {
-
-    }
-
-    @Test
-    public void testDeleteAPI() throws Exception {
 
     }
 

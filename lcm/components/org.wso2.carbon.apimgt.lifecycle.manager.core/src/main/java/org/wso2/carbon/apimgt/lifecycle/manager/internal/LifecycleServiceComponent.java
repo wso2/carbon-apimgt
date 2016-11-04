@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager.internal;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -45,7 +44,7 @@ public class LifecycleServiceComponent   {
     private static Logger  log = LoggerFactory.getLogger(LifecycleServiceComponent.class);
 
     @Activate
-    public void start(BundleContext bundleContext) {
+    public void start() {
         LifecycleUtils.initiateLCMap();
         if (log.isDebugEnabled()) {
             log.debug("Lifecycle service is activated.");

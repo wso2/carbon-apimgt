@@ -112,7 +112,7 @@ public interface APIPublisher extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateAPIStatus(API api, String status, boolean deprecateOldVersions,
+    boolean updateAPIStatus(String api, String status, boolean deprecateOldVersions,
                             boolean makeKeysForwardCompatible)
             throws APIManagementException;
 

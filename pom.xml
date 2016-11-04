@@ -246,6 +246,11 @@
                 <artifactId>jackson-jaxrs-base</artifactId>
                 <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${findbug.exclude.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -261,7 +266,7 @@
                         <xmlOutput>true</xmlOutput>
                         <findbugsXmlOutputDirectory>${project.build.directory}/findbugs
                         </findbugsXmlOutputDirectory>
-                        <excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>
+                        <!--<excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>-->
                         <!--Exclude generated sources-->
                     </configuration>
                     <version>${maven.findbugsplugin.version}</version>
@@ -320,11 +325,32 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.19.1</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <properties>
+        <!-- File encoding of build -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->
         <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
@@ -375,7 +401,6 @@
 
         <antlr4.runtime.version>4.5.1.wso2v1</antlr4.runtime.version>
         <plugin.version.antlr>4.5.1</plugin.version.antlr>
-        <junit.version>4.8.2</junit.version>
         <mockito.version>1.9.0</mockito.version>
         <powermock.version>1.4.11</powermock.version>
         <geronimo.version>1.6</geronimo.version>
@@ -415,6 +440,8 @@
 
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
+
+        <findbug.exclude.version>3.0.0</findbug.exclude.version>
 
     </properties>
 
