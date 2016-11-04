@@ -20,8 +20,56 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * CORS Config related information
  */
 public class CorsConfiguration {
+    private boolean isEnabled = false;
+    private boolean isAllowCredentials = false;
+    private List<String>  allowOrigins = new ArrayList<>();
+    private List<String>  allowHeaders = new ArrayList<>();
+    private List<String>  allowMethods = new ArrayList<>();
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    public boolean isAllowCredentials() {
+        return isAllowCredentials;
+    }
+
+    public void setAllowCredentials(boolean allowCredentials) {
+        isAllowCredentials = allowCredentials;
+    }
+
+    public List<String> getAllowOrigins() {
+        return allowOrigins;
+    }
+
+    public void setAllowOrigins(List<String> allowOrigins) {
+        this.allowOrigins = allowOrigins;
+    }
+
+    public List<String> getAllowHeaders() {
+        return allowHeaders;
+    }
+
+    public void setAllowHeaders(List<String> allowHeaders) {
+        this.allowHeaders = allowHeaders;
+    }
+
+    public List<String> getAllowMethods() {
+        return allowMethods;
+    }
+
+    public void setAllowMethods(List<String> allowMethods) {
+        this.allowMethods = allowMethods;
+    }
 }
