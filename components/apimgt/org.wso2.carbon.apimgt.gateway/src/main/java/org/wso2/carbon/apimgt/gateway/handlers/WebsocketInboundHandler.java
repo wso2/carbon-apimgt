@@ -85,8 +85,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	 * @param url
 	 * @return version String
 	 */
-	public static String getversionFromUrl(final String url) {
+	private String getversionFromUrl(final String url) {
 		return url.replaceFirst(".*/([^/?]+).*", "$1");
+	}
+
+	private String getContextFromUrl(String url) {
+		int lastIndex = url.lastIndexOf('/');
+		return url.substring(0, lastIndex);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -293,7 +298,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			requestPublisherDTO.setApplicationOwner(appOwner);
 			requestPublisherDTO.setClientIp(clientIp);
 			requestPublisherDTO.setConsumerKey(infoDTO.getConsumerKey());
-			requestPublisherDTO.setContext(uri); // TODO: 10/18/16 set correct context
+			requestPublisherDTO.setContext(getContextFromUrl(uri));
 			requestPublisherDTO.setContinuedOnThrottleOut(isThrottledOut);
 			requestPublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
 			requestPublisherDTO.setMethod("-");
