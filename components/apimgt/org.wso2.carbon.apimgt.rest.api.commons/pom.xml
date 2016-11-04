@@ -22,6 +22,7 @@
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
@@ -68,7 +69,7 @@
 	</build>
 	<properties>
 		<import.package>
-			*;resolution:=optional
+			javax.ws.rs.*; version="${javax.ws.rs.import.version.range}"
 		</import.package>
 		<export.package>
 			org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",
