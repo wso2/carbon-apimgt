@@ -84,6 +84,7 @@ public class LifecycleUtils {
      *
      * @throws LifecycleException
      */
+    //TODO : move to seperate class. not util
     public static void initiateLCMap() {
         lifecycleMap = new ConcurrentHashMap<>();
         String defaultLifecycleConfigLocation = getDefaltLifecycleConfigLocation();

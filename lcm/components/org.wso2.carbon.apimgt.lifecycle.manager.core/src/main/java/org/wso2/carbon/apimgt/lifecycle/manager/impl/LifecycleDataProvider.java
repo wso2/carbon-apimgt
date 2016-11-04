@@ -28,16 +28,6 @@ import java.util.List;
  */
 public class LifecycleDataProvider {
 
-    /**
-     * Get current life cycle state object.
-     *
-     * @param uuid  UUID of the lifecycle state.
-     * @return {@code LifecycleState} object represent current life cycle.
-     * @throws LifecycleException
-     */
-    public static LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException {
-        return LifecycleOperationUtil.getCurrentLifecycleState(uuid);
-    }
 
     /**
      * This method provides set of operations performed to a particular lifecycle id.

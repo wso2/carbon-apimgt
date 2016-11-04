@@ -37,9 +37,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.sql.utils.LifecycleMgtDBUtil;
 import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleUtils;
 import org.xml.sax.SAXException;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
@@ -138,67 +136,11 @@ public class LifecycleOperationsTest {
         }
     }
 
-    /*public void testAddLifecycle() throws Exception {
-        String payload = readLifecycleFile(
-                System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
-        LifecycleUtils.addLifecycle(payload);
-        assertTrue(LifecycleUtils.getLifecycleList().length > 0);
-        assertNotNull(LifecycleUtils.getLifecycleConfiguration(TestConstants.SERVICE_LIFE_CYCLE));
-    }
-
-    @Test(dependsOnMethods = "testAddLifecycle")
-    public void testAddSameLifecycle() throws Exception {
-        String payload = readLifecycleFile(
-                System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
-        try {
-            LifecycleUtils.addLifecycle(payload);
-        } catch (LifecycleException e) {
-            assertTrue(e.getMessage().contains("Lifecycle already exist"));
-        }
-    }
-
-    @Test(dependsOnMethods = "testAddLifecycle")
-    public void testUpdateLifecycle() throws Exception {
-        String payload = readLifecycleFile(
-                System.getProperty("LCConfigPath") + File.separator + "ServiceLifeCycle.xml");
-        LifecycleUtils.updateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, payload);
-        assertTrue(LifecycleUtils.getLifecycleList().length == 1);
-        assertNotNull(LifecycleUtils.getLifecycleConfiguration(TestConstants.SERVICE_LIFE_CYCLE));
-        assertTrue(LifecycleUtils.getLifecycleConfiguration(TestConstants.SERVICE_LIFE_CYCLE).contains
-                ("transitionPermission"));
-    }
-
-    @Test(dependsOnMethods = "testAddLifecycle")
-    public void testDeleteLifecycle() throws Exception {
-        String payload = readLifecycleFile(System.getProperty("LCConfigPath") + File.separator + "APILifeCycle.xml");
-        LifecycleUtils.addLifecycle(payload);
-        assertTrue(LifecycleUtils.getLifecycleList().length == 2);
-        LifecycleUtils.deleteLifecycle("APILifeCycle");
-        assertTrue(LifecycleUtils.getLifecycleList().length == 1);
-    }
-
-    @Test(dependsOnMethods = "testUpdateLifecycle")
-    public void testAssociateLifecycle() throws Exception {
-        sampleAPI = createSampleAPI();
-        sampleAPI
-                .setLifecycleState(sampleAPI.associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN));
-        assertNotNull(sampleAPI.getLifecycleState().getState());
-        assertNotNull(sampleAPI.getLifecycleState().getLifecycleId());
-    }
-
-    @Test(dependsOnMethods = "testAssociateLifecycle")
-    public void testCheckDeletingAssociatedLifecycle() throws Exception {
-        try {
-            LifecycleUtils.deleteLifecycle(TestConstants.SERVICE_LIFE_CYCLE);
-        } catch (LifecycleException e) {
-            assertTrue(e.getMessage().contains("is associated with assets"));
-        }
-    }*/
     @Test
     public void testAssociateLifecycle() throws Exception {
         sampleAPI = createSampleAPI();
-        sampleAPI
-                .setLifecycleState(sampleAPI.associateLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN));
+
+        sampleAPI.createLifecycleEntry(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN);
         assertNotNull(sampleAPI.getLifecycleState().getState());
         assertNotNull(sampleAPI.getLifecycleState().getLifecycleId());
     }
@@ -213,14 +155,15 @@ public class LifecycleOperationsTest {
             inputBean.setValues("value 1");
         }
         try {
-            sampleAPI.setLifecycleState(
-                    sampleAPI.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
+            sampleAPI.setLifecycleState(sampleAPI
+                    .executeLifecycleEvent(targetState, TestConstants.ADMIN, TestConstants.SERVICE_LIFE_CYCLE));
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Required checklist items are not selected"));
         }
-        sampleAPI
-                .setLifecycleState(sampleAPI.checkListItemEvent(uuid, currentState.getState(), "Code Completed", true));
-        sampleAPI.setLifecycleState(sampleAPI.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
+        sampleAPI.setLifecycleState(
+                sampleAPI.checkListItemEvent(TestConstants.SERVICE_LIFE_CYCLE, "Code Completed", true));
+        sampleAPI.setLifecycleState(
+                sampleAPI.executeLifecycleEvent(targetState, TestConstants.ADMIN, TestConstants.SERVICE_LIFE_CYCLE));
         assertEquals(sampleAPI.getLifecycleState().getState(), targetState);
 
     }
@@ -243,26 +186,12 @@ public class LifecycleOperationsTest {
 
     @Test(dependsOnMethods = "testGetLifecycleIdsFromState")
     public void testDissociateLifecycle() throws Exception {
-        String uuid = sampleAPI.getLifecycleState().getLifecycleId();
-        sampleAPI.dissociateLifecycle(uuid);
+        sampleAPI.removeLifecycleEntry(TestConstants.SERVICE_LIFE_CYCLE);
         try {
-            LifecycleDataProvider.getCurrentLifecycleState(uuid);
+            sampleAPI.getCurrentLifecycleState(TestConstants.SERVICE_LIFE_CYCLE);
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Error while getting lifecycle data for id"));
         }
-    }
-
-    private String readLifecycleFile(String path) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-
-        }
-
-        return sb.toString();
     }
 
     private SampleAPI createSampleAPI() {

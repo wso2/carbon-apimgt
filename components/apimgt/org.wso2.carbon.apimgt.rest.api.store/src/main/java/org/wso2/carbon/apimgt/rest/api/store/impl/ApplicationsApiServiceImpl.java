@@ -1,22 +1,32 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 
 import javax.ws.rs.core.Response;
+
+import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
+
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
@@ -107,50 +117,80 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
-//        String username = RestApiUtil.getLoggedInUsername();
-//        try {
-//            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-//            Application application = apiConsumer.getApplicationByUUID(applicationId);
-//            if (application != null) {
-//                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-//                    String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-//                    JSONObject jsonParamObj = new JSONObject();
-//                    jsonParamObj.put(Constants.OAUTH_CLIENT_USERNAME, username);
-//                    String jsonParams = jsonParamObj.toString();
-//                    String tokenScopes = StringUtils.join(body.getScopes(), " ");
-//
-//                    Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-//                            username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
-//                            accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-//                            jsonParams);
-//                    ApplicationKeyDTO applicationKeyDTO =
-//                            ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
-//
-//                    return Response.ok().entity(applicationKeyDTO).build();
-//                } else {
-//                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-//                }
-//            } else {
-//                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-//            }
-//        } catch (APIManagementException e) {
-//            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
-//                RestApiUtil
-//                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
-//                                e,
-//                                log);
-//            } else {
-//                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
-//                        log);
-//            }
-//        }
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+                    JSONObject jsonParamObj = new JSONObject();
+                    jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+                    String jsonParams = jsonParamObj.toString();
+                    String tokenScopes = StringUtils.join(body.getScopes(), " ");
+
+                    Map<String, Object> keyDetails = apiConsumer
+                            .requestApprovalForApplicationRegistration(username, application.getName(),
+                                    body.getKeyType().toString(), body.getCallbackUrl(), accessAllowDomainsArray,
+                                    body.getValidityTime(), tokenScopes, application.getGroupId(), jsonParams);
+                    ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
+                            .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+
+                    return Response.ok().entity(applicationKeyDTO).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
+                RestApiUtil
+                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
+                                e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
+                        log);
+            }
+        }
         return null;
     }
 
     @Override public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
             String ifNoneMatch) throws NotFoundException {
-        // do some magic!
+        String username = RestApiUtil.getLoggedInUsername();
 
+        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+        // As a improvement, we can check admin privileges of the user and honor groupId.
+        String groupId = RestApiUtil.getLoggedInUserGroupId();
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        ApplicationListDTO applicationListDTO;
+        try {
+            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application[] allMatchedApps = new Application[0];
+            if (StringUtils.isBlank(query)) {
+                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+            } else {
+                Application application = apiConsumer.getApplicationsByName(username, query, groupId);
+                if (application != null) {
+                    allMatchedApps = new Application[1];
+                    allMatchedApps[0] = application;
+                }
+            }
+
+            //allMatchedApps are already sorted to application name
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
+                    allMatchedApps.length);
+
+            return Response.ok().entity(applicationListDTO).build();
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);
+        }
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 

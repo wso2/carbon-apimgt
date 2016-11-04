@@ -80,8 +80,12 @@
                             </bundles>
                             <importFeatures>
                                 <feature>
-                                    <id>org.wso2.carbon.datasource.core.feature</id>
-                                    <version>${carbon.datasources.version}</version>
+                                    <id>org.wso2.carbon.apimgt.core.feature</id>
+                                    <version>${carbon.apimgt.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.apimgt.rest.api.commons.feature</id>
+                                    <version>${carbon.apimgt.version}</version>
                                 </feature>
                             </importFeatures>
                         </configuration>
