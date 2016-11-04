@@ -25,7 +25,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -171,27 +170,28 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="add";
-                    if(!api.isWS()){
-                    //Add the API
-                    if(APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())){
-                        client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
-                    }else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())){
-                        client.addApi(builder, tenantDomain, api.getId());
-                    }
-
-                    if(api.isDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(), api.getId());
-                        }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(), api.getId());
+                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                        //Add the API
+                        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                            client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
+                        } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
+                                .equalsIgnoreCase(api.getImplementation())) {
+                            client.addApi(builder, tenantDomain, api.getId());
                         }
-                    }
-					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
-                    //Deploy the custom sequences of the API.
-					deployCustomSequences(api, tenantDomain, environment);
+                        if (api.isDefaultVersion()) {
+                            if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                            } else {
+                                client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                            }
+                        }
+                        setSecureVaultProperty(api, tenantDomain, environment, operation);
+
+                        //Deploy the custom sequences of the API.
+                        deployCustomSequences(api, tenantDomain, environment);
                     } else {
-                        deployWebsocketAPI(api, client);
+                        deployWebsocketAPI(api,client);
                     }
 
 				}
@@ -235,14 +235,13 @@ public class APIGatewayManager {
                     if (environment == null) {
                         continue;
                     }
-                    APIGatewayAdminClient client =
-                            new APIGatewayAdminClient(api.getId(), environment);
-                    if (!api.isWS()) {
+
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
                             if (debugEnabled) {
-                                log.debug("Removing API " + api.getId().getApiName() +
-                                          " From environment " +
-                                          environment.getName());
+                                log.debug("Removing API " + api.getId().getApiName() + " From environment " +
+                                        environment.getName());
                             }
                             String operation = "delete";
 
@@ -256,7 +255,7 @@ public class APIGatewayManager {
                         String[] fileNames = new String[2];
                         fileNames[0] = "_PRODUCTION_" + fileName;
                         fileNames[1] = "_SANDBOX_" + fileName;
-                        client.undeployWSApi(new String[] {  });
+                        client.undeployWSApi(fileNames);
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -388,7 +387,6 @@ public class APIGatewayManager {
                      "   </send>\n" +
                      "</sequence>";
         return seq;
-
     }
 
 

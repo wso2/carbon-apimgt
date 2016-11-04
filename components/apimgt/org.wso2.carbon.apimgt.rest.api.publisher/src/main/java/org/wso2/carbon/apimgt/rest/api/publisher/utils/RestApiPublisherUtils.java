@@ -25,10 +25,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.hibernate.validator.internal.constraintvalidators.URLValidator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -127,5 +133,37 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleResourceNotFoundError(
                     "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), e, log);
         }
+    }
+
+    /**
+     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints
+     *
+     * @param api api model
+     * @return validity of the web socket api
+     * @throws JSONException
+     */
+    public static boolean isValidWSAPI(APIDTO api) throws JSONException {
+        boolean isValid = false;
+
+        if (api.getEndpointConfig() != null) {
+            JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
+            JSONObject endpointCfg = new JSONObject(tokener);
+            try {
+                String prodEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.PRODUCTION_ENDPOINTS)
+                        .getString("url");
+                String sandboxEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.SANDBOX_ENDPOINTS)
+                        .getString("url");
+                isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
+
+                if (isValid) {
+                    isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
+                }
+            } catch (JSONException ex) {
+                RestApiUtil.handleBadRequest(
+                        "Error in endpoint configurations. Web Socket APIs do not accept array of endpoints.", log);
+            }
+        }
+
+        return isValid;
     }
 }

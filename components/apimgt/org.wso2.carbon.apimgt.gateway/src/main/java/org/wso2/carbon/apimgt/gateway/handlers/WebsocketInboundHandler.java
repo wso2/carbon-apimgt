@@ -48,10 +48,10 @@ import java.net.InetSocketAddress;
  */
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	private static String tenantDomain;
-	private boolean isDefaultVersion;
 	private static int port;
 	private static volatile ThrottleDataPublisher throttleDataPublisher = null;
 	private static Logger log = LoggerFactory.getLogger(WebsocketInboundHandler.class);
+	private boolean isDefaultVersion;
 	private String uri;
 	private String version;
 	private APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
@@ -89,24 +89,25 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			if (tenantDomain.equals(req.getUri())) {
 				tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 			} else {
-				req.setUri(req.getUri().replaceFirst("/","-"));
+				req.setUri(req.getUri().replaceFirst("/", "-"));
 				msg = req;
 			}
 			if (validateOAuthHeader(req)) {
 				req.setUri(uri);
 				ctx.fireChannelRead(msg);
 			} else {
-				ctx.writeAndFlush(new TextWebSocketFrame(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
+				ctx.writeAndFlush(new TextWebSocketFrame(
+						APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
 				throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
 				                               APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
 			}
 		} else if (msg instanceof WebSocketFrame) {
 
-				if (doThrottle(ctx, (WebSocketFrame) msg)) {
-					ctx.fireChannelRead(msg);
-				} else {
-					ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
-				}
+			if (doThrottle(ctx, (WebSocketFrame) msg)) {
+				ctx.fireChannelRead(msg);
+			} else {
+				ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
+			}
 		}
 	}
 
@@ -121,7 +122,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			throws APIManagementException, APISecurityException {
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			PrivilegedCarbonContext.getThreadLocalCarbonContext()
+			                       .setTenantDomain(tenantDomain, true);
 			version = getversionFromUrl(uri);
 			APIKeyValidationInfoDTO info;
 			if (!req.headers().contains(HttpHeaders.AUTHORIZATION)) {
@@ -147,7 +149,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 				String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
 				if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
 					info = new WebsocketWSClient().getAPIKeyData(uri, version, apikey);
-				} else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
+				} else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT
+						.equals(keyValidatorClientType)) {
 					info = new WebsocketThriftClient().getAPIKeyData(uri, version, apikey);
 				} else {
 					return false;
@@ -177,7 +180,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			} else {
 				return false;
 			}
-		}finally {
+		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
 		}
 	}
@@ -189,14 +192,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 	 * @return false if throttled
 	 * @throws APIManagementException
 	 */
-	public boolean doThrottle(ChannelHandlerContext ctx, WebSocketFrame msg) throws APIManagementException {
+	public boolean doThrottle(ChannelHandlerContext ctx, WebSocketFrame msg)
+			throws APIManagementException {
 
 		String applicationLevelTier = infoDTO.getApplicationTier();
 		String apiLevelTier = infoDTO.getApiTier();
 		String subscriptionLevelTier = infoDTO.getTier();
 		String resourceLevelTier = apiLevelTier;
 		String authorizedUser;
-		if(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
+		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+				.equalsIgnoreCase(infoDTO.getSubscriberTenantDomain())) {
 			authorizedUser = infoDTO.getSubscriber() + "@" + infoDTO.getSubscriberTenantDomain();
 		} else {
 			authorizedUser = infoDTO.getSubscriber();
@@ -223,13 +228,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			PrivilegedCarbonContext.startTenantFlow();
 			PrivilegedCarbonContext.getThreadLocalCarbonContext()
 			                       .setTenantDomain(tenantDomain, true);
-			boolean isThrottled =
-					WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
-					                          applicationLevelThrottleKey);
+			boolean isThrottled = WebsocketUtil
+					.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+					             applicationLevelThrottleKey);
 			if (isThrottled) {
 				return false;
 			}
-		}finally {
+		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
 		}
 		Object[] objects =

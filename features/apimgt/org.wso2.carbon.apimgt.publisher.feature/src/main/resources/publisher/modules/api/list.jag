@@ -66,8 +66,7 @@ var getAPI = function (api) {
             currentDefaultVersion:defaultVersion,
             availableSubscriptionPolicy:result[50],
             apiLevelPolicy:result[51],
-            gatewayUrls:result[52],
-            ws:result[53]
+            type:result[52]
         };
         return {
             error:false,

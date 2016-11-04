@@ -111,6 +111,44 @@ include("/jagg/jagg.jag");
                                }
                  print(obj);
 
+        } else if (action === "bpmnAssignTask" && request.getMethod() == 'POST') {
+                 var mod = jagg.module("taskmanager");
+                 var taskId = request.getParameter("taskId");
+                 var taskName = request.getParameter("taskName");
+
+                 result = mod.assignBPMNTask(taskId,taskName);
+                 if (result.error==true) {
+                         obj = {
+                                       error:true,
+                                       message:result.message
+                               };
+                               } else {
+                                     obj = {
+                                         error:false
+
+                                     }
+                               }
+                 print(obj);
+
+        } else if (action === "bpmnCompleteTask" && request.getMethod() == 'POST') {
+                 var mod = jagg.module("taskmanager");
+                 var taskId = request.getParameter("taskId");       
+                 var status= request.getParameter("status");
+
+                 result = mod.completeBPMNTask(taskId,status);
+                 if (result.error==true) {
+                         obj = {
+                                       error:true,
+                                       message:result.message
+                               };
+                               } else {
+                                     obj = {
+                                         error:false
+
+                                     }
+                               }
+                 print(obj);
+
         }
         else {
             print({

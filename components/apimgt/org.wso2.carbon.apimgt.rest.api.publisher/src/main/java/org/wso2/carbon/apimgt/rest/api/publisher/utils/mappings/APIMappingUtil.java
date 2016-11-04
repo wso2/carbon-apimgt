@@ -201,8 +201,11 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setTiers(tiersToReturn);
+        dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
 
-        dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        if (!model.getType().equals(APIConstants.APIType.WS)) {
+            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
 
         if (model.getVisibleRoles() != null) {
@@ -277,6 +280,8 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setWsdlUrl(dto.getWsdlUri());
+        model.setType(dto.getType().toString());
+
         if (dto.getStatus() != null) {
             model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
         }

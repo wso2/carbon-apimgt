@@ -48,6 +48,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_TIER = "tier";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
+    public static final String RESOURCE_WORKFLOW = "workflow";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -147,4 +148,8 @@ public final class RestApiConstants {
 
     public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered " 
             + "an internal error. Please contact administrator.";
+
+    // common attributes
+    public static final String PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String SANDBOX_ENDPOINTS = "sandbox_endpoints";
 }

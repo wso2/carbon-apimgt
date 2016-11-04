@@ -79,7 +79,7 @@ jagg.block("api/api-info", {
         if (!isAdvertiseOnly) {
             if (tenantDomain == "carbon.super" || tenantDomain == null) {
                 if (showConsole) {
-                    if(api.ws != "true"){
+                    if(api.type.toUpperCase() != "WS"){
                     var result = {
                         "api": api,
                         "deniedTiers": deniedTiers,
@@ -261,7 +261,7 @@ jagg.block("api/api-info", {
             } else {
                 if (showConsole) {
                     var result;
-                    if(api.ws != "true") {
+                    if(api.type.toUpperCase() != "WS"){
                         result = {
                             "api": api,
                             "deniedTiers": deniedTiers,

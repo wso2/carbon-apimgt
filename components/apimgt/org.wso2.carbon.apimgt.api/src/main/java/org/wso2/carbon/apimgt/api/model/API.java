@@ -39,7 +39,7 @@ public class API implements Serializable{
     private String sandboxUrl;
     private String wsdlUrl;
     private String wadlUrl;
-    private boolean isWebsocketApi;
+    private String type;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -52,7 +52,7 @@ public class API implements Serializable{
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-    public static final String WEB_SOCKET = "ws";
+
     //dirty pattern to identify which parts to be updated
     private boolean apiHeaderChanged;
     private boolean apiResourcePatternsChanged;
@@ -107,7 +107,6 @@ public class API implements Serializable{
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
 
-    private String gatewayUrls;
     private Set<String> environments;
 
     public Set<String> getEnvironments() {
@@ -118,19 +117,6 @@ public class API implements Serializable{
         this.environments = environments;
     }
 
-    /**
-     * @param gatewayUrls Custom environments given by the Publisher of the API
-     */
-    public void setGatewayUrls(String gatewayUrls) {
-        this.gatewayUrls = gatewayUrls;
-    }
-    /**
-     * Contains Custom Environments given by the Publisher of the API
-     * @return
-     */
-    public String getGatewayUrls() {
-        return gatewayUrls;
-    }
     /**
      * Contains flag indicating whether dummy backend or not
      * @return
@@ -667,13 +653,15 @@ public class API implements Serializable{
         this.apiLevelPolicy = apiLevelPolicy;
     }
 
-    public boolean isWS() {
-        return isWebsocketApi;
+    public String getType() {
+        return type;
     }
 
-    public void setWS(String websocket) {
-        if(WEB_SOCKET.equalsIgnoreCase(websocket) || "true".equalsIgnoreCase(websocket)) {
-            isWebsocketApi = true;
+    public void setType(String type) {
+        if (type != null && type != "") {
+            this.type = type.toUpperCase();
+        } else {
+            this.type = "HTTP";
         }
     }
 }

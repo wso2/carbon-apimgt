@@ -18,9 +18,6 @@ public class SequenceDTO  {
   private String name = null;
   
   
-  private String config = null;
-  
-  
   private String type = null;
 
   
@@ -33,18 +30,6 @@ public class SequenceDTO  {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("config")
-  public String getConfig() {
-    return config;
-  }
-  public void setConfig(String config) {
-    this.config = config;
   }
 
   
@@ -67,7 +52,6 @@ public class SequenceDTO  {
     sb.append("class SequenceDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  config: ").append(config).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("}\n");
     return sb.toString();

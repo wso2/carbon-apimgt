@@ -638,9 +638,9 @@ public interface APIProvider extends APIManager {
      *
      * @param  apiIdentifier apiIdentifier
      * @param  action  Action which need to execute from registry lifecycle
-     *
+     * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-     boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+    APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
              throws APIManagementException, FaultGatewaysException;
 
     /**
