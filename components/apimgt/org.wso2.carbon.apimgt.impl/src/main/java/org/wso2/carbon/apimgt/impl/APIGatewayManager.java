@@ -56,6 +56,10 @@ public class APIGatewayManager {
 
 	private boolean debugEnabled = log.isDebugEnabled();
 
+    private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
+
+    private final String ENDPOINT_SANDBOX = "_SANDBOX_";
+
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
 		                                                       .getAPIManagerConfigurationService()
@@ -80,7 +84,8 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain)
+            throws JSONException {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
@@ -235,6 +240,7 @@ public class APIGatewayManager {
                     if (environment == null) {
                         continue;
                     }
+
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
@@ -251,7 +257,10 @@ public class APIGatewayManager {
                         }
                     } else {
                         String fileName = api.getContext().substring(1).replace('/', '-');
-                        client.undeployWSApi(new String[] { fileName });
+                        String[] fileNames = new String[2];
+                        fileNames[0] = ENDPOINT_PRODUCTION + fileName;
+                        fileNames[1] = ENDPOINT_SANDBOX + fileName;
+                        client.undeployWSApi(fileNames);
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -279,36 +288,56 @@ public class APIGatewayManager {
                 }
             }
 
-		}
+        }
         return failedEnvironmentsMap;
     }
 
-	/**
-	 * add websoocket api to the gateway
-	 * @param api
-	 * @param client
-	 * @throws APIManagementException
-	 */
-    public void deployWebsocketAPI(API api,APIGatewayAdminClient client) throws APIManagementException {
-        String content = createSeqString(api);
-        OMElement element;
+    /**
+     * add websoocket api to the gateway
+     *
+     * @param api
+     * @param client
+     * @throws APIManagementException
+     */
+    public void deployWebsocketAPI(API api, APIGatewayAdminClient client)
+            throws APIManagementException, JSONException {
         try {
-            element = AXIOMUtil.stringToOM(content);
-            String fileName = element.getAttributeValue(new QName("name"));
+            JSONObject obj = new JSONObject(api.getEndpointConfig());
+            String production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
+            String sandbox_endpoint = obj.getJSONObject("sandbox_endpoints").getString("url");
+            OMElement element;
+            String context;
+            context = api.getContext();
+            try {
+                if (production_endpoint != null) {
+                    api.setContext(ENDPOINT_PRODUCTION + context);
+                    String content = createSeqString(api, production_endpoint);
+                    element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    client.deployWSApi(content, fileName);
+                }
+                if (sandbox_endpoint != null) {
+                    api.setContext(ENDPOINT_SANDBOX + context);
+                    String content = createSeqString(api, sandbox_endpoint);
+                    element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    client.deployWSApi(content, fileName);
+                }
 
-                client.deployWSApi(content, fileName);
-
-
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the policy to get the eligibility query: ";
+            } catch (XMLStreamException e) {
+                String msg = "Error while parsing the policy to get the eligibility query: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            } catch (IOException e) {
+                String msg = "Error while deploying the policy in gateway manager: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            }
+        } catch (JSONException e) {
+            String msg = "Error in reading JSON object " + e.getMessage();
             log.error(msg, e);
-            throw new APIManagementException(msg);
-        } catch (IOException e) {
-            String msg = "Error while deploying the policy in gateway manager: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
+            throw new JSONException(msg);
         }
-
     }
 
     /**
@@ -317,7 +346,8 @@ public class APIGatewayManager {
      * @param artifact
      * @param api
      */
-    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
+    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api)
+            throws JSONException {
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIGatewayAdminClient client;
@@ -344,34 +374,27 @@ public class APIGatewayManager {
         }
     }
 
-	/**
-	 * create body of sequence
-	 *
-	 * @param api
-	 * @return
-	 */
-    public String createSeqString(API api){
-        try {
-            JSONObject obj = new JSONObject(api.getEndpointConfig());
-            String url = obj.getJSONObject("production_endpoints").getString("url");
-            String context = api.getContext();
-            if(context.startsWith("/")){
-                context = context.substring(1);
-            }
+    /**
+     * create body of sequence
+     *
+     * @param api
+     * @param url
+     * @return
+     */
+    public String createSeqString(API api, String url) {
+
+        String context = api.getContext();
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\""+context.replace('/','-')+"\">\n" +
-                "   <send>\n" +
-                "      <endpoint>\n" +
-                "         <http method=\"GET\"\n" +
-                "               uri-template=\""+url+"\"/>\n" +
-                "      </endpoint>\n" +
-                "   </send>\n" +
-                "</sequence>";
+                     "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
+                     context.replace('/', '-') + "\">\n" +
+                     "   <send>\n" +
+                     "      <endpoint>\n" +
+                     "         <http method=\"GET\"\n" +
+                     "               uri-template=\"" + url + "\"/>\n" +
+                     "      </endpoint>\n" +
+                     "   </send>\n" +
+                     "</sequence>";
         return seq;
-        } catch (JSONException e) {
-            log.error("Error in reading JSON object " + e, e);
-            return null;
-        }
     }
 
 
