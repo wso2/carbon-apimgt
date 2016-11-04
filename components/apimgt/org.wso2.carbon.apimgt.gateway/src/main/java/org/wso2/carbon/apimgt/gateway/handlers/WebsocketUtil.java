@@ -198,4 +198,8 @@ public class WebsocketUtil {
 				                                                              .isThrottled(applicationLevelThrottleKey);
 		return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
 	}
+
+	public static String getAccessTokenCacheKey(String accessToken, String apiContext) {
+		return accessToken + ':' + apiContext;
+	}
 }

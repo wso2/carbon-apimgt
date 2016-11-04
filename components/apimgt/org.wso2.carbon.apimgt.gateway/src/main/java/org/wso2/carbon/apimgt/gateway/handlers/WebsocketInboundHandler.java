@@ -104,6 +104,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
 				if (doThrottle(ctx, (WebSocketFrame) msg)) {
 					ctx.fireChannelRead(msg);
+				} else {
+					ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 				}
 		}
 	}
@@ -225,7 +227,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 					WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
 					                          applicationLevelThrottleKey);
 			if (isThrottled) {
-				ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 				return false;
 			}
 		}finally {
