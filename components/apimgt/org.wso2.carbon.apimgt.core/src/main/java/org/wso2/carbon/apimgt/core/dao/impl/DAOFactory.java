@@ -43,8 +43,7 @@ public class DAOFactory {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                apiDAO = new ApiDAOImpl(new H2MySQLStatements(),
-                                                    LoggerFactory.getLogger(ApiDAOImpl.class));
+                apiDAO = new ApiDAOImpl(new H2MySQLStatements(), LoggerFactory.getLogger(ApiDAOImpl.class));
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {

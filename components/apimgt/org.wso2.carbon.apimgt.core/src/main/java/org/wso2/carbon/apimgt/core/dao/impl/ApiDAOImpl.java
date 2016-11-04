@@ -157,6 +157,61 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
+     * exists
+     *
+     * @param providerName Name of API provider/publisher
+     * @param apiName      Name of API
+     * @param version      version of the API
+     * @return true if providerName, apiName, version combination already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isAPIExists(String providerName, String apiName, String version) throws SQLException {
+        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE PROVIDER = ? AND NAME = ? AND VERSION = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
+            statement.setString(1, providerName);
+            statement.setString(2, apiName);
+            statement.setString(3, version);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a given API Context already exists
+     *
+     * @param contextName Name of API Context
+     * @return true if contextName already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isAPIContextExists(String contextName) throws SQLException {
+        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE CONTEXT = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
+            statement.setString(1, contextName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Add a new instance of an API
      *
      * @param api The {@link API} object to be added
@@ -173,7 +228,7 @@ public class ApiDAOImpl implements ApiDAO {
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
+             PreparedStatement statement = connection.prepareStatement(addAPIQuery, new String[]{"api_id"})) {
             statement.setString(1, api.getProvider());
             statement.setString(2, api.getName());
             statement.setString(3, api.getContext());
@@ -210,6 +265,19 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setTimestamp(25, new java.sql.Timestamp(date.getTime()));
 
             statement.execute();
+
+            try (ResultSet rs = statement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int apiPrimaryKey = rs.getInt(1);
+
+                    if (API.Visibility.RESTRICTED == api.getVisibility()) {
+                        addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
+                    }
+
+                    addTags(connection, apiPrimaryKey, api.getTags());
+                }
+            }
+
             connection.commit();
         }
 
@@ -347,24 +415,68 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    private boolean isAPIExists(API api) throws SQLException {
-        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE " +
-                "PROVIDER = ? AND NAME = ? AND VERSION = ?";
+    private void addTags(Connection connection, int apiID, List<String> tags) throws SQLException {
+        final String tagIDQuery = "SELECT TAG_ID FROM AM_TAGS WHERE TAG_NAME = ?";
 
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, api.getProvider());
-            statement.setString(2, api.getName());
-            statement.setString(3, api.getVersion());
+        try (PreparedStatement statement = connection.prepareStatement(tagIDQuery)) {
+            for (String tag : tags) {
+                statement.setString(1, tag);
 
-            try (ResultSet rs = statement.executeQuery()) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    int tagID;
+
+                    if (rs.next()) {
+                        tagID = rs.getInt("TAG_ID");
+                    }
+                    else {
+                        tagID = insertNewTag(connection, tag);
+                    }
+
+                    addAPITagMapping(connection, apiID, tagID);
+                }
+            }
+        }
+    }
+
+
+    private void addAPITagMapping(Connection connection, int apiID, int tagID) throws SQLException {
+        final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiID);
+            statement.setInt(2, tagID);
+            statement.execute();
+        }
+    }
+
+    private int insertNewTag(Connection connection, String tag) throws SQLException {
+        final String query = "INSERT INTO AM_TAGS (TAG_NAME) VALUES (?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query, new String[]{"tag_id"})) {
+            statement.setString(1, tag);
+            statement.execute();
+
+            try (ResultSet rs = statement.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return true;
+                    return rs.getInt(1);
                 }
             }
         }
 
-        return false;
+        return -1;
     }
 
+
+    private void addVisibleRole(Connection connection, int apiID, List<String> roles) throws SQLException {
+        final String query = "INSERT INTO AM_API_VISIBLE_ROLES (API_ID, ROLE) VALUES (?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (String role : roles) {
+                statement.setInt(1, apiID);
+                statement.setString(2, role);
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+        }
+    }
 }
