@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 

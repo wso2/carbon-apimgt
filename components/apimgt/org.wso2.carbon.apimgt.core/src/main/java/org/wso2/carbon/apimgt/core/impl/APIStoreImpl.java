@@ -84,7 +84,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         APISummaryResults apiSummaryResults = null;
         try {
             List<String> roles = new ArrayList<>(); // TODO -- roles list
-            apiSummaryResults = getApiDAO().searchAPIsForRoles(APIUtils.createSearchCriteriaMap(query), offset, limit,
+            apiSummaryResults = getApiDAO().searchAPIsForRoles(query, offset, limit,
                     roles);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + query, e, log);

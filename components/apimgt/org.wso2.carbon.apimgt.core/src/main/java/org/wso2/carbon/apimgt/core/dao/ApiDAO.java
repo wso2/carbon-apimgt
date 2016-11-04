@@ -60,7 +60,6 @@ public interface ApiDAO {
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided
-     * @param searchAttribute The attribute of an API against which the search will be performed
      * @param searchString The search string provided
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
@@ -69,7 +68,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APISummaryResults searchAPIsForRoles(String searchAttribute, String searchString, int offset, int limit,
+    APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
                                          List<String> roles) throws SQLException;
     /**
      * Add a new instance of an API
