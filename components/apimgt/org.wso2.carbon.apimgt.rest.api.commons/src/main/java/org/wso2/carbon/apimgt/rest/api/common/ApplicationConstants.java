@@ -22,5 +22,7 @@ public class ApplicationConstants {
 
     public static final String OAUTH_APP_DETAILS = "appDetails";
     public static final String OAUTH_CLIENT_GRANT = "grant_types";
+    public static final String OAUTH_CLIENT_USERNAME = "username";
+
 
 }
