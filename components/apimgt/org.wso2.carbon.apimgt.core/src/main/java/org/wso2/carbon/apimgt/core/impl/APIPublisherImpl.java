@@ -26,8 +26,10 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -189,10 +191,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIStatus(API api, String status, boolean
+    public boolean updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         try {
-            getApiDAO().changeLifeCycleStatus(api.getId(), status, deprecateOldVersions, makeKeysForwardCompatible);
+            getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
             return true;
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api" + api.getName(), e, log);
@@ -340,25 +342,39 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteAPI(String identifier) throws APIManagementException {
         try {
-            getApiDAO().deleteAPI(identifier);
-            APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+            if (getAPISubscriptionCountByAPI(identifier) < 0) {
+                getApiDAO().deleteAPI(identifier);
+                APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+            } else {
+                throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
+            }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
         }
     }
 
     /**
-     * Search API
-     *
-     * @param searchTerm Search Term
-     * @param searchType Search Type
-     * @param providerId
-     * @return Set of APIs
+     * @param limit
+     * @param offset
+     * @param query
+     * @return
      * @throws APIManagementException
      */
     @Override
-    public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException {
-        return null;
+    public APISummaryResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
+
+        APISummaryResults apiSummaryResults = null;
+        try {
+            if (query != null && !query.isEmpty()) {
+
+                apiSummaryResults = getApiDAO().searchAPIs(APIUtils.createSearchCriteriaMap(query), offset, limit);
+            } else {
+                apiSummaryResults = getApiDAO().getAPIs(offset, limit);
+            }
+        } catch (APIManagementDAOException e) {
+            APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
+        }
+        return apiSummaryResults;
     }
 
     /**

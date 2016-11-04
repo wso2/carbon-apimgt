@@ -16,9 +16,9 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.utils;
+package org.wso2.carbon.apimgt.rest.api.store.util;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;

@@ -13,14 +13,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 
+import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +56,25 @@ public class ApplicationMappingUtil {
         }
         applicationListDTO.setCount(applicationInfoDTOs.size());
         return applicationListDTO;
+    }
+
+    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(application.getUUID());
+        applicationDTO.setThrottlingTier(application.getTier());
+        applicationDTO.setDescription(application.getDescription());
+        applicationDTO.setCallbackUrl(application.getCallbackUrl());
+        applicationDTO.setName(application.getName());
+        applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setGroupId(application.getGroupId());
+        applicationDTO.setSubscriber(application.getSubscriber().getName());
+        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
+        for(APIKey apiKey : application.getKeys()) {
+            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+            applicationKeyDTOs.add(applicationKeyDTO);
+        }
+        applicationDTO.setKeys(applicationKeyDTOs);
+        return applicationDTO;
     }
 
     /** Sets pagination urls for a ApplicationListDTO object given pagination parameters and url parameters
@@ -95,6 +118,19 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         return applicationInfoDTO;
+    }
+
+    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String username) {
+        //subscriber field of the body is not honored
+        Subscriber subscriber = new Subscriber(username);
+        Application application = new Application(applicationDTO.getName(), subscriber);
+        application.setTier(applicationDTO.getThrottlingTier());
+        application.setDescription(applicationDTO.getDescription());
+        application.setCallbackUrl(applicationDTO.getCallbackUrl());
+        application.setUUID(applicationDTO.getApplicationId());
+        //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
+        //application.setGroupId(applicationDTO.getGroupId());
+        return application;
     }
 
 }

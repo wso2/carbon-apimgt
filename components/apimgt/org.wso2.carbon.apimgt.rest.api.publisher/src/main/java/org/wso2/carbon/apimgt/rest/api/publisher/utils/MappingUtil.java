@@ -28,14 +28,17 @@ import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MappingUtil {
 
@@ -133,7 +136,7 @@ public class MappingUtil {
         documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentInfo.getSourceType().getType()));
         documentDTO.setSourceUrl(documentDTO.getSourceUrl());
         documentDTO.setSummary(documentDTO.getSummary());
-        documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().getValue()));
+        documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType()));
         return documentDTO;
     }
@@ -149,10 +152,36 @@ public class MappingUtil {
         documentInfo.setSummary(documentDTO.getSummary());
         documentInfo.setName(documentDTO.getName());
         documentInfo.setOtherType(documentDTO.getOtherTypeName());
-        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().getValue()));
+        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString()));
         documentInfo.setSourceURL(documentInfo.getSourceURL());
-        documentInfo.setType(documentDTO.getType().getValue());
-        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().getValue()));
+        documentInfo.setType(documentDTO.getType().toString());
+        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString()));
         return documentInfo;
+    }
+
+    /**
+     * This method converts documentInfoResults to documentListDTO
+     * @param documentInfoResults
+     * @return
+     */
+    public static DocumentListDTO toDocumentListDTO(DocumentInfoResults documentInfoResults){
+        DocumentListDTO documentListDTO = new DocumentListDTO();
+        List<DocumentDTO> documentDTOList = documentInfoResults.getDocumentInfoList().stream().map
+                (MappingUtil::toDocumentDTO).collect(Collectors.toList());
+        documentListDTO.setList(documentDTOList);
+        return documentListDTO;
+    }
+
+    /**
+     * This method converts the {@link DocumentListDTO} to {@link DocumentInfoResults}
+     * @param documentListDTO
+     * @return
+     */
+    public static DocumentInfoResults toDocumentInfoResults(DocumentListDTO documentListDTO){
+        DocumentInfoResults documentInfoResults = new DocumentInfoResults();
+        for (DocumentDTO documentDTO: documentListDTO.getList()){
+            documentInfoResults.addDocumentInfo(toDocumentInfo(documentDTO));
+        }
+        return documentInfoResults;
     }
 }

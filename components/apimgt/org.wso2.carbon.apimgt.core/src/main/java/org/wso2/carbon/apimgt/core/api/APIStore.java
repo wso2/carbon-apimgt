@@ -52,14 +52,12 @@ public interface APIStore extends APIManager {
     /**
      * Returns a paginated list of all APIs which match the given search criteria.
      *   
-     * @param searchContent searchContent
-     * @param searchType searchType
-     * @param offset offset
+     * @param query searchType
      * @param limit limit
      * @return APISummaryResults
      * @throws APIManagementException
      */
-    APISummaryResults searchAPIs(String searchContent, String searchType, int offset, int limit)
+    APISummaryResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException;
 
     /**
@@ -117,5 +115,31 @@ public interface APIStore extends APIManager {
 
     Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
+    /**
+     * Updates the details of the specified user application.
+     *
+     * @param application Application object containing updated data
+     * @throws APIManagementException If an error occurs while updating the application
+     */
+    void updateApplication(Application application) throws APIManagementException;
+
+    /**
+     * Creates a request for getting Approval for Application Registration.
+     *
+     * @param userId Subsriber name.
+     * @param applicationName of the Application.
+     * @param tokenType Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl callback URL
+     * @param allowedDomains allowedDomains for token.
+     * @param validityTime validity time period.
+     * @param groupingId APIM application id.
+     * @param jsonString Callback URL for the Application.
+     * @param tokenScope Scopes for the requested tokens.
+     *
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String groupingId, String jsonString) throws APIManagementException;
 
 }

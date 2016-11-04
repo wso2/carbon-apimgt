@@ -98,43 +98,53 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
+            <plugin><!-- Overridden from parent pom to exclude generated sources -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>bundle-manifest</id>
-                        <phase>process-classes</phase>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
+                            </configLocation>
+                            <suppressionsLocation>
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
+                            </suppressionsLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <!--Exclude generated sources-->
+                            <excludes>**/gen/**/*</excludes>
+                            <!--skip for generated resources-->
+                            <skip>true</skip>
+                        </configuration>
                         <goals>
-                            <goal>manifest</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>
-                            ${project.artifactId}
-                        </Bundle-SymbolicName>
-                        <Private-Package>
-                            org.wso2.carbon.apimgt.core.dao.internal
-                        </Private-Package>
-                        <Import-Package>
-                            org.eclipse.osgi.util,
-                            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-                            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
-                            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
-                            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
-                            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
-                            org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
-                            com.zaxxer.hikari.*
-                        </Import-Package>
-                        <Export-Package>
-                            !org.wso2.carbon.apimgt.core.dao.internal,
-                            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}",
-                        </Export-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <private.package>org.wso2.carbon.apimgt.core.dao.internal</private.package>
+        <import.package>
+            org.eclipse.osgi.util,
+            org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+            org.osgi.framework.*;version="${osgi.framework.package.import.version.range}",
+            org.eclipse.osgi.framework.console;version="${osgi.framework.console.package.import.version.range}",
+            org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
+            org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
+            org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
+            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}"
+        </import.package>
+        <export.package>
+            !org.wso2.carbon.apimgt.core.dao.internal,
+            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
+        </export.package>
+    </properties>
 </project>

@@ -13,78 +13,79 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.rest.api.store.utils;
+package org.wso2.carbon.apimgt.rest.api.common.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
-import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
+import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 
-import java.util.Collection;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
+import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.util.exception.BadRequestException;
-import org.wso2.carbon.apimgt.core.util.exception.ConflictException;
-import org.wso2.carbon.apimgt.core.util.exception.ForbiddenException;
-import org.wso2.carbon.apimgt.core.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.core.util.exception.NotFoundException;
 
+/**
+ * Utility class for all REST APIS.
+ */
 public class RestApiUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class); 
+    private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
 
     public static String getLoggedInUsername() {
         return "DUMMY_LOGGEDUSER";
     }
 
     public static String getLoggedInUserTenantDomain() {
-        return "DUMMY_TENANTdOMAIN";//CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return "DUMMY_TENANTdOMAIN";
     }
-
 
     /**
      * Returns the current logged in consumer's group id
+     *
      * @return group id of the current logged in user.
      */
-    @SuppressWarnings("unchecked")
-    public static String getLoggedInUserGroupId() {
-//        String username = RestApiUtil.getLoggedInUsername();
-//        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-//        JSONObject loginInfoJsonObj = new JSONObject();
-//        try {
-//            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-//            loginInfoJsonObj.put("user", username);
-//            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-//                loginInfoJsonObj.put("isSuperTenant", true);
-//            } else {
-//                loginInfoJsonObj.put("isSuperTenant", false);
-//            }
-//            String loginInfoString = loginInfoJsonObj.toJSONString();
-//            return apiConsumer.getGroupIds(loginInfoString);
-//        } catch (APIManagementException e) {
-//            String errorMsg = "Unable to get groupIds of user " + username;
-//            handleInternalServerError(errorMsg, e, log);
-            return "";
-//        }
+    @SuppressWarnings("unchecked") public static String getLoggedInUserGroupId() {
+        //        String username = RestApiUtil.getLoggedInUsername();
+        //        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //        JSONObject loginInfoJsonObj = new JSONObject();
+        //        try {
+        //            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        //            loginInfoJsonObj.put("user", username);
+        //            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        //                loginInfoJsonObj.put("isSuperTenant", true);
+        //            } else {
+        //                loginInfoJsonObj.put("isSuperTenant", false);
+        //            }
+        //            String loginInfoString = loginInfoJsonObj.toJSONString();
+        //            return apiConsumer.getGroupIds(loginInfoString);
+        //        } catch (APIManagementException e) {
+        //            String errorMsg = "Unable to get groupIds of user " + username;
+        //            handleInternalServerError(errorMsg, e, log);
+        return "";
+        //        }
     }
 
     /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
      *
      * @param resource requested resource
-     * @param id id of resource
-     * @param log Log instance
+     * @param id       id of resource
+     * @param log      Log instance
      * @throws ForbiddenException
      */
     public static void handleAuthorizationFailure(String resource, String id, Logger log) throws ForbiddenException {
@@ -97,7 +98,7 @@ public class RestApiUtil {
      * Returns a new ForbiddenException
      *
      * @param resource Resource type
-     * @param id identifier of the resource
+     * @param id       identifier of the resource
      * @return a new ForbiddenException with the specified details as a response DTO
      */
     public static ForbiddenException buildForbiddenException(String resource, String id) {
@@ -107,7 +108,7 @@ public class RestApiUtil {
         } else {
             description = "You don't have permission to access the " + resource;
         }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403L, description);
         return new ForbiddenException(errorDTO);
     }
 
@@ -115,8 +116,8 @@ public class RestApiUtil {
      * Logs the error, builds a NotFoundException with specified details and throws it
      *
      * @param resource requested resource
-     * @param id id of resource
-     * @param log Log instance
+     * @param id       id of resource
+     * @param log      Log instance
      * @throws NotFoundException
      */
     public static void handleResourceNotFoundError(String resource, String id, Logger log) throws NotFoundException {
@@ -124,11 +125,12 @@ public class RestApiUtil {
         log.error(notFoundException.getMessage());
         throw notFoundException;
     }
+
     /**
      * Returns a new NotFoundException
      *
      * @param resource Resource type
-     * @param id identifier of the resource
+     * @param id       identifier of the resource
      * @return a new NotFoundException with the specified details as a response DTO
      */
     public static NotFoundException buildNotFoundException(String resource, String id) {
@@ -138,7 +140,7 @@ public class RestApiUtil {
         } else {
             description = "Requested " + resource + " not found";
         }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L, description);
         return new NotFoundException(errorDTO);
     }
 
@@ -146,11 +148,12 @@ public class RestApiUtil {
      * Logs the error, builds a internalServerErrorException with specified details and throws it
      *
      * @param msg error message
-     * @param t Throwable instance
+     * @param t   Throwable instance
      * @param log Log instance
      * @throws InternalServerErrorException
      */
-    public static void handleInternalServerError(String msg, Throwable t, Logger log) throws InternalServerErrorException {
+    public static void handleInternalServerError(String msg, Throwable t, Logger log)
+            throws InternalServerErrorException {
         InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
         log.error(msg, t);
         throw internalServerErrorException;
@@ -162,11 +165,10 @@ public class RestApiUtil {
      * @return a new InternalServerErrorException with default details as a response DTO
      */
     public static InternalServerErrorException buildInternalServerErrorException() {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
                 RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
         return new InternalServerErrorException(errorDTO);
     }
-
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
@@ -188,7 +190,7 @@ public class RestApiUtil {
      * @return a new BadRequestException with the specified details as a response DTO
      */
     public static BadRequestException buildBadRequestException(String description) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, description);
         return new BadRequestException(errorDTO);
     }
 
@@ -196,8 +198,8 @@ public class RestApiUtil {
      * Logs the error, builds a ConflictException with specified details and throws it
      *
      * @param description description of the error
-     * @param t Throwable instance
-     * @param log Log instance
+     * @param t           Throwable instance
+     * @param log         Log instance
      * @throws ConflictException
      */
     public static void handleResourceAlreadyExistsError(String description, Throwable t, Logger log)
@@ -211,12 +213,12 @@ public class RestApiUtil {
     /**
      * Returns a new ConflictException
      *
-     * @param message summary of the error
+     * @param message     summary of the error
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
      */
     public static ConflictException buildConflictException(String message, String description) {
-        ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
+        ErrorDTO errorDTO = getErrorDTO(message, 409L, description);
         return new ConflictException(errorDTO);
     }
 
@@ -226,62 +228,47 @@ public class RestApiUtil {
      *
      * @param e throwable to check
      * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
-     *   existing resource, false otherwise
+     * existing resource, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceAlreadyExists(Throwable e) {
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToResourceAlreadyExists(
+            Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
     }
-    
+
     /**
      * Check if the specified throwable e is happened as the required resource cannot be found
+     *
      * @param e throwable to check
      * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceNotFound(Throwable e) {
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToResourceNotFound(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceNotFoundException;
     }
 
     /**
      * Check if the specified throwable e is due to an authorization failure
+     *
      * @param e throwable to check
      * @return true if the specified throwable e is due to an authorization failure, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToAuthorizationFailure(Throwable e) {
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToAuthorizationFailure(
+            Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtAuthorizationFailedException;
     }
-    
+
     /**
      * Attempts to find the actual cause of the throwable 'e'
      *
      * @param e throwable
      * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
      */
-    private static Throwable getPossibleErrorCause (Throwable e) {
+    private static Throwable getPossibleErrorCause(Throwable e) {
         Throwable rootCause = ExceptionUtils.getRootCause(e);
         rootCause = rootCause == null ? e : rootCause;
         return rootCause;
-    }
-
-    /**
-     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
-     *
-     * @param tiers    Tier Collection
-     * @param tierName Tier to find
-     * @return Matched tier with its name
-     */
-    public static TierDTO findTier(Collection<TierDTO> tiers, String tierName) {
-        for (TierDTO tier : tiers) {
-            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
-                return tier;
-            }
-        }
-        return null;
     }
 
     /**
@@ -290,7 +277,7 @@ public class RestApiUtil {
      * @param message specifies the error message
      * @return A generic errorDTO with the specified details
      */
-    public static ErrorDTO getErrorDTO(String message, Long code, String description){
+    public static ErrorDTO getErrorDTO(String message, Long code, String description) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
         errorDTO.setMoreInfo("");
@@ -301,7 +288,7 @@ public class RestApiUtil {
 
     /**
      * Returns an APIStore.
-     * 
+     *
      * @param subscriberName
      * @return
      * @throws APIManagementException
@@ -311,18 +298,19 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
+     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are
+     * specified
      *
      * @param offset current starting index
-     * @param limit current max records
-     * @param size maximum index possible
+     * @param limit  current max records
+     * @param size   maximum index possible
      * @return the next/previous offset/limit parameters as a hash-map
      */
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
         Map<String, Integer> result = new HashMap<>();
-        if (offset >= size || offset < 0)
+        if (offset >= size || offset < 0) {
             return result;
-
+        }
         int start = offset;
         int end = offset + limit - 1;
 
@@ -347,10 +335,11 @@ public class RestApiUtil {
         return result;
     }
 
-    /** Returns the paginated url for Applications API
+    /**
+     * Returns the paginated url for Applications API
      *
-     * @param offset starting index
-     * @param limit max number of objects returned
+     * @param offset  starting index
+     * @param limit   max number of objects returned
      * @param groupId groupId of the Application
      * @return constructed paginated url
      */
@@ -363,4 +352,32 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /**
+     * Check if the message of the root cause message of 'e' matches with the specified message
+     *
+     * @param e       throwable to check
+     * @param message error message
+     * @return true if the message of the root cause of 'e' matches with 'message'
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean rootCauseMessageMatches(Throwable e,
+            String message) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause.getMessage().contains(message);
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param resource requested resource
+     * @param id id of resource
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage(), t);
+        throw notFoundException;
+    }
 }

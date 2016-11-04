@@ -1,19 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.TiersApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
@@ -23,9 +17,7 @@ import java.io.InputStream;
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.*;
 
 @Component(
@@ -37,7 +29,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the tiers API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
 public class TiersApi implements Microservice  {
    private final TiersApiService delegate = TiersApiServiceFactory.getTiersApi();
 

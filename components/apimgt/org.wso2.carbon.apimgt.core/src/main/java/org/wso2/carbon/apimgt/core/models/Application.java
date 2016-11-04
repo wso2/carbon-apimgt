@@ -21,7 +21,9 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,7 +38,10 @@ public final class Application {
     private String uuid;
     private String description;
     private String tier;
-    private  String status;
+    private String status;
+    private String callbackUrl;
+    private List<APIKey> keys = new ArrayList<APIKey>();
+
 
     public Application(String name, Subscriber subscriber) {
         this.name = name;
@@ -125,5 +130,21 @@ public final class Application {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
+    }
+
+    public List<APIKey> getKeys() {
+        return keys;
+    }
+
+    public void addKey(APIKey key) {
+        keys.add(key);
     }
 }

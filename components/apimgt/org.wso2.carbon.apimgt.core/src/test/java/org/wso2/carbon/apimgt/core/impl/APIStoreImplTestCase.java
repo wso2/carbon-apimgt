@@ -20,10 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -47,7 +47,7 @@ public class APIStoreImplTestCase {
       
       //apiStore = new APIStoreImpl();
       
-      apiStore.searchAPIs("", "", 1, 1);
+      apiStore.searchAPIs("",0,0);
             Assert.assertTrue(true);
         } catch (APIManagementException e) {
            

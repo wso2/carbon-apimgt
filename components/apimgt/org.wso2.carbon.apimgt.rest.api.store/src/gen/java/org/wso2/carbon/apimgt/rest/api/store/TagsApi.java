@@ -1,17 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
@@ -21,9 +15,7 @@ import java.io.InputStream;
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.*;
 
 @Component(
@@ -35,7 +27,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
 public class TagsApi implements Microservice  {
    private final TagsApiService delegate = TagsApiServiceFactory.getTagsApi();
 
