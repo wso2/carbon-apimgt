@@ -79,21 +79,13 @@ $( document ).ready(function() {
                         apiName = this.value;
                         pupulateAppList(apiName);
                         var datePicker=$('#date-range').data('daterangepicker');
-<<<<<<< HEAD
-                        getDateTime(to, from);
-=======
                         drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
->>>>>>> release-6.0.0
                     });
 
                     $("#appSelect").change(function (e) {
                         appName = this.value;
                         var datePicker=$('#date-range').data('daterangepicker');
-<<<<<<< HEAD
-                        getDateTime(to, from);
-=======
                         drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
->>>>>>> release-6.0.0
                     });
 
                     pupulateAPIList();
@@ -280,16 +272,16 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
                         }
 
                         d3.select('#throttledTimeChart svg').datum([
-                          {
-                            key: "Success Count",
-                            color: "#60CA60",
-                            values: successValues
-                          },
-                          {
-                            key: "Throttled Count",
-                            color: "#BD362F",
-                            values: throttledValues
-                          }
+						  {
+						    key: "Throttled Count",
+						    color: "#BD362F",
+						    values: throttledValues
+						  },
+						  {
+						    key: "Success Count",
+						    color: "#60CA60",
+						    values: successValues
+						  }
                         ]).transition().duration(500).call(chart);
                         nv.utils.windowResize(chart.update);
                             return chart;
