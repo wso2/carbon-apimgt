@@ -1,16 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Objects;
 
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
 public class DocumentDTO   {
   @JsonProperty("documentId")
   private String documentId = null;
@@ -57,10 +57,6 @@ public class DocumentDTO   {
       }
       return null;
     }
-
-    public String getValue() {
-      return value;
-    }
   }
 
   @JsonProperty("type")
@@ -99,10 +95,6 @@ public class DocumentDTO   {
         }
       }
       return null;
-    }
-
-    public String getValue() {
-      return value;
     }
   }
 
@@ -145,10 +137,6 @@ public class DocumentDTO   {
         }
       }
       return null;
-    }
-
-    public String getValue() {
-      return value;
     }
   }
 

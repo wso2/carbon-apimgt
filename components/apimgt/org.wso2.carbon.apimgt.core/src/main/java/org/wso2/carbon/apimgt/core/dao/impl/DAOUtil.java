@@ -23,9 +23,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.exception.APIManagementDAOException;
-import org.wso2.carbon.apimgt.core.exception.ErrorCode;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -57,16 +54,6 @@ public class DAOUtil {
         }
 
         throw new SQLException("Data source is not configured properly.");
-    }
-
-    static void handleException(ErrorCode errorCode, String msg) throws APIManagementDAOException {
-        log.error(msg);
-        throw new APIManagementDAOException(errorCode, msg);
-    }
-
-    public static void handleException(ErrorCode errorCode, String msg, Throwable t) throws APIManagementDAOException {
-        log.error(msg, t);
-        throw new APIManagementDAOException(errorCode, msg, t);
     }
 }
 

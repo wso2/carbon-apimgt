@@ -40,6 +40,6 @@ public class Constants {
     public static final String ID = "ID";
     public static final String PREV_STATE = "PREV_STATE";
     public static final String POST_STATE = "POST_STATE";
-    public static final String USER = "USER";
-    public static final String TIME = "TIME";
+    public static final String USER = "USERNAME";
+    public static final String TIME = "UPDATE_TIME";
 }

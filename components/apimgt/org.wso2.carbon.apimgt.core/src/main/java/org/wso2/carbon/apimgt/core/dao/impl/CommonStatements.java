@@ -30,8 +30,19 @@ public class CommonStatements implements SQLStatements {
     private static final String ADD_API = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
             "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
             "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, CREATED_BY, " +
-            "CREATED_TIME, LAST_UPDATED_TIME)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "CREATED_TIME, LAST_UPDATED_TIME) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    private static final String ADD_API_VISIBLE_ROLES = "INSERT INTO AM_API_VISIBLE_ROLES (API_ID, ROLE_ID) " +
+            "VALUES (?,?)";
+
+    private static final String ADD_API_SWAGGER = "INSERT INTO AM_API_SWAGGER (API_ID, SWAGGER_FILE) VALUES (?,?)";
+
+    private static final String ADD_API_WSDL = "INSERT INTO AM_API_WSDL (API_ID, WSDL_FILE) VALUES (?,?)";
+
+    private static final String ADD_TAG = "INSERT INTO AM_TAGS (TAG_NAME) VALUES (?)";
+
+    private static final String ADD_API_TAG_MAPPING = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?,?)";
 
     private static final String GET_API = "SELECT PROVIDER, NAME, CONTEXT, VERSION, " +
             "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
@@ -59,4 +70,8 @@ public class CommonStatements implements SQLStatements {
     public String getDeleteApi() {
         return DELETE_API;
     }
+
+    public String getAddApiVisibleRoles() { return ADD_API_VISIBLE_ROLES; }
+
+
 }

@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,18 +29,26 @@ import java.util.List;
  */
 
 public final class API {
-    public String getEndpointConfig() {
-        return endpointConfig;
+    public String getLifeCycleInstanceID() {
+        return lifeCycleInstanceID;
     }
 
-    public void setEndpointConfig(String endpointConfig) {
-        this.endpointConfig = endpointConfig;
+    public void setLifeCycleInstanceID(String lifeCycleInstanceID) {
+        this.lifeCycleInstanceID = lifeCycleInstanceID;
+    }
+
+    public int getApiPolicyID() {
+        return apiPolicyID;
+    }
+
+    public void setApiPolicyID(int apiPolicyID) {
+        this.apiPolicyID = apiPolicyID;
     }
 
     /**
      * Visibility options
      */
-    public enum VisibilityEnum {
+    public enum Visibility {
         PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
     };
 
@@ -51,33 +58,26 @@ public final class API {
     private String name;
     private String context;
     private String id;
-    private String status;
+    private String lifeCycleStatus;
+    private String lifeCycleInstanceID;
     private String apiDefinition;
     private String wsdlUri;
     private boolean isResponseCachingEnabled;
     private int cacheTimeout;
-    private boolean isDestinationStatsEnabled;
     private boolean isDefaultVersion;
+    private int apiPolicyID;
     private List<String> transport = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
-    private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
+    private Visibility visibility = Visibility.PUBLIC;
     private List<String> visibleRoles = new ArrayList<>();
     private List<Endpoint> endpoints = new ArrayList<>();
     private List<Environment> gatewayEnvironments;
-
-    private String endpointConfig;
-    private String businessOwnerEmail;
-    private String technicalOwnerEmail;
-    private String technicalOwner;
-    private String businessOwner;
-    private BusinessInformation businessInformation;
-
+    private BusinessInformation businessInformation = new BusinessInformation();
+    private CorsConfiguration corsConfiguration = new CorsConfiguration();
     private Date createdTime;
     private String createdBy;
     private Date lastUpdatedTime;
-
-    private CorsConfiguration corsConfiguration;
 
     public API(String provider, String version, String name) {
         this.provider = provider;
@@ -112,11 +112,11 @@ public final class API {
         this.lastUpdatedTime = new Date(lastUpdatedTime.getTime());
     }
 
-    public VisibilityEnum getVisibility() {
+    public Visibility getVisibility() {
         return visibility;
     }
 
-    public void setVisibility(VisibilityEnum visibility) {
+    public void setVisibility(Visibility visibility) {
         this.visibility = visibility;
     }
 
@@ -142,38 +142,6 @@ public final class API {
 
     public void setGatewayEnvironments(List<Environment> gatewayEnvironments) {
         this.gatewayEnvironments = gatewayEnvironments;
-    }
-
-    public String getBusinessOwnerEmail() {
-        return businessOwnerEmail;
-    }
-
-    public void setBusinessOwnerEmail(String businessOwnerEmail) {
-        this.businessOwnerEmail = businessOwnerEmail;
-    }
-
-    public String getTechnicalOwnerEmail() {
-        return technicalOwnerEmail;
-    }
-
-    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-        this.technicalOwnerEmail = technicalOwnerEmail;
-    }
-
-    public String getTechnicalOwner() {
-        return technicalOwner;
-    }
-
-    public void setTechnicalOwner(String technicalOwner) {
-        this.technicalOwner = technicalOwner;
-    }
-
-    public String getBusinessOwner() {
-        return businessOwner;
-    }
-
-    public void setBusinessOwner(String businessOwner) {
-        this.businessOwner = businessOwner;
     }
 
     public CorsConfiguration getCorsConfiguration() {
@@ -240,14 +208,6 @@ public final class API {
         this.cacheTimeout = cacheTimeout;
     }
 
-    public boolean isDestinationStatsEnabled() {
-        return isDestinationStatsEnabled;
-    }
-
-    public void setDestinationStatsEnabled(boolean destinationStatsEnabled) {
-        isDestinationStatsEnabled = destinationStatsEnabled;
-    }
-
     public boolean isDefaultVersion() {
         return isDefaultVersion;
     }
@@ -304,12 +264,12 @@ public final class API {
         this.id = id;
     }
 
-    public String getStatus() {
-        return status;
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
     }
 
     public BusinessInformation getBusinessInformation() {

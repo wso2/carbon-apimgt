@@ -365,4 +365,19 @@ public class RestApiUtil {
         return rootCause.getMessage().contains(message);
     }
 
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param resource requested resource
+     * @param id id of resource
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage(), t);
+        throw notFoundException;
+    }
 }
