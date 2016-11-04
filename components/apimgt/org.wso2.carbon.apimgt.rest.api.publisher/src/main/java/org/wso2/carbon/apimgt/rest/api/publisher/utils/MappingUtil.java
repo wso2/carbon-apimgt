@@ -138,7 +138,7 @@ public class MappingUtil {
         documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentInfo.getSourceType().getType()));
         documentDTO.setSourceUrl(documentDTO.getSourceUrl());
         documentDTO.setSummary(documentDTO.getSummary());
-        documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().getValue()));
+        documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType()));
         return documentDTO;
     }
@@ -154,10 +154,10 @@ public class MappingUtil {
         documentInfo.setSummary(documentDTO.getSummary());
         documentInfo.setName(documentDTO.getName());
         documentInfo.setOtherType(documentDTO.getOtherTypeName());
-        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().getValue()));
+        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString()));
         documentInfo.setSourceURL(documentInfo.getSourceURL());
-        documentInfo.setType(documentDTO.getType().getValue());
-        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().getValue()));
+        documentInfo.setType(documentDTO.getType().toString());
+        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString()));
         return documentInfo;
     }
 
