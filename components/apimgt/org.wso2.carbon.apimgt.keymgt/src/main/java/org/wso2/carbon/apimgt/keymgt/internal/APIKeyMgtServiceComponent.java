@@ -183,21 +183,6 @@ public class APIKeyMgtServiceComponent {
     }
 
     /**
-     * set Thrift authentication service
-     *
-     * @param authenticationService <code>ThriftAuthenticatorService</code>
-     */
-    protected void setThriftAuthenticationService(
-            ThriftAuthenticatorService authenticationService) {
-        if (log.isDebugEnabled()) {
-            log.debug("ThriftAuthenticatorService set in Entitlement bundle");
-        }
-        this.thriftAuthenticationService = authenticationService;
-        //log.info("STUBHUB " + authenticationService + " received.");
-
-    }
-
-    /**
      * un-set Thrift authentication service
      *
      * @param //authenticationService <code>ThriftAuthenticatorService</code>
@@ -208,6 +193,19 @@ public class APIKeyMgtServiceComponent {
             log.debug("ThriftAuthenticatorService unset in Entitlement bundle");
         }
         this.thriftAuthenticationService = null;
+    }
+
+    /**
+     * set Thrift authentication service
+     *
+     * @param authenticationService <code>ThriftAuthenticatorService</code>
+     */
+    protected void setThriftAuthenticationService(
+            ThriftAuthenticatorService authenticationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("ThriftAuthenticatorService set in Entitlement bundle");
+        }
+        this.thriftAuthenticationService = authenticationService;
     }
 
     private void startThriftService() throws Exception {
