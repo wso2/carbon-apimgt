@@ -2,7 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
@@ -17,6 +19,8 @@ import org.wso2.msf4j.formparam.FileInfo;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -118,8 +122,21 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            return Response.ok().entity(apidto).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdPut(String apiId
@@ -235,7 +252,21 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisPost(APIDTO body
 , String contentType
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+     String username = "";
+        API api = MappingUtil.toAPI(body);
+        try {
+            API returnAPI = RestAPIPublisherUtil.getApiPublisher(username).addAPI(api);
+          URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
+            return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
+                    body.getName() + "-" + body.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }
