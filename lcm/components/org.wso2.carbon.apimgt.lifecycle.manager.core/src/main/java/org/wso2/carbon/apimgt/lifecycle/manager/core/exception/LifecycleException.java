@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.lifecycle.manager.exception;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.exception;
 
 /**
  * The class {@code LifecycleException} and its subclasses are a form of

@@ -1,10 +1,10 @@
-package org.wso2.carbon.apimgt.lifecycle.manager.impl;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.impl;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.AvailableTransitionBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.InputBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.PermissionBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.AvailableTransitionBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CustomCodeBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.PermissionBean;
 
 import java.util.ArrayList;
 import java.util.List;

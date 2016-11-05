@@ -1,22 +1,22 @@
-package org.wso2.carbon.apimgt.lifecycle.manager;
+package org.wso2.carbon.apimgt.lifecycle.manager.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CustomCodeBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil;
-import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleUtils;
 
 import java.util.List;
 
-import static org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil.changeCheckListItem;
-import static org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil.getInitialState;
-import static org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil.populateItems;
-import static org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil.removeLifecycleStateData;
+import static org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil.changeCheckListItem;
+import static org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil.getInitialState;
+import static org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil.populateItems;
+import static org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil.removeLifecycleStateData;
 
 /**
  * This is the class provides all the logic related to lifecycle operations. (Associate, Dissociate, State change
