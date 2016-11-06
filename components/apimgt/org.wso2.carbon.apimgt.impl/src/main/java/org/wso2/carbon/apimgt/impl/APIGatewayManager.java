@@ -84,8 +84,7 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain)
-            throws JSONException {
+    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
@@ -210,6 +209,14 @@ public class APIGatewayManager {
                 failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
             } catch (APIManagementException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                log.error("Error occurred deploying sequences on " + environmentName, ex);
+                failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            } catch (JSONException ex) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
                 if gateway is unreachable we collect that environments into map with issue and show on popup in ui
@@ -346,8 +353,7 @@ public class APIGatewayManager {
      * @param artifact
      * @param api
      */
-    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api)
-            throws JSONException {
+    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIGatewayAdminClient client;
@@ -358,7 +364,16 @@ public class APIGatewayManager {
             for (String environmentName : environments) {
                 Environment environment = this.environments.get(environmentName);
                 client = new APIGatewayAdminClient(api.getId(), environment);
-                gatewayManager.deployWebsocketAPI(api, client);
+                try {
+                    gatewayManager.deployWebsocketAPI(api, client);
+                } catch (JSONException ex) {
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway publishing if one gateway unreachable
+                    */
+                    log.error("Error occurred deploying sequences on " + environmentName, ex);
+                }
             }
         } catch (APIManagementException ex) {
             /*
