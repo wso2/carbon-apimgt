@@ -32,6 +32,10 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.wso2.msf4j</groupId>
+            <artifactId>msf4j-core</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -69,6 +73,8 @@
 	</build>
 	<properties>
 		<import.package>
+            org.osgi.framework.*;version="${osgi.framework.import.version.range}",
+            org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
 			org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
 			javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
 			org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
@@ -77,6 +83,9 @@
 		<export.package>
 			org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",
 		</export.package>
+        <carbon.component>
+            osgi.service;objectClass="org.wso2.msf4j.Interceptor" ; serviceCount="1"
+        </carbon.component>
 	</properties>
 
 </project>
