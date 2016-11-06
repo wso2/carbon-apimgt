@@ -60,7 +60,7 @@ var getDomainConfiguration = function (domainName, configurationName) {
 };
 
 
-var saveConfiguration = function (domainName, templateType, configurationName, description, parametersJson) {
+var editConfiguration = function (domainName, templateType, configurationName, description, parametersJson) {
     try {
 
         var valueSeparator = "::";
@@ -106,7 +106,7 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         authenticator.setPreemptiveAuthentication(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
-        var configInfo = stub.saveConfiguration(scenarioConfigurationDTO);
+        var configInfo = stub.editConfiguration(scenarioConfigurationDTO);
         return configInfo;
     } catch (ex) {
         var message = "Error occurred while Saving Domain Configuration (Cause:" + ex.message + ")";

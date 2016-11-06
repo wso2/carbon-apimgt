@@ -25,8 +25,8 @@ jagg.module("configure-alerts", {
         return jagg.require(jagg.getModulesDir() + "configure-alerts/alerts-domain-manage.jag").deleteConfiguration.apply(this, arguments);
     },
     
-    saveConfiguration:function () {
-        return jagg.require(jagg.getModulesDir() + "configure-alerts/alerts-domain-edit.jag").saveConfiguration.apply(this, arguments);
+    editConfiguration:function () {
+        return jagg.require(jagg.getModulesDir() + "configure-alerts/alerts-domain-edit.jag").editConfiguration.apply(this, arguments);
     }
 
 });
