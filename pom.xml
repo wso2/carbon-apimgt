@@ -255,7 +255,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.security.caas</groupId>
                 <artifactId>org.wso2.carbon.security.caas</artifactId>
-                <version>1.0.0.-m2</version>
+                <version>${carbon.security.caas.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
