@@ -43,6 +43,7 @@
 
     <modules>
         <module>components/apimgt</module>
+        <module>components/web</module>
         <module>features/apimgt</module>
         <module>lcm</module>
     </modules>
@@ -442,6 +443,9 @@
 
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
+        <carbon.uuf.version>1.0.0-m7</carbon.uuf.version>
+        <carbon-uuf-maven-plugin.version>1.0.0-m6</carbon-uuf-maven-plugin.version>
+
 
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
 

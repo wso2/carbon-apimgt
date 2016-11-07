@@ -20,8 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.slf4j.Logger;
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
@@ -30,17 +29,18 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -48,12 +48,10 @@ import javax.annotation.CheckForNull;
  */
 public class ApiDAOImpl implements ApiDAO {
 
-    private final SQLStatements sqlStatements;
-    private final Logger log;
+    //private final SQLStatements sqlStatements;
 
-    ApiDAOImpl(SQLStatements sqlStatements, Logger log) {
-        this.sqlStatements = sqlStatements;
-        this.log = log;
+    ApiDAOImpl(SQLStatements sqlStatements) {
+        //this.sqlStatements = sqlStatements;
     }
 
     /**
@@ -61,14 +59,14 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The {@link String} that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws SQLException {
         API api = null;
 
-        final String getAPIQuery = "SELECT PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
+        final String getAPIQuery = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, API_POLICY_ID, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
@@ -80,41 +78,44 @@ public class ApiDAOImpl implements ApiDAO {
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    api = new API(rs.getString("PROVIDER"), rs.getString("VERSION"), rs.getString("NAME"));
-                    api.setId(rs.getString("UUID"));
-                    api.setContext(rs.getString("CONTEXT"));
-                    api.setDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION"));
-                    api.setDescription(rs.getString("DESCRIPTION"));
-                    api.setVisibility(API.Visibility.valueOf(rs.getString("VISIBILITY")));
-                    api.setResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED"));
-                    api.setCacheTimeout(rs.getInt("CACHE_TIMEOUT"));
-                    api.setId(rs.getString("UUID"));
-
                     BusinessInformation businessInformation = new BusinessInformation();
                     businessInformation.setTechnicalOwner(rs.getString("TECHNICAL_OWNER"));
                     businessInformation.setTechnicalOwnerEmail(rs.getString("TECHNICAL_EMAIL"));
                     businessInformation.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                     businessInformation.setBusinessOwnerEmail(rs.getString("BUSINESS_EMAIL"));
-                    api.setBusinessInformation(businessInformation);
-
-                    api.setLifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID"));
-                    api.setLifeCycleStatus(rs.getString("CURRENT_LC_STATUS"));
-                    api.setApiPolicyID(rs.getInt("API_POLICY_ID"));
 
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setEnabled(rs.getBoolean("CORS_ENABLED"));
                     corsConfiguration.setAllowOrigins(Arrays.asList(rs.getString("CORS_ALLOW_ORIGINS").
-                                                                                                split("\\s*,\\s*")));
+                            split("\\s*,\\s*")));
                     corsConfiguration.setAllowCredentials(rs.getBoolean("CORS_ALLOW_CREDENTIALS"));
                     corsConfiguration.setAllowHeaders(Arrays.asList(rs.getString("CORS_ALLOW_HEADERS").
-                                                                                                split("\\s*,\\s*")));
+                            split("\\s*,\\s*")));
                     corsConfiguration.setAllowMethods(Arrays.asList(rs.getString("CORS_ALLOW_METHODS").
-                                                                                                split("\\s*,\\s*")));
-                    api.setCorsConfiguration(corsConfiguration);
+                            split("\\s*,\\s*")));
 
-                    api.setCreatedBy(rs.getString("CREATED_BY"));
-                    api.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
-                    api.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
+                    int apiPrimaryKey = rs.getInt("API_ID");
+
+                    api = new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
+                    id(rs.getString("UUID")).
+                    context(rs.getString("CONTEXT")).
+                    isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
+                    description(rs.getString("DESCRIPTION")).
+                    visibility(API.Visibility.valueOf(rs.getString("VISIBILITY"))).
+                    visibleRoles(getVisibleRoles(connection, apiPrimaryKey)).
+                    isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
+                    cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
+                    tags(getTags(connection, apiPrimaryKey)).
+                    apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
+                    businessInformation(businessInformation).
+                    lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                    lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
+                    apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
+                    corsConfiguration(corsConfiguration).
+                    createdBy(rs.getString("CREATED_BY")).
+                    createdTime(rs.getTimestamp("CREATED_TIME")).
+                    lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
+                    build();
                 }
 
             }
@@ -131,7 +132,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param limit         The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles)
@@ -149,7 +150,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param roles   The list of roles of the user making the query
      * @return {@link APISummaryResults} matching results
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
@@ -158,14 +159,69 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
+     * exists
+     *
+     * @param providerName Name of API provider/publisher
+     * @param apiName      Name of API
+     * @param version      version of the API
+     * @return true if providerName, apiName, version combination already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isAPIExists(String providerName, String apiName, String version) throws SQLException {
+        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE PROVIDER = ? AND NAME = ? AND VERSION = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
+            statement.setString(1, providerName);
+            statement.setString(2, apiName);
+            statement.setString(3, version);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a given API Context already exists
+     *
+     * @param contextName Name of API Context
+     * @return true if contextName already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isAPIContextExists(String contextName) throws SQLException {
+        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE CONTEXT = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
+            statement.setString(1, contextName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Add a new instance of an API
      *
      * @param api The {@link API} object to be added
      * @return true if addition is successful else false
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public API addAPI(API api) throws SQLException {
+    public API addAPI(final API api) throws SQLException {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
@@ -174,7 +230,7 @@ public class ApiDAOImpl implements ApiDAO {
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
+             PreparedStatement statement = connection.prepareStatement(addAPIQuery, new String[]{"api_id"})) {
             statement.setString(1, api.getProvider());
             statement.setString(2, api.getName());
             statement.setString(3, api.getContext());
@@ -194,7 +250,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.setString(15, api.getLifeCycleInstanceID());
             statement.setString(16, api.getLifeCycleStatus());
-            statement.setInt(17, api.getApiPolicyID());
+            statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
             CorsConfiguration corsConfiguration = api.getCorsConfiguration();
             statement.setBoolean(18, corsConfiguration.isEnabled());
@@ -204,13 +260,24 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(22, String.join(",", corsConfiguration.getAllowMethods()));
 
             statement.setString(23, api.getCreatedBy());
-            Date date = new Date();
-            api.setCreatedTime(date);
-            api.setLastUpdatedTime(date);
-            statement.setTimestamp(24, new java.sql.Timestamp(date.getTime()));
-            statement.setTimestamp(25, new java.sql.Timestamp(date.getTime()));
+            statement.setTimestamp(24, new java.sql.Timestamp(api.getCreatedTime().getTime()));
+            statement.setTimestamp(25, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
 
             statement.execute();
+
+            try (ResultSet rs = statement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int apiPrimaryKey = rs.getInt(1);
+
+                    if (API.Visibility.RESTRICTED == api.getVisibility()) {
+                        addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
+                    }
+
+                    addTags(connection, apiPrimaryKey, api.getTags());
+                    addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+                }
+            }
+
             connection.commit();
         }
 
@@ -223,10 +290,16 @@ public class ApiDAOImpl implements ApiDAO {
      * @param apiID      The {@link String} of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return true if update is successful else false
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public API updateAPI(String apiID, API substituteAPI) throws SQLException {
+        final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
+                "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
+                "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
+                "CURRENT_LC_STATUS, API_POLICY_ID, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
+                "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         return null;
     }
 
@@ -234,8 +307,7 @@ public class ApiDAOImpl implements ApiDAO {
      * Remove an existing API
      *
      * @param apiID The {@link String} of the API that needs to be deleted
-     * @return true if update is successful else false
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public void deleteAPI(String apiID) throws SQLException {
@@ -244,6 +316,7 @@ public class ApiDAOImpl implements ApiDAO {
              PreparedStatement statement = connection.prepareStatement(deleteAPIQuery)) {
             statement.setString(1, apiID);
             statement.execute();
+            connection.commit();
         }
     }
 
@@ -251,11 +324,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Get swagger definition of a given API
      *
      * @param apiID The UUID of the respective API
-     * @return Swagger definition stream
-     * @throws SQLException
+     * @return Swagger definition String
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public OutputStream getSwaggerDefinition(String apiID) throws SQLException {
+    public String getSwaggerDefinition(String apiID) throws SQLException {
         return null;
     }
 
@@ -263,11 +336,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Update swagger definition of a given API
      *
      * @param apiID             The UUID of the respective API
-     * @param swaggerDefinition Swagger definition stream
-     * @throws SQLException
+     * @param swaggerDefinition Swagger definition String
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws SQLException {
+    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException {
 
     }
 
@@ -276,7 +349,7 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID of the respective API
      * @return Image stream
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public OutputStream getImage(String apiID) throws SQLException {
@@ -288,7 +361,7 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID of the respective API
      * @param image Image stream
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public void updateImage(String apiID, InputStream image) throws SQLException {
@@ -302,7 +375,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param status                    The lifecycle status that the API must be set to
      * @param deprecateOldVersions      if true for deprecate older versions
      * @param makeKeysForwardCompatible if true for make subscriptions get forward
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
@@ -316,7 +389,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param apiID   The UUID of the respective API
      * @param version The new version of the API
      * @return The new version {@link API} object
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public API createNewAPIVersion(String apiID, String version) throws SQLException {
@@ -329,7 +402,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param apiID  The UUID of the respective API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit  The maximum number of results to be returned after the offset
-     * @throws SQLException
+     * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     public DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit)
@@ -348,25 +421,157 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-    private boolean isAPIExists(API api) throws SQLException {
-        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE " +
-                "PROVIDER = ? AND NAME = ? AND VERSION = ?";
+    private void addTags(Connection connection, int apiID, List<String> tags) throws SQLException {
+        if (!tags.isEmpty()) {
+            List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
 
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, api.getProvider());
-            statement.setString(2, api.getName());
-            statement.setString(3, api.getVersion());
+            final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
 
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return true;
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (Integer tagID : tagIDs) {
+                    statement.setInt(1, apiID);
+                    statement.setInt(2, tagID);
+                    statement.addBatch();
+                }
+
+                statement.execute();
+            }
+        }
+    }
+
+    private List<String> getTags(Connection connection, int apiID) throws SQLException {
+        List<String> tags = new ArrayList<>();
+
+        final String query = "SELECT TAG_ID FROM AM_API_TAG_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                List<Integer> tagIDs = new ArrayList<>();
+
+                while (rs.next()) {
+                    tagIDs.add(rs.getInt("TAG_ID"));
+                }
+
+                if (!tagIDs.isEmpty()) {
+                    tags = TagDAO.getTagsByIDs(connection, tagIDs);
                 }
             }
         }
 
-        return false;
+        return tags;
     }
 
+    private void addVisibleRole(Connection connection, int apiID, List<String> roles) throws SQLException {
+        final String query = "INSERT INTO AM_API_VISIBLE_ROLES (API_ID, ROLE) VALUES (?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (String role : roles) {
+                statement.setInt(1, apiID);
+                statement.setString(2, role);
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+        }
+    }
+
+    private List<String> getVisibleRoles(Connection connection, int apiID) throws SQLException {
+        List<String> roles =  new ArrayList<>();
+
+        final String query = "SELECT ROLE FROM AM_API_VISIBLE_ROLES WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    roles.add(rs.getString("ROLE"));
+                }
+            }
+        }
+
+        return roles;
+    }
+
+    private void addAPIDefinition(Connection connection, int apiID, String apiDefinition) throws SQLException {
+        if (!apiDefinition.isEmpty()) {
+            int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                                                            ResourceConstants.ResourceType.SWAGGER.toString());
+
+            if (resourceTypeID == -1) { // If resource type does not already exist
+                ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.SWAGGER.toString());
+                resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                                                            ResourceConstants.ResourceType.SWAGGER.toString());
+            }
+
+            final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
+                    "RESOURCE_BINARY_VALUE) VALUES (?,?,?,?)";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setInt(1, apiID);
+                statement.setInt(2, resourceTypeID);
+                statement.setString(3, MediaType.APPLICATION_JSON);
+                statement.setBlob(4, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
+
+                statement.execute();
+            }
+        }
+    }
+
+    private String getAPIDefinition(Connection connection, int apiID) throws SQLException {
+        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                                                            ResourceConstants.ResourceType.SWAGGER.toString());
+        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
+                "RESOURCE_TYPE_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiID);
+            statement.setInt(2, resourceTypeID);
+            statement.execute();
+
+            try (ResultSet rs =  statement.getResultSet()) {
+                if (rs.next()) {
+                    try {
+                        return IOUtils.toString(rs.getBlob("RESOURCE_BINARY_VALUE").
+                                getBinaryStream(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        throw new SQLException("IO Error while reading API definition", e);
+                    }
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+        final String query = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getInt("POLICY_ID");
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private String getAPIThrottlePolicyName(Connection connection, int policyID) throws SQLException {
+        final String query = "SELECT NAME FROM AM_API_THROTTLE_POLICY WHERE POLICY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, policyID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("NAME");
+                }
+            }
+        }
+
+        return "";
+    }
 }
