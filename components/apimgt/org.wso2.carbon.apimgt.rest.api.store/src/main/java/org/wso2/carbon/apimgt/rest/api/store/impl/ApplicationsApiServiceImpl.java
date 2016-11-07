@@ -202,7 +202,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             //validate the tier specified for the application
             String tierName = body.getThrottlingTier();
