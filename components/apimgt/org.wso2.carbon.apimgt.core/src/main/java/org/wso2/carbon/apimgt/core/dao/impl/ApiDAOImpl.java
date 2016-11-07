@@ -529,7 +529,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs =  statement.getResultSet()) {
-                while (rs.next()) {
+                if (rs.next()) {
                     try {
                         return IOUtils.toString(rs.getBlob("RESOURCE_BINARY_VALUE").
                                 getBinaryStream(), StandardCharsets.UTF_8);
