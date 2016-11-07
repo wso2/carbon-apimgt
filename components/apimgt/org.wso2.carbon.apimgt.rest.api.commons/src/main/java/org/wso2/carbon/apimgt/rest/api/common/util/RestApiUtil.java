@@ -81,7 +81,7 @@ public class RestApiUtil {
         //            String errorMsg = "Unable to get groupIds of user " + username;
         //            handleInternalServerError(errorMsg, e, log);
         return "";
-        //        }
+        //       }
     }
 
     /**
