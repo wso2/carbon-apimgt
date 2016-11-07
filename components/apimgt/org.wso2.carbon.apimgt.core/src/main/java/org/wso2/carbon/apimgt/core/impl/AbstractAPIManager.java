@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIManager;

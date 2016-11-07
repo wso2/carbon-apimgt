@@ -14,10 +14,10 @@
  *   limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager;
+package org.wso2.carbon.apimgt.lifecycle.manager.core;
 
 
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 
 import java.util.Map;
 

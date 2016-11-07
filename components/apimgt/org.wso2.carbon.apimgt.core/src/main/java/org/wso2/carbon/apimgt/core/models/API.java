@@ -23,6 +23,8 @@ package org.wso2.carbon.apimgt.core.models;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Representation of an API object
@@ -261,7 +263,11 @@ public final class API {
     }
 
     public void setId(String id) {
-        this.id = id;
+        if (id != null && !Objects.equals(id, "")) {
+            this.id = id;
+        } else {
+            this.id = UUID.randomUUID().toString();
+        }
     }
 
     public String getLifeCycleStatus() {

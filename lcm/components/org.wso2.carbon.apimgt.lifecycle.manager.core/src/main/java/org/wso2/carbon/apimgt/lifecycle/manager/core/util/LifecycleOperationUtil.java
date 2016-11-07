@@ -16,22 +16,22 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.lifecycle.manager.util;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.util;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.wso2.carbon.apimgt.lifecycle.manager.Executor;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.AvailableTransitionBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CheckItemBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.CustomCodeBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.InputBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.beans.PermissionBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.constants.LifecycleConstants;
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleEventManager;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.AvailableTransitionBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CustomCodeBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.PermissionBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.constants.LifecycleConstants;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleEventManager;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleStateBean;
 import org.xml.sax.SAXException;

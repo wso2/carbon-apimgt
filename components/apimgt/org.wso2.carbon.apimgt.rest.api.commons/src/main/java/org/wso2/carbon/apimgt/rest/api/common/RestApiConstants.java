@@ -62,4 +62,6 @@ public class RestApiConstants {
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
+    public static final String RESOURCE_PATH_APIS = "/apis";
+
 }

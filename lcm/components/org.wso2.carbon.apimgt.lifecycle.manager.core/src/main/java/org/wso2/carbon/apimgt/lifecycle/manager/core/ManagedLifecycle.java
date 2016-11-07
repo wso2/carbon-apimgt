@@ -15,10 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager;
+package org.wso2.carbon.apimgt.lifecycle.manager.core;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 /**
  * This is the base ManageLifecycle Interface. If users need to extend life cycle management

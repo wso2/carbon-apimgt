@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.beans;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.beans;
 
 /**
  * This bean holds the data for custom executors for a particular lifecycle state which are defined in lifecycle

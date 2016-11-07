@@ -15,11 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.impl;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.impl;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
-import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleOperationUtil;
 
 import java.util.List;
 

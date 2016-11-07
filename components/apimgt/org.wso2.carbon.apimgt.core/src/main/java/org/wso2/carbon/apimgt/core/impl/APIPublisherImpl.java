@@ -141,13 +141,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public void addAPI(API api) throws APIManagementException {
+    public API addAPI(API api) throws APIManagementException {
+        API createdAPI = null;
         try {
-            getApiDAO().addAPI(api);
+            createdAPI =  getApiDAO().addAPI(api);
             APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
         }
+        return createdAPI;
     }
 
     /**

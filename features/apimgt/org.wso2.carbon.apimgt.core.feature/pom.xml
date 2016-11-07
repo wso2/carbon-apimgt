@@ -56,10 +56,104 @@
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-base</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.h2database.wso2</groupId>
+            <artifactId>h2-database-engine</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.osgi</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean_target</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>clean-apim-h2-database</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete file="resources/database/AM_DB.h2.db" />
+                                <delete file="resources/database/AM_DB.trace.db" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create-carbon-apim-database</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <path id="h2.classpath">
+                                    <path refid="maven.compile.classpath" />
+                                </path>
+                                <echo message="########### Creating Carbon APIM Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                    <classpath>
+                                        <path refid="h2.classpath" />
+                                    </classpath>
+                                    <fileset file="${basedir}/resources/dbscripts/h2.sql" />
+                                </sql>
+                                <echo message="##################### END ########################" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prefilter-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>dbscripts/**</include>
+                                        <include>database/**</include>
+                                        <include>p2.inf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.wso2.carbon.maven</groupId>
                 <artifactId>carbon-feature-plugin</artifactId>
