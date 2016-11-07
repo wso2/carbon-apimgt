@@ -72,17 +72,20 @@ public class MappingUtil {
      * @return
      */
     public static API toAPI(APIDTO apidto) {
-        API api = new API(apidto.getProvider(), apidto.getVersion(), apidto.getName());
-        api.setId(apidto.getId());
-        api.setContext(apidto.getContext());
-        api.setDescription(apidto.getDescription());
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
         businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
         businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
         businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
-        api.setBusinessInformation(businessInformation);
+
+        API api = new API.Builder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+                id(apidto.getId()).
+                context(apidto.getContext()).
+                description(apidto.getDescription()).
+                businessInformation(businessInformation).
+                build();
+
         return api;
     }
 
