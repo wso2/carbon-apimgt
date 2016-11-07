@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.util;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -26,8 +26,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.wso2.carbon.apimgt.lifecycle.manager.constants.LifecycleConstants;
-import org.wso2.carbon.apimgt.lifecycle.manager.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.constants.LifecycleConstants;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.kernel.utils.Utils;
 import org.xml.sax.SAXException;
 

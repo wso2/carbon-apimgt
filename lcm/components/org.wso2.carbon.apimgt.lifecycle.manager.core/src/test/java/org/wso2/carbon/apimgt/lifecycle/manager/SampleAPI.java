@@ -17,7 +17,8 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.util.HashMap;
 import java.util.Map;

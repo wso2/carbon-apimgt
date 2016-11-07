@@ -81,7 +81,7 @@ public interface APIPublisher extends APIManager {
      * @param api API
      * @throws APIManagementException if failed to add API
      */
-    void addAPI(API api) throws APIManagementException;
+    API addAPI(API api) throws APIManagementException;
 
     /**
      * @param api

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.lifecycle.manager.internal;
+package org.wso2.carbon.apimgt.lifecycle.manager.core.internal;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -25,11 +25,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.LifecycleConfigBuilder;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.config.model.LifecycleConfig;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.exception.LifecycleManagerDatabaseException;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.utils.LifecycleMgtDBUtil;
-import org.wso2.carbon.apimgt.lifecycle.manager.util.LifecycleUtils;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 
 /**

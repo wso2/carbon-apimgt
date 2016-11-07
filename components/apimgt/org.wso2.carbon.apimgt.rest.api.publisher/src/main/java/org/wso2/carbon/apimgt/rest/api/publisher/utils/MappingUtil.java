@@ -23,16 +23,19 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 
@@ -55,6 +58,12 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
+        apidto.setIsDefaultVersion(api.isDefaultVersion());
+        apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
+        apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
+        apidto.setCacheTimeout(api.getCacheTimeout());
+        apidto.setVisibleRoles(api.getVisibleRoles());
+        apidto.setStatus(api.getLifeCycleStatus());
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -62,6 +71,15 @@ public class MappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(businessInformation.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(businessInformation.getTechnicalOwnerEmail());
         apidto.setBusinessInformation(apiBusinessInformationDTO);
+        CorsConfiguration corsConfiguration = api.getCorsConfiguration();
+        API_corsConfigurationDTO apiCorsConfigurationDTO = new API_corsConfigurationDTO();
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAllowCredentials());
+        apiCorsConfigurationDTO.setAccessControlAllowHeaders(corsConfiguration.getAllowHeaders());
+        apiCorsConfigurationDTO.setAccessControlAllowMethods(corsConfiguration.getAllowMethods());
+        apiCorsConfigurationDTO.setAccessControlAllowOrigins(corsConfiguration.getAllowOrigins());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isEnabled());
+        apidto.setCorsConfiguration(apiCorsConfigurationDTO);
+
         return apidto;
     }
 
@@ -79,11 +97,26 @@ public class MappingUtil {
         businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
         businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
 
-        API api = new API.Builder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+        API_corsConfigurationDTO apiCorsConfigurationDTO = apidto.getCorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
+        corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
+        corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
+        corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
+        corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
+
+		API api = new API.Builder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
+                lifeCycleStatus(apidto.getStatus()).
+                visibleRoles(apidto.getVisibleRoles()).
+                visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
+                cacheTimeout(apidto.getCacheTimeout()).
+                isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
+                policies(apidto.getTiers()).
                 businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
                 build();
 
         return api;
