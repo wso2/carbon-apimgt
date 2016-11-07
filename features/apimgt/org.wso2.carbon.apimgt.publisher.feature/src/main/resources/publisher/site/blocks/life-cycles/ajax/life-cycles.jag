@@ -65,16 +65,7 @@ if(jagg.isCSRFTokenValid())
         var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),
         															version:request.getParameter("version")}).lcs;
         var wfdto = mod.getAPILCWorkflowStatus(apiData);
-
-        var jsonResponse = {};
-        jsonResponse.workflowResponse = {};
-        jsonResponse.stateChangeStatus = result.getStateChangeStatus();
-        jsonResponse.workflowResponse.jsonPayload = result.getWorkflowResponse().getJSONPayload();
-
-        var apiWFStatus = null;
-        if(wfdto != null && wfdto.status != null){
-            apiWFStatus = wfdto.status;
-        } 
+        
 
      	if (result.error == true) {
             obj = {
@@ -82,6 +73,16 @@ if(jagg.isCSRFTokenValid())
                 message:result.message
             };
         } else {
+
+            var jsonResponse = {};
+            jsonResponse.workflowResponse = {};
+            jsonResponse.stateChangeStatus = result.getStateChangeStatus();
+            jsonResponse.workflowResponse.jsonPayload = result.getWorkflowResponse().getJSONPayload();
+
+            var apiWFStatus = null;
+            if(wfdto != null && wfdto.status != null){
+                apiWFStatus = wfdto.status;
+            } 
             obj = {
                 error:false,
                 lcs:lcs,
@@ -90,7 +91,7 @@ if(jagg.isCSRFTokenValid())
             }
         }
         print(obj);
-
+        
     } else if (action === "isAPIOlderVersionExist") {
         mod = jagg.module("api");
         var apiData = {};
