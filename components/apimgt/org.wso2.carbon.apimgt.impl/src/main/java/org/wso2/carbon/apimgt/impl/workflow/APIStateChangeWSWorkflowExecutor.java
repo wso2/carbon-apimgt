@@ -204,7 +204,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
                     log.error(errorMsg, e);
                     throw new WorkflowException(errorMsg, e);
                 } catch (IOException e) {
-                    String errorMsg = "Error while connecting to the external service";
+                    String errorMsg = "Error while connecting to the BPMN process server from the WorkflowExecutor.";
                     log.error(errorMsg, e);
                     throw new WorkflowException(errorMsg, e);
                 } finally {
@@ -364,7 +364,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
             log.error("Error while creating the http client", e);
             throw new WorkflowException("Error while creating the http client", e);
         } catch (IOException e) {
-            log.error("Error while connecting to the external service", e);
+            log.error("Error while connecting to the BPMN process server from the WorkflowExecutor.", e);
             throw new WorkflowException("Error while connecting to the external service", e);
         } catch (ParseException e) {
             log.error("Error while parsing response from BPS server", e);
