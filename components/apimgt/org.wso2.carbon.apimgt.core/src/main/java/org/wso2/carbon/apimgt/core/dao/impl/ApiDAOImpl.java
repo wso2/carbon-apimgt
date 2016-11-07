@@ -324,11 +324,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Get swagger definition of a given API
      *
      * @param apiID The UUID of the respective API
-     * @return Swagger definition stream
+     * @return Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public OutputStream getSwaggerDefinition(String apiID) throws SQLException {
+    public String getSwaggerDefinition(String apiID) throws SQLException {
         return null;
     }
 
@@ -336,11 +336,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Update swagger definition of a given API
      *
      * @param apiID             The UUID of the respective API
-     * @param swaggerDefinition Swagger definition stream
+     * @param swaggerDefinition Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws SQLException {
+    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException {
 
     }
 
