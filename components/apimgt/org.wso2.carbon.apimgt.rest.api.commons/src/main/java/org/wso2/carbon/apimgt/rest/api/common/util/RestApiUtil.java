@@ -49,6 +49,9 @@ public class RestApiUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
 
+    /**
+     * Get the current logged in user's username
+     */
     public static String getLoggedInUsername() {
         CarbonContext carbonContext = CarbonContext.getCurrentContext();
         Principal principal = carbonContext.getUserPrincipal();
