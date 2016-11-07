@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -30,9 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-
-import static org.mockito.Mockito.mock;
 
 
 public class ApiDAOImplIT {
@@ -58,8 +57,8 @@ public class ApiDAOImplIT {
 
     @Test
     public void testAddAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
-        API api = new API("admin", "1.0.0", "WeatherAPI");
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        API api = SampleAPICreator.createDefaultAPI();
 
         API createdAPI = apiDAO.addAPI(api);
 
@@ -70,9 +69,8 @@ public class ApiDAOImplIT {
 
     @Test
     public void testGetAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
-        API api = new API("admin", "1.0.0", "WeatherAPI");
-        api.setId(UUID.randomUUID().toString());
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        API api = SampleAPICreator.createDefaultAPI();
 
         apiDAO.addAPI(api);
 
@@ -88,8 +86,8 @@ public class ApiDAOImplIT {
 
     @Test
     public void testDeleteAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements(), mock(Logger.class));
-        API api = new API("admin", "1.0.0", "WeatherAPI");
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        API api = SampleAPICreator.createDefaultAPI();
 
         apiDAO.addAPI(api);
 

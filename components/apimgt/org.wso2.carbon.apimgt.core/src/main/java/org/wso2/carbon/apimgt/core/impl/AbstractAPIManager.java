@@ -39,7 +39,7 @@ import java.util.Set;
  */
 public abstract class AbstractAPIManager implements APIManager {
 
-    private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractAPIManager.class);
 
     private ApiDAO apiDAO;
     private ApplicationDAO applicationDAO;

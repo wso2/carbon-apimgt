@@ -70,6 +70,26 @@ public interface ApiDAO {
      */
     APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
                                          List<String> roles) throws SQLException;
+
+    /**
+     * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
+     * exists
+     * @param providerName Name of API provider/publisher
+     * @param apiName Name of API
+     * @param version version of the API
+     * @return true if providerName, apiName, version combination already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    boolean isAPIExists(String providerName, String apiName, String version) throws SQLException;
+
+    /**
+     * Checks if a given API Context already exists
+     * @param contextName Name of API Context
+     * @return true if contextName already exists else false
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    boolean isAPIContextExists(String contextName) throws SQLException;
+
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added

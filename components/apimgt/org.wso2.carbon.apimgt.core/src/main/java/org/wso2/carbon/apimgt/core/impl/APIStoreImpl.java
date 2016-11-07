@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
-    private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
