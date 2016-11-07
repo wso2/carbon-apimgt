@@ -120,20 +120,20 @@ public interface ApiDAO {
     /**
      * Get swagger definition of a given API
      * @param apiID The UUID of the respective API
-     * @return Swagger definition stream
+     * @return Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    OutputStream getSwaggerDefinition(String apiID) throws SQLException;
+    String getSwaggerDefinition(String apiID) throws SQLException;
 
     /**
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
-     * @param swaggerDefinition Swagger definition stream
+     * @param swaggerDefinition Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws SQLException;
+    void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException;
 
     /**
      * Get image of a given API

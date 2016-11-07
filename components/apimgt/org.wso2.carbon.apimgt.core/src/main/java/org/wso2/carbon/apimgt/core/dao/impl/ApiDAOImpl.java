@@ -110,7 +110,7 @@ public class ApiDAOImpl implements ApiDAO {
                     businessInformation(businessInformation).
                     lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
                     lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                    //apiPolicy(rs.getInt("API_POLICY_ID")).
+                    apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                     corsConfiguration(corsConfiguration).
                     createdBy(rs.getString("CREATED_BY")).
                     createdTime(rs.getTimestamp("CREATED_TIME")).
@@ -324,11 +324,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Get swagger definition of a given API
      *
      * @param apiID The UUID of the respective API
-     * @return Swagger definition stream
+     * @return Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public OutputStream getSwaggerDefinition(String apiID) throws SQLException {
+    public String getSwaggerDefinition(String apiID) throws SQLException {
         return null;
     }
 
@@ -336,11 +336,11 @@ public class ApiDAOImpl implements ApiDAO {
      * Update swagger definition of a given API
      *
      * @param apiID             The UUID of the respective API
-     * @param swaggerDefinition Swagger definition stream
+     * @param swaggerDefinition Swagger definition String
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, InputStream swaggerDefinition) throws SQLException {
+    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException {
 
     }
 
@@ -521,9 +521,6 @@ public class ApiDAOImpl implements ApiDAO {
     private String getAPIDefinition(Connection connection, int apiID) throws SQLException {
         int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
                                                             ResourceConstants.ResourceType.SWAGGER.toString());
-
-        String apiDefinition = "";
-
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -532,9 +529,9 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs =  statement.getResultSet()) {
-                while (rs.next()) {
+                if (rs.next()) {
                     try {
-                        apiDefinition = IOUtils.toString(rs.getBlob("RESOURCE_BINARY_VALUE").
+                        return IOUtils.toString(rs.getBlob("RESOURCE_BINARY_VALUE").
                                 getBinaryStream(), StandardCharsets.UTF_8);
                     } catch (IOException e) {
                         throw new SQLException("IO Error while reading API definition", e);
@@ -543,7 +540,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
 
-        return apiDefinition;
+        return "";
     }
 
     private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
@@ -560,5 +557,21 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return -1;
+    }
+
+    private String getAPIThrottlePolicyName(Connection connection, int policyID) throws SQLException {
+        final String query = "SELECT NAME FROM AM_API_THROTTLE_POLICY WHERE POLICY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, policyID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("NAME");
+                }
+            }
+        }
+
+        return "";
     }
 }
