@@ -82,7 +82,7 @@ $( document ).ready(function() {
 
     function changeSelectedAlertType(alertType) {
         if(alertType != null){
-            if(alertType == "Unseen Source IP Address"){
+            if(alertType == "Unseen Source IP Access"){
                 $('#alertSelected').val(2).change();
             } else if(alertType == "Abnormal Request Count"){
                 $('#alertSelected').val(3).change();
@@ -96,9 +96,9 @@ $( document ).ready(function() {
                 $('#alertSelected').val(7).change();
             } else if(alertType == "Abnormal Backend Time"){
                 $('#alertSelected').val(8).change();
-            } else if(alertType == "Availability of APIs"){
+            } else if(alertType == "Health Availability"){
                 $('#alertSelected').val(9).change();
-            } else if(alertType == "Abnormal Resource Access Pattern"){
+            } else if(alertType == "Abnormal Resource Access"){
                 $('#alertSelected').val(10).change();
             }
         }
