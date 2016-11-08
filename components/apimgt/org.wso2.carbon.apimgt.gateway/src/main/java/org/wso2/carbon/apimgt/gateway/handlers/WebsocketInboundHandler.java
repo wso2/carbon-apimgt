@@ -122,6 +122,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 			}
 		} else if (msg instanceof WebSocketFrame) {
 			boolean isThrottledOut = doThrottle(ctx, (WebSocketFrame) msg);
+			String clientIp = ctx.channel().remoteAddress().toString();
 
 			if (isThrottledOut) {
 				ctx.fireChannelRead(msg);
@@ -129,7 +130,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 				ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
 			}
 
-			publishRequestEvent(infoDTO, ctx.channel().remoteAddress().toString(), isThrottledOut);
+			// publish analytics events if analytics is enabled
+			if (APIUtil.isAnalyticsEnabled()) {
+				publishRequestEvent(infoDTO, clientIp, isThrottledOut);
+			}
 		}
 	}
 
