@@ -23,7 +23,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
@@ -89,7 +88,7 @@ public class MappingUtil {
      * @param apidto
      * @return
      */
-    public static API toAPI(APIDTO apidto) {
+    public static API.APIBuilder toAPI(APIDTO apidto) {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
         businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
@@ -105,7 +104,7 @@ public class MappingUtil {
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
 
-		API api = new API.Builder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+		API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
@@ -116,10 +115,8 @@ public class MappingUtil {
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getTiers()).
                 businessInformation(businessInformation).
-                corsConfiguration(corsConfiguration).
-                build();
-
-        return api;
+                corsConfiguration(corsConfiguration);
+        return apiBuilder;
     }
 
     /**

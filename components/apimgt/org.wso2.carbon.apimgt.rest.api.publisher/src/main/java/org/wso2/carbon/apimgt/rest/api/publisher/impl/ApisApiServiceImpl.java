@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
@@ -145,8 +146,28 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            API api = apiPublisher.updateAPI(MappingUtil.toAPI(body));
+            APIDTO apidto = null;
+            if (api != null){
+
+                apidto = MappingUtil.toAPIDto(api);
+            }
+            return Response.ok().entity(apidto).build();
+        } catch (APIManagementException e) {
+
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdSwaggerGet(String apiId
@@ -253,9 +274,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String contentType
  ) throws NotFoundException {
      String username = "";
-        API api = MappingUtil.toAPI(body);
+        API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
-            API returnAPI = RestAPIPublisherUtil.getApiPublisher(username).addAPI(api);
+            API returnAPI = RestAPIPublisherUtil.getApiPublisher(username).addAPI(apiBuilder);
           URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
             return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {
