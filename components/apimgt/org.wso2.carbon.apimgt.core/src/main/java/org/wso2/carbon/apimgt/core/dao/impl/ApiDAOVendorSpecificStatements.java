@@ -24,9 +24,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
  *  Interface for getting SQL Statement strings. Implementation of the interface could return different values based
  *  on DB vendor type being used
  */
-public interface SQLStatements {
-    String getIsApiExists();
-    String getAddApi();
-    String getGetApi();
-    String getDeleteApi();
+public interface ApiDAOVendorSpecificStatements {
+    String getAPIsForRoles(int numberOfRoles);
+    String searchAPIsForRoles();
 }

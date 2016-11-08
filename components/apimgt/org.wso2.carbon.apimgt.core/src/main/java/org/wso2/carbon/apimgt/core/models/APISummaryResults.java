@@ -23,34 +23,54 @@ package org.wso2.carbon.apimgt.core.models;
 import java.util.List;
 
 /**
- * Matching results related to API summary details
+ * Matching results related to API summary detail. Only immutable instances of this class
+ * can be created via the provided inner static {@code Builder} class which implements the builder pattern
+ * as outlined in "Effective Java 2nd Edition by Joshua Bloch(Item 2)"
  */
 public final class APISummaryResults {
-    private List<APISummary> apiSummaryList;
-    private boolean isMoreResultsExist;
-    private int nextOffset;
+    private final List<APISummary> apiSummaryList;
+    private final boolean isMoreResultsExist;
+    private final int nextOffset;
+
+    private APISummaryResults(Builder builder) {
+        apiSummaryList = builder.apiSummaryList;
+        isMoreResultsExist = builder.isMoreResultsExist;
+        nextOffset = builder.nextOffset;
+    }
 
     public List<APISummary> getApiSummaryList() {
         return apiSummaryList;
-    }
-
-    public void setApiSummaryList(List<APISummary> apiSummaryList) {
-        this.apiSummaryList = apiSummaryList;
     }
 
     public boolean isMoreResultsExist() {
         return isMoreResultsExist;
     }
 
-    public void setMoreResultsExist(boolean moreResultsExist) {
-        isMoreResultsExist = moreResultsExist;
-    }
-
     public int getNextOffset() {
         return nextOffset;
     }
 
-    public void setNextOffset(int nextOffset) {
-        this.nextOffset = nextOffset;
+    /**
+     * {@code APISummaryResults} builder static inner class.
+     */
+    public static final class Builder {
+        private List<APISummary> apiSummaryList;
+        private boolean isMoreResultsExist;
+        private int nextOffset;
+
+        public Builder(List<APISummary> apiSummaryList, boolean isMoreResultsExist, int nextOffset) {
+            this.apiSummaryList = apiSummaryList;
+            this.isMoreResultsExist = isMoreResultsExist;
+            this.nextOffset = nextOffset;
+        }
+
+        /**
+         * Returns a {@code APISummaryResults} built from the parameters previously set.
+         *
+         * @return a {@code APISummaryResults} built with parameters of this {@code APISummaryResults.Builder}
+         */
+        public APISummaryResults build() {
+            return new APISummaryResults(this);
+        }
     }
 }

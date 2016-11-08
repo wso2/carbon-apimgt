@@ -23,5 +23,24 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 /**
  * SQL Statements that are common to H2 and MySQL DBs.
  */
-public class H2MySQLStatements extends CommonStatements {
+public class H2MySQLStatements implements ApiDAOVendorSpecificStatements {
+
+    private static final String API_SELECT = "SELECT a.API_ID, a.PROVIDER, a.NAME, a.CONTEXT, a.VERSION, " +
+            "a.IS_DEFAULT_VERSION, a.DESCRIPTION, a.VISIBILITY, a.IS_RESPONSE_CACHED, a.CACHE_TIMEOUT, a.UUID, " +
+            "a.TECHNICAL_OWNER, a.TECHNICAL_EMAIL, a.BUSINESS_OWNER, a.BUSINESS_EMAIL, a.LIFECYCLE_INSTANCE_ID, " +
+            "a.CURRENT_LC_STATUS, a.API_POLICY_ID, a.CORS_ENABLED, a.CORS_ALLOW_ORIGINS, a.CORS_ALLOW_CREDENTIALS, " +
+            "a.CORS_ALLOW_HEADERS, a.CORS_ALLOW_METHODS, a.CREATED_BY, a.CREATED_TIME, a.LAST_UPDATED_TIME " +
+            "FROM AM_API a";
+
+    @Override
+    public String getAPIsForRoles(int numberOfRoles) {
+        return API_SELECT + ", AM_API_VISIBLE_ROLES b WHERE a.API_ID = b.API_ID AND " +
+                "b.ROLE IN(" + DAOUtil.getParameterString(numberOfRoles) + ") ORDER BY a.CREATED_TIME " +
+                "LIMIT ?,?";
+    }
+
+    @Override
+    public String searchAPIsForRoles() {
+        return null;
+    }
 }

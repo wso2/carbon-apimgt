@@ -25,6 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Provides Utility functionality required by the DAO layer
@@ -54,6 +57,11 @@ public class DAOUtil {
         }
 
         throw new SQLException("Data source is not configured properly.");
+    }
+
+    static String getParameterString(int numberOfParameters) {
+        List<String> questionMarks = new ArrayList<>(Collections.nCopies(numberOfParameters, "?"));
+        return String.join(",", questionMarks);
     }
 }
 

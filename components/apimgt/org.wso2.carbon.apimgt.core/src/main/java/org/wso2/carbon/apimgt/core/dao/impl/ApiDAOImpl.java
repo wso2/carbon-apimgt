@@ -20,14 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -48,10 +44,10 @@ import javax.ws.rs.core.MediaType;
  */
 public class ApiDAOImpl implements ApiDAO {
 
-    //private final SQLStatements sqlStatements;
+    private final ApiDAOVendorSpecificStatements sqlStatements;
 
-    ApiDAOImpl(SQLStatements sqlStatements) {
-        //this.sqlStatements = sqlStatements;
+    ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
+        this.sqlStatements = sqlStatements;
     }
 
     /**
@@ -64,64 +60,30 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws SQLException {
-        API api = null;
-
-        final String getAPIQuery = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
+        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, API_POLICY_ID, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
                 "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(getAPIQuery)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
 
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    BusinessInformation businessInformation = new BusinessInformation();
-                    businessInformation.setTechnicalOwner(rs.getString("TECHNICAL_OWNER"));
-                    businessInformation.setTechnicalOwnerEmail(rs.getString("TECHNICAL_EMAIL"));
-                    businessInformation.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
-                    businessInformation.setBusinessOwnerEmail(rs.getString("BUSINESS_EMAIL"));
-
-                    CorsConfiguration corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setEnabled(rs.getBoolean("CORS_ENABLED"));
-                    corsConfiguration.setAllowOrigins(Arrays.asList(rs.getString("CORS_ALLOW_ORIGINS").
-                            split("\\s*,\\s*")));
-                    corsConfiguration.setAllowCredentials(rs.getBoolean("CORS_ALLOW_CREDENTIALS"));
-                    corsConfiguration.setAllowHeaders(Arrays.asList(rs.getString("CORS_ALLOW_HEADERS").
-                            split("\\s*,\\s*")));
-                    corsConfiguration.setAllowMethods(Arrays.asList(rs.getString("CORS_ALLOW_METHODS").
-                            split("\\s*,\\s*")));
-
-                    int apiPrimaryKey = rs.getInt("API_ID");
-
-                    api = new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
-                    id(rs.getString("UUID")).
-                    context(rs.getString("CONTEXT")).
-                    isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
-                    description(rs.getString("DESCRIPTION")).
-                    visibility(API.Visibility.valueOf(rs.getString("VISIBILITY"))).
-                    visibleRoles(getVisibleRoles(connection, apiPrimaryKey)).
-                    isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
-                    cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
-                    tags(getTags(connection, apiPrimaryKey)).
-                    apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
-                    businessInformation(businessInformation).
-                    lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                    lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                    apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
-                    corsConfiguration(corsConfiguration).
-                    createdBy(rs.getString("CREATED_BY")).
-                    createdTime(rs.getTimestamp("CREATED_TIME")).
-                    lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
-                    build();
-                }
-
-            }
+            return constructAPIFromResultSet(connection, statement);
         }
+    }
 
-        return api;
+    /**
+     * Retrieve a given instance of an APISummary object
+     *
+     * @param apiID The UUID that uniquely identifies an API
+     * @return valid {@link APISummary} object or null
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummary getAPISummary(String apiID) throws SQLException {
+        return null;
     }
 
     /**
@@ -135,8 +97,51 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles)
                                                                             throws SQLException {
+        final String query = sqlStatements.getAPIsForRoles(roles.size());
+
+        try (Connection connection = DAOUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            int numberOfParams = roles.size();
+
+            for (int i = 0; i < numberOfParams; ++i) {
+                statement.setString(i + 1, roles.get(i));
+            }
+
+            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
+
+            statement.setInt(++numberOfParams, offset);
+            statement.setInt(++numberOfParams, rowCount);
+
+            List<APISummary> apiSummaryList = constructAPISummaryFromResultSet(connection, statement);
+
+            boolean isMoreResultsExist = false;
+
+            if (apiSummaryList.size() == rowCount) { // More results exist
+                apiSummaryList.remove(rowCount - 1); // Remove additional result that was not asked for
+                isMoreResultsExist = true;
+            }
+
+            return new APISummaryResults.Builder(apiSummaryList, isMoreResultsExist,
+                                                    offset + apiSummaryList.size()).build();
+        }
+    }
+
+    /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     * doing a permission check to ensure results returned are only those that match the list of roles provided
+     *
+     * @param offset       The number of results from the beginning that is to be ignored
+     * @param limit        The maximum number of results to be returned after the offset
+     * @param providerName A given API Provider
+     * @return {@link APISummaryResults} matching results
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
         return null;
     }
 
@@ -419,6 +424,72 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public DocumentInfo getDocumentInfo(String apiID, String docID) throws SQLException {
         return null;
+    }
+
+    private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {
+        try (ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                BusinessInformation businessInformation = new BusinessInformation();
+                businessInformation.setTechnicalOwner(rs.getString("TECHNICAL_OWNER"));
+                businessInformation.setTechnicalOwnerEmail(rs.getString("TECHNICAL_EMAIL"));
+                businessInformation.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
+                businessInformation.setBusinessOwnerEmail(rs.getString("BUSINESS_EMAIL"));
+
+                CorsConfiguration corsConfiguration = new CorsConfiguration();
+                corsConfiguration.setEnabled(rs.getBoolean("CORS_ENABLED"));
+                corsConfiguration.setAllowOrigins(Arrays.asList(rs.getString("CORS_ALLOW_ORIGINS").
+                        split("\\s*,\\s*")));
+                corsConfiguration.setAllowCredentials(rs.getBoolean("CORS_ALLOW_CREDENTIALS"));
+                corsConfiguration.setAllowHeaders(Arrays.asList(rs.getString("CORS_ALLOW_HEADERS").
+                        split("\\s*,\\s*")));
+                corsConfiguration.setAllowMethods(Arrays.asList(rs.getString("CORS_ALLOW_METHODS").
+                        split("\\s*,\\s*")));
+
+                int apiPrimaryKey = rs.getInt("API_ID");
+
+                return new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
+                        id(rs.getString("UUID")).
+                        context(rs.getString("CONTEXT")).
+                        isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
+                        description(rs.getString("DESCRIPTION")).
+                        visibility(API.Visibility.valueOf(rs.getString("VISIBILITY"))).
+                        visibleRoles(getVisibleRoles(connection, apiPrimaryKey)).
+                        isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
+                        cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
+                        tags(getTags(connection, apiPrimaryKey)).
+                        apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
+                        businessInformation(businessInformation).
+                        lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
+                        apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
+                        corsConfiguration(corsConfiguration).
+                        createdBy(rs.getString("CREATED_BY")).
+                        createdTime(rs.getTimestamp("CREATED_TIME")).
+                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
+                        build();
+            }
+        }
+
+        return null;
+    }
+
+    private List<APISummary> constructAPISummaryFromResultSet(Connection connection, PreparedStatement statement)
+                                                                                                throws SQLException {
+        List<APISummary> apiSummaryList = new ArrayList<>();
+        try (ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                APISummary apiSummary = new APISummary.Builder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                        rs.getString("VERSION")).
+                        id(rs.getString("UUID")).
+                        context(rs.getString("CONTEXT")).
+                        description(rs.getString("DESCRIPTION")).
+                        status(rs.getString("CURRENT_LC_STATUS")).build();
+
+                apiSummaryList.add(apiSummary);
+            }
+        }
+
+        return apiSummaryList;
     }
 
     private void addTags(Connection connection, int apiID, List<String> tags) throws SQLException {
