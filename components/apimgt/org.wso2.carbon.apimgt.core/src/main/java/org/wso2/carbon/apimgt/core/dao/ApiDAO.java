@@ -22,11 +22,11 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.models.*;
 
+import javax.annotation.CheckForNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
-import javax.annotation.CheckForNull;
 
 /**
  * Provides access to API data layer
@@ -161,7 +161,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    OutputStream getImage(String apiID) throws SQLException;
+    InputStream getImage(String apiID) throws SQLException;
 
     /**
      * Update swagger definition of a given API
@@ -170,7 +170,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    void updateImage(String apiID, InputStream image) throws SQLException;
+    void updateImage(String apiID, OutputStream image) throws SQLException;
 
     /**
      * Change the lifecycle status of a given API
@@ -207,12 +207,48 @@ public interface ApiDAO {
 
     /**
      *
-     * @param apiID The UUID of the respective API
      * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} Document Info object
      * @throws SQLException if error occurs while accessing data layer
      */
-    DocumentInfo getDocumentInfo(String apiID, String docID) throws SQLException;
+    DocumentInfo getDocumentInfo(String docID) throws SQLException;
 
+    /**
+     *
+     * @param docID The UUID of the respective Document
+     * @return {@link InputStream} Document Info object
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    InputStream getDocumentContent(String docID) throws SQLException;
+
+    /**
+     * Attach Documentation (without content) to an API
+     *
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws SQLException;
+
+    /**
+     * Add a document (of source type FILE) with a file
+     *
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
+     * @param filename      name of the file
+     * @param content       content of the file as an Input Stream
+     * @param contentType   content type of the file
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
+                                  String contentType) throws SQLException;
+
+    /**
+     * Removes a given documentation
+     *
+     * @param id   Document Id
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    void removeDocumentation(String id) throws SQLException;
 
 }

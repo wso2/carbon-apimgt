@@ -23,9 +23,20 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
-import java.io.*;
+import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,12 +45,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.CheckForNull;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -359,7 +365,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public OutputStream getImage(String apiID) throws SQLException {
+    public InputStream getImage(String apiID) throws SQLException {
         return null;
     }
 
@@ -371,7 +377,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void updateImage(String apiID, InputStream image) throws SQLException {
+    public void updateImage(String apiID, OutputStream image) throws SQLException {
 
     }
 
@@ -418,14 +424,64 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @param apiID The UUID of the respective API
      * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} Document Info object
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public DocumentInfo getDocumentInfo(String apiID, String docID) throws SQLException {
+    public DocumentInfo getDocumentInfo(String docID) throws SQLException {
+        //todo:implement
         return null;
+    }
+
+    /**
+     * @param docID The UUID of the respective Document
+     * @return {@link InputStream} Document Info object
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public InputStream getDocumentContent(String docID) throws SQLException {
+        //todo:implement
+        return null;
+    }
+
+    /**
+     * Attach Documentation (without content) to an API
+     *
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws SQLException {
+        //todo:implement
+    }
+
+    /**
+     * Add a document (of source type FILE) with a file
+     *
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
+     * @param filename      name of the file
+     * @param content       content of the file as an Input Stream
+     * @param contentType   content type of the file
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
+                                         String contentType) throws SQLException {
+        //todo:implement
+    }
+
+    /**
+     * Removes a given documentation
+     *
+     * @param id Document Id
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void removeDocumentation(String id) throws SQLException {
+        //todo:implement
     }
 
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {

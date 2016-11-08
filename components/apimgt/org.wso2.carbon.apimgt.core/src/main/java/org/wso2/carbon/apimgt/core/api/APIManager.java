@@ -22,7 +22,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -96,5 +99,34 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getSwagger20Definition(String api) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of documentation attached to a particular API
+     *
+     * @param apiId UUID of API
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @return {@link DocumentInfoResults} Document list
+     * @throws APIManagementException if it failed to fetch Documentations
+     */
+    DocumentInfoResults getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException;
+
+    /**
+     * Get a summary of documentation by doc Id
+     *
+     * @param docId Document ID
+     * @return {@link DocumentInfo} Documentation summary
+     * @throws APIManagementException if it failed to fetch Documentation
+     */
+    DocumentInfo getDocumentationSummary(String docId) throws APIManagementException;
+
+    /**
+     * This method used to get the content of a documentation
+     *
+     * @param docId Document ID
+     * @return {@link InputStream} Input stream for document content
+     * @throws APIManagementException if the requested documentation content is not available
+     */
+    InputStream getDocumentationContent(String docId) throws APIManagementException;
 
 }
