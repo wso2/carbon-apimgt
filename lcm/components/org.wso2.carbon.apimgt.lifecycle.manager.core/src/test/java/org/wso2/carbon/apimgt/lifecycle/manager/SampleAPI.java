@@ -79,7 +79,7 @@ public class SampleAPI implements ManagedLifecycle {
     }*/
 
     @Override
-    public void dissociateLifecycle() {
+    public void dissociateLifecycle(String lcName) {
         this.lifecycleState = null;
         // Implement logic to remove persisted lifecycle id in API side.
     }
@@ -91,9 +91,14 @@ public class SampleAPI implements ManagedLifecycle {
         // Implement logic to persist lifecycle id in API side as well
     }
 
-    @Override
+    /*@Override
     public String getLifecycleId(String lcName) {
         return lifecycleIdMap.get(lcName);
+    }*/
+
+    @Override
+    public void setLifecycleStateInfo(LifecycleState lifecycleState) {
+        this.lifecycleState = lifecycleState;
     }
 
 }
