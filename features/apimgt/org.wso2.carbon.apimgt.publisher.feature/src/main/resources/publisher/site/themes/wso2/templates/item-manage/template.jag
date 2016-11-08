@@ -335,7 +335,7 @@
                                                         for (var i = 0; i < tiers.length; i++) {
                                                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
                                                         %>
-                                                        <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                                                        <label id="<%=tiers[i].tierName%>" class="tier_checkbox_label checkbox add-padding-bottom-1x">
                                                                 <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
                                                                 <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
@@ -697,8 +697,12 @@
                                 <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("Save")%></button>
                                 <% if(outputs.isPermitted) {
                                    var status=outputs.lcStatus;
+                                   var wfStatus = "";
+                                   if(outputs.wfStatus != null && outputs.wfStatus.status != null){
+                                     wfStatus = outputs.wfStatus.status;               
+                                   }
                                 %>
-                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
+                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
                                      <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
                                      <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
@@ -737,6 +741,25 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+
+
+        <div id="waiting-approval" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+                <h3><%=i18n.localize("approval waiting topic")%></h3>
+              </div>
+              <div class="modal-body">
+                <p>
+                    <%=i18n.localize("approval waiting message")%>
+                </p>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
 
 
     </div>
@@ -843,6 +866,30 @@
 </script>
 
 <script>
+    var setIntervalId;
+    function runSuccessMessageHint() {
+        setIntervalId = setInterval(function() {
+            runEnjoyHintScriptOnApiPublish()
+        }, 1000);
+    }
+
+    function runEnjoyHintScriptOnApiPublish() {
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_onMessage, item_manage_success_message_script_data);
+            stopSuccessMessageHint();
+        }
+    }
+
+    function stopSuccessMessageHint() {
+        clearInterval(setIntervalId);
+    }
+
+
+   
+
+    var enjoyhint_instance_item_manage = null;
+    var enjoyhint_instance_onMessage = null;
+
     $(document).ready(function(){
         $.ajaxSetup({
             contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -875,15 +922,31 @@
                 success: function(responseText){
                     $("body").unbind('api_saved');
                     if (!responseText.error) {
-                        $('#publish-success').modal({
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        $('#publish-success').modal('show');
-                        $('#goToStore-btn').click(function(){
-                            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
-                            location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
-                        });
+                        var jsonObj = JSON.stringify(responseText);                        
+                        var jsonPayload = responseText.status.workflowResponse.jsonPayload;
+                        if (responseText.status.stateChangeStatus == 'REJECTED') {
+                                showWorkflowRejectedMessage();
+                        } else if (responseText.status.stateChangeStatus == 'CREATED') {
+                                showWorkflowSubmittedMessage();
+                        } else if (jsonPayload != null && jsonPayload != "") {
+                            var apiInfo = {};
+                                apiInfo.provider = "<%=api.provider%>";
+                                apiInfo.name = "<%=api.name%>";
+                                apiInfo.version = "<%=api.version%>";
+                                handleWorkflowRedirection(jsonPayload, apiInfo);
+
+                        } else {
+                            $('#publish-success').modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            $('#publish-success').modal('show');
+                            runSuccessMessageHint();
+                            $('#goToStore-btn').click(function(){
+                                window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+                                location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
+                            });
+                        }
                     } else {
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {
@@ -1042,7 +1105,9 @@
                 $('#cacheTimeout').hide();
             }
         });
-
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance_item_manage, item_manage_script_data);
+        }
     });
 
     var hideMsg=function () {

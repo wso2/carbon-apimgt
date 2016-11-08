@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -139,6 +140,21 @@ public class TenantWorkflowConfigHolder implements Serializable {
             workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);
+            
+            workflowElem = workflowExtensionsElem.getFirstChildWithName(new QName(WorkflowConstants.API_STATE_CHANGE));
+            if (workflowElem == null) {
+                // TO handle migrated environment, create the default simple workflow executor
+                workflowElem = OMAbstractFactory.getOMFactory()
+                        .createOMElement(new QName(WorkflowConstants.API_STATE_CHANGE));
+                executorClass = WorkflowConstants.DEFAULT_EXECUTOR_API_STATE_CHANGE;
+                workflowElem.addAttribute(WorkflowConstants.EXECUTOR, executorClass, null);
+            } else {
+                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+            }
+            clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            loadProperties(workflowElem, workFlowExecutor);
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_STATE, workFlowExecutor);
 
         } catch (RegistryException e) {
             log.error("Error loading Resource from path" + APIConstants.WORKFLOW_EXECUTOR_LOCATION, e);

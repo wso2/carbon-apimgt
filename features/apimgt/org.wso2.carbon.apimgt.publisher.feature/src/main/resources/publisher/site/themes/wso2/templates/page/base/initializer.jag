@@ -16,6 +16,8 @@ jagg.initializer("page/base", {
         jagg.addHeaderCSS("page/base", "bootstrap-datatables", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
         jagg.addHeaderCSS("page/base", "datatables-responsive", "libs/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css");
         jagg.addHeaderCSS("page/base","select-2","libs/select2_4.0.0/css/select2.min.css")
+        jagg.addHeaderCSS("page/base","enjoyhint.css","libs/enjoyhint-3.1.0/enjoyhint.css");
+        jagg.addHeaderCSS("page/base","jquery.enjoyhint.css","libs/enjoyhint-3.1.0/src/jquery.enjoyhint.css");
 
 
         //include jquery at the top
@@ -26,9 +28,11 @@ jagg.initializer("page/base", {
         jagg.addHeaderJS("page/base", "bootstrap-rating.js", "libs/bootstrap-rating/bootstrap-rating.js");
         jagg.addHeaderJS("page/base", "validator", "libs/jquery-validation/jquery.validate.min.js");
         jagg.addHeaderJS("page/base","select-2-js", "libs/select2_4.0.0/js/select2.full.min.js");
-       
-
+        jagg.addHeaderJS("page/base","enjoyhint.js", "libs/enjoyhint-3.1.0/enjoyhint.js");
+        jagg.addHeaderJS("page/base","cloud-enjoyhint-script-data.js", "libs/enjoyhint-3.1.0/js/cloud-enjoyhint-script-data.js");
+        jagg.addHeaderJS("page/base","cloud-enjoyhint-functions.js", "libs/enjoyhint-3.1.0/js/cloud-enjoyhint-functions.js");
         jagg.addHeaderJS("page/base", "jagg", "templates/page/base/js/jagg.js");
+        jagg.addHeaderJS("page/base","workflow-dialog.js", "templates/utils/dialog/workflow-dialog.js");
         jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
 
 

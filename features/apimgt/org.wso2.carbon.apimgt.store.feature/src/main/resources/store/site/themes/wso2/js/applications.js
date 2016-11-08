@@ -484,7 +484,7 @@ $("#application-actions").each(function(){
                 } else if(status=='REJECTED') {
                     result='REJECTED';
                 } else{
-                    result='INACTIVE';
+                    result='INACTIVE <p><i>Waiting for approval</i></p>';
                 }
                 return new Handlebars.SafeString(result);  
               }

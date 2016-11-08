@@ -236,7 +236,7 @@
     <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.
          Unless a ThirdParty KeyManager is used, you don't need to configure this section. -->
     <!--APIKeyManager>
-        <KeyManagerClientImpl>org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl</KeyManagerClientImpl>
+        <KeyManagerClientImpl>org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl</KeyManagerClientImpl>
         <Configuration>
             <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
             <Username>${admin.username}</Username>
@@ -539,6 +539,18 @@
         <EnableJWTClaimConditions>false</EnableJWTClaimConditions>
         <EnableQueryParamConditions>false</EnableQueryParamConditions>
     </ThrottlingConfigurations>
+    
+    <WorkflowConfigurations>
+        <Enabled>false</Enabled>
+    	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>   		
+    	<ServerUser>${admin.username}</ServerUser>
+    	<ServerPassword>${admin.password}</ServerPassword>
+    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
+        <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
+        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.10/register</DCREndPoint>
+        <DCREndPointUser>${admin.username}</DCREndPointUser>
+        <DCREndPointPassword>${admin.password}</DCREndPointPassword>
+    </WorkflowConfigurations>
 
     <SwaggerCodegen>
         <ClientGeneration>

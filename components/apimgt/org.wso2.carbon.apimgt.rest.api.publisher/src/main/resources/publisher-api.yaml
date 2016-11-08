@@ -83,6 +83,10 @@ x-wso2-security:
         roles: admin
         name: apim:subscription_block
         key: apim:subscription_block
+      - description: ""
+        roles: admin
+        name: apim:api_workflow
+        key: apim:api_workflow
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2024,6 +2028,59 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
+            
+            
+######################################################
+# The "Workflow approval" resource API
+######################################################
+  /workflows/update-workflow-status:
+
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_workflow
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n\"status\" : \"APPROVED\", \n\"attributes\" : {\n  \"apiCurrentState\": \"Created\",\n  \"apiLCAction\": \"Publish\",\n  \"apiName\":\"APIname\",\n  \"apiVersion\" : \"1.0.0\",\n  \"apiProvider\" : \"admin\",\n  \"invoker\": \"admin\"\n	}\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task. .
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId-Q'
+       - in: body
+         name: body
+         description: |
+            Workflow event that need to be updated
+         required: true
+         schema:
+           $ref: '#/definitions/Workflow'
+      tags:
+        - Workflows (Individual) 
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/Workflow'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -2219,6 +2276,17 @@ parameters:
     description: |
       Validator for conditional requests; based on Last Modified header.
     type: string
+    
+
+# Workflow reference ID
+# Specified as part of the path expression
+  workflowReferenceId-Q:
+    name: workflowReferenceId
+    in: query
+    description: |
+      Workflow reference id
+    required: true
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -2325,7 +2393,7 @@ definitions:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
-        example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+        example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
       wsdlUri:
         description: |
           WSDL URL if the API is based on a WSDL endpoint
@@ -2758,9 +2826,6 @@ definitions:
       name:
         type: string
         example: log_in_message
-      config:
-        type: string
-        example: ""
       type:
         type: string
         example: in
@@ -2885,3 +2950,32 @@ definitions:
         type: string
         description: media-type of the file
         example: "image/jpeg"
+        
+
+#-----------------------------------------------------
+# The workflow response resource
+#-----------------------------------------------------
+  Workflow:
+    title: workflow
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
+

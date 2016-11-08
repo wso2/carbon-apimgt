@@ -1,4 +1,15 @@
 <% jagg.template("item-info", function(inputs, outputs, jagg) { %>
+
+<!--START Enjoyhint script data-->
+<script type="text/javascript">
+    var enjoyhint_instance = null;
+    $(document).ready(function () {
+        if (isEnjoyHintEnabled()) {
+            runEnjoyHintScript(enjoyhint_instance, item_info_script_data);
+        }
+    });
+</script>
+
 <% var api = outputs.api;
    var permitted=outputs.isPermitted;
    var isCreatePermitted=outputs.isCreatePermitted;

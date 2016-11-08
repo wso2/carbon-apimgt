@@ -1,7 +1,18 @@
 <% jagg.template("item-add", function(inputs, outputs, jagg) { %>
 
-<div class="page-header">
-	<h2><%=i18n.localize("Let's get started!")%></h2>
+<script type="text/javascript">
+    // Enjoyhint instance
+    var enjoyhint_instance = null;
+    $(document).ready(function () {
+        if (isEnjoyHintEnabled()) {
+            // Run the enjoyhint script
+            runEnjoyHintScript(enjoyhint_instance, item_add_script_data);
+        }
+    });
+</script>
+
+ <div class="page-header">
+     <h2><%=i18n.localize("Let's get started!")%></h2>
 	<p class="lead"><%=i18n.localize("Add New API")%></p>
 </div>
 

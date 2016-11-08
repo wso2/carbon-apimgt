@@ -5,8 +5,8 @@
     api = outputs.api;
 
     var reqUrl = request.getRequestURI();
-    var tierManageUrl = "/site/pages/tier-manage.jag";
-    var tierManageMappedUrl = "/site/pages/tier-manage.jag";
+    var tierManageUrl = "/tier-manage";
+    var tierManageMappedUrl = "/tier-manage";
 
     var appPolicyEditUrl= "/app-policy-edit";
     var appPolicyEditMappedUrl= "/app-policy-edit";

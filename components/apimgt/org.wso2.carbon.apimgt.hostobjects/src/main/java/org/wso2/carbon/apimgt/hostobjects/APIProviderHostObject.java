@@ -4764,6 +4764,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         HttpClient client = new DefaultHttpClient();
         HttpHead head = new HttpHead(urlVal);
+        // extract the host name and add the Host http header for sanity
+        head.addHeader("Host", urlVal.replaceAll("https?://", "").replaceAll("(/.*)?", ""));
         client.getParams().setParameter("http.socket.timeout", 4000);
         client.getParams().setParameter("http.connection.timeout", 4000);
 

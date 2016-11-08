@@ -28,6 +28,7 @@ public final class RestApiConstants {
     public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
 
@@ -47,6 +48,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_TIER = "tier";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
+    public static final String RESOURCE_WORKFLOW = "workflow";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";

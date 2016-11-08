@@ -65,7 +65,12 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 }
 
                 ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
-                throttlePublisherDTO.setAccessToken(authContext.getApiKey());
+                String consumerKey = authContext.getApiKey();
+                int hashCode = -1; //set -1 for non auth users
+                if (consumerKey != null) {
+                    hashCode = consumerKey.hashCode();
+                }
+                throttlePublisherDTO.setAccessToken(String.valueOf(hashCode));
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
                 throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(

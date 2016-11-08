@@ -144,6 +144,32 @@ function triggerSubscribe() {
          //                        $('#messageModal').modal();
         }
     }, "json");
+
+    runSuccessMessageHint(api.name);
+}
+
+var enjoyhint_instance_onMessage = null;
+
+var intervalId;
+
+function runSuccessMessageHint(apiName) {
+    intervalId = setInterval(function () {
+        runEnjoyHint_subscription_message_Script(apiName)
+    }, 1000);
+}
+
+function runEnjoyHint_subscription_message_Script(apiName) {
+    if (isEnjoyHintEnabled()) {
+        stopSuccessMessageHint();
+        var storeStep = "subscribed";
+        localStorage.setItem("storeStep", storeStep);
+        localStorage.setItem("apiName", apiName);
+        runEnjoyHintScript(enjoyhint_instance_onMessage, goto_mysubscription_message_script_data);
+    }
+}
+
+function stopSuccessMessageHint() {
+    clearInterval(intervalId);
 }
 
 $(document).ready(function () {

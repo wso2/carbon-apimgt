@@ -10,19 +10,23 @@ i18n.init(request,localeResourcesBasePath);
 var middlePage="signup-task";
 
 var pageName=request.getParameter("task");
-if(pageName=="subscription"){
-middlePage="subscription-task";
-}else if(pageName=="signup"){
-middlePage="signup-task";
-}else if(pageName=="application"){
-middlePage="application-task";
-}else if(pageName=="appRegistration"){
-middlePage="app-registration-task";
-}else if(pageName=="themeUpload"){
-middlePage="theme-upload-task";
-}else if(pageName=="analytics"){
-middlePage="analytics-task";
+
+if(pageName == "subscription") {
+   middlePage = "subscription-task";
+} else if(pageName == "signup") {
+   middlePage = "signup-task";
+} else if(pageName == "application") {
+   middlePage = "application-task";
+} else if(pageName == "appRegistration") {
+   middlePage = "app-registration-task";
+} else if(pageName == "themeUpload") {
+   middlePage = "theme-upload-task";
+} else if(pageName == "analytics") {
+   middlePage = "analytics-task";
+} else if(pageName == "apistate"){
+   middlePage="apistate-task";   
 }
+
 
 (function () {
     var user = jagg.getUser();

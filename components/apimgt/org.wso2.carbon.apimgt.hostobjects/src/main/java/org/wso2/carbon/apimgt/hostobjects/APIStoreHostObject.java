@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
+import org.wso2.carbon.apimgt.impl.workflow.UserSignUpWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -95,6 +96,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
@@ -3389,7 +3391,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
-                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
+                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, groupingId);
 
                 int i = 0;
                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -3686,16 +3688,9 @@ public class APIStoreHostObject extends ScriptableObject {
                     userDTO.setUserName(username);
                     userDTO.setPassword(password);
 
-                    UserRegistrationAdminServiceStub stub = new UserRegistrationAdminServiceStub(null, serverURL +
-                                                                                       "UserRegistrationAdminService");
-                    ServiceClient client = stub._getServiceClient();
-                    Options option = client.getOptions();
-                    option.setManageSession(true);
-
-                    stub.addUser(userDTO);
-
                     WorkflowExecutor userSignUpWFExecutor = WorkflowExecutorFactory.getInstance()
                                                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+                    ((UserSignUpWorkflowExecutor) userSignUpWFExecutor).addUserToUserStore(serverURL, userDTO);
 
                     WorkflowDTO signUpWFDto = new WorkflowDTO();
                     signUpWFDto.setWorkflowReference(username);
@@ -3976,6 +3971,53 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (UserStoreException e) {
             handleException("Error while checking user existence for " + username, e);
         }
+        return exists;
+    }
+
+
+    /**
+     * check whether the given user is existing in one of the given roles
+     * @param username
+     * @param rolenames
+     * @return
+     */
+    public static boolean jsFunction_isUserExistsInRole(Context cx, Scriptable thisObj,
+                                                        Object[] args, Function funObj)
+            throws ScriptException,
+            APIManagementException, org.wso2.carbon.user.api.UserStoreException {
+        if (args == null || args.length == 0) {
+            handleException("Invalid input parameters to the isUserExists method");
+        }
+
+        String username = (String) args[0];
+        String roleNames = (String) args[1];
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        //add user storage info
+        username = SelfSignUpUtil.getDomainSpecificUserName(username, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        boolean exists = false;
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            //UserRealm realm = realmService.getBootstrapRealm();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            UserStoreManager manager = realm.getUserStoreManager();
+
+            String[] roleNamesArr = roleNames.split(",");
+            for (String roleName : roleNamesArr) {
+                AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+                if (abstractManager.isUserInRole(tenantAwareUserName, roleName)) {
+                    exists = true;
+                    break;
+                }
+            }
+
+        } catch (UserStoreException e) {
+            handleException("Error while checking user existence for " + username + " roles" + roleNames, e);
+        }
+
         return exists;
     }
 
