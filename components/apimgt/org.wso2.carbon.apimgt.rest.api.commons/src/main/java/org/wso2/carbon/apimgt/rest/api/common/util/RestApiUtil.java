@@ -15,7 +15,6 @@
 */
 package org.wso2.carbon.apimgt.rest.api.common.util;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -26,8 +25,8 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
-
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.models.Tier;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
@@ -35,7 +34,10 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
+import org.wso2.carbon.kernel.context.CarbonContext;
 
+import java.security.Principal;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,12 +49,13 @@ public class RestApiUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
 
+    /**
+     * Get the current logged in user's username
+     */
     public static String getLoggedInUsername() {
-        return "DUMMY_LOGGEDUSER";
-    }
-
-    public static String getLoggedInUserTenantDomain() {
-        return "DUMMY_TENANTdOMAIN";
+        CarbonContext carbonContext = CarbonContext.getCurrentContext();
+        Principal principal = carbonContext.getUserPrincipal();
+        return principal.getName();
     }
 
     /**
@@ -78,7 +81,7 @@ public class RestApiUtil {
         //            String errorMsg = "Unable to get groupIds of user " + username;
         //            handleInternalServerError(errorMsg, e, log);
         return "";
-        //        }
+        //       }
     }
 
     /**
@@ -380,5 +383,21 @@ public class RestApiUtil {
         NotFoundException notFoundException = buildNotFoundException(resource, id);
         log.error(notFoundException.getMessage(), t);
         throw notFoundException;
+    }
+
+    /**
+     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
+     *
+     * @param tiers    Tier Collection
+     * @param tierName Tier to find
+     * @return Matched tier with its name
+     */
+     public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
     }
 }

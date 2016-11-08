@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
 /**
  *  This class contains REST API Store related utility operations
@@ -37,7 +38,7 @@ public class RestAPIStoreUtils {
      * @return true if current logged in consumer has access to the specified application
      */
     public static boolean isUserAccessAllowedForApplication(Application application) {
-        String username = "DUMMY_USER";//RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername();
 
         if (application != null) {
             //if groupId is null or empty, it is not a shared app

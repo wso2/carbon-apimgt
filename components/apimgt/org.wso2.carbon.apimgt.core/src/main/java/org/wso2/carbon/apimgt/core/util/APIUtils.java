@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.util;
 
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Tier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,5 +83,16 @@ public class APIUtils {
             }
         }
         return searchCriteriaMap;
+    }
+
+    /**
+     * Returns a map of API availability tiers of the tenant as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getTiers(int tierType) throws APIManagementException {
+        return null;
     }
 }

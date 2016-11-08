@@ -36,6 +36,10 @@
             <groupId>org.wso2.msf4j</groupId>
             <artifactId>msf4j-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.security.caas</groupId>
+            <artifactId>org.wso2.carbon.security.caas</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -78,7 +82,8 @@
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
-            org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}"
+            org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
+            org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}"
         </import.package>
         <export.package>
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",
