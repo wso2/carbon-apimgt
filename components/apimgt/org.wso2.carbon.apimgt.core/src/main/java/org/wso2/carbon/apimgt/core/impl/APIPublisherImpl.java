@@ -73,12 +73,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * only the latest version will
      * be included in this list.
      *
-     * @param providerId , provider id
-     * @return set of API
+     * @param providerName username of the the user who created the API
+     * @return set of APIs
      * @throws APIManagementException if failed to get set of API
      */
     @Override
-    public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
+    public List<API> getAPIsByProvider(String providerName) throws APIManagementException {
+        try {
+            getApiDAO().getAPI(providerName); //todo: call correct doa method
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to fetch APIs of " + providerName, e, log);
+        }
         return null;
     }
 
@@ -248,56 +253,54 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Removes a given documentation
+     * Attach Documentation (without content) to an API
      *
-     * @param apiId   String
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws APIManagementException if failed to remove documentation
-     */
-    @Override
-    public void removeDocumentation(String apiId, String docType, String docName) throws APIManagementException {
-
-    }
-
-    /**
-     * Removes a given documentation
-     *
-     * @param apiId String
-     * @param docId UUID of the doc
-     * @throws APIManagementException if failed to remove documentation
-     */
-    @Override
-    public void removeDocumentation(String apiId, String docId) throws APIManagementException {
-
-    }
-
-    /**
-     * Adds Documentation to an API
-     *
-     * @param apiId         String
-     * @param documentation Documentation
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException {
-
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
+        try {
+            getApiDAO().addDocumentationInfo(apiId, documentation);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation", e, log);
+        }
     }
 
     /**
-     * Add a file to a document of source type FILE
+     * Add a document (of source type FILE) with a file
      *
-     * @param apiId         API identifier the document belongs to
-     * @param documentation document
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
      * @param filename      name of the file
      * @param content       content of the file as an Input Stream
      * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void addFileToDocumentation(String apiId, DocumentInfo documentation, String filename, InputStream
-            content, String contentType) throws APIManagementException {
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
+                                         String contentType) throws APIManagementException {
+        try {
+            getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
+        }
+    }
 
+    /**
+     * Removes a given documentation
+     *
+     * @param docId Document Id
+     * @throws APIManagementException if failed to remove documentation
+     */
+    @Override
+    public void removeDocumentation(String docId) throws APIManagementException {
+        try {
+            getApiDAO().removeDocumentation(docId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
+        }
     }
 
     /**
