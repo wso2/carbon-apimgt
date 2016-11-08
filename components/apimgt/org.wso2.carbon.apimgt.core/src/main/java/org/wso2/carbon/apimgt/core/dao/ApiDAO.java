@@ -20,10 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.*;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,6 +42,16 @@ public interface ApiDAO {
     @CheckForNull API getAPI(String apiID) throws SQLException;
 
     /**
+     * Retrieve a given instance of an APISummary object
+     * @param apiID The UUID that uniquely identifies an API
+     * @return valid {@link APISummary} object or null
+     * @throws SQLException if error occurs while accessing data layer
+     *
+     */
+    @CheckForNull
+    APISummary getAPISummary(String apiID) throws SQLException;
+
+    /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
      * doing a permission check to ensure results returned are only those that match the list of roles provided
      * @param offset The number of results from the beginning that is to be ignored
@@ -55,6 +62,18 @@ public interface ApiDAO {
      *
      */
     APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles) throws SQLException;
+
+    /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     * doing a permission check to ensure results returned are only those that match the list of roles provided
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @param providerName A given API Provider
+     * @return {@link APISummaryResults} matching results
+     * @throws SQLException if error occurs while accessing data layer
+     *
+     */
+    APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
