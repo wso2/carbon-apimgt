@@ -201,6 +201,7 @@ public final class APIConstants {
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
+    public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
@@ -265,7 +266,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS = "overview_tenants";
     
     public static final String API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED = "overview_destinationStatsEnabled";
-    
+    public static final String API_OVERVIEW_WEBSOCKET = "overview_ws";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME= "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -1082,7 +1084,10 @@ public final class APIConstants {
     public static final String CPS_SERVER_PASSWORD = "CPSServerPassword";
     public static final String POLICY_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
             "server" + File.separator + "throttle-config";
+    public static final String SEQUENCE_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
+            "server" + File.separator + "synapse-configs" + File.separator + "default" + File.separator + "sequences";
     public static final String POLICY_FILE_LOCATION = POLICY_FILE_FOLDER + File.separator;
+    public static final String SEQUENCE_FILE_LOCATION = SEQUENCE_FILE_FOLDER + File.separator;
 
     public static final String ELIGIBILITY_QUERY_ELEM= "eligibilityQuery";
     public static final String POLICY_NAME_ELEM = "name";
@@ -1252,5 +1257,9 @@ public final class APIConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";
     }
+
+    public enum APIType {
+        HTTP, WS,
+    };
 
 }

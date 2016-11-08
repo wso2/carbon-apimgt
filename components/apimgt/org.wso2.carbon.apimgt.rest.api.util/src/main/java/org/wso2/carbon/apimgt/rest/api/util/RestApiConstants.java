@@ -148,4 +148,8 @@ public final class RestApiConstants {
 
     public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered " 
             + "an internal error. Please contact administrator.";
+
+    // common attributes
+    public static final String PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String SANDBOX_ENDPOINTS = "sandbox_endpoints";
 }

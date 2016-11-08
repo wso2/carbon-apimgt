@@ -11116,4 +11116,184 @@ public class ApiMgtDAO {
 
         return accessTokens;
     }
+
+    public String[] getAPIDetailsByContext(String context) {
+        String apiName = "";
+        String apiProvider = "";
+        String sql = SQLConstants.GET_API_FOR_CONTEXT_TEMPLATE_SQL;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, context);
+
+            rs = ps.executeQuery();
+            if (rs.first()) {
+                apiName = rs.getString("API_NAME");
+                apiProvider = rs.getString("API_PROVIDER");
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while fetching data: " + e.getMessage(), e);
+        } finally {
+            try {
+                conn.setAutoCommit(false);
+            } catch (SQLException e) {
+                log.error("Error occurred while fetching data: " + e.getMessage(), e);
+            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return new String[] { apiName, apiProvider };
+    }
+
+    /**
+     * Check for the subscription of the user
+     *
+     * @param infoDTO
+     * @param context
+     * @param version
+     * @param consumerKey
+     * @return APIKeyValidationInfoDTO including data of api and application
+     * @throws APIManagementException
+     */
+    public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO,
+                                                               String context, String version,
+                                                               String consumerKey,
+                                                               boolean defaultVersionInvoked)
+            throws APIManagementException {
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
+        if (apiTenantDomain == null) {
+            apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        String sql;
+        boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        if (!isAdvancedThrottleEnabled) {
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
+        } else {
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
+        }
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, context);
+            ps.setString(2, consumerKey);
+            if (isAdvancedThrottleEnabled) {
+                ps.setInt(3, apiOwnerTenantId);
+                if (!defaultVersionInvoked) {
+                    ps.setString(4, version);
+                }
+            } else {
+                if (!defaultVersionInvoked) {
+                    ps.setString(3, version);
+                }
+            }
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String subscriptionStatus = rs.getString("SUB_STATUS");
+                String type = rs.getString("KEY_TYPE");
+                if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
+                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
+                    infoDTO.setAuthorized(false);
+                    return infoDTO;
+                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) ||
+                           APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
+                    infoDTO.setValidationStatus(
+                            APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
+                    infoDTO.setAuthorized(false);
+                    return infoDTO;
+                } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED
+                                   .equals(subscriptionStatus) &&
+                           !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
+                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
+                    infoDTO.setType(type);
+                    infoDTO.setAuthorized(false);
+                    return infoDTO;
+                }
+
+                final String API_PROVIDER = rs.getString("API_PROVIDER");
+                final String SUB_TIER = rs.getString("TIER_ID");
+                final String APP_TIER = rs.getString("APPLICATION_TIER");
+                infoDTO.setTier(SUB_TIER);
+                infoDTO.setSubscriber(rs.getString("USER_ID"));
+                infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
+                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setApiPublisher(API_PROVIDER);
+                infoDTO.setApplicationName(rs.getString("NAME"));
+                infoDTO.setApplicationTier(APP_TIER);
+                infoDTO.setType(type);
+
+                //Advanced Level Throttling Related Properties
+                if (APIUtil.isAdvanceThrottlingEnabled()) {
+                    String apiTier = rs.getString("API_TIER");
+                    String subscriberUserId = rs.getString("USER_ID");
+                    String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
+                    int apiId = rs.getInt("API_ID");
+                    int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
+                    int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
+                    //TODO isContentAware
+                    boolean isContentAware =
+                            isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
+                                                    subscriberTenantId, apiTenantId, apiId);
+                    infoDTO.setContentAware(isContentAware);
+
+                    //TODO this must implement as a part of throttling implementation.
+                    int spikeArrest = 0;
+                    String apiLevelThrottlingKey = "api_level_throttling_key";
+                    if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
+                        spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
+                    }
+
+                    String spikeArrestUnit = null;
+                    if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
+                        spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                    }
+                    boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
+                    List<String> list = new ArrayList<String>();
+                    list.add(apiLevelThrottlingKey);
+                    infoDTO.setSpikeArrestLimit(spikeArrest);
+                    infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+                    infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+                    infoDTO.setSubscriberTenantDomain(subscriberTenant);
+                    if (apiTier != null && apiTier.trim().length() > 0) {
+                        infoDTO.setApiTier(apiTier);
+                    }
+                    //We also need to set throttling data list associated with given API. This need to have policy id and
+                    // condition id list for all throttling tiers associated with this API.
+                    infoDTO.setThrottlingDataList(list);
+                }
+                return infoDTO;
+            }
+            infoDTO.setAuthorized(false);
+            infoDTO.setValidationStatus(
+                    APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+        } catch (SQLException e) {
+            handleException("Exception occurred while validating Subscription.", e);
+        } finally {
+            try {
+                conn.setAutoCommit(false);
+            } catch (SQLException e) {
+                log.error("Error occurred while fetching data: " + e.getMessage(), e);
+            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return infoDTO;
+    }
 }

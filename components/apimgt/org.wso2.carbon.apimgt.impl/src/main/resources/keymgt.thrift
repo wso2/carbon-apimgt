@@ -63,4 +63,5 @@ struct URITemplate {
 service APIKeyValidationService {
 APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain, 7:required string matchingResource, 8:required string httpVerb) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 list<URITemplate> getAllURITemplates(1:required string context, 2:required string apiVersion, 3:required string sessionId) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+APIKeyValidationInfoDTO validateKeyforHandshake(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 }

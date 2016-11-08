@@ -63,7 +63,7 @@ var unSubscribe = function (userName){
             };
 
         }
-        var apiDataPublisher = org.wso2.carbon.apimgt.usage.publisher.AlertTypesPublisher;
+        var apiDataPublisher = org.wso2.carbon.apimgt.gateway.mediators.AlertTypesPublisher;
         var apiDatapublisherInstance = new apiDataPublisher();
 
         apiDatapublisherInstance.unSubscribe(userName,agent);
@@ -99,7 +99,7 @@ var saveAlertsTypes  = function (checkedAlertList, emailList,userName,checkedAle
             };
 
         }
-        var apiDataPublisher = org.wso2.carbon.apimgt.usage.publisher.AlertTypesPublisher;
+        var apiDataPublisher = org.wso2.carbon.apimgt.gateway.mediators.AlertTypesPublisher;
         var apiDatapublisherInstance = new apiDataPublisher();
         //if it is publisher "p" if it is store agent should be "s"
 

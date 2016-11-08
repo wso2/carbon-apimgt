@@ -27,20 +27,30 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -247,5 +257,73 @@ public class APIKeyValidationService extends AbstractAdmin {
         logMessage = logMessage + " , responseTime=" + new Date(System.currentTimeMillis());
 
         log.debug("OAuth token response from keyManager to gateway: " + logMessage);
+    }
+
+    /**
+     * validate access token for websocket handshake
+     *
+     * @param context context of the API
+     * @param version version of the API
+     * @param accessToken access token of the request
+     * @return api information
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     */
+    public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
+                                                           String accessToken)
+            throws APIKeyMgtException, APIManagementException {
+        boolean defaultVersionInvoked = false;
+        APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
+        info.setAuthorized(false);
+        TokenValidationContext validationContext = new TokenValidationContext();
+        validationContext.setAccessToken(accessToken);
+        validationContext.setContext(context);
+        validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
+        validationContext.setVersion(version);
+        validationContext.setRequiredAuthenticationLevel("Any");
+        boolean state = keyValidationHandler.validateToken(validationContext);
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
+        if (state) {
+            info.setAuthorized(true);
+            info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
+            info.setIssuedTime(validationContext.getTokenInfo().getIssuedTime());
+            String def_version = isDefaultVersionInvoked(validationContext.getContext());
+            if (def_version != null) {
+                defaultVersionInvoked = true;
+                version = def_version;
+                context += "/" + def_version;
+                validationContext.setVersion(version);
+                validationContext.setContext(context);
+            }
+            info = dao.validateSubscriptionDetails(info, validationContext.getContext(),
+                                               validationContext.getVersion(),
+                                               validationContext.getTokenInfo().getConsumerKey(), defaultVersionInvoked);
+
+            if (defaultVersionInvoked) {
+                info.setApiName(info.getApiName() + "*" + version);
+            }
+        }
+
+        info.setConsumerKey(validationContext.getTokenInfo().getConsumerKey());
+        info.setEndUserName(validationContext.getTokenInfo().getEndUserName());
+        return info;
+    }
+
+    /**
+     * find out whether the Default API version is invoked
+     *
+     * @param context context of API accessing
+     * @return Default API version. return null if not default version
+     * @throws APIManagementException
+     */
+    private String isDefaultVersionInvoked(String context) throws APIManagementException {
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
+        String[] APIDetails = dao.getAPIDetailsByContext(context);
+        String apiName = APIDetails[0];
+        String apiProvider = APIDetails[1];
+        if (!(apiName.equalsIgnoreCase("") || apiProvider.equalsIgnoreCase(""))) {
+            return dao.getDefaultVersion(new APIIdentifier(apiProvider, apiName, ""));
+        }
+        return null;
     }
 }

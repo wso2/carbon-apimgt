@@ -16,15 +16,21 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -36,6 +42,8 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class APIGatewayManager {
@@ -47,6 +55,10 @@ public class APIGatewayManager {
     private Map<String, Environment> environments;
 
 	private boolean debugEnabled = log.isDebugEnabled();
+
+    private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
+
+    private final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -162,25 +174,30 @@ public class APIGatewayManager {
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
                     operation ="add";
-
-                    //Add the API
-                    if(APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())){
-                        client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
-                    }else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())){
-                        client.addApi(builder, tenantDomain, api.getId());
-                    }
-
-                    if(api.isDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(), api.getId());
-                        }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(), api.getId());
+                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                        //Add the API
+                        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                            client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
+                        } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
+                                .equalsIgnoreCase(api.getImplementation())) {
+                            client.addApi(builder, tenantDomain, api.getId());
                         }
-                    }
-					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
-                    //Deploy the custom sequences of the API.
-					deployCustomSequences(api, tenantDomain, environment);
+                        if (api.isDefaultVersion()) {
+                            if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                            } else {
+                                client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                            }
+                        }
+                        setSecureVaultProperty(api, tenantDomain, environment, operation);
+
+                        //Deploy the custom sequences of the API.
+                        deployCustomSequences(api, tenantDomain, environment);
+                    } else {
+                        deployWebsocketAPI(api,client);
+                    }
+
 				}
 			}
             } catch (AxisFault axisFault) {
@@ -192,6 +209,14 @@ public class APIGatewayManager {
                 failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
             } catch (APIManagementException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                log.error("Error occurred deploying sequences on " + environmentName, ex);
+                failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            } catch (JSONException ex) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
                 if gateway is unreachable we collect that environments into map with issue and show on popup in ui
@@ -222,17 +247,27 @@ public class APIGatewayManager {
                     if (environment == null) {
                         continue;
                     }
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
-                    if (client.getApi(tenantDomain, api.getId()) != null) {
-                        if (debugEnabled) {
-                            log.debug("Removing API " + api.getId().getApiName() + " From environment " +
-                                      environment.getName());
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                        if (client.getApi(tenantDomain, api.getId()) != null) {
+                            if (debugEnabled) {
+                                log.debug("Removing API " + api.getId().getApiName() + " From environment " +
+                                        environment.getName());
+                            }
+                            String operation = "delete";
+
+                            client.deleteApi(tenantDomain, api.getId());
+                            undeployCustomSequences(api, tenantDomain, environment);
+
+                            setSecureVaultProperty(api, tenantDomain, environment, operation);
                         }
-                        String operation = "delete";
-                        client.deleteApi(tenantDomain, api.getId());
-                        undeployCustomSequences(api, tenantDomain, environment);
-                        setSecureVaultProperty(api, tenantDomain, environment, operation);
+                    } else {
+                        String fileName = api.getContext().substring(1).replace('/', '-');
+                        String[] fileNames = new String[2];
+                        fileNames[0] = ENDPOINT_PRODUCTION + fileName;
+                        fileNames[1] = ENDPOINT_SANDBOX + fileName;
+                        client.undeployWSApi(fileNames);
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -241,27 +276,143 @@ public class APIGatewayManager {
                         }
                     }
                 } catch (AxisFault axisFault) {
-                 /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
-                    log.error("Error occurred when removing from gateway " + environmentName, axisFault);
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
+                    log.error("Error occurred when removing from gateway " + environmentName,
+                              axisFault);
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 } catch (APIManagementException ex) {
                     /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                    */
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
                     failedEnvironmentsMap.put(environmentName, ex.getMessage());
                 }
             }
 
-		}
+        }
         return failedEnvironmentsMap;
     }
+
+    /**
+     * add websoocket api to the gateway
+     *
+     * @param api
+     * @param client
+     * @throws APIManagementException
+     */
+    public void deployWebsocketAPI(API api, APIGatewayAdminClient client)
+            throws APIManagementException, JSONException {
+        try {
+            JSONObject obj = new JSONObject(api.getEndpointConfig());
+            String production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
+            String sandbox_endpoint = obj.getJSONObject("sandbox_endpoints").getString("url");
+            OMElement element;
+            String context;
+            context = api.getContext();
+            try {
+                if (production_endpoint != null) {
+                    api.setContext(ENDPOINT_PRODUCTION + context);
+                    String content = createSeqString(api, production_endpoint);
+                    element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    client.deployWSApi(content, fileName);
+                }
+                if (sandbox_endpoint != null) {
+                    api.setContext(ENDPOINT_SANDBOX + context);
+                    String content = createSeqString(api, sandbox_endpoint);
+                    element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    client.deployWSApi(content, fileName);
+                }
+
+            } catch (XMLStreamException e) {
+                String msg = "Error while parsing the policy to get the eligibility query: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            } catch (IOException e) {
+                String msg = "Error while deploying the policy in gateway manager: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            }
+        } catch (JSONException e) {
+            String msg = "Error in reading JSON object " + e.getMessage();
+            log.error(msg, e);
+            throw new JSONException(msg);
+        }
+    }
+
+    /**
+     * add new api version at the API Gateway
+     *
+     * @param artifact
+     * @param api
+     */
+    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
+        try {
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            APIGatewayAdminClient client;
+            Set<String> environments = APIUtil.extractEnvironmentsForAPI(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            for (String environmentName : environments) {
+                Environment environment = this.environments.get(environmentName);
+                client = new APIGatewayAdminClient(api.getId(), environment);
+                try {
+                    gatewayManager.deployWebsocketAPI(api, client);
+                } catch (JSONException ex) {
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway publishing if one gateway unreachable
+                    */
+                    log.error("Error occurred deploying sequences on " + environmentName, ex);
+                }
+            }
+        } catch (APIManagementException ex) {
+            /*
+            didn't throw this exception to handle multiple gateway publishing
+            if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+            therefore this didn't break the gateway unpublisihing if one gateway unreachable
+            */
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } catch (AxisFault ex) {
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } catch (GovernanceException ex) {
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * create body of sequence
+     *
+     * @param api
+     * @param url
+     * @return
+     */
+    public String createSeqString(API api, String url) {
+
+        String context = api.getContext();
+        String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                     "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
+                     context.replace('/', '-') + "\">\n" +
+                     "   <send>\n" +
+                     "      <endpoint>\n" +
+                     "         <http method=\"GET\"\n" +
+                     "               uri-template=\"" + url + "\"/>\n" +
+                     "      </endpoint>\n" +
+                     "   </send>\n" +
+                     "</sequence>";
+        return seq;
+    }
+
+
 
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);

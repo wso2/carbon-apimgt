@@ -23,7 +23,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Publisher - Add API",
+            "title":"API Publisher - Add REST API",
              "header":{
                 "name":"menu/primary"
             },

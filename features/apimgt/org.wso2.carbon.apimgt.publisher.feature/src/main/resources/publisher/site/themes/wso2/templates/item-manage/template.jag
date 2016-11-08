@@ -11,6 +11,8 @@
     var tiers = mod.getTiers().tiers;
     var resourceTiers = mod.getResourceTiers().tiers;
     var default_tier = resourceTiers[resourceTiers.length -1].tierName;
+    var isWSAPI = api.type.toUpperCase() == "WS";
+
     for (var i = 0; i < resourceTiers.length; i++){
         if(resourceTiers[i].defaultTier){
             default_tier = resourceTiers[i].tierName;
@@ -50,6 +52,7 @@
     var inSequencesLoaded = false;
     var outSequencesLoaded = false;
     var faultSequencesLoaded = false;
+    var ws = "<%=isWSAPI%>";
 </script>
 <div id="item-add">
 <%
@@ -128,9 +131,10 @@
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
-
+                  <input type="hidden" id="type" name="type" value="<%=api.type%>"/>
 
                 <div class="panel-group accordion">
+                    <%if(!isWSAPI){%>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -261,7 +265,90 @@
                             </div>
                         </div>
                     </div>
+                    <%}else{%>
+                    <input type="checkbox" id="transport_http" class="hidden" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <div>
+                                    <div class="heading no-description"><%=i18n.localize("Configurations")%></div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default Version:")%>
+                                        <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
+                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            </span>
+                                        </a>
+                                        <p id="default_api_help" class="hide"><%=i18n.localize("Marks one API version in a group as the default so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default, the previous default published API will still be used as the default until the new default API is published")%></p>
+                                    </label>
+                                    <div class="controls col-sm-8">
+                                        <label class="checkbox">
+                                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version"        <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
+                                            <span class="helper"></span>
+                                        </label>
+                                        <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                                        <p class="help-block"><%=i18n.localize("Currently set to version")%> : <%=api.currentDefaultVersion%></p>
+                                        <%}else{%>
+                                        <p class="help-block"><%=i18n.localize("No default version defined for the current API")%></p>
+                                        <%}}%>
+                                    </div>
+                                    <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true")       {%>"default_version"<%}else{%>""<%}%>/>
+                                </div>
 
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <% mod = jagg.module("api");
+                    result = mod.isMultipleTenantsAvailable();
+                    var isMultipleTenantsAvailable = result.status;
+                    if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
+                            <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
+                                <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                </span>
+                            </a>
+                            <p id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></p>
+                        </label>
+                        <div class="col-sm-4">
+                            <% if(api.visibility!="public") {%>
+                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                <option value="current_tenant"  selected="selected"><%=i18n.localize("Available to current tenant only")%></option>
+                            </select>
+                            <%} else {%>
+                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
+                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+                                <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
+                                <% } %>
+                            </select>
+                            <%}%>
+                        </div>
+                    </div>
+                    <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                        <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
+                            <%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
+                        </label>
+                        <div class="col-sm-4">
+                            <input type="text" class="input form-control"id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                            <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
+                        </div>
+                    </div>
+                    <% } %>
+                <%}%>
+                    
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -274,7 +361,7 @@
                         <div class="panel-collapse">
                             <div class="panel-body">
 
-                                        <% if (isSynapseGateway) { %>
+                                        <% if (isSynapseGateway && !isWSAPI) { %>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("Maximum Backend Throughput")%> :
                                                          <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
@@ -347,10 +434,11 @@
                                         	</div>
 
 
-                                        <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+                                        <%  if(mod.isGlobalCEPThrottlingEnabled() || isWSAPI){%>
                                             <hr />
                                             <div class="form-group">
                                                 <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("Advanced Throttling Policies")%>:
+                                                    <%if(!isWSAPI){%>
                                                     <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
                                                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
                                             				<i class="fw fw-circle fw-stack-2x"></i>
@@ -368,12 +456,36 @@
                                                             <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="resource_level" <%if(api.apiLevelPolicy == null || api.apiLevelPolicy == ""){%>checked<%}%>>
                                                             <span class="helper"><%=i18n.localize("Apply per Resource")%></span>
                                                     </label>
+                                                </div><%}else{%>
+                                                        <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
+                                                    	<span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            				<i class="fw fw-circle fw-stack-2x"></i>
+                                            				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            			</span>
+                                                    </a>
+
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Since there aren't resources for Websocket API's , Advanced throttling policies apply to API Level")%></p>
+                                                </label>
+                                                        <div class="controls col-sm-8">
+                                                    <label class="radio hide">
+                                                            <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" checked>
+                                                            <span class="helper"><%=i18n.localize("Apply to API")%></span>
+                                                    </label>
                                                 </div>
+                                                        
+                                                        <%}%>
                                             </div>
-                                            <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
+                                            <%if(!isWSAPI){%>
+                                            <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/><%}else{%>
+                                                <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value="true"/>
+                                                <%}%>
                                           	<div class="form-group">
                                           		<div class="control-label col-sm-3"></div>
+                                                 <%if(!isWSAPI){%>
                                               	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
+                                                     <%}else{%>
+                                                         <div class="col-sm-4" id="api-level-policy-section" style="display:block">
+                                                         <%}%>
                                                     <select id="apiTier" name="apiTier"  class="form-control selected required">
                                                     <%
                                                     for (var i = 0; i < resourceTiers.length; i++) {
@@ -390,6 +502,7 @@
                                                     %>
                                                     </select>
                                                 </div>
+                                                         <%if(!isWSAPI){%>
                                                 <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
                                                     <script id="resource-policy-ui-template" language="text/x-handlebars-template">
                                                         <a class="select_adv_policy_for_resource btn btn-secondary"><%=i18n.localize("Select Policy per Resource")%></a>
@@ -437,6 +550,7 @@
                                                     <a class=" help_popup" help_data="tier_help"></a>
                                                     <p id="tier_help" class="hide"><%=i18n.localize("The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.")%></p>
                                                 </div>
+                                                             <%}%>
                                         	</div>
                                         <%  } else { %>
                                         <hr />
@@ -665,6 +779,7 @@
 
         <div class="panel-group accordion">
             <div class="panel panel-default">
+                 <%if(!isWSAPI){%>
                 <div class="panel-heading">
                     <h4 class="panel-title">
                         <div>
@@ -673,8 +788,10 @@
                         <div class="clearfix"></div>
                     </h4>
                 </div>
+                    <%}%>
                 <div class="panel-collapse">
                     <div class="panel-body">
+                         <%if(isWSAPI){%>
                     <!-- Resources Information -->
                         <div id="api_designer">
                             <div id ="apidoc_details"></div>
@@ -682,6 +799,7 @@
                             <div id ="resource_details"></div>
                         </div>
                         <!-- Resources Information -->
+                             <%}%>
                         <hr/>
                             <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
                             <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
