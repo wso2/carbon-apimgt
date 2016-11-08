@@ -21,18 +21,23 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
- * {@code Builder} class which implements the builder pattern as outlined in "Effective Java 2nd Edition
+ * {@code APIBuilder} class which implements the builder pattern as outlined in "Effective Java 2nd Edition
  * by Joshua Bloch(Item 2)"
  */
 
 public final class API {
-    private API(Builder builder) {
+    private API(APIBuilder builder) {
         id = builder.id;
         provider = builder.provider;
         name = builder.name;
@@ -40,7 +45,7 @@ public final class API {
         context = builder.context;
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
-        lifeCycleInstanceID = builder.lifeCycleInstanceID;
+        lifeCycleInstanceMap = builder.lifeCycleInstanceMap;
         apiDefinition = builder.apiDefinition;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
@@ -89,8 +94,8 @@ public final class API {
         return lifeCycleStatus;
     }
 
-    public String getLifeCycleInstanceID() {
-        return lifeCycleInstanceID;
+    public Map<String, String> getLifeCycleInstanceMap() {
+        return lifeCycleInstanceMap;
     }
 
     public String getApiDefinition() {
@@ -179,7 +184,7 @@ public final class API {
     private final String context;
     private final String description;
     private final String lifeCycleStatus;
-    private final String lifeCycleInstanceID;
+    private final Map<String,String> lifeCycleInstanceMap;
     private final String apiDefinition;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -224,7 +229,7 @@ public final class API {
      * {@code API} builder static inner class.
      */
     @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
-    public static final class Builder {
+    public static final class APIBuilder implements ManagedLifecycle{
         private String id;
         private String provider;
         private String name;
@@ -232,7 +237,7 @@ public final class API {
         private String context;
         private String description;
         private String lifeCycleStatus;
-        private String lifeCycleInstanceID;
+        private Map<String,String> lifeCycleInstanceMap = new HashMap<>();
         private String apiDefinition;
         private String wsdlUri;
         private boolean isResponseCachingEnabled;
@@ -252,261 +257,261 @@ public final class API {
         private String createdBy;
         private Date lastUpdatedTime;
 
-        public Builder(String provider, String name, String version) {
+        public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
             this.version = version;
         }
 
         /**
-         * Sets the {@code id} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code id} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param id the {@code id} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder id(String id) {
+        public APIBuilder id(String id) {
             this.id = id;
             return this;
         }
 
         /**
-         * Sets the {@code context} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param context the {@code context} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder context(String context) {
+        public APIBuilder context(String context) {
             this.context = context;
             return this;
         }
 
         /**
-         * Sets the {@code description} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param description the {@code description} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder description(String description) {
+        public APIBuilder description(String description) {
             this.description = description;
             return this;
         }
 
         /**
-         * Sets the {@code lifeCycleStatus} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param lifeCycleStatus the {@code lifeCycleStatus} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder lifeCycleStatus(String lifeCycleStatus) {
+        public APIBuilder lifeCycleStatus(String lifeCycleStatus) {
             this.lifeCycleStatus = lifeCycleStatus;
             return this;
         }
 
         /**
-         * Sets the {@code lifeCycleInstanceID} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
-         * @param lifeCycleInstanceID the {@code lifeCycleInstanceID} to set
-         * @return a reference to this Builder
+         * @param lifeCycleInstanceMap the {@code lifeCycleInstanceID} to set
+         * @return a reference to this APIBuilder
          */
-        public Builder lifeCycleInstanceID(String lifeCycleInstanceID) {
-            this.lifeCycleInstanceID = lifeCycleInstanceID;
+        public APIBuilder lifeCycleInstanceMap(Map<String,String> lifeCycleInstanceMap) {
+            this.lifeCycleInstanceMap = lifeCycleInstanceMap;
             return this;
         }
 
         /**
-         * Sets the {@code apiDefinition} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param apiDefinition the {@code apiDefinition} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder apiDefinition(String apiDefinition) {
+        public APIBuilder apiDefinition(String apiDefinition) {
             this.apiDefinition = apiDefinition;
             return this;
         }
 
         /**
-         * Sets the {@code wsdlUri} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code wsdlUri} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param wsdlUri the {@code wsdlUri} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder wsdlUri(String wsdlUri) {
+        public APIBuilder wsdlUri(String wsdlUri) {
             this.wsdlUri = wsdlUri;
             return this;
         }
 
         /**
-         * Sets the {@code isResponseCachingEnabled} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param isResponseCachingEnabled the {@code isResponseCachingEnabled} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder isResponseCachingEnabled(boolean isResponseCachingEnabled) {
+        public APIBuilder isResponseCachingEnabled(boolean isResponseCachingEnabled) {
             this.isResponseCachingEnabled = isResponseCachingEnabled;
             return this;
         }
 
         /**
-         * Sets the {@code cacheTimeout} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param cacheTimeout the {@code cacheTimeout} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder cacheTimeout(int cacheTimeout) {
+        public APIBuilder cacheTimeout(int cacheTimeout) {
             this.cacheTimeout = cacheTimeout;
             return this;
         }
 
         /**
-         * Sets the {@code isDefaultVersion} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param isDefaultVersion the {@code isDefaultVersion} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder isDefaultVersion(boolean isDefaultVersion) {
+        public APIBuilder isDefaultVersion(boolean isDefaultVersion) {
             this.isDefaultVersion = isDefaultVersion;
             return this;
         }
 
         /**
-         * Sets the {@code apiPolicy} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code apiPolicy} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param apiPolicy the {@code apiPolicy} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder apiPolicy(String apiPolicy) {
+        public APIBuilder apiPolicy(String apiPolicy) {
             this.apiPolicy = apiPolicy;
             return this;
         }
 
         /**
-         * Sets the {@code transport} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param transport the {@code transport} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder transport(List<String> transport) {
+        public APIBuilder transport(List<String> transport) {
             this.transport = transport;
             return this;
         }
 
         /**
-         * Sets the {@code tags} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code tags} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param tags the {@code tags} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder tags(List<String> tags) {
+        public APIBuilder tags(List<String> tags) {
             this.tags = tags;
             return this;
         }
 
         /**
-         * Sets the {@code policies} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param policies the {@code policies} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder policies(List<String> policies) {
+        public APIBuilder policies(List<String> policies) {
             this.policies = policies;
             return this;
         }
 
         /**
-         * Sets the {@code visibility} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code visibility} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param visibility the {@code visibility} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder visibility(Visibility visibility) {
+        public APIBuilder visibility(Visibility visibility) {
             this.visibility = visibility;
             return this;
         }
 
         /**
-         * Sets the {@code visibleRoles} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code visibleRoles} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param visibleRoles the {@code visibleRoles} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder visibleRoles(List<String> visibleRoles) {
+        public APIBuilder visibleRoles(List<String> visibleRoles) {
             this.visibleRoles = visibleRoles;
             return this;
         }
 
         /**
-         * Sets the {@code endpoints} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param endpoints the {@code endpoints} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder endpoints(List<Endpoint> endpoints) {
+        public APIBuilder endpoints(List<Endpoint> endpoints) {
             this.endpoints = endpoints;
             return this;
         }
 
         /**
-         * Sets the {@code gatewayEnvironments} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param gatewayEnvironments the {@code gatewayEnvironments} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder gatewayEnvironments(List<Environment> gatewayEnvironments) {
+        public APIBuilder gatewayEnvironments(List<Environment> gatewayEnvironments) {
             this.gatewayEnvironments = gatewayEnvironments;
             return this;
         }
 
         /**
-         * Sets the {@code businessInformation} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param businessInformation the {@code businessInformation} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder businessInformation(BusinessInformation businessInformation) {
+        public APIBuilder businessInformation(BusinessInformation businessInformation) {
             this.businessInformation = businessInformation;
             return this;
         }
 
         /**
-         * Sets the {@code corsConfiguration} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param corsConfiguration the {@code corsConfiguration} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder corsConfiguration(CorsConfiguration corsConfiguration) {
+        public APIBuilder corsConfiguration(CorsConfiguration corsConfiguration) {
             this.corsConfiguration = corsConfiguration;
             return this;
         }
 
         /**
-         * Sets the {@code createdTime} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param createdTime the {@code createdTime} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder createdTime(Date createdTime) {
+        public APIBuilder createdTime(Date createdTime) {
             this.createdTime = new Date(createdTime.getTime());
             return this;
         }
 
         /**
-         * Sets the {@code createdBy} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param createdBy the {@code createdBy} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder createdBy(String createdBy) {
+        public APIBuilder createdBy(String createdBy) {
             this.createdBy = createdBy;
             return this;
         }
 
         /**
-         * Sets the {@code lastUpdatedTime} and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
-         * @return a reference to this Builder
+         * @return a reference to this APIBuilder
          */
-        public Builder lastUpdatedTime(Date lastUpdatedTime) {
+        public APIBuilder lastUpdatedTime(Date lastUpdatedTime) {
             this.lastUpdatedTime = new Date(lastUpdatedTime.getTime());
             return this;
         }
@@ -514,10 +519,45 @@ public final class API {
         /**
          * Returns a {@code API} built from the parameters previously set.
          *
-         * @return a {@code API} built with parameters of this {@code API.Builder}
+         * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
         public API build() {
             return new API(this);
+        }
+
+        /**
+         * This method should be implemented to create association between object which implementing Managed
+         * Lifecycle and
+         * the Lifecycle framework. This method should implement logic which saves the returned uuid in the external
+         * party (API, APP etc). So both parties will have lifecycle uuid saved in their side which will cater the
+         * purpose of mapping.
+         *
+         * @param lifecycleState Lifecycle state object.
+         */
+        @Override
+        public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
+            lifeCycleInstanceMap.put(lifecycleState.getLcName(), lifecycleState.getLifecycleId());
+        }
+
+        /**
+         * This method should be implemented to remove the lifecycle data from the object which implements this
+         * interface.
+         * Persisted lifecycle state id (say stored in database) should be removed by implementing this method.
+         */
+        @Override
+        public void dissociateLifecycle() throws LifecycleException {
+
+        }
+
+        /**
+         * This method should provide lifecycle uuid when lifecycle name is given. Object which implements this method
+         * should maintain a mapping between lifecycle name and uuid. This is important for multiple lifecycle as well.
+         *
+         * @param lcName Name of the lifecycle.
+         */
+        @Override
+        public String getLifecycleId(String lcName) {
+            return lifeCycleInstanceMap.get(lcName);
         }
     }
 }

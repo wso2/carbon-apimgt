@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -137,17 +138,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Adds a new API to the system
      *
-     * @param api API model object
+     * @param apiBuilder API model object
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public API addAPI(API api) throws APIManagementException {
+    public API addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         API createdAPI = null;
         try {
-            createdAPI =  getApiDAO().addAPI(api);
-            APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
+            apiBuilder.createLifecycleEntry("API_LIFECYCLE",getUsername());
+            createdAPI = apiBuilder.build();
+            createdAPI =  getApiDAO().addAPI(createdAPI);
+            APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created successfully.",
+                    log);
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while creating the API - " + createdAPI.getName(), e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Error occurred while Associating the API - " + createdAPI.getName(), e, log);
         }
         return createdAPI;
     }
@@ -171,15 +177,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to update API
      */
     @Override
-    public void updateAPI(API api) throws APIManagementException {
+    public API updateAPI(API api) throws APIManagementException {
         try {
-            getApiDAO().updateAPI(api.getId(), api);
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
+            return getApiDAO().updateAPI(api.getId(), api);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
         }
+        return null;
     }
 
 
@@ -194,12 +201,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIStatus(String apiId, String status, boolean
+    public boolean updateAPIStatus(API.APIBuilder apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         try {
             getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
-            return true;
+            API api = getApiDAO().getAPI(apiId);
+            if (api != null){
+                api.executeLifecycleEvent(status,getUsername(),"API_LIFECYCLE");
+                return true;
+            }else{
+                return false;
+            }
         } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
+            return false;
+        } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
             return false;
         }

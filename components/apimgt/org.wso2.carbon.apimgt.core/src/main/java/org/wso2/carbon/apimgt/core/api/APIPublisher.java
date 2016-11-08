@@ -98,10 +98,10 @@ public interface APIPublisher extends APIManager {
     /**
      * Adds a new API to the Store
      *
-     * @param api API
+     * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    API addAPI(API api) throws APIManagementException;
+    API addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -118,7 +118,7 @@ public interface APIPublisher extends APIManager {
      * @param api API
      * @throws APIManagementException if failed to update API
      */
-    void updateAPI(API api) throws APIManagementException;
+    API updateAPI(API api) throws APIManagementException;
 
 
 

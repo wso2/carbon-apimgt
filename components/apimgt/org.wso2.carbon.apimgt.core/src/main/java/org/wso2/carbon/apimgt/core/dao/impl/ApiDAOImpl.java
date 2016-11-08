@@ -37,7 +37,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -95,8 +97,8 @@ public class ApiDAOImpl implements ApiDAO {
                             split("\\s*,\\s*")));
 
                     int apiPrimaryKey = rs.getInt("API_ID");
-
-                    api = new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
+                    Map lifecycleInstanceMap = new HashMap();
+                    api = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
                     id(rs.getString("UUID")).
                     context(rs.getString("CONTEXT")).
                     isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
@@ -108,7 +110,7 @@ public class ApiDAOImpl implements ApiDAO {
                     tags(getTags(connection, apiPrimaryKey)).
                     apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                     businessInformation(businessInformation).
-                    lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                    lifeCycleInstanceMap(lifecycleInstanceMap).
                     lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                     apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                     corsConfiguration(corsConfiguration).
@@ -248,7 +250,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(13, businessInformation.getBusinessOwner());
             statement.setString(14, businessInformation.getBusinessOwnerEmail());
 
-            statement.setString(15, api.getLifeCycleInstanceID());
+            statement.setString(15, api.getLifeCycleInstanceMap().get("API_LIFECYCLE"));
             statement.setString(16, api.getLifeCycleStatus());
             statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 

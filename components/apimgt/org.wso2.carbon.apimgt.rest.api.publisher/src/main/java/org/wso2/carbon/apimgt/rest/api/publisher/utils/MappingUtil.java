@@ -23,7 +23,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
@@ -105,7 +104,7 @@ public class MappingUtil {
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
 
-		API api = new API.Builder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+		API api = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).

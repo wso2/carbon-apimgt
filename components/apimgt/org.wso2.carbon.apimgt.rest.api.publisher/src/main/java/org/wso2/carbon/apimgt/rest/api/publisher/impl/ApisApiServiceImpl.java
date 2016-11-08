@@ -145,8 +145,28 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            API api = apiPublisher.updateAPI(MappingUtil.toAPI(body));
+            APIDTO apidto = null;
+            if (api != null){
+
+                apidto = MappingUtil.toAPIDto(api);
+            }
+            return Response.ok().entity(apidto).build();
+        } catch (APIManagementException e) {
+
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdSwaggerGet(String apiId
