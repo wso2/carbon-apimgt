@@ -33,7 +33,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -82,7 +85,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public APISummary getAPISummary(String apiID) throws SQLException {
+    public APISummary.Builder getAPISummary(String apiID) throws SQLException {
         return null;
     }
 
@@ -253,7 +256,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(13, businessInformation.getBusinessOwner());
             statement.setString(14, businessInformation.getBusinessOwnerEmail());
 
-            statement.setString(15, api.getLifeCycleInstanceID());
+            statement.setString(15, api.getLifeCycleInstanceMap().get("API_LIFECYCLE"));
             statement.setString(16, api.getLifeCycleStatus());
             statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
@@ -397,7 +400,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public API createNewAPIVersion(String apiID, String version) throws SQLException {
+    public API.APIBuilder createNewAPIVersion(String apiID, String version) throws SQLException {
         return null;
     }
 
@@ -447,7 +450,7 @@ public class ApiDAOImpl implements ApiDAO {
 
                 int apiPrimaryKey = rs.getInt("API_ID");
 
-                return new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
+                return new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
@@ -459,7 +462,7 @@ public class ApiDAOImpl implements ApiDAO {
                         tags(getTags(connection, apiPrimaryKey)).
                         apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
-                        lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        lifeCycleInstanceMap(Collections.emptyMap()).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).

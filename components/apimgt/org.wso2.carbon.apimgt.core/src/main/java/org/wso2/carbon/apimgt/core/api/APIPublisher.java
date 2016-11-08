@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
@@ -98,10 +99,10 @@ public interface APIPublisher extends APIManager {
     /**
      * Adds a new API to the Store
      *
-     * @param api API
+     * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    API addAPI(API api) throws APIManagementException;
+    API addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -115,10 +116,10 @@ public interface APIPublisher extends APIManager {
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param api API
+     * @param apiBuilder API
      * @throws APIManagementException if failed to update API
      */
-    void updateAPI(API api) throws APIManagementException;
+    API updateAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
 
 

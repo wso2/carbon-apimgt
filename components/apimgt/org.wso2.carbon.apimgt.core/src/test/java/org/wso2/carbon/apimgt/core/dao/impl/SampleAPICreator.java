@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.models.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -53,12 +54,11 @@ public class SampleAPICreator {
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration =  new CorsConfiguration();
 
-        return new API.Builder("admin", "WeatherAPI", "1.0.0").
+        return new API.APIBuilder("admin", "WeatherAPI", "1.0.0").
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
-                lifeCycleInstanceID(UUID.randomUUID().toString()).
                 apiDefinition("").
                 wsdlUri("").
                 isResponseCachingEnabled(false).
