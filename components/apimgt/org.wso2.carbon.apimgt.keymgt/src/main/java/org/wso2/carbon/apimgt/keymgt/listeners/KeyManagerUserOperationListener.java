@@ -89,6 +89,11 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             Tenant tenant = APIKeyMgtDataHolder.getRealmService().getTenantManager().getTenant(tenantId);
+            if(tenant == null && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+                tenant = new org.wso2.carbon.user.core.tenant.Tenant();
+                tenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                tenant.setId(MultitenantConstants.SUPER_TENANT_ID);
+            }
             Map<String, String> userStoreProperties = userStoreManager.getProperties(tenant);
             String userDomain = userStoreProperties.get(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
 
