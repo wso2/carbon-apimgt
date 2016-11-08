@@ -455,7 +455,14 @@
 
 
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
-
+        <!--Start of Dependency for integration gateway extension-->
+        <carbon.messaging.version>1.0.2</carbon.messaging.version>
+        <carbon.messaging.package.import.version.range>[0.0.0, 2.0.0)</carbon.messaging.package.import.version.range>
+        <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
+        <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
+        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
+        <!--End of Dependency for integration gateway extension-->
     </properties>
 
 </project>
