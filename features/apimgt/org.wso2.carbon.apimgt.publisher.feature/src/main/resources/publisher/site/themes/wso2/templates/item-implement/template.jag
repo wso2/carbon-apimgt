@@ -394,7 +394,7 @@
 												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
-                                                        <%if(api.type != "true"){%>
+                                                        <%if(api.type.toUpperCase() != "WS"){%>
 							                        <legend ><%=i18n.localize("Message Mediation Policies")%></legend>
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("Enable Message Mediation")%></label>
