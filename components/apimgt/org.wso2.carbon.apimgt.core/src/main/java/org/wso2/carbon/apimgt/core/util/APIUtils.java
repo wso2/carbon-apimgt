@@ -20,11 +20,13 @@
 package org.wso2.carbon.apimgt.core.util;
 
 import org.slf4j.Logger;
+import org.wso2.carbon.apimgt.core.api.Scope;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Tier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class for all utility methods
@@ -69,20 +71,19 @@ public class APIUtils {
     }
 
     /**
-     * This method converts the Search String into map
-     * @param query
-     * @return
+     * Find scope object in a set based on the key
+     *
+     * @param scopes - Set of scopes
+     * @param key    - Key to search with
+     * @return Scope - scope object
      */
-    public static Map createSearchCriteriaMap(String query){
-        Map<String,String> searchCriteriaMap = new HashMap<>();
-        String[] queryArray =  query.split(",");
-        for (String criteria1 : queryArray){
-            String[] criteria = criteria1.split(":");
-            if (criteria.length >1){
-                searchCriteriaMap.put(criteria[0],criteria[1]);
+    public static Scope findScopeByKey(Set<Scope> scopes, String key) {
+        for (Scope scope : scopes) {
+            if (scope.getKey().equals(key)) {
+                return scope;
             }
         }
-        return searchCriteriaMap;
+        return null;
     }
 
     /**

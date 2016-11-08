@@ -49,7 +49,7 @@ public interface ApiDAO {
      *
      */
     @CheckForNull
-    APISummary getAPISummary(String apiID) throws SQLException;
+    APISummary.Builder getAPISummary(String apiID) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
@@ -116,7 +116,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    API addAPI(API api) throws SQLException;
+    void addAPI(API api) throws SQLException;
 
     /**
      * Update an existing API
@@ -192,7 +192,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    API createNewAPIVersion(String apiID, String version) throws SQLException;
+    API.APIBuilder createNewAPIVersion(String apiID, String version) throws SQLException;
 
     /**
      * Return list of all Document info belonging to a given API. This method supports result pagination
@@ -213,4 +213,6 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     DocumentInfo getDocumentInfo(String apiID, String docID) throws SQLException;
+
+
 }

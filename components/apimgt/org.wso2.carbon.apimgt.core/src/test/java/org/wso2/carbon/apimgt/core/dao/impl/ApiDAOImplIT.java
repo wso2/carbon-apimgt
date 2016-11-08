@@ -60,8 +60,8 @@ public class ApiDAOImplIT {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
         API api = SampleAPICreator.createDefaultAPI();
 
-        API createdAPI = apiDAO.addAPI(api);
-
+         apiDAO.addAPI(api);
+        API createdAPI = apiDAO.getAPI(api.getId());
         Assert.assertEquals(createdAPI.getProvider(), api.getProvider());
         Assert.assertEquals(createdAPI.getVersion(), api.getVersion());
         Assert.assertEquals(createdAPI.getName(), api.getName());
