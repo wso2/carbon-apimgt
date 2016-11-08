@@ -72,8 +72,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         claims.put(dialect + "/tier", tier);
         claims.put(dialect + "/keytype", keyType);
         claims.put(dialect + "/usertype", userType);
-        claims.put(dialect + "/enduser",
-                   UserCoreUtil.removeDomainFromName(APIUtil.getUserNameWithTenantSuffix(endUserName)));
+        claims.put(dialect + "/enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
         claims.put(dialect + "/enduserTenantId", enduserTenantId);
 
         return claims;
