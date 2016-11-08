@@ -229,7 +229,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public API addAPI(final API api) throws SQLException {
+    public void addAPI(final API api) throws SQLException {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
@@ -289,7 +289,6 @@ public class ApiDAOImpl implements ApiDAO {
             connection.commit();
         }
 
-        return api;
     }
 
     /**

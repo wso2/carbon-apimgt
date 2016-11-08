@@ -233,6 +233,91 @@ public final class API {
         private String id;
         private String provider;
         private String name;
+
+        public String getId() {
+            return id;
+        }
+
+        public String getProvider() {
+            return provider;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public String getContext() {
+            return context;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getLifeCycleStatus() {
+            return lifeCycleStatus;
+        }
+
+        public Map<String, String> getLifeCycleInstanceMap() {
+            return lifeCycleInstanceMap;
+        }
+
+        public String getApiDefinition() {
+            return apiDefinition;
+        }
+
+        public String getWsdlUri() {
+            return wsdlUri;
+        }
+
+        public boolean isResponseCachingEnabled() {
+            return isResponseCachingEnabled;
+        }
+
+        public int getCacheTimeout() {
+            return cacheTimeout;
+        }
+
+        public boolean isDefaultVersion() {
+            return isDefaultVersion;
+        }
+
+        public String getApiPolicy() {
+            return apiPolicy;
+        }
+
+        public List<String> getTransport() {
+            return transport;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public List<String> getPolicies() {
+            return policies;
+        }
+
+        public Visibility getVisibility() {
+            return visibility;
+        }
+
+        public List<String> getVisibleRoles() {
+            return visibleRoles;
+        }
+
+        public List<Endpoint> getEndpoints() {
+            return endpoints;
+        }
+
+        public List<Environment> getGatewayEnvironments() {
+            return gatewayEnvironments;
+        }
+
+        public BusinessInformation getBusinessInformation() {
+            return businessInformation;
+        }
+
         private String version;
         private String context;
         private String description;
@@ -558,6 +643,10 @@ public final class API {
         @Override
         public String getLifecycleId(String lcName) {
             return lifeCycleInstanceMap.get(lcName);
+        }
+
+        public String getName() {
+            return name;
         }
     }
 }

@@ -116,7 +116,7 @@ public interface ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    API addAPI(API api) throws SQLException;
+    void addAPI(API api) throws SQLException;
 
     /**
      * Update an existing API

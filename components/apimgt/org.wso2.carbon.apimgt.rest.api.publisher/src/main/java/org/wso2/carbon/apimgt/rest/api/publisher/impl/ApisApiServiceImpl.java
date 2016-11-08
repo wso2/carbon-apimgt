@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
@@ -149,12 +148,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            API api = apiPublisher.updateAPI(MappingUtil.toAPI(body));
-            APIDTO apidto = null;
-            if (api != null){
-
-                apidto = MappingUtil.toAPIDto(api);
-            }
+            apiPublisher.updateAPI(MappingUtil.toAPI(body));
+            APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
             return Response.ok().entity(apidto).build();
         } catch (APIManagementException e) {
 
@@ -276,7 +271,9 @@ public class ApisApiServiceImpl extends ApisApiService {
      String username = "";
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
-            API returnAPI = RestAPIPublisherUtil.getApiPublisher(username).addAPI(apiBuilder);
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.addAPI(apiBuilder);
+            API returnAPI = apiPublisher.getAPIbyUUID(apiBuilder.getId());
           URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
             return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {

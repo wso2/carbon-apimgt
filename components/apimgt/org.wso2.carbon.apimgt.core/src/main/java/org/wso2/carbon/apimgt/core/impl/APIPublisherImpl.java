@@ -143,20 +143,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public API addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-        API createdAPI = apiBuilder.build();
+    public void addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+
         try {
-            apiBuilder.createLifecycleEntry("API_LIFECYCLE",getUsername());
-            createdAPI = apiBuilder.build();
-            createdAPI =  getApiDAO().addAPI(createdAPI);
-            APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created successfully.",
+            apiBuilder.createLifecycleEntry("API_LIFECYCLE", getUsername());
+            API createdAPI = apiBuilder.build();
+            getApiDAO().addAPI(createdAPI);
+            APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
+                    "successfully.",
                     log);
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while creating the API - " + createdAPI.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Error occurred while Associating the API - " + createdAPI.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while Associating the API - " + apiBuilder.getName(), e, log);
         }
-        return createdAPI;
     }
 
     /**
@@ -174,21 +174,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param apiBuilder API model object
+     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder} model object
      * @throws APIManagementException if failed to update API
      */
     @Override
-    public API updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+    public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         API api = apiBuilder.build();
         try {
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
-            return getApiDAO().updateAPI(api.getId(), api);
+             getApiDAO().updateAPI(api.getId(), api);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
         }
-        return null;
     }
 
 

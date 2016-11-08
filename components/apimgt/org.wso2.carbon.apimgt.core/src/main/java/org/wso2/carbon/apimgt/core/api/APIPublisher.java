@@ -102,7 +102,7 @@ public interface APIPublisher extends APIManager {
      * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    API addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
+    void addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -116,10 +116,10 @@ public interface APIPublisher extends APIManager {
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param apiBuilder API
+     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update API
      */
-    API updateAPI(API.APIBuilder apiBuilder) throws APIManagementException;
+    void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
 
 
