@@ -275,7 +275,7 @@ var drawRegisteredUserCountByApplications = function(from,to){
 
                         // CREATE VIS & GROUPS
 
-                        var vis = d3.select("#subsChart").append("div:div").attr("class", "col-xs-12 col-sm-4 col-md-3 col-lg-2");
+                        var vis = d3.select("#subsChart").append("div:div").attr("class", "col-xs-12 col-sm-6 col-md-4 col-lg-3");
                         
                         vis = vis.append("svg:svg").style("height","200px");
 
