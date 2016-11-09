@@ -21,12 +21,10 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Representation an API object that contains a limited number of details. Only immutable instances of this class
@@ -42,7 +40,7 @@ public final class APISummary {
     private final String context;
     private final String id;
     private final String status;
-    private final String lifecycleInstanceId;
+    private final String lifeCycleInstanceId;
 
     private APISummary(Builder builder) {
         provider = builder.provider;
@@ -52,11 +50,11 @@ public final class APISummary {
         context = builder.context;
         id = builder.id;
         status = builder.status;
-        lifecycleInstanceId = builder.lifecycleInstanceId;
+        lifeCycleInstanceId = builder.lifeCycleInstanceId;
     }
 
-    public String getLifecycleInstanceId() {
-        return lifecycleInstanceId;
+    public String getLifeCycleInstanceId() {
+        return lifeCycleInstanceId;
     }
 
     @Override
@@ -111,6 +109,7 @@ public final class APISummary {
     /**
      * {@code APISummary} builder static inner class.
      */
+    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
     public static final class Builder implements ManagedLifecycle{
         private String provider;
         private String version;
@@ -119,7 +118,7 @@ public final class APISummary {
         private String context;
         private String id;
         private String status;
-        private String lifecycleInstanceId ;
+        private String lifeCycleInstanceId;
         public Builder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -190,7 +189,7 @@ public final class APISummary {
          */
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifecycleInstanceId = lifecycleState.getLifecycleId();
+            lifeCycleInstanceId = lifecycleState.getLifecycleId();
         }
 
         /**
@@ -215,8 +214,8 @@ public final class APISummary {
             status = lifecycleState.getState();
         }
 
-        public String getLifecycleInstanceId() {
-            return lifecycleInstanceId;
+        public String getLifeCycleInstanceId() {
+            return lifeCycleInstanceId;
         }
     }
 }

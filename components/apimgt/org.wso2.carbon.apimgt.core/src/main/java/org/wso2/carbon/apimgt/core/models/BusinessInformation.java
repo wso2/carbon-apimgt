@@ -27,10 +27,10 @@ package org.wso2.carbon.apimgt.core.models;
  * This Class represents the Business information of the API
  */
 public final class BusinessInformation {
-    private String businessOwner;
-    private String businessOwnerEmail;
-    private String technicalOwner;
-    private String technicalOwnerEmail;
+    private String businessOwner = "";
+    private String businessOwnerEmail = "";
+    private String technicalOwner = "";
+    private String technicalOwnerEmail = "";
 
     public String getBusinessOwner() {
         return businessOwner;
@@ -62,5 +62,28 @@ public final class BusinessInformation {
 
     public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
         this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BusinessInformation that = (BusinessInformation) o;
+
+        if (!businessOwner.equals(that.businessOwner)) return false;
+        if (!businessOwnerEmail.equals(that.businessOwnerEmail)) return false;
+        if (!technicalOwner.equals(that.technicalOwner)) return false;
+        return technicalOwnerEmail.equals(that.technicalOwnerEmail);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = businessOwner.hashCode();
+        result = 31 * result + businessOwnerEmail.hashCode();
+        result = 31 * result + technicalOwner.hashCode();
+        result = 31 * result + technicalOwnerEmail.hashCode();
+        return result;
     }
 }

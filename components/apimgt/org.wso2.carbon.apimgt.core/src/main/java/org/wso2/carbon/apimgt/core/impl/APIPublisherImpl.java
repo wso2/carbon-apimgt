@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,7 +154,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         try {
             LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
-            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
+            apiBuilder.lifeCycleInstanceId(lifecycleState.getLifecycleId());
             API createdAPI = apiBuilder.build();
             getApiDAO().addAPI(createdAPI);
             APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -214,11 +213,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public boolean updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         try {
-            APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(apiId);
-            if (apiSummaryBuilder != null){
-                getApiLifecycleManager().executeLifecycleEvent(status, apiSummaryBuilder.getLifecycleInstanceId(),
-                        status, apiSummaryBuilder);
-                APISummary apiSummary = apiSummaryBuilder.build();
+            APISummary apiSummary = getApiDAO().getAPISummary(apiId);
+            if (apiSummary != null){
+                getApiLifecycleManager().executeLifecycleEvent(status, apiSummary.getLifeCycleInstanceId(),
+                        status, apiSummary);
                 getApiDAO().changeLifeCycleStatus(apiSummary.getId(), status, deprecateOldVersions,
                         makeKeysForwardCompatible);
                 return true;
@@ -245,7 +243,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
-        try {
+        /*try {
 
            API.APIBuilder apiBuilder = getApiDAO().createNewAPIVersion(api.getId(), newVersion);
             LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
@@ -255,6 +253,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + api.getName(), e, log);
         }
+        */
     }
 
     /**
@@ -378,9 +377,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void deleteAPI(String identifier) throws APIManagementException {
         try {
             if (getAPISubscriptionCountByAPI(identifier) < 0) {
-                APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(identifier);
-                if (apiSummaryBuilder != null){
-                    getApiLifecycleManager().removeLifecycle(apiSummaryBuilder.getLifecycleInstanceId());
+                APISummary apiSummary = getApiDAO().getAPISummary(identifier);
+                if (apiSummary != null){
+                    getApiLifecycleManager().removeLifecycle(apiSummary.getLifeCycleInstanceId());
                     getApiDAO().deleteAPI(identifier);
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                 }

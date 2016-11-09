@@ -34,6 +34,7 @@ import java.util.List;
  * by Joshua Bloch(Item 2)"
  */
 
+@SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
 public final class API {
     private API(APIBuilder builder) {
         id = builder.id;
@@ -43,7 +44,7 @@ public final class API {
         context = builder.context;
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
-        lifecycleInstanceId = builder.lifecycleInstanceId;
+        lifeCycleInstanceId = builder.lifeCycleInstanceId;
         apiDefinition = builder.apiDefinition;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
@@ -92,8 +93,8 @@ public final class API {
         return lifeCycleStatus;
     }
 
-    public String getLifecycleInstanceId() {
-        return lifecycleInstanceId;
+    public String getLifeCycleInstanceId() {
+        return lifeCycleInstanceId;
     }
 
     public String getApiDefinition() {
@@ -182,7 +183,7 @@ public final class API {
     private final String context;
     private final String description;
     private final String lifeCycleStatus;
-    private final String lifecycleInstanceId;
+    private final String lifeCycleInstanceId;
     private final String apiDefinition;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -256,8 +257,8 @@ public final class API {
             return lifeCycleStatus;
         }
 
-        public String getLifecycleInstanceId() {
-            return lifecycleInstanceId;
+        public String getLifeCycleInstanceId() {
+            return lifeCycleInstanceId;
         }
 
         public String getApiDefinition() {
@@ -320,7 +321,7 @@ public final class API {
         private String context;
         private String description;
         private String lifeCycleStatus;
-        private String lifecycleInstanceId;
+        private String lifeCycleInstanceId;
         private String apiDefinition;
         private String wsdlUri;
         private boolean isResponseCachingEnabled;
@@ -391,13 +392,13 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleInstanceId} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
-         * @param lifecycleInstanceId the {@code lifeCycleInstanceID} to set
+         * @param lifeCycleInstanceId the {@code lifeCycleInstanceId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
-            this.lifecycleInstanceId = lifecycleInstanceId;
+        public APIBuilder lifeCycleInstanceId(String lifeCycleInstanceId) {
+            this.lifeCycleInstanceId = lifeCycleInstanceId;
             return this;
         }
 
@@ -619,7 +620,7 @@ public final class API {
          */
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifecycleInstanceId = lifecycleState.getLifecycleId();
+            lifeCycleInstanceId = lifecycleState.getLifecycleId();
         }
 
         /**

@@ -39,9 +39,9 @@ public class SampleAPICreator {
         tags.add("climate");
 
         List<String> policies = new ArrayList<>();
-        tags.add("Gold");
-        tags.add("Silver");
-        tags.add("Bronze");
+        policies.add("Gold");
+        policies.add("Silver");
+        policies.add("Bronze");
 
         Endpoint endpoint = new Endpoint();
         List<Endpoint> endpointList = new ArrayList<>();

@@ -72,4 +72,29 @@ public class CorsConfiguration {
     public void setAllowMethods(List<String> allowMethods) {
         this.allowMethods = allowMethods;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CorsConfiguration that = (CorsConfiguration) o;
+
+        if (isEnabled != that.isEnabled) return false;
+        if (isAllowCredentials != that.isAllowCredentials) return false;
+        if (!allowOrigins.equals(that.allowOrigins)) return false;
+        if (!allowHeaders.equals(that.allowHeaders)) return false;
+        return allowMethods.equals(that.allowMethods);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (isEnabled ? 1 : 0);
+        result = 31 * result + (isAllowCredentials ? 1 : 0);
+        result = 31 * result + allowOrigins.hashCode();
+        result = 31 * result + allowHeaders.hashCode();
+        result = 31 * result + allowMethods.hashCode();
+        return result;
+    }
 }

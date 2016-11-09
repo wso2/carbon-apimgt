@@ -29,9 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 
 public class ApiDAOImplIT {
@@ -56,19 +53,7 @@ public class ApiDAOImplIT {
     }
 
     @Test
-    public void testAddAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API api = SampleAPICreator.createDefaultAPI();
-
-         apiDAO.addAPI(api);
-        API createdAPI = apiDAO.getAPI(api.getId());
-        Assert.assertEquals(createdAPI.getProvider(), api.getProvider());
-        Assert.assertEquals(createdAPI.getVersion(), api.getVersion());
-        Assert.assertEquals(createdAPI.getName(), api.getName());
-    }
-
-    @Test
-    public void testGetAPI() throws Exception {
+    public void testAddGetAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
         API api = SampleAPICreator.createDefaultAPI();
 
@@ -77,10 +62,7 @@ public class ApiDAOImplIT {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getProvider(), api.getProvider());
-        Assert.assertEquals(apiFromDB.getVersion(), api.getVersion());
-        Assert.assertEquals(apiFromDB.getName(), api.getName());
-        Assert.assertEquals(apiFromDB.getId(), api.getId());
+        validateAPIs(apiFromDB, api);
     }
 
 
@@ -152,6 +134,35 @@ public class ApiDAOImplIT {
     @Test
     public void testGetDocumentInfo() throws Exception {
 
+    }
+
+    private void validateAPIs(API actualAPI, API expectedAPI) {
+        Assert.assertEquals(actualAPI.getProvider(), expectedAPI.getProvider());
+        Assert.assertEquals(actualAPI.getVersion(), expectedAPI.getVersion());
+        Assert.assertEquals(actualAPI.getName(), expectedAPI.getName());
+        Assert.assertEquals(actualAPI.getDescription(), expectedAPI.getDescription());
+        Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
+        Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
+        Assert.assertEquals(actualAPI.getLifeCycleStatus(), expectedAPI.getLifeCycleStatus());
+        Assert.assertEquals(actualAPI.getLifeCycleInstanceId(), expectedAPI.getLifeCycleInstanceId());
+        Assert.assertEquals(actualAPI.getApiDefinition(), expectedAPI.getApiDefinition());
+        Assert.assertEquals(actualAPI.getWsdlUri(), expectedAPI.getWsdlUri());
+        Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());
+        Assert.assertEquals(actualAPI.getCacheTimeout(), expectedAPI.getCacheTimeout());
+        Assert.assertEquals(actualAPI.isDefaultVersion(), expectedAPI.isDefaultVersion());
+        //Assert.assertEquals(actualAPI.getApiPolicy(), expectedAPI.getApiPolicy());
+        Assert.assertEquals(actualAPI.getTransport(), expectedAPI.getTransport());
+        Assert.assertEquals(actualAPI.getTags(), expectedAPI.getTags());
+        //Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
+        Assert.assertEquals(actualAPI.getVisibility(), expectedAPI.getVisibility());
+        Assert.assertEquals(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles());
+        //Assert.assertEquals(actualAPI.getEndpoints(), expectedAPI.getEndpoints());
+        //Assert.assertEquals(actualAPI.getGatewayEnvironments(), expectedAPI.getGatewayEnvironments());
+        Assert.assertEquals(actualAPI.getBusinessInformation(), expectedAPI.getBusinessInformation());
+        Assert.assertEquals(actualAPI.getCorsConfiguration(), expectedAPI.getCorsConfiguration());
+        Assert.assertEquals(actualAPI.getCreatedTime(), expectedAPI.getCreatedTime());
+        Assert.assertEquals(actualAPI.getCreatedBy(), expectedAPI.getCreatedBy());
+        Assert.assertEquals(actualAPI.getLastUpdatedTime(), expectedAPI.getLastUpdatedTime());
     }
 
 }
