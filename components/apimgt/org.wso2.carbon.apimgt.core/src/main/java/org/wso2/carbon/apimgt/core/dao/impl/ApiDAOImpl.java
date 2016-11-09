@@ -44,7 +44,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -262,7 +261,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(13, businessInformation.getBusinessOwner());
             statement.setString(14, businessInformation.getBusinessOwnerEmail());
 
-            statement.setString(15, api.getLifeCycleInstanceMap().get("API_LIFECYCLE"));
+            statement.setString(15, api.getLifecycleInstanceId());
             statement.setString(16, api.getLifeCycleStatus());
             statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
@@ -517,7 +516,7 @@ public class ApiDAOImpl implements ApiDAO {
                         tags(getTags(connection, apiPrimaryKey)).
                         apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
-                        lifeCycleInstanceMap(Collections.emptyMap()).
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).

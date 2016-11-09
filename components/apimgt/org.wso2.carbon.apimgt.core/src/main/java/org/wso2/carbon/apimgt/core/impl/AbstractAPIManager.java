@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -46,13 +47,15 @@ public abstract class AbstractAPIManager implements APIManager {
     private ApplicationDAO applicationDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
     private String username;
+    private APILifecycleManager apiLifecycleManager;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO)  {
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.apiLifecycleManager = apiLifecycleManager;
     }
 
     /**
@@ -206,24 +209,12 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDAO;
     }
 
-    protected void setApiDAO(ApiDAO apiDAO) {
-        this.apiDAO = apiDAO;
-    }
-
     protected ApplicationDAO getApplicationDAO() {
         return applicationDAO;
     }
 
-    protected void setApplicationDAO(ApplicationDAO applicationDAO) {
-        this.applicationDAO = applicationDAO;
-    }
-
     protected APISubscriptionDAO getApiSubscriptionDAO() {
         return apiSubscriptionDAO;
-    }
-
-    protected void setApiSubscriptionDAO(APISubscriptionDAO apiSubscriptionDAO) {
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
     }
 
     protected String getUsername() {
@@ -233,6 +224,8 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void setUsername(String username) {
         this.username = username;
     }
-    
-    
+
+    public APILifecycleManager getApiLifecycleManager() {
+        return apiLifecycleManager;
+    }
 }

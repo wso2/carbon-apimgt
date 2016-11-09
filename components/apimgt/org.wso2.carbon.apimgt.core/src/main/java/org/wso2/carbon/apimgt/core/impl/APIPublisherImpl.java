@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -37,10 +38,12 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,8 +56,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,apiLifecycleManager);
     }
 
     /**
@@ -151,7 +154,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         try {
-            apiBuilder.createLifecycleEntry("API_LIFECYCLE", getUsername());
+            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
             API createdAPI = apiBuilder.build();
             getApiDAO().addAPI(createdAPI);
             APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -212,8 +216,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(apiId);
             if (apiSummaryBuilder != null){
-
-                apiSummaryBuilder.executeLifecycleEvent(status, getUsername(), "API_LIFECYCLE");
+                getApiLifecycleManager().executeLifecycleEvent(status, apiSummaryBuilder.getLifecycleInstanceId(),
+                        status, apiSummaryBuilder);
                 APISummary apiSummary = apiSummaryBuilder.build();
                 getApiDAO().changeLifeCycleStatus(apiSummary.getId(), status, deprecateOldVersions,
                         makeKeysForwardCompatible);
@@ -244,7 +248,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
 
            API.APIBuilder apiBuilder = getApiDAO().createNewAPIVersion(api.getId(), newVersion);
-            apiBuilder.createLifecycleEntry("API_LIFECYCLE",getUsername());
+            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), e, log);
         } catch (LifecycleException e) {
@@ -375,8 +380,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getAPISubscriptionCountByAPI(identifier) < 0) {
                 APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(identifier);
                 if (apiSummaryBuilder != null){
-
-                    apiSummaryBuilder.removeLifecycleEntry("API_LIFECYCLE");
+                    getApiLifecycleManager().removeLifecycle(apiSummaryBuilder.getLifecycleInstanceId());
                     getApiDAO().deleteAPI(identifier);
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                 }

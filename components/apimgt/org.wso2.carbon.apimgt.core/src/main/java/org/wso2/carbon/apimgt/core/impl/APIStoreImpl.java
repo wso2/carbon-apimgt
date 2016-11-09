@@ -47,7 +47,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,new APILifeCycleManagerImpl());
     }
 
     @Override
