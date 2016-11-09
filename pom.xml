@@ -1054,6 +1054,9 @@
     <properties>
         <project.scm.id>scm-server</project.scm.id>
 
+        <!-- File encoding of build -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <!-- APIM Component Version -->
 
         <carbon.apimgt.version>6.1.0-SNAPSHOT</carbon.apimgt.version>
