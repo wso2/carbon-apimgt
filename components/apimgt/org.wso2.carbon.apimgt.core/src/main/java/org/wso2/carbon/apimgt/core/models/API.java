@@ -26,9 +26,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleExceptio
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -45,7 +43,7 @@ public final class API {
         context = builder.context;
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
-        lifeCycleInstanceMap = builder.lifeCycleInstanceMap;
+        lifecycleInstanceId = builder.lifecycleInstanceId;
         apiDefinition = builder.apiDefinition;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
@@ -94,8 +92,8 @@ public final class API {
         return lifeCycleStatus;
     }
 
-    public Map<String, String> getLifeCycleInstanceMap() {
-        return lifeCycleInstanceMap;
+    public String getLifecycleInstanceId() {
+        return lifecycleInstanceId;
     }
 
     public String getApiDefinition() {
@@ -184,7 +182,7 @@ public final class API {
     private final String context;
     private final String description;
     private final String lifeCycleStatus;
-    private final Map<String,String> lifeCycleInstanceMap;
+    private final String lifecycleInstanceId;
     private final String apiDefinition;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -258,8 +256,8 @@ public final class API {
             return lifeCycleStatus;
         }
 
-        public Map<String, String> getLifeCycleInstanceMap() {
-            return lifeCycleInstanceMap;
+        public String getLifecycleInstanceId() {
+            return lifecycleInstanceId;
         }
 
         public String getApiDefinition() {
@@ -322,7 +320,7 @@ public final class API {
         private String context;
         private String description;
         private String lifeCycleStatus;
-        private Map<String,String> lifeCycleInstanceMap = new HashMap<>();
+        private String lifecycleInstanceId;
         private String apiDefinition;
         private String wsdlUri;
         private boolean isResponseCachingEnabled;
@@ -395,11 +393,11 @@ public final class API {
         /**
          * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
-         * @param lifeCycleInstanceMap the {@code lifeCycleInstanceID} to set
+         * @param lifecycleInstanceId the {@code lifeCycleInstanceID} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lifeCycleInstanceMap(Map<String,String> lifeCycleInstanceMap) {
-            this.lifeCycleInstanceMap = lifeCycleInstanceMap;
+        public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
+            this.lifecycleInstanceId = lifecycleInstanceId;
             return this;
         }
 
@@ -621,28 +619,29 @@ public final class API {
          */
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifeCycleInstanceMap.put(lifecycleState.getLcName(), lifecycleState.getLifecycleId());
+            lifecycleInstanceId = lifecycleState.getLifecycleId();
         }
 
         /**
-         * This method should be implemented to remove the lifecycle data from the object which implements this
-         * interface.
-         * Persisted lifecycle state id (say stored in database) should be removed by implementing this method.
+         * @param lcName Name of the lifecycle to be removed.
+         *               This method should be implemented to remove the lifecycle data from the object which
+         *               implements this interface.
+         *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
+         *               method.
          */
         @Override
-        public void dissociateLifecycle() throws LifecycleException {
-
+        public void dissociateLifecycle(String lcName) throws LifecycleException {
         }
 
         /**
-         * This method should provide lifecycle uuid when lifecycle name is given. Object which implements this method
-         * should maintain a mapping between lifecycle name and uuid. This is important for multiple lifecycle as well.
-         *
-         * @param lcName Name of the lifecycle.
+         * @param lifecycleState Lifecycle state object.
+         *                       This method should be implemented to update the lifecycle state after state change
+         *                       operation and check list
+         *                       item operation
          */
         @Override
-        public String getLifecycleId(String lcName) {
-            return lifeCycleInstanceMap.get(lcName);
+        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
+            lifeCycleStatus = lifecycleState.getState();
         }
 
         public String getName() {

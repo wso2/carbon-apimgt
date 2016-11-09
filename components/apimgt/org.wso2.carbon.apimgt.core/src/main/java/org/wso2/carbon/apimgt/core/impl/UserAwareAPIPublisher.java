@@ -28,6 +28,6 @@ public class UserAwareAPIPublisher extends APIPublisherImpl {
 
     public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,new APILifeCycleManagerImpl());
     }
 }

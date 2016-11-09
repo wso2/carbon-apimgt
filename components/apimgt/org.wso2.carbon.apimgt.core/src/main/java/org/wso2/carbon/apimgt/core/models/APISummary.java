@@ -42,7 +42,7 @@ public final class APISummary {
     private final String context;
     private final String id;
     private final String status;
-    private final Map<String,String> lifeCycleInstanceMap;
+    private final String lifecycleInstanceId;
 
     private APISummary(Builder builder) {
         provider = builder.provider;
@@ -52,11 +52,11 @@ public final class APISummary {
         context = builder.context;
         id = builder.id;
         status = builder.status;
-        lifeCycleInstanceMap = builder.lifeCycleInstanceMap;
+        lifecycleInstanceId = builder.lifecycleInstanceId;
     }
 
-    public Map<String, String> getLifeCycleInstanceMap() {
-        return lifeCycleInstanceMap;
+    public String getLifecycleInstanceId() {
+        return lifecycleInstanceId;
     }
 
     @Override
@@ -119,7 +119,7 @@ public final class APISummary {
         private String context;
         private String id;
         private String status;
-        private Map<String,String> lifeCycleInstanceMap = new HashMap<>();
+        private String lifecycleInstanceId ;
         public Builder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -190,28 +190,33 @@ public final class APISummary {
          */
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifeCycleInstanceMap.put(lifecycleState.getLcName(), lifecycleState.getLifecycleId());
+            lifecycleInstanceId = lifecycleState.getLifecycleId();
         }
 
         /**
-         * This method should be implemented to remove the lifecycle data from the object which implements this
-         * interface.
-         * Persisted lifecycle state id (say stored in database) should be removed by implementing this method.
+         * @param lcName Name of the lifecycle to be removed.
+         *               This method should be implemented to remove the lifecycle data from the object which
+         *               implements this interface.
+         *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
+         *               method.
          */
         @Override
-        public void dissociateLifecycle() throws LifecycleException {
-
+        public void dissociateLifecycle(String lcName) throws LifecycleException {
         }
 
         /**
-         * This method should provide lifecycle uuid when lifecycle name is given. Object which implements this method
-         * should maintain a mapping between lifecycle name and uuid. This is important for multiple lifecycle as well.
-         *
-         * @param lcName Name of the lifecycle.
+         * @param lifecycleState Lifecycle state object.
+         *                       This method should be implemented to update the lifecycle state after state change
+         *                       operation and check list
+         *                       item operation
          */
         @Override
-        public String getLifecycleId(String lcName) {
-            return lifeCycleInstanceMap.get(lcName);
+        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
+            status = lifecycleState.getState();
+        }
+
+        public String getLifecycleInstanceId() {
+            return lifecycleInstanceId;
         }
     }
 }
