@@ -25,6 +25,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.TestConstants;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.LifecycleOperationManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleDataProvider;
@@ -140,7 +141,8 @@ public class LifecycleOperationsTest {
     public void testAssociateLifecycle() throws Exception {
         sampleAPI = createSampleAPI();
 
-        sampleAPI.createLifecycleEntry(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN);
+        sampleAPI.associateLifecycle(
+                LifecycleOperationManager.addLifecycle(TestConstants.SERVICE_LIFE_CYCLE, TestConstants.ADMIN));
         assertNotNull(sampleAPI.getLifecycleState().getState());
         assertNotNull(sampleAPI.getLifecycleState().getLifecycleId());
     }
@@ -155,15 +157,15 @@ public class LifecycleOperationsTest {
             inputBean.setValues("value 1");
         }
         try {
-            sampleAPI.setLifecycleState(sampleAPI
-                    .executeLifecycleEvent(targetState, TestConstants.ADMIN, TestConstants.SERVICE_LIFE_CYCLE));
+            sampleAPI.setLifecycleState(
+                    LifecycleOperationManager.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Required checklist items are not selected"));
         }
+        sampleAPI.setLifecycleState(LifecycleOperationManager
+                .checkListItemEvent(uuid, sampleAPI.getLifecycleState().getState(), "Code Completed", true));
         sampleAPI.setLifecycleState(
-                sampleAPI.checkListItemEvent(TestConstants.SERVICE_LIFE_CYCLE, "Code Completed", true));
-        sampleAPI.setLifecycleState(
-                sampleAPI.executeLifecycleEvent(targetState, TestConstants.ADMIN, TestConstants.SERVICE_LIFE_CYCLE));
+                LifecycleOperationManager.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
         assertEquals(sampleAPI.getLifecycleState().getState(), targetState);
 
     }
@@ -186,9 +188,9 @@ public class LifecycleOperationsTest {
 
     @Test(dependsOnMethods = "testGetLifecycleIdsFromState")
     public void testDissociateLifecycle() throws Exception {
-        sampleAPI.removeLifecycleEntry(TestConstants.SERVICE_LIFE_CYCLE);
+        LifecycleOperationManager.removeLifecycle(sampleAPI.getLifecycleState().getLifecycleId());
         try {
-            sampleAPI.getCurrentLifecycleState(TestConstants.SERVICE_LIFE_CYCLE);
+            LifecycleOperationManager.getCurrentLifecycleState(sampleAPI.getLifecycleState().getLifecycleId());
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Error while getting lifecycle data for id"));
         }

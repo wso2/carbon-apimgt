@@ -37,7 +37,7 @@ public class LifecycleOperationManager {
      * @return                                  {@code LifecycleState} object of updated life cycle state.
      * @throws LifecycleException               If exception occurred while execute life cycle state change.
      */
-    protected static LifecycleState executeLifecycleEvent(String targetState, String uuid, String user, Object resource)
+    public static LifecycleState executeLifecycleEvent(String targetState, String uuid, String user, Object resource)
             throws LifecycleException {
         LifecycleState nextState = new LifecycleState();
         LifecycleState currentState = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
@@ -72,7 +72,7 @@ public class LifecycleOperationManager {
      *
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
-    protected static LifecycleState checkListItemEvent(String uuid, String currentState, String checkListItemName,
+    public static LifecycleState checkListItemEvent(String uuid, String currentState, String checkListItemName,
             boolean value) throws LifecycleException {
         changeCheckListItem(uuid, currentState, checkListItemName, value);
         LifecycleState currentStateObject = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
@@ -96,7 +96,7 @@ public class LifecycleOperationManager {
      * @return                              Object of added life cycle state.
      * @throws LifecycleException  If failed to associate life cycle with asset.
      */
-    protected static LifecycleState associateLifecycle(String lcName, String user) throws LifecycleException {
+    public static LifecycleState addLifecycle(String lcName, String user) throws LifecycleException {
         LifecycleState lifecycleState;
         Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
         lifecycleState = new LifecycleState();
@@ -121,7 +121,7 @@ public class LifecycleOperationManager {
      * @param uuid                      Lifecycle id that maps with the asset.
      * @throws LifecycleException       If failed to associate life cycle with asset.
      */
-    protected static void dissociateLifecycle(String uuid) throws LifecycleException {
+    public static void removeLifecycle(String uuid) throws LifecycleException {
         removeLifecycleStateData(uuid);
     }
 
