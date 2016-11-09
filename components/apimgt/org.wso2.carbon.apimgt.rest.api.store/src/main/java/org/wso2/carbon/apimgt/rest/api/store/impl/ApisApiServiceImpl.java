@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -21,7 +20,7 @@ import javax.ws.rs.core.Response;
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     
-    private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId

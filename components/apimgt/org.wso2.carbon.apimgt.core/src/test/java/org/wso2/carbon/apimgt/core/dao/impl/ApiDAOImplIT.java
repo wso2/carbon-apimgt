@@ -144,7 +144,7 @@ public class ApiDAOImplIT {
         Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
         Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
         Assert.assertEquals(actualAPI.getLifeCycleStatus(), expectedAPI.getLifeCycleStatus());
-        Assert.assertEquals(actualAPI.getLifeCycleInstanceId(), expectedAPI.getLifeCycleInstanceId());
+        Assert.assertEquals(actualAPI.getLifecycleInstanceId(), expectedAPI.getLifecycleInstanceId());
         Assert.assertEquals(actualAPI.getApiDefinition(), expectedAPI.getApiDefinition());
         Assert.assertEquals(actualAPI.getWsdlUri(), expectedAPI.getWsdlUri());
         Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());

@@ -34,7 +34,6 @@ import java.util.List;
  * by Joshua Bloch(Item 2)"
  */
 
-@SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
 public final class API {
     private API(APIBuilder builder) {
         id = builder.id;
@@ -44,7 +43,7 @@ public final class API {
         context = builder.context;
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
-        lifeCycleInstanceId = builder.lifeCycleInstanceId;
+        lifecycleInstanceId = builder.lifecycleInstanceId;
         apiDefinition = builder.apiDefinition;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
@@ -93,8 +92,8 @@ public final class API {
         return lifeCycleStatus;
     }
 
-    public String getLifeCycleInstanceId() {
-        return lifeCycleInstanceId;
+    public String getLifecycleInstanceId() {
+        return lifecycleInstanceId;
     }
 
     public String getApiDefinition() {
@@ -183,7 +182,7 @@ public final class API {
     private final String context;
     private final String description;
     private final String lifeCycleStatus;
-    private final String lifeCycleInstanceId;
+    private final String lifecycleInstanceId;
     private final String apiDefinition;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -257,8 +256,8 @@ public final class API {
             return lifeCycleStatus;
         }
 
-        public String getLifeCycleInstanceId() {
-            return lifeCycleInstanceId;
+        public String getLifecycleInstanceId() {
+            return lifecycleInstanceId;
         }
 
         public String getApiDefinition() {
@@ -321,7 +320,7 @@ public final class API {
         private String context;
         private String description;
         private String lifeCycleStatus;
-        private String lifeCycleInstanceId;
+        private String lifecycleInstanceId;
         private String apiDefinition;
         private String wsdlUri;
         private boolean isResponseCachingEnabled;
@@ -345,6 +344,34 @@ public final class API {
             this.provider = provider;
             this.name = name;
             this.version = version;
+        }
+        public APIBuilder(API copy) {
+            this.id = copy.id;
+            this.provider = copy.provider;
+            this.name = copy.name;
+            this.version = copy.version;
+            this.context = copy.context;
+            this.description = copy.description;
+            this.lifeCycleStatus = copy.lifeCycleStatus;
+            this.lifecycleInstanceId = copy.lifecycleInstanceId;
+            this.apiDefinition = copy.apiDefinition;
+            this.wsdlUri = copy.wsdlUri;
+            this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
+            this.cacheTimeout = copy.cacheTimeout;
+            this.isDefaultVersion = copy.isDefaultVersion;
+            this.apiPolicy = copy.apiPolicy;
+            this.transport = copy.transport;
+            this.tags = copy.tags;
+            this.policies = copy.policies;
+            this.visibility = copy.visibility;
+            this.visibleRoles = copy.visibleRoles;
+            this.endpoints = copy.endpoints;
+            this.gatewayEnvironments = copy.gatewayEnvironments;
+            this.businessInformation = copy.businessInformation;
+            this.corsConfiguration = copy.corsConfiguration;
+            this.createdTime = copy.createdTime;
+            this.createdBy = copy.createdBy;
+            this.lastUpdatedTime = copy.lastUpdatedTime;
         }
 
         /**
@@ -392,16 +419,19 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleInstanceId} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
-         * @param lifeCycleInstanceId the {@code lifeCycleInstanceId} to set
+         * @param lifecycleInstanceId the {@code lifeCycleInstanceID} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lifeCycleInstanceId(String lifeCycleInstanceId) {
-            this.lifeCycleInstanceId = lifeCycleInstanceId;
+        public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
+            this.lifecycleInstanceId = lifecycleInstanceId;
             return this;
         }
-
+        public APIBuilder version(String version) {
+            this.version = version;
+            return this;
+        }
         /**
          * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
@@ -620,7 +650,8 @@ public final class API {
          */
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifeCycleInstanceId = lifecycleState.getLifecycleId();
+            lifecycleInstanceId = lifecycleState.getLifecycleId();
+            lifeCycleStatus = lifecycleState.getState();
         }
 
         /**
@@ -649,4 +680,5 @@ public final class API {
             return name;
         }
     }
+
 }

@@ -36,7 +36,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-//Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+//Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the
+// resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
@@ -44,7 +45,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
-        return null;        }
+        return null;
+    }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
@@ -242,8 +244,36 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisCopyApiPost(String newVersion
 , String apiId
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+      //  URI newVersionedApiUri;
+        APIDTO newVersionedApi;
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
+            newVersionedApi = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(newAPIVersionId));
+            //This URI used to set the location header of the POST response
+//            newVersionedApiUri =
+//                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+//            // return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+            return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+                // existence of the resource
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while copying API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+//        catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving API location of " + apiId;
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
+        return null;
     }
     @Override
     public Response apisGet(Integer limit

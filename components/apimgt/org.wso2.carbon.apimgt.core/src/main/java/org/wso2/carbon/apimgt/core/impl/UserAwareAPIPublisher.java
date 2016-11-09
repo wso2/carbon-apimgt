@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 /**
  * This class used to check the permissions for users
  */
-public class UserAwareAPIPublisher extends APIPublisherImpl {
+ class UserAwareAPIPublisher extends APIPublisherImpl {
 
     public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {

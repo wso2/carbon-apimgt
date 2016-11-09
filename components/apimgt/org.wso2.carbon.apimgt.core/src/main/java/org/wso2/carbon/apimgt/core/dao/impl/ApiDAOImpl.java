@@ -294,7 +294,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(13, businessInformation.getBusinessOwner());
             statement.setString(14, businessInformation.getBusinessOwnerEmail());
 
-            statement.setString(15, api.getLifeCycleInstanceId());
+            statement.setString(15, api.getLifecycleInstanceId());
             statement.setString(16, api.getLifeCycleStatus());
             statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
@@ -589,7 +589,7 @@ public class ApiDAOImpl implements ApiDAO {
                         transport(getTransports(connection, apiPrimaryKey)).
                         apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
-                        lifeCycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).
