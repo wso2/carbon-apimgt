@@ -86,6 +86,7 @@ public class APIStoreImplTestCase {
     
     @Test
     public void testAddApplication () {
-        
+
     }
+
 }
