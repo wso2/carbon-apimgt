@@ -1,43 +1,32 @@
 <header class="header header-default">
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
-            {{defineZone "dashboardLabel"}}
+            <a href="{{@contextPath}}/">
+                <img src="{{public "images/logo-white.png"}}" class="logo" />
+                <h1>{{@config.appName}}</h1>
+            </a>
         </div>
-        <div class="pull-right auth float-remove-xs text-center-xs">
-            {{#if user}}
-                <span class="hidden-xs add-padding-left-2x">
-                <a href="#" class="dropdown add-padding-left-2x add-padding-right-2x display-inline-block" data-toggle="dropdown">
-                    <span class="icon fw-stack fw-lg">
-                       <i class="fw fw-circle fw-stack-2x"></i>
-                       <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-                    </span>
-                    <span>{{user.username}} <span class="caret"></span></span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li class="dropdown-header visible-xs">{{user.username}} <span class="caret"></span></li>
-                    <li><a href="<%=urlPrefix%>logout?destination=<%=dest%>">Logout</a></li>
-                </ul>
-            </span>
-                <div class="visible-xs auth-xs">
-                    <a href="#" class="collapsed" data-toggle="collapse" data-target="#auth-menu-items" aria-expanded="false">
-                    <span class="icon fw-stack fw">
-                        <i class="fw fw-user fw-stack-1x"></i>
-                    </span>
-                        <span class="caret"></span>
-                    </a>
-                    <div id="auth-menu-items" class="collapse">
-                        <ul >
-                            <li>{{user.username}}</li>
-                            <li><a href="<%=urlPrefix%>logout?destination=<%=dest%>">Logout</a></li>
-                        </ul>
-                    </div>
-                </div>
-            {{else}}
-                <a href="<%=urlPrefix%>login?destination=<%=dest%>" class="dropdown" data-toggle="dropdown">
-                    Login
-                </a>
-            {{/if}}
 
-        </div>
+        <ul class="nav navbar-right float-remove-xs text-center-xs">
+            <li class="visible-inline-block">
+                <a title="user account" href="#" class="dropdown" data-toggle="dropdown">
+					            <span class="icon fw-stack fw-lg">
+					               <i class="fw fw-circle-outline fw-stack-2x"></i>
+					               <i class="fw fw-user fw-stack-1x"></i>
+					            </span>
+                    <span class="hidden-xs"> &nbsp; {{user.username}}<span class="caret"></span></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+                    <li class="dropdown-header visible-xs">&nbsp; admin <span class="caret"></span></li>
+
+                    <li><a title="My Account" href="/store/site/pages/user-info.jag"><i class="fw fw-settings"></i> &nbsp; My Account</a></li>
+
+                    <li class="divider visible-xs"></li>
+                    <li><a title="Sign Out" href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Sign Out</a></li>
+                </ul>
+            </li>
+        </ul>
+        <!-- TODO: Check and include relevant -->
+        <!--  -->
     </div>
 </header>
