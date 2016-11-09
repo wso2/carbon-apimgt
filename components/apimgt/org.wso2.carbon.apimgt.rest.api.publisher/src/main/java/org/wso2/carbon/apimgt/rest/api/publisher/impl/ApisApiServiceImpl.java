@@ -244,7 +244,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisCopyApiPost(String newVersion
 , String apiId
  ) throws NotFoundException {
-        URI newVersionedApiUri;
+      //  URI newVersionedApiUri;
         APIDTO newVersionedApi;
         String username = "";
         try {
@@ -252,9 +252,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
             newVersionedApi = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(newAPIVersionId));
             //This URI used to set the location header of the POST response
-            newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
-            // return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+//            newVersionedApiUri =
+//                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+//            // return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
             return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
@@ -268,10 +268,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while copying API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location of " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+//        catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving API location of " + apiId;
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
         return null;
     }
     @Override
