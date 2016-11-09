@@ -206,11 +206,10 @@ public interface ApiDAO {
     DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws SQLException;
 
     /**
-     *
-     * @param apiID The UUID of the respective API
+     * Return Document info object
      * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} Document Info object
      * @throws SQLException if error occurs while accessing data layer
      */
-    DocumentInfo getDocumentInfo(String apiID, String docID) throws SQLException;
+    DocumentInfo getDocumentInfo(String docID) throws SQLException;
 }
