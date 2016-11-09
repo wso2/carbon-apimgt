@@ -58,38 +58,11 @@
         <!-- media left-->
         <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="50" data-side="left" data-width="200">
 
+            <!-- sidebar -->
+            {{defineZone "sidebar"}}
 
-            <!-- Sidebar -->
-
-            <nav class="navigation">
-                <ul>
-
-                    <li class="purple active"><a title="APIs" href="/store/"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a></li>
-                    <li class="green"><a title="Applications" href="/store/site/pages/applications.jag" class="link-myapplications"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>
-
-                    <li class="orange"><a title="forum" href="/store/forum"><i class="fw fw-forum icon"></i><span class="left-menu-item">Forum</span></a></li>
-
-                    <li class="yellow"><a title="Statistics" href="/store/site/pages/statistics.jag?stat=perAppAPICount" class=""><i class="fw fw-statistics icon"></i><span class="left-menu-item">Statistics <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
-                        <ul class="sublevel-menu">
-                            <li><a title="API Usage" href="/store/site/pages/statistics.jag?stat=perAppAPICount" class=""><i class="fw fw-api icon"></i><span class="name">API Usage</span></a></li>
-                            <li><a title="Top Users" href="/store/site/pages/statistics.jag?stat=topUsers" class=""><i class="fw fw-api icon"></i><span class="name">Top Users</span></a></li>
-                            <li><a title="Resource Usage" href="/store/site/pages/statistics.jag?stat=apiCallType" class=""><i class="fw fw-api icon"></i><span class="name">Resource Usage</span></a></li>
-                            <li><a title="Faulty Invocations" href="/store/site/pages/statistics.jag?stat=faultCount" class=""><i class="fw fw-api icon"></i><span class="name">Faulty Invocations</span></a></li>
-                            <li><a title="Manage Alert Types" href="/store/site/pages/manage-alert-type.jag" class=""><i class="fw fw-notification icon"></i><span class="name">Manage Alert Types</span></a></li>
-                        </ul>
-                    </li>
-
-                </ul>
-            </nav>
-
-            <div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style="display:none">
-                <div class="tag-title">Tags</div>
-                <div class="tag-content" id="tag-content" style="width:100%;">
-                </div>
-            </div>
-
-
-
+            <!-- tagCloud -->
+            {{defineZone "tagCloud"}}
 
         </div><!-- media left-->
 
@@ -101,66 +74,13 @@
 
 
             <!-- navbar -->
-            <div class="navbar-wrapper navbar-search">
-                <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
-                    <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="false" rel="leftmenu-sidebar">
-                        <span class="icon fw-stack">
-                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
-                        </span>
-                    </a>
+            {{defineZone "contentTop"}}
 
-
-
-                    <form action="https://10.100.1.24:9443/store/apis/list?" id="search_apis">
-                        <div class="col-xs-10 col-sm-12 col-md-6 col-lg-5">
-
-                            <div class="input-group input-wrap search-wrap">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Category">All <span class="caret"></span></button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="https://10.100.1.24:9443/store/apis/list">All</a></li>
-                                        <li><a href="https://10.100.1.24:9443/store/apis/list?type=production">Production</a></li>
-                                        <li><a href="https://10.100.1.24:9443/store/apis/list?type=prototyped">Prototyped</a></li>
-                                    </ul>
-                                </div>
-                                <input type="text" class="form-control appm-content-search" title="apim_search"  name="query" id="query" placeholder="Search...">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
-                                        <i class="fw fw-search" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                <div class="input-group-btn">
-                                    <a class="help_popup" title="Search Options" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
-          <span class="icon fw-lg  add-margin-bottom-1x add-margin-left-2x" style="font-size:16px;">
-            <i class="fw fw-info fw-inverse" title="Search Options"></i>
-          </span>
-                                    </a>
-                                </div>
-                                <div id="apiSearchTips" class="hide help-popover-content" >
-                                    <ol>
-                                        <li>By API Name [Default]</li>
-                                        <li>By API Provider [ Syntax - provider:xxxx ]  or</li>
-                                        <li>By API Version [ Syntax - version:xxxx ]  or</li>
-                                        <li>By Context [ Syntax - context:xxxx ]  or</li>
-                                        <li>By Description [ Syntax - description:xxxx ] or</li>
-                                        <li>By Tags [ Syntax - tags:xxxx ] or</li>
-                                        <li>By Sub-Context [ Syntax - subcontext:xxxx ] or</li>
-                                        <li>By Documentation Content [ Syntax - doc:xxxx ]</li>
-                                    </ol>
-                                </div>
-
-                            </div><!-- /input-group -->
-                        </div>
-                    </form>
-                </nav>
-            </div>
             <div class="container-fluid">
                 <div class="body-wrapper">
-
                     {{defineZone "content"}}
-
-            </div>
-        </div><!-- /#media body-->
+                </div>
+            </div><!-- /#media body-->
     </div><!-- /#media-->
 </div><!-- /#page-content-wrapper -->
 <!-- footer -->
