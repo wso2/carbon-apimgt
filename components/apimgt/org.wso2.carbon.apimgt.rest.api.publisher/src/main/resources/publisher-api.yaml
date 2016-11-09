@@ -2552,6 +2552,9 @@ definitions:
       sourceUrl:
         type: string
         example: ""
+      inlineContent:
+        type: string
+        example: "This is doc content. This can have many lines."
       otherTypeName:
         type: string
         example: ""
