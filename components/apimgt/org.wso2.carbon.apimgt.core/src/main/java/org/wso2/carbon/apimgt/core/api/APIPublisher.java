@@ -101,7 +101,7 @@ public interface APIPublisher extends APIManager {
      * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    void addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
+    String addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -132,7 +132,7 @@ public interface APIPublisher extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    boolean updateAPIStatus(String api, String status, boolean deprecateOldVersions,
+    void updateAPIStatus(String api, String status, boolean deprecateOldVersions,
                             boolean makeKeysForwardCompatible)
             throws APIManagementException;
 
@@ -140,12 +140,12 @@ public interface APIPublisher extends APIManager {
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param api        The API to be copied
+     * @param apiId        The API to be copied
      * @param newVersion The version of the new API
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    void createNewAPIVersion(API api, String newVersion) throws APIManagementException;
+    String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
 
     /**
      * Attach Documentation (without content) to an API
