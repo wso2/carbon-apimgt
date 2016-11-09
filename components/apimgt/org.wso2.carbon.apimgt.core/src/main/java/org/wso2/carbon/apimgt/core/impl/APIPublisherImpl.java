@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -29,12 +30,15 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -51,8 +55,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,apiLifecycleManager);
     }
 
     /**
@@ -71,12 +75,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * only the latest version will
      * be included in this list.
      *
-     * @param providerId , provider id
-     * @return set of API
+     * @param providerName username of the the user who created the API
+     * @return set of APIs
      * @throws APIManagementException if failed to get set of API
      */
     @Override
-    public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
+    public List<API> getAPIsByProvider(String providerName) throws APIManagementException {
+        try {
+            getApiDAO().getAPI(providerName); //todo: call correct doa method
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to fetch APIs of " + providerName, e, log);
+        }
         return null;
     }
 
@@ -137,19 +146,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Adds a new API to the system
      *
-     * @param api API model object
+     * @param apiBuilder API model object
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public API addAPI(API api) throws APIManagementException {
-        API createdAPI = null;
+    public void addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+
         try {
-            createdAPI =  getApiDAO().addAPI(api);
-            APIUtils.logDebug("API " + api.getName() + "-" + api.getVersion() + " was created successfully.", log);
+            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+            apiBuilder.lifeCycleInstanceId(lifecycleState.getLifecycleId());
+            API createdAPI = apiBuilder.build();
+            getApiDAO().addAPI(createdAPI);
+            APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
+                    "successfully.",
+                    log);
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while creating the API - " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Error occurred while Associating the API - " + apiBuilder.getName(), e, log);
         }
-        return createdAPI;
     }
 
     /**
@@ -167,16 +182,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param api API model object
+     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder} model object
      * @throws APIManagementException if failed to update API
      */
     @Override
-    public void updateAPI(API api) throws APIManagementException {
+    public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+        API api = apiBuilder.build();
         try {
-            getApiDAO().updateAPI(api.getId(), api);
             if (log.isDebugEnabled()) {
                 log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
             }
+             getApiDAO().updateAPI(api.getId(), api);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
         }
@@ -197,9 +213,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public boolean updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         try {
-            getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
-            return true;
+            APISummary apiSummary = getApiDAO().getAPISummary(apiId);
+            if (apiSummary != null){
+                getApiLifecycleManager().executeLifecycleEvent(status, apiSummary.getLifeCycleInstanceId(),
+                        status, apiSummary);
+                getApiDAO().changeLifeCycleStatus(apiSummary.getId(), status, deprecateOldVersions,
+                        makeKeysForwardCompatible);
+                return true;
+            }else{
+                return false;
+            }
         } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
+            return false;
+        } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
             return false;
         }
@@ -216,64 +243,68 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
-        try {
-            getApiDAO().createNewAPIVersion(api.getId(), newVersion);
+        /*try {
+
+           API.APIBuilder apiBuilder = getApiDAO().createNewAPIVersion(api.getId(), newVersion);
+            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + api.getName(), e, log);
+        }
+        */
+    }
+
+    /**
+     * Attach Documentation (without content) to an API
+     *
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
+     * @throws APIManagementException if failed to add documentation
+     */
+    @Override
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
+        try {
+            getApiDAO().addDocumentationInfo(apiId, documentation);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
     }
 
     /**
-     * Removes a given documentation
+     * Add a document (of source type FILE) with a file
      *
-     * @param apiId   String
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws APIManagementException if failed to remove documentation
-     */
-    @Override
-    public void removeDocumentation(String apiId, String docType, String docName) throws APIManagementException {
-
-    }
-
-    /**
-     * Removes a given documentation
-     *
-     * @param apiId String
-     * @param docId UUID of the doc
-     * @throws APIManagementException if failed to remove documentation
-     */
-    @Override
-    public void removeDocumentation(String apiId, String docId) throws APIManagementException {
-
-    }
-
-    /**
-     * Adds Documentation to an API
-     *
-     * @param apiId         String
-     * @param documentation Documentation
-     * @throws APIManagementException if failed to add documentation
-     */
-    @Override
-    public void addDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException {
-
-    }
-
-    /**
-     * Add a file to a document of source type FILE
-     *
-     * @param apiId         API identifier the document belongs to
-     * @param documentation document
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
      * @param filename      name of the file
      * @param content       content of the file as an Input Stream
      * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void addFileToDocumentation(String apiId, DocumentInfo documentation, String filename, InputStream
-            content, String contentType) throws APIManagementException {
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
+                                         String contentType) throws APIManagementException {
+        try {
+            getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
+        }
+    }
 
+    /**
+     * Removes a given documentation
+     *
+     * @param docId Document Id
+     * @throws APIManagementException if failed to remove documentation
+     */
+    @Override
+    public void removeDocumentation(String docId) throws APIManagementException {
+        try {
+            getApiDAO().removeDocumentation(docId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
+        }
     }
 
     /**
@@ -346,13 +377,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void deleteAPI(String identifier) throws APIManagementException {
         try {
             if (getAPISubscriptionCountByAPI(identifier) < 0) {
-                getApiDAO().deleteAPI(identifier);
-                APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                APISummary apiSummary = getApiDAO().getAPISummary(identifier);
+                if (apiSummary != null){
+                    getApiLifecycleManager().removeLifecycle(apiSummary.getLifeCycleInstanceId());
+                    getApiDAO().deleteAPI(identifier);
+                    APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                }
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
             }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Error occurred while Disassociating the API with Lifecycle id " + identifier,
+                    e, log);
         }
     }
 

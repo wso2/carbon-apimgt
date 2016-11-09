@@ -1,0 +1,19 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Statistics - API Usage | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header">
+        <h1>{{t "api-store.statistic.topUsers"}}</h1>
+    </div>
+    <div class="page-content">
+        <i>Statistics - topUsers content goes here.. </i>
+    </div>
+{{/fillZone}}

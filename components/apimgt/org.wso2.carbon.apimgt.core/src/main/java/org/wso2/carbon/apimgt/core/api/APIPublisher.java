@@ -51,11 +51,11 @@ public interface APIPublisher extends APIManager {
      * only the latest version will
      * be included in this list.
      *
-     * @param providerId , provider id
-     * @return set of API
+     * @param providerName  username of the the user who created the API
+     * @return set of APIs
      * @throws APIManagementException if failed to get set of API
      */
-    List<API> getAPIsByProvider(String providerId) throws APIManagementException;
+    List<API> getAPIsByProvider(String providerName) throws APIManagementException;
 
     /**
      * Get a list of all the consumers for all APIs
@@ -98,10 +98,10 @@ public interface APIPublisher extends APIManager {
     /**
      * Adds a new API to the Store
      *
-     * @param api API
+     * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    API addAPI(API api) throws APIManagementException;
+    void addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -115,10 +115,10 @@ public interface APIPublisher extends APIManager {
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param api API
+     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update API
      */
-    void updateAPI(API api) throws APIManagementException;
+    void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
 
 
@@ -148,45 +148,34 @@ public interface APIPublisher extends APIManager {
     void createNewAPIVersion(API api, String newVersion) throws APIManagementException;
 
     /**
-     * Removes a given documentation
+     * Attach Documentation (without content) to an API
      *
-     * @param id   String
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws APIManagementException if failed to remove documentation
-     */
-    void removeDocumentation(String id, String docType, String docName) throws APIManagementException;
-
-    /**
-     * Removes a given documentation
-     *
-     * @param apiId String
-     * @param docId UUID of the doc
-     * @throws APIManagementException if failed to remove documentation
-     */
-    public void removeDocumentation(String apiId, String docId) throws APIManagementException;
-
-    /**
-     * Adds Documentation to an API
-     *
-     * @param apiId         String
-     * @param documentation Documentation
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
+    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException;
 
     /**
-     * Add a file to a document of source type FILE
+     * Add a document (of source type FILE) with a file
      *
-     * @param apiId         API identifier the document belongs to
-     * @param documentation document
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
      * @param filename      name of the file
      * @param content       content of the file as an Input Stream
      * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
-    void addFileToDocumentation(String apiId, DocumentInfo documentation, String filename, InputStream content,
+    void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
                                 String contentType) throws APIManagementException;
+
+    /**
+     * Removes a given documentation
+     *
+     * @param docId   Document Id
+     * @throws APIManagementException if failed to remove documentation
+     */
+    void removeDocumentation(String docId) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry

@@ -19,18 +19,20 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
@@ -45,13 +47,15 @@ public abstract class AbstractAPIManager implements APIManager {
     private ApplicationDAO applicationDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
     private String username;
+    private APILifecycleManager apiLifecycleManager;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO)  {
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.apiLifecycleManager = apiLifecycleManager;
     }
 
     /**
@@ -151,28 +155,66 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
-    protected ApiDAO getApiDAO() {
-        return apiDAO;
+    /**
+     * Returns a paginated list of documentation attached to a particular API
+     *
+     * @param apiId UUID of API
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @return {@link DocumentInfoResults} Document list
+     * @throws APIManagementException if it failed to fetch Documentations
+     */
+    public DocumentInfoResults getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException {
+        try {
+            return getApiDAO().getDocumentsInfoList(apiId, offset, limit);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while retrieving documents", e, log);
+        }
+        return null;
     }
 
-    protected void setApiDAO(ApiDAO apiDAO) {
-        this.apiDAO = apiDAO;
+    /**
+     * Get a summary of documentation by doc Id
+     *
+     * @param docId Document ID
+     * @return {@link DocumentInfo} Documentation summary
+     * @throws APIManagementException if it failed to fetch Documentation
+     */
+    public DocumentInfo getDocumentationSummary(String docId) throws APIManagementException {
+        try {
+            return getApiDAO().getDocumentInfo(docId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while retrieving document", e, log);
+        }
+        return null;
+    }
+
+    /**
+     * This method used to get the content of a documentation
+     *
+     * @param docId Document ID
+     * @return {@link InputStream} Input stream for document content
+     * @throws APIManagementException if the requested documentation content is not available
+     */
+    public InputStream getDocumentationContent(String docId) throws APIManagementException {
+        try {
+            return getApiDAO().getDocumentContent(docId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
+        }
+        return null;
+    }
+
+    protected ApiDAO getApiDAO() {
+        return apiDAO;
     }
 
     protected ApplicationDAO getApplicationDAO() {
         return applicationDAO;
     }
 
-    protected void setApplicationDAO(ApplicationDAO applicationDAO) {
-        this.applicationDAO = applicationDAO;
-    }
-
     protected APISubscriptionDAO getApiSubscriptionDAO() {
         return apiSubscriptionDAO;
-    }
-
-    protected void setApiSubscriptionDAO(APISubscriptionDAO apiSubscriptionDAO) {
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
     }
 
     protected String getUsername() {
@@ -182,6 +224,8 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void setUsername(String username) {
         this.username = username;
     }
-    
-    
+
+    public APILifecycleManager getApiLifecycleManager() {
+        return apiLifecycleManager;
+    }
 }

@@ -29,9 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 
 public class ApiDAOImplIT {
@@ -67,6 +64,7 @@ public class ApiDAOImplIT {
         Assert.assertNotNull(apiFromDB);
         validateAPIs(apiFromDB, api);
     }
+
 
     @Test
     public void testDeleteAPI() throws Exception {
@@ -146,7 +144,7 @@ public class ApiDAOImplIT {
         Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
         Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
         Assert.assertEquals(actualAPI.getLifeCycleStatus(), expectedAPI.getLifeCycleStatus());
-        Assert.assertEquals(actualAPI.getLifeCycleInstanceID(), expectedAPI.getLifeCycleInstanceID());
+        Assert.assertEquals(actualAPI.getLifeCycleInstanceId(), expectedAPI.getLifeCycleInstanceId());
         Assert.assertEquals(actualAPI.getApiDefinition(), expectedAPI.getApiDefinition());
         Assert.assertEquals(actualAPI.getWsdlUri(), expectedAPI.getWsdlUri());
         Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());

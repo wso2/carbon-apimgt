@@ -34,9 +34,9 @@ public interface ManagedLifecycle {
      * @param user                          The user who invoked the action. This will be used for auditing purposes.
      * @throws LifecycleException           If failed to get lifecycle list.
      */
-    default void createLifecycleEntry(String lcName, String user) throws LifecycleException {
-        associateLifecycle(LifecycleOperationManager.associateLifecycle(lcName, user));
-    }
+    /*default void createLifecycleEntry(String lcName, String user) throws LifecycleException {
+        addLifecycle(LifecycleOperationManager.addLifecycle(lcName, user));
+    }*/
 
     /**
      * This method need to call for each life cycle state change.
@@ -48,21 +48,21 @@ public interface ManagedLifecycle {
      *
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
-    default LifecycleState executeLifecycleEvent(String targetState, String user, String lcName)
+    /*default LifecycleState executeLifecycleEvent(String targetState, String user, String lcName)
             throws LifecycleException {
         return LifecycleOperationManager
                 .executeLifecycleEvent(targetState, getCurrentLifecycleState(lcName).getLifecycleId(), user, this);
-    }
+    }*/
 
     /**
      * Remove the lifecycle from the asset instance.
      *
      * @param lcName                            Lc name which associates with the resource.
      */
-    default void removeLifecycleEntry(String lcName) throws LifecycleException {
-        LifecycleOperationManager.dissociateLifecycle(getCurrentLifecycleState(lcName).getLifecycleId());
-        dissociateLifecycle();
-    }
+    /*default void removeLifecycleEntry(String lcName) throws LifecycleException {
+        LifecycleOperationManager.removeLifecycle(getCurrentLifecycleState(lcName).getLifecycleId());
+        removeLifecycle();
+    }*/
 
     /**
      * This method need to call for each check list item operation.
@@ -73,11 +73,11 @@ public interface ManagedLifecycle {
      *
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
-    default LifecycleState checkListItemEvent(String lcName, String checkListItemName, boolean value)
+    /*default LifecycleState checkListItemEvent(String lcName, String checkListItemName, boolean value)
             throws LifecycleException {
         return LifecycleOperationManager.checkListItemEvent(getCurrentLifecycleState(lcName).getLifecycleId(),
                 getCurrentLifecycleState(lcName).getState(), checkListItemName, value);
-    }
+    }*/
 
     /**
      * This method should be implemented to create association between object which implementing Managed Lifecycle and
@@ -91,11 +91,20 @@ public interface ManagedLifecycle {
     void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException;
 
     /**
+     * @param lcName        Name of the lifecycle to be removed.
      * This method should be implemented to remove the lifecycle data from the object which implements this interface.
      * Persisted lifecycle state id (say stored in database) should be removed by implementing this method.
      *
      */
-    void dissociateLifecycle() throws LifecycleException;
+    void dissociateLifecycle(String lcName) throws LifecycleException;
+
+    /**
+     * @param lifecycleState        Lifecycle state object.
+     * This method should be implemented to update the lifecycle state after state change operation and check list
+     * item operation
+     *
+     */
+    void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException;
 
     /**
      * This method is used to provide lifecycle state data object for a particular life cycle. "getLifecycleId"
@@ -104,9 +113,9 @@ public interface ManagedLifecycle {
      * @param lcName                    Name of the lifecycle.
      *
      */
-    default LifecycleState getCurrentLifecycleState(String lcName) throws LifecycleException {
+    /*default LifecycleState getCurrentLifecycleState(String lcName) throws LifecycleException {
         return LifecycleOperationManager.getCurrentLifecycleState(getLifecycleId(lcName));
-    }
+    }*/
 
     /**
      * This method should provide lifecycle uuid when lifecycle name is given. Object which implements this method
@@ -115,6 +124,6 @@ public interface ManagedLifecycle {
      * @param lcName                    Name of the lifecycle.
      *
      */
-    String getLifecycleId(String lcName);
+    //String getLifecycleId(String lcName);
 
 }

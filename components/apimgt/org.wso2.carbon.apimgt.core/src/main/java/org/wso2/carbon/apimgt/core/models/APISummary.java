@@ -21,6 +21,11 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+
 /**
  * Representation an API object that contains a limited number of details. Only immutable instances of this class
  * can be created via the provided inner static {@code Builder} class which implements the builder pattern
@@ -35,6 +40,7 @@ public final class APISummary {
     private final String context;
     private final String id;
     private final String status;
+    private final String lifeCycleInstanceId;
 
     private APISummary(Builder builder) {
         provider = builder.provider;
@@ -44,8 +50,12 @@ public final class APISummary {
         context = builder.context;
         id = builder.id;
         status = builder.status;
+        lifeCycleInstanceId = builder.lifeCycleInstanceId;
     }
 
+    public String getLifeCycleInstanceId() {
+        return lifeCycleInstanceId;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -99,7 +109,8 @@ public final class APISummary {
     /**
      * {@code APISummary} builder static inner class.
      */
-    public static final class Builder {
+    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
+    public static final class Builder implements ManagedLifecycle{
         private String provider;
         private String version;
         private String description;
@@ -107,7 +118,7 @@ public final class APISummary {
         private String context;
         private String id;
         private String status;
-
+        private String lifeCycleInstanceId;
         public Builder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -165,6 +176,46 @@ public final class APISummary {
          */
         public APISummary build() {
             return new APISummary(this);
+        }
+
+        /**
+         * This method should be implemented to create association between object which implementing Managed
+         * Lifecycle and
+         * the Lifecycle framework. This method should implement logic which saves the returned uuid in the external
+         * party (API, APP etc). So both parties will have lifecycle uuid saved in their side which will cater the
+         * purpose of mapping.
+         *
+         * @param lifecycleState Lifecycle state object.
+         */
+        @Override
+        public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
+            lifeCycleInstanceId = lifecycleState.getLifecycleId();
+        }
+
+        /**
+         * @param lcName Name of the lifecycle to be removed.
+         *               This method should be implemented to remove the lifecycle data from the object which
+         *               implements this interface.
+         *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
+         *               method.
+         */
+        @Override
+        public void dissociateLifecycle(String lcName) throws LifecycleException {
+        }
+
+        /**
+         * @param lifecycleState Lifecycle state object.
+         *                       This method should be implemented to update the lifecycle state after state change
+         *                       operation and check list
+         *                       item operation
+         */
+        @Override
+        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
+            status = lifecycleState.getState();
+        }
+
+        public String getLifeCycleInstanceId() {
+            return lifeCycleInstanceId;
         }
     }
 }

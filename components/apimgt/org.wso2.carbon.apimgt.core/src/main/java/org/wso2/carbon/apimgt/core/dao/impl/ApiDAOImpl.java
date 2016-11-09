@@ -100,7 +100,7 @@ public class ApiDAOImpl implements ApiDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
 
-            return constructAPISummary(connection, statement);
+            return constructAPISummary(statement);
         }
     }
 
@@ -149,6 +149,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
         final String query = sqlStatements.getAPIsForProvider();
 
@@ -178,6 +179,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
                                                 List<String> roles) throws SQLException {
         final String query = sqlStatements.searchAPIsForRoles(roles.size());
@@ -265,7 +267,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public API addAPI(final API api) throws SQLException {
+    public void addAPI(final API api) throws SQLException {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
@@ -292,7 +294,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(13, businessInformation.getBusinessOwner());
             statement.setString(14, businessInformation.getBusinessOwnerEmail());
 
-            statement.setString(15, api.getLifeCycleInstanceID());
+            statement.setString(15, api.getLifeCycleInstanceId());
             statement.setString(16, api.getLifeCycleStatus());
             statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
@@ -326,8 +328,6 @@ public class ApiDAOImpl implements ApiDAO {
 
             connection.commit();
         }
-
-        return api;
     }
 
     /**
@@ -418,8 +418,6 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
             connection.commit();
         }
-
-
     }
 
     /**
@@ -454,7 +452,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public OutputStream getImage(String apiID) throws SQLException {
+    public InputStream getImage(String apiID) throws SQLException {
         return null;
     }
 
@@ -466,7 +464,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void updateImage(String apiID, InputStream image) throws SQLException {
+    public void updateImage(String apiID, OutputStream image) throws SQLException {
 
     }
 
@@ -483,19 +481,6 @@ public class ApiDAOImpl implements ApiDAO {
     public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
             makeKeysForwardCompatible) throws SQLException {
 
-    }
-
-    /**
-     * Create a new version of an existing API
-     *
-     * @param apiID   The UUID of the respective API
-     * @param version The new version of the API
-     * @return The new version {@link API} object
-     * @throws SQLException if error occurs while accessing data layer
-     */
-    @Override
-    public API createNewAPIVersion(String apiID, String version) throws SQLException {
-        return null;
     }
 
     /**
@@ -520,7 +505,56 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public DocumentInfo getDocumentInfo(String docID) throws SQLException {
+        //todo:implement
         return null;
+    }
+
+    /**
+     * @param docID The UUID of the respective Document
+     * @return {@link InputStream} Document Info object
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public InputStream getDocumentContent(String docID) throws SQLException {
+        return null;
+    }
+
+    /**
+     * Attach Documentation (without content) to an API
+     *
+     * @param apiId         UUID of API
+     * @param documentation Documentat Summary
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws SQLException {
+
+    }
+
+    /**
+     * Add a document (of source type FILE) with a file
+     *
+     * @param apiId         UUID of API
+     * @param documentation Document Summary
+     * @param filename      name of the file
+     * @param content       content of the file as an Input Stream
+     * @param contentType   content type of the file
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content, String contentType) throws SQLException {
+
+    }
+
+    /**
+     * Removes a given documentation
+     *
+     * @param id Document Id
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public void removeDocumentation(String id) throws SQLException {
+
     }
 
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {
@@ -541,7 +575,7 @@ public class ApiDAOImpl implements ApiDAO {
 
                 int apiPrimaryKey = rs.getInt("API_ID");
 
-                return new API.Builder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
+                return new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
@@ -555,7 +589,7 @@ public class ApiDAOImpl implements ApiDAO {
                         transport(getTransports(connection, apiPrimaryKey)).
                         apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
-                        lifeCycleInstanceID(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        lifeCycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).
@@ -569,7 +603,7 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    private APISummary constructAPISummary(Connection connection, PreparedStatement statement) throws SQLException {
+    private APISummary constructAPISummary(PreparedStatement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery()) {
             if (rs.next()) {
                 return new APISummary.Builder(rs.getString("PROVIDER"), rs.getString("NAME"),
@@ -584,8 +618,7 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    private List<APISummary> constructAPISummaryList(Connection connection, PreparedStatement statement)
-                                                                                                throws SQLException {
+    private List<APISummary> constructAPISummaryList(PreparedStatement statement) throws SQLException {
         List<APISummary> apiSummaryList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
@@ -605,7 +638,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private APISummaryResults constructAPISummaryResults(Connection connection, PreparedStatement statement,
                                                          int offset, int rowCount) throws SQLException {
-        List<APISummary> apiSummaryList = constructAPISummaryList(connection, statement);
+        List<APISummary> apiSummaryList = constructAPISummaryList(statement);
 
         boolean isMoreResultsExist = false;
 

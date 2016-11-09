@@ -37,9 +37,9 @@
     <dependencies>
         <!--UUF Components-->
         <dependency>
-            <groupId>org.wso2.carbon.uuf.sample</groupId>
-            <artifactId>org.wso2.carbon.uuf.sample.foundation</artifactId>
-            <version>${carbon.uuf.version}</version>
+            <groupId>org.wso2.carbon.apimgt.web</groupId>
+            <artifactId>org.wso2.carbon.apimgt.web.store.foundation</artifactId>
+            <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>

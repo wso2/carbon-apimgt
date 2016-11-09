@@ -29,6 +29,29 @@ public final class DocumentInfo {
     /**
      *Document Types
      */
+    public enum DocumentationType {
+        HOWTO("How To"),
+        SAMPLES("Samples"),
+        PUBLIC_FORUM("Public Forum"),
+        SUPPORT_FORUM("Support Forum"),
+        API_MESSAGE_FORMAT("API Message Format"),
+        SWAGGER_DOC("Swagger API Definition"),
+        OTHER("Other");
+
+        private String type;
+
+        private DocumentationType(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    /**
+     *Document Source Types
+     */
     public enum SourceType {
         FILE("FILE"),
         INLINE("INLINE"),
@@ -80,7 +103,7 @@ public final class DocumentInfo {
     private String name;
     private String type;
     private Visibility visibility;
-
+    private String inlineContent;
 
     public SourceType getSourceType() {
         return sourceType;
@@ -144,5 +167,13 @@ public final class DocumentInfo {
 
     public void setVisibility(Visibility visibility) {
         this.visibility = visibility;
+    }
+
+    public String getInlineContent() {
+        return inlineContent;
+    }
+
+    public void setInlineContent(String inlineContent) {
+        this.inlineContent = inlineContent;
     }
 }

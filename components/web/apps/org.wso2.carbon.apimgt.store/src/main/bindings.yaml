@@ -1,1 +1,4 @@
 # zone name : fragment name
+footer : footer
+sidebar : sidebar
+topbar : globalNavigation
