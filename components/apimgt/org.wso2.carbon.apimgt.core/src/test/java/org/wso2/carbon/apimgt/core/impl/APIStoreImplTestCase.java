@@ -20,12 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-//import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,7 +33,18 @@ import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import static org.mockito.Mockito.*;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+//import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Test class for APIStore
