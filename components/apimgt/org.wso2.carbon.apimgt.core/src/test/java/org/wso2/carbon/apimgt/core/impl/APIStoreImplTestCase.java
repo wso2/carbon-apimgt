@@ -82,30 +82,6 @@ public class APIStoreImplTestCase {
         }
 
     }
-    
-    @Test
-    public void testSearchAPIByUUID() {        
-        
-        try {
-            API apiFromDAO = new API.APIBuilder("provider1", "TestAPIByUUID", "1.0.0").build();
-            when(apiDAO.getAPI("1234")).thenReturn(apiFromDAO);
-            
-            API api = apiStore.getAPIbyUUID("1234");
-            Assert.assertEquals(api.getName(), "TestAPIByUUID");
-            verify(apiDAO, atLeastOnce()).getAPI("1234");
-        } catch (APIManagementException | SQLException e) {
-            Assert.fail(e.getMessage());            
-        }
-    }
-    
-    @Test
-    public void testGetDocument() {
-        try {
-            InputStream docContent = apiStore.getDocumentationContent("");
-        } catch (APIManagementException e) {
-            Assert.fail(e.getMessage());
-        }
-    }
 
     @Test
     public void testGetApplicationById () {
