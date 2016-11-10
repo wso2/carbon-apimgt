@@ -93,6 +93,18 @@ public class TagDAO {
     }
 
     private static void insertNewTags(Connection connection, List<String> tags, List<Integer> tagIDs) throws SQLException {
+        final String maxTagIDQuery = "SELECT MAX(TAG_ID) AS TAG_ID FROM AM_TAGS";
+        int maxTagID = -1;
+        try (PreparedStatement statement = connection.prepareStatement(maxTagIDQuery)) {
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    maxTagID = rs.getInt("TAG_ID");
+                }
+            }
+        }
+
         final String query = "INSERT INTO AM_TAGS (TAG_NAME) VALUES (?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query, new String[]{"tag_id"})) {
@@ -101,14 +113,21 @@ public class TagDAO {
                 statement.addBatch();
             }
 
+            statement.executeBatch();
+        }
+
+        final String newTagIDsQuery = "SELECT TAG_ID FROM AM_TAGS WHERE TAG_ID > ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(newTagIDsQuery)) {
+            statement.setInt(1, maxTagID);
             statement.execute();
 
-            try (ResultSet rs = statement.getGeneratedKeys()) {
-                while (rs.next()) { // Get tag ID of newly added tags
-                    tagIDs.add(rs.getInt(1));
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    tagIDs.add(rs.getInt("TAG_ID"));
                 }
             }
-
         }
+
     }
 }

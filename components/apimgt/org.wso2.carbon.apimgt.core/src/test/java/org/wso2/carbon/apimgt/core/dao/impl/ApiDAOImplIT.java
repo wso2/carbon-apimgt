@@ -29,6 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class ApiDAOImplIT {
@@ -55,7 +58,8 @@ public class ApiDAOImplIT {
     @Test
     public void testAddGetAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API api = SampleAPICreator.createDefaultAPI();
+        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API api = builder.build();
 
         apiDAO.addAPI(api);
 
@@ -69,7 +73,8 @@ public class ApiDAOImplIT {
     @Test
     public void testDeleteAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API api = SampleAPICreator.createDefaultAPI();
+        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API api = builder.build();
 
         apiDAO.addAPI(api);
 
@@ -77,6 +82,31 @@ public class ApiDAOImplIT {
 
         API deletedAPI = apiDAO.getAPI(api.getId());
         Assert.assertNull(deletedAPI);
+    }
+
+    @Test
+    public void testUpdateAPI() throws Exception {
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API api = builder.build();
+
+        apiDAO.addAPI(api);
+
+        builder = SampleAPICreator.createAlternativeAPI();
+        API substituteAPI = builder.build();
+
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        API apiFromDB = apiDAO.getAPI(substituteAPI.getId());
+
+        API expectedAPI = builder.provider(api.getProvider()).
+                name(api.getName()).
+                version(api.getVersion()).
+                context(api.getContext()).
+                createdTime(api.getCreatedTime()).
+                createdBy(api.getCreatedBy()).build();
+
+        Assert.assertNotNull(apiFromDB);
+        validateAPIs(apiFromDB, expectedAPI);
     }
 
     @Test
@@ -89,12 +119,6 @@ public class ApiDAOImplIT {
 
     }
 
-
-
-    @Test
-    public void testUpdateAPI() throws Exception {
-
-    }
 
     @Test
     public void testGetSwaggerDefinition() throws Exception {
@@ -151,11 +175,11 @@ public class ApiDAOImplIT {
         Assert.assertEquals(actualAPI.getCacheTimeout(), expectedAPI.getCacheTimeout());
         Assert.assertEquals(actualAPI.isDefaultVersion(), expectedAPI.isDefaultVersion());
         //Assert.assertEquals(actualAPI.getApiPolicy(), expectedAPI.getApiPolicy());
-        Assert.assertEquals(actualAPI.getTransport(), expectedAPI.getTransport());
-        Assert.assertEquals(actualAPI.getTags(), expectedAPI.getTags());
+        Assert.assertTrue(equalLists(actualAPI.getTransport(), expectedAPI.getTransport()));
+        Assert.assertTrue(equalLists(actualAPI.getTags(), expectedAPI.getTags()));
         //Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
         Assert.assertEquals(actualAPI.getVisibility(), expectedAPI.getVisibility());
-        Assert.assertEquals(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles());
+        Assert.assertTrue(equalLists(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles()));
         //Assert.assertEquals(actualAPI.getEndpoints(), expectedAPI.getEndpoints());
         //Assert.assertEquals(actualAPI.getGatewayEnvironments(), expectedAPI.getGatewayEnvironments());
         Assert.assertEquals(actualAPI.getBusinessInformation(), expectedAPI.getBusinessInformation());
@@ -164,5 +188,26 @@ public class ApiDAOImplIT {
         Assert.assertEquals(actualAPI.getCreatedBy(), expectedAPI.getCreatedBy());
         Assert.assertEquals(actualAPI.getLastUpdatedTime(), expectedAPI.getLastUpdatedTime());
     }
+
+    private boolean equalLists(List<String> one, List<String> two){
+        if (one == null && two == null){
+            return true;
+        }
+
+        if((one == null && two != null)
+                || one != null && two == null
+                || one.size() != two.size()){
+            return false;
+        }
+
+        one = new ArrayList<String>(one);
+        two = new ArrayList<String>(two);
+
+        Collections.sort(one);
+        Collections.sort(two);
+        return one.equals(two);
+    }
+
+
 
 }
