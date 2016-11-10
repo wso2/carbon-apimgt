@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.atLeastOnce;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 
@@ -74,9 +76,33 @@ public class APIStoreImplTestCase {
             verify(apiDAO, atLeastOnce()).searchAPIsForRoles("", 1, 2, new ArrayList<>());
             
         } catch (APIManagementException | SQLException e) {
-            Assert.assertTrue(false);
+            Assert.fail(e.getMessage());
         }
 
+    }
+    
+    @Test
+    public void testSearchAPIByUUID() {        
+        
+        try {
+            API apiFromDAO = new API.APIBuilder("provider1", "TestAPIByUUID", "1.0.0").build();
+            when(apiDAO.getAPI("1234")).thenReturn(apiFromDAO);
+            
+            API api = apiStore.getAPIbyUUID("1234");
+            Assert.assertEquals(api.getName(), "TestAPIByUUID");
+            verify(apiDAO, atLeastOnce()).getAPI("1234");
+        } catch (APIManagementException | SQLException e) {
+            Assert.fail(e.getMessage());            
+        }
+    }
+    
+    @Test
+    public void testGetDocument() {
+        try {
+            InputStream docContent = apiStore.getDocumentationContent("");
+        } catch (APIManagementException e) {
+            Assert.fail(e.getMessage());
+        }
     }
     
     @Test
