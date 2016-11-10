@@ -20,18 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.atLeastOnce;
-
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-//import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,6 +31,20 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.Application;
+
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+//import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Test class for APIStore
@@ -102,6 +104,20 @@ public class APIStoreImplTestCase {
             InputStream docContent = apiStore.getDocumentationContent("");
         } catch (APIManagementException e) {
             Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetApplicationById () {
+        try {
+            Application applicationFromDAO = new Application("username", null);
+            when(applicationDAO.getApplicationById(1)).thenReturn(applicationFromDAO);
+
+            Application application = apiStore.getApplicationById(1);
+            Assert.assertNotNull(application);
+            verify(applicationDAO, times(1)).getApplicationById(1);
+        } catch (APIManagementException | SQLException e) {
+            Assert.assertTrue(false);
         }
     }
     
