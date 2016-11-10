@@ -29,12 +29,12 @@
                     <ul class="nav navbar-nav">
 
                         <li>
-                            <a title="Edit Application" href="/store/site/pages/application-add.jag">
+                            <a title="Add Application" href="/store/application/add">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-                                Edit Application
+                                Add Application
                             </a>
                         </li>
 
@@ -48,78 +48,131 @@
 
 {{/fillZone}}
 {{#fillZone "content"}}
-    <div class="page-header" id="Message">
-        <h2>Edit Application</h2>
+    <div class="page-header">
+        <h1>{{t "api-store.application.list"}}</h1>
     </div>
-    <div class="alert alert-success" id="appAddMessage" style="display:none">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><%=i18n.localize("Application")%> "<span id="applicationShowName"></span>" <%=i18n.localize("Successfully added!")%></strong>
-    </div>
-    <div class="alert alert-success" id="appAddPendingMessage" style="display:none">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><%=i18n.localize("Congratulations! Your application creation request for -")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("has been submitted and is now awaiting approval.")%></strong>
-    </div>
-    <br />
-    <div class="white-wrapper add-padding-5x">
-        <form class="form-horizontal" id="appAddForm">
-            <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
-            <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
-            <div class="form-group">
-                <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
-                <div class="col-md-9 col-lg-9">
-                    <input type="text" class="form-control required validateSpecialChars validName" title="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <%
-                if(!APIUtil.isAdvanceThrottlingEnabled()){
-                %>
-                <label class="col-md-3 col-lg-3 control-label" for="appTier"><%=i18n.localize("Throttling Tier")%></label>
-                <% } else { %>
-                <label class="col-md-3 col-lg-3 control-label" for="appTier"><%=i18n.localize("Per Token Quota")%></label>
-                <% } %>
-                <div class="col-md-9 col-lg-9">
-                    <select id="appTier" name="appTier" onChange="tierChanged(this)">
-                        <%
-                        var tierDescriptions = "";
-                        var unlimitedTierDesc = "";
-                        for(i=0; i<tiers.length; i++){
-                        if(tierDescriptions == ""){
-                        tierDescriptions = tierDescriptions + tiers[i].tierDescription;
-                        }
-                        else{
-                        tierDescriptions = tierDescriptions + "," + tiers[i].tierDescription;
-                        }
 
-                        if(tiers[i].tierName == "Unlimited"){
-                        unlimitedTierDesc = tiers[i].tierDescription;
-                        }
-                        %>
-                        <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>"  <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>
-                        <%=encode.forHtml(tiers[i].tierDisplayName+"")%>
-                        </option>
-                        <%}%>
-                    </select>
-                    <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
-                        <em><%=encode.forHtml(unlimitedTierDesc+"")%></em>
+
+        <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke
+            a collection of APIs and to subscribe to one API multiple times with different SLA levels. The
+            DefaultApplication is pre-created and allows unlimited access by default.</p>
+
+        <div id="application-list">
+            <div id="application-table-nodata" class="hide message message-info">
+                <h4><i class="icon fw fw-info"></i>No Applications</h4>
+
+                <p>No applications yet. Click Add Applications in the action bar to add an application.</p>
+            </div>
+
+            <div id="application-table-wrap" class="white-wrapper add-padding-5x">
+                <div id="application-table_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                    <div class="dataTablesTop">
+                        <div id="application-table_filter" class="dataTables_filter"><label><i
+                                class="fw fw-search search-icon"></i><input type="search" class="form-control"
+                                                                            placeholder="Filter by ..."
+                                                                            aria-controls="application-table"></label>
+                        </div>
+                        <div class="dataTables_toolbar"></div>
                     </div>
-                    <div class="help-block"><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%> </div>
-                    <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>
+                    <div id="application-table_processing" class="dataTables_processing" style="display: none;">
+                        Processing...
+                    </div>
+                    <table id="application-table"
+                           class="table table-striped table-hover table-bordered display data-table dataTable no-footer"
+                           cellspacing="0" role="grid" aria-describedby="application-table_info">
+                        <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" tabindex="0" aria-controls="application-table" rowspan="1"
+                                colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">
+                                Name
+                            </th>
+                            <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
+                                colspan="1" aria-label="Tier: activate to sort column ascending">Tier
+                            </th>
+                            <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
+                                colspan="1" aria-label="Workflow Status: activate to sort column ascending">Workflow
+                                Status
+                            </th>
+                            <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
+                                colspan="1" aria-label="Subscriptions: activate to sort column ascending">Subscriptions
+                            </th>
+                            <th class="col-md-3 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
+                                colspan="1" aria-label="Actions: activate to sort column ascending">Actions
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr role="row" class="odd">
+                            <td class="sorting_1">
+                                <a title="applications"
+                                   href="/store/application/DefaultApplication/">DefaultApplication</a>
+                            </td>
+                            <td>Unlimited</td>
+                            <td>ACTIVE</td>
+                            <td>1</td>
+                            <td>
+                                <a title="View" href="/store/application/DefaultApplication"
+                                   class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-view fw-stack-1x"></i>
+      </span>
+                                    <span class="hidden-xs">View</span>
+                                </a>
+                                <a title="Edit" href="/store/application/edit"
+                                   class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-edit fw-stack-1x"></i>
+      </span>
+                                    <span class="hidden-xs">Edit</span>
+                                </a>
+                                <a title="Delete" href="#" data-id="DefaultApplication" data-count="1"
+                                   class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-delete fw-stack-1x"></i>
+      </span>
+                                    <span class="hidden-xs">Delete</span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="dataTablesBottom">
+                        <div class="dataTables_length" id="application-table_length"><label>Show <select
+                                name="application-table_length" aria-controls="application-table"
+                                class="form-control input-sm">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select> entries</label></div>
+                        <div class="dataTables_info" id="application-table_info" role="status" aria-live="polite">
+                            Showing 1 to 1 of 1 entries
+                        </div>
+                        <div class="dataTables_paginate paging_simple_numbers" id="application-table_paginate">
+                            <ul class="pagination">
+                                <li class="paginate_button previous disabled" id="application-table_previous"><a
+                                        href="#" aria-controls="application-table" data-dt-idx="0"
+                                        tabindex="0">Previous</a></li>
+                                <li class="paginate_button active"><a href="#" aria-controls="application-table"
+                                                                      data-dt-idx="1" tabindex="0">1</a></li>
+                                <li class="paginate_button next disabled" id="application-table_next"><a href="#"
+                                                                                                         aria-controls="application-table"
+                                                                                                         data-dt-idx="2"
+                                                                                                         tabindex="0">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="description" class="col-md-3 col-lg-3 control-label">Description</label>
-                <div class="col-md-9 col-lg-9">
-                    <textarea id="description"  class="form-control" type="text" rows="3"><%= encode.forHtml(description)%></textarea>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-3 col-sm-9">
-                    <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="Update"/>
-                    <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
-                </div>
-            </div>
-            <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>
-        </form>
-    </div>
+        </div>
+
+
+
+
+
+
 {{/fillZone}}
