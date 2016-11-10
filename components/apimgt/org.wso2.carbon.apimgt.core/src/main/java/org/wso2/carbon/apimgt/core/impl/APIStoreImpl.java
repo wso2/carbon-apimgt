@@ -57,9 +57,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
-    @Override public Application getApplicationsByName(String userId, String applicationName, String groupId)
+    @Override
+    public Application getApplicationsByName(String userId, String applicationName, String groupId)
             throws APIManagementException {
-        return null;
+        Application application = null;
+        try {
+            application = getApplicationDAO().getApplicationByName(userId, applicationName, groupId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException(
+                    "Error occurred while fetching application for the given applicationName - " + applicationName, e,
+                    log);
+        }
+        return application;
     }
 
     @Override public Application[] getApplications(Subscriber subscriber, String groupingId)
@@ -77,7 +86,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
-
     public APISummaryResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException {
 
@@ -93,9 +101,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiSummaryResults;
     }
 
-    @Override public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return null;
-    }
 
     @Override public void removeApplication(Application application) throws APIManagementException {
 
@@ -105,14 +110,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return 0;
     }
 
-    @Override public Application getApplicationById(int id) throws APIManagementException {
+    @Override
+    public Application getApplicationById(int id) throws APIManagementException {
         Application application = null;
         try {
             application = getApplicationDAO().getApplicationById(id);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while fetching application for the given id - " + id, e, log);
         }
-
         return application;
     }
 
