@@ -131,4 +131,22 @@ public interface ApplicationDAO {
      */
     Application getApplicationById(int id) throws SQLException;
 
+    /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
+
+    /**
+     * Retrieves the Application which is corresponding to the given UUID String
+     *
+     * @param uuid UUID of Application
+     * @return
+     * @throws SQLException
+     */
+    public Application getApplicationByUUID(String uuid) throws SQLException;
+
 }

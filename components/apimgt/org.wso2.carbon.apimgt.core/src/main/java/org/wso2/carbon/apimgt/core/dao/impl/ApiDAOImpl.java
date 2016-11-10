@@ -220,24 +220,20 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
+     * Checks if a given API which is uniquely identified by the API Name  already
      * exists
      *
-     * @param providerName Name of API provider/publisher
      * @param apiName      Name of API
-     * @param version      version of the API
-     * @return true if providerName, apiName, version combination already exists else false
+     * @return true if  apiName combination already exists else false
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPIExists(String providerName, String apiName, String version) throws SQLException {
-        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE PROVIDER = ? AND NAME = ? AND VERSION = ?";
+    public boolean isAPINameExists(String apiName ) throws SQLException {
+        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, providerName);
-            statement.setString(2, apiName);
-            statement.setString(3, version);
+            statement.setString(1, apiName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {

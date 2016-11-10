@@ -61,14 +61,6 @@ public interface APIStore extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
-     */
-    Application getApplicationByUUID(String uuid) throws APIManagementException;
-
-    /**
      * Function to remove an Application from the API Store
      * @param application - The Application Object that represents the Application
      * @throws APIManagementException

@@ -115,4 +115,5 @@ public interface APISubscriptionDAO {
     void deleteAPISubscription(String subscriptionID) throws SQLException;
 
 
+    long getAPISubscriptionCountByAPI(String apiId) throws SQLException;
 }

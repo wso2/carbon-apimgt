@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -115,6 +116,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public boolean isContextExist(String context) throws APIManagementException {
+        try {
+            return getApiDAO().isAPIContextExists(context);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't check API Context " + context + "Exists", e, log);
+        }
         return false;
     }
 
@@ -127,6 +133,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public boolean isApiNameExist(String apiName) throws APIManagementException {
+        try {
+            return getApiDAO().isAPINameExists(apiName);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't check API Name " + apiName + "Exists", e, log);
+        }
         return false;
     }
 
@@ -203,6 +214,22 @@ public abstract class AbstractAPIManager implements APIManager {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return null;
+    }
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        Application application = null;
+        try {
+           getApplicationDAO().getApplicationByUUID(uuid);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
+        }
+        return  application;
     }
 
     protected ApiDAO getApiDAO() {

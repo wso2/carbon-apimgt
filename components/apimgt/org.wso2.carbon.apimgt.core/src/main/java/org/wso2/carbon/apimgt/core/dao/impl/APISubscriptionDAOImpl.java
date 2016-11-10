@@ -134,4 +134,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
     }
 
+    @Override
+    public long getAPISubscriptionCountByAPI(String apiId) throws SQLException {
+        return 0;
+    }
+
 }

@@ -27,10 +27,12 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -135,7 +137,13 @@ import java.util.UUID;
      */
     @Override
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
-        return 0;
+       long subscriptionCount = 0;
+        try {
+            subscriptionCount =  getApiSubscriptionDAO().getAPISubscriptionCountByAPI(id);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't retrieve Subscriptions for API " + id, e, log);
+        }
+        return subscriptionCount;
     }
 
     @Override
@@ -157,12 +165,17 @@ import java.util.UUID;
             apiBuilder.id(UUID.randomUUID().toString());
         }
         try {
-            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
-            apiBuilder.associateLifecycle(lifecycleState);
-            createdAPI = apiBuilder.build();
-            getApiDAO().addAPI(createdAPI);
-            APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
-                    "successfully.", log);
+            if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
+                LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+                apiBuilder.associateLifecycle(lifecycleState);
+                createdAPI = apiBuilder.build();
+                getApiDAO().addAPI(createdAPI);
+                APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
+                        "successfully.", log);
+            } else {
+                APIUtils.logAndThrowException("Duplicate API already Exist with name/Context " + apiBuilder.getName(),
+                        log);
+            }
         } catch (SQLException e) {
             try {
                 getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
@@ -272,23 +285,26 @@ import java.util.UUID;
      */
     @Override
     public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
+        String newVersionedId = null;
         try {
-            API api  = getApiDAO().getAPI(apiId);
-            if (api != null){
+            API api = getApiDAO().getAPI(apiId);
+            if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
                 getApiDAO().addAPI(apiBuilder.build());
-                return apiBuilder.getId();
+                newVersionedId = apiBuilder.getId();
+            } else {
+                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't found");
             }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't create new API version from " + apiId, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + apiId, e, log);
         }
-        return null;
+        return newVersionedId;
     }
 
     /**
@@ -415,8 +431,8 @@ import java.util.UUID;
                 API api = getApiDAO().getAPI(identifier);
                 if (api != null){
                     API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                    getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     getApiDAO().deleteAPI(identifier);
+                    getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                 }
             } else {

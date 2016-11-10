@@ -41,89 +41,57 @@ public class LoggingHandler implements MessagingHandler {
      * request should have a header named "hello_continue" to pass the validation
      */
     public boolean validateRequestContinuation(CarbonMessage carbonMessage, CarbonCallback carbonCallback) {
-        //String helloContinue = carbonMessage.getHeader("helloContinue");
-        /*if (helloContinue == null) {
-            DefaultCarbonMessage securityFailedCM = new DefaultCarbonMessage();
-            String errMsg = "import header not found";
-            securityFailedCM.setStringMessageBody(errMsg);
-            Map<String, String> transportHeaders = new HashMap<>();
-            transportHeaders.put(Constants.HTTP_CONNECTION, Constants.KEEP_ALIVE);
-            transportHeaders.put(Constants.HTTP_CONTENT_TYPE, Constants.TEXT_PLAIN);
-            transportHeaders.put(Constants.HTTP_CONTENT_LENGTH,
-                    (String.valueOf(errMsg.getBytes(Charset.defaultCharset()).length)));
-
-            securityFailedCM.setHeaders(transportHeaders);
-
-            securityFailedCM.setProperty(Constants.HTTP_STATUS_CODE, 401);
-            securityFailedCM.setProperty(Constants.DIRECTION, Constants.DIRECTION_RESPONSE);
-            carbonCallback.done(securityFailedCM);
-
-            return false;
-        }*/
         return true;
     }
 
     @Override
     public void invokeAtSourceConnectionInitiation(String s) {
-
     }
 
     @Override
     public void invokeAtSourceConnectionTermination(String s) {
-
     }
 
     @Override
     public void invokeAtSourceRequestReceiving(CarbonMessage carbonMessage) {
-
+        //We need to check auth header here. All authenticstion shoud happens here.
+        log.info("message came with auth header:" + formatHeader(carbonMessage));
     }
 
     @Override
     public void invokeAtSourceRequestSending(CarbonMessage carbonMessage) {
-        //+ formatHeader(carbonMessage.getHeaders())
-        log.info("headers in request receiving to engine: ");
     }
 
     @Override
     public void invokeAtTargetRequestReceiving(CarbonMessage carbonMessage) {
-        log.info("headers in request sending from engine:");
-        // + formatHeader(carbonMessage.getHeaders()));
     }
 
     @Override
     public void invokeAtTargetRequestSending(CarbonMessage carbonMessage) {
-
     }
 
     @Override
     public void invokeAtTargetResponseReceiving(CarbonMessage carbonMessage) {
-
     }
 
     @Override
     public void invokeAtTargetResponseSending(CarbonMessage carbonMessage) {
-        log.info("headers in response receiving to engine: ");
-        //+ formatHeader(carbonMessage.getHeaders()));
     }
 
     @Override
     public void invokeAtSourceResponseReceiving(CarbonMessage carbonMessage) {
-        log.info("headers in response sending" + formatHeader(carbonMessage));
     }
 
     @Override
     public void invokeAtSourceResponseSending(CarbonMessage carbonMessage) {
-
     }
 
     @Override
     public void invokeAtTargetConnectionInitiation(String s) {
-
     }
 
     @Override
     public void invokeAtTargetConnectionTermination(String s) {
-
     }
 
     @Override

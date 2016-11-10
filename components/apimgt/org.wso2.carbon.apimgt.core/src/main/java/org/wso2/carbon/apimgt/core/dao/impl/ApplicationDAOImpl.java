@@ -151,7 +151,39 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     }
 
-    @Override public Application getApplicationById(int id) throws SQLException {
+    /**
+     * Returns the corresponding application given the Id
+     * @param id Id of the Application
+     * @return it will return the Application corresponding to the id.
+     * @throws SQLException
+     */
+    @Override
+    public Application getApplicationById(int id) throws SQLException {
+        return null;
+    }
+
+    /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    @Override
+    public Application getApplicationByName(String userId, String applicationName, String groupId)
+            throws SQLException {
+        return null;
+    }
+
+    /**
+     * Retrieves the Application which is corresponding to the given UUID String
+     *
+     * @param uuid UUID of Application
+     * @return
+     * @throws SQLException
+     */
+    @Override
+    public Application getApplicationByUUID(String uuid) throws SQLException {
         return null;
     }
 }

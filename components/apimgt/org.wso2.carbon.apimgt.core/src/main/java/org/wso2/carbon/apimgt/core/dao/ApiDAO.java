@@ -105,13 +105,11 @@ public interface ApiDAO {
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
      * exists
-     * @param providerName Name of API provider/publisher
      * @param apiName Name of API
-     * @param version version of the API
      * @return true if providerName, apiName, version combination already exists else false
      * @throws SQLException if error occurs while accessing data layer
      */
-    boolean isAPIExists(String providerName, String apiName, String version) throws SQLException;
+    boolean isAPINameExists(String apiName) throws SQLException;
 
     /**
      * Checks if a given API Context already exists
