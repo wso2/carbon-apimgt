@@ -22,10 +22,12 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -128,5 +130,13 @@ public interface APIManager {
      * @throws APIManagementException if the requested documentation content is not available
      */
     InputStream getDocumentationContent(String docId) throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
 
 }

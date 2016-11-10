@@ -122,13 +122,17 @@ public class APIStoreImplTestCase {
     }
     
     @Test
-    public void testGetApplicationByUUID () {
-        
-    }
-    
-    @Test
-    public void testAddApplication () {
+    public void testGetApplicationByName () {
+        try {
+            Application applicationFromDAO = new Application("username", null);
+            when(applicationDAO.getApplicationByName("userId","applicationName","groupId")).thenReturn(applicationFromDAO);
 
+            Application application = apiStore.getApplicationsByName("userId","applicationName","groupId");
+            Assert.assertNotNull(application);
+            verify(applicationDAO, times(1)).getApplicationByName("userId","applicationName","groupId");
+        } catch (APIManagementException |SQLException e) {
+            Assert.assertTrue(false);
+        }
     }
 
 }
