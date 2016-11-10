@@ -26,5 +26,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
  */
 public interface ApiDAOVendorSpecificStatements {
     String getAPIsForRoles(int numberOfRoles);
-    String searchAPIsForRoles();
+    String getAPIsForProvider();
+    String searchAPIsForRoles(int numberOfRoles);
 }

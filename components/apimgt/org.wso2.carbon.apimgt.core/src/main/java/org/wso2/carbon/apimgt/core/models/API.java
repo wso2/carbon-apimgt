@@ -345,6 +345,34 @@ public final class API {
             this.name = name;
             this.version = version;
         }
+        public APIBuilder(API copy) {
+            this.id = copy.id;
+            this.provider = copy.provider;
+            this.name = copy.name;
+            this.version = copy.version;
+            this.context = copy.context;
+            this.description = copy.description;
+            this.lifeCycleStatus = copy.lifeCycleStatus;
+            this.lifecycleInstanceId = copy.lifecycleInstanceId;
+            this.apiDefinition = copy.apiDefinition;
+            this.wsdlUri = copy.wsdlUri;
+            this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
+            this.cacheTimeout = copy.cacheTimeout;
+            this.isDefaultVersion = copy.isDefaultVersion;
+            this.apiPolicy = copy.apiPolicy;
+            this.transport = copy.transport;
+            this.tags = copy.tags;
+            this.policies = copy.policies;
+            this.visibility = copy.visibility;
+            this.visibleRoles = copy.visibleRoles;
+            this.endpoints = copy.endpoints;
+            this.gatewayEnvironments = copy.gatewayEnvironments;
+            this.businessInformation = copy.businessInformation;
+            this.corsConfiguration = copy.corsConfiguration;
+            this.createdTime = copy.createdTime;
+            this.createdBy = copy.createdBy;
+            this.lastUpdatedTime = copy.lastUpdatedTime;
+        }
 
         /**
          * Sets the {@code id} and returns a reference to this APIBuilder so that the methods can be chained together.
@@ -400,7 +428,10 @@ public final class API {
             this.lifecycleInstanceId = lifecycleInstanceId;
             return this;
         }
-
+        public APIBuilder version(String version) {
+            this.version = version;
+            return this;
+        }
         /**
          * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
@@ -620,6 +651,7 @@ public final class API {
         @Override
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
             lifecycleInstanceId = lifecycleState.getLifecycleId();
+            lifeCycleStatus = lifecycleState.getState();
         }
 
         /**
@@ -648,4 +680,5 @@ public final class API {
             return name;
         }
     }
+
 }

@@ -111,7 +111,7 @@ public final class APISummary {
     /**
      * {@code APISummary} builder static inner class.
      */
-    public static final class Builder implements ManagedLifecycle{
+    public static final class Builder{
         private String provider;
         private String version;
         private String description;
@@ -162,6 +162,16 @@ public final class APISummary {
         /**
          * Sets the {@code status} and returns a reference to this Builder so that the methods can be chained together.
          *
+         * @param lifecycleInstanceId the {@code status} to set
+         * @return a reference to this Builder
+         */
+        public Builder lifecycleInstanceId(String lifecycleInstanceId) {
+            this.lifecycleInstanceId = lifecycleInstanceId;
+            return this;
+        }
+        /**
+         * Sets the {@code status} and returns a reference to this Builder so that the methods can be chained together.
+         *
          * @param status the {@code status} to set
          * @return a reference to this Builder
          */
@@ -169,6 +179,7 @@ public final class APISummary {
             this.status = status;
             return this;
         }
+
 
         /**
          * Returns a {@code APISummary} built from the parameters previously set.
@@ -179,44 +190,13 @@ public final class APISummary {
             return new APISummary(this);
         }
 
-        /**
-         * This method should be implemented to create association between object which implementing Managed
-         * Lifecycle and
-         * the Lifecycle framework. This method should implement logic which saves the returned uuid in the external
-         * party (API, APP etc). So both parties will have lifecycle uuid saved in their side which will cater the
-         * purpose of mapping.
-         *
-         * @param lifecycleState Lifecycle state object.
-         */
-        @Override
-        public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
-            lifecycleInstanceId = lifecycleState.getLifecycleId();
-        }
 
-        /**
-         * @param lcName Name of the lifecycle to be removed.
-         *               This method should be implemented to remove the lifecycle data from the object which
-         *               implements this interface.
-         *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
-         *               method.
-         */
-        @Override
-        public void dissociateLifecycle(String lcName) throws LifecycleException {
-        }
 
-        /**
-         * @param lifecycleState Lifecycle state object.
-         *                       This method should be implemented to update the lifecycle state after state change
-         *                       operation and check list
-         *                       item operation
-         */
-        @Override
-        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
-            status = lifecycleState.getState();
-        }
+
 
         public String getLifecycleInstanceId() {
             return lifecycleInstanceId;
         }
+
     }
 }

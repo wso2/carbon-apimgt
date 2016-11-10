@@ -150,4 +150,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void deleteApplication(String appID) throws SQLException {
 
     }
+
+    @Override public Application getApplicationById(int id) throws SQLException {
+        return null;
+    }
 }

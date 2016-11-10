@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
@@ -43,15 +42,15 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Implementation of API Publisher operations
  */
-public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
+ class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
@@ -151,21 +150,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public void addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+    public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
+        API createdAPI;
+        if (apiBuilder.getId() == null){
+            apiBuilder.id(UUID.randomUUID().toString());
+        }
         try {
             LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
-            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
-            API createdAPI = apiBuilder.build();
+            apiBuilder.associateLifecycle(lifecycleState);
+            createdAPI = apiBuilder.build();
             getApiDAO().addAPI(createdAPI);
             APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
-                    "successfully.",
-                    log);
+                    "successfully.", log);
         } catch (SQLException e) {
+            try {
+                getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
+            } catch (LifecycleException e1) {
+                // here we don't throw the exception as we are removing lifecycle entry due to api does not saved in
+                // api manager tables.
+               log.error("Couldn't remove lifecycle entry");
+            }
             APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Error occurred while Associating the API - " + apiBuilder.getName(), e, log);
         }
+        return apiBuilder.getId();
     }
 
     /**
@@ -190,10 +200,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         API api = apiBuilder.build();
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+            API originalAPI = getAPIbyUUID(api.getId());
+            if (originalAPI.getLifeCycleStatus().equalsIgnoreCase(api.getLifeCycleStatus())) {
+                getApiDAO().updateAPI(api.getId(), api);
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                }
+            } else {
+                String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have status " +
+                        "change";
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
+                APIUtils.logAndThrowException(msg, log);
             }
-             getApiDAO().updateAPI(api.getId(), api);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
         }
@@ -211,26 +231,33 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIStatus(String apiId, String status, boolean
+    public void updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
+        API originalAPI = null;
         try {
-            APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(apiId);
-            if (apiSummaryBuilder != null){
-                getApiLifecycleManager().executeLifecycleEvent(status, apiSummaryBuilder.getLifecycleInstanceId(),
-                        status, apiSummaryBuilder);
-                APISummary apiSummary = apiSummaryBuilder.build();
-                getApiDAO().changeLifeCycleStatus(apiSummary.getId(), status, deprecateOldVersions,
-                        makeKeysForwardCompatible);
-                return true;
-            }else{
-                return false;
+            API api = getApiDAO().getAPI(apiId);
+            if (api != null) {
+                API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                originalAPI = apiBuilder.build();
+                LifecycleState lifecycleState = getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
+                        .getLifecycleInstanceId(), getUsername(), originalAPI);
+                apiBuilder.associateLifecycle(lifecycleState);
+                getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
             }
         } catch (SQLException e) {
+            try {
+                if (originalAPI != null) {
+                    getApiLifecycleManager().executeLifecycleEvent(originalAPI.getLifeCycleStatus(), originalAPI
+                            .getLifecycleInstanceId(), getUsername(), originalAPI);
+                }
+            } catch (LifecycleException e1) {
+                // here we don't throw the exception as we are execute lifecycle entry due to api does not saved in
+                // api manager tables.
+                log.error("Couldn't execute lifecycle event");
+            }
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
-            return false;
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
-            return false;
         }
     }
 
@@ -238,23 +265,30 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param api        The API to be copied
+     * @param apiId        The API to be copied
      * @param newVersion The version of the new API
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws APIManagementException {
+    public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
         try {
-
-           API.APIBuilder apiBuilder = getApiDAO().createNewAPIVersion(api.getId(), newVersion);
-            LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
-            apiBuilder.lifecycleInstanceId(lifecycleState.getLifecycleId());
+            API api  = getApiDAO().getAPI(apiId);
+            if (api != null){
+                API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                apiBuilder.id(UUID.randomUUID().toString());
+                apiBuilder.version(newVersion);
+                LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+                apiBuilder.associateLifecycle(lifecycleState);
+                getApiDAO().addAPI(apiBuilder.build());
+                return apiBuilder.getId();
+            }
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Couldn't create new API version from " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Couldn't create new API version from " + apiId, e, log);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + apiId, e, log);
         }
+        return null;
     }
 
     /**
@@ -377,10 +411,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteAPI(String identifier) throws APIManagementException {
         try {
-            if (getAPISubscriptionCountByAPI(identifier) < 0) {
-                APISummary.Builder apiSummaryBuilder = getApiDAO().getAPISummary(identifier);
-                if (apiSummaryBuilder != null){
-                    getApiLifecycleManager().removeLifecycle(apiSummaryBuilder.getLifecycleInstanceId());
+            if (getAPISubscriptionCountByAPI(identifier) == 0) {
+                API api = getApiDAO().getAPI(identifier);
+                if (api != null){
+                    API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                    getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     getApiDAO().deleteAPI(identifier);
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                 }

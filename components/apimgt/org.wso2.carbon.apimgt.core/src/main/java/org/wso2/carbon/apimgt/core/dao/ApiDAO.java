@@ -22,11 +22,11 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.models.*;
 
-import javax.annotation.CheckForNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to API data layer
@@ -49,7 +49,7 @@ public interface ApiDAO {
      *
      */
     @CheckForNull
-    APISummary.Builder getAPISummary(String apiID) throws SQLException;
+    APISummary getAPISummary(String apiID) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
@@ -183,16 +183,6 @@ public interface ApiDAO {
      */
     void changeLifeCycleStatus(String apiID, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws SQLException;
-
-    /**
-     * Create a new version of an existing API
-     * @param apiID The UUID of the respective API
-     * @param version The new version of the API
-     * @return The new version {@link API} object
-     * @throws SQLException if error occurs while accessing data layer
-     *
-     */
-    API.APIBuilder createNewAPIVersion(String apiID, String version) throws SQLException;
 
     /**
      * Return list of all Document info belonging to a given API. This method supports result pagination

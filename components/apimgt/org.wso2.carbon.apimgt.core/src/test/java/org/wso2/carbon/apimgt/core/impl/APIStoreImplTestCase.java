@@ -20,38 +20,73 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.powermock.api.mockito.PowerMockito;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.atLeastOnce;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+//import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-
-import static org.mockito.Mockito.mock;
+import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.APISummaryResults;
 
 /**
  * Test class for APIStore
  *
  */
-@PrepareForTest(DAOFactory.class)
+@PrepareForTest
 public class APIStoreImplTestCase {
-    
-    private APIStore apiStore = mock(APIStoreImpl.class);
+
+    private ApiDAO apiDAO = mock(ApiDAO.class);
+    private ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+    private APISubscriptionDAO subscriptionDAO = mock(APISubscriptionDAO.class);
+
+    private APIStore apiStore = new APIStoreImpl("username", apiDAO, applicationDAO, subscriptionDAO);
 
     @Test
     public void testSearchAPIs() {
         try {
+            //PowerMockito.mockStatic(DAOFactory.class);
+            // apiDAO.searchAPIsForRoles(searchString, offset, limit, roles);
+            List<APISummary> apiSummaryList = new ArrayList<APISummary>();
+            apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
+            apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
+            apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
             
-      PowerMockito.mockStatic(DAOFactory.class);
-      
-      //apiStore = new APIStoreImpl();
-      
-      apiStore.searchAPIs("",0,0);
-            Assert.assertTrue(true);
-        } catch (APIManagementException e) {
-           
+            APISummaryResults apimResultsFromDAO = new APISummaryResults.Builder(apiSummaryList, true, 1).build();
+            when(apiDAO.searchAPIsForRoles("", 1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
+            
+            APISummaryResults apis = apiStore.searchAPIs("", 1, 2);
+            Assert.assertEquals(apis.getApiSummaryList().size(), 3);
+                        
+            verify(apiDAO, atLeastOnce()).searchAPIsForRoles("", 1, 2, new ArrayList<>());
+            
+        } catch (APIManagementException | SQLException e) {
+            Assert.assertTrue(false);
         }
-               
+
     }
+    
+    @Test
+    public void testGetApplicationByUUID () {
+        
+    }
+    
+    @Test
+    public void testAddApplication () {
+
+    }
+
 }
