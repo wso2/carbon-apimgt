@@ -107,6 +107,12 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -139,6 +145,44 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+
+<!--<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <executions>
+        <execution>
+            <id>prepare-agent</id>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+                <propertyName>jcoverage.command</propertyName>
+                <includes>
+                    <include>org.wso2.carbon.apimgt.core.impl*</include>
+                </includes>
+                <append>true</append>
+            </configuration>
+        </execution>
+        <execution>
+            <id>default-check</id>
+            <goals>
+                <goal>check</goal>
+            </goals>
+            <configuration>
+                <rules>
+                    <rule>
+                    </rule>
+                </rules>
+            </configuration>
+        </execution>
+    </executions>
+</plugin> -->
+
+
         </plugins>
     </build>
 
@@ -159,4 +203,5 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
     </properties>
+
 </project>
