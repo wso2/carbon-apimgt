@@ -115,6 +115,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public boolean isContextExist(String context) throws APIManagementException {
+        try {
+            return getApiDAO().isAPIContextExists(context);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't check API Context " + context + "Exists", e, log);
+        }
         return false;
     }
 
@@ -127,6 +132,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public boolean isApiNameExist(String apiName) throws APIManagementException {
+        try {
+            return getApiDAO().isAPINameExists(apiName);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't check API Name " + apiName + "Exists", e, log);
+        }
         return false;
     }
 
