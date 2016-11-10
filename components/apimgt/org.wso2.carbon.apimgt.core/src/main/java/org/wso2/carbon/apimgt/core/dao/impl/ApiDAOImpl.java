@@ -167,6 +167,21 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     * ensuring the life cycle status of the APIs returned matches the status list provided
+     *
+     * @param offset   The number of results from the beginning that is to be ignored
+     * @param limit    The maximum number of results to be returned after the offset
+     * @param statuses A list of matching life cycle statuses
+     * @return {@link APISummaryResults} matching results
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    @Override
+    public APISummaryResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException {
+        return null;
+    }
+
+    /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided
@@ -341,38 +356,41 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public API updateAPI(String apiID, API substituteAPI) throws SQLException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
-                "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
+                "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, UUID = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, API_POLICY_ID = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
-                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ? LAST_UPDATED_TIME = ? " +
+                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ? " +
                 "WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
+            int apiPrimaryKey = getAPIPrimaryKey(connection, apiID);
+
             statement.setBoolean(1, substituteAPI.isDefaultVersion());
-            statement.setString(2, substituteAPI.getVisibility().toString());
-            statement.setBoolean(3, substituteAPI.isResponseCachingEnabled());
-            statement.setInt(4, substituteAPI.getCacheTimeout());
+            statement.setString(2, substituteAPI.getDescription());
+            statement.setString(3, substituteAPI.getVisibility().toString());
+            statement.setBoolean(4, substituteAPI.isResponseCachingEnabled());
+            statement.setInt(5, substituteAPI.getCacheTimeout());
+            statement.setString(6, substituteAPI.getId());
 
             BusinessInformation businessInformation = substituteAPI.getBusinessInformation();
-            statement.setString(5, businessInformation.getTechnicalOwner());
-            statement.setString(6, businessInformation.getTechnicalOwnerEmail());
-            statement.setString(7, businessInformation.getBusinessOwner());
-            statement.setString(8, businessInformation.getBusinessOwnerEmail());
+            statement.setString(7, businessInformation.getTechnicalOwner());
+            statement.setString(8, businessInformation.getTechnicalOwnerEmail());
+            statement.setString(9, businessInformation.getBusinessOwner());
+            statement.setString(10, businessInformation.getBusinessOwnerEmail());
 
-            statement.setInt(9, getAPIThrottlePolicyID(connection, substituteAPI.getApiPolicy()));
+            statement.setInt(11, getAPIThrottlePolicyID(connection, substituteAPI.getApiPolicy()));
 
             CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
-            statement.setBoolean(10, corsConfiguration.isEnabled());
-            statement.setString(11, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(12, corsConfiguration.isAllowCredentials());
-            statement.setString(13, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(14, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(12, corsConfiguration.isEnabled());
+            statement.setString(13, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(14, corsConfiguration.isAllowCredentials());
+            statement.setString(15, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(16, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setTimestamp(15, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
+            statement.setTimestamp(17, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
+            statement.setString(18, apiID);
 
             statement.execute();
-
-            int apiPrimaryKey = getAPIPrimaryKey(connection, apiID);
 
             deleteVisibleRoles(connection, apiPrimaryKey); // Delete current visible roles if they exist
 
@@ -385,7 +403,12 @@ public class ApiDAOImpl implements ApiDAO {
                 deleteWsdlURI(connection, apiPrimaryKey);
             }
             else {
-                updateWsdlURI(connection, apiPrimaryKey, wsdlUri);
+                if (getWsdlURI(connection, apiPrimaryKey).isEmpty()) {
+                    addWsdlURI(connection, apiPrimaryKey, wsdlUri);
+                }
+                else {
+                    updateWsdlURI(connection, apiPrimaryKey, wsdlUri);
+                }
             }
 
             deleteTransports(connection, apiPrimaryKey);
@@ -742,14 +765,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addAPIDefinition(Connection connection, int apiID, String apiDefinition) throws SQLException {
         if (!apiDefinition.isEmpty()) {
-            int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                                                            ResourceConstants.ResourceType.SWAGGER.toString());
-
-            if (resourceTypeID == -1) { // If resource type does not already exist
-                ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.SWAGGER.toString());
-                resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                                                            ResourceConstants.ResourceType.SWAGGER.toString());
-            }
+            int resourceTypeID = getSwaggerResourceTypeID(connection);
 
             final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
                     "RESOURCE_BINARY_VALUE) VALUES (?,?,?,?)";
@@ -765,10 +781,9 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void updateAPIDefinition(Connection connection, int apiID, String apiDefinition) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.SWAGGER.toString());
+        int resourceTypeID = getSwaggerResourceTypeID(connection);
 
-        final String query = "UPDATE AM_API_RESOURCES RESOURCE_BINARY_VALUE = ? WHERE " +
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE " +
                 "API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBlob(1, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
@@ -780,8 +795,8 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private String getAPIDefinition(Connection connection, int apiID) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                                                            ResourceConstants.ResourceType.SWAGGER.toString());
+        int resourceTypeID = getSwaggerResourceTypeID(connection);
+
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -806,14 +821,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addWsdlURI(Connection connection, int apiID, String wsdlURI) throws SQLException {
         if (!wsdlURI.isEmpty()) {
-            int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                    ResourceConstants.ResourceType.WSDL_URI.toString());
-
-            if (resourceTypeID == -1) { // If resource type does not already exist
-                ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.WSDL_URI.toString());
-                resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                        ResourceConstants.ResourceType.WSDL_URI.toString());
-            }
+            int resourceTypeID = getWSDLResourceTypeID(connection);
 
             final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
                     "RESOURCE_TEXT_VALUE) VALUES (?,?,?,?)";
@@ -829,10 +837,9 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void updateWsdlURI(Connection connection, int apiID, String wsdlURI) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.WSDL_URI.toString());
+        int resourceTypeID = getWSDLResourceTypeID(connection);
 
-        final String query = "UPDATE AM_API_RESOURCES RESOURCE_TEXT_VALUE = ? WHERE " +
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ? WHERE " +
                 "API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, wsdlURI);
@@ -844,8 +851,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void deleteWsdlURI(Connection connection, int apiID) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.WSDL_URI.toString());
+        int resourceTypeID = getWSDLResourceTypeID(connection);
 
         final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -857,8 +863,8 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private String getWsdlURI(Connection connection, int apiID) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.WSDL_URI.toString());
+        int resourceTypeID = getWSDLResourceTypeID(connection);
+
         final String query = "SELECT RESOURCE_TEXT_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -874,6 +880,32 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return "";
+    }
+
+    private int getSwaggerResourceTypeID(Connection connection) throws SQLException {
+        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                ResourceConstants.ResourceType.SWAGGER.toString());
+
+        if (resourceTypeID == -1) { // If resource type does not already exist
+            ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.SWAGGER.toString());
+            resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                    ResourceConstants.ResourceType.SWAGGER.toString());
+        }
+
+        return resourceTypeID;
+    }
+
+    private int getWSDLResourceTypeID(Connection connection) throws SQLException {
+        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                ResourceConstants.ResourceType.WSDL_URI.toString());
+
+        if (resourceTypeID == -1) { // If resource type does not already exist
+            ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.WSDL_URI.toString());
+            resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                    ResourceConstants.ResourceType.WSDL_URI.toString());
+        }
+
+        return resourceTypeID;
     }
 
     private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {

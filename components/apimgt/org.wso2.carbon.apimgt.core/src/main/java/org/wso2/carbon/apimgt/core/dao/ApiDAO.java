@@ -76,6 +76,18 @@ public interface ApiDAO {
     APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException;
 
     /**
+     * Retrieves summary data of all available APIs. This method supports result pagination as well as
+     * ensuring the life cycle status of the APIs returned matches the status list provided
+     * @param offset The number of results from the beginning that is to be ignored
+     * @param limit The maximum number of results to be returned after the offset
+     * @param statuses A list of matching life cycle statuses
+     * @return {@link APISummaryResults} matching results
+     * @throws SQLException if error occurs while accessing data layer
+     *
+     */
+    APISummaryResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException;
+
+    /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
      * pagination as well as doing a permission check to ensure results returned are only those that match
      * the list of roles provided

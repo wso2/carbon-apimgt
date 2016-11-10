@@ -386,6 +386,39 @@ public final class API {
         }
 
         /**
+         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained together.
+         *
+         * @param provider the {@code provider} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder provider(String provider) {
+            this.provider = provider;
+            return this;
+        }
+
+        /**
+         * Sets the {@code name} and returns a reference to this APIBuilder so that the methods can be chained together.
+         *
+         * @param name the {@code name} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be chained together.
+         *
+         * @param version the {@code version} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder version(String version) {
+            this.version = version;
+            return this;
+        }
+
+        /**
          * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
          * @param context the {@code context} to set
@@ -428,10 +461,7 @@ public final class API {
             this.lifecycleInstanceId = lifecycleInstanceId;
             return this;
         }
-        public APIBuilder version(String version) {
-            this.version = version;
-            return this;
-        }
+
         /**
          * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
          *
