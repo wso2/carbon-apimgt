@@ -34,47 +34,30 @@ public class LifeCycleEvent {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getOldStatus() {
         return oldStatus;
     }
 
-    public void setOldStatus(APIStatus oldStatus) {
-        this.oldStatus = oldStatus.toString();
-    }
 
-    public void setOldStatus(String oldStatus) {
-        this.oldStatus = oldStatus;
-    }
 
     public String getNewStatus() {
         return newStatus;
-    }
-
-    public void setNewStatus(APIStatus newStatus) {
-        this.newStatus = newStatus.toString();
-    }
-
-    public void setNewStatus(String newStatus) {
-        this.newStatus = newStatus;
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public Date getDate() {
         return new Date(date.getTime());
     }
 
-    public void setDate(Date date) {
+    public LifeCycleEvent(String id, String oldStatus, String newStatus, String userId, Date date) {
+        this.id = id;
+        this.oldStatus = oldStatus;
+        this.newStatus = newStatus;
+        this.userId = userId;
         this.date = new Date(date.getTime());
     }
 }

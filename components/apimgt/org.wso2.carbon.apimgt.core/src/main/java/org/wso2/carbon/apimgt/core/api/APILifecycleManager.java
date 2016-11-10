@@ -22,6 +22,9 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
+
+import java.util.List;
 
 /**
  * This Class used for managing API Lifecycle
@@ -81,4 +84,12 @@ public interface APILifecycleManager {
      */
     LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException;
 
+    /**
+     * Get Current Lifecycle History for uuid
+     *
+     * @param uuid uuid of lifecycle instance
+     * @return
+     * @throws LifecycleException
+     */
+    List<LifecycleHistoryBean> getLifecycleHistory(String uuid) throws LifecycleException;
 }
