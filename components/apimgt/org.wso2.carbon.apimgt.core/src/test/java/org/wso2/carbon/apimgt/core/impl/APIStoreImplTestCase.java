@@ -29,11 +29,9 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,15 +62,15 @@ public class APIStoreImplTestCase {
         try {
             //PowerMockito.mockStatic(DAOFactory.class);
             // apiDAO.searchAPIsForRoles(searchString, offset, limit, roles);
-            List<APISummary> apiSummaryList = new ArrayList<APISummary>();
-            apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
-            apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
-            apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
+            List<API> apiSummaryList = new ArrayList<API>();
+            apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
+            apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
+            apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
             
-            APISummaryResults apimResultsFromDAO = new APISummaryResults.Builder(apiSummaryList, true, 1).build();
+            APIResults apimResultsFromDAO = new APIResults.Builder(apiSummaryList, true, 1).build();
             when(apiDAO.searchAPIsForRoles("", 1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
             
-            APISummaryResults apis = apiStore.searchAPIs("", 1, 2);
+            APIResults apis = apiStore.searchAPIs("", 1, 2);
             Assert.assertEquals(apis.getApiSummaryList().size(), 3);
                         
             verify(apiDAO, atLeastOnce()).searchAPIsForRoles("", 1, 2, new ArrayList<>());

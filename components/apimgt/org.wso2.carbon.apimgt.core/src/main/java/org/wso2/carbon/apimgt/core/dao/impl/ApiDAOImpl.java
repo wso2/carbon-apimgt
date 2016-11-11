@@ -23,13 +23,8 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -87,12 +82,12 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieve a given instance of an APISummary object
      *
      * @param apiID The UUID that uniquely identifies an API
-     * @return valid {@link APISummary} object or null
+     * @return valid {@link API} object or null
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public APISummary getAPISummary(String apiID) throws SQLException {
+    public API getAPISummary(String apiID) throws SQLException {
         final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, UUID, CURRENT_LC_STATUS " +
                 "FROM AM_API WHERE UUID = ?";
 
@@ -111,12 +106,12 @@ public class ApiDAOImpl implements ApiDAO {
      * @param offset        The number of results from the beginning that is to be ignored
      * @param limit         The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles)
+    public APIResults getAPIsForRoles(int offset, int limit, List<String> roles)
                                                                             throws SQLException {
         final String query = sqlStatements.getAPIsForRoles(roles.size());
 
@@ -145,12 +140,12 @@ public class ApiDAOImpl implements ApiDAO {
      * @param offset       The number of results from the beginning that is to be ignored
      * @param limit        The maximum number of results to be returned after the offset
      * @param providerName A given API Provider
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
+    public APIResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
         final String query = sqlStatements.getAPIsForProvider();
 
         try (Connection connection = DAOUtil.getConnection();
@@ -173,11 +168,11 @@ public class ApiDAOImpl implements ApiDAO {
      * @param offset   The number of results from the beginning that is to be ignored
      * @param limit    The maximum number of results to be returned after the offset
      * @param statuses A list of matching life cycle statuses
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public APISummaryResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException {
+    public APIResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException {
         return null;
     }
 
@@ -190,13 +185,13 @@ public class ApiDAOImpl implements ApiDAO {
      * @param offset          The number of results from the beginning that is to be ignored
      * @param limit           The maximum number of results to be returned after the offset
      * @param roles   The list of roles of the user making the query
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
-                                                List<String> roles) throws SQLException {
+    public APIResults searchAPIsForRoles(String searchString, int offset, int limit,
+                                         List<String> roles) throws SQLException {
         final String query = sqlStatements.searchAPIsForRoles(roles.size());
 
         try (Connection connection = DAOUtil.getConnection();
@@ -622,52 +617,52 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    private APISummary constructAPISummary(PreparedStatement statement) throws SQLException {
+    private API constructAPISummary(PreparedStatement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery()) {
             if (rs.next()) {
-                return new APISummary.Builder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                return new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        status(rs.getString("CURRENT_LC_STATUS")).build();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).build();
             }
         }
 
         return null;
     }
 
-    private List<APISummary> constructAPISummaryList(PreparedStatement statement) throws SQLException {
-        List<APISummary> apiSummaryList = new ArrayList<>();
+    private List<API> constructAPISummaryList(PreparedStatement statement) throws SQLException {
+        List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
-                APISummary apiSummary = new APISummary.Builder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        status(rs.getString("CURRENT_LC_STATUS")).build();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).build();
 
-                apiSummaryList.add(apiSummary);
+                apiList.add(apiSummary);
             }
         }
 
-        return apiSummaryList;
+        return apiList;
     }
 
-    private APISummaryResults constructAPISummaryResults(Connection connection, PreparedStatement statement,
-                                                         int offset, int rowCount) throws SQLException {
-        List<APISummary> apiSummaryList = constructAPISummaryList(statement);
+    private APIResults constructAPISummaryResults(Connection connection, PreparedStatement statement,
+                                                  int offset, int rowCount) throws SQLException {
+        List<API> apiList = constructAPISummaryList(statement);
 
         boolean isMoreResultsExist = false;
 
-        if (apiSummaryList.size() == rowCount) { // More results exist
-            apiSummaryList.remove(rowCount - 1); // Remove additional result that was not asked for
+        if (apiList.size() == rowCount) { // More results exist
+            apiList.remove(rowCount - 1); // Remove additional result that was not asked for
             isMoreResultsExist = true;
         }
 
-        return new APISummaryResults.Builder(apiSummaryList, isMoreResultsExist,
-                offset + apiSummaryList.size()).build();
+        return new APIResults.Builder(apiList, isMoreResultsExist,
+                offset + apiList.size()).build();
     }
 
     private void addTagsMapping(Connection connection, int apiID, List<String> tags) throws SQLException {

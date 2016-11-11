@@ -21,7 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 
@@ -54,10 +54,10 @@ public interface APIStore extends APIManager {
      *   
      * @param query searchType
      * @param limit limit
-     * @return APISummaryResults
+     * @return APIResults
      * @throws APIManagementException
      */
-    APISummaryResults searchAPIs(String query, int offset, int limit)
+    APIResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException;
 
     /**

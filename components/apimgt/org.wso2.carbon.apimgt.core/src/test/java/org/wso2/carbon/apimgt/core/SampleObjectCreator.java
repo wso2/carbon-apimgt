@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core;
 
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 
@@ -39,7 +38,7 @@ public class SampleObjectCreator {
         lifecycleState.setState("PUBLISH");
         return lifecycleState;
     }
-    public static APISummary getMockApiSummaryObject(){
-        return new APISummary.Builder("admin","Sample","1.0.0").build();
+    public static API getMockApiSummaryObject(){
+        return new API.APIBuilder("admin","Sample","1.0.0").build();
     }
 }
