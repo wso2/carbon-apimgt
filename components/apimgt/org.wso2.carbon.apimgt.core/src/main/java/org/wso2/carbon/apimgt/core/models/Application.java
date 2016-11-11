@@ -31,7 +31,6 @@ import java.util.Set;
  */
 public final class Application {
     private String name;
-    private String id;
     private Subscriber subscriber;
     private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
     private String groupId;
@@ -114,14 +113,6 @@ public final class Application {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getGroupId() {
