@@ -24,8 +24,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -120,21 +119,21 @@ public class MappingUtil {
     }
 
     /**
-     * Converts {@link APISummary} List to an {@link APIInfoDTO} List.
+     * Converts {@link API} List to an {@link APIInfoDTO} List.
      *
      * @param apiSummaryList
      * @return
      */
-    private static List<APIInfoDTO> toAPIInfo(List<APISummary> apiSummaryList) {
+    private static List<APIInfoDTO> toAPIInfo(List<API> apiSummaryList) {
         List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
-        for (APISummary apiSummary : apiSummaryList) {
+        for (API apiSummary : apiSummaryList) {
             APIInfoDTO apiInfo = new APIInfoDTO();
             apiInfo.setId(apiSummary.getId());
             apiInfo.setContext(apiSummary.getContext());
             apiInfo.setDescription(apiSummary.getDescription());
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setStatus(apiSummary.getStatus());
+            apiInfo.setStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfoList.add(apiInfo);
         }
@@ -142,12 +141,12 @@ public class MappingUtil {
     }
 
     /**
-     * Converts {@link APISummaryResults} to {@link APIListDTO} DTO.
+     * Converts {@link APIResults} to {@link APIListDTO} DTO.
      *
      * @param apisResult
      * @return
      */
-    public static APIListDTO toAPIListDTO(APISummaryResults apisResult) {
+    public static APIListDTO toAPIListDTO(APIResults apisResult) {
         APIListDTO apiListDTO = new APIListDTO();
         apiListDTO.setCount(apisResult.getApiSummaryList().size());
         // apiListDTO.setNext(next);

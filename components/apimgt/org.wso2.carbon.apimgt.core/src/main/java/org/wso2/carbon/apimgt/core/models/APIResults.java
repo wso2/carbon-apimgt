@@ -27,18 +27,18 @@ import java.util.List;
  * can be created via the provided inner static {@code Builder} class which implements the builder pattern
  * as outlined in "Effective Java 2nd Edition by Joshua Bloch(Item 2)"
  */
-public final class APISummaryResults {
-    private final List<APISummary> apiSummaryList;
+public final class APIResults {
+    private final List<API> apiSummaryList;
     private final boolean isMoreResultsExist;
     private final int nextOffset;
 
-    private APISummaryResults(Builder builder) {
+    private APIResults(Builder builder) {
         apiSummaryList = builder.apiSummaryList;
         isMoreResultsExist = builder.isMoreResultsExist;
         nextOffset = builder.nextOffset;
     }
 
-    public List<APISummary> getApiSummaryList() {
+    public List<API> getApiSummaryList() {
         return apiSummaryList;
     }
 
@@ -51,26 +51,26 @@ public final class APISummaryResults {
     }
 
     /**
-     * {@code APISummaryResults} builder static inner class.
+     * {@code APIResults} builder static inner class.
      */
     public static final class Builder {
-        private List<APISummary> apiSummaryList;
+        private List<API> apiSummaryList;
         private boolean isMoreResultsExist;
         private int nextOffset;
 
-        public Builder(List<APISummary> apiSummaryList, boolean isMoreResultsExist, int nextOffset) {
+        public Builder(List<API> apiSummaryList, boolean isMoreResultsExist, int nextOffset) {
             this.apiSummaryList = apiSummaryList;
             this.isMoreResultsExist = isMoreResultsExist;
             this.nextOffset = nextOffset;
         }
 
         /**
-         * Returns a {@code APISummaryResults} built from the parameters previously set.
+         * Returns a {@code APIResults} built from the parameters previously set.
          *
-         * @return a {@code APISummaryResults} built with parameters of this {@code APISummaryResults.Builder}
+         * @return a {@code APIResults} built with parameters of this {@code APIResults.Builder}
          */
-        public APISummaryResults build() {
-            return new APISummaryResults(this);
+        public APIResults build() {
+            return new APIResults(this);
         }
     }
 }

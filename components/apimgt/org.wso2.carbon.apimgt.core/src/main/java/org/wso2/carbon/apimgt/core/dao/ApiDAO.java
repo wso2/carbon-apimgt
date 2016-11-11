@@ -44,12 +44,12 @@ public interface ApiDAO {
     /**
      * Retrieve a given instance of an APISummary object
      * @param apiID The UUID that uniquely identifies an API
-     * @return valid {@link APISummary} object or null
+     * @return valid {@link API} object or null
      * @throws SQLException if error occurs while accessing data layer
      *
      */
     @CheckForNull
-    APISummary getAPISummary(String apiID) throws SQLException;
+    API getAPISummary(String apiID) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
@@ -57,11 +57,11 @@ public interface ApiDAO {
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APISummaryResults getAPIsForRoles(int offset, int limit, List<String> roles) throws SQLException;
+    APIResults getAPIsForRoles(int offset, int limit, List<String> roles) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
@@ -69,11 +69,11 @@ public interface ApiDAO {
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @param providerName A given API Provider
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APISummaryResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException;
+    APIResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs. This method supports result pagination as well as
@@ -81,11 +81,11 @@ public interface ApiDAO {
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @param statuses A list of matching life cycle statuses
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APISummaryResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException;
+    APIResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException;
 
     /**
      * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
@@ -95,12 +95,12 @@ public interface ApiDAO {
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @param roles The list of roles of the user making the query
-     * @return {@link APISummaryResults} matching results
+     * @return {@link APIResults} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APISummaryResults searchAPIsForRoles(String searchString, int offset, int limit,
-                                         List<String> roles) throws SQLException;
+    APIResults searchAPIsForRoles(String searchString, int offset, int limit,
+                                  List<String> roles) throws SQLException;
 
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already

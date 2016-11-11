@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -111,7 +112,40 @@ public class ApiDAOImplIT {
 
     @Test
     public void testGetAPIsForRoles() throws Exception {
+        /*
+        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
 
+        builder.visibility(API.Visibility.RESTRICTED);
+        builder.visibleRoles(Arrays.asList("topsecret", "classified"));
+        API superSecureAPI = builder.build();
+
+        apiDAO.addAPI(superSecureAPI);
+
+        builder = SampleAPICreator.createDefaultAPI();
+        builder.visibility(API.Visibility.RESTRICTED);
+        builder.visibleRoles(Arrays.asList("secret", "classified"));
+
+        API verySecureAPI = builder.build();
+
+        apiDAO.addAPI(verySecureAPI);
+
+        builder = SampleAPICreator.createDefaultAPI();
+        builder.visibility(API.Visibility.RESTRICTED);
+        builder.visibleRoles(Arrays.asList("hidden"));
+
+        API hiddenAPI = builder.build();
+
+        apiDAO.addAPI(hiddenAPI);
+
+        builder = SampleAPICreator.createDefaultAPI();
+        builder.visibility(API.Visibility.PUBLIC);
+        API publicAPI = builder.build();
+
+        apiDAO.addAPI(publicAPI);
+
+        apiDAO.getAPIsForRoles(0, 10, Arrays.asList("classified"));
+        */
     }
 
     @Test

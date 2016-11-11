@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -119,7 +119,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
  ) throws NotFoundException {
         
-        APISummaryResults apisResult = null;
+        APIResults apisResult = null;
         APIListDTO apiListDTO = null;
         
         try {

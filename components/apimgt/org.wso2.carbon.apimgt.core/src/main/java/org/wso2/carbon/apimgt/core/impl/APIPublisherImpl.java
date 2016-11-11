@@ -31,8 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.models.APISummary;
-import org.wso2.carbon.apimgt.core.models.APISummaryResults;
+import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -253,9 +252,8 @@ import java.util.UUID;
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 originalAPI = apiBuilder.build();
-                LifecycleState lifecycleState = getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
+                getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
-                apiBuilder.associateLifecycle(lifecycleState);
                 getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
             }else{
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
@@ -438,7 +436,7 @@ import java.util.UUID;
     public List<LifeCycleEvent> getLifeCycleEvents(String apiId) throws APIManagementException {
         List<LifeCycleEvent> lifeCycleEventList = new ArrayList<>();
         try {
-            APISummary apiSummary = getApiDAO().getAPISummary(apiId);
+            API apiSummary = getApiDAO().getAPISummary(apiId);
             if (apiSummary != null) {
                 List<LifecycleHistoryBean> lifecycleHistoryBeanList = getApiLifecycleManager().getLifecycleHistory
                         (apiSummary.getLifecycleInstanceId());
@@ -492,20 +490,20 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public APISummaryResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
+    public APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
-        APISummaryResults apiSummaryResults = null;
+        APIResults apiResults = null;
         try {
             List<String> roles = new ArrayList<>();
             if (query != null && !query.isEmpty()) {
-                apiSummaryResults = getApiDAO().searchAPIsForRoles(query, offset, limit, roles);
+                apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit, roles);
             } else {
-                apiSummaryResults = getApiDAO().getAPIsForRoles(offset, limit, roles);
+                apiResults = getApiDAO().getAPIsForRoles(offset, limit, roles);
             }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
         }
-        return apiSummaryResults;
+        return apiResults;
     }
 
     /**
