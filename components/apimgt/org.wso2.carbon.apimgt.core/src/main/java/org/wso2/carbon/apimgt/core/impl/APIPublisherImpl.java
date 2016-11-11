@@ -31,8 +31,8 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.APISummaryResults;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -256,6 +257,8 @@ import java.util.UUID;
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
                 apiBuilder.associateLifecycle(lifecycleState);
                 getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
+            }else{
+                throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
         } catch (SQLException e) {
             try {
@@ -286,13 +289,14 @@ import java.util.UUID;
     @Override
     public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
         String newVersionedId = null;
+        LifecycleState lifecycleState = null;
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);
-                LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
+                lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
@@ -300,6 +304,13 @@ import java.util.UUID;
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't found");
             }
         } catch (SQLException e) {
+            if (lifecycleState != null) {
+                try {
+                    getApiLifecycleManager().removeLifecycle(lifecycleState.getLifecycleId());
+                } catch (LifecycleException e1) {
+                    log.error("Couldn't disassociate lifecycle " + lifecycleState.getLifecycleId());
+                }
+            }
             APIUtils.logAndThrowException("Couldn't create new API version from " + apiId, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't Associate  new API Lifecycle from " + apiId, e, log);
@@ -367,7 +378,17 @@ import java.util.UUID;
      */
     @Override
     public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-        return false;
+       boolean status = false;
+        try {
+            if (getApiDAO().getAPISummary(apiId) == null) {
+                status =  false;
+            }else{
+                status = true;
+            }
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't get APISummary for " + apiId, e, log);
+        }
+        return status;
     }
 
     /**
@@ -415,7 +436,24 @@ import java.util.UUID;
      */
     @Override
     public List<LifeCycleEvent> getLifeCycleEvents(String apiId) throws APIManagementException {
-        return null;
+        List<LifeCycleEvent> lifeCycleEventList = new ArrayList<>();
+        try {
+            APISummary apiSummary = getApiDAO().getAPISummary(apiId);
+            if (apiSummary != null) {
+                List<LifecycleHistoryBean> lifecycleHistoryBeanList = getApiLifecycleManager().getLifecycleHistory
+                        (apiSummary.getLifecycleInstanceId());
+                for (LifecycleHistoryBean lifecycleHistoryBean : lifecycleHistoryBeanList) {
+                    lifeCycleEventList.add(new LifeCycleEvent(apiId, lifecycleHistoryBean.getPreviousState(),
+                            lifecycleHistoryBean.getPostState(), lifecycleHistoryBean.getUser(), lifecycleHistoryBean
+                            .getUpdatedTime()));
+                }
+            }
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't found APISummary Resource for ID " + apiId, e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Couldn't found APILifecycle History for ID " + apiId, e, log);
+        }
+        return lifeCycleEventList;
     }
 
     /**

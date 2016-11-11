@@ -23,9 +23,13 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.LifecycleOperationManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleDataProvider;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 
-public class APILifeCycleManagerImpl implements APILifecycleManager {
+import java.util.List;
+
+class APILifeCycleManagerImpl implements APILifecycleManager {
     /**
      * This method need to call for each and event life cycle state changes.
      *
@@ -91,5 +95,17 @@ public class APILifeCycleManagerImpl implements APILifecycleManager {
     @Override
     public LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException {
         return LifecycleOperationManager.getCurrentLifecycleState(uuid);
+    }
+
+    /**
+     * Get Current Lifecycle History for uuid
+     *
+     * @param uuid uuid of lifecycle instance
+     * @return
+     * @throws LifecycleException
+     */
+    @Override
+    public List<LifecycleHistoryBean> getLifecycleHistory(String uuid) throws LifecycleException {
+        return LifecycleDataProvider.getLifecycleHistory(uuid);
     }
 }

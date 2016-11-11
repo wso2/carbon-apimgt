@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core;
 
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 
@@ -28,7 +29,7 @@ public class SampleObjectCreator {
 
     public static API.APIBuilder getMockAPIObject() {
         return new API.APIBuilder("admin", "Sample", "1.0.0").context("/sample/v1").lifecycleInstanceId
-                ("7a2298c4-c905-403f-8fac-38c73301631f").id("7a2298c4-c905-403f-8fac-38c73301631f");
+                ("7a2298c4-c905-403f-8fac-38c73301631f");
     }
 
     public static LifecycleState getMockLifecycleStateObject() {
@@ -37,5 +38,8 @@ public class SampleObjectCreator {
         lifecycleState.setLifecycleId("7a2298c4-c905-403f-8fac-38c73301631f");
         lifecycleState.setState("PUBLISH");
         return lifecycleState;
+    }
+    public static APISummary getMockApiSummaryObject(){
+        return new APISummary.Builder("admin","Sample","1.0.0").build();
     }
 }
