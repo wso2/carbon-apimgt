@@ -108,6 +108,22 @@ function validate_tiers(){
     return false;
 }
 
+function validateGatewaysSelected(){
+    debugger;
+    var atLeastOneIsSelected = false;
+    var gateway_error = $("#gateway_error").text();
+    $("input[name='gateways']:not(:checked)").each(function() {
+        atLeastOneIsSelected = true;
+    });
+    if(atLeastOneIsSelected){
+        $("#gateway_error").removeClass("hide").show().text(gateway_error);
+
+    } else {
+        $("#gateway_error").addClass("hide");
+    }
+
+}
+
 function validateSubscription() {
     var subscriptionType = $('#subscriptions').val();
     if (subscriptionType == 'specific_tenants') {
@@ -145,6 +161,7 @@ $(document).ready(function(){
 
     //$('.multiselect').multiselect();
 
+    $('.env').change(validateGatewaysSelected);
     $('#tier').change(validate_tiers);
     $('#transport_http').change(validate_Transports);
     $('#transport_https').change(validate_Transports);
@@ -170,7 +187,8 @@ $(document).ready(function(){
         }
     });
 
-   validateAPITier();
+    validateAPITier();
+    validateGatewaysSelected();
 
     $("select[name='apiTier']").change(function(){
     	       validateAPITier();
