@@ -309,9 +309,15 @@ public class APIGatewayManager {
     public void deployWebsocketAPI(API api, APIGatewayAdminClient client)
             throws APIManagementException, JSONException {
         try {
+            String production_endpoint = null;
+            String sandbox_endpoint = null;
             JSONObject obj = new JSONObject(api.getEndpointConfig());
-            String production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
-            String sandbox_endpoint = obj.getJSONObject("sandbox_endpoints").getString("url");
+            if (obj.has("production_endpoints")) {
+                production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
+            }
+            if (obj.has("sandbox_endpoints")) {
+                sandbox_endpoint = obj.getJSONObject("sandbox_endpoints").getString("url");
+            }
             OMElement element;
             String context;
             context = api.getContext();
