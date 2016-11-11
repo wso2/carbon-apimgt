@@ -124,14 +124,6 @@ public interface ApplicationDAO {
     void deleteApplication(String appID) throws SQLException;
 
     /**
-     * Returns the corresponding application given the Id
-     * @param id Id of the Application
-     * @return it will return the Application corresponding to the id.
-     * @throws SQLException
-     */
-    Application getApplicationById(int id) throws SQLException;
-
-    /**
      * Fetches an Application by name.
      *
      * @param applicationName Name of the Application

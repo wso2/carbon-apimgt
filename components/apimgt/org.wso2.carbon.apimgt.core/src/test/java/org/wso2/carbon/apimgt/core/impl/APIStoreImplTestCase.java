@@ -84,20 +84,6 @@ public class APIStoreImplTestCase {
     }
 
     @Test
-    public void testGetApplicationById () {
-        try {
-            Application applicationFromDAO = new Application("username", null);
-            when(applicationDAO.getApplicationById(1)).thenReturn(applicationFromDAO);
-
-            Application application = apiStore.getApplicationById(1);
-            Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplicationById(1);
-        } catch (APIManagementException | SQLException e) {
-            Assert.assertTrue(false);
-        }
-    }
-    
-    @Test
     public void testGetApplicationByName () {
         try {
             Application applicationFromDAO = new Application("username", null);
