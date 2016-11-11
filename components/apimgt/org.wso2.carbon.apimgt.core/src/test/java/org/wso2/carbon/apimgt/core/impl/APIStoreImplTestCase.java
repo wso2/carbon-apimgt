@@ -20,6 +20,20 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.powermock.api.mockito.PowerMockito;
+//import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,12 +57,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 //import org.powermock.api.mockito.PowerMockito;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 /**
  * Test class for APIStore
  *
  */
-@PrepareForTest
+@PrepareForTest(APIUtils.class)
 public class APIStoreImplTestCase {
 
     private ApiDAO apiDAO = mock(ApiDAO.class);
@@ -58,14 +73,12 @@ public class APIStoreImplTestCase {
     private APIStore apiStore = new APIStoreImpl("username", apiDAO, applicationDAO, subscriptionDAO);
 
     @Test
-    public void testSearchAPIs() {
+    public void searchAPIs() {
         try {
-            //PowerMockito.mockStatic(DAOFactory.class);
-            // apiDAO.searchAPIsForRoles(searchString, offset, limit, roles);
-            List<API> apiSummaryList = new ArrayList<API>();
-            apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
-            apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
-            apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
+            List<APISummary> apiSummaryList = new ArrayList<APISummary>();
+            apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
+            apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
+            apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
             
             APIResults apimResultsFromDAO = new APIResults.Builder(apiSummaryList, true, 1).build();
             when(apiDAO.searchAPIsForRoles("", 1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
@@ -78,7 +91,14 @@ public class APIStoreImplTestCase {
         } catch (APIManagementException | SQLException e) {
             Assert.fail(e.getMessage());
         }
-
+    }
+    
+    @Test(expectedExceptions = APIManagementException.class)
+    public void searchAPIsWithException() throws Exception {    
+            PowerMockito.mockStatic(APIUtils.class); // TODO
+            when(apiDAO.searchAPIsForRoles("select *", 1, 2, new ArrayList<>())).thenThrow(SQLException.class);
+            //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
+            apiStore.searchAPIs("select *", 1, 2);                    
     }
 
     @Test
