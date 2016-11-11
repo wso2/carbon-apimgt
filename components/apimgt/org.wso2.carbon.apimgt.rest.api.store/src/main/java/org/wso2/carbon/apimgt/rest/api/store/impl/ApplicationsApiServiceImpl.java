@@ -220,10 +220,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             // Later we can honor it by checking admin privileges of the user.
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            int applicationId = apiConsumer.addApplication(application, username);
+            String applicationUUID = apiConsumer.addApplication(application, username);
 
             //retrieves the created application and send as the response
-            Application createdApplication = apiConsumer.getApplicationById(applicationId);
+            Application createdApplication = apiConsumer.getApplicationByUUID(applicationUUID);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header

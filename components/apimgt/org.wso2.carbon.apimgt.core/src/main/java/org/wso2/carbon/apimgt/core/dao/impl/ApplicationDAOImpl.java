@@ -152,17 +152,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
-     * Returns the corresponding application given the Id
-     * @param id Id of the Application
-     * @return it will return the Application corresponding to the id.
-     * @throws SQLException
-     */
-    @Override
-    public Application getApplicationById(int id) throws SQLException {
-        return null;
-    }
-
-    /**
      * Fetches an Application by name.
      *
      * @param applicationName Name of the Application
