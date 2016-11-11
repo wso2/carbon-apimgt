@@ -312,11 +312,11 @@ public class APIGatewayManager {
             String production_endpoint = null;
             String sandbox_endpoint = null;
             JSONObject obj = new JSONObject(api.getEndpointConfig());
-            if (obj.has("production_endpoints")) {
-                production_endpoint = obj.getJSONObject("production_endpoints").getString("url");
+            if (obj.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                production_endpoint = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
             }
-            if (obj.has("sandbox_endpoints")) {
-                sandbox_endpoint = obj.getJSONObject("sandbox_endpoints").getString("url");
+            if (obj.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
             }
             OMElement element;
             String context;
