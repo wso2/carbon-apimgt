@@ -62,6 +62,7 @@ public final class API {
         createdTime = builder.createdTime;
         createdBy = builder.createdBy;
         lastUpdatedTime = builder.lastUpdatedTime;
+        lifecycleState = builder.lifecycleState;
     }
 
     public String getId() {
@@ -168,6 +169,10 @@ public final class API {
         return new Date(lastUpdatedTime.getTime());
     }
 
+    public LifecycleState getLifecycleState() {
+        return lifecycleState;
+    }
+
     /**
      * Visibility options
      */
@@ -201,6 +206,7 @@ public final class API {
     private final Date createdTime;
     private final String createdBy;
     private final Date lastUpdatedTime;
+    private final LifecycleState lifecycleState;
 
     @Override
     public boolean equals(Object o) {
@@ -339,6 +345,7 @@ public final class API {
         private Date createdTime;
         private String createdBy;
         private Date lastUpdatedTime;
+        private LifecycleState lifecycleState;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -372,6 +379,7 @@ public final class API {
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
+            this.lifecycleState = copy.lifecycleState;
         }
 
         /**
@@ -459,6 +467,17 @@ public final class API {
          */
         public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
             this.lifecycleInstanceId = lifecycleInstanceId;
+            return this;
+        }
+
+        /**
+         * Sets the lifecycleState and return a reference to this APIBuilder
+         *
+         * @param lifecycleState
+         * @return a reference to APIBuilder
+         */
+        public APIBuilder lifecycleState(LifecycleState lifecycleState){
+            this.lifecycleState = lifecycleState;
             return this;
         }
 
@@ -682,6 +701,7 @@ public final class API {
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
             lifecycleInstanceId = lifecycleState.getLifecycleId();
             lifeCycleStatus = lifecycleState.getState();
+            this.lifecycleState = lifecycleState;
         }
 
         /**
@@ -704,10 +724,15 @@ public final class API {
         @Override
         public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
             lifeCycleStatus = lifecycleState.getState();
+            this.lifecycleState = lifecycleState;
         }
 
         public String getName() {
             return name;
+        }
+
+        public LifecycleState getLifecycleState() {
+            return lifecycleState;
         }
     }
 
