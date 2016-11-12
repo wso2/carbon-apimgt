@@ -38,6 +38,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.publisher.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.indexing.feature</module>
+        <module>org.wso2.carbon.apimgt.gateway.extension.feature</module>
     </modules>
 
 

@@ -7,7 +7,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.carbon.apimgt.gateway.extension</groupId>
     <artifactId>org.wso2.carbon.apimgt.gateway.extension</artifactId>
     <packaging>bundle</packaging>
     <name>API Manager Gateway Extension</name>
