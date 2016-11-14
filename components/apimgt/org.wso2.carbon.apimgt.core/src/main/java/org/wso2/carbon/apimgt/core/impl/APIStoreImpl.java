@@ -121,19 +121,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public int addApplication(Application application, String userId) throws APIManagementException {
-        return 0;
-    }
-
-    @Override
-    public Application getApplicationById(int id) throws APIManagementException {
-        Application application = null;
-        try {
-            application = getApplicationDAO().getApplicationById(id);
-        } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while fetching application for the given id - " + id, e, log);
-        }
-        return application;
+    public String addApplication(Application application, String userId) throws APIManagementException {
+        return null;
     }
 
   }

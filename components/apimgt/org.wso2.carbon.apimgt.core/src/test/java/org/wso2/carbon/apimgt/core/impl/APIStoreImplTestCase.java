@@ -76,10 +76,10 @@ public class APIStoreImplTestCase {
     @Test
     public void searchAPIs() {
         try {
-            List<APISummary> apiSummaryList = new ArrayList<APISummary>();
-            apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
-            apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
-            apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
+            List<API> apiSummaryList = new ArrayList<API>();
+            apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
+            apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
+            apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
             
             APIResults apimResultsFromDAO = new APIResults.Builder(apiSummaryList, true, 1).build();
             when(apiDAO.searchAPIsForRoles("", 1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
@@ -106,15 +106,15 @@ public class APIStoreImplTestCase {
     @Test
     public void getAPIsByStatus() throws APIManagementException, SQLException {
         
-        List<APISummary> apiSummaryList = new ArrayList<APISummary>();
-        apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
-        apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
-        apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
+        List<API> apiSummaryList = new ArrayList<API>();
+        apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
+        apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
+        apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
         
-        APISummaryResults expectedAPIs = new APISummaryResults.Builder(apiSummaryList, true, 1).build();
+        APIResults expectedAPIs = new APIResults.Builder(apiSummaryList, true, 1).build();
         when(apiDAO.getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"))).thenReturn(expectedAPIs);
         
-        APISummaryResults actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {"CREATED", "APUBLISHED"});
+        APIResults actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {"CREATED", "APUBLISHED"});
         Assert.assertNotNull(actualAPIs);
         Assert.assertEquals(actualAPIs.getApiSummaryList().size(), expectedAPIs.getApiSummaryList().size());
         verify(apiDAO, times(1)).getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"));
