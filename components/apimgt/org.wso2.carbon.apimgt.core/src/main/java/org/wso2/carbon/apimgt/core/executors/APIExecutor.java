@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;

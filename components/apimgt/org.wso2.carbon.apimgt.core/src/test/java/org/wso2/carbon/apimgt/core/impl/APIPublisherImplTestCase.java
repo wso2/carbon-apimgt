@@ -168,13 +168,12 @@ public class APIPublisherImplTestCase {
                 apiLifecycleManager);
         Mockito.when(apiDAO.updateAPI("7a2298c4-c905-403f-8fac-38c73301631f", new API.APIBuilder("admin", "Sample",
                 "1.0.0").build())).thenReturn(new API.APIBuilder("admin", "Sample", "1.0.0").build());
-        Mockito.when(apiDAO.getAPI("7a2298c4-c905-403f-8fac-38c73301631f")).thenReturn(new API.APIBuilder("admin", "1" +
-                ".0.0", "Calculator").lifecycleInstanceId("7a2298c4-c905-403f-8fac-38c73301631f").lifeCycleStatus
-                ("CREATED").build());
-        apiPublisher.updateAPI(new API.APIBuilder("admin", "Sample", "1.0.0").id
-                ("7a2298c4-c905-403f-8fac-38c73301631f").lifeCycleStatus("CREATED"));
-        Mockito.verify(apiDAO, Mockito.times(1)).updateAPI("7a2298c4-c905-403f-8fac-38c73301631f", new API.APIBuilder
-                ("admin", "Sample", "1.0.0").lifeCycleStatus("CREATED").build());
+        Mockito.when(apiDAO.getAPI("7a2298c4-c905-403f-8fac-38c73301631f")).thenReturn
+                (SampleObjectCreator.getMockAPIObject().lifeCycleStatus("CREATED").build());
+        apiPublisher.updateAPI(SampleObjectCreator.getMockAPIObject().lifeCycleStatus("CREATED").id
+                ("7a2298c4-c905-403f-8fac-38c73301631f"));
+        Mockito.verify(apiDAO, Mockito.times(1)).updateAPI("7a2298c4-c905-403f-8fac-38c73301631f",
+                SampleObjectCreator.getMockAPIObject().lifeCycleStatus("CREATED").build());
     }
 
     @Test(description = "Test UpdateAPI with Status unchanged", expectedExceptions = APIManagementException.class)
@@ -188,8 +187,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI("7a2298c4-c905-403f-8fac-38c73301631f")).thenReturn(new API.APIBuilder("admin", "1" +
                 ".0.0", "Calculator").lifecycleInstanceId("7a2298c4-c905-403f-8fac-38c73301631f").lifeCycleStatus
                 ("CREATED").build());
-        apiPublisher.updateAPI(new API.APIBuilder("admin", "Sample", "1.0.0").id
-                ("7a2298c4-c905-403f-8fac-38c73301631f").lifeCycleStatus("PUBLISH"));
+        apiPublisher.updateAPI(SampleObjectCreator.getMockAPIObject().lifeCycleStatus("PUBLISH"));
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI("7a2298c4-c905-403f-8fac-38c73301631f", new API.APIBuilder
                 ("admin", "Sample", "1.0.0").lifeCycleStatus("CREATED").build());
     }
