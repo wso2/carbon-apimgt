@@ -20,11 +20,21 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Environment;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
-public class SampleAPICreator {
+public class SampleTestObjectCreator {
 
     static API.APIBuilder createDefaultAPI() {
         List<String> transport = new ArrayList<>();
@@ -185,5 +195,17 @@ public class SampleAPICreator {
                 createdTime(new Date()).
                 createdBy("Adam Doe").
                 lastUpdatedTime(new Date());
+    }
+
+    static Application createDefaultApplication(){
+        Subscriber subscriber = new Subscriber("admin");
+        Application application = new Application("TestApp", subscriber);
+        application.setUUID(UUID.randomUUID().toString());
+        application.setCallbackUrl("http://localhost/myapp");
+        application.setDescription("This is a test application");
+        application.setGroupId("groupx");
+        application.setStatus("APPROVED");
+        application.setTier("gold");
+        return application;
     }
 }

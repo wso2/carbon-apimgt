@@ -1541,6 +1541,8 @@ definitions:
           - FILE
       sourceUrl:
         type: string
+      inlineContent:
+        type: string
       otherTypeName:
         type: string
 

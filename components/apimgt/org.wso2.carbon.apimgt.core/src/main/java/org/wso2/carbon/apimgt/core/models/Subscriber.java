@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.Date;
+
 /**
  * Subscriber of API. Mapping between a particular Subscriber using a selected API is captured in
  */
@@ -28,6 +30,9 @@ public class Subscriber {
 
     private String name;
     private String email;
+    private String description;
+    private Date subscribedDate = new Date();
+    private int id = 0;
 
     public Subscriber(String name) {
         this.name = name;
@@ -43,5 +48,33 @@ public class Subscriber {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Date getSubscribedDate() {
+        return new Date(subscribedDate.getTime());
+    }
+
+    public void setSubscribedDate(Date subscribedDate) {
+        this.subscribedDate = new Date(subscribedDate.getTime());
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

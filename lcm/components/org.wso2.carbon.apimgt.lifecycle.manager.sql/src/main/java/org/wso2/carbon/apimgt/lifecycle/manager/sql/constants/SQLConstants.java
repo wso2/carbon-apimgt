@@ -61,4 +61,6 @@ public class SQLConstants {
 
     public static final String GET_LIFECYCLE_IDS_IN_STATE = "SELECT LC_STATE_ID AS ID FROM LC_DATA WHERE LC_STATUS =?"
             + " AND LC_NAME=?";
+
+
 }

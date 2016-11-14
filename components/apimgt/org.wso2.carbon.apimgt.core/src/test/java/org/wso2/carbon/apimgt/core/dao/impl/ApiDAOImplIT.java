@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,7 +49,6 @@ public class ApiDAOImplIT {
         }
     }
 
-
     @org.testng.annotations.AfterMethod
     public void tempDBCleanup() throws SQLException, IOException {
         ((InMemoryDataSource) dataSource).resetDB();
@@ -59,7 +57,7 @@ public class ApiDAOImplIT {
     @Test
     public void testAddGetAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 
         apiDAO.addAPI(api);
@@ -74,7 +72,7 @@ public class ApiDAOImplIT {
     @Test
     public void testDeleteAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 
         apiDAO.addAPI(api);
@@ -88,12 +86,12 @@ public class ApiDAOImplIT {
     @Test
     public void testUpdateAPI() throws Exception {
         ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 
         apiDAO.addAPI(api);
 
-        builder = SampleAPICreator.createAlternativeAPI();
+        builder = SampleTestObjectCreator.createAlternativeAPI();
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);

@@ -99,21 +99,20 @@ public interface ApplicationDAO {
     /**
      * Add a new instance of an Application
      * @param application The {@link Application} object to be added
-     * @return The newly added {@link Application} object
+     * @return UUID of created {@link Application}
      * @throws SQLException
      *
      */
-    Application addApplication(Application application) throws SQLException;
+    String addApplication(Application application) throws SQLException;
 
     /**
      * Update an existing Application
      * @param appID The UUID of the Application that needs to be updated
-     * @param substituteApplication Substitute {@link Application} object that will replace the existing Application
-     * @return The updated {@link Application} object
+     * @param updatedApp Substitute {@link Application} object that will replace the existing Application
      * @throws SQLException
      *
      */
-    Application updateApplication(String appID, Application substituteApplication) throws SQLException;
+    void updateApplication(String appID, Application updatedApp) throws SQLException;
 
     /**
      * Remove an existing Application
