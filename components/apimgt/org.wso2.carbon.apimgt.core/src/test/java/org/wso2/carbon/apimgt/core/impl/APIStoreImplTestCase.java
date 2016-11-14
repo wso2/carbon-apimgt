@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doThrow;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.powermock.api.mockito.PowerMockito;
@@ -99,6 +100,24 @@ public class APIStoreImplTestCase {
             when(apiDAO.searchAPIsForRoles("select *", 1, 2, new ArrayList<>())).thenThrow(SQLException.class);
             //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
             apiStore.searchAPIs("select *", 1, 2);                    
+    }
+    
+    
+    @Test
+    public void getAPIsByStatus() throws APIManagementException, SQLException {
+        
+        List<APISummary> apiSummaryList = new ArrayList<APISummary>();
+        apiSummaryList.add(new APISummary.Builder("p1", "n1", "v1").build());
+        apiSummaryList.add(new APISummary.Builder("p2", "n2", "v2").build());
+        apiSummaryList.add(new APISummary.Builder("p3", "n3", "v3").build());
+        
+        APISummaryResults expectedAPIs = new APISummaryResults.Builder(apiSummaryList, true, 1).build();
+        when(apiDAO.getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"))).thenReturn(expectedAPIs);
+        
+        APISummaryResults actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {"CREATED", "APUBLISHED"});
+        Assert.assertNotNull(actualAPIs);
+        Assert.assertEquals(actualAPIs.getApiSummaryList().size(), expectedAPIs.getApiSummaryList().size());
+        verify(apiDAO, times(1)).getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"));
     }
 
     @Test

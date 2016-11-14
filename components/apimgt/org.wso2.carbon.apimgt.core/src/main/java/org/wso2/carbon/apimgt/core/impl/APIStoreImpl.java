@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +52,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public APISummaryResults getAllAPIsByStatus(int offset, int limit, String[] status) throws APIManagementException {
-        // TODO --> getApiDAO().getAPIsByStatus
-        return null;
+    public APISummaryResults getAllAPIsByStatus(int offset, int limit, String[] statuses)
+            throws APIManagementException {
+        APISummaryResults apiResults = null;
+        try {
+            apiResults = getApiDAO().getAPIsByStatus(offset, limit, new ArrayList<String>(Arrays.asList(statuses)));
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e,
+                    log);
+        }
+        return apiResults;
     }
 
     @Override
