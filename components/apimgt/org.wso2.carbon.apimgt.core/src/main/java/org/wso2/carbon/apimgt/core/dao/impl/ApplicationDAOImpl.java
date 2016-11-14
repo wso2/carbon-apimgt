@@ -23,8 +23,15 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -43,6 +50,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplication(String appID) throws SQLException {
+        final String getAppQuery = "";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getAppQuery)) {
+            constructApplicationFromResultSet(ps);
+        }
         return null;
     }
 
@@ -118,26 +130,70 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @return The newly added {@link Application} object
+     * @return UUID of created {@link Application}
      * @throws SQLException
      */
     @Override
-    public Application addApplication(Application application) throws SQLException {
-        return null;
+    public String addApplication(Application application) throws SQLException {
+        final String addAppQuery = "INSERT INTO AM_APPLICATION (NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
+                             "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
+                             "LAST_UPDATED_TIME, UUID) VALUES (?, (SELECT POLICY_ID FROM AM_POLICY_APPLICATION " +
+                             "WHERE NAME = ?),?,?,?,?,?,?,?,?,?)";
+        final String applicationUuid = UUID.randomUUID().toString();
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
+            conn.setAutoCommit(false);
+            ps.setString(1, application.getName());
+            ps.setString(2, application.getTier());
+            ps.setString(3, application.getCallbackUrl());
+            ps.setString(4, application.getDescription());
+
+            if (APIConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
+                ps.setString(5, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+            } else {
+                ps.setString(5, APIConstants.ApplicationStatus.APPLICATION_CREATED);
+            }
+
+            ps.setString(6, application.getGroupId());
+            ps.setString(7, application.getSubscriber().getName());
+            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            ps.setString(9, application.getSubscriber().getName());
+            ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+            ps.setString(11, applicationUuid);
+            ps.executeUpdate();
+            conn.commit();
+        }
+        return applicationUuid;
     }
 
     /**
      * Update an existing Application
      *
      * @param appID                 The UUID of the Application that needs to be updated
-     * @param substituteApplication Substitute {@link Application} object that will replace the existing Application
-     * @return The updated {@link Application} object
+     * @param updatedApp Substitute {@link Application} object that will replace the existing Application
      * @throws SQLException
      */
     @Override
-    public Application updateApplication(String appID, Application substituteApplication)
+    public void updateApplication(String appID, Application updatedApp)
                                                                         throws SQLException {
-        return null;
+        final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
+                                "(SELECT POLICY_ID FROM AM_POLICY_APPLICATION WHERE NAME=?), " +
+                                "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
+                                "LAST_UPDATED_TIME=?)";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
+            conn.setAutoCommit(false);
+            ps.setString(1, updatedApp.getName());
+            ps.setString(2, updatedApp.getTier());
+            ps.setString(3, updatedApp.getCallbackUrl());
+            ps.setString(4, updatedApp.getDescription());
+            ps.setString(5, updatedApp.getStatus());
+            ps.setString(6, updatedApp.getGroupId());
+            ps.setString(7, updatedApp.getSubscriber().getName());
+            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            ps.executeUpdate();
+            conn.commit();
+        }
     }
 
     /**
@@ -173,6 +229,23 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplicationByUUID(String uuid) throws SQLException {
+        return null;
+    }
+
+    private Application constructApplicationFromResultSet(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Subscriber subscriber = new Subscriber(rs.getString("CREATED_BY"));
+                Application application = new Application(rs.getString("NAME"), subscriber);
+                application.setUUID(rs.getString("UUID"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setTier(rs.getString("APPLICATION_POLICY_ID"));
+                return application;
+            }
+        }
         return null;
     }
 }

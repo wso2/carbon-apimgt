@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 /**
  * SQL Statements that are common to H2 and MySQL DBs.
  */
-public class H2MySQLStatements implements ApiDAOVendorSpecificStatements {
+public class H2MySQLStatements implements ApiDAOVendorSpecificStatements, ApplicationDAOVendorSpecificStatements {
 
     private static final String API_SELECT = "SELECT a.API_ID, a.PROVIDER, a.NAME, a.CONTEXT, a.VERSION, " +
             "a.IS_DEFAULT_VERSION, a.DESCRIPTION, a.VISIBILITY, a.IS_RESPONSE_CACHED, a.CACHE_TIMEOUT, a.UUID, " +
@@ -52,5 +52,10 @@ public class H2MySQLStatements implements ApiDAOVendorSpecificStatements {
         return API_SUMMARY_SELECT + ", AM_API_VISIBLE_ROLES b WHERE b.ROLE " +
                 "IN(" + DAOUtil.getParameterString(numberOfRoles) + ") AND a.NAME LIKE ? ORDER BY a.CREATED_TIME " +
                 "LIMIT ?,?";
+    }
+
+    @Override
+    public String getApplications() {
+        return null;
     }
 }

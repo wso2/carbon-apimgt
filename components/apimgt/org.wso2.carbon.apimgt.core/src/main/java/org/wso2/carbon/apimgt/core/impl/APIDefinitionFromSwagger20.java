@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.core.api.Scope;
 import org.wso2.carbon.apimgt.core.api.URITemplate;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
