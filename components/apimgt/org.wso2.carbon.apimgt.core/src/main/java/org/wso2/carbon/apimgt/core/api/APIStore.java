@@ -41,10 +41,10 @@ public interface APIStore extends APIManager {
      * @param offset offset
      * @param limit limit
      * @param status One or more Statuses
-     * @return APISummaryResults
+     * @return APIResults
      * @throws APIManagementException if failed to API set
      */
-    APISummaryResults getAllAPIsByStatus(int offset, int limit, String[] status)
+    APIResults getAllAPIsByStatus(int offset, int limit, String[] status)
             throws APIManagementException;
     
    

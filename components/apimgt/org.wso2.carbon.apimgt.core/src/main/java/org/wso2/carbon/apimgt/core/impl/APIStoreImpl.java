@@ -52,9 +52,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public APISummaryResults getAllAPIsByStatus(int offset, int limit, String[] statuses)
+    public APIResults getAllAPIsByStatus(int offset, int limit, String[] statuses)
             throws APIManagementException {
-        APISummaryResults apiResults = null;
+        APIResults apiResults = null;
         try {
             apiResults = getApiDAO().getAPIsByStatus(offset, limit, new ArrayList<String>(Arrays.asList(statuses)));
         } catch (SQLException e) {
