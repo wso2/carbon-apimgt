@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,6 +164,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (apiBuilder.getId() == null){
             apiBuilder.id(UUID.randomUUID().toString());
         }
+        if (apiBuilder.getApiDefinition() == null) {
+            APIUtils.logAndThrowException("Couldn't find swagger definition of API " + apiBuilder.getName(), log);
+        }
+            apiBuilder.createdTime(new Date());
+            apiBuilder.lastUpdatedTime(new Date());
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
@@ -210,24 +216,30 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-        API api = apiBuilder.build();
+            apiBuilder.lastUpdatedTime(new Date());
         try {
-            API originalAPI = getAPIbyUUID(api.getId());
-            if (originalAPI.getLifeCycleStatus().equalsIgnoreCase(api.getLifeCycleStatus())) {
-                getApiDAO().updateAPI(api.getId(), api);
-                if (log.isDebugEnabled()) {
-                    log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+            API originalAPI = getAPIbyUUID(apiBuilder.getId());
+            if (originalAPI != null) {
+                apiBuilder.createdTime(originalAPI.getCreatedTime());
+                API api = apiBuilder.build();
+                if (originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
+                    getApiDAO().updateAPI(api.getId(), api);
+                    if (log.isDebugEnabled()) {
+                        log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                    }
+                } else {
+                    String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have " +
+                            "status change";
+                    if (log.isDebugEnabled()) {
+                        log.debug(msg);
+                    }
+                    APIUtils.logAndThrowException(msg, log);
                 }
-            } else {
-                String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have status " +
-                        "change";
-                if (log.isDebugEnabled()) {
-                    log.debug(msg);
-                }
-                APIUtils.logAndThrowException(msg, log);
+            }else{
+                APIUtils.logAndThrowException("Couldn't found API with ID " + apiBuilder.getId(), log);
             }
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while updating the API - " + apiBuilder.getName(), e, log);
         }
     }
 

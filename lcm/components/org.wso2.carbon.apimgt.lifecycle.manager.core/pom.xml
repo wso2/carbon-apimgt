@@ -165,6 +165,7 @@
             org.wso2.carbon.apimgt.lifecycle.manager.sql.*;version="${carbon.apimgt.version}",
             *;
         </import.package>
+        <dynamic.import.package>*</dynamic.import.package>
     </properties>
 
 </project>

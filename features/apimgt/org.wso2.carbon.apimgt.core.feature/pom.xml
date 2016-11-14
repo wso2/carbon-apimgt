@@ -70,6 +70,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -166,7 +174,6 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-
                             <propertyFile>../../etc/feature.properties</propertyFile>
                             <adviceFileContents>
                                 <advice>
@@ -203,7 +210,21 @@
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
                                     <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
+                                <bundle>
+                                    <symbolicName>json-simple</symbolicName>
+                                    <version>${json-simple.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                        <symbolicName>commons-io</symbolicName>
+                                        <version>${commons-io.version}</version>
+                                </bundle>
                             </bundles>
+                            <importFeatures>
+                                <feature>
+                                    <id>org.wso2.carbon.apimgt.lifecycle.manager.feature</id>
+                                    <version>${carbon.apimgt.version}</version>
+                                </feature>
+                            </importFeatures>
                         </configuration>
                     </execution>
                 </executions>

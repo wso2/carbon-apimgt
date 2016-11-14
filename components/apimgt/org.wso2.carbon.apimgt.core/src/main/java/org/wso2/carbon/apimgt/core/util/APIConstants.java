@@ -30,7 +30,8 @@ import java.util.Set;
  * This class represents the constants that are used for APIManager implementation
  */
 public class APIConstants {
-
+    public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
+    public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";

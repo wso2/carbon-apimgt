@@ -296,17 +296,19 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.addAPI(apiBuilder);
             API returnAPI = apiPublisher.getAPIbyUUID(apiBuilder.getId());
-          URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
-            return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
+//          URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
+//            return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
+            return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+//        catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
+//                    body.getName() + "-" + body.getVersion();
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
         return null;
     }
 }

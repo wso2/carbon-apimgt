@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -328,18 +329,18 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private String apiDefinition;
-        private String wsdlUri;
+        private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
         private boolean isDefaultVersion;
         private String apiPolicy;
-        private List<String> transport;
-        private List<String> tags;
+        private List<String> transport = Collections.emptyList();
+        private List<String> tags = Collections.emptyList();
         private List<String> policies;
         private Visibility visibility;
-        private List<String> visibleRoles;
-        private List<Endpoint> endpoints;
-        private List<Environment> gatewayEnvironments;
+        private List<String> visibleRoles = Collections.emptyList();
+        private List<Endpoint> endpoints = Collections.emptyList();
+        private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private Date createdTime;
@@ -733,6 +734,18 @@ public final class API {
 
         public LifecycleState getLifecycleState() {
             return lifecycleState;
+        }
+
+        public Date getCreatedTime() {
+            return new Date(createdTime.getTime());
+        }
+
+        public String getCreatedBy() {
+            return createdBy;
+        }
+
+        public Date getLastUpdatedTime() {
+            return new Date(lastUpdatedTime.getTime());
         }
     }
 
