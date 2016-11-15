@@ -61,7 +61,7 @@
         <slf4j.version>1.7.5</slf4j.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range-->
         <export.package>
-            org.wso2.carbon.apimgt.gateway.extension
+            org.wso2.carbon.apimgt.gateway.extension.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
         <import.package>
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",

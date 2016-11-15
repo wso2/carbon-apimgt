@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
+import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import javax.annotation.CheckForNull;
 import java.sql.SQLException;
@@ -150,5 +151,8 @@ public interface ApplicationDAO {
      * @throws SQLException if failed to get applications for given subscriber
      */
     boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
+
+
+    Application[] getApplications(Subscriber subscriber, String groupingId) throws SQLException;
 
 }

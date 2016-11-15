@@ -237,6 +237,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return false;
     }
 
+    @Override public Application[] getApplications(Subscriber subscriber, String groupingId) throws SQLException {
+        return new Application[0];
+    }
+
     private Application constructApplicationFromResultSet(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
