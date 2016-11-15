@@ -66,6 +66,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
     </dependencies>
     <build>
 
@@ -154,7 +158,9 @@
             org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
-            javax.ws.rs.*; version="${javax.ws.rs.import.version.range}"
+            javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
+            org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
+            org.json.simple.*
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.publisher.internal,

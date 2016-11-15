@@ -18,7 +18,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>commons-io</groupId>
+            <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>

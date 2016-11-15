@@ -185,14 +185,11 @@ public interface ApiDAO {
     /**
      * Change the lifecycle status of a given API
      * @param apiID The UUID of the respective API
-     *              @param deprecateOldVersions  if true for deprecate older versions
-     *              @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @param status The lifecycle status that the API must be set to
      * @throws SQLException  if error occurs while accessing data layer
      *
      */
-    void changeLifeCycleStatus(String apiID, String status, boolean
-            deprecateOldVersions, boolean makeKeysForwardCompatible) throws SQLException;
+    void changeLifeCycleStatus(String apiID, String status) throws SQLException;
 
     /**
      * Return list of all Document info belonging to a given API. This method supports result pagination
@@ -251,4 +248,9 @@ public interface ApiDAO {
      */
     void removeDocumentation(String id) throws SQLException;
 
+    /**
+     * used to deprecate older versions of the api
+     * @param identifier
+     */
+    void deprecateOlderVersions(String identifier);
 }
