@@ -56,12 +56,16 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
+        apidto.setApiDefinition(api.getApiDefinition());
         apidto.setIsDefaultVersion(api.isDefaultVersion());
         apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
         apidto.setStatus(api.getLifeCycleStatus());
+        apidto.setTags(api.getTags());
+        apidto.setTransport(api.getTransport());
+        api.getPolicies().forEach(apidto::addTiersItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -107,9 +111,12 @@ public class MappingUtil {
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
+                apiDefinition(apidto.getApiDefinition()).
                 lifeCycleStatus(apidto.getStatus()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
+                policies(apidto.getTiers()).
+                tags(apidto.getTags()).
                 cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getTiers()).

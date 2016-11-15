@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -125,5 +126,16 @@ public interface APIStore extends APIManager {
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
             String groupingId, String jsonString) throws APIManagementException;
+
+    /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param appName  application name
+     * @param username subscriber username
+     * @param groupId  group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws SQLException if failed to get applications for given subscriber
+     */
+    boolean isApplicationExists(String appName, String username, String groupId) throws APIManagementException;
 
 }

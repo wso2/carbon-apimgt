@@ -134,4 +134,17 @@ public class APIStoreImplTestCase {
         }
     }
 
+    @Test
+    public void testIsApplicationExists(){
+        try {
+            when(applicationDAO.isApplicationExists("applicationName","userId","groupId")).thenReturn(true);
+
+            boolean isApplicationExists = apiStore.isApplicationExists("applicationName","userId","groupId");
+            Assert.assertTrue(isApplicationExists);
+            verify(applicationDAO, times(1)).isApplicationExists("applicationName","userId","groupId");
+        } catch (APIManagementException |SQLException e) {
+            Assert.assertTrue(false);
+        }
+    }
+
 }

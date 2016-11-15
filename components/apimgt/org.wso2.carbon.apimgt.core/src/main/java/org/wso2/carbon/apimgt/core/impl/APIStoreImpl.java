@@ -95,6 +95,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
+    @Override
+    public boolean isApplicationExists(String appName, String username, String groupId)
+            throws APIManagementException {
+        boolean isApplicationExists = false;
+        try {
+            isApplicationExists = getApplicationDAO().isApplicationExists(appName, username, groupId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException(
+                    "Error occurred while checking whether application exists for applicationName- " + appName, e, log);
+        }
+        return isApplicationExists;
+    }
+
     public APIResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException {
 

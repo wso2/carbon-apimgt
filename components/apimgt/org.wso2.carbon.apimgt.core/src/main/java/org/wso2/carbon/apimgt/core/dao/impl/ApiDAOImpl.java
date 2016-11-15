@@ -23,9 +23,15 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResults;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
+import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +44,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.annotation.CheckForNull;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -88,7 +91,8 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPISummary(String apiID) throws SQLException {
-        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, UUID, CURRENT_LC_STATUS " +
+        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, UUID, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID" +
+                " " +
                 "FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -487,13 +491,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID                     The UUID of the respective API
      * @param status                    The lifecycle status that the API must be set to
-     * @param deprecateOldVersions      if true for deprecate older versions
-     * @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
-            makeKeysForwardCompatible) throws SQLException {
+    public void changeLifeCycleStatus(String apiID, String status) throws SQLException {
 
     }
 
@@ -571,6 +572,17 @@ public class ApiDAOImpl implements ApiDAO {
 
     }
 
+    /**
+     * Used to deprecate older versions of the api
+     * @param identifier
+     */
+    @Override
+    public void deprecateOlderVersions(String identifier) {
+        /**
+         * todo:
+         */
+    }
+
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
@@ -625,7 +637,8 @@ public class ApiDAOImpl implements ApiDAO {
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).build();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).lifecycleInstanceId(rs.getString
+                        ("LIFECYCLE_INSTANCE_ID")).build();
             }
         }
 

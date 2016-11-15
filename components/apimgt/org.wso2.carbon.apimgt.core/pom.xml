@@ -113,6 +113,10 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -196,7 +200,9 @@
             org.osgi.service.*;version="${equinox.osgi.services.package.import.version.range}",
             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
-            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}"
+            com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
+            org.wso2.carbon.apimgt.lifecycle.manager.*,
+            org.apache.commons.io.*;
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.dao.internal,

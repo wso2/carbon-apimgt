@@ -23,12 +23,15 @@ package org.wso2.carbon.apimgt.core;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.util.Date;
+
 
 public class SampleObjectCreator {
 
     public static API.APIBuilder getMockAPIObject() {
         return new API.APIBuilder("admin", "Sample", "1.0.0").context("/sample/v1").lifecycleInstanceId
-                ("7a2298c4-c905-403f-8fac-38c73301631f");
+                ("7a2298c4-c905-403f-8fac-38c73301631f").apiDefinition("").createdTime(new Date()).lastUpdatedTime
+                (new Date());
     }
 
     public static LifecycleState getMockLifecycleStateObject() {
