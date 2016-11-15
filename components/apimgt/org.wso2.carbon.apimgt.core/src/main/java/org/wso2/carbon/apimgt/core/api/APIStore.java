@@ -93,12 +93,12 @@ public interface APIStore extends APIManager {
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupingId the groupId to which the applications must belong.
+     * @param groupId the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
+    Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

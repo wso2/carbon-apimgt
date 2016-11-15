@@ -72,15 +72,23 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application = getApplicationDAO().getApplicationByName(userId, applicationName, groupId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
-                    "Error occurred while fetching application for the given applicationName - " + applicationName, e,
+                    "Error occurred while fetching application for the given applicationName - " + applicationName  + " with groupId - " + groupId, e,
                     log);
         }
         return application;
     }
 
     @Override
-    public Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException {
-        return new Application[0];
+    public Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException {
+        Application[] applicationList = null;
+        try {
+            applicationList = getApplicationDAO().getApplications(subscriber, groupId);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException(
+                    "Error occurred while fetching applications for the given subscriber - " + subscriber.getName()
+                            + " with groupId - " + groupId, e, log);
+        }
+        return applicationList;
     }
 
     @Override
@@ -103,7 +111,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             isApplicationExists = getApplicationDAO().isApplicationExists(appName, username, groupId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
-                    "Error occurred while checking whether application exists for applicationName- " + appName, e, log);
+                    "Error occurred while checking whether application exists for applicationName- " + appName + " with groupId - " + groupId, e, log);
         }
         return isApplicationExists;
     }
