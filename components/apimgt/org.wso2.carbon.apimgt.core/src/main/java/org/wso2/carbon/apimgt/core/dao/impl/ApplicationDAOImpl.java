@@ -232,6 +232,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return null;
     }
 
+    @Override
+    public boolean isApplicationExists(String appName, String username, String groupId) throws SQLException {
+        return false;
+    }
+
     private Application constructApplicationFromResultSet(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

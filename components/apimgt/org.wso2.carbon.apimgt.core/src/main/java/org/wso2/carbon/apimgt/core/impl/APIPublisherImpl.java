@@ -299,7 +299,7 @@ import java.util.UUID;
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
-                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't found");
+                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
         } catch (SQLException e) {
             if (lifecycleState != null) {
@@ -447,9 +447,9 @@ import java.util.UUID;
                 }
             }
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Couldn't found APISummary Resource for ID " + apiId, e, log);
+            APIUtils.logAndThrowException("Couldn't find APISummary Resource for ID " + apiId, e, log);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't found APILifecycle History for ID " + apiId, e, log);
+            APIUtils.logAndThrowException("Couldn't find APILifecycle History for ID " + apiId, e, log);
         }
         return lifeCycleEventList;
     }
