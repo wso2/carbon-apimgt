@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.Tier;
+import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
@@ -386,16 +386,16 @@ public class RestApiUtil {
     }
 
     /**
-     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
+     * Search the Policy in the given collection of Policies. Returns it if it is included there. Otherwise return null
      *
-     * @param tiers    Tier Collection
-     * @param tierName Tier to find
-     * @return Matched tier with its name
+     * @param policies    Policy Collection
+     * @param tierName Policy to find
+     * @return Matched Policy with its name
      */
-     public static Tier findTier(Collection<Tier> tiers, String tierName) {
-        for (Tier tier : tiers) {
-            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
-                return tier;
+     public static Policy findPolicy(Collection<Policy> policies, String tierName) {
+        for (Policy policy : policies) {
+            if (policy.getName() != null && tierName != null && policy.getName().equals(tierName)) {
+                return policy;
             }
         }
         return null;
