@@ -20,7 +20,10 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.URITemplate;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -29,14 +32,14 @@ import java.util.Set;
  */
 
 @SuppressWarnings("unused")
-public abstract class APIDefinition {
+public interface APIDefinition {
 
     /**
      * This method extracts the URI templates from the API definition
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
+    Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
@@ -44,17 +47,7 @@ public abstract class APIDefinition {
      * @param resourceConfigsJSON resource json
      * @return scopes
      */
-    public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
-
-
-    /**
-     * This method reads the API definition from registry
-     *
-     * @param apiId api identifier
-     * @param apiDAO  Database Access
-     * @return API definition
-     */
-    public abstract String getAPIDefinition(String apiId, ApiDAO apiDAO) throws APIManagementException;
+    Map<String,Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
 
 }

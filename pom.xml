@@ -268,6 +268,21 @@
                 <classifier>runtime</classifier>
                 <version>${jacoco.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>${swagger.parser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${io.swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${google.code.gson.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -520,7 +535,8 @@
         <slf4j.version>1.7.5</slf4j.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
         <!--End of Dependency for integration gateway extension-->
-
+        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
+        <google.code.gson.version>2.7</google.code.gson.version>
 	<!-- Jacoco for code coverage -->
 	<jacoco.version>0.7.5.201505241946</jacoco.version>
 	<maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>

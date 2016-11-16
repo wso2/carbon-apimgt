@@ -78,6 +78,18 @@
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -217,6 +229,18 @@
                                 <bundle>
                                         <symbolicName>commons-io</symbolicName>
                                         <version>${commons-io.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>io.swagger.core</symbolicName>
+                                    <version>${io.swagger.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>swagger-parser</symbolicName>
+                                    <version>${swagger.parser.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.gson</symbolicName>
+                                    <version>${google.code.gson.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

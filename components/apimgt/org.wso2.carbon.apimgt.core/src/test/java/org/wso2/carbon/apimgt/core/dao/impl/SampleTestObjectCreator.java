@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -60,7 +62,7 @@ public class SampleTestObjectCreator {
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration =  new CorsConfiguration();
 
-        return new API.APIBuilder("admin", "WeatherAPI", "1.0.0").
+        API.APIBuilder apiBuilder = new API.APIBuilder("admin", "WeatherAPI", "1.0.0").
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Weather Info").
@@ -110,6 +112,12 @@ public class SampleTestObjectCreator {
                 createdTime(new Date()).
                 createdBy("admin").
                 lastUpdatedTime(new Date());
+        try {
+            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+        return apiBuilder;
     }
 
     static API.APIBuilder createAlternativeAPI() {
