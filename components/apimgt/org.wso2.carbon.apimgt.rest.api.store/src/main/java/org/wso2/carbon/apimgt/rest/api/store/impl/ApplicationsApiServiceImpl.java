@@ -220,7 +220,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             // Later we can honor it by checking admin privileges of the user.
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            String applicationUUID = apiConsumer.addApplication(application, username);
+            String applicationUUID = apiConsumer.addApplication(application);
 
             //retrieves the created application and send as the response
             Application createdApplication = apiConsumer.getApplicationByUUID(applicationUUID);

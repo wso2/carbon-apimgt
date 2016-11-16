@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
@@ -137,8 +139,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public String addApplication(Application application, String userId) throws APIManagementException {
-        return null;
+    public String addApplication(Application application) throws APIManagementException {
+        String applicationUuid = null;
+        if (isApplicationExists(application.getName(),application.getSubscriber().getName(), application.getGroupId())) {
+            handleResourceAlreadyExistsException(
+                    "An application already exists with a duplicate name - " + application.getName());
+        }
+
+        try {
+           applicationUuid = getApplicationDAO().addApplication(application);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
+        }
+        return applicationUuid;
+        //// TODO: 16/11/16 Workflow related implementation has to be done 
     }
 
   }
