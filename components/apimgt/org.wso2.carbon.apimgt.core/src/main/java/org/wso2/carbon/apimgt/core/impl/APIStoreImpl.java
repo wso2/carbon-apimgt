@@ -132,11 +132,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return null;
-    }
-
-    @Override
     public void removeApplication(Application application) throws APIManagementException {
 
     }
