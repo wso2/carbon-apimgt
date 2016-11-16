@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APIResults;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -52,11 +52,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public APIResults getAllAPIsByStatus(int offset, int limit, String[] statuses)
+    public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
             throws APIManagementException {
-        APIResults apiResults = null;
+        List<API> apiResults = null;
         try {
-            apiResults = getApiDAO().getAPIsByStatus(offset, limit, new ArrayList<String>(Arrays.asList(statuses)));
+            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e,
                     log);
@@ -116,14 +116,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return isApplicationExists;
     }
 
-    public APIResults searchAPIs(String query, int offset, int limit)
+    public List<API> searchAPIs(String query, int offset, int limit)
             throws APIManagementException {
 
-        APIResults apiResults = null;
+        List<API> apiResults = null;
         try {
-            List<String> roles = new ArrayList<>(); // TODO -- roles list
-            apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit,
-                    roles);
+            apiResults = getApiDAO().searchAPIs(query);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + query, e, log);
         }

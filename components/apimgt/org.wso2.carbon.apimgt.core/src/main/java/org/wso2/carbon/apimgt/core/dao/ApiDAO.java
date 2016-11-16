@@ -52,55 +52,39 @@ public interface ApiDAO {
     API getAPISummary(String apiID) throws SQLException;
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param roles The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * Retrieves summary data of all available APIs.
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APIResults getAPIsForRoles(int offset, int limit, List<String> roles) throws SQLException;
+    List<API> getAPIs() throws SQLException;
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APIResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException;
+    List<API> getAPIsForProvider(String providerName) throws SQLException;
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * ensuring the life cycle status of the APIs returned matches the status list provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APIResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException;
+    List<API> getAPIsByStatus(List<String> statuses) throws SQLException;
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
-     * pagination as well as doing a permission check to ensure results returned are only those that match
-     * the list of roles provided
+     * Retrieves summary data of all available APIs that match the given search criteria.
      * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param roles The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
      *
      */
-    APIResults searchAPIsForRoles(String searchString, int offset, int limit,
-                                  List<String> roles) throws SQLException;
+    List<API> searchAPIs(String searchString) throws SQLException;
 
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already

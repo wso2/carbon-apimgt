@@ -23,11 +23,9 @@ package org.wso2.carbon.apimgt.core.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,18 +42,11 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 //import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -76,18 +67,13 @@ public class APIStoreImplTestCase {
     @Test
     public void searchAPIs() {
         try {
-            List<API> apiSummaryList = new ArrayList<API>();
-            apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
-            apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
-            apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
-            
-            APIResults apimResultsFromDAO = new APIResults.Builder(apiSummaryList, true, 1).build();
-            when(apiDAO.searchAPIsForRoles("", 1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
-            
-            APIResults apis = apiStore.searchAPIs("", 1, 2);
-            Assert.assertEquals(apis.getApiSummaryList().size(), 3);
+            List<API> apimResultsFromDAO = new ArrayList<>();
+            when(apiDAO.searchAPIs("")).thenReturn(apimResultsFromDAO);
+
+            List<API> apis = apiStore.searchAPIs("", 1, 2);
+            Assert.assertNotNull(apis);
                         
-            verify(apiDAO, atLeastOnce()).searchAPIsForRoles("", 1, 2, new ArrayList<>());
+            verify(apiDAO, atLeastOnce()).searchAPIs("");
             
         } catch (APIManagementException | SQLException e) {
             Assert.fail(e.getMessage());
@@ -97,7 +83,7 @@ public class APIStoreImplTestCase {
     @Test(expectedExceptions = APIManagementException.class)
     public void searchAPIsWithException() throws Exception {    
             PowerMockito.mockStatic(APIUtils.class); // TODO
-            when(apiDAO.searchAPIsForRoles("select *", 1, 2, new ArrayList<>())).thenThrow(SQLException.class);
+            when(apiDAO.searchAPIs("select *")).thenThrow(SQLException.class);
             //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
             apiStore.searchAPIs("select *", 1, 2);                    
     }
@@ -105,19 +91,12 @@ public class APIStoreImplTestCase {
     
     @Test
     public void getAPIsByStatus() throws APIManagementException, SQLException {
-        
-        List<API> apiSummaryList = new ArrayList<API>();
-        apiSummaryList.add(new API.APIBuilder("p1", "n1", "v1").build());
-        apiSummaryList.add(new API.APIBuilder("p2", "n2", "v2").build());
-        apiSummaryList.add(new API.APIBuilder("p3", "n3", "v3").build());
-        
-        APIResults expectedAPIs = new APIResults.Builder(apiSummaryList, true, 1).build();
-        when(apiDAO.getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"))).thenReturn(expectedAPIs);
-        
-        APIResults actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {"CREATED", "APUBLISHED"});
+        List<API> expectedAPIs = new ArrayList<API>();
+        when(apiDAO.getAPIsByStatus(Arrays.asList("CREATED", "APUBLISHED"))).thenReturn(expectedAPIs);
+
+        List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {"CREATED", "APUBLISHED"});
         Assert.assertNotNull(actualAPIs);
-        Assert.assertEquals(actualAPIs.getApiSummaryList().size(), expectedAPIs.getApiSummaryList().size());
-        verify(apiDAO, times(1)).getAPIsByStatus(1, 2, Arrays.asList("CREATED", "APUBLISHED"));
+        verify(apiDAO, times(1)).getAPIsByStatus(Arrays.asList("CREATED", "APUBLISHED"));
     }
 
     @Test

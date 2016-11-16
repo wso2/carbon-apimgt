@@ -21,11 +21,12 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APIResults;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,10 +43,10 @@ public interface APIStore extends APIManager {
      * @param offset offset
      * @param limit limit
      * @param status One or more Statuses
-     * @return APIResults
+     * @return List<API>
      * @throws APIManagementException if failed to API set
      */
-    APIResults getAllAPIsByStatus(int offset, int limit, String[] status)
+    List<API> getAllAPIsByStatus(int offset, int limit, String[] status)
             throws APIManagementException;
     
    
@@ -54,10 +55,10 @@ public interface APIStore extends APIManager {
      *   
      * @param query searchType
      * @param limit limit
-     * @return APIResults
+     * @return List<API>
      * @throws APIManagementException
      */
-    APIResults searchAPIs(String query, int offset, int limit)
+    List<API> searchAPIs(String query, int offset, int limit)
             throws APIManagementException;
 
     /**

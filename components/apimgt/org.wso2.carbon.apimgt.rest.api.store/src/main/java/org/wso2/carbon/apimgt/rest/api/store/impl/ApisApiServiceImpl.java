@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -16,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -119,7 +119,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
  ) throws NotFoundException {
         
-        APIResults apisResult = null;
+        List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         
         try {

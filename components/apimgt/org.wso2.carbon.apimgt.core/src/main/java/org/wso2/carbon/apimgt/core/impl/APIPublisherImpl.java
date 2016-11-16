@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -491,15 +490,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
+    public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
-        APIResults apiResults = null;
+        List<API> apiResults = null;
         try {
-            List<String> roles = new ArrayList<>();
+            //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit, roles);
+                apiResults = getApiDAO().searchAPIs(query);
             } else {
-                apiResults = getApiDAO().getAPIsForRoles(offset, limit, roles);
+                apiResults = getApiDAO().getAPIs();
             }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
