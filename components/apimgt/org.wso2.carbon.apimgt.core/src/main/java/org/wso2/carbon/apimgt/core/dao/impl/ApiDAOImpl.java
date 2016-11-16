@@ -44,10 +44,12 @@ import java.util.*;
  */
 public class ApiDAOImpl implements ApiDAO {
 
-    private final ApiDAOVendorSpecificStatements sqlStatements;
+    //private final ApiDAOVendorSpecificStatements sqlStatements;
+    private static final String API_SUMMARY_SELECT = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
+            "UUID, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
-        this.sqlStatements = sqlStatements;
+        //this.sqlStatements = sqlStatements;
     }
 
     /**
@@ -84,9 +86,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPISummary(String apiID) throws SQLException {
-        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, UUID, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID" +
-                " " +
-                "FROM AM_API WHERE UUID = ?";
+        final String query = API_SUMMARY_SELECT + " WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -97,117 +97,70 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     *
-     * @param offset        The number of results from the beginning that is to be ignored
-     * @param limit         The maximum number of results to be returned after the offset
-     * @param roles The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * Retrieves summary data of all available APIs.
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults getAPIsForRoles(int offset, int limit, List<String> roles)
-                                                                            throws SQLException {
-        final String query = sqlStatements.getAPIsForRoles(roles.size());
-
+    public List<API> getAPIs() throws SQLException {
         try (Connection connection = DAOUtil.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(API_SUMMARY_SELECT)) {
 
-            int numberOfParams = roles.size();
-
-            for (int i = 0; i < numberOfParams; ++i) {
-                statement.setString(i + 1, roles.get(i));
-            }
-
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(++numberOfParams, offset);
-            statement.setInt(++numberOfParams, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            return constructAPISummaryList(statement);
         }
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     *
-     * @param offset       The number of results from the beginning that is to be ignored
-     * @param limit        The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
-        final String query = sqlStatements.getAPIsForProvider();
+    public List<API> getAPIsForProvider(String providerName) throws SQLException {
+        final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, providerName);
 
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(2, offset);
-            statement.setInt(3, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            return constructAPISummaryList(statement);
         }
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * ensuring the life cycle status of the APIs returned matches the status list provided
-     *
-     * @param offset   The number of results from the beginning that is to be ignored
-     * @param limit    The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
-    public APIResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException {
+    public List<API> getAPIsByStatus(List<String> statuses) throws SQLException {
         return null;
     }
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
-     * pagination as well as doing a permission check to ensure results returned are only those that match
-     * the list of roles provided
-     *
-     * @param searchString    The search string provided
-     * @param offset          The number of results from the beginning that is to be ignored
-     * @param limit           The maximum number of results to be returned after the offset
-     * @param roles   The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * Retrieves summary data of all available APIs that match the given search criteria.
+     * @param searchString The search string provided
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults searchAPIsForRoles(String searchString, int offset, int limit,
-                                         List<String> roles) throws SQLException {
-        final String query = sqlStatements.searchAPIsForRoles(roles.size());
+    public List<API> searchAPIs(String searchString) throws SQLException {
+        final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            int numberOfParams = roles.size();
-
-            for (int i = 0; i < numberOfParams; ++i) {
-                statement.setString(i + 1, roles.get(i));
-            }
-
-            statement.setString(++numberOfParams, '%' + searchString + '%');
-
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(++numberOfParams, offset);
-            statement.setInt(++numberOfParams, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            statement.setString(1, '%' + searchString + '%');
+            return constructAPISummaryList(statement);
         }
     }
 
@@ -366,7 +319,6 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(8, businessInformation.getTechnicalOwnerEmail());
             statement.setString(9, businessInformation.getBusinessOwner());
             statement.setString(10, businessInformation.getBusinessOwnerEmail());
-
 
             CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
             statement.setBoolean(11, corsConfiguration.isEnabled());
@@ -655,21 +607,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return apiList;
-    }
-
-    private APIResults constructAPISummaryResults(Connection connection, PreparedStatement statement,
-                                                  int offset, int rowCount) throws SQLException {
-        List<API> apiList = constructAPISummaryList(statement);
-
-        boolean isMoreResultsExist = false;
-
-        if (apiList.size() == rowCount) { // More results exist
-            apiList.remove(rowCount - 1); // Remove additional result that was not asked for
-            isMoreResultsExist = true;
-        }
-
-        return new APIResults.Builder(apiList, isMoreResultsExist,
-                offset + apiList.size()).build();
     }
 
     private void addTagsMapping(Connection connection, int apiID, List<String> tags) throws SQLException {

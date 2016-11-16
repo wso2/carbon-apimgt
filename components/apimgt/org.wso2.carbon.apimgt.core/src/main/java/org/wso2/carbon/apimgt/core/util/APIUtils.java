@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.util;
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Tier;
+import org.wso2.carbon.apimgt.core.models.Policy;
 
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +92,7 @@ public class APIUtils {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getTiers(int tierType) throws APIManagementException {
+    public static Map<String, Policy> getPolicies(int policyType) throws APIManagementException {
         return null;
     }
 }

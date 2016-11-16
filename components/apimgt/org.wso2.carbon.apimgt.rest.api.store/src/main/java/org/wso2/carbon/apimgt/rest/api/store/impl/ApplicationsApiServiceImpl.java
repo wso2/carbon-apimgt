@@ -9,7 +9,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
-import org.wso2.carbon.apimgt.core.models.Tier;
+import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -205,8 +205,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             //validate the tier specified for the application
             String tierName = body.getThrottlingTier();
             if (tierName != null) {
-                Map<String, Tier> appTierMap = APIUtils.getTiers(APIConstants.TIER_APPLICATION_TYPE);
-                if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
+                Map<String, Policy> appTierMap = APIUtils.getPolicies(APIConstants.POLICY_APPLICATION_TYPE);
+                if (appTierMap == null || RestApiUtil.findPolicy(appTierMap.values(), tierName) == null) {
                     RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
                 }
             } else {

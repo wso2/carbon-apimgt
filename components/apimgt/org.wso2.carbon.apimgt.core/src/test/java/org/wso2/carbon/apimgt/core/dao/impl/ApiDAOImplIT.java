@@ -142,7 +142,7 @@ public class ApiDAOImplIT {
 
         apiDAO.addAPI(publicAPI);
 
-        apiDAO.getAPIsForRoles(0, 10, Arrays.asList("classified"));
+        apiDAO.getAPIs(0, 10, Arrays.asList("classified"));
         */
     }
 

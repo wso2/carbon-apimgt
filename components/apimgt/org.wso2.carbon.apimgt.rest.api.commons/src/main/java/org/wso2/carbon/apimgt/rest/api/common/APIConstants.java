@@ -46,5 +46,5 @@ public class APIConstants {
         public static final String TOKEN_SCOPES = "tokenScope";
     }
 
-    public static final int TIER_APPLICATION_TYPE = 2;
+    public static final int POLICY_APPLICATION_TYPE = 2;
 }

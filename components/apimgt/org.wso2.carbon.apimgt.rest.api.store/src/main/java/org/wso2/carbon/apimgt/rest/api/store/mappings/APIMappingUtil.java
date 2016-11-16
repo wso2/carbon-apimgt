@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
@@ -32,17 +31,17 @@ import java.util.List;
 public class APIMappingUtil {
 
     /**
-     * Converts {@link APIResults} to {@link APIListDTO} DTO.
+     * Converts {@link List<API>} to {@link APIListDTO} DTO.
      * 
      * @param apisResult
      * @return
      */
-    public static APIListDTO toAPIListDTO(APIResults apisResult) {
+    public static APIListDTO toAPIListDTO(List<API> apisResult) {
         APIListDTO apiListDTO = new APIListDTO();
-        apiListDTO.setCount(apisResult.getApiSummaryList().size());
+        apiListDTO.setCount(apisResult.size());
         // apiListDTO.setNext(next);
         // apiListDTO.setPrevious(previous);
-        apiListDTO.setList(toAPIInfo(apisResult.getApiSummaryList()));
+        apiListDTO.setList(toAPIInfo(apisResult));
         return apiListDTO;
     }
 
