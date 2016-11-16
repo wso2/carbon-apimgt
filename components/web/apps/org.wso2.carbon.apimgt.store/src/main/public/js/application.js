@@ -1,3 +1,39 @@
+$(window).load(function () {
+
+    var client = new SwaggerClient({
+        url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
+        success: function () {
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer e2994e30-749b-3b54-a294-1eab85abf0f7", "header"));
+            client["Application (Collection)"].get_applications({"responseContentType": 'application/json'},
+                function (data) {
+
+                    $.ajax({
+                        url: '/store/public/components/root/base/templates/appListRow.hbs',
+                        type: 'GET',
+                        success: function (result) {
+                            var theTemplateScript = result;
+                            var theTemplate = Handlebars.compile(theTemplateScript);
+                            var theCompiledHtml, context;
+
+                            for (var i in data.obj.list) {
+
+                                context = {
+                                    "name": data.obj.list[i].name,
+                                    "tier": data.obj.list[i].throttlingTier,
+                                    "status": data.obj.list[i].status,
+                                    "subscriptions": data.obj.list[i].subscriptions || 0
+                                };
+                                theCompiledHtml = theTemplate(context);
+                                $("tbody").append(theCompiledHtml);
+                            }
+                        }
+                    });
+                });
+        }
+    });
+});
+
+
 ;(function( $ ) {
     $.fn.zclip = function() {
         if(typeof ZeroClipboard == 'function'){
