@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -166,6 +167,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (apiBuilder.getApiDefinition() == null) {
             APIUtils.logAndThrowException("Couldn't find swagger definition of API " + apiBuilder.getName(), log);
         }
+        APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+        apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
             apiBuilder.createdTime(new Date());
             apiBuilder.lastUpdatedTime(new Date());
         try {

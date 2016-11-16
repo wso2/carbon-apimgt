@@ -23,11 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.*;
 
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -40,9 +36,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -70,7 +64,7 @@ public class ApiDAOImpl implements ApiDAO {
     public API getAPI(String apiID) throws SQLException {
         final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
-                "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, API_POLICY_ID, " +
+                "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
                 "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
 
@@ -233,9 +227,9 @@ public class ApiDAOImpl implements ApiDAO {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
-                "CURRENT_LC_STATUS, API_POLICY_ID, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
+                "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
                 "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery, new String[]{"api_id"})) {
@@ -258,18 +252,17 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.setString(15, api.getLifecycleInstanceId());
             statement.setString(16, api.getLifeCycleStatus());
-            statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
             CorsConfiguration corsConfiguration = api.getCorsConfiguration();
-            statement.setBoolean(18, corsConfiguration.isEnabled());
-            statement.setString(19, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(20, corsConfiguration.isAllowCredentials());
-            statement.setString(21, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(22, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(17, corsConfiguration.isEnabled());
+            statement.setString(18, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(19, corsConfiguration.isAllowCredentials());
+            statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setString(23, api.getCreatedBy());
-            statement.setTimestamp(24, new java.sql.Timestamp(api.getCreatedTime().getTime()));
-            statement.setTimestamp(25, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
+            statement.setString(22, api.getCreatedBy());
+            statement.setTimestamp(23, new java.sql.Timestamp(api.getCreatedTime().getTime()));
+            statement.setTimestamp(24, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
 
             statement.execute();
 
@@ -285,6 +278,8 @@ public class ApiDAOImpl implements ApiDAO {
                     addTagsMapping(connection, apiPrimaryKey, api.getTags());
                     addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
                     addTransports(connection, apiPrimaryKey, api.getTransport());
+                    addUrlMappings(connection,api.getUriTemplates(),apiPrimaryKey);
+                    addSubscriptionPolicies(connection,api.getPolicies(),apiPrimaryKey);
                 }
             }
 
@@ -304,7 +299,7 @@ public class ApiDAOImpl implements ApiDAO {
     public API updateAPI(String apiID, API substituteAPI) throws SQLException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
                 "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, UUID = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
-                "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, API_POLICY_ID = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
+                "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ? " +
                 "WHERE UUID = ?";
 
@@ -325,17 +320,15 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(9, businessInformation.getBusinessOwner());
             statement.setString(10, businessInformation.getBusinessOwnerEmail());
 
-            statement.setInt(11, getAPIThrottlePolicyID(connection, substituteAPI.getApiPolicy()));
-
             CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
-            statement.setBoolean(12, corsConfiguration.isEnabled());
-            statement.setString(13, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(14, corsConfiguration.isAllowCredentials());
-            statement.setString(15, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(16, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(11, corsConfiguration.isEnabled());
+            statement.setString(12, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(13, corsConfiguration.isAllowCredentials());
+            statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setTimestamp(17, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
-            statement.setString(18, apiID);
+            statement.setTimestamp(16, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
+            statement.setString(17, apiID);
 
             statement.execute();
 
@@ -569,11 +562,12 @@ public class ApiDAOImpl implements ApiDAO {
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                        apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).
                         createdBy(rs.getString("CREATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME")).
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
+                        uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
+                        policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).
                         build();
             }
         }
@@ -944,5 +938,88 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return -1;
+    }
+
+    private void addUrlMappings(Connection connection, Set<URITemplate> uriTemplates, int apiID) throws
+            SQLException {
+        final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, " +
+                "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                statement.setInt(1, apiID);
+                statement.setString(2, uriTemplate.getHttpVerb());
+                statement.setString(3, uriTemplate.getUriTemplate());
+                statement.setString(4, uriTemplate.getAuthType());
+                statement.setInt(5, getAPIThrottlePolicyID(connection,uriTemplate.getPolicy()));
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    private Set<URITemplate> getUriTemplates(Connection connection, int apiId) throws SQLException {
+        String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE" +
+                " API_ID = ?";
+        Set<URITemplate> uriTemplateSet = new HashSet<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiId);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    URITemplate uriTemplate = new URITemplate.URITemplateBuilder()
+                            .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME")).httpVerb
+                                    (rs.getString("HTTP_METHOD")).policy(getAPIThrottlePolicyName(connection, rs
+                                    .getInt("API_POLICY_ID"))).build();
+                    uriTemplateSet.add(uriTemplate);
+                }
+            }
+        }
+        return uriTemplateSet;
+    }
+    private void addSubscriptionPolicies(Connection connection, List<String> policies, int apiID) throws
+            SQLException {
+        final String query = "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, POLICY_ID) " +
+                "VALUES (?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (String policy : policies) {
+                statement.setInt(1, apiID);
+                statement.setInt(2, getSubscriptionThrottlePolicyID(connection,policy));
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+    private int getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+        final String query = "SELECT POLICY_ID from AM_POLICY_SUBSCRIPTION where NAME=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getInt("POLICY_ID");
+                }
+            }
+        }
+
+        return -1;
+    }
+    private List<String> getSubscripitonPolciesByAPIId(Connection connection, int apiId) throws SQLException {
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
+                "AM_POLICY_SUBSCRIPTION as amPolcySub where apimsubmapping.POLICY_ID=amPolcySub.POLICY_ID AND " +
+                "apimsubmapping.API_ID = ?";
+        List<String> policies = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiId);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    policies.add(rs.getString("NAME"));
+                }
+            }
+        }
+
+        return policies;
     }
 }
