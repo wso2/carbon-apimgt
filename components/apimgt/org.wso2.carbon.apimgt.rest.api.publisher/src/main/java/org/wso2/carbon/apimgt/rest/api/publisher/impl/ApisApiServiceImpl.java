@@ -130,8 +130,12 @@ public class ApisApiServiceImpl extends ApisApiService {
  ) throws NotFoundException {
         String username = "";
         try {
-            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
-            return Response.ok().entity(apidto).build();
+            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)){
+                APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+                return Response.ok().entity(apidto).build();
+            }else{
+                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource

@@ -26,7 +26,7 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/apis")
+@Path("/api/am/store/v0.10/apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")

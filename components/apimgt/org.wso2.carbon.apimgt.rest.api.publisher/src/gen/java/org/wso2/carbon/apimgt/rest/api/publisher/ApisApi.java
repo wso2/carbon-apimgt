@@ -31,7 +31,7 @@ import java.io.InputStream;
     service = Microservice.class,
     immediate = true
 )
-@Path("/apis")
+@Path("/api/am/publisher/v0.10/apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")

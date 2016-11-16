@@ -117,6 +117,18 @@
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -202,6 +214,10 @@
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
             org.wso2.carbon.apimgt.lifecycle.manager.*,
+            io.swagger.models.*,
+            com.google.gson.*,
+            io.swagger.parser.*,
+            org.json.simple.*,
             org.apache.commons.io.*;
         </import.package>
         <export.package>
