@@ -263,7 +263,7 @@ public class APIGatewayManager {
                             setSecureVaultProperty(api, tenantDomain, environment, operation);
                         }
                     } else {
-                        String fileName = api.getContext().substring(1).replace('/', '-');
+                        String fileName = api.getContext().replace('/', '-');
                         String[] fileNames = new String[2];
                         fileNames[0] = ENDPOINT_PRODUCTION + fileName;
                         fileNames[1] = ENDPOINT_SANDBOX + fileName;
