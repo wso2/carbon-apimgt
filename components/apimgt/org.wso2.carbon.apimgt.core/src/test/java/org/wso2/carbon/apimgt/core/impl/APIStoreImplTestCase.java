@@ -123,7 +123,7 @@ public class APIStoreImplTestCase {
     @Test
     public void testGetApplicationByName () {
         try {
-            Application applicationFromDAO = new Application("username", null);
+            Application applicationFromDAO = new Application("appName", null);
             when(applicationDAO.getApplicationByName("userId","applicationName","groupId")).thenReturn(applicationFromDAO);
 
             Application application = apiStore.getApplicationsByName("userId","applicationName","groupId");
@@ -142,6 +142,21 @@ public class APIStoreImplTestCase {
             boolean isApplicationExists = apiStore.isApplicationExists("applicationName","userId","groupId");
             Assert.assertTrue(isApplicationExists);
             verify(applicationDAO, times(1)).isApplicationExists("applicationName","userId","groupId");
+        } catch (APIManagementException |SQLException e) {
+            Assert.assertTrue(false);
+        }
+    }
+
+    @Test
+    public void testAddApplication(){
+        try {
+            Application application = new Application("appName", null);
+            when(apiStore.isApplicationExists("appName",null,null)).thenReturn(false);
+            when(applicationDAO.addApplication(application)).thenReturn("1");
+
+            String applicationUuid = apiStore.addApplication(application);
+            Assert.assertNotNull(applicationUuid);
+            verify(applicationDAO, times(1)).addApplication(application);
         } catch (APIManagementException |SQLException e) {
             Assert.assertTrue(false);
         }

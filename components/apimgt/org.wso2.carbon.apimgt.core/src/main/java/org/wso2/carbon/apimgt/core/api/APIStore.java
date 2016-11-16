@@ -71,11 +71,10 @@ public interface APIStore extends APIManager {
      * Adds an application
      *
      * @param application Application
-     * @param userId      User Id
      * @return uuid of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-     String addApplication(Application application, String userId) throws APIManagementException;
+     String addApplication(Application application) throws APIManagementException;
 
 
     /**
