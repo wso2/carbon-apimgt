@@ -141,10 +141,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override
     public String addApplication(Application application) throws APIManagementException {
         String applicationUuid = null;
-        if (isApplicationExists(application.getName(),application.getSubscriber().getName(), application.getGroupId())) {
-            handleResourceAlreadyExistsException(
-                    "An application already exists with a duplicate name - " + application.getName());
-        }
+//        if (isApplicationExists(application.getName(),application.getSubscriber().getName(), application.getGroupId())) {
+//            handleResourceAlreadyExistsException(
+//                    "An application already exists with a duplicate name - " + application.getName());
+//        }
 
         try {
            applicationUuid = getApplicationDAO().addApplication(application);
