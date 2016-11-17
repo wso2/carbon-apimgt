@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -86,7 +87,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public List<API> getAPIsByProvider(String providerName) throws APIManagementException {
         try {
             getApiDAO().getAPI(providerName); //todo: call correct doa method
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to fetch APIs of " + providerName, e, log);
         }
         return null;
@@ -185,7 +186,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 APIUtils.logAndThrowException("Duplicate API already Exist with name/Context " + apiBuilder.getName(),
                         log);
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             try {
                 getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
             } catch (LifecycleException e1) {
@@ -242,7 +243,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }else{
                 APIUtils.logAndThrowException("Couldn't found API with ID " + apiBuilder.getId(), log);
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while updating the API - " + apiBuilder.getName(), e, log);
         }
     }
@@ -273,7 +274,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }else{
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId + " ", e, log);
@@ -306,7 +307,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             if (lifecycleState != null) {
                 try {
                     getApiLifecycleManager().removeLifecycle(lifecycleState.getLifecycleId());
@@ -332,7 +333,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
         try {
             getApiDAO().addDocumentationInfo(apiId, documentation);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
     }
@@ -352,7 +353,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                          String contentType) throws APIManagementException {
         try {
             getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
     }
@@ -367,7 +368,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void removeDocumentation(String docId) throws APIManagementException {
         try {
             getApiDAO().removeDocumentation(docId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
     }
@@ -388,7 +389,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }else{
                 status = true;
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't get APISummary for " + apiId, e, log);
         }
         return status;
@@ -451,7 +452,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             .getUpdatedTime()));
                 }
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't find APISummary Resource for ID " + apiId, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't find APILifecycle History for ID " + apiId, e, log);
@@ -479,7 +480,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Error occurred while Disassociating the API with Lifecycle id " + identifier,
@@ -505,7 +506,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 apiResults = getApiDAO().getAPIs();
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
         }
         return apiResults;
@@ -554,7 +555,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }else{
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't retrieve API Summary for " + apiId, e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Couldn't retrieve API Lifecycle for " + apiId, e, log);
@@ -585,6 +586,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 getApiSubscriptionDAO().copySubscriptions(identifier);
             }
 
+        } catch (APIMgtDAOException e) {
+            APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
         }

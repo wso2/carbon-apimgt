@@ -22,10 +22,8 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-
-import java.io.InputStream;
-import java.sql.SQLException;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -49,7 +47,7 @@ public class AbstractAPIManagerTestCase {
             API api = apiStore.getAPIbyUUID("1234");
             Assert.assertEquals(api.getName(), "TestAPIByUUID");
             verify(apiDAO, atLeastOnce()).getAPI("1234");
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.fail(e.getMessage());
         }
     }

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.*;
 
 import javax.annotation.CheckForNull;
@@ -62,11 +63,11 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The {@link String} that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public API getAPI(String apiID) throws SQLException {
+    public API getAPI(String apiID) throws APIMgtDAOException {
         final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
@@ -78,6 +79,8 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, apiID);
 
             return constructAPIFromResultSet(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when getting API", e);
         }
     }
 
@@ -86,11 +89,11 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public API getAPISummary(String apiID) throws SQLException {
+    public API getAPISummary(String apiID) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -98,6 +101,8 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, apiID);
 
             return constructAPISummary(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when getting API", e);
         }
     }
 
@@ -109,11 +114,13 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs() throws SQLException {
+    public List<API> getAPIs() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
             PreparedStatement statement = connection.prepareStatement(API_SUMMARY_SELECT)) {
 
             return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when getting APIs", e);
         }
     }
 
@@ -121,12 +128,12 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIsForProvider(String providerName) throws SQLException {
+    public List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -134,6 +141,8 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, providerName);
 
             return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when getting APIs", e);
         }
     }
 
@@ -141,12 +150,12 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIsByStatus(List<String> statuses) throws SQLException {
+    public List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE CURRENT_LC_STATUS IN (" +
                 DAOUtil.getParameterString(statuses.size()) + ")";
 
@@ -158,6 +167,8 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when getting APIs", e);
         }
     }
 
@@ -165,12 +176,12 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieves summary data of all available APIs that match the given search criteria.
      * @param searchString The search string provided
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> searchAPIs(String searchString) throws SQLException {
+    public List<API> searchAPIs(String searchString) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -178,6 +189,8 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.setString(1, '%' + searchString + '%');
             return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when searching APIs", e);
         }
     }
 
@@ -187,10 +200,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiName      Name of API
      * @return true if  apiName combination already exists else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPINameExists(String apiName ) throws SQLException {
+    public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
         final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -202,6 +215,8 @@ public class ApiDAOImpl implements ApiDAO {
                     return true;
                 }
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when checking if API name exists", e);
         }
 
         return false;
@@ -212,10 +227,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param contextName Name of API Context
      * @return true if contextName already exists else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPIContextExists(String contextName) throws SQLException {
+    public boolean isAPIContextExists(String contextName) throws APIMgtDAOException {
         final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE CONTEXT = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -227,6 +242,8 @@ public class ApiDAOImpl implements ApiDAO {
                     return true;
                 }
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when checking if API context exists", e);
         }
 
         return false;
@@ -237,10 +254,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param api The {@link API} object to be added
      * @return true if addition is successful else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addAPI(final API api) throws SQLException {
+    public void addAPI(final API api) throws APIMgtDAOException {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
@@ -301,6 +318,8 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             connection.commit();
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when adding API", e);
         }
     }
 
@@ -310,10 +329,10 @@ public class ApiDAOImpl implements ApiDAO {
      * @param apiID      The {@link String} of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return true if update is successful else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public API updateAPI(String apiID, API substituteAPI) throws SQLException {
+    public API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
                 "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, UUID = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
@@ -377,6 +396,8 @@ public class ApiDAOImpl implements ApiDAO {
             updateAPIDefinition(connection, apiPrimaryKey, substituteAPI.getApiDefinition());
 
             connection.commit();
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when updating API", e);
         }
 
 
@@ -387,16 +408,18 @@ public class ApiDAOImpl implements ApiDAO {
      * Remove an existing API
      *
      * @param apiID The {@link String} of the API that needs to be deleted
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void deleteAPI(String apiID) throws SQLException {
+    public void deleteAPI(String apiID) throws APIMgtDAOException {
         final String query = "DELETE FROM AM_API WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.execute();
             connection.commit();
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when deleting API", e);
         }
     }
 
@@ -405,10 +428,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID of the respective API
      * @return Swagger definition String
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public String getSwaggerDefinition(String apiID) throws SQLException {
+    public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
         return null;
     }
 
@@ -417,10 +440,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID             The UUID of the respective API
      * @param swaggerDefinition Swagger definition String
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException {
+    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException {
 
     }
 
@@ -429,10 +452,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID of the respective API
      * @return Image stream
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public InputStream getImage(String apiID) throws SQLException {
+    public InputStream getImage(String apiID) throws APIMgtDAOException {
         return null;
     }
 
@@ -441,10 +464,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID The UUID of the respective API
      * @param image Image stream
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void updateImage(String apiID, OutputStream image) throws SQLException {
+    public void updateImage(String apiID, OutputStream image) throws APIMgtDAOException {
 
     }
 
@@ -453,10 +476,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID                     The UUID of the respective API
      * @param status                    The lifecycle status that the API must be set to
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void changeLifeCycleStatus(String apiID, String status) throws SQLException {
+    public void changeLifeCycleStatus(String apiID, String status) throws APIMgtDAOException {
 
     }
 
@@ -466,11 +489,11 @@ public class ApiDAOImpl implements ApiDAO {
      * @param apiID  The UUID of the respective API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit  The maximum number of results to be returned after the offset
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     public DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit)
-                                                                    throws SQLException {
+                                                                    throws APIMgtDAOException {
         return null;
     }
 
@@ -478,10 +501,10 @@ public class ApiDAOImpl implements ApiDAO {
      * Return Document info object
      * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} Document Info object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public DocumentInfo getDocumentInfo(String docID) throws SQLException {
+    public DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException {
         //todo:implement
         return null;
     }
@@ -489,10 +512,10 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * @param docID The UUID of the respective Document
      * @return {@link InputStream} Document Info object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public InputStream getDocumentContent(String docID) throws SQLException {
+    public InputStream getDocumentContent(String docID) throws APIMgtDAOException {
         return null;
     }
 
@@ -501,10 +524,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiId         UUID of API
      * @param documentation Documentat Summary
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws SQLException {
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIMgtDAOException {
 
     }
 
@@ -516,10 +539,10 @@ public class ApiDAOImpl implements ApiDAO {
      * @param filename      name of the file
      * @param content       content of the file as an Input Stream
      * @param contentType   content type of the file
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content, String contentType) throws SQLException {
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content, String contentType) throws APIMgtDAOException {
 
     }
 
@@ -527,10 +550,10 @@ public class ApiDAOImpl implements ApiDAO {
      * Removes a given documentation
      *
      * @param id Document Id
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void removeDocumentation(String id) throws SQLException {
+    public void removeDocumentation(String id) throws APIMgtDAOException {
 
     }
 
