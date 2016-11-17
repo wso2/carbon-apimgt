@@ -71,6 +71,8 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApisList.apply(this, arguments);
     },getTopApiUsers:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getTopApiUsers.apply(this, arguments);
+    },checkTenants:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").checkTenants.apply(this, arguments);
     }
 });
 %>
