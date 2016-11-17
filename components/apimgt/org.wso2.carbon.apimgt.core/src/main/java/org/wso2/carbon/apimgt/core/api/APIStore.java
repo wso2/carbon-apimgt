@@ -98,7 +98,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
+    Application[] getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

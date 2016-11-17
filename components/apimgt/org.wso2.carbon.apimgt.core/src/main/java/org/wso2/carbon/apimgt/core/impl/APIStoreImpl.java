@@ -81,13 +81,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException {
+    public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
         Application[] applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber, groupId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
-                    "Error occurred while fetching applications for the given subscriber - " + subscriber.getName()
+                    "Error occurred while fetching applications for the given subscriber - " + subscriber
                             + " with groupId - " + groupId, e, log);
         }
         return applicationList;
