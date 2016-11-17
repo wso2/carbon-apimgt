@@ -767,6 +767,11 @@ public final class API {
         public Date getLastUpdatedTime() {
             return new Date(lastUpdatedTime.getTime());
         }
+
+        public Set<URITemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
     }
 
 }
