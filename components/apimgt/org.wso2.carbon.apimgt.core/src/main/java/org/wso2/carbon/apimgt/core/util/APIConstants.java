@@ -55,14 +55,12 @@ public class APIConstants {
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
     public static final String API = "API";
-    //URI Authentication Schemes
-    public static final Set<String> SUPPORTED_METHODS = Collections.unmodifiableSet(new HashSet<>(
-                    Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+    public static final String API_LIFECYCLE = "API_LIFECYCLE";
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
-
+    public static final String DEFAULT_API_POLICY = "Default";
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
 
