@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Environment;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -109,9 +110,9 @@ public class SampleTestObjectCreator {
                 gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(new Date()).
+                createdTime(LocalDateTime.now()).
                 createdBy("admin").
-                lastUpdatedTime(new Date());
+                lastUpdatedTime(LocalDateTime.now());
         try {
             apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
         } catch (APIManagementException e) {
@@ -200,9 +201,9 @@ public class SampleTestObjectCreator {
                 gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(new Date()).
+                createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
-                lastUpdatedTime(new Date());
+                lastUpdatedTime(LocalDateTime.now());
     }
 
     static Application createDefaultApplication(){

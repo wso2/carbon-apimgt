@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -169,8 +170,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
-            apiBuilder.createdTime(new Date());
-            apiBuilder.lastUpdatedTime(new Date());
+        LocalDateTime localDateTime = LocalDateTime.now();
+            apiBuilder.createdTime(localDateTime);
+            apiBuilder.lastUpdatedTime(localDateTime);
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
@@ -218,7 +220,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-            apiBuilder.lastUpdatedTime(new Date());
+            apiBuilder.lastUpdatedTime(LocalDateTime.now());
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {

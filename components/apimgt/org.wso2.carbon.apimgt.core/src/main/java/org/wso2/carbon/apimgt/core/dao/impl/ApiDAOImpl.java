@@ -36,7 +36,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -140,8 +145,20 @@ public class ApiDAOImpl implements ApiDAO {
      *
      */
     @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> statuses) throws SQLException {
-        return null;
+        final String query = API_SUMMARY_SELECT + " WHERE CURRENT_LC_STATUS IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            for (int i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 1, statuses.get(i));
+            }
+
+            return constructAPISummaryList(statement);
+        }
     }
 
     /**
@@ -261,8 +278,8 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
             statement.setString(22, api.getCreatedBy());
-            statement.setTimestamp(23, new java.sql.Timestamp(api.getCreatedTime().getTime()));
-            statement.setTimestamp(24, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
+            statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
+            statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
 
             statement.execute();
 
@@ -327,7 +344,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
             statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setTimestamp(16, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
+            statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
             statement.setString(17, apiID);
 
             statement.execute();
@@ -564,8 +581,8 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         corsConfiguration(corsConfiguration).
                         createdBy(rs.getString("CREATED_BY")).
-                        createdTime(rs.getTimestamp("CREATED_TIME")).
-                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
+                        createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
+                        lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).
                         build();

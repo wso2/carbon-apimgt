@@ -72,9 +72,8 @@ public class TagDAO {
         List<String> tags = new ArrayList<>();
 
         if (!tagIDs.isEmpty()) {
-            List<String> questionMarks = new ArrayList<>(Collections.nCopies(tagIDs.size(), "?"));
-
-            final String query = "SELECT TAG_NAME FROM AM_TAGS WHERE TAG_ID IN (" + String.join(",", questionMarks) + ")";
+            final String query = "SELECT TAG_NAME FROM AM_TAGS WHERE TAG_ID IN (" +
+                                            DAOUtil.getParameterString(tagIDs.size()) + ")";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (int i = 0; i < tagIDs.size(); ++i) {
