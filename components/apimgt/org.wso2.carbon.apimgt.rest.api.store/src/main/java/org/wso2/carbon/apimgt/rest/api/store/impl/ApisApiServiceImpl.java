@@ -64,16 +64,13 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API of the given ID
      */
     @Override
-    public Response apisApiIdGet(String apiId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince)
+            throws NotFoundException {
 
         APIDTO apiToReturn = null;
-        
         try {
-            APIStore apiStore = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
+            String apiConsumer = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
             API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
         } catch (APIManagementException e) {
@@ -82,20 +79,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleInternalServerError("Error while retrieving API : " + apiId, e, log);
             }
-        } 
+        }
         return Response.ok().entity(apiToReturn).build();
     }
     
     
     @Override
-    public Response apisApiIdSwaggerGet(String apiId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+    public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -112,28 +105,19 @@ public class ApisApiServiceImpl extends ApisApiService {
      * 
      */
     @Override
-    public Response apisGet(Integer limit
-, Integer offset
-, String query
-, String accept
-, String ifNoneMatch
- ) throws NotFoundException {
-        
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch)
+            throws NotFoundException {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
-        
         try {
-            APIStore apiStore = RestApiUtil.getConsumer("subscriber-name"); // TODO -- get logged in user's name
-
+            String apiConsumer = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
             apisResult = apiStore.searchAPIs(query, offset, limit);
-            
             // convert API
-            apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);           
-            
+            apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);
         } catch (APIManagementException e) {
-           RestApiUtil.handleInternalServerError(" Error while retrieving APIs ", e, log);
-        }       
-       
+            RestApiUtil.handleInternalServerError(" Error while retrieving APIs ", e, log);
+        }
         return Response.ok().entity(apiListDTO).build();
     }
 }

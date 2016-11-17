@@ -35,8 +35,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -101,7 +99,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
     @Override
-    public Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException {
+    public Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException {
         return null;
     }
 
@@ -125,7 +123,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to get Subscribers
      */
     @Override
-    public Set<Subscriber> getSubscribersOfAPI(API identifier) throws APIManagementException {
+    public Set<String> getSubscribersOfAPI(API identifier) throws APIManagementException {
         return null;
     }
 

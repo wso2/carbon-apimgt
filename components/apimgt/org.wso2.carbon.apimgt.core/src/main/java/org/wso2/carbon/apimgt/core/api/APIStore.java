@@ -98,7 +98,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
+    Application[] getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -126,16 +126,5 @@ public interface APIStore extends APIManager {
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
             String groupingId, String jsonString) throws APIManagementException;
-
-    /**
-     * Check whether given application name is available under current subscriber or group
-     *
-     * @param appName  application name
-     * @param username subscriber username
-     * @param groupId  group of the subscriber
-     * @return true if application is available for the subscriber
-     * @throws SQLException if failed to get applications for given subscriber
-     */
-    boolean isApplicationExists(String appName, String username, String groupId) throws APIManagementException;
 
 }

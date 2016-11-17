@@ -237,7 +237,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return false;
     }
 
-    @Override public Application[] getApplications(Subscriber subscriber, String groupingId) throws SQLException {
+    @Override
+    public Application[] getApplications(String subscriber, String groupingId) throws SQLException {
         return new Application[0];
     }
 
