@@ -25,34 +25,12 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 
-public class ApiDAOImplIT {
-    private DataSource dataSource;
-    private static final String sqlFilePath = "src" + File.separator + "main" +
-            File.separator + "resources" + File.separator + "h2.sql";
-
-    @org.testng.annotations.BeforeMethod
-    public void setUp() throws Exception {
-        dataSource = new InMemoryDataSource();
-        DAOUtil.initialize(dataSource);
-
-        try (Connection connection = DAOUtil.getConnection()) {
-            DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
-        }
-    }
-
-    @org.testng.annotations.AfterMethod
-    public void tempDBCleanup() throws SQLException, IOException {
-        ((InMemoryDataSource) dataSource).resetDB();
-    }
+public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetAPI() throws Exception {
