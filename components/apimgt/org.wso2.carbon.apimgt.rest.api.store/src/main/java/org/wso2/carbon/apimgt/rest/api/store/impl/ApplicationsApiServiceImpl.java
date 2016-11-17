@@ -97,7 +97,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     // Later we can improve by checking admin privileges of the user.
                     application.setGroupId(oldApplication.getGroupId());
                     //we do not honor the application id which is sent via the request body
-                    application.setUUID(oldApplication.getUUID());
+                    application.setUuid(oldApplication.getUuid());
 
                     apiConsumer.updateApplication(application);
 

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Implementation of API Store operations.
@@ -131,7 +132,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
+            String generatedUuid = UUID.randomUUID().toString();
+            application.setUuid(generatedUuid);
             getApplicationDAO().addApplication(application);
+            applicationUuid = application.getUuid();
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
         }
