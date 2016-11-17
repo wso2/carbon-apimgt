@@ -60,7 +60,7 @@ public class APIConstants {
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
-    public static final String DEFAULT_API_POLICY = "Default";
+    public static final String DEFAULT_API_POLICY = "Unlimited";
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
 

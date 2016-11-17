@@ -115,13 +115,12 @@ public class APIStoreImplTestCase {
     }
 
 
-    //@Test(description = "Add an application")
+//    @Test(description = "Add an application")
     public void testAddApplication(){
         try {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
             APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
             Application application = new Application(APP_NAME, USER_NAME);
-            //when(applicationDAO.addApplication(application)).thenReturn("1");
             when(applicationDAO.isApplicationExists(APP_NAME,USER_NAME,null)).thenReturn(false);
             String applicationUuid = apiStore.addApplication(application);
             Assert.assertNotNull(applicationUuid);

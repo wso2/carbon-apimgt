@@ -59,7 +59,7 @@ public class ApplicationMappingUtil {
 
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setApplicationId(application.getUUID());
+        applicationDTO.setApplicationId(application.getUuid());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
@@ -109,7 +109,7 @@ public class ApplicationMappingUtil {
 
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
-        applicationInfoDTO.setApplicationId(application.getUUID());
+        applicationInfoDTO.setApplicationId(application.getUuid());
         applicationInfoDTO.setThrottlingTier(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());
@@ -125,7 +125,7 @@ public class ApplicationMappingUtil {
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
-        application.setUUID(applicationDTO.getApplicationId());
+        application.setUuid(applicationDTO.getApplicationId());
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;

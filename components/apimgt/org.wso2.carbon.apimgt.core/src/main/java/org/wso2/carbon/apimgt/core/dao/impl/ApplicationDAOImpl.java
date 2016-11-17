@@ -58,7 +58,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 if (rs.next()) {
                     String createdUser = rs.getString("CREATED_BY");
                     application = new Application(rs.getString("NAME"), createdUser);
-                    application.setUUID(rs.getString("UUID"));
+                    application.setUuid(rs.getString("UUID"));
                     application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                     application.setDescription(rs.getString("DESCRIPTION"));
                     application.setGroupId(rs.getString("GROUP_ID"));
@@ -173,7 +173,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
             ps.setString(9, application.getCreatedUser());
             ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
-            ps.setString(11, application.getUUID());
+            ps.setString(11, application.getUuid());
             ps.executeUpdate();
             conn.commit();
         }
