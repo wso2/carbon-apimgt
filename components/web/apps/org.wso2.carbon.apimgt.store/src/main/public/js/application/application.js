@@ -1,6 +1,6 @@
 $(function () {
 
-    var bearerToken = "Bearer 3dcec29c-9aae-3fbf-b23e-7e11dc908637";
+    var bearerToken = "Bearer fe004415-4986-3230-8030-683885de3f23";
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function (swaggerData) {
@@ -28,11 +28,11 @@ $(function () {
             //Delete Application
             $('#application-table').on('click', 'a.deleteApp', function () {
                 //TODO: Get Application id
-                var appId = "d8f4c84e-1875-4b30-b484-835f8f1e748e";
+                var appId = $(this).attr("data-id")
                 client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
                 client["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
                     function (data) {
-                        console.log(JSON.stringify(data.obj));
+                       // window.location.reload(true);
                     });
             });
         }
