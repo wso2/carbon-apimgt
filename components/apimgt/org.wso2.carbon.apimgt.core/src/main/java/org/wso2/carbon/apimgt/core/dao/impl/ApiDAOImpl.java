@@ -358,7 +358,10 @@ public class ApiDAOImpl implements ApiDAO {
             addTagsMapping(connection, apiPrimaryKey, substituteAPI.getTags());
 
             updateAPIDefinition(connection, apiPrimaryKey, substituteAPI.getApiDefinition());
-
+            deleteSubscriptionPolicies(connection, apiPrimaryKey);
+            addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiPrimaryKey);
+            deleteUrlMappings(connection, apiPrimaryKey);
+            addUrlMappings(connection, substituteAPI.getUriTemplates(), apiPrimaryKey);
             connection.commit();
         }
 
@@ -440,7 +443,13 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void changeLifeCycleStatus(String apiID, String status) throws SQLException {
-
+    final String query = "UPDATE AM_API SET CURRENT_LC_STATUS = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1,status);
+            statement.setString(2,apiID);
+            statement.execute();
+        }
     }
 
     /**
@@ -956,7 +965,14 @@ public class ApiDAOImpl implements ApiDAO {
             statement.executeBatch();
         }
     }
-
+    private void deleteUrlMappings(Connection connection, int apiID) throws
+            SQLException {
+        final String query = "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiID);
+            statement.execute();
+        }
+    }
     private Set<URITemplate> getUriTemplates(Connection connection, int apiId) throws SQLException {
         String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE" +
                 " API_ID = ?";
@@ -987,6 +1003,14 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.addBatch();
             }
             statement.executeBatch();
+        }
+    }
+    private void deleteSubscriptionPolicies(Connection connection, int apiID) throws
+            SQLException {
+        final String query = "DELETE FROM AM_API_SUBSCRIPTION_POLICY_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1,apiID);
+            statement.execute();
         }
     }
     private int getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
