@@ -31,7 +31,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
     public void testAddAndGetApplication() throws Exception {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
-        Application appFromDB = applicationDAO.getApplication(app.getuuid());
+        Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNotNull(appFromDB);
         validateApp(appFromDB, app);
     }
@@ -41,10 +41,10 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
         Application currentApp = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
-        newApp.setUUID(currentApp.getuuid());
+        newApp.setUuid(currentApp.getUuid());
         newApp.setCreatedTime(currentApp.getCreatedTime());
-        applicationDAO.updateApplication(currentApp.getuuid(), newApp);
-        Application appFromDB = applicationDAO.getApplication(newApp.getuuid());
+        applicationDAO.updateApplication(currentApp.getUuid(), newApp);
+        Application appFromDB = applicationDAO.getApplication(newApp.getUuid());
         Assert.assertNotNull(appFromDB);
         validateApp(appFromDB, newApp);
     }
@@ -53,8 +53,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
     public void testDeleteApplication() throws Exception {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
-        applicationDAO.deleteApplication(app.getuuid());
-        Application appFromDB = applicationDAO.getApplication(app.getuuid());
+        applicationDAO.deleteApplication(app.getUuid());
+        Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNull(appFromDB);
     }
 
@@ -88,7 +88,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
         Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
         Assert.assertEquals(appFromDB.getGroupId(), expectedApp.getGroupId());
         Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus());
-        Assert.assertEquals(appFromDB.getuuid(), expectedApp.getuuid());
+        Assert.assertEquals(appFromDB.getUuid(), expectedApp.getUuid());
         Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
         Assert.assertEquals(appFromDB.getCreatedTime(), expectedApp.getCreatedTime());

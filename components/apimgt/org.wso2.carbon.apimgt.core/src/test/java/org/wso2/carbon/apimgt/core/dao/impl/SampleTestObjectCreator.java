@@ -216,7 +216,7 @@ public class SampleTestObjectCreator {
     static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
-        application.setUUID(UUID.randomUUID().toString());
+        application.setUuid(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
@@ -231,7 +231,7 @@ public class SampleTestObjectCreator {
     static Application createAlternativeApplication(){
         //created by admin and updated by admin2
         Application application = new Application("TestApp2", "admin");
-        application.setUUID(UUID.randomUUID().toString());
+        application.setUuid(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp2");
         application.setDescription("This is test application 2");
         application.setGroupId("groupx2");
