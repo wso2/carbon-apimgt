@@ -103,14 +103,6 @@ public final class Application {
         this.apiSubscriptions.addAll(apiSubscriptions);
     }
 
-    public String getUUID() {
-        return uuid;
-    }
-
-    public void setUUID(String uuid) {
-        this.uuid = uuid;
-    }
-
     public String getDescription() {
         return description;
     }
