@@ -127,15 +127,4 @@ public interface APIStore extends APIManager {
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
             String groupingId, String jsonString) throws APIManagementException;
 
-    /**
-     * Check whether given application name is available under current subscriber or group
-     *
-     * @param appName  application name
-     * @param username subscriber username
-     * @param groupId  group of the subscriber
-     * @return true if application is available for the subscriber
-     * @throws SQLException if failed to get applications for given subscriber
-     */
-    boolean isApplicationExists(String appName, String username, String groupId) throws APIManagementException;
-
 }
