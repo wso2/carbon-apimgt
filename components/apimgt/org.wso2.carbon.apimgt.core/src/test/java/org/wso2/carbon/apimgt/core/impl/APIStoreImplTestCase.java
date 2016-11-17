@@ -59,7 +59,7 @@ public class APIStoreImplTestCase {
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
 
-    @Test
+    @Test(description = "Search APIs")
     public void searchAPIs() {
         try {
             ApiDAO apiDAO = mock(ApiDAO.class);
@@ -74,7 +74,7 @@ public class APIStoreImplTestCase {
         }
     }
     
-    @Test(expectedExceptions = APIManagementException.class)
+    @Test(description = "Search API", expectedExceptions = APIManagementException.class)
     public void searchAPIsWithException() throws Exception {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
@@ -85,7 +85,7 @@ public class APIStoreImplTestCase {
     }
     
     
-    @Test
+    @Test(description = "Retrieve an API by status")
     public void getAPIsByStatus() throws APIManagementException, SQLException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
@@ -97,7 +97,7 @@ public class APIStoreImplTestCase {
         verify(apiDAO, times(1)).getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED ));
     }
 
-    @Test
+    @Test(description = "Retrieve an application by name")
     public void testGetApplicationByName () {
         try {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
@@ -115,7 +115,7 @@ public class APIStoreImplTestCase {
     }
 
 
-    @Test
+    @Test(description = "Add an application")
     public void testAddApplication(){
         try {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);

@@ -153,6 +153,6 @@ public interface ApplicationDAO {
     boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
 
 
-    Application[] getApplications(Subscriber subscriber, String groupingId) throws SQLException;
+    Application[] getApplications(String subscriber, String groupingId) throws SQLException;
 
 }
