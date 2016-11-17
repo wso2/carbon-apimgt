@@ -138,6 +138,20 @@ public interface ApplicationDAO {
      * @return
      * @throws SQLException
      */
-    public Application getApplicationByUUID(String uuid) throws SQLException;
+    Application getApplicationByUUID(String uuid) throws SQLException;
+
+    /**
+     * Check whether given application name is available under current subscriber or group
+     *
+     * @param appName  application name
+     * @param username subscriber username
+     * @param groupId  group of the subscriber
+     * @return true if application is available for the subscriber
+     * @throws SQLException if failed to get applications for given subscriber
+     */
+    boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
+
+
+    Application[] getApplications(String subscriber, String groupingId) throws SQLException;
 
 }

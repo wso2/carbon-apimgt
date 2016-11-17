@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -30,8 +31,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -43,6 +42,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +51,7 @@ import java.util.UUID;
 /**
  * Implementation of API Publisher operations
  */
- class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
+public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
@@ -163,6 +163,13 @@ import java.util.UUID;
         if (apiBuilder.getId() == null){
             apiBuilder.id(UUID.randomUUID().toString());
         }
+        if (apiBuilder.getApiDefinition() == null) {
+            APIUtils.logAndThrowException("Couldn't find swagger definition of API " + apiBuilder.getName(), log);
+        }
+        APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+        apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
+            apiBuilder.createdTime(new Date());
+            apiBuilder.lastUpdatedTime(new Date());
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle("API_LIFECYCLE", getUsername());
@@ -210,24 +217,30 @@ import java.util.UUID;
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-        API api = apiBuilder.build();
+            apiBuilder.lastUpdatedTime(new Date());
         try {
-            API originalAPI = getAPIbyUUID(api.getId());
-            if (originalAPI.getLifeCycleStatus().equalsIgnoreCase(api.getLifeCycleStatus())) {
-                getApiDAO().updateAPI(api.getId(), api);
-                if (log.isDebugEnabled()) {
-                    log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+            API originalAPI = getAPIbyUUID(apiBuilder.getId());
+            if (originalAPI != null) {
+                apiBuilder.createdTime(originalAPI.getCreatedTime());
+                API api = apiBuilder.build();
+                if (originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
+                    getApiDAO().updateAPI(api.getId(), api);
+                    if (log.isDebugEnabled()) {
+                        log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                    }
+                } else {
+                    String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have " +
+                            "status change";
+                    if (log.isDebugEnabled()) {
+                        log.debug(msg);
+                    }
+                    APIUtils.logAndThrowException(msg, log);
                 }
-            } else {
-                String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have status " +
-                                       "change";
-                if (log.isDebugEnabled()) {
-                    log.debug(msg);
-                }
-                APIUtils.logAndThrowException(msg, log);
+            }else{
+                APIUtils.logAndThrowException("Couldn't found API with ID " + apiBuilder.getId(), log);
             }
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Error occurred while updating the API - " + api.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while updating the API - " + apiBuilder.getName(), e, log);
         }
     }
 
@@ -237,40 +250,30 @@ import java.util.UUID;
      *
      * @param apiId
      * @param status
-     * @param deprecateOldVersions
-     * @param makeKeysForwardCompatible
      * @return
      * @throws APIManagementException
      */
     @Override
-    public void updateAPIStatus(String apiId, String status, boolean
-            deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
-        API originalAPI = null;
-        try {
+    public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
+            APIManagementException {
+         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                originalAPI = apiBuilder.build();
+                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()){
+                    apiBuilder.lifecycleState(getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                            (), status, checkListItem.getKey(), checkListItem.getValue()));
+                }
+                API originalAPI = apiBuilder.build();
                 getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
-                getApiDAO().changeLifeCycleStatus(apiId, status, deprecateOldVersions, makeKeysForwardCompatible);
             }else{
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
         } catch (SQLException e) {
-            try {
-                if (originalAPI != null) {
-                    getApiLifecycleManager().executeLifecycleEvent(originalAPI.getLifeCycleStatus(), originalAPI
-                            .getLifecycleInstanceId(), getUsername(), originalAPI);
-                }
-            } catch (LifecycleException e1) {
-                // here we don't throw the exception as we are execute lifecycle entry due to api does not saved in
-                // api manager tables.
-                log.error("Couldn't execute lifecycle event");
-            }
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);
+            APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId + " ", e, log);
         }
     }
 
@@ -298,7 +301,7 @@ import java.util.UUID;
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
-                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't found");
+                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
         } catch (SQLException e) {
             if (lifecycleState != null) {
@@ -446,9 +449,9 @@ import java.util.UUID;
                 }
             }
         } catch (SQLException e) {
-            APIUtils.logAndThrowException("Couldn't found APISummary Resource for ID " + apiId, e, log);
+            APIUtils.logAndThrowException("Couldn't find APISummary Resource for ID " + apiId, e, log);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't found APILifecycle History for ID " + apiId, e, log);
+            APIUtils.logAndThrowException("Couldn't find APILifecycle History for ID " + apiId, e, log);
         }
         return lifeCycleEventList;
     }
@@ -489,15 +492,15 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
+    public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
-        APIResults apiResults = null;
+        List<API> apiResults = null;
         try {
-            List<String> roles = new ArrayList<>();
+            //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit, roles);
+                apiResults = getApiDAO().searchAPIs(query);
             } else {
-                apiResults = getApiDAO().getAPIsForRoles(offset, limit, roles);
+                apiResults = getApiDAO().getAPIs();
             }
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
@@ -531,46 +534,6 @@ import java.util.UUID;
 
     }
 
-    /**
-     * This method is to change registry lifecycle states for an API artifact
-     *
-     * @param string string
-     * @param action Action which need to execute from registry lifecycle
-     */
-    @Override
-    public boolean changeLifeCycleStatus(String string, String action) throws APIManagementException {
-        return false;
-    }
-
-    /**
-     * This method is to set checklist item values for a particular life-cycle state of an API
-     *
-     * @param string         string
-     * @param checkItem      Order of the checklist item
-     * @param checkItemValue Value of the checklist item
-     */
-    @Override
-    public boolean changeAPILCCheckListItems(String string, int checkItem, boolean checkItemValue)
-            throws APIManagementException {
-        return false;
-    }
-
-    /**
-     * This method is to set a lifecycle check list item given the String and the checklist item name.
-     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay
-     * silent and return false. Otherwise, the checklist item will be updated and returns true.
-     *
-     * @param string         String
-     * @param checkItemName  Name of the checklist item
-     * @param checkItemValue Value to be set to the checklist item
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    @Override
-    public boolean checkAndChangeAPILCCheckListItem(String string, String checkItemName, boolean
-            checkItemValue) throws APIManagementException {
-        return false;
-    }
 
     /**
      * This method returns the lifecycle data for an API including current state,next states.
@@ -579,37 +542,49 @@ import java.util.UUID;
      * @return Map<String,Object> a map with lifecycle data
      */
     @Override
-    public Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException {
+    public LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException {
+        try {
+            API api =  getApiDAO().getAPISummary(apiId);
+            if (api != null){
+
+                return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
+            }else{
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
+            }
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't retrieve API Summary for " + apiId, e, log);
+        } catch (LifecycleException e) {
+            APIUtils.logAndThrowException("Couldn't retrieve API Lifecycle for " + apiId, e, log);
+        }
         return null;
     }
 
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     *
-     * @param identifier Api identifier
-     * @param newStatus  new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(String identifier, APIStatus newStatus)
-            throws APIManagementException {
-        return null;
-    }
 
     /**
      * Update api related information such as database entries, registry updates for state change.
      *
      * @param identifier
      * @param newStatus  accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
+     * @param deprecateOlderVersions
+     *@param requireReSubscriptions @return boolean value representing success not not
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws
+    public void updateAPIForStateChange(String identifier, String newStatus, boolean deprecateOlderVersions, boolean
+            requireReSubscriptions) throws
             APIManagementException {
-        return false;
+        try {
+            getApiDAO().changeLifeCycleStatus(identifier, newStatus);
+            if (deprecateOlderVersions){
+                getApiDAO().deprecateOlderVersions(identifier);
+            }
+            if (!requireReSubscriptions) {
+                getApiSubscriptionDAO().copySubscriptions(identifier);
+            }
+
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
+        }
     }
 
     /**

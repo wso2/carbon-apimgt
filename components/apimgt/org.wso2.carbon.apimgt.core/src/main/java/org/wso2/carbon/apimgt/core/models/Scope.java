@@ -20,9 +20,11 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.api;
+package org.wso2.carbon.apimgt.core.models;
 
-
+/**
+ * This class contains the model of scope
+ */
 public class Scope {
 
     String key;

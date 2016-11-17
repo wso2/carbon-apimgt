@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -21,6 +24,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -126,8 +130,12 @@ public class ApisApiServiceImpl extends ApisApiService {
  ) throws NotFoundException {
         String username = "";
         try {
-            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
-            return Response.ok().entity(apidto).build();
+            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)){
+                APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+                return Response.ok().entity(apidto).build();
+            }else{
+                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -212,24 +220,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifUnmodifiedSince
  ) throws NotFoundException {
         String username = "";
-        String checklistArray[] = lifecycleChecklist.split(",");
-        boolean deprecarteOlderVersion = true;
-        boolean requireResubscriptions = false;
-        if (checklistArray.length == 2) {
-            for (String checkList : checklistArray) {
-                if (checkList.contains("attribute1")) {
-                    deprecarteOlderVersion = Boolean.valueOf(checkList.split(":")[1]);
-                } else {
-                    requireResubscriptions = Boolean.valueOf(checkList.split(":")[1]);
-                }
-            }
-        }
-
+        Map<String,Boolean> lifecycleChecklistMap;
         try {
-            RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, deprecarteOlderVersion,
-                    requireResubscriptions);
+            lifecycleChecklistMap = (JSONObject)new JSONParser().parse(lifecycleChecklist);
+            RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
             return Response.ok().build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | ParseException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -304,17 +300,19 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.addAPI(apiBuilder);
             API returnAPI = apiPublisher.getAPIbyUUID(apiBuilder.getId());
-          URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
-            return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
+//          URI  createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + returnAPI.getId());
+//            return Response.created(createdApiUri).entity(MappingUtil.toAPIDto(returnAPI)).build();
+            return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+//        catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
+//                    body.getName() + "-" + body.getVersion();
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
         return null;
     }
 }

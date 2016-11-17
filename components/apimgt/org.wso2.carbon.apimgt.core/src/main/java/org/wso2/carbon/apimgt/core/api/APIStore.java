@@ -21,9 +21,11 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APIResults;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,11 +42,10 @@ public interface APIStore extends APIManager {
      * @param offset offset
      * @param limit limit
      * @param status One or more Statuses
-     * @param returnAPITags If true, tags of each API is returned
-     * @return set of API
+     * @return List<API>
      * @throws APIManagementException if failed to API set
      */
-    Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
+    List<API> getAllAPIsByStatus(int offset, int limit, String[] status)
             throws APIManagementException;
     
    
@@ -53,10 +54,10 @@ public interface APIStore extends APIManager {
      *   
      * @param query searchType
      * @param limit limit
-     * @return APIResults
+     * @return List<API>
      * @throws APIManagementException
      */
-    APIResults searchAPIs(String query, int offset, int limit)
+    List<API> searchAPIs(String query, int offset, int limit)
             throws APIManagementException;
 
     /**
@@ -70,11 +71,10 @@ public interface APIStore extends APIManager {
      * Adds an application
      *
      * @param application Application
-     * @param userId      User Id
      * @return uuid of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-     String addApplication(Application application, String userId) throws APIManagementException;
+     String addApplication(Application application) throws APIManagementException;
 
 
     /**
@@ -92,12 +92,12 @@ public interface APIStore extends APIManager {
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupingId the groupId to which the applications must belong.
+     * @param groupId the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(String subscriber, String groupingId) throws APIManagementException;
+    Application[] getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

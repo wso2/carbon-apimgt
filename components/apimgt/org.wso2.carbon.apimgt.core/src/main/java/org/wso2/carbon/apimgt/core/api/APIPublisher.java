@@ -22,11 +22,10 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
 import java.util.List;
@@ -126,13 +125,9 @@ public interface APIPublisher extends APIManager {
      *
      * @param api
      * @param status
-     * @param deprecateOldVersions
-     * @param makeKeysForwardCompatible
-     * @return
      * @throws APIManagementException
      */
-    void updateAPIStatus(String api, String status, boolean deprecateOldVersions,
-                         boolean makeKeysForwardCompatible)
+    void updateAPIStatus(String api, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException;
 
 
@@ -238,7 +233,7 @@ public interface APIPublisher extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
+    List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
 
     /**
      * Update the subscription status
@@ -261,38 +256,7 @@ public interface APIPublisher extends APIManager {
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
 
-    /**
-     * This method is to change registry lifecycle states for an API artifact
-     *
-     * @param apiIdentifier apiIdentifier
-     * @param action        Action which need to execute from registry lifecycle
-     */
-    boolean changeLifeCycleStatus(String apiIdentifier, String action)
-            throws APIManagementException;
 
-    /**
-     * This method is to set checklist item values for a particular life-cycle state of an API
-     *
-     * @param apiIdentifier  apiIdentifier
-     * @param checkItem      Order of the checklist item
-     * @param checkItemValue Value of the checklist item
-     */
-    boolean changeAPILCCheckListItems(String apiIdentifier, int checkItem, boolean checkItemValue)
-            throws APIManagementException;
-
-    /**
-     * This method is to set a lifecycle check list item given the String and the checklist item name.
-     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay
-     * silent and return false. Otherwise, the checklist item will be updated and returns true.
-     *
-     * @param apiIdentifier  String
-     * @param checkItemName  Name of the checklist item
-     * @param checkItemValue Value to be set to the checklist item
-     * @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    boolean checkAndChangeAPILCCheckListItem(String apiIdentifier, String checkItemName, boolean checkItemValue)
-            throws APIManagementException;
 
     /**
      * This method returns the lifecycle data for an API including current state,next states.
@@ -300,29 +264,20 @@ public interface APIPublisher extends APIManager {
      * @param apiId String
      * @return Map<String,Object> a map with lifecycle data
      */
-    Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException;
+    LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException;
 
-    /**
-     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
-     * according to the new state.
-     *
-     * @param identifier Api identifier
-     * @param newStatus  new state of the lifecycle
-     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
-     * @throws APIManagementException
-     */
-    Map<String, String> propergateAPIStatusChangeToGateways(String identifier, APIStatus newStatus)
-            throws APIManagementException;
 
     /**
      * Update api related information such as database entries, registry updates for state change.
      *
      * @param identifier
      * @param newStatus  accepted if changes are not pushed to a gateway
-     * @return boolean value representing success not not
+     * @param deprecateOlderVersions
+     *@param requireReSubscriptions @return boolean value representing success not not
      * @throws APIManagementException
      */
-    boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws APIManagementException;
+    void updateAPIForStateChange(String identifier, String newStatus, boolean deprecateOlderVersions, boolean
+            requireReSubscriptions) throws APIManagementException;
 
     /**
      * Get the current lifecycle status of the api

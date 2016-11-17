@@ -25,8 +25,10 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -62,6 +64,8 @@ public final class API {
         createdTime = builder.createdTime;
         createdBy = builder.createdBy;
         lastUpdatedTime = builder.lastUpdatedTime;
+        lifecycleState = builder.lifecycleState;
+        uriTemplates = builder.uriTemplates;
     }
 
     public String getId() {
@@ -168,6 +172,14 @@ public final class API {
         return new Date(lastUpdatedTime.getTime());
     }
 
+    public LifecycleState getLifecycleState() {
+        return lifecycleState;
+    }
+
+    public Set<URITemplate> getUriTemplates() {
+        return uriTemplates;
+    }
+
     /**
      * Visibility options
      */
@@ -201,6 +213,8 @@ public final class API {
     private final Date createdTime;
     private final String createdBy;
     private final Date lastUpdatedTime;
+    private final LifecycleState lifecycleState;
+    private final Set<URITemplate> uriTemplates ;
 
     @Override
     public boolean equals(Object o) {
@@ -322,23 +336,25 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private String apiDefinition;
-        private String wsdlUri;
+        private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
         private boolean isDefaultVersion;
         private String apiPolicy;
-        private List<String> transport;
-        private List<String> tags;
+        private List<String> transport = Collections.emptyList();
+        private List<String> tags = Collections.emptyList();
         private List<String> policies;
         private Visibility visibility;
-        private List<String> visibleRoles;
-        private List<Endpoint> endpoints;
-        private List<Environment> gatewayEnvironments;
+        private List<String> visibleRoles = Collections.emptyList();
+        private List<Endpoint> endpoints = Collections.emptyList();
+        private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private Date createdTime;
         private String createdBy;
         private Date lastUpdatedTime;
+        private LifecycleState lifecycleState;
+        private Set<URITemplate> uriTemplates;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -372,6 +388,8 @@ public final class API {
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
+            this.lifecycleState = copy.lifecycleState;
+            this.uriTemplates = copy.uriTemplates;
         }
 
         /**
@@ -459,6 +477,17 @@ public final class API {
          */
         public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
             this.lifecycleInstanceId = lifecycleInstanceId;
+            return this;
+        }
+
+        /**
+         * Sets the lifecycleState and return a reference to this APIBuilder
+         *
+         * @param lifecycleState
+         * @return a reference to APIBuilder
+         */
+        public APIBuilder lifecycleState(LifecycleState lifecycleState){
+            this.lifecycleState = lifecycleState;
             return this;
         }
 
@@ -558,6 +587,17 @@ public final class API {
          */
         public APIBuilder policies(List<String> policies) {
             this.policies = policies;
+            return this;
+        }
+
+        /**
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
+         *
+         * @param uriTemplates the {@code uriTemplates} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder uriTemplates(Set<URITemplate> uriTemplates) {
+            this.uriTemplates = uriTemplates;
             return this;
         }
 
@@ -682,6 +722,7 @@ public final class API {
         public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
             lifecycleInstanceId = lifecycleState.getLifecycleId();
             lifeCycleStatus = lifecycleState.getState();
+            this.lifecycleState = lifecycleState;
         }
 
         /**
@@ -704,10 +745,27 @@ public final class API {
         @Override
         public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
             lifeCycleStatus = lifecycleState.getState();
+            this.lifecycleState = lifecycleState;
         }
 
         public String getName() {
             return name;
+        }
+
+        public LifecycleState getLifecycleState() {
+            return lifecycleState;
+        }
+
+        public Date getCreatedTime() {
+            return new Date(createdTime.getTime());
+        }
+
+        public String getCreatedBy() {
+            return createdBy;
+        }
+
+        public Date getLastUpdatedTime() {
+            return new Date(lastUpdatedTime.getTime());
         }
     }
 

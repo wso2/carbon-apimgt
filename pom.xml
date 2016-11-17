@@ -158,7 +158,7 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-io</groupId>
+                <groupId>commons-io.wso2</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
@@ -267,6 +267,21 @@
                 <artifactId>org.jacoco.agent</artifactId>
                 <classifier>runtime</classifier>
                 <version>${jacoco.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>${swagger.parser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${io.swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${google.code.gson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -477,12 +492,13 @@
         <carbon.deployment.export.version>5.0.0</carbon.deployment.export.version>
         <rxjava.export.version>1.2.0.wso2v1</rxjava.export.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
+        <json-simple.wso2.export.version>1.1.0.wso2v1</json-simple.wso2.export.version>
         <com.h2database.wso2.version>1.2.140.wso2v3</com.h2database.wso2.version>
         <io.swagger.version>1.5.10</io.swagger.version>
         <org.hibernate.version>5.2.4.Final</org.hibernate.version>
         <carbon.security.caas.version>1.0.0-m2</carbon.security.caas.version>
 
-        <commons-io.version>2.4</commons-io.version>
+        <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <rx.java.version>1.2.0.wso2v1</rx.java.version>
         <testng.version>6.9.10</testng.version>
@@ -510,8 +526,6 @@
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m7</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m6</carbon-uuf-maven-plugin.version>
-
-
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
         <carbon.messaging.version>1.0.2</carbon.messaging.version>
@@ -521,7 +535,8 @@
         <slf4j.version>1.7.5</slf4j.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
         <!--End of Dependency for integration gateway extension-->
-
+        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
+        <google.code.gson.version>2.7</google.code.gson.version>
 	<!-- Jacoco for code coverage -->
 	<jacoco.version>0.7.5.201505241946</jacoco.version>
 	<maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>

@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -56,12 +55,16 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
+        apidto.setApiDefinition(api.getApiDefinition());
         apidto.setIsDefaultVersion(api.isDefaultVersion());
         apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
         apidto.setStatus(api.getLifeCycleStatus());
+        apidto.setTags(api.getTags());
+        apidto.setTransport(api.getTransport());
+        api.getPolicies().forEach(apidto::addTiersItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -107,9 +110,12 @@ public class MappingUtil {
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
+                apiDefinition(apidto.getApiDefinition()).
                 lifeCycleStatus(apidto.getStatus()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
+                policies(apidto.getTiers()).
+                tags(apidto.getTags()).
                 cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getTiers()).
@@ -141,17 +147,17 @@ public class MappingUtil {
     }
 
     /**
-     * Converts {@link APIResults} to {@link APIListDTO} DTO.
+     * Converts {@link List<API>} to {@link APIListDTO} DTO.
      *
      * @param apisResult
      * @return
      */
-    public static APIListDTO toAPIListDTO(APIResults apisResult) {
+    public static APIListDTO toAPIListDTO(List<API> apisResult) {
         APIListDTO apiListDTO = new APIListDTO();
-        apiListDTO.setCount(apisResult.getApiSummaryList().size());
+        apiListDTO.setCount(apisResult.size());
         // apiListDTO.setNext(next);
         // apiListDTO.setPrevious(previous);
-        apiListDTO.setList(toAPIInfo(apisResult.getApiSummaryList()));
+        apiListDTO.setList(toAPIInfo(apisResult));
         return apiListDTO;
     }
 

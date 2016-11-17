@@ -116,4 +116,11 @@ public interface APISubscriptionDAO {
 
 
     long getAPISubscriptionCountByAPI(String apiId) throws SQLException;
+
+    /**
+     * Copy existing subscriptions on one of the API versions into latest version
+     * @param identifier uuid of newly created version
+     * @throws SQLException
+     */
+    void copySubscriptions(String identifier) throws SQLException;
 }

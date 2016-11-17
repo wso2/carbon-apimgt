@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 
@@ -139,4 +140,17 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         return 0;
     }
 
+    /**
+     * Copy existing subscriptions on one of the API versions into latest version
+     *
+     * @param identifier uuid of newly created version
+     * @throws SQLException
+     */
+    @Override
+    public void copySubscriptions(String identifier) throws SQLException {
+        /* TODO: 11/12/16 Get identifiers of existing versions
+        Get subscriptions of above apiid
+        insert new entries with above given identifier
+         */
+    }
 }

@@ -252,6 +252,16 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return null;
     }
 
+    @Override
+    public boolean isApplicationExists(String appName, String username, String groupId) throws SQLException {
+        return false;
+    }
+
+    @Override
+    public Application[] getApplications(String subscriber, String groupingId) throws SQLException {
+        return new Application[0];
+    }
+
     private String getSubscriptionTierName(Connection connection, int policyID) throws SQLException {
         final String query = "SELECT NAME FROM AM_POLICY_APPLICATION WHERE POLICY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {

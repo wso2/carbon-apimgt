@@ -16,9 +16,9 @@
 package org.wso2.carbon.apimgt.core.models;
 
 /**
- * This class represent the Tier
+ * This class represent a Policy
  */
-public class Tier {
+public class Policy {
 
     private String name;
 

@@ -24,8 +24,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.*;
-import org.wso2.carbon.apimgt.core.models.APIResults;
 
+import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +36,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.CheckForNull;
-import javax.ws.rs.core.MediaType;
+import java.util.*;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -48,10 +44,12 @@ import javax.ws.rs.core.MediaType;
  */
 public class ApiDAOImpl implements ApiDAO {
 
-    private final ApiDAOVendorSpecificStatements sqlStatements;
+    //private final ApiDAOVendorSpecificStatements sqlStatements;
+    private static final String API_SUMMARY_SELECT = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
+            "UUID, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
-        this.sqlStatements = sqlStatements;
+        //this.sqlStatements = sqlStatements;
     }
 
     /**
@@ -66,7 +64,7 @@ public class ApiDAOImpl implements ApiDAO {
     public API getAPI(String apiID) throws SQLException {
         final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
-                "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, API_POLICY_ID, " +
+                "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
                 "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
 
@@ -88,8 +86,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPISummary(String apiID) throws SQLException {
-        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, UUID, CURRENT_LC_STATUS " +
-                "FROM AM_API WHERE UUID = ?";
+        final String query = API_SUMMARY_SELECT + " WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -100,117 +97,70 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     *
-     * @param offset        The number of results from the beginning that is to be ignored
-     * @param limit         The maximum number of results to be returned after the offset
-     * @param roles The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * Retrieves summary data of all available APIs.
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults getAPIsForRoles(int offset, int limit, List<String> roles)
-                                                                            throws SQLException {
-        final String query = sqlStatements.getAPIsForRoles(roles.size());
-
+    public List<API> getAPIs() throws SQLException {
         try (Connection connection = DAOUtil.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(API_SUMMARY_SELECT)) {
 
-            int numberOfParams = roles.size();
-
-            for (int i = 0; i < numberOfParams; ++i) {
-                statement.setString(i + 1, roles.get(i));
-            }
-
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(++numberOfParams, offset);
-            statement.setInt(++numberOfParams, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            return constructAPISummaryList(statement);
         }
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * doing a permission check to ensure results returned are only those that match the list of roles provided
-     *
-     * @param offset       The number of results from the beginning that is to be ignored
-     * @param limit        The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults getAPIsForProvider(int offset, int limit, String providerName) throws SQLException {
-        final String query = sqlStatements.getAPIsForProvider();
+    public List<API> getAPIsForProvider(String providerName) throws SQLException {
+        final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, providerName);
 
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(2, offset);
-            statement.setInt(3, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            return constructAPISummaryList(statement);
         }
     }
 
     /**
-     * Retrieves summary data of all available APIs. This method supports result pagination as well as
-     * ensuring the life cycle status of the APIs returned matches the status list provided
-     *
-     * @param offset   The number of results from the beginning that is to be ignored
-     * @param limit    The maximum number of results to be returned after the offset
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
-     * @return {@link APIResults} matching results
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
-    public APIResults getAPIsByStatus(int offset, int limit, List<String> statuses) throws SQLException {
+    public List<API> getAPIsByStatus(List<String> statuses) throws SQLException {
         return null;
     }
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria. This method supports result
-     * pagination as well as doing a permission check to ensure results returned are only those that match
-     * the list of roles provided
-     *
-     * @param searchString    The search string provided
-     * @param offset          The number of results from the beginning that is to be ignored
-     * @param limit           The maximum number of results to be returned after the offset
-     * @param roles   The list of roles of the user making the query
-     * @return {@link APIResults} matching results
+     * Retrieves summary data of all available APIs that match the given search criteria.
+     * @param searchString The search string provided
+     * @return {@link List<API>} matching results
      * @throws SQLException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public APIResults searchAPIsForRoles(String searchString, int offset, int limit,
-                                         List<String> roles) throws SQLException {
-        final String query = sqlStatements.searchAPIsForRoles(roles.size());
+    public List<API> searchAPIs(String searchString) throws SQLException {
+        final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            int numberOfParams = roles.size();
-
-            for (int i = 0; i < numberOfParams; ++i) {
-                statement.setString(i + 1, roles.get(i));
-            }
-
-            statement.setString(++numberOfParams, '%' + searchString + '%');
-
-            int rowCount = limit + 1;  // We ask for an additional row to check if more results are available
-
-            statement.setInt(++numberOfParams, offset);
-            statement.setInt(++numberOfParams, rowCount);
-
-            return constructAPISummaryResults(connection, statement, offset, rowCount);
+            statement.setString(1, '%' + searchString + '%');
+            return constructAPISummaryList(statement);
         }
     }
 
@@ -277,9 +227,9 @@ public class ApiDAOImpl implements ApiDAO {
         final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
-                "CURRENT_LC_STATUS, API_POLICY_ID, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
+                "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
                 "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery, new String[]{"api_id"})) {
@@ -302,18 +252,17 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.setString(15, api.getLifecycleInstanceId());
             statement.setString(16, api.getLifeCycleStatus());
-            statement.setInt(17, getAPIThrottlePolicyID(connection, api.getApiPolicy()));
 
             CorsConfiguration corsConfiguration = api.getCorsConfiguration();
-            statement.setBoolean(18, corsConfiguration.isEnabled());
-            statement.setString(19, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(20, corsConfiguration.isAllowCredentials());
-            statement.setString(21, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(22, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(17, corsConfiguration.isEnabled());
+            statement.setString(18, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(19, corsConfiguration.isAllowCredentials());
+            statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setString(23, api.getCreatedBy());
-            statement.setTimestamp(24, new java.sql.Timestamp(api.getCreatedTime().getTime()));
-            statement.setTimestamp(25, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
+            statement.setString(22, api.getCreatedBy());
+            statement.setTimestamp(23, new java.sql.Timestamp(api.getCreatedTime().getTime()));
+            statement.setTimestamp(24, new java.sql.Timestamp(api.getLastUpdatedTime().getTime()));
 
             statement.execute();
 
@@ -329,6 +278,8 @@ public class ApiDAOImpl implements ApiDAO {
                     addTagsMapping(connection, apiPrimaryKey, api.getTags());
                     addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
                     addTransports(connection, apiPrimaryKey, api.getTransport());
+                    addUrlMappings(connection,api.getUriTemplates(),apiPrimaryKey);
+                    addSubscriptionPolicies(connection,api.getPolicies(),apiPrimaryKey);
                 }
             }
 
@@ -348,7 +299,7 @@ public class ApiDAOImpl implements ApiDAO {
     public API updateAPI(String apiID, API substituteAPI) throws SQLException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
                 "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, UUID = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
-                "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, API_POLICY_ID = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
+                "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ? " +
                 "WHERE UUID = ?";
 
@@ -369,17 +320,15 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(9, businessInformation.getBusinessOwner());
             statement.setString(10, businessInformation.getBusinessOwnerEmail());
 
-            statement.setInt(11, getAPIThrottlePolicyID(connection, substituteAPI.getApiPolicy()));
-
             CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
-            statement.setBoolean(12, corsConfiguration.isEnabled());
-            statement.setString(13, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(14, corsConfiguration.isAllowCredentials());
-            statement.setString(15, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(16, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(11, corsConfiguration.isEnabled());
+            statement.setString(12, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(13, corsConfiguration.isAllowCredentials());
+            statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setTimestamp(17, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
-            statement.setString(18, apiID);
+            statement.setTimestamp(16, new java.sql.Timestamp(substituteAPI.getLastUpdatedTime().getTime()));
+            statement.setString(17, apiID);
 
             statement.execute();
 
@@ -487,13 +436,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID                     The UUID of the respective API
      * @param status                    The lifecycle status that the API must be set to
-     * @param deprecateOldVersions      if true for deprecate older versions
-     * @param makeKeysForwardCompatible if true for make subscriptions get forward
      * @throws SQLException if error occurs while accessing data layer
      */
     @Override
-    public void changeLifeCycleStatus(String apiID, String status, boolean deprecateOldVersions, boolean
-            makeKeysForwardCompatible) throws SQLException {
+    public void changeLifeCycleStatus(String apiID, String status) throws SQLException {
 
     }
 
@@ -571,6 +517,17 @@ public class ApiDAOImpl implements ApiDAO {
 
     }
 
+    /**
+     * Used to deprecate older versions of the api
+     * @param identifier
+     */
+    @Override
+    public void deprecateOlderVersions(String identifier) {
+        /**
+         * todo:
+         */
+    }
+
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
@@ -605,11 +562,12 @@ public class ApiDAOImpl implements ApiDAO {
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                        apiPolicy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).
                         corsConfiguration(corsConfiguration).
                         createdBy(rs.getString("CREATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME")).
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME")).
+                        uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
+                        policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).
                         build();
             }
         }
@@ -625,7 +583,8 @@ public class ApiDAOImpl implements ApiDAO {
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).build();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).lifecycleInstanceId(rs.getString
+                        ("LIFECYCLE_INSTANCE_ID")).build();
             }
         }
 
@@ -648,21 +607,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return apiList;
-    }
-
-    private APIResults constructAPISummaryResults(Connection connection, PreparedStatement statement,
-                                                  int offset, int rowCount) throws SQLException {
-        List<API> apiList = constructAPISummaryList(statement);
-
-        boolean isMoreResultsExist = false;
-
-        if (apiList.size() == rowCount) { // More results exist
-            apiList.remove(rowCount - 1); // Remove additional result that was not asked for
-            isMoreResultsExist = true;
-        }
-
-        return new APIResults.Builder(apiList, isMoreResultsExist,
-                offset + apiList.size()).build();
     }
 
     private void addTagsMapping(Connection connection, int apiID, List<String> tags) throws SQLException {
@@ -994,5 +938,88 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return -1;
+    }
+
+    private void addUrlMappings(Connection connection, Set<URITemplate> uriTemplates, int apiID) throws
+            SQLException {
+        final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, " +
+                "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (URITemplate uriTemplate : uriTemplates) {
+                statement.setInt(1, apiID);
+                statement.setString(2, uriTemplate.getHttpVerb());
+                statement.setString(3, uriTemplate.getUriTemplate());
+                statement.setString(4, uriTemplate.getAuthType());
+                statement.setInt(5, getAPIThrottlePolicyID(connection,uriTemplate.getPolicy()));
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    private Set<URITemplate> getUriTemplates(Connection connection, int apiId) throws SQLException {
+        String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE" +
+                " API_ID = ?";
+        Set<URITemplate> uriTemplateSet = new HashSet<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiId);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    URITemplate uriTemplate = new URITemplate.URITemplateBuilder()
+                            .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME")).httpVerb
+                                    (rs.getString("HTTP_METHOD")).policy(getAPIThrottlePolicyName(connection, rs
+                                    .getInt("API_POLICY_ID"))).build();
+                    uriTemplateSet.add(uriTemplate);
+                }
+            }
+        }
+        return uriTemplateSet;
+    }
+    private void addSubscriptionPolicies(Connection connection, List<String> policies, int apiID) throws
+            SQLException {
+        final String query = "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, POLICY_ID) " +
+                "VALUES (?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (String policy : policies) {
+                statement.setInt(1, apiID);
+                statement.setInt(2, getSubscriptionThrottlePolicyID(connection,policy));
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+    private int getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+        final String query = "SELECT POLICY_ID from AM_POLICY_SUBSCRIPTION where NAME=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getInt("POLICY_ID");
+                }
+            }
+        }
+
+        return -1;
+    }
+    private List<String> getSubscripitonPolciesByAPIId(Connection connection, int apiId) throws SQLException {
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
+                "AM_POLICY_SUBSCRIPTION as amPolcySub where apimsubmapping.POLICY_ID=amPolcySub.POLICY_ID AND " +
+                "apimsubmapping.API_ID = ?";
+        List<String> policies = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, apiId);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    policies.add(rs.getString("NAME"));
+                }
+            }
+        }
+
+        return policies;
     }
 }
