@@ -45,6 +45,9 @@ public class DBScriptRunnerUtil {
                     if (line.startsWith("--")) {
                         continue;
                     }
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
                     StringTokenizer st = new StringTokenizer(line);
                     if (st.hasMoreTokens()) {
                         String token = st.nextToken();

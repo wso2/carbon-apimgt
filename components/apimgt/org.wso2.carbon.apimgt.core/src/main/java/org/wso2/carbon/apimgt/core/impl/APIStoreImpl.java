@@ -30,8 +30,6 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
@@ -67,7 +65,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Application getApplicationsByName(String userId, String applicationName, String groupId)
+    public Application getApplicationsByName(String userId, String applicationName, java.lang
+            .String groupId)
             throws APIManagementException {
         Application application = null;
         try {
@@ -127,12 +126,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     public String addApplication(Application application) throws APIManagementException {
         String applicationUuid = null;
         try {
-            if (getApplicationDAO().isApplicationExists(application.getName(), application.getSubscriber().getName(),
+            if (getApplicationDAO().isApplicationExists(application.getName(), application.getCreatedUser(),
                     application.getGroupId())) {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
-            applicationUuid = getApplicationDAO().addApplication(application);
+            getApplicationDAO().addApplication(application);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
         }

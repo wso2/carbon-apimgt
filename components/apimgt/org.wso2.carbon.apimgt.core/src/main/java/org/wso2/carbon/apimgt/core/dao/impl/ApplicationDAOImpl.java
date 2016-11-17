@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 
 import java.sql.Connection;
@@ -31,7 +30,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.UUID;
 
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -50,12 +48,29 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplication(String appID) throws SQLException {
-        final String getAppQuery = "";
+        final String getAppQuery = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
+        "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
+        "LAST_UPDATED_TIME, UUID FROM AM_APPLICATION";
+        Application application = null;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getAppQuery)) {
-            constructApplicationFromResultSet(ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String createdUser = rs.getString("CREATED_BY");
+                    application = new Application(rs.getString("NAME"), createdUser);
+                    application.setUUID(rs.getString("UUID"));
+                    application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                    application.setDescription(rs.getString("DESCRIPTION"));
+                    application.setGroupId(rs.getString("GROUP_ID"));
+                    application.setStatus(rs.getString("APPLICATION_STATUS"));
+                    application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+                    application.setUpdatedUser(rs.getString("UPDATED_BY"));
+                    application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+                    application.setTier(getSubscriptionTierName(conn, rs.getInt("APPLICATION_POLICY_ID")));
+                }
+            }
         }
-        return null;
+        return application;
     }
 
     /**
@@ -134,12 +149,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @throws SQLException
      */
     @Override
-    public String addApplication(Application application) throws SQLException {
+    public void addApplication(Application application) throws SQLException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
                              "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
                              "LAST_UPDATED_TIME, UUID) VALUES (?, (SELECT POLICY_ID FROM AM_POLICY_APPLICATION " +
                              "WHERE NAME = ?),?,?,?,?,?,?,?,?,?)";
-        final String applicationUuid = UUID.randomUUID().toString();
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
             conn.setAutoCommit(false);
@@ -155,15 +169,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
 
             ps.setString(6, application.getGroupId());
-            ps.setString(7, application.getSubscriber().getName());
-            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-            ps.setString(9, application.getSubscriber().getName());
-            ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
-            ps.setString(11, applicationUuid);
+            ps.setString(7, application.getCreatedUser());
+            ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
+            ps.setString(9, application.getCreatedUser());
+            ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
+            ps.setString(11, application.getUUID());
             ps.executeUpdate();
             conn.commit();
         }
-        return applicationUuid;
     }
 
     /**
@@ -179,7 +192,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
                                 "(SELECT POLICY_ID FROM AM_POLICY_APPLICATION WHERE NAME=?), " +
                                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
-                                "LAST_UPDATED_TIME=?)";
+                                "LAST_UPDATED_TIME=?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
             conn.setAutoCommit(false);
@@ -189,8 +202,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(4, updatedApp.getDescription());
             ps.setString(5, updatedApp.getStatus());
             ps.setString(6, updatedApp.getGroupId());
-            ps.setString(7, updatedApp.getSubscriber().getName());
-            ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            ps.setString(7, updatedApp.getUpdatedUser());
+            ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
             ps.executeUpdate();
             conn.commit();
         }
@@ -204,7 +217,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public void deleteApplication(String appID) throws SQLException {
-
+        final String query = "DELETE FROM AM_APPLICATION WHERE UUID = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement statement = conn.prepareStatement(query)) {
+            conn.setAutoCommit(false);
+            statement.setString(1, appID);
+            statement.execute();
+            conn.commit();
+        }
     }
 
     /**
@@ -242,18 +262,16 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return new Application[0];
     }
 
-    private Application constructApplicationFromResultSet(PreparedStatement ps) throws SQLException {
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Subscriber subscriber = new Subscriber(rs.getString("CREATED_BY"));
-                Application application = new Application(rs.getString("NAME"), subscriber);
-                application.setUUID(rs.getString("UUID"));
-                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                application.setDescription(rs.getString("DESCRIPTION"));
-                application.setGroupId(rs.getString("GROUP_ID"));
-                application.setStatus(rs.getString("APPLICATION_STATUS"));
-                application.setTier(rs.getString("APPLICATION_POLICY_ID"));
-                return application;
+    private String getSubscriptionTierName(Connection connection, int policyID) throws SQLException {
+        final String query = "SELECT NAME FROM AM_POLICY_APPLICATION WHERE POLICY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, policyID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("NAME");
+                }
             }
         }
         return null;
