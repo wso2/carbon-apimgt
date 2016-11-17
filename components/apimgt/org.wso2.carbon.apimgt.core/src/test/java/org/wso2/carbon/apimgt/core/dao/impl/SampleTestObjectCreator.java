@@ -37,14 +37,14 @@ import java.util.UUID;
 public class SampleTestObjectCreator {
 
     static API.APIBuilder createDefaultAPI() {
-        List<java.lang.String> transport = new ArrayList<>();
+        List<String> transport = new ArrayList<>();
         transport.add("http");
         transport.add("https");
 
-        List<java.lang.String> tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("climate");
 
-        List<java.lang.String> policies = new ArrayList<>();
+        List<String> policies = new ArrayList<>();
         policies.add("Gold");
         policies.add("Silver");
         policies.add("Bronze");
@@ -113,14 +113,14 @@ public class SampleTestObjectCreator {
     }
 
     static API.APIBuilder createAlternativeAPI() {
-        List<java.lang.String> transport = new ArrayList<>();
+        List<String> transport = new ArrayList<>();
         transport.add("http");
 
-        List<java.lang.String> tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("food");
         tags.add("beverage");
 
-        List<java.lang.String> policies = new ArrayList<>();
+        List<String> policies = new ArrayList<>();
         policies.add("Silver");
         policies.add("Bronze");
 

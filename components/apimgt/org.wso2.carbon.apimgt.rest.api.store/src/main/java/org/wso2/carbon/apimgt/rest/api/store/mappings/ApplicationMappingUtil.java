@@ -84,13 +84,13 @@ public class ApplicationMappingUtil {
      * @param offset starting index
      * @param size max offset
      */
-    public static void setPaginationParams(ApplicationListDTO applicationListDTO, java.lang.String groupId, int limit, int offset,
+    public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
                                            int size) {
 
-        Map<java.lang.String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
 
-        java.lang.String paginatedPrevious = "";
-        java.lang.String paginatedNext = "";
+        String paginatedPrevious = "";
+        String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil

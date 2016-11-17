@@ -44,20 +44,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
-    public APIStoreImpl(java.lang.String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+    public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO,new APILifeCycleManagerImpl());
     }
 
     @Override
-    public Map<java.lang.String, Object> getAllAPIsByStatus(int offset, int limit, java.lang.String[] status, boolean returnAPITags)
+    public Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
             throws APIManagementException {
 
         return null;
     }
 
     @Override
-    public Application getApplicationsByName(java.lang.String userId, java.lang.String applicationName, java.lang
+    public Application getApplicationsByName(String userId, String applicationName, java.lang
             .String groupId)
             throws APIManagementException {
         Application application = null;
@@ -71,7 +71,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public Application[] getApplications(String subscriber, java.lang.String groupingId)
+    @Override public Application[] getApplications(String subscriber, String groupingId)
             throws APIManagementException {
         return new Application[0];
     }
@@ -80,18 +80,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     }
 
-    @Override public Map<java.lang.String, Object> requestApprovalForApplicationRegistration(java.lang.String userId,
-                                                                                             java.lang.String applicationName, java.lang.String tokenType, java.lang.String callbackUrl, java.lang.String[] allowedDomains, java.lang.String validityTime,
-                                                                                             java.lang.String tokenScope, java.lang.String groupingId, java.lang.String jsonString) throws APIManagementException {
+    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+                                                                                             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
+                                                                                             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
     }
 
-    public APIResults searchAPIs(java.lang.String query, int offset, int limit)
+    public APIResults searchAPIs(String query, int offset, int limit)
             throws APIManagementException {
 
         APIResults apiResults = null;
         try {
-            List<java.lang.String> roles = new ArrayList<>(); // TODO -- roles list
+            List<String> roles = new ArrayList<>(); // TODO -- roles list
             apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit,
                     roles);
         } catch (SQLException e) {
@@ -106,7 +106,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     }
 
-    @Override public java.lang.String addApplication(Application application, java.lang.String userId) throws APIManagementException {
+    @Override public String addApplication(Application application, String userId) throws APIManagementException {
         return null;
     }
 

@@ -55,7 +55,7 @@ import java.util.UUID;
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    public APIPublisherImpl(java.lang.String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+    public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO,apiLifecycleManager);
     }
@@ -81,7 +81,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to get set of API
      */
     @Override
-    public List<API> getAPIsByProvider(java.lang.String providerName) throws APIManagementException {
+    public List<API> getAPIsByProvider(String providerName) throws APIManagementException {
         try {
             getApiDAO().getAPI(providerName); //todo: call correct doa method
         } catch (SQLException e) {
@@ -98,7 +98,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
     @Override
-    public Set<String> getSubscribersOfProvider(java.lang.String providerId) throws APIManagementException {
+    public Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException {
         return null;
     }
 
@@ -110,7 +110,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to get Provider
      */
     @Override
-    public Provider getProvider(java.lang.String providerName) throws APIManagementException {
+    public Provider getProvider(String providerName) throws APIManagementException {
         return null;
     }
 
@@ -135,7 +135,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     @Override
-    public long getAPISubscriptionCountByAPI(java.lang.String id) throws APIManagementException {
+    public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
        long subscriptionCount = 0;
         try {
             subscriptionCount =  getApiSubscriptionDAO().getAPISubscriptionCountByAPI(id);
@@ -146,7 +146,7 @@ import java.util.UUID;
     }
 
     @Override
-    public java.lang.String getDefaultVersion(java.lang.String apiid) throws APIManagementException {
+    public String getDefaultVersion(String apiid) throws APIManagementException {
         return null;
     }
 
@@ -157,7 +157,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to add API
      */
     @Override
-    public java.lang.String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
+    public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         API createdAPI;
         if (apiBuilder.getId() == null){
@@ -219,7 +219,7 @@ import java.util.UUID;
                     log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
                 }
             } else {
-                java.lang.String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have status " +
+                String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have status " +
                                        "change";
                 if (log.isDebugEnabled()) {
                     log.debug(msg);
@@ -243,7 +243,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public void updateAPIStatus(java.lang.String apiId, java.lang.String status, boolean
+    public void updateAPIStatus(String apiId, String status, boolean
             deprecateOldVersions, boolean makeKeysForwardCompatible) throws APIManagementException {
         API originalAPI = null;
         try {
@@ -284,8 +284,8 @@ import java.util.UUID;
      *                                the new version of the API
      */
     @Override
-    public java.lang.String createNewAPIVersion(java.lang.String apiId, java.lang.String newVersion) throws APIManagementException {
-        java.lang.String newVersionedId = null;
+    public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
+        String newVersionedId = null;
         LifecycleState lifecycleState = null;
         try {
             API api = getApiDAO().getAPI(apiId);
@@ -323,7 +323,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(java.lang.String apiId, DocumentInfo documentation) throws APIManagementException {
+    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
         try {
             getApiDAO().addDocumentationInfo(apiId, documentation);
         } catch (SQLException e) {
@@ -342,8 +342,8 @@ import java.util.UUID;
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void addDocumentationWithFile(java.lang.String apiId, DocumentInfo documentation, java.lang.String filename, InputStream content,
-                                         java.lang.String contentType) throws APIManagementException {
+    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
+                                         String contentType) throws APIManagementException {
         try {
             getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
         } catch (SQLException e) {
@@ -358,7 +358,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to remove documentation
      */
     @Override
-    public void removeDocumentation(java.lang.String docId) throws APIManagementException {
+    public void removeDocumentation(String docId) throws APIManagementException {
         try {
             getApiDAO().removeDocumentation(docId);
         } catch (SQLException e) {
@@ -374,7 +374,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public boolean checkIfAPIExists(java.lang.String apiId) throws APIManagementException {
+    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
        boolean status = false;
         try {
             if (getApiDAO().getAPISummary(apiId) == null) {
@@ -396,7 +396,7 @@ import java.util.UUID;
      * @param text              @throws APIManagementException if failed to add the document as a resource to registry
      */
     @Override
-    public void addDocumentationContent(API api, java.lang.String documentationName, java.lang.String text) throws APIManagementException {
+    public void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException {
 
     }
 
@@ -408,7 +408,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to update docs
      */
     @Override
-    public void updateDocumentation(java.lang.String apiId, DocumentInfo documentation) throws APIManagementException {
+    public void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException {
 
     }
 
@@ -420,7 +420,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to copy docs
      */
     @Override
-    public void copyAllDocumentation(java.lang.String apiId, java.lang.String toVersion) throws APIManagementException {
+    public void copyAllDocumentation(String apiId, String toVersion) throws APIManagementException {
 
     }
 
@@ -432,7 +432,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to copy docs
      */
     @Override
-    public List<LifeCycleEvent> getLifeCycleEvents(java.lang.String apiId) throws APIManagementException {
+    public List<LifeCycleEvent> getLifeCycleEvents(String apiId) throws APIManagementException {
         List<LifeCycleEvent> lifeCycleEventList = new ArrayList<>();
         try {
             API apiSummary = getApiDAO().getAPISummary(apiId);
@@ -460,7 +460,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to remove the API
      */
     @Override
-    public void deleteAPI(java.lang.String identifier) throws APIManagementException {
+    public void deleteAPI(String identifier) throws APIManagementException {
         try {
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
@@ -489,11 +489,11 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public APIResults searchAPIs(Integer limit, Integer offset, java.lang.String query) throws APIManagementException {
+    public APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
         APIResults apiResults = null;
         try {
-            List<java.lang.String> roles = new ArrayList<>();
+            List<String> roles = new ArrayList<>();
             if (query != null && !query.isEmpty()) {
                 apiResults = getApiDAO().searchAPIsForRoles(query, offset, limit, roles);
             } else {
@@ -515,7 +515,7 @@ import java.util.UUID;
      * @throws APIManagementException If failed to update subscription status
      */
     @Override
-    public void updateSubscription(java.lang.String apiId, java.lang.String subStatus, int appId) throws APIManagementException {
+    public void updateSubscription(String apiId, String subStatus, int appId) throws APIManagementException {
 
     }
 
@@ -527,7 +527,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public void saveSwagger20Definition(java.lang.String apiId, java.lang.String jsonText) throws APIManagementException {
+    public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
 
     }
 
@@ -538,7 +538,7 @@ import java.util.UUID;
      * @param action Action which need to execute from registry lifecycle
      */
     @Override
-    public boolean changeLifeCycleStatus(java.lang.String string, java.lang.String action) throws APIManagementException {
+    public boolean changeLifeCycleStatus(String string, String action) throws APIManagementException {
         return false;
     }
 
@@ -550,7 +550,7 @@ import java.util.UUID;
      * @param checkItemValue Value of the checklist item
      */
     @Override
-    public boolean changeAPILCCheckListItems(java.lang.String string, int checkItem, boolean checkItemValue)
+    public boolean changeAPILCCheckListItems(String string, int checkItem, boolean checkItemValue)
             throws APIManagementException {
         return false;
     }
@@ -567,7 +567,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public boolean checkAndChangeAPILCCheckListItem(java.lang.String string, java.lang.String checkItemName, boolean
+    public boolean checkAndChangeAPILCCheckListItem(String string, String checkItemName, boolean
             checkItemValue) throws APIManagementException {
         return false;
     }
@@ -579,7 +579,7 @@ import java.util.UUID;
      * @return Map<String,Object> a map with lifecycle data
      */
     @Override
-    public Map<java.lang.String, Object> getAPILifeCycleData(java.lang.String apiId) throws APIManagementException {
+    public Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException {
         return null;
     }
 
@@ -593,7 +593,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public Map<java.lang.String, java.lang.String> propergateAPIStatusChangeToGateways(java.lang.String identifier, APIStatus newStatus)
+    public Map<String, String> propergateAPIStatusChangeToGateways(String identifier, APIStatus newStatus)
             throws APIManagementException {
         return null;
     }
@@ -607,7 +607,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public boolean updateAPIForStateChange(java.lang.String identifier, APIStatus newStatus) throws
+    public boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws
             APIManagementException {
         return false;
     }
@@ -620,7 +620,7 @@ import java.util.UUID;
      * @throws APIManagementException
      */
     @Override
-    public java.lang.String getAPILifeCycleStatus(java.lang.String string) throws APIManagementException {
+    public String getAPILifeCycleStatus(String string) throws APIManagementException {
         return null;
     }
 
@@ -633,7 +633,7 @@ import java.util.UUID;
      * @throws APIManagementException if failed to get Apis
      */
     @Override
-    public Map<java.lang.String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException {
+    public Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException {
         return null;
     }
 }
