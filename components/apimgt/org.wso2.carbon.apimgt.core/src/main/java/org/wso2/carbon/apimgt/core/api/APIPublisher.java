@@ -161,7 +161,7 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to add the file
      */
     void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                String contentType) throws APIManagementException;
+                                  String contentType) throws APIManagementException;
 
     /**
      * Removes a given documentation

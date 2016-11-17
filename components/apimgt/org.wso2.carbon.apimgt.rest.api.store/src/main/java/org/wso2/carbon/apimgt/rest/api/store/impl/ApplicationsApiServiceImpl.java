@@ -11,22 +11,20 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import javax.ws.rs.core.Response;
-
-import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;

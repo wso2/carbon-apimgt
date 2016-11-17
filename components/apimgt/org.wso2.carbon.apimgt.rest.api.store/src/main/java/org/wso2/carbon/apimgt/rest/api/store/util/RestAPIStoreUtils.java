@@ -44,7 +44,7 @@ public class RestAPIStoreUtils {
             //if groupId is null or empty, it is not a shared app
             if (StringUtils.isEmpty(application.getGroupId())) {
                 //if the application is not shared, its subscriber and the current logged in user must be same
-                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
+                if (application.getCreatedUser() != null && application.getCreatedUser().equals(username)) {
                     return true;
                 }
             } else {
