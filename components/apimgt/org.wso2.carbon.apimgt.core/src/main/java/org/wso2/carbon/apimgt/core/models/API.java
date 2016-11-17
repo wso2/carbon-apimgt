@@ -768,6 +768,11 @@ public final class API {
         public LocalDateTime getLastUpdatedTime() {
             return lastUpdatedTime;
         }
+
+        public Set<URITemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
     }
 
 }

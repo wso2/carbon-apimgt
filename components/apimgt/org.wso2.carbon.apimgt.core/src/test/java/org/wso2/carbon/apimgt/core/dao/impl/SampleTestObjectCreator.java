@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Environment;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -154,7 +153,7 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        return new API.APIBuilder("Adam", "restaurantAPI", "0.9").
+        API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("yummy").
                 description("Get Food & Beverage Info").
@@ -204,17 +203,42 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
                 lastUpdatedTime(LocalDateTime.now());
+
+        try {
+            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return apiBuilder;
     }
 
     static Application createDefaultApplication(){
-        Subscriber subscriber = new Subscriber("admin");
-        Application application = new Application("TestApp", subscriber);
+        //created by admin
+        Application application = new Application("TestApp", "admin");
         application.setUUID(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
-        application.setStatus("APPROVED");
+        application.setStatus("CREATED");
         application.setTier("gold");
+        application.setCreatedTime(LocalDateTime.now());
+        application.setUpdatedUser("admin");
+        application.setUpdatedTime(LocalDateTime.now());
+        return application;
+    }
+
+    static Application createAlternativeApplication(){
+        //created by admin and updated by admin2
+        Application application = new Application("TestApp2", "admin");
+        application.setUUID(UUID.randomUUID().toString());
+        application.setCallbackUrl("http://localhost/myapp2");
+        application.setDescription("This is test application 2");
+        application.setGroupId("groupx2");
+        application.setStatus("APPROVED");
+        application.setTier("silver");
+        application.setUpdatedUser("admin2");
+        application.setUpdatedTime(LocalDateTime.now());
         return application;
     }
 }

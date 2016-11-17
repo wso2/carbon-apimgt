@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
@@ -63,7 +62,7 @@ public interface APIPublisher extends APIManager {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
-    Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException;
+    Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException;
 
     /**
      * get details of provider
@@ -81,7 +80,7 @@ public interface APIPublisher extends APIManager {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get Subscribers
      */
-    Set<Subscriber> getSubscribersOfAPI(API identifier) throws APIManagementException;
+    Set<String> getSubscribersOfAPI(API identifier) throws APIManagementException;
 
     /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
@@ -162,7 +161,7 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to add the file
      */
     void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                String contentType) throws APIManagementException;
+                                  String contentType) throws APIManagementException;
 
     /**
      * Removes a given documentation

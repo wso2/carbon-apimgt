@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -98,7 +97,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
+    Application[] getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -124,7 +123,8 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId, String jsonString) throws APIManagementException;
+                                                                            String tokenType, java.lang
+                                                                                    .String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+                                                                            String groupingId, String jsonString) throws APIManagementException;
 
 }

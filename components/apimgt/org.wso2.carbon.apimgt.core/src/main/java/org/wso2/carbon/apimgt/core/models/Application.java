@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.Set;
  */
 public final class Application {
     private String name;
-    private Subscriber subscriber;
     private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
     private String groupId;
     private String uuid;
@@ -39,20 +39,60 @@ public final class Application {
     private String tier;
     private String status;
     private String callbackUrl;
+    private String createdUser;
+    private LocalDateTime createdTime;
+    private String updatedUser;
+    private LocalDateTime updatedTime;
     private List<APIKey> keys = new ArrayList<APIKey>();
 
 
-    public Application(String name, Subscriber subscriber) {
+    public Application(String name, String createdUser) {
         this.name = name;
-        this.subscriber = subscriber;
+        this.createdUser = createdUser;
     }
 
     public String getName() {
         return name;
     }
 
-    public Subscriber getSubscriber() {
-        return subscriber;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getCreatedUser() {
+        return createdUser;
+    }
+
+    public void setCreatedUser(String createdUser) {
+        this.createdUser = createdUser;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdatedUser() {
+        return updatedUser;
+    }
+
+    public void setUpdatedUser(String updatedUser) {
+        this.updatedUser = updatedUser;
+    }
+
+    public LocalDateTime getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(LocalDateTime updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
     public Set<APISubscription> getAPISubscriptions() {
@@ -61,26 +101,6 @@ public final class Application {
 
     public void addAPISubscriptions(Set<APISubscription> apiSubscriptions) {
         this.apiSubscriptions.addAll(apiSubscriptions);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Application that = (Application) o;
-        return name.equals(that.name) && subscriber.equals(that.subscriber);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + subscriber.hashCode();
-        return result;
     }
 
     public String getUUID() {
@@ -137,5 +157,25 @@ public final class Application {
 
     public void addKey(APIKey key) {
         keys.add(key);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Application that = (Application) o;
+        return name.equals(that.name) && createdUser.equals(that.createdUser);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + createdUser.hashCode();
+        return result;
     }
 }

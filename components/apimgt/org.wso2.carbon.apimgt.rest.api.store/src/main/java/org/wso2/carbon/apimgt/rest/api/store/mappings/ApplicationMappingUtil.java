@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
@@ -67,7 +66,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
         applicationDTO.setGroupId(application.getGroupId());
-        applicationDTO.setSubscriber(application.getSubscriber().getName());
+        applicationDTO.setSubscriber(application.getCreatedUser());
         List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
         for(APIKey apiKey : application.getKeys()) {
             ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
@@ -86,7 +85,7 @@ public class ApplicationMappingUtil {
      * @param size max offset
      */
     public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
-            int size) {
+                                           int size) {
 
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
 
@@ -116,14 +115,13 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
-        applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
+        applicationInfoDTO.setSubscriber(application.getCreatedUser());
         return applicationInfoDTO;
     }
 
-    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String username) {
+    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String createdUser) {
         //subscriber field of the body is not honored
-        Subscriber subscriber = new Subscriber(username);
-        Application application = new Application(applicationDTO.getName(), subscriber);
+        Application application = new Application(applicationDTO.getName(), createdUser);
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());

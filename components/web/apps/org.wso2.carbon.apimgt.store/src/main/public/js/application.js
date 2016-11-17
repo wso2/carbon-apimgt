@@ -3,8 +3,8 @@ $(window).load(function () {
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function () {
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer e2994e30-749b-3b54-a294-1eab85abf0f7", "header"));
-            client["Application (Collection)"].get_applications({"responseContentType": 'application/json'},
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer fe004415-4986-3230-8030-683885de3f23", "header"));
+            client["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (data) {
 
                     $.ajax({
@@ -19,6 +19,7 @@ $(window).load(function () {
 
                                 context = {
                                     "name": data.obj.list[i].name,
+                                    "applicationId": data.obj.list[i].applicationId,
                                     "tier": data.obj.list[i].throttlingTier,
                                     "status": data.obj.list[i].status,
                                     "subscriptions": data.obj.list[i].subscriptions || 0
@@ -538,39 +539,7 @@ $("#application-actions").each(function(){
         ],
     });
 
-    $('#application-table').on( 'click', 'a.deleteApp', function () {
-    	var appName = $(this).attr("data-id");
-    	var apiCount = $(this).attr("data-count");
-    	$('#messageModal').html($('#confirmation-data').html());
-        if(apiCount > 0){
-            $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
-            $('#messageModal div.modal-body').text('\n\n' +i18n.t("This application is subscribed to ")
-                + apiCount + i18n.t(" APIs. ") +i18n.t("Are you sure you want to remove the application ")+'"' + appName + '"'+i18n.t("? This will cancel all the existing subscriptions and keys associated with the application. "));
-        } else {
-            $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
-            $('#messageModal div.modal-body').text('\n\n'+i18n.t("Are you sure you want to remove the application ")+'"' + appName + '" ?');
-        }
-        $('#messageModal a.btn-primary').html(i18n.t("Yes"));
-        $('#messageModal a.btn-other').html(i18n.t("No"));
-        $('#messageModal a.btn-primary').click(function() {
-            jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
-                action:"removeApplication",
-                application:appName
-            }, function (result) {
-                if (!result.error) {
-                	window.location.reload(true);
-                } else {
-                    jagg.message({content:result.message,type:"error"});
-                }
-            }, "json");
-        });
-        $('#messageModal a.btn-other').click(function() {
-            window.location.reload(true);
-        });
-        $('#messageModal').modal();
 
-
-    });
 });
 
 $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
