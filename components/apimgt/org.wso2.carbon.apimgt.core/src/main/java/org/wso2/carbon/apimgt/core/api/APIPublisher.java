@@ -22,12 +22,11 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.APIResults;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.io.InputStream;
 import java.util.List;
@@ -55,7 +54,7 @@ public interface APIPublisher extends APIManager {
      * @return set of APIs
      * @throws APIManagementException if failed to get set of API
      */
-    List<API> getAPIsByProvider(String providerName) throws APIManagementException;
+    List<API> getAPIsByProvider(java.lang.String providerName) throws APIManagementException;
 
     /**
      * Get a list of all the consumers for all APIs
@@ -64,7 +63,7 @@ public interface APIPublisher extends APIManager {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
-    Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException;
+    Set<String> getSubscribersOfProvider(java.lang.String providerId) throws APIManagementException;
 
     /**
      * get details of provider
@@ -73,7 +72,7 @@ public interface APIPublisher extends APIManager {
      * @return Provider
      * @throws APIManagementException if failed to get Provider
      */
-    Provider getProvider(String providerName) throws APIManagementException;
+    Provider getProvider(java.lang.String providerName) throws APIManagementException;
 
     /**
      * Returns full list of Subscribers of an API
@@ -82,7 +81,7 @@ public interface APIPublisher extends APIManager {
      * @return Set<Subscriber>
      * @throws APIManagementException if failed to get Subscribers
      */
-    Set<Subscriber> getSubscribersOfAPI(API identifier) throws APIManagementException;
+    Set<String> getSubscribersOfAPI(API identifier) throws APIManagementException;
 
     /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
@@ -91,9 +90,9 @@ public interface APIPublisher extends APIManager {
      * @return Set<APISubscriptionCount>
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
-    long getAPISubscriptionCountByAPI(String id) throws APIManagementException;
+    long getAPISubscriptionCountByAPI(java.lang.String id) throws APIManagementException;
 
-    String getDefaultVersion(String apiid) throws APIManagementException;
+    java.lang.String getDefaultVersion(java.lang.String apiid) throws APIManagementException;
 
     /**
      * Adds a new API to the Store
@@ -101,7 +100,7 @@ public interface APIPublisher extends APIManager {
      * @param apiBuilder API
      * @throws APIManagementException if failed to add API
      */
-    String addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
+    java.lang.String addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
      * @param api
@@ -132,8 +131,8 @@ public interface APIPublisher extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    void updateAPIStatus(String api, String status, boolean deprecateOldVersions,
-                            boolean makeKeysForwardCompatible)
+    void updateAPIStatus(java.lang.String api, java.lang.String status, boolean deprecateOldVersions,
+                         boolean makeKeysForwardCompatible)
             throws APIManagementException;
 
 
@@ -145,7 +144,7 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
+    java.lang.String createNewAPIVersion(java.lang.String apiId, java.lang.String newVersion) throws APIManagementException;
 
     /**
      * Attach Documentation (without content) to an API
@@ -154,7 +153,7 @@ public interface APIPublisher extends APIManager {
      * @param documentation Documentat Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException;
+    void addDocumentationInfo(java.lang.String apiId, DocumentInfo documentation) throws APIManagementException;
 
     /**
      * Add a document (of source type FILE) with a file
@@ -166,8 +165,8 @@ public interface APIPublisher extends APIManager {
      * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
-    void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                String contentType) throws APIManagementException;
+    void addDocumentationWithFile(java.lang.String apiId, DocumentInfo documentation, java.lang.String filename, InputStream content,
+                                  java.lang.String contentType) throws APIManagementException;
 
     /**
      * Removes a given documentation
@@ -175,7 +174,7 @@ public interface APIPublisher extends APIManager {
      * @param docId   Document Id
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(String docId) throws APIManagementException;
+    void removeDocumentation(java.lang.String docId) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry
@@ -184,7 +183,7 @@ public interface APIPublisher extends APIManager {
      * @return boolean result
      * @throws APIManagementException
      */
-    boolean checkIfAPIExists(String apiId) throws APIManagementException;
+    boolean checkIfAPIExists(java.lang.String apiId) throws APIManagementException;
 
     /**
      * This method used to save the documentation content
@@ -194,7 +193,7 @@ public interface APIPublisher extends APIManager {
      * @param text              content of the inline documentation
      * @throws APIManagementException if failed to add the document as a resource to registry
      */
-    void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException;
+    void addDocumentationContent(API api, java.lang.String documentationName, java.lang.String text) throws APIManagementException;
 
     /**
      * Updates a given documentation
@@ -203,7 +202,7 @@ public interface APIPublisher extends APIManager {
      * @param documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
+    void updateDocumentation(java.lang.String apiId, DocumentInfo documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
@@ -212,7 +211,7 @@ public interface APIPublisher extends APIManager {
      * @param apiId     id of the String
      * @throws APIManagementException if failed to copy docs
      */
-    void copyAllDocumentation(String apiId, String toVersion) throws APIManagementException;
+    void copyAllDocumentation(java.lang.String apiId, java.lang.String toVersion) throws APIManagementException;
 
     /**
      * Returns the details of all the life-cycle changes done per API.
@@ -221,7 +220,7 @@ public interface APIPublisher extends APIManager {
      * @return List of life-cycle events per given API
      * @throws APIManagementException if failed to copy docs
      */
-    List<LifeCycleEvent> getLifeCycleEvents(String apiId) throws APIManagementException;
+    List<LifeCycleEvent> getLifeCycleEvents(java.lang.String apiId) throws APIManagementException;
 
     /**
      * Delete an API
@@ -229,7 +228,7 @@ public interface APIPublisher extends APIManager {
      * @param identifier String
      * @throws APIManagementException if failed to remove the API
      */
-    void deleteAPI(String identifier) throws APIManagementException;
+    void deleteAPI(java.lang.String identifier) throws APIManagementException;
 
     /**
      *
@@ -239,7 +238,7 @@ public interface APIPublisher extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    APIResults searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
+    APIResults searchAPIs(Integer limit, Integer offset, java.lang.String query) throws APIManagementException;
 
     /**
      * Update the subscription status
@@ -249,7 +248,7 @@ public interface APIPublisher extends APIManager {
      * @param appId     Application Id              *
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String apiId, String subStatus, int appId) throws APIManagementException;
+    void updateSubscription(java.lang.String apiId, java.lang.String subStatus, int appId) throws APIManagementException;
 
 
     /**
@@ -259,7 +258,7 @@ public interface APIPublisher extends APIManager {
      * @param jsonText json text to be saved in the registry
      * @throws APIManagementException
      */
-    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
+    void saveSwagger20Definition(java.lang.String apiId, java.lang.String jsonText) throws APIManagementException;
 
 
     /**
@@ -268,7 +267,7 @@ public interface APIPublisher extends APIManager {
      * @param apiIdentifier apiIdentifier
      * @param action        Action which need to execute from registry lifecycle
      */
-    boolean changeLifeCycleStatus(String apiIdentifier, String action)
+    boolean changeLifeCycleStatus(java.lang.String apiIdentifier, java.lang.String action)
             throws APIManagementException;
 
     /**
@@ -278,7 +277,7 @@ public interface APIPublisher extends APIManager {
      * @param checkItem      Order of the checklist item
      * @param checkItemValue Value of the checklist item
      */
-    boolean changeAPILCCheckListItems(String apiIdentifier, int checkItem, boolean checkItemValue)
+    boolean changeAPILCCheckListItems(java.lang.String apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException;
 
     /**
@@ -292,7 +291,7 @@ public interface APIPublisher extends APIManager {
      * @return boolean value representing success not not
      * @throws APIManagementException
      */
-    boolean checkAndChangeAPILCCheckListItem(String apiIdentifier, String checkItemName, boolean checkItemValue)
+    boolean checkAndChangeAPILCCheckListItem(java.lang.String apiIdentifier, java.lang.String checkItemName, boolean checkItemValue)
             throws APIManagementException;
 
     /**
@@ -301,7 +300,7 @@ public interface APIPublisher extends APIManager {
      * @param apiId String
      * @return Map<String,Object> a map with lifecycle data
      */
-    Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException;
+    Map<java.lang.String, Object> getAPILifeCycleData(java.lang.String apiId) throws APIManagementException;
 
     /**
      * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
@@ -312,7 +311,7 @@ public interface APIPublisher extends APIManager {
      * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
      * @throws APIManagementException
      */
-    Map<String, String> propergateAPIStatusChangeToGateways(String identifier, APIStatus newStatus)
+    Map<java.lang.String, java.lang.String> propergateAPIStatusChangeToGateways(java.lang.String identifier, APIStatus newStatus)
             throws APIManagementException;
 
     /**
@@ -323,7 +322,7 @@ public interface APIPublisher extends APIManager {
      * @return boolean value representing success not not
      * @throws APIManagementException
      */
-    boolean updateAPIForStateChange(String identifier, APIStatus newStatus) throws APIManagementException;
+    boolean updateAPIForStateChange(java.lang.String identifier, APIStatus newStatus) throws APIManagementException;
 
     /**
      * Get the current lifecycle status of the api
@@ -332,7 +331,7 @@ public interface APIPublisher extends APIManager {
      * @return Current lifecycle status
      * @throws APIManagementException
      */
-    String getAPILifeCycleStatus(String apiIdentifier) throws APIManagementException;
+    java.lang.String getAPILifeCycleStatus(java.lang.String apiIdentifier) throws APIManagementException;
 
     /**
      * Get the paginated APIs from publisher
@@ -342,6 +341,6 @@ public interface APIPublisher extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to get Apis
      */
-    Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException;
+    Map<java.lang.String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException;
 
 }

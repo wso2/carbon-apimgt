@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APIResults;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public interface APIStore extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
-    Map<String, Object> getAllAPIsByStatus(int offset, int limit, String[] status, boolean returnAPITags)
+    Map<java.lang.String, Object> getAllAPIsByStatus(int offset, int limit, java.lang.String[] status, boolean returnAPITags)
             throws APIManagementException;
     
    
@@ -57,7 +56,7 @@ public interface APIStore extends APIManager {
      * @return APIResults
      * @throws APIManagementException
      */
-    APIResults searchAPIs(String query, int offset, int limit)
+    APIResults searchAPIs(java.lang.String query, int offset, int limit)
             throws APIManagementException;
 
     /**
@@ -75,7 +74,7 @@ public interface APIStore extends APIManager {
      * @return uuid of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-     String addApplication(Application application, String userId) throws APIManagementException;
+     java.lang.String addApplication(Application application, java.lang.String userId) throws APIManagementException;
 
 
     /**
@@ -86,7 +85,7 @@ public interface APIStore extends APIManager {
      * @return it will return Application.
      * @throws APIManagementException
      */
-    Application getApplicationsByName(String userId, String applicationName, String groupId)
+    Application getApplicationsByName(java.lang.String userId, java.lang.String applicationName, java.lang.String groupId)
             throws APIManagementException;
 
     /**
@@ -98,7 +97,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
+    Application[] getApplications(String subscriber, java.lang.String groupingId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -123,8 +122,9 @@ public interface APIStore extends APIManager {
      *
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId, String jsonString) throws APIManagementException;
+    Map<java.lang.String, Object> requestApprovalForApplicationRegistration(java.lang.String userId, java.lang.String applicationName,
+                                                                            java.lang.String tokenType, java.lang
+                                                                                    .String callbackUrl, java.lang.String[] allowedDomains, java.lang.String validityTime, java.lang.String tokenScope,
+                                                                            java.lang.String groupingId, java.lang.String jsonString) throws APIManagementException;
 
 }

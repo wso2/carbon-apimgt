@@ -103,7 +103,7 @@ public interface ApplicationDAO {
      * @throws SQLException
      *
      */
-    String addApplication(Application application) throws SQLException;
+    void addApplication(Application application) throws SQLException;
 
     /**
      * Update an existing Application

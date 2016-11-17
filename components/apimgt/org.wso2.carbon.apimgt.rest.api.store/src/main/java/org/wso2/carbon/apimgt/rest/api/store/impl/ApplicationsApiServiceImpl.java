@@ -8,26 +8,23 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.models.Tier;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import javax.ws.rs.core.Response;
-
-import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -38,9 +35,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince)
+    public Response applicationsApplicationIdDelete(java.lang.String applicationId, java.lang.String ifMatch, java
+            .lang.String ifUnmodifiedSince)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -61,9 +59,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-            String ifModifiedSince) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response applicationsApplicationIdGet(java.lang.String applicationId, java.lang.String accept, java.lang.String ifNoneMatch,
+
+                                                 java.lang.String ifModifiedSince) throws NotFoundException {
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -83,9 +82,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
-    @Override public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    @Override public Response applicationsApplicationIdPut(java.lang.String applicationId, ApplicationDTO body,
+                                                           java.lang.String contentType, java.lang.String ifMatch, java.lang.String ifUnmodifiedSince) throws NotFoundException {
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
@@ -119,21 +118,21 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response applicationsGenerateKeysPost(java.lang.String applicationId, ApplicationKeyGenerateRequestDTO body,
+                                                 java.lang.String contentType, java.lang.String ifMatch, java.lang.String ifUnmodifiedSince) throws NotFoundException {
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+                    java.lang.String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new java.lang.String[1]);
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-                    String jsonParams = jsonParamObj.toString();
-                    String tokenScopes = StringUtils.join(body.getScopes(), " ");
+                    java.lang.String jsonParams = jsonParamObj.toString();
+                    java.lang.String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
-                    Map<String, Object> keyDetails = apiConsumer
+                    Map<java.lang.String, Object> keyDetails = apiConsumer
                             .requestApprovalForApplicationRegistration(username, application.getName(),
                                     body.getKeyType().toString(), body.getCallbackUrl(), accessAllowDomainsArray,
                                     body.getValidityTime(), tokenScopes, application.getGroupId(), jsonParams);
@@ -160,13 +159,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
-    @Override public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
-            String ifNoneMatch) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    @Override public Response applicationsGet(java.lang.String query, Integer limit, Integer offset, java.lang.String accept,
+                                              java.lang.String ifNoneMatch) throws NotFoundException {
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
+        java.lang.String groupId = RestApiUtil.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -176,7 +175,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] allMatchedApps = new Application[0];
             if (StringUtils.isBlank(query)) {
-                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+                allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
                 Application application = apiConsumer.getApplicationsByName(username, query, groupId);
                 if (application != null) {
@@ -198,14 +197,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
-    @Override public Response applicationsPost(ApplicationDTO body, String contentType) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    @Override public Response applicationsPost(ApplicationDTO body, java.lang.String contentType) throws NotFoundException {
+        java.lang.String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
+            java.lang.String tierName = body.getThrottlingTier();
             if (tierName != null) {
-                Map<String, Tier> appTierMap = APIUtils.getTiers(APIConstants.TIER_APPLICATION_TYPE);
+                Map<java.lang.String, Tier> appTierMap = APIUtils.getTiers(APIConstants.TIER_APPLICATION_TYPE);
                 if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
                     RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
                 }
@@ -218,9 +217,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             //setting the proper groupId. This is not honored for now.
             // Later we can honor it by checking admin privileges of the user.
-            String groupId = RestApiUtil.getLoggedInUserGroupId();
+            java.lang.String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            String applicationUUID = apiConsumer.addApplication(application, username);
+            java.lang.String applicationUUID = apiConsumer.addApplication(application, username);
 
             //retrieves the created application and send as the response
             Application createdApplication = apiConsumer.getApplicationByUUID(applicationUUID);
