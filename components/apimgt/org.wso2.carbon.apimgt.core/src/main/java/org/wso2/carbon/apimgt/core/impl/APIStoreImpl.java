@@ -105,19 +105,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
-    @Override
-    public boolean isApplicationExists(String appName, String username, String groupId)
-            throws APIManagementException {
-        boolean isApplicationExists = false;
-        try {
-            isApplicationExists = getApplicationDAO().isApplicationExists(appName, username, groupId);
-        } catch (SQLException e) {
-            APIUtils.logAndThrowException(
-                    "Error occurred while checking whether application exists for applicationName- " + appName + " with groupId - " + groupId, e, log);
-        }
-        return isApplicationExists;
-    }
-
     public List<API> searchAPIs(String query, int offset, int limit)
             throws APIManagementException {
 
@@ -139,13 +126,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override
     public String addApplication(Application application) throws APIManagementException {
         String applicationUuid = null;
-//        if (isApplicationExists(application.getName(),application.getSubscriber().getName(), application.getGroupId())) {
-//            handleResourceAlreadyExistsException(
-//                    "An application already exists with a duplicate name - " + application.getName());
-//        }
-
         try {
-           applicationUuid = getApplicationDAO().addApplication(application);
+            if (getApplicationDAO().isApplicationExists(application.getName(), application.getSubscriber().getName(),
+                    application.getGroupId())) {
+                handleResourceAlreadyExistsException(
+                        "An application already exists with a duplicate name - " + application.getName());
+            }
+            applicationUuid = getApplicationDAO().addApplication(application);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
         }
