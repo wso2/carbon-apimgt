@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
@@ -220,9 +221,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifUnmodifiedSince
  ) throws NotFoundException {
         String username = "";
-        Map<String,Boolean> lifecycleChecklistMap;
+        Map<String,Boolean> lifecycleChecklistMap = new HashMap<>();
         try {
-            lifecycleChecklistMap = (JSONObject)new JSONParser().parse(lifecycleChecklist);
+            if (lifecycleChecklist != null){
+                lifecycleChecklistMap = (JSONObject)new JSONParser().parse(lifecycleChecklist);
+            }
             RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
             return Response.ok().build();
         } catch (APIManagementException | ParseException e) {

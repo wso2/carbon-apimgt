@@ -33,6 +33,10 @@ public final class URITemplate {
     private final String authType;
     private final String policy;
     private final Scope scope;
+    private final String templateId;
+    private final String produces;
+    private final String consumes;
+
 
     private URITemplate(URITemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
@@ -40,6 +44,9 @@ public final class URITemplate {
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
         scope = uriTemplateBuilder.scope;
+        templateId = uriTemplateBuilder.templateId;
+        produces = uriTemplateBuilder.produces;
+        consumes = uriTemplateBuilder.consumes;
     }
 
     public String getUriTemplate() {
@@ -67,6 +74,9 @@ public final class URITemplate {
         private String httpVerb;
         private String authType;
         private String policy;
+        private String templateId;
+        private String produces;
+        private String consumes;
         private Scope scope;
 
         public URITemplateBuilder() {
@@ -101,9 +111,33 @@ public final class URITemplate {
             return this;
         }
 
+        public URITemplateBuilder produces(String produces) {
+            this.produces = produces;
+            return this;
+        }
+        public URITemplateBuilder consumes(String consumes) {
+            this.consumes = consumes;
+            return this;
+        }
+        public URITemplateBuilder templateId(String templateId) {
+            this.templateId = templateId;
+            return this;
+        }
         public URITemplate build() {
 
             return new URITemplate(this);
         }
+    }
+
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public String getProduces() {
+        return produces;
+    }
+
+    public String getConsumes() {
+        return consumes;
     }
 }

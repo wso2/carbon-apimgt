@@ -31,6 +31,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.omg.PortableInterceptor.ServerRequestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -65,10 +66,36 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             URITemplate.URITemplateBuilder uriTemplateBuilder = new URITemplate.URITemplateBuilder();
             uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
             for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
-                Map<String, Object> vendorExtensions = operationEntry.getValue().getVendorExtensions();
-                uriTemplateBuilder.authType((String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE));
+                Operation operation = operationEntry.getValue();
+                Map<String, Object> vendorExtensions =operation.getVendorExtensions();
+                String authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                if (authType == null){
+                    uriTemplateBuilder.authType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                }else{
+                    uriTemplateBuilder.authType(authType);
+                }
+                String policy = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                if (policy == null){
+                    uriTemplateBuilder.policy(APIConstants.DEFAULT_API_POLICY);
+                }else{
+                    uriTemplateBuilder.policy(policy);
+                }
+                List<String> producesList = operation.getProduces();
+                if (producesList != null){
+                    String produceSeparatedString = "\"";
+                    produceSeparatedString += String.join("\",\"", producesList) + "\"";
+                    uriTemplateBuilder.produces(produceSeparatedString);
+                }
+                List<String> consumesList = operation.getConsumes();
+                if (consumesList != null){
+                    String consumesSeparatedString = "\"";
+                    consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
+                    uriTemplateBuilder.produces(consumesSeparatedString);
+                }
+                if (operation.getOperationId() != null){
+                    uriTemplateBuilder.templateId(operation.getOperationId());
+                }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
-                uriTemplateBuilder.policy((String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                 uriTemplateBuilder.scope(scopeMap.get(vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE)));
                 uriTemplateSet.add(uriTemplateBuilder.build());
             }
