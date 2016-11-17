@@ -652,11 +652,12 @@ APIDesigner.prototype.render_resource = function(container){
 
 
     if(container.find('.editor').length){
-        var textarea = container.find('.editor').ace({ theme: 'textmate', lang: 'javascript' ,fontSize: "10pt"});
-        var decorator = container.find('.editor').data('ace');
-        var aceInstance = decorator.editor.ace;
-        aceInstance.getSession().on('change', function(e) {   
-            operation[0]["x-mediation-script"] = aceInstance.getValue();
+        var textarea = container.find('.editor')[0];
+        var editor = CodeMirror.fromTextArea(textarea, {
+            lineNumbers: true,
+            mode: "javascript",
+            gutters: ["CodeMirror-lint-markers"],
+            lint: true
         });
     }
 
