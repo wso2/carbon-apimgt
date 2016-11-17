@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -68,7 +69,7 @@ public class APIStoreImplTestCase {
             List<API> apis = apiStore.searchAPIs("", 1, 2);
             Assert.assertNotNull(apis);
             verify(apiDAO, atLeastOnce()).searchAPIs("");
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -78,14 +79,14 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
         PowerMockito.mockStatic(APIUtils.class); // TODO
-        when(apiDAO.searchAPIs("select *")).thenThrow(SQLException.class);
+        when(apiDAO.searchAPIs("select *")).thenThrow(APIMgtDAOException.class);
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
         apiStore.searchAPIs("select *", 1, 2);
     }
     
     
     @Test(description = "Retrieve an API by status")
-    public void getAPIsByStatus() throws APIManagementException, SQLException {
+    public void getAPIsByStatus() throws APIManagementException, APIMgtDAOException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
         List<API> expectedAPIs = new ArrayList<API>();

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -269,8 +270,8 @@ public class SampleObjectCreator {
                 "    email: architecture@pizzashack.com\n" +
                 "    name: John Doe\n" +
                 "    url: 'http://www.pizzashack.com'\n" +
-                "  version: 1.0.0").createdTime(new Date()).lastUpdatedTime
-                (new Date());
+                "  version: 1.0.0").createdTime(LocalDateTime.now()).lastUpdatedTime
+                (LocalDateTime.now());
     }
 
     public static LifecycleState getMockLifecycleStateObject() {

@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -89,7 +90,7 @@ public abstract class AbstractAPIManager implements APIManager {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving API with id " + uuid, e, log);
         }
         return api;
@@ -119,7 +120,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isContextExist(String context) throws APIManagementException {
         try {
             return getApiDAO().isAPIContextExists(context);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't check API Context " + context + "Exists", e, log);
         }
         return false;
@@ -136,7 +137,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
             return getApiDAO().isAPINameExists(apiName);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't check API Name " + apiName + "Exists", e, log);
         }
         return false;
@@ -179,7 +180,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public DocumentInfoResults getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException {
         try {
             return getApiDAO().getDocumentsInfoList(apiId, offset, limit);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving documents", e, log);
         }
         return null;
@@ -195,7 +196,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public DocumentInfo getDocumentationSummary(String docId) throws APIManagementException {
         try {
             return getApiDAO().getDocumentInfo(docId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document", e, log);
         }
         return null;
@@ -211,7 +212,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public InputStream getDocumentationContent(String docId) throws APIManagementException {
         try {
             return getApiDAO().getDocumentContent(docId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return null;

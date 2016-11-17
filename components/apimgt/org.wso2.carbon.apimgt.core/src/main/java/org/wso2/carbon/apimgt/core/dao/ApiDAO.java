@@ -20,7 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,144 +39,144 @@ public interface ApiDAO {
      * Retrieve a given instance of an API
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    @CheckForNull API getAPI(String apiID) throws SQLException;
+    @CheckForNull API getAPI(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of an APISummary object
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
     @CheckForNull
-    API getAPISummary(String apiID) throws SQLException;
+    API getAPISummary(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs.
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIs() throws SQLException;
+    List<API> getAPIs() throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsForProvider(String providerName) throws SQLException;
+    List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsByStatus(List<String> statuses) throws SQLException;
+    List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs that match the given search criteria.
      * @param searchString The search string provided
      * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(String searchString) throws SQLException;
+    List<API> searchAPIs(String searchString) throws APIMgtDAOException;
 
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
      * exists
      * @param apiName Name of API
      * @return true if providerName, apiName, version combination already exists else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    boolean isAPINameExists(String apiName) throws SQLException;
+    boolean isAPINameExists(String apiName) throws APIMgtDAOException;
 
     /**
      * Checks if a given API Context already exists
      * @param contextName Name of API Context
      * @return true if contextName already exists else false
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    boolean isAPIContextExists(String contextName) throws SQLException;
+    boolean isAPIContextExists(String contextName) throws APIMgtDAOException;
 
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
      * @return The newly added {@link API} object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void addAPI(API api) throws SQLException;
+    void addAPI(API api) throws APIMgtDAOException;
 
     /**
      * Update an existing API
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @return The updated {@link API} object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    API updateAPI(String apiID, API substituteAPI) throws SQLException;
+    API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException;
 
     /**
      * Remove an existing API
      * @param apiID The UUID of the API that needs to be deleted
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void deleteAPI(String apiID) throws SQLException;
+    void deleteAPI(String apiID) throws APIMgtDAOException;
 
     /**
      * Get swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @return Swagger definition String
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    String getSwaggerDefinition(String apiID) throws SQLException;
+    String getSwaggerDefinition(String apiID) throws APIMgtDAOException;
 
     /**
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @param swaggerDefinition Swagger definition String
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws SQLException;
+    void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException;
 
     /**
      * Get image of a given API
      * @param apiID The UUID of the respective API
      * @return Image stream
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    InputStream getImage(String apiID) throws SQLException;
+    InputStream getImage(String apiID) throws APIMgtDAOException;
 
     /**
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @param image Image stream
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void updateImage(String apiID, OutputStream image) throws SQLException;
+    void updateImage(String apiID, OutputStream image) throws APIMgtDAOException;
 
     /**
      * Change the lifecycle status of a given API
      * @param apiID The UUID of the respective API
      * @param status The lifecycle status that the API must be set to
-     * @throws SQLException  if error occurs while accessing data layer
+     * @throws APIMgtDAOException  if error occurs while accessing data layer
      *
      */
-    void changeLifeCycleStatus(String apiID, String status) throws SQLException;
+    void changeLifeCycleStatus(String apiID, String status) throws APIMgtDAOException;
 
     /**
      * Return list of all Document info belonging to a given API. This method supports result pagination
@@ -181,35 +184,35 @@ public interface ApiDAO {
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
      * @return {@link DocumentInfoResults} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws SQLException;
+    DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws APIMgtDAOException;
 
     /**
      *
      * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} Document Info object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    DocumentInfo getDocumentInfo(String docID) throws SQLException;
+    DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException;
 
     /**
      *
      * @param docID The UUID of the respective Document
      * @return {@link InputStream} Document Info object
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    InputStream getDocumentContent(String docID) throws SQLException;
+    InputStream getDocumentContent(String docID) throws APIMgtDAOException;
 
     /**
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API
      * @param documentation Documentat Summary
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws SQLException;
+    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIMgtDAOException;
 
     /**
      * Add a document (of source type FILE) with a file
@@ -219,18 +222,18 @@ public interface ApiDAO {
      * @param filename      name of the file
      * @param content       content of the file as an Input Stream
      * @param contentType   content type of the file
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                  String contentType) throws SQLException;
+                                  String contentType) throws APIMgtDAOException;
 
     /**
      * Removes a given documentation
      *
      * @param id   Document Id
-     * @throws SQLException if error occurs while accessing data layer
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void removeDocumentation(String id) throws SQLException;
+    void removeDocumentation(String id) throws APIMgtDAOException;
 
     /**
      * used to deprecate older versions of the api
