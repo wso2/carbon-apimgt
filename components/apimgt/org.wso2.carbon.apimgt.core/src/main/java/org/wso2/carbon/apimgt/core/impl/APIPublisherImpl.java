@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
