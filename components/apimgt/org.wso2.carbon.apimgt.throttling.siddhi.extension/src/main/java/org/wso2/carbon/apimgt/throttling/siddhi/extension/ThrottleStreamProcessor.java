@@ -144,9 +144,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
             boolean sendEvents;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
-                if (expiredEventChunk.getFirst() != null) {
-                    scheduler.notifyAt(expireEventTime);
-                }
+                scheduler.notifyAt(expireEventTime);
                 sendEvents = true;
             } else {
                 sendEvents = false;

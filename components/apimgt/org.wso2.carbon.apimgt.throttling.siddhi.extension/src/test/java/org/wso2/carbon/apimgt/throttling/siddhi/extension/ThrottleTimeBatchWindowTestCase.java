@@ -34,6 +34,7 @@ public class ThrottleTimeBatchWindowTestCase {
     private int removeEventCount;
     private boolean eventArrived;
     private Event lastRemoveEvent;
+    private Event lastCurrentEvent;
 
 
     @Before
@@ -128,6 +129,51 @@ public class ThrottleTimeBatchWindowTestCase {
         Thread.sleep(10000);
         Assert.assertEquals(2, inEventCount);
         Assert.assertEquals(0.0d, lastRemoveEvent.getData()[1]);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
+
+    @Test
+    public void throttleTimeWindowBatchTest3() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from cseEventStream#throttler:timeBatch(1 min , 0) " +
+                       "select symbol,sum(price) as sumPrice,volume, expiryTimeStamp " +
+                       "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                    lastCurrentEvent = inEvents[inEvents.length - 1];
+                } else if(removeEvents != null){
+                    removeEventCount = removeEventCount + removeEvents.length;
+                    lastRemoveEvent = removeEvents[removeEvents.length - 1];
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        Thread.sleep(260000);
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertTrue("Event expiry time is not valid for the current batch" , (Long) (lastCurrentEvent.getData()[3]) >= System.currentTimeMillis());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
