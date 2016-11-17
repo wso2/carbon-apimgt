@@ -73,9 +73,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);
-        API apiFromDB = apiDAO.getAPI(substituteAPI.getId());
+        API apiFromDB = apiDAO.getAPI(api.getId());
 
         API expectedAPI = builder.provider(api.getProvider()).
+                id(api.getId()).
                 name(api.getName()).
                 version(api.getVersion()).
                 context(api.getContext()).

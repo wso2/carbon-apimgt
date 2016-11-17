@@ -51,8 +51,8 @@ import java.util.Set;
 public class ApiDAOImpl implements ApiDAO {
 
     //private final ApiDAOVendorSpecificStatements sqlStatements;
-    private static final String API_SUMMARY_SELECT = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "UUID, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
+    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
+            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
         //this.sqlStatements = sqlStatements;
@@ -68,8 +68,8 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public API getAPI(String apiID) throws APIMgtDAOException {
-        final String query = "SELECT API_ID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
-                "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
+        final String query = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
+                "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
                 "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME FROM AM_API WHERE UUID = ?";
@@ -204,7 +204,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE NAME = ?";
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
@@ -231,7 +231,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public boolean isAPIContextExists(String contextName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT API_ID FROM AM_API WHERE CONTEXT = ?";
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE CONTEXT = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
@@ -266,7 +266,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(addAPIQuery, new String[]{"api_id"})) {
+             PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
+            String apiPrimaryKey = api.getId();
             statement.setString(1, api.getProvider());
             statement.setString(2, api.getName());
             statement.setString(3, api.getContext());
@@ -276,7 +277,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(7, api.getVisibility().toString());
             statement.setBoolean(8, api.isResponseCachingEnabled());
             statement.setInt(9, api.getCacheTimeout());
-            statement.setString(10, api.getId());
+            statement.setString(10, apiPrimaryKey);
 
             BusinessInformation businessInformation = api.getBusinessInformation();
             statement.setString(11, businessInformation.getTechnicalOwner());
@@ -300,22 +301,16 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.execute();
 
-            try (ResultSet rs = statement.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int apiPrimaryKey = rs.getInt(1);
-
-                    if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                        addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
-                    }
-
-                    addWsdlURI(connection, apiPrimaryKey, api.getWsdlUri());
-                    addTagsMapping(connection, apiPrimaryKey, api.getTags());
-                    addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
-                    addTransports(connection, apiPrimaryKey, api.getTransport());
-                    addUrlMappings(connection,api.getUriTemplates(),apiPrimaryKey);
-                    addSubscriptionPolicies(connection,api.getPolicies(),apiPrimaryKey);
-                }
+            if (API.Visibility.RESTRICTED == api.getVisibility()) {
+                addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
             }
+
+            addWsdlURI(connection, apiPrimaryKey, api.getWsdlUri());
+            addTagsMapping(connection, apiPrimaryKey, api.getTags());
+            addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+            addTransports(connection, apiPrimaryKey, api.getTransport());
+            addUrlMappings(connection,api.getUriTemplates(),apiPrimaryKey);
+            addSubscriptionPolicies(connection,api.getPolicies(),apiPrimaryKey);
 
             connection.commit();
         } catch (SQLException e) {
@@ -334,70 +329,67 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
-                "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, UUID = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
+                "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ? " +
                 "WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            int apiPrimaryKey = getAPIPrimaryKey(connection, apiID);
-
             statement.setBoolean(1, substituteAPI.isDefaultVersion());
             statement.setString(2, substituteAPI.getDescription());
             statement.setString(3, substituteAPI.getVisibility().toString());
             statement.setBoolean(4, substituteAPI.isResponseCachingEnabled());
             statement.setInt(5, substituteAPI.getCacheTimeout());
-            statement.setString(6, substituteAPI.getId());
 
             BusinessInformation businessInformation = substituteAPI.getBusinessInformation();
-            statement.setString(7, businessInformation.getTechnicalOwner());
-            statement.setString(8, businessInformation.getTechnicalOwnerEmail());
-            statement.setString(9, businessInformation.getBusinessOwner());
-            statement.setString(10, businessInformation.getBusinessOwnerEmail());
+            statement.setString(6, businessInformation.getTechnicalOwner());
+            statement.setString(7, businessInformation.getTechnicalOwnerEmail());
+            statement.setString(8, businessInformation.getBusinessOwner());
+            statement.setString(9, businessInformation.getBusinessOwnerEmail());
 
             CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
-            statement.setBoolean(11, corsConfiguration.isEnabled());
-            statement.setString(12, String.join(",", corsConfiguration.getAllowOrigins()));
-            statement.setBoolean(13, corsConfiguration.isAllowCredentials());
-            statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
-            statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
+            statement.setBoolean(10, corsConfiguration.isEnabled());
+            statement.setString(11, String.join(",", corsConfiguration.getAllowOrigins()));
+            statement.setBoolean(12, corsConfiguration.isAllowCredentials());
+            statement.setString(13, String.join(",", corsConfiguration.getAllowHeaders()));
+            statement.setString(14, String.join(",", corsConfiguration.getAllowMethods()));
 
-            statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
-            statement.setString(17, apiID);
+            statement.setTimestamp(15, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
+            statement.setString(16, apiID);
 
             statement.execute();
 
-            deleteVisibleRoles(connection, apiPrimaryKey); // Delete current visible roles if they exist
+            deleteVisibleRoles(connection, apiID); // Delete current visible roles if they exist
 
             if (API.Visibility.RESTRICTED == substituteAPI.getVisibility()) {
-                addVisibleRole(connection, apiPrimaryKey, substituteAPI.getVisibleRoles());
+                addVisibleRole(connection, apiID, substituteAPI.getVisibleRoles());
             }
 
             String wsdlUri = substituteAPI.getWsdlUri();
             if (wsdlUri.isEmpty()) {
-                deleteWsdlURI(connection, apiPrimaryKey);
+                deleteWsdlURI(connection, apiID);
             }
             else {
-                if (getWsdlURI(connection, apiPrimaryKey).isEmpty()) {
-                    addWsdlURI(connection, apiPrimaryKey, wsdlUri);
+                if (getWsdlURI(connection, apiID).isEmpty()) {
+                    addWsdlURI(connection, apiID, wsdlUri);
                 }
                 else {
-                    updateWsdlURI(connection, apiPrimaryKey, wsdlUri);
+                    updateWsdlURI(connection, apiID, wsdlUri);
                 }
             }
 
-            deleteTransports(connection, apiPrimaryKey);
-            addTransports(connection, apiPrimaryKey, substituteAPI.getTransport());
+            deleteTransports(connection, apiID);
+            addTransports(connection, apiID, substituteAPI.getTransport());
 
-            deleteTagsMapping(connection, apiPrimaryKey); // Delete current tag mappings if they exist
-            addTagsMapping(connection, apiPrimaryKey, substituteAPI.getTags());
+            deleteTagsMapping(connection, apiID); // Delete current tag mappings if they exist
+            addTagsMapping(connection, apiID, substituteAPI.getTags());
 
-            updateAPIDefinition(connection, apiPrimaryKey, substituteAPI.getApiDefinition());
-            deleteSubscriptionPolicies(connection, apiPrimaryKey);
-            addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiPrimaryKey);
-            deleteUrlMappings(connection, apiPrimaryKey);
-            addUrlMappings(connection, substituteAPI.getUriTemplates(), apiPrimaryKey);
+            updateAPIDefinition(connection, apiID, substituteAPI.getApiDefinition());
+            deleteSubscriptionPolicies(connection, apiID);
+            addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiID);
+            deleteUrlMappings(connection, apiID);
+            addUrlMappings(connection, substituteAPI.getUriTemplates(), apiID);
             connection.commit();
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API", e);
@@ -595,10 +587,10 @@ public class ApiDAOImpl implements ApiDAO {
                 corsConfiguration.setAllowHeaders(commaSeperatedStringToList(rs.getString("CORS_ALLOW_HEADERS")));
                 corsConfiguration.setAllowMethods(commaSeperatedStringToList(rs.getString("CORS_ALLOW_METHODS")));
 
-                int apiPrimaryKey = rs.getInt("API_ID");
+                String apiPrimaryKey = rs.getString("UUID");
 
                 return new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"), rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
+                        id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
                         isDefaultVersion(rs.getBoolean("IS_DEFAULT_VERSION")).
                         description(rs.getString("DESCRIPTION")).
@@ -660,7 +652,7 @@ public class ApiDAOImpl implements ApiDAO {
         return apiList;
     }
 
-    private void addTagsMapping(Connection connection, int apiID, List<String> tags) throws SQLException {
+    private void addTagsMapping(Connection connection, String apiID, List<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
             List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
 
@@ -668,7 +660,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (Integer tagID : tagIDs) {
-                    statement.setInt(1, apiID);
+                    statement.setString(1, apiID);
                     statement.setInt(2, tagID);
                     statement.addBatch();
                 }
@@ -678,20 +670,20 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void deleteTagsMapping(Connection connection, int apiID) throws SQLException {
+    private void deleteTagsMapping(Connection connection, String apiID) throws SQLException {
         final String query = "DELETE FROM AM_API_TAG_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
         }
     }
 
-    private List<String> getTags(Connection connection, int apiID) throws SQLException {
+    private List<String> getTags(Connection connection, String apiID) throws SQLException {
         List<String> tags = new ArrayList<>();
 
         final String query = "SELECT TAG_ID FROM AM_API_TAG_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
@@ -710,11 +702,11 @@ public class ApiDAOImpl implements ApiDAO {
         return tags;
     }
 
-    private void addVisibleRole(Connection connection, int apiID, List<String> roles) throws SQLException {
+    private void addVisibleRole(Connection connection, String apiID, List<String> roles) throws SQLException {
         final String query = "INSERT INTO AM_API_VISIBLE_ROLES (API_ID, ROLE) VALUES (?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String role : roles) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setString(2, role);
                 statement.addBatch();
             }
@@ -723,20 +715,20 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void deleteVisibleRoles(Connection connection, int apiID) throws SQLException {
+    private void deleteVisibleRoles(Connection connection, String apiID) throws SQLException {
         final String query =  "DELETE FROM AM_API_VISIBLE_ROLES WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
         }
     }
 
-    private List<String> getVisibleRoles(Connection connection, int apiID) throws SQLException {
+    private List<String> getVisibleRoles(Connection connection, String apiID) throws SQLException {
         List<String> roles =  new ArrayList<>();
 
         final String query = "SELECT ROLE FROM AM_API_VISIBLE_ROLES WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
@@ -749,14 +741,14 @@ public class ApiDAOImpl implements ApiDAO {
         return roles;
     }
 
-    private void addAPIDefinition(Connection connection, int apiID, String apiDefinition) throws SQLException {
+    private void addAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
         if (!apiDefinition.isEmpty()) {
             int resourceTypeID = getSwaggerResourceTypeID(connection);
 
             final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
                     "RESOURCE_BINARY_VALUE) VALUES (?,?,?,?)";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setInt(2, resourceTypeID);
                 statement.setString(3, MediaType.APPLICATION_JSON);
                 statement.setBlob(4, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
@@ -766,27 +758,27 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void updateAPIDefinition(Connection connection, int apiID, String apiDefinition) throws SQLException {
+    private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
         int resourceTypeID = getSwaggerResourceTypeID(connection);
 
         final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE " +
                 "API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBlob(1, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
-            statement.setInt(2, apiID);
+            statement.setString(2, apiID);
             statement.setInt(3, resourceTypeID);
 
             statement.execute();
         }
     }
 
-    private String getAPIDefinition(Connection connection, int apiID) throws SQLException {
+    private String getAPIDefinition(Connection connection, String apiID) throws SQLException {
         int resourceTypeID = getSwaggerResourceTypeID(connection);
 
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.setInt(2, resourceTypeID);
             statement.execute();
 
@@ -805,14 +797,14 @@ public class ApiDAOImpl implements ApiDAO {
         return "";
     }
 
-    private void addWsdlURI(Connection connection, int apiID, String wsdlURI) throws SQLException {
+    private void addWsdlURI(Connection connection, String apiID, String wsdlURI) throws SQLException {
         if (!wsdlURI.isEmpty()) {
             int resourceTypeID = getWSDLResourceTypeID(connection);
 
             final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
                     "RESOURCE_TEXT_VALUE) VALUES (?,?,?,?)";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setInt(2, resourceTypeID);
                 statement.setString(3, MediaType.TEXT_PLAIN);
                 statement.setString(4, wsdlURI);
@@ -822,39 +814,39 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void updateWsdlURI(Connection connection, int apiID, String wsdlURI) throws SQLException {
+    private void updateWsdlURI(Connection connection, String apiID, String wsdlURI) throws SQLException {
         int resourceTypeID = getWSDLResourceTypeID(connection);
 
         final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ? WHERE " +
                 "API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, wsdlURI);
-            statement.setInt(2, apiID);
+            statement.setString(2, apiID);
             statement.setInt(3, resourceTypeID);
 
             statement.execute();
         }
     }
 
-    private void deleteWsdlURI(Connection connection, int apiID) throws SQLException {
+    private void deleteWsdlURI(Connection connection, String apiID) throws SQLException {
         int resourceTypeID = getWSDLResourceTypeID(connection);
 
         final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.setInt(2, resourceTypeID);
 
             statement.execute();
         }
     }
 
-    private String getWsdlURI(Connection connection, int apiID) throws SQLException {
+    private String getWsdlURI(Connection connection, String apiID) throws SQLException {
         int resourceTypeID = getWSDLResourceTypeID(connection);
 
         final String query = "SELECT RESOURCE_TEXT_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_TYPE_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.setInt(2, resourceTypeID);
             statement.execute();
 
@@ -926,11 +918,11 @@ public class ApiDAOImpl implements ApiDAO {
         return "";
     }
 
-    private void addTransports(Connection connection, int apiID, List<String> transports) throws SQLException {
+    private void addTransports(Connection connection, String apiID, List<String> transports) throws SQLException {
         final String query = "INSERT INTO AM_API_TRANSPORTS (API_ID, TRANSPORT) VALUES (?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String transport : transports) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setString(2, transport);
 
                 statement.addBatch();
@@ -940,20 +932,20 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void deleteTransports(Connection connection, int apiID) throws SQLException {
+    private void deleteTransports(Connection connection, String apiID) throws SQLException {
         final String query = "DELETE FROM AM_API_TRANSPORTS WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
         }
     }
 
-    private List<String> getTransports(Connection connection, int apiID) throws SQLException {
+    private List<String> getTransports(Connection connection, String apiID) throws SQLException {
         List<String> transports = new ArrayList<>();
 
         final String query = "SELECT TRANSPORT FROM AM_API_TRANSPORTS WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
@@ -974,30 +966,13 @@ public class ApiDAOImpl implements ApiDAO {
         return new ArrayList<>();
     }
 
-    private int getAPIPrimaryKey(Connection connection, String apiID) throws SQLException {
-        final String query = "SELECT API_ID FROM AM_API WHERE UUID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiID);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getInt("API_ID");
-                }
-            }
-        }
-
-        return -1;
-    }
-
-    private void addUrlMappings(Connection connection, Set<URITemplate> uriTemplates, int apiID) throws
+    private void addUrlMappings(Connection connection, Set<URITemplate> uriTemplates, String apiID) throws
             SQLException {
         final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, " +
                 "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setString(2, uriTemplate.getHttpVerb());
                 statement.setString(3, uriTemplate.getUriTemplate());
                 statement.setString(4, uriTemplate.getAuthType());
@@ -1007,21 +982,21 @@ public class ApiDAOImpl implements ApiDAO {
             statement.executeBatch();
         }
     }
-    private void deleteUrlMappings(Connection connection, int apiID) throws
+    private void deleteUrlMappings(Connection connection, String apiID) throws
             SQLException {
         final String query = "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiID);
+            statement.setString(1, apiID);
             statement.execute();
         }
     }
 
-    private Set<URITemplate> getUriTemplates(Connection connection, int apiId) throws SQLException {
+    private Set<URITemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
         String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE" +
                 " API_ID = ?";
         Set<URITemplate> uriTemplateSet = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiId);
+            statement.setString(1, apiId);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
@@ -1035,13 +1010,13 @@ public class ApiDAOImpl implements ApiDAO {
         }
         return uriTemplateSet;
     }
-    private void addSubscriptionPolicies(Connection connection, List<String> policies, int apiID) throws
+    private void addSubscriptionPolicies(Connection connection, List<String> policies, String apiID) throws
             SQLException {
         final String query = "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, POLICY_ID) " +
                 "VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy : policies) {
-                statement.setInt(1, apiID);
+                statement.setString(1, apiID);
                 statement.setInt(2, getSubscriptionThrottlePolicyID(connection,policy));
                 statement.addBatch();
             }
@@ -1049,11 +1024,11 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void deleteSubscriptionPolicies(Connection connection, int apiID) throws
+    private void deleteSubscriptionPolicies(Connection connection, String apiID) throws
             SQLException {
         final String query = "DELETE FROM AM_API_SUBSCRIPTION_POLICY_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1,apiID);
+            statement.setString(1, apiID);
             statement.execute();
         }
     }
@@ -1073,13 +1048,13 @@ public class ApiDAOImpl implements ApiDAO {
 
         return -1;
     }
-    private List<String> getSubscripitonPolciesByAPIId(Connection connection, int apiId) throws SQLException {
+    private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
         final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
                 "AM_POLICY_SUBSCRIPTION as amPolcySub where apimsubmapping.POLICY_ID=amPolcySub.POLICY_ID AND " +
                 "apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiId);
+            statement.setString(1, apiId);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
