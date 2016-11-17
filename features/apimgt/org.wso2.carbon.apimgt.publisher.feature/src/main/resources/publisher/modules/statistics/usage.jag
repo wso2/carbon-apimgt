@@ -1009,4 +1009,14 @@ function getTopApiUsers(apiName, version, tenantDomain, fromDate, toDate, start,
         };
     }
 }
+
+function checkTenants () {
+    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var tenantList = APIUtil.getAllTenantsWithSuperTenant();
+    if(tenantList.size() > 1){
+        return true;
+    } else {
+        return false;
+    }
+}
 %>
