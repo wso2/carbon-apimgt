@@ -22,8 +22,10 @@
 
 package org.wso2.carbon.apimgt.core.exception;
 
-
-public class ApiDeleteFailureException extends APIManagementException{
+/**
+ *  Exception class for API delete failure.
+ */
+public class ApiDeleteFailureException extends APIManagementException {
     public ApiDeleteFailureException(String message, Throwable cause) {
         super(message, cause);
     }
@@ -32,8 +34,8 @@ public class ApiDeleteFailureException extends APIManagementException{
         super(cause);
     }
 
-    protected ApiDeleteFailureException(String message, Throwable cause, boolean enableSuppression, boolean
-            writableStackTrace) {
+    protected ApiDeleteFailureException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

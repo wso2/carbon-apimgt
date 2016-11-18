@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -53,36 +52,32 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, new APILifeCycleManagerImpl());
     }
 
-    @Override
-    public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
+    @Override public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
             throws APIManagementException {
         List<API> apiResults = null;
         try {
             apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e,
-                    log);
+            APIUtils.logAndThrowException(
+                    "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e, log);
         }
         return apiResults;
     }
 
-    @Override
-    public Application getApplicationsByName(String userId, String applicationName, java.lang
-            .String groupId)
+    @Override public Application getApplicationsByName(String userId, String applicationName, java.lang.String groupId)
             throws APIManagementException {
         Application application = null;
         try {
             application = getApplicationDAO().getApplicationByName(userId, applicationName, groupId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
-                    "Error occurred while fetching application for the given applicationName - " + applicationName  + " with groupId - " + groupId, e,
-                    log);
+                    "Error occurred while fetching application for the given applicationName - " + applicationName
+                            + " with groupId - " + groupId, e, log);
         }
         return application;
     }
 
-    @Override
-    public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
+    @Override public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
         Application[] applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber, groupId);
@@ -94,20 +89,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return applicationList;
     }
 
-    @Override
-    public void updateApplication(Application application) throws APIManagementException {
+    @Override public void updateApplication(Application application) throws APIManagementException {
 
     }
 
-    @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId, String jsonString) throws APIManagementException {
+    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+            String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
     }
 
-    public List<API> searchAPIs(String query, int offset, int limit)
-            throws APIManagementException {
+    public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;
         try {
@@ -119,13 +111,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override
-    public void removeApplication(Application application) throws APIManagementException {
+    @Override public void removeApplication(Application application) throws APIManagementException {
 
     }
 
-    @Override
-    public String addApplication(Application application) throws APIManagementException {
+    @Override public String addApplication(Application application) throws APIManagementException {
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationExists(application.getName(), application.getCreatedUser(),
@@ -144,4 +134,4 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         //// TODO: 16/11/16 Workflow related implementation has to be done 
     }
 
-  }
+}

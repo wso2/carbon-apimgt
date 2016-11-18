@@ -20,12 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.util;
 
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * This class represents the constants that are used for APIManager implementation
  */
@@ -64,6 +58,9 @@ public class APIConstants {
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
 
+    /**
+     *  Application status related constants.
+     */
     public static class ApplicationStatus {
         public static final String APPLICATION_CREATED = "CREATED";
         public static final String APPLICATION_APPROVED = "APPROVED";
@@ -71,6 +68,9 @@ public class APIConstants {
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
     }
 
+    /**
+     *  Application registration status related constants.
+     */
     public static class AppRegistrationStatus {
         public static final String REGISTRATION_CREATED = "CREATED";
         public static final String REGISTRATION_APPROVED = "APPROVED";

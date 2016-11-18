@@ -20,9 +20,9 @@
 package org.wso2.carbon.apimgt.core.util;
 
 import org.slf4j.Logger;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Policy;
+import org.wso2.carbon.apimgt.core.models.Scope;
 
 import java.util.Map;
 import java.util.Set;
