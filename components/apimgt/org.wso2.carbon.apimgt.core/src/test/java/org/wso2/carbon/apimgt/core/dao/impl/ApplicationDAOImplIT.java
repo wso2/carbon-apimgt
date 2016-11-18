@@ -30,30 +30,39 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddAndGetApplication() throws Exception {
+        //add new app
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //get added app
         Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNotNull(appFromDB);
+        //compare
         validateApp(appFromDB, app);
     }
 
     @Test
     public void testUpdateApplication() throws Exception {
+        //add new app
         Application currentApp = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
         newApp.setUuid(currentApp.getUuid());
         newApp.setCreatedTime(currentApp.getCreatedTime());
+        //update app
         applicationDAO.updateApplication(currentApp.getUuid(), newApp);
+        //get app
         Application appFromDB = applicationDAO.getApplication(newApp.getUuid());
         Assert.assertNotNull(appFromDB);
+        //compare
         validateApp(appFromDB, newApp);
     }
 
     @Test
     public void testDeleteApplication() throws Exception {
+        // add app
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //delete app
         applicationDAO.deleteApplication(app.getUuid());
         Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNull(appFromDB);
