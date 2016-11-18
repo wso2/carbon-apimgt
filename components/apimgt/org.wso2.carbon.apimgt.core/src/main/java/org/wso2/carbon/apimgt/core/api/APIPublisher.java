@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import io.swagger.models.auth.In;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;

@@ -46,7 +46,6 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +60,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,apiLifecycleManager);
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, apiLifecycleManager);
     }
 
     /**
@@ -173,8 +172,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
-            apiBuilder.createdTime(localDateTime);
-            apiBuilder.lastUpdatedTime(localDateTime);
+        apiBuilder.createdTime(localDateTime);
+        apiBuilder.lastUpdatedTime(localDateTime);
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIConstants.API_LIFECYCLE,
@@ -189,7 +188,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         log);
             }
         } catch (APIMgtDAOException e) {
-                       APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
+            APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
         } catch (LifecycleException e) {
             APIUtils.logAndThrowException("Error occurred while Associating the API - " + apiBuilder.getName(), e, log);
         }
@@ -216,7 +215,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-            apiBuilder.lastUpdatedTime(LocalDateTime.now());
+        apiBuilder.lastUpdatedTime(LocalDateTime.now());
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
@@ -233,43 +232,48 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
                     }
-                } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())){
-                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as API have " +
+                } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
+                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                            " API have " +
                             "status change";
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
                     APIUtils.logAndThrowException(msg, log);
-                }else if (!originalAPI.getName().equals(apiBuilder.getName())) {
-                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as API have " +
+                } else if (!originalAPI.getName().equals(apiBuilder.getName())) {
+                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                            " API have " +
                             "API Name Change";
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
                     APIUtils.logAndThrowException(msg, log);
-                }else if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
-                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as API have " +
+                } else if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
+                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                            " API have " +
                             "Context change";
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
                     APIUtils.logAndThrowException(msg, log);
                 } else if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
-                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as API have " +
+                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                            " API have " +
                             "Version change";
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
                     APIUtils.logAndThrowException(msg, log);
                 } else if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
-                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as API have " +
+                    String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                            " API have " +
                             "provider change";
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
                     APIUtils.logAndThrowException(msg, log);
                 }
-            }else{
+            } else {
                 APIUtils.logAndThrowException("Couldn't found API with ID " + apiBuilder.getId(), log);
             }
         } catch (APIMgtDAOException e) {
@@ -289,20 +293,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
             APIManagementException {
-         try {
+        try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
                         .getLifecycleInstanceId()));
-                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()){
+                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     apiBuilder.lifecycleState(getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
                             (), status, checkListItem.getKey(), checkListItem.getValue()));
                 }
                 API originalAPI = apiBuilder.build();
                 getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
-            }else{
+            } else {
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
         } catch (APIMgtDAOException e) {
@@ -331,7 +335,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);
-                apiBuilder.context(api.getContext().replace(api.getVersion(),newVersion));
+                apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
                 getApiDAO().addAPI(apiBuilder.build());
@@ -414,11 +418,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-       boolean status = false;
+        boolean status = false;
         try {
             if (getApiDAO().getAPISummary(apiId) == null) {
-                status =  false;
-            }else{
+                status = false;
+            } else {
                 status = true;
             }
         } catch (APIMgtDAOException e) {
@@ -503,7 +507,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
-                if (api != null){
+                if (api != null) {
                     API.APIBuilder apiBuilder = new API.APIBuilder(api);
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
@@ -568,7 +572,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
         try {
-            getApiDAO().updateSwaggerDefinition(apiId,jsonText);
+            getApiDAO().updateSwaggerDefinition(apiId, jsonText);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't update the Swagger Definition", e, log);
         }
@@ -584,11 +588,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException {
         try {
-            API api =  getApiDAO().getAPISummary(apiId);
-            if (api != null){
+            API api = getApiDAO().getAPISummary(apiId);
+            if (api != null) {
 
                 return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
-            }else{
+            } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }
         } catch (APIMgtDAOException e) {
@@ -615,7 +619,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         try {
             getApiDAO().changeLifeCycleStatus(identifier, newStatus);
-            if (deprecateOlderVersions){
+            if (deprecateOlderVersions) {
                 getApiDAO().deprecateOlderVersions(identifier);
             }
             if (!requireReSubscriptions) {
