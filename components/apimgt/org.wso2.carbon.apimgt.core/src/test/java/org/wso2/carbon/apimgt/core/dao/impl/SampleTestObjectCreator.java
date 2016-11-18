@@ -109,9 +109,9 @@ public class SampleTestObjectCreator {
                 gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(new Date()).
+                createdTime(LocalDateTime.now()).
                 createdBy("admin").
-                lastUpdatedTime(new Date());
+                lastUpdatedTime(LocalDateTime.now());
         try {
             apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
         } catch (APIManagementException e) {
@@ -153,7 +153,7 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        return new API.APIBuilder("Adam", "restaurantAPI", "0.9").
+        API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("yummy").
                 description("Get Food & Beverage Info").
@@ -200,15 +200,23 @@ public class SampleTestObjectCreator {
                 gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                createdTime(new Date()).
+                createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
-                lastUpdatedTime(new Date());
+                lastUpdatedTime(LocalDateTime.now());
+
+        try {
+            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return apiBuilder;
     }
 
     static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
-        application.setUUID(UUID.randomUUID().toString());
+        application.setUuid(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
@@ -223,7 +231,7 @@ public class SampleTestObjectCreator {
     static Application createAlternativeApplication(){
         //created by admin and updated by admin2
         Application application = new Application("TestApp2", "admin");
-        application.setUUID(UUID.randomUUID().toString());
+        application.setUuid(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp2");
         application.setDescription("This is test application 2");
         application.setGroupId("groupx2");

@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Implementation of API Store operations.
@@ -57,7 +59,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         List<API> apiResults = null;
         try {
             apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e,
                     log);
         }
@@ -110,7 +112,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         List<API> apiResults = null;
         try {
             apiResults = getApiDAO().searchAPIs(query);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + query, e, log);
         }
 
@@ -131,7 +133,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
+            String generatedUuid = UUID.randomUUID().toString();
+            application.setUuid(generatedUuid);
             getApplicationDAO().addApplication(application);
+            applicationUuid = application.getUuid();
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
         }

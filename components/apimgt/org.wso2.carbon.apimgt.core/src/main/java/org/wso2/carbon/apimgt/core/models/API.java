@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -160,16 +161,16 @@ public final class API {
         return corsConfiguration;
     }
 
-    public Date getCreatedTime() {
-        return new Date(createdTime.getTime());
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
     }
 
     public String getCreatedBy() {
         return createdBy;
     }
 
-    public Date getLastUpdatedTime() {
-        return new Date(lastUpdatedTime.getTime());
+    public LocalDateTime getLastUpdatedTime() {
+        return lastUpdatedTime;
     }
 
     public LifecycleState getLifecycleState() {
@@ -210,9 +211,9 @@ public final class API {
     private final List<Environment> gatewayEnvironments;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
-    private final Date createdTime;
+    private final LocalDateTime createdTime;
     private final String createdBy;
-    private final Date lastUpdatedTime;
+    private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<URITemplate> uriTemplates ;
 
@@ -350,9 +351,9 @@ public final class API {
         private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
-        private Date createdTime;
+        private LocalDateTime createdTime;
         private String createdBy;
-        private Date lastUpdatedTime;
+        private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<URITemplate> uriTemplates;
 
@@ -673,8 +674,8 @@ public final class API {
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder createdTime(Date createdTime) {
-            this.createdTime = new Date(createdTime.getTime());
+        public APIBuilder createdTime(LocalDateTime createdTime) {
+            this.createdTime = createdTime;
             return this;
         }
 
@@ -695,8 +696,8 @@ public final class API {
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lastUpdatedTime(Date lastUpdatedTime) {
-            this.lastUpdatedTime = new Date(lastUpdatedTime.getTime());
+        public APIBuilder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+            this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }
 
@@ -756,16 +757,16 @@ public final class API {
             return lifecycleState;
         }
 
-        public Date getCreatedTime() {
-            return new Date(createdTime.getTime());
+        public LocalDateTime getCreatedTime() {
+            return createdTime;
         }
 
         public String getCreatedBy() {
             return createdBy;
         }
 
-        public Date getLastUpdatedTime() {
-            return new Date(lastUpdatedTime.getTime());
+        public LocalDateTime getLastUpdatedTime() {
+            return lastUpdatedTime;
         }
 
         public Set<URITemplate> getUriTemplates() {
