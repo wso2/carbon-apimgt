@@ -20,11 +20,12 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
+
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 
-import javax.annotation.CheckForNull;
 import java.sql.SQLException;
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to Application data layer
@@ -117,7 +118,6 @@ public interface ApplicationDAO {
     /**
      * Add a new instance of an Application
      * @param application The {@link Application} object to be added
-     * @return UUID of created {@link Application}
      * @throws SQLException
      *
      */
