@@ -104,7 +104,6 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000,
                           "Application created time is not the same!");
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
-        Assert.assertEquals(appFromDB.getUpdatedTime(), expectedApp.getUpdatedTime());
         Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000,
                           "Application updated time is not the same!");
     }

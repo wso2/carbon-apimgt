@@ -887,14 +887,14 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
-        final String query = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ?";
+        final String query = "SELECT UUID FROM AM_API_POLICY WHERE NAME = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, policyName);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getInt("POLICY_ID");
+                    return rs.getInt("UUID");
                 }
             }
         }
@@ -903,7 +903,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private String getAPIThrottlePolicyName(Connection connection, int policyID) throws SQLException {
-        final String query = "SELECT NAME FROM AM_API_THROTTLE_POLICY WHERE POLICY_ID = ?";
+        final String query = "SELECT NAME FROM AM_API_POLICY WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, policyID);
             statement.execute();
@@ -1012,7 +1012,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
     private void addSubscriptionPolicies(Connection connection, List<String> policies, String apiID) throws
             SQLException {
-        final String query = "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, POLICY_ID) " +
+        final String query = "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " +
                 "VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy : policies) {
@@ -1034,14 +1034,14 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private int getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
-        final String query = "SELECT POLICY_ID from AM_POLICY_SUBSCRIPTION where NAME=?";
+        final String query = "SELECT UUID from AM_SUBSCRIPTION_POLICY where NAME=?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, policyName);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getInt("POLICY_ID");
+                    return rs.getInt("UUID");
                 }
             }
         }
@@ -1050,8 +1050,8 @@ public class ApiDAOImpl implements ApiDAO {
     }
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
         final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
-                "AM_POLICY_SUBSCRIPTION as amPolcySub where apimsubmapping.POLICY_ID=amPolcySub.POLICY_ID AND " +
-                "apimsubmapping.API_ID = ?";
+                "AM_SUBSCRIPTION_POLICY as amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
+                "AND apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
