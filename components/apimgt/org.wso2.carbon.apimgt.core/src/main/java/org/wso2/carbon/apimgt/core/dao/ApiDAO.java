@@ -25,10 +25,10 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 
-import javax.annotation.CheckForNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to API data layer

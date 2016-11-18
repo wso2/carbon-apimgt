@@ -121,7 +121,7 @@ public class APIStoreImplTestCase {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
             APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
             Application application = new Application(APP_NAME, USER_NAME);
-            when(applicationDAO.isApplicationExists(APP_NAME,USER_NAME,null)).thenReturn(false);
+            when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
             String applicationUuid = apiStore.addApplication(application);
             Assert.assertNotNull(applicationUuid);
             verify(applicationDAO, times(1)).addApplication(application);

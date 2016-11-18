@@ -20,11 +20,12 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
+
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 
-import javax.annotation.CheckForNull;
 import java.sql.SQLException;
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to Application data layer
@@ -41,6 +42,25 @@ public interface ApplicationDAO {
     Application getApplication(String appID) throws SQLException;
 
     /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
+
+    /**
+     * Retrieves summary data of all available Applications that belongs to a user or a groups.
+     *
+     * @param createdUser Username of user
+     * @param groupingId Id of group
+     * @return An array of {@link Application}
+     * @throws SQLException
+     */
+    Application[] getApplications(String createdUser, String groupingId) throws SQLException;
+
+    /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
      * @param offset The number of results from the beginning that is to be ignored
@@ -48,7 +68,6 @@ public interface ApplicationDAO {
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
      * @throws SQLException
-     *
      */
     ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
                                                                                 throws SQLException;
@@ -99,7 +118,6 @@ public interface ApplicationDAO {
     /**
      * Add a new instance of an Application
      * @param application The {@link Application} object to be added
-     * @return UUID of created {@link Application}
      * @throws SQLException
      *
      */
@@ -123,35 +141,12 @@ public interface ApplicationDAO {
     void deleteApplication(String appID) throws SQLException;
 
     /**
-     * Fetches an Application by name.
-     *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @throws SQLException
-     */
-    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
-
-    /**
-     * Retrieves the Application which is corresponding to the given UUID String
-     *
-     * @param uuid UUID of Application
-     * @return
-     * @throws SQLException
-     */
-    Application getApplicationByUUID(String uuid) throws SQLException;
-
-    /**
-     * Check whether given application name is available under current subscriber or group
+     * Check whether given application name is already available in the system
      *
      * @param appName  application name
-     * @param username subscriber username
-     * @param groupId  group of the subscriber
-     * @return true if application is available for the subscriber
+     * @return true if application name is already available
      * @throws SQLException if failed to get applications for given subscriber
      */
-    boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
-
-
-    Application[] getApplications(String subscriber, String groupingId) throws SQLException;
+    boolean isApplicationNameExists(String appName) throws SQLException;
 
 }
