@@ -69,6 +69,9 @@ public final class URITemplate {
         return scope;
     }
 
+    /**
+     *  Builder class for URITemplate
+     */
     public static final class URITemplateBuilder {
         private String uriTemplate;
         private String httpVerb;

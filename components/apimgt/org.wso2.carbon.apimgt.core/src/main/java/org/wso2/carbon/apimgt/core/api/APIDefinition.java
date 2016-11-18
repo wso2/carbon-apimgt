@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
-
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.URITemplate;
@@ -47,7 +45,6 @@ public interface APIDefinition {
      * @param resourceConfigsJSON resource json
      * @return scopes
      */
-    Map<String,Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
-
+    Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
 }

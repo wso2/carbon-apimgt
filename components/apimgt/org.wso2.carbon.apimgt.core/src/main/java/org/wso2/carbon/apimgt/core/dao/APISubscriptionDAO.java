@@ -23,8 +23,10 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 
-import javax.annotation.CheckForNull;
 import java.sql.SQLException;
+
+import javax.annotation.CheckForNull;
+
 
 /**
  * Provides access to API Subscription data layer

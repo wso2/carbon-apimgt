@@ -20,7 +20,14 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+/**
+ * This class represent Resource Constants.
+ */
 public class ResourceConstants {
+
+    /**
+     * Enum for Resource Types.
+     */
     public enum ResourceType {
         SWAGGER,
         WSDL_URI,

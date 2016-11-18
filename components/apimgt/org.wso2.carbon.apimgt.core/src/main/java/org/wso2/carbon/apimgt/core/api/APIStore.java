@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -34,34 +33,31 @@ import java.util.Map;
  */
 public interface APIStore extends APIManager {
 
-
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
-     * 
+     *
      * @param offset offset
-     * @param limit limit
+     * @param limit  limit
      * @param status One or more Statuses
      * @return List<API>
      * @throws APIManagementException if failed to API set
      */
-    List<API> getAllAPIsByStatus(int offset, int limit, String[] status)
-            throws APIManagementException;
-    
-   
+    List<API> getAllAPIsByStatus(int offset, int limit, String[] status) throws APIManagementException;
+
     /**
      * Returns a paginated list of all APIs which match the given search criteria.
-     *   
+     *
      * @param query searchType
      * @param limit limit
      * @return List<API>
      * @throws APIManagementException
      */
-    List<API> searchAPIs(String query, int offset, int limit)
-            throws APIManagementException;
+    List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
+     *
      * @param application - The Application Object that represents the Application
      * @throws APIManagementException
      */
@@ -74,14 +70,14 @@ public interface APIStore extends APIManager {
      * @return uuid of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-     String addApplication(Application application) throws APIManagementException;
-
+    String addApplication(Application application) throws APIManagementException;
 
     /**
      * This will return APIM application by giving name and subscriber
-     * @param userId APIM subscriber ID.
+     *
+     * @param userId          APIM subscriber ID.
      * @param applicationName APIM application name.
-     * @param groupId Group id.
+     * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException
      */
@@ -92,7 +88,7 @@ public interface APIStore extends APIManager {
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupId the groupId to which the applications must belong.
+     * @param groupId    the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
@@ -110,21 +106,19 @@ public interface APIStore extends APIManager {
     /**
      * Creates a request for getting Approval for Application Registration.
      *
-     * @param userId Subsriber name.
+     * @param userId          Subsriber name.
      * @param applicationName of the Application.
-     * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl callback URL
-     * @param allowedDomains allowedDomains for token.
-     * @param validityTime validity time period.
-     * @param groupingId APIM application id.
-     * @param jsonString Callback URL for the Application.
-     * @param tokenScope Scopes for the requested tokens.
-     *
+     * @param tokenType       Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl     callback URL
+     * @param allowedDomains  allowedDomains for token.
+     * @param validityTime    validity time period.
+     * @param groupingId      APIM application id.
+     * @param jsonString      Callback URL for the Application.
+     * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                            String tokenType, java.lang
-                                                                                    .String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-                                                                            String groupingId, String jsonString) throws APIManagementException;
+            String tokenType, java.lang.String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
 }

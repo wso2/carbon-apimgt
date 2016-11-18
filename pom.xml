@@ -332,6 +332,7 @@
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
                                 <!--Exclude generated sources-->
                                 <excludes>**/generated/**/*</excludes>
+                                <includeTestSourceDirectory>false</includeTestSourceDirectory>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
