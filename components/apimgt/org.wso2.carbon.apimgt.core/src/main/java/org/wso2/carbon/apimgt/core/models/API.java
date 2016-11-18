@@ -176,7 +176,7 @@ public final class API {
         return lifecycleState;
     }
 
-    public Set<URITemplate> getUriTemplates() {
+    public Set<UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
 
@@ -214,7 +214,7 @@ public final class API {
     private final String createdBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final Set<URITemplate> uriTemplates;
+    private final Set<UriTemplate> uriTemplates;
 
     @Override public boolean equals(Object o) {
         if (this == o) {
@@ -351,7 +351,7 @@ public final class API {
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<URITemplate> uriTemplates;
+        private Set<UriTemplate> uriTemplates;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -609,7 +609,7 @@ public final class API {
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(Set<URITemplate> uriTemplates) {
+        public APIBuilder uriTemplates(Set<UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
@@ -787,7 +787,7 @@ public final class API {
             return lastUpdatedTime;
         }
 
-        public Set<URITemplate> getUriTemplates() {
+        public Set<UriTemplate> getUriTemplates() {
             return uriTemplates;
         }
 

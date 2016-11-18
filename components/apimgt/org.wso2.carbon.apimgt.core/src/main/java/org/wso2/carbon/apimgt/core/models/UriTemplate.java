@@ -26,7 +26,7 @@ package org.wso2.carbon.apimgt.core.models;
 /**
  * This Class contains the model of Uri Templates
  */
-public final class URITemplate {
+public final class UriTemplate {
 
     private final String uriTemplate;
     private final String httpVerb;
@@ -38,7 +38,7 @@ public final class URITemplate {
     private final String consumes;
 
 
-    private URITemplate(URITemplateBuilder uriTemplateBuilder) {
+    private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
@@ -70,9 +70,9 @@ public final class URITemplate {
     }
 
     /**
-     *  Builder class for URITemplate
+     *  Builder class for getInstance
      */
-    public static final class URITemplateBuilder {
+    public static final class UriTemplateBuilder {
         private String uriTemplate;
         private String httpVerb;
         private String authType;
@@ -82,53 +82,53 @@ public final class URITemplate {
         private String consumes;
         private Scope scope;
 
-        public URITemplateBuilder() {
+        public UriTemplateBuilder() {
         }
 
-        public static URITemplateBuilder URITemplate() {
-            return new URITemplateBuilder();
+        public static UriTemplateBuilder getInstance() {
+            return new UriTemplateBuilder();
         }
 
-        public URITemplateBuilder uriTemplate(String uriTemplate) {
+        public UriTemplateBuilder uriTemplate(String uriTemplate) {
             this.uriTemplate = uriTemplate;
             return this;
         }
 
-        public URITemplateBuilder httpVerb(String httpVerb) {
+        public UriTemplateBuilder httpVerb(String httpVerb) {
             this.httpVerb = httpVerb;
             return this;
         }
 
-        public URITemplateBuilder authType(String authType) {
+        public UriTemplateBuilder authType(String authType) {
             this.authType = authType;
             return this;
         }
 
-        public URITemplateBuilder policy(String policy) {
+        public UriTemplateBuilder policy(String policy) {
             this.policy = policy;
             return this;
         }
 
-        public URITemplateBuilder scope(Scope scope) {
+        public UriTemplateBuilder scope(Scope scope) {
             this.scope = scope;
             return this;
         }
 
-        public URITemplateBuilder produces(String produces) {
+        public UriTemplateBuilder produces(String produces) {
             this.produces = produces;
             return this;
         }
-        public URITemplateBuilder consumes(String consumes) {
+        public UriTemplateBuilder consumes(String consumes) {
             this.consumes = consumes;
             return this;
         }
-        public URITemplateBuilder templateId(String templateId) {
+        public UriTemplateBuilder templateId(String templateId) {
             this.templateId = templateId;
             return this;
         }
-        public URITemplate build() {
+        public UriTemplate build() {
 
-            return new URITemplate(this);
+            return new UriTemplate(this);
         }
     }
 

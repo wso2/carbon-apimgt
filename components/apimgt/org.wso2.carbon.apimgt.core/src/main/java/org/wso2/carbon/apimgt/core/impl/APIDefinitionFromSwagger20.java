@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.URITemplate;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
@@ -46,6 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Implementation for Swagger 2.0
+ */
 public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
@@ -57,15 +60,15 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        Set<URITemplate> uriTemplateSet = new HashSet<>();
+    public Set<UriTemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
+        Set<UriTemplate> uriTemplateSet = new HashSet<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         Map<String, Path> resourceList = swagger.getPaths();
         Map<String, Scope> scopeMap = getScopes(resourceConfigsJSON);
         for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
             Path resource = resourceEntry.getValue();
-            URITemplate.URITemplateBuilder uriTemplateBuilder = new URITemplate.URITemplateBuilder();
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
             uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
             for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
                 Operation operation = operationEntry.getValue();
