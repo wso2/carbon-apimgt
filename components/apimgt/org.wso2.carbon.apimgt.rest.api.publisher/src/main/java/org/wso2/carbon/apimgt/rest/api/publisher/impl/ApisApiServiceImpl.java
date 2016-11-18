@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -10,7 +9,6 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
@@ -26,10 +24,7 @@ import org.wso2.msf4j.formparam.FileInfo;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -241,7 +236,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream imageInputStream = apiPublisher.getThumbnailImage(apiId);
             if (imageInputStream != null) {
-                return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
+                return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header
+                        ("Content-Disposition", "attachment; filename=\"thename.jpg\"").build();
             } else {
                 return Response.noContent().build();
             }

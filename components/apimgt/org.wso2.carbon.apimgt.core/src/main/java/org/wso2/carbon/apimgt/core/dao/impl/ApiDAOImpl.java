@@ -21,18 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.io.IOUtils;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
-import org.wso2.carbon.apimgt.core.models.URITemplate;
 
-import javax.annotation.CheckForNull;
-import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +37,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
+import org.apache.commons.io.IOUtils;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -131,12 +132,14 @@ public class ApiDAOImpl implements ApiDAO {
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING") public List<API> getAPIsForProvider(
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsForProvider(
             String providerName) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, providerName);
 
             return constructAPISummaryList(statement);
@@ -152,13 +155,15 @@ public class ApiDAOImpl implements ApiDAO {
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING") public List<API> getAPIsByStatus(
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByStatus(
             List<String> statuses) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE CURRENT_LC_STATUS IN (" +
                 DAOUtil.getParameterString(statuses.size()) + ")";
 
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             for (int i = 0; i < statuses.size(); ++i) {
                 statement.setString(i + 1, statuses.get(i));
@@ -177,12 +182,14 @@ public class ApiDAOImpl implements ApiDAO {
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING") public List<API> searchAPIs(
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> searchAPIs(
             String searchString) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, '%' + searchString + '%');
             return constructAPISummaryList(statement);
@@ -994,12 +1001,12 @@ public class ApiDAOImpl implements ApiDAO {
         return new ArrayList<>();
     }
 
-    private void addUrlMappings(Connection connection, Set<URITemplate> uriTemplates, String apiID)
+    private void addUrlMappings(Connection connection, Set<UriTemplate> uriTemplates, String apiID)
             throws SQLException {
         final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, "
                 + "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            for (URITemplate uriTemplate : uriTemplates) {
+            for (UriTemplate uriTemplate : uriTemplates) {
                 statement.setString(1, apiID);
                 statement.setString(2, uriTemplate.getHttpVerb());
                 statement.setString(3, uriTemplate.getUriTemplate());
@@ -1019,16 +1026,16 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private Set<URITemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
+    private Set<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
         String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE"
                 + " API_ID = ?";
-        Set<URITemplate> uriTemplateSet = new HashSet<>();
+        Set<UriTemplate> uriTemplateSet = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
-                    URITemplate uriTemplate = new URITemplate.URITemplateBuilder()
+                    UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder()
                             .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME"))
                             .httpVerb(rs.getString("HTTP_METHOD"))
                             .policy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).build();

@@ -108,7 +108,6 @@ public interface ApiDAO {
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
-     * @return The newly added {@link API} object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
@@ -246,6 +245,6 @@ public interface ApiDAO {
      * @param inputStream
      * @throws APIMgtDAOException
      */
-    void addThumbnailImage(String apiID, InputStream inputStream) throws APIMgtDAOException ;
+    void addThumbnailImage(String apiID, InputStream inputStream) throws APIMgtDAOException;
 
     }
