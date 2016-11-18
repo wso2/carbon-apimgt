@@ -24,35 +24,45 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.sql.SQLException;
+import java.time.Duration;
 
-public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
+public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddAndGetApplication() throws Exception {
+        //add new app
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //get added app
         Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNotNull(appFromDB);
+        //compare
         validateApp(appFromDB, app);
     }
 
     @Test
     public void testUpdateApplication() throws Exception {
+        //add new app
         Application currentApp = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
         newApp.setUuid(currentApp.getUuid());
         newApp.setCreatedTime(currentApp.getCreatedTime());
+        //update app
         applicationDAO.updateApplication(currentApp.getUuid(), newApp);
+        //get app
         Application appFromDB = applicationDAO.getApplication(newApp.getUuid());
         Assert.assertNotNull(appFromDB);
+        //compare
         validateApp(appFromDB, newApp);
     }
 
     @Test
     public void testDeleteApplication() throws Exception {
+        // add app
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //delete app
         applicationDAO.deleteApplication(app.getUuid());
         Application appFromDB = applicationDAO.getApplication(app.getUuid());
         Assert.assertNull(appFromDB);
@@ -91,9 +101,12 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase{
         Assert.assertEquals(appFromDB.getUuid(), expectedApp.getUuid());
         Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
-        Assert.assertEquals(appFromDB.getCreatedTime(), expectedApp.getCreatedTime());
+        Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000,
+                          "Application created time is not the same!");
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
         Assert.assertEquals(appFromDB.getUpdatedTime(), expectedApp.getUpdatedTime());
+        Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000,
+                          "Application updated time is not the same!");
     }
 
     private Application addTestApplication() throws SQLException {

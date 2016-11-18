@@ -24,8 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DAOIntegrationTestBase {
-    private DataSource dataSource;
-    private static final String sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
+    protected DataSource dataSource;
+    protected static final String sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                                               + "features" + File.separator + "apimgt" + File.separator
                                               + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                                               + File.separator + "dbscripts" + File.separator + "h2.sql";
@@ -34,7 +34,6 @@ public class DAOIntegrationTestBase {
     public void setUp() throws Exception {
         dataSource = new InMemoryDataSource();
         DAOUtil.initialize(dataSource);
-
         try (Connection connection = DAOUtil.getConnection()) {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
