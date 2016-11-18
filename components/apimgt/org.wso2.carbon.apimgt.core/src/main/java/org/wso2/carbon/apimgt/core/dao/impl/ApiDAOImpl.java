@@ -33,16 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -427,7 +419,13 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
-        return null;
+
+        try {
+            Connection connection = DAOUtil.getConnection();
+            return getAPIDefinition(connection,apiID);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when Retrieving API definition", e);
+        }
     }
 
     /**
@@ -439,7 +437,12 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException {
-
+        try {
+            Connection connection = DAOUtil.getConnection();
+            updateAPIDefinition(connection,apiID,swaggerDefinition);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when updating API definition", e);
+        }
     }
 
     /**
@@ -451,7 +454,11 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public InputStream getImage(String apiID) throws APIMgtDAOException {
-        return null;
+        try (Connection connection = DAOUtil.getConnection()) {
+            return getAPIthumbnail(connection, apiID);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Couldn't retrieve api thumbnail for api " + apiID, e);
+        }
     }
 
     /**
@@ -758,6 +765,27 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    public void addThumbnailImage(String apiID, InputStream inputStream) throws APIMgtDAOException {
+        final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
+                "RESOURCE_BINARY_VALUE) VALUES (?,?,?,?)";
+        if (inputStream != null) {
+            try (Connection connection = DAOUtil.getConnection()){
+                int resourceTypeID = getImageResourceTypeID(connection);
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setString(1, apiID);
+                    statement.setInt(2, resourceTypeID);
+                    statement.setString(3, MediaType.APPLICATION_OCTET_STREAM);
+                    statement.setBlob(4, inputStream);
+                    statement.execute();
+                }
+            } catch (SQLException e) {
+                throw new APIMgtDAOException("Couldn't save Thumbnail Image for apiId", e);
+
+            }
+
+        }
+    }
+
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
         int resourceTypeID = getSwaggerResourceTypeID(connection);
 
@@ -868,6 +896,19 @@ public class ApiDAOImpl implements ApiDAO {
             ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.SWAGGER.toString());
             resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
                     ResourceConstants.ResourceType.SWAGGER.toString());
+        }
+
+        return resourceTypeID;
+    }
+
+    private int getImageResourceTypeID(Connection connection) throws SQLException {
+        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                ResourceConstants.ResourceType.IMAGE.toString());
+
+        if (resourceTypeID == -1) { // If resource type does not already exist
+            ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.IMAGE.toString());
+            resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
+                    ResourceConstants.ResourceType.IMAGE.toString());
         }
 
         return resourceTypeID;
@@ -1065,5 +1106,23 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return policies;
+    }
+    private InputStream getAPIthumbnail(Connection connection, String apiID) throws SQLException {
+        int resourceTypeID = getImageResourceTypeID(connection);
+
+        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
+                "RESOURCE_TYPE_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, resourceTypeID);
+            statement.execute();
+
+            try (ResultSet rs =  statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getBlob("RESOURCE_BINARY_VALUE").getBinaryStream();
+                }
+            }
+        }
+        return null;
     }
 }

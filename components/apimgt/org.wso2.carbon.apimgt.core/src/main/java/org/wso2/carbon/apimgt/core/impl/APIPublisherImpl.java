@@ -567,7 +567,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
-
+        try {
+            getApiDAO().updateSwaggerDefinition(apiId,jsonText);
+        } catch (APIMgtDAOException e) {
+            APIUtils.logAndThrowException("Couldn't update the Swagger Definition", e, log);
+        }
     }
 
 
@@ -647,6 +651,37 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException {
+        return null;
+    }
+
+    /**
+     * Save the thumbnail icon for api
+     * @param apiId apiId of api
+     * @param inputStream inputStream of image
+     * @throws APIManagementException
+     */
+    @Override
+    public void saveThumbnailImage(String apiId, InputStream inputStream) throws APIManagementException {
+        try {
+            getApiDAO().addThumbnailImage(apiId, inputStream);
+        } catch (APIMgtDAOException e) {
+            APIUtils.logAndThrowException("Couldn't save the thumbnail image", e, log);
+        }
+    }
+
+    /**
+     * Get the thumbnail icon for api
+     *
+     * @param apiId apiId of api
+     * @throws APIManagementException
+     */
+    @Override
+    public InputStream getThumbnailImage(String apiId) throws APIManagementException {
+        try {
+            return getApiDAO().getImage(apiId);
+        } catch (APIMgtDAOException e) {
+            APIUtils.logAndThrowException("Couldn't retrieve thumbnail for api " + apiId, e, log);
+        }
         return null;
     }
 }
