@@ -87,6 +87,19 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
+     * Retrieves summary data of all available Applications that belongs to a user or a groups.
+     *
+     * @param createdUser Username of user
+     * @param groupingId  Id of group
+     * @return An array of {@link Application}
+     * @throws SQLException
+     */
+    @Override
+    public Application[] getApplications(String createdUser, String groupingId) throws SQLException {
+        return new Application[0];
+    }
+
+    /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
      * @param offset The number of results from the beginning that is to be ignored
@@ -240,14 +253,28 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
     }
 
+    /**
+     * Check whether given application name is already available in the system
+     *
+     * @param appName application name
+     * @return true if application name is already available
+     * @throws SQLException if failed to get applications for given subscriber
+     */
     @Override
-    public boolean isApplicationExists(String appName, String username, String groupId) throws SQLException {
-        return false;
-    }
+    public boolean isApplicationNameExists(String appName) throws SQLException {
+        final String query = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, appName);
+            statement.execute();
 
-    @Override
-    public Application[] getApplications(String subscriber, String groupingId) throws SQLException {
-        return new Application[0];
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getSubscriptionTierName(Connection connection, String policyID) throws SQLException {

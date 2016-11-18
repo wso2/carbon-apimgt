@@ -69,6 +69,17 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testIsApplicationNameExists() throws Exception {
+        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //check for a non-existing application
+        Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
+        //add new app
+        Application app = addTestApplication();
+        //check for the existing application
+        Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName()));
+    }
+
+    @Test
     public void testGetApplicationsForUser() throws Exception {
 
     }
