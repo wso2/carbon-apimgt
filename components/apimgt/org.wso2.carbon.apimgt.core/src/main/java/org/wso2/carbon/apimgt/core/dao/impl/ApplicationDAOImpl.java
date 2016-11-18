@@ -74,6 +74,19 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    @Override
+    public Application getApplicationByName(String userId, String applicationName, String groupId)
+            throws SQLException {
+        return null;
+    }
+
+    /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
      * @param offset The number of results from the beginning that is to be ignored
@@ -225,31 +238,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             statement.execute();
             conn.commit();
         }
-    }
-
-    /**
-     * Fetches an Application by name.
-     *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @throws SQLException
-     */
-    @Override
-    public Application getApplicationByName(String userId, String applicationName, String groupId)
-            throws SQLException {
-        return null;
-    }
-
-    /**
-     * Retrieves the Application which is corresponding to the given UUID String
-     *
-     * @param uuid UUID of Application
-     * @return
-     * @throws SQLException
-     */
-    @Override
-    public Application getApplicationByUUID(String uuid) throws SQLException {
-        return null;
     }
 
     @Override

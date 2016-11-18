@@ -41,6 +41,15 @@ public interface ApplicationDAO {
     Application getApplication(String appID) throws SQLException;
 
     /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
+
+    /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
      * @param offset The number of results from the beginning that is to be ignored
@@ -123,24 +132,6 @@ public interface ApplicationDAO {
     void deleteApplication(String appID) throws SQLException;
 
     /**
-     * Fetches an Application by name.
-     *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @throws SQLException
-     */
-    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
-
-    /**
-     * Retrieves the Application which is corresponding to the given UUID String
-     *
-     * @param uuid UUID of Application
-     * @return
-     * @throws SQLException
-     */
-    Application getApplicationByUUID(String uuid) throws SQLException;
-
-    /**
      * Check whether given application name is available under current subscriber or group
      *
      * @param appName  application name
@@ -152,6 +143,6 @@ public interface ApplicationDAO {
     boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
 
 
-    Application[] getApplications(String subscriber, String groupingId) throws SQLException;
+    Application[] getApplications(String createdUser, String groupingId) throws SQLException;
 
 }

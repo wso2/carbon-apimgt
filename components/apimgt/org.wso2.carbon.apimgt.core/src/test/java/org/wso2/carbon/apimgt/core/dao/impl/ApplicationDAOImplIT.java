@@ -88,11 +88,6 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
-    @Test
-    public void testGetApplicationById() throws Exception {
-
-    }
-
     private void validateApp(Application appFromDB, Application expectedApp) {
         Assert.assertEquals(appFromDB.getName(), expectedApp.getName());
         Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
