@@ -240,4 +240,13 @@ public interface ApiDAO {
      * @param identifier
      */
     void deprecateOlderVersions(String identifier);
-}
+
+    /**
+     * Used to save the thumbnail image
+     * @param apiID
+     * @param inputStream
+     * @throws APIMgtDAOException
+     */
+    void addThumbnailImage(String apiID, InputStream inputStream) throws APIMgtDAOException ;
+
+    }

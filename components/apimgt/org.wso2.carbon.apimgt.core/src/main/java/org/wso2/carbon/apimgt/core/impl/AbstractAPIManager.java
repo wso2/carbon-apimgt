@@ -165,6 +165,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public String getSwagger20Definition(String api) throws APIManagementException {
+        try {
+            return getApiDAO().getSwaggerDefinition(api);
+        } catch (APIMgtDAOException e) {
+            APIUtils.logAndThrowException("Couldn't retrieve swagger definition for apiId " + api, e, log);
+        }
         return null;
     }
 

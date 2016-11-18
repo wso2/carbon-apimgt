@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import io.swagger.models.auth.In;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -297,5 +298,21 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException;
+
+    /**
+     * Save the thumbnail icon for api
+     * @param apiId apiId of api
+     * @param inputStream inputStream of image
+     * @throws APIManagementException
+     */
+   void saveThumbnailImage(String apiId, InputStream inputStream) throws APIManagementException;
+
+
+    /**
+     * Get the thumbnail icon for api
+     * @param apiId apiId of api
+     * @throws APIManagementException
+     */
+    InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
 }

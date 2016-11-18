@@ -63,5 +63,7 @@ public class RestApiConstants {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String APIID_PARAM = "{apiId}";
+    public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
 
 }
