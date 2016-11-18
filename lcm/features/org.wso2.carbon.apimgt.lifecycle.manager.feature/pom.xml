@@ -117,6 +117,7 @@
             <plugin>
                 <groupId>org.wso2.carbon.maven</groupId>
                 <artifactId>carbon-feature-plugin</artifactId>
+                <version>${carbon.feature.plugin.version}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
