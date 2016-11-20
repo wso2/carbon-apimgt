@@ -435,4 +435,13 @@ public interface APIManager {
      */
     Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
                                            boolean limitAttributes) throws APIManagementException;
+
+    /**
+     * fetches the lastUpdated timestamp for the API swagger resource
+     * @param apiIdentifier
+     * @return long
+     * @throws APIManagementException
+     */
+    Map<String,String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException;
+
 }
