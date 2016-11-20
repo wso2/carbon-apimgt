@@ -840,6 +840,11 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
+                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
+                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
+                if (lastModified != null) {
+                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
+                }
             }
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
@@ -1518,5 +1523,25 @@ public abstract class AbstractAPIManager implements APIManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException {
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+
+        String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+        try {
+            if (registry.resourceExists(thumbPath)) {
+                Resource res = registry.get(thumbPath);
+                Date lastModifiedTime = res.getLastModified();
+                return lastModifiedTime == null ? String.valueOf(res.getCreatedTime().getTime()) : String.valueOf(lastModifiedTime.getTime());
+            }
+        } catch (RegistryException e) {
+            handleException("Error while loading API icon from the registry", e);
+        }
+        return null;
+
     }
 }
