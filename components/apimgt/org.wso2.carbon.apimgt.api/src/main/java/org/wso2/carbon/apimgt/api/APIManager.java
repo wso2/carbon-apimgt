@@ -444,4 +444,11 @@ public interface APIManager {
      */
     Map<String,String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException;
 
+    /**
+     * gets the updated timestamp for the API swagger resource
+     * @param apiIdentifier
+     * @return long
+     * @throws APIManagementException
+     */
+    String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException;
 }
