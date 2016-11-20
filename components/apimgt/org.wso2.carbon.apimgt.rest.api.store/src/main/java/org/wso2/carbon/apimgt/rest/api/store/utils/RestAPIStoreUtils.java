@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -268,5 +269,30 @@ public class RestAPIStoreUtils {
             RestApiUtil.handleInternalServerError("Error while getting application with id " + applicationId, e, log);
         }
         return null;
+    }
+    public static String getLastUpdatedTimeBySubscriptionId(String subscriptionId) {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer;
+        try {
+            apiConsumer = RestApiUtil.getConsumer(username);
+            SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+            if (subscribedAPI != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
+                    String updatedTime = subscribedAPI.getUpdatedTime();
+                    return updatedTime != null ? updatedTime : subscribedAPI.getCreatedTime();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving resource timestamps due to " + e.getMessage(), e);
+            }
+            RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
+        }
+        return null;
+
     }
 }
