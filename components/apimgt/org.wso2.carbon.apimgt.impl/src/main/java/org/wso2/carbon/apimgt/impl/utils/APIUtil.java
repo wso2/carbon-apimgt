@@ -545,6 +545,7 @@ public final class APIUtil {
             }
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
@@ -4173,9 +4174,15 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API fro artifact ";
+            String msg = "Failed to get API from artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
             throw new APIManagementException(msg, e);
         }
         return api;
