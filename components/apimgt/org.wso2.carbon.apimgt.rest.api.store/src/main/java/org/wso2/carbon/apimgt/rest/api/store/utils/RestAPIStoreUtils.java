@@ -21,29 +21,18 @@ package org.wso2.carbon.apimgt.rest.api.store.utils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -262,5 +251,22 @@ public class RestAPIStoreUtils {
             apiSwagger = apiSwagger.replace(matcher.group(), "");
         }
         return apiSwagger;
+    }
+
+    public static String getLastUpdatedTimeByApplicationId(String applicationId){
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer;
+        try {
+            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String lastUpdated = application.getLastUpdatedTime();
+            return lastUpdated != null ? lastUpdated : application.getCreatedTime();
+        } catch (APIManagementException e) {
+            if(log.isDebugEnabled()){
+                log.debug("Error while retrieving resource timestamps due to " + e.getMessage(),e);
+            }
+            RestApiUtil.handleInternalServerError("Error while getting application with id " + applicationId, e, log);
+        }
+        return null;
     }
 }
