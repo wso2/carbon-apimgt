@@ -1496,4 +1496,27 @@ public abstract class AbstractAPIManager implements APIManager {
         result.put("isMore", isMore);
         return result;
     }
+
+    public Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException {
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                        apiTenantDomain);
+                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            return definitionFromSwagger20.getAPISwaggerDefinitionTimeStamps(apiIdentifier,registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            e.printStackTrace();
+        } catch (RegistryException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
