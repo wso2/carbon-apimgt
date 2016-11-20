@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
@@ -36,9 +35,9 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -51,8 +50,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /** This is the service implementation class for Store API related operations 
  *
@@ -512,6 +509,46 @@ public class ApisApiServiceImpl extends ApisApiService {
             String errorMessage = "SDK generation failed. Unable to fetch location of the SDK.";
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
+        return null;
+    }
+
+    @Override
+    public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return null;
+    }
+
+    @Override
+    public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return null;
+    }
+
+    @Override
+    public String apisApiIdDocumentsGetGetLastUpdatedTime(String apiId, Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    @Override
+    public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
+        return null;
+    }
+
+    @Override
+    public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
+        return null;
+    }
+
+    @Override
+    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return null;
+    }
+
+    @Override
+    public String apisGenerateSdkPostGetLastUpdatedTime(String apiId, String language, String xWSO2Tenant) {
+        return null;
+    }
+
+    @Override
+    public String apisGetGetLastUpdatedTime(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept, String ifNoneMatch) {
         return null;
     }
 
