@@ -167,4 +167,14 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
+    @Override
+    public String tiersTierLevelGetGetLastUpdatedTime(String tierLevel, Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    @Override
+    public String tiersTierLevelTierNameGetGetLastUpdatedTime(String tierName, String tierLevel, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return null;
+    }
+
 }
