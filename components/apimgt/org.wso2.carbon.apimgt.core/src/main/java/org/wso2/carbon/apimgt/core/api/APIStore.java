@@ -61,7 +61,7 @@ public interface APIStore extends APIManager {
      * @param application - The Application Object that represents the Application
      * @throws APIManagementException
      */
-    void removeApplication(Application application) throws APIManagementException;
+    void deleteApplication(Application application) throws APIManagementException;
 
     /**
      * Adds an application
@@ -97,11 +97,11 @@ public interface APIStore extends APIManager {
 
     /**
      * Updates the details of the specified user application.
-     *
+     * @param uuid Uuid of the existing application
      * @param application Application object containing updated data
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void updateApplication(Application application) throws APIManagementException;
+    void updateApplication(String uuid, Application application) throws APIManagementException;
 
     /**
      * Creates a request for getting Approval for Application Registration.
