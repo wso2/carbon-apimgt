@@ -38,11 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -79,8 +75,8 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, apiID);
 
             return constructAPIFromResultSet(connection, statement);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when getting API", e);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -102,7 +98,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             return constructAPISummary(statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when getting API", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -120,7 +116,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when getting APIs", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -142,7 +138,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when getting APIs", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -168,7 +164,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when getting APIs", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -190,7 +186,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, '%' + searchString + '%');
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when searching APIs", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -216,7 +212,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when checking if API name exists", e);
+            throw new APIMgtDAOException(e);
         }
 
         return false;
@@ -243,7 +239,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when checking if API context exists", e);
+            throw new APIMgtDAOException(e);
         }
 
         return false;
@@ -305,16 +301,16 @@ public class ApiDAOImpl implements ApiDAO {
                 addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
             }
 
-            addWsdlURI(connection, apiPrimaryKey, api.getWsdlUri());
+            addWsdlURI(connection, apiPrimaryKey, api.getWsdlUri(), "TODO");
             addTagsMapping(connection, apiPrimaryKey, api.getTags());
-            addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+            addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), "TODO");
             addTransports(connection, apiPrimaryKey, api.getTransport());
             addUrlMappings(connection,api.getUriTemplates(),apiPrimaryKey);
             addSubscriptionPolicies(connection,api.getPolicies(),apiPrimaryKey);
 
             connection.commit();
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when adding API", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -372,7 +368,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
             else {
                 if (getWsdlURI(connection, apiID).isEmpty()) {
-                    addWsdlURI(connection, apiID, wsdlUri);
+                    addWsdlURI(connection, apiID, wsdlUri, "TODO");
                 }
                 else {
                     updateWsdlURI(connection, apiID, wsdlUri);
@@ -392,7 +388,7 @@ public class ApiDAOImpl implements ApiDAO {
             addUrlMappings(connection, substituteAPI.getUriTemplates(), apiID);
             connection.commit();
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when updating API", e);
+            throw new APIMgtDAOException(e);
         }
 
 
@@ -414,7 +410,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
             connection.commit();
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when deleting API", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -482,7 +478,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(2,apiID);
             statement.execute();
         } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when changing life cycle status", e);
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -571,7 +567,8 @@ public class ApiDAOImpl implements ApiDAO {
          */
     }
 
-    private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException {
+    private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException,
+                                                                                                        IOException {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 BusinessInformation businessInformation = new BusinessInformation();
@@ -741,149 +738,92 @@ public class ApiDAOImpl implements ApiDAO {
         return roles;
     }
 
-    private void addAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
+    private void addAPIDefinition(Connection connection, String apiID, String apiDefinition, String visibility)
+                                                                                                throws SQLException {
         if (!apiDefinition.isEmpty()) {
-            int resourceTypeID = getSwaggerResourceTypeID(connection);
+            String resourceCategoryID = getSwaggerResourceCategoryID(connection);
 
-            final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
-                    "RESOURCE_BINARY_VALUE) VALUES (?,?,?,?)";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, apiID);
-                statement.setInt(2, resourceTypeID);
-                statement.setString(3, MediaType.APPLICATION_JSON);
-                statement.setBlob(4, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
-
-                statement.execute();
-            }
+            ApiResourceDAO.addBinaryResource(connection, apiID, ResourceConstants.Resource.SWAGGER.toString(),
+                    resourceCategoryID, visibility,
+                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         }
     }
 
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
-        int resourceTypeID = getSwaggerResourceTypeID(connection);
+        String resourceCategoryID = getSwaggerResourceCategoryID(connection);
 
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE " +
-                "API_ID = ? AND RESOURCE_TYPE_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setBlob(1, new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
-            statement.setString(2, apiID);
-            statement.setInt(3, resourceTypeID);
-
-            statement.execute();
-        }
+        ApiResourceDAO.updateBinarytResource(connection, apiID, resourceCategoryID,
+                                        new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
     }
 
-    private String getAPIDefinition(Connection connection, String apiID) throws SQLException {
-        int resourceTypeID = getSwaggerResourceTypeID(connection);
+    private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
+        String resourceCategoryID = getSwaggerResourceCategoryID(connection);
 
-        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
-                "RESOURCE_TYPE_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiID);
-            statement.setInt(2, resourceTypeID);
-            statement.execute();
+        InputStream apiDefinition = ApiResourceDAO.getBinaryResource(connection, apiID, resourceCategoryID);
 
-            try (ResultSet rs =  statement.getResultSet()) {
-                if (rs.next()) {
-                    try {
-                        return IOUtils.toString(rs.getBlob("RESOURCE_BINARY_VALUE").
-                                getBinaryStream(), StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        throw new SQLException("IO Error while reading API definition", e);
-                    }
-                }
-            }
-        }
-
-        return "";
+        return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
 
-    private void addWsdlURI(Connection connection, String apiID, String wsdlURI) throws SQLException {
+    private void addWsdlURI(Connection connection, String apiID, String wsdlURI, String visibility) throws SQLException {
         if (!wsdlURI.isEmpty()) {
-            int resourceTypeID = getWSDLResourceTypeID(connection);
+            String resourceCategoryID = getWSDLResourceCategoryID(connection);
 
-            final String query = "INSERT INTO AM_API_RESOURCES (API_ID, RESOURCE_TYPE_ID, DATA_TYPE, " +
-                    "RESOURCE_TEXT_VALUE) VALUES (?,?,?,?)";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, apiID);
-                statement.setInt(2, resourceTypeID);
-                statement.setString(3, MediaType.TEXT_PLAIN);
-                statement.setString(4, wsdlURI);
-
-                statement.execute();
-            }
+            ApiResourceDAO.addTextResource(connection, apiID, ResourceConstants.Resource.WSDL_URI.toString(),
+                    resourceCategoryID, visibility, wsdlURI);
         }
     }
 
     private void updateWsdlURI(Connection connection, String apiID, String wsdlURI) throws SQLException {
-        int resourceTypeID = getWSDLResourceTypeID(connection);
+        String resourceCategoryID = getWSDLResourceCategoryID(connection);
 
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ? WHERE " +
-                "API_ID = ? AND RESOURCE_TYPE_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, wsdlURI);
-            statement.setString(2, apiID);
-            statement.setInt(3, resourceTypeID);
-
-            statement.execute();
-        }
+        ApiResourceDAO.updateTextResource(connection, apiID, resourceCategoryID, wsdlURI);
     }
 
     private void deleteWsdlURI(Connection connection, String apiID) throws SQLException {
-        int resourceTypeID = getWSDLResourceTypeID(connection);
+        String resourceCategoryID = getWSDLResourceCategoryID(connection);
 
-        final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_TYPE_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiID);
-            statement.setInt(2, resourceTypeID);
-
-            statement.execute();
-        }
+        ApiResourceDAO.deleteResource(connection, apiID, resourceCategoryID);
     }
 
     private String getWsdlURI(Connection connection, String apiID) throws SQLException {
-        int resourceTypeID = getWSDLResourceTypeID(connection);
+        String resourceCategoryID = getWSDLResourceCategoryID(connection);
 
-        final String query = "SELECT RESOURCE_TEXT_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
-                "RESOURCE_TYPE_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiID);
-            statement.setInt(2, resourceTypeID);
-            statement.execute();
-
-            try (ResultSet rs =  statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("RESOURCE_TEXT_VALUE");
-                }
-            }
+        if (ApiResourceDAO.isResourceExists(connection, apiID, resourceCategoryID)) {
+            return ApiResourceDAO.getTextResource(connection, apiID, resourceCategoryID);
         }
-
-        return "";
+        else {
+            return "";
+        }
     }
 
-    private int getSwaggerResourceTypeID(Connection connection) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.SWAGGER.toString());
+    private String getSwaggerResourceCategoryID(Connection connection) throws SQLException {
+        String resourceCategoryID = ResourceCategoryDAO.getResourceCategoryID(connection,
+                ResourceConstants.Resource.SWAGGER.toString());
 
-        if (resourceTypeID == -1) { // If resource type does not already exist
-            ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.SWAGGER.toString());
-            resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                    ResourceConstants.ResourceType.SWAGGER.toString());
+        if (resourceCategoryID == null) { // If resource category does not already exist
+            ResourceCategoryDAO.addResourceCategory(connection, ResourceConstants.Resource.SWAGGER.toString(),
+                                                                MediaType.APPLICATION_JSON);
+
+            resourceCategoryID = ResourceCategoryDAO.getResourceCategoryID(connection,
+                    ResourceConstants.Resource.SWAGGER.toString());
         }
 
-        return resourceTypeID;
+        return resourceCategoryID;
     }
 
-    private int getWSDLResourceTypeID(Connection connection) throws SQLException {
-        int resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                ResourceConstants.ResourceType.WSDL_URI.toString());
+    private String getWSDLResourceCategoryID(Connection connection) throws SQLException {
+        String resourceCategoryID = ResourceCategoryDAO.getResourceCategoryID(connection,
+                ResourceConstants.Resource.WSDL_URI.toString());
 
-        if (resourceTypeID == -1) { // If resource type does not already exist
-            ResourceTypeDAO.addResourceType(connection, ResourceConstants.ResourceType.WSDL_URI.toString());
-            resourceTypeID = ResourceTypeDAO.getResourceTypeID(connection,
-                    ResourceConstants.ResourceType.WSDL_URI.toString());
+        if (resourceCategoryID == null) { // If resource category does not already exist
+            ResourceCategoryDAO.addResourceCategory(connection, ResourceConstants.Resource.WSDL_URI.toString(),
+                                                                MediaType.TEXT_PLAIN);
+
+            resourceCategoryID = ResourceCategoryDAO.getResourceCategoryID(connection,
+                    ResourceConstants.Resource.WSDL_URI.toString());
         }
 
-        return resourceTypeID;
+        return resourceCategoryID;
     }
 
     private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {

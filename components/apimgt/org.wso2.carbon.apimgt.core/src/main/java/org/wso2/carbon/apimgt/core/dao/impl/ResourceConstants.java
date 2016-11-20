@@ -21,7 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 public class ResourceConstants {
-    public enum ResourceType {
+    public enum Resource {
         SWAGGER,
         WSDL_URI
     }
