@@ -38,14 +38,14 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDT
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store application related operations
@@ -323,4 +323,35 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
         return null;
     }
+
+    @Override
+    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId, ApplicationKeyGenerateRequestDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        return null;
+    }
+
+    @Override
+    public String applicationsGetGetLastUpdatedTime(String groupId, String query, Integer limit, Integer offset, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    @Override
+    public String applicationsPostGetLastUpdatedTime(ApplicationDTO body, String contentType) {
+        return null;
+    }
+
 }
