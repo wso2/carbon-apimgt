@@ -154,7 +154,7 @@ public final class RestApiConstants {
     public static final String SANDBOX_ENDPOINTS = "sandbox_endpoints";
 
 
-    public static final String GET_LAST_UPDATED = "GetLastUpdated";
+    public static final String GET_LAST_UPDATED = "GetLastUpdatedTime";
     public static final String GET = "GET";
     public static final String ETAG = "ETag";
     public static final String PUT = "PUT";
