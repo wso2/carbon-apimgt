@@ -43,9 +43,9 @@ public class RestAPIStoreUtils {
 
     private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
 
-    /** 
+    /**
      * check whether current logged in user has access to the specified application
-     * 
+     *
      * @param application Application object
      * @return true if current logged in consumer has access to the specified application
      */
@@ -105,10 +105,10 @@ public class RestAPIStoreUtils {
 
     /**
      * Check whether the specified API exists and the current logged in user has access to it.
-     * 
-     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user 
+     *
+     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user
      * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
-     * 
+     *
      * @param apiId API identifier
      * @throws APIManagementException
      */
@@ -136,7 +136,7 @@ public class RestAPIStoreUtils {
     /**
      * Check whether the specified API exists and the current logged in user has access to it.
      *
-     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user 
+     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user
      * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
      *
      * @param apiId API identifier
@@ -166,7 +166,7 @@ public class RestAPIStoreUtils {
 
     /**
      * Check if the specified subscription is allowed for the logged in user
-     * 
+     *
      * @param apiIdentifier API identifier
      * @param tier the subscribing tier of the API
      * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
@@ -233,7 +233,7 @@ public class RestAPIStoreUtils {
 
     /**
      * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
-     * 
+     *
      * @param apiSwagger swagger definition of API
      * @return swagger which exclude x-mediation-script elements
      */
@@ -253,7 +253,7 @@ public class RestAPIStoreUtils {
         return apiSwagger;
     }
 
-    public static String getLastUpdatedTimeByApplicationId(String applicationId){
+    public static String getLastUpdatedTimeByApplicationId(String applicationId) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
@@ -262,8 +262,8 @@ public class RestAPIStoreUtils {
             String lastUpdated = application.getLastUpdatedTime();
             return lastUpdated != null ? lastUpdated : application.getCreatedTime();
         } catch (APIManagementException e) {
-            if(log.isDebugEnabled()){
-                log.debug("Error while retrieving resource timestamps due to " + e.getMessage(),e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving resource timestamps due to " + e.getMessage(), e);
             }
             RestApiUtil.handleInternalServerError("Error while getting application with id " + applicationId, e, log);
         }
