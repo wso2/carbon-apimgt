@@ -36,6 +36,7 @@ public class Documentation implements Serializable{
     private DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
+    private Date createdDate;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -154,4 +155,13 @@ public class Documentation implements Serializable{
     public void setId(String id) {
         this.id = id;
     }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
 }
