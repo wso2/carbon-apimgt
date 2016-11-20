@@ -89,8 +89,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return applicationList;
     }
 
-    @Override public void updateApplication(Application application) throws APIManagementException {
-
+    @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
+        try {
+            getApplicationDAO().updateApplication(uuid, application);
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while updating application - " + application.getName(), e,
+                    log);
+        }
     }
 
     @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
@@ -111,8 +116,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public void removeApplication(Application application) throws APIManagementException {
-
+    @Override public void deleteApplication(Application application) throws APIManagementException {
+        try {
+            getApplicationDAO().deleteApplication(application.getUuid());
+        } catch (SQLException e) {
+            APIUtils.logAndThrowException("Error occurred while deleting application - " + application.getName(), e,
+                    log);
+        }
     }
 
     @Override public String addApplication(Application application) throws APIManagementException {
