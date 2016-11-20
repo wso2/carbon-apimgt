@@ -1618,6 +1618,8 @@ public class SQLConstants {
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_STATUS, " +
             "   APP.GROUP_ID, " +
+            "   APP.UPDATED_TIME, "+
+            "   APP.CREATED_TIME, "+
             "   APP.UUID," +
             "   SUB.USER_ID " +
             " FROM " +
