@@ -5956,6 +5956,11 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
+                Timestamp updatedTime = rs.getTimestamp("UPDATED_TIME");
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setLastUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 for (APIKey key : keys) {
                     application.addKey(key);
