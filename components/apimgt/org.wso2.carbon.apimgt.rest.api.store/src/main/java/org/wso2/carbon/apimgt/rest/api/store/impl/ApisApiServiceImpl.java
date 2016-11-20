@@ -514,12 +514,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return null;
+        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
     @Override
     public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return null;
+        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
     @Override
@@ -529,17 +529,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
-        return null;
+        return RestAPIStoreUtils.apisApiIdGetLastUpdated(apiId, xWSO2Tenant);
     }
 
     @Override
     public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
-        return null;
+        return RestAPIStoreUtils.apisApiIdSwaggerGetLastUpdated(xWSO2Tenant,apiId);
     }
 
     @Override
     public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return null;
+        return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
     }
 
     @Override
