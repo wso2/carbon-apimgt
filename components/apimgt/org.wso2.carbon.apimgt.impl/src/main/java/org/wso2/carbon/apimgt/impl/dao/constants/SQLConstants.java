@@ -472,6 +472,8 @@ public class SQLConstants {
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUBS.CREATED_TIME AS CREATED_TIME, "+
+            "   SUBS.UPDATED_TIME AS UPDATED_TIME, "+
             "   SUBS.UUID AS UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
