@@ -17,10 +17,13 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.io.Serializable;
-import java.util.*;
-
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provider's & system's view of API
@@ -108,6 +111,8 @@ public class API implements Serializable{
     private boolean isPublishedDefaultVersion=false;
 
     private Set<String> environments;
+
+    private String createdTime;
 
     public Set<String> getEnvironments() {
         return environments;
@@ -663,5 +668,12 @@ public class API implements Serializable{
         } else {
             this.type = "HTTP";
         }
+    }
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 }
