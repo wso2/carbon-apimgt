@@ -1,23 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
+import io.swagger.annotations.ApiParam;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.TiersApiServiceFactory;
 
-import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Path("/tiers")
 @Consumes({ "application/json" })
@@ -48,6 +37,11 @@ public class TiersApi  {
     {
     return delegate.tiersTierLevelGet(tierLevel,limit,offset,xWSO2Tenant,accept,ifNoneMatch);
     }
+
+    public String tiersTierLevelGetGetLastUpdatedTime(String tierLevel,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch)
+    {
+        return delegate.tiersTierLevelGetGetLastUpdatedTime(tierLevel,limit,offset,xWSO2Tenant,accept,ifNoneMatch);
+    }
     @GET
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
@@ -70,6 +64,11 @@ public class TiersApi  {
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.tiersTierLevelTierNameGet(tierName,tierLevel,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    }
+
+    public String tiersTierLevelTierNameGetGetLastUpdatedTime(String tierName,String tierLevel,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.tiersTierLevelTierNameGetGetLastUpdatedTime(tierName,tierLevel,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
     }
 }
 
