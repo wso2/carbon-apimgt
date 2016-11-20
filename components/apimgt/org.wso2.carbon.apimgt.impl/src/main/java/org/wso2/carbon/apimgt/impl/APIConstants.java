@@ -475,6 +475,10 @@ public final class APIConstants {
     public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
     public static final String API_RESTAPI_WHITELISTED_URI_URI = API_RESTAPI_WHITELISTED_URI + "URI";
     public static final String API_RESTAPI_WHITELISTED_URI_HTTPMethods = API_RESTAPI_WHITELISTED_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ETAG_SKIP_LIST = API_RESTAPI + "ETagSkipList.";
+    public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
+    public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
+    public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
