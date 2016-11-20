@@ -25,28 +25,20 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * This is the service implementation class for Store subscription related operations
@@ -292,4 +284,25 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
         return null;
     }
+
+    @Override
+    public String subscriptionsGetGetLastUpdatedTime(String apiId, String applicationId, String groupId, Integer offset, Integer limit, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    @Override
+    public String subscriptionsPostGetLastUpdatedTime(SubscriptionDTO body, String contentType) {
+        return null;
+    }
+
+    @Override
+    public String subscriptionsSubscriptionIdDeleteGetLastUpdatedTime(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
+    }
+
+    @Override
+    public String subscriptionsSubscriptionIdGetGetLastUpdatedTime(String subscriptionId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
+    }
+
 }
