@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
 import java.util.*;
 
 /**
@@ -39,6 +37,25 @@ public class Application {
     private String status;
     private String groupId;
     private Boolean isBlackListed;
+
+    private String createdTime;
+    private String lastUpdatedTime;
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getLastUpdatedTime() {
+        return lastUpdatedTime;
+    }
+
+    public void setLastUpdatedTime(String lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
+    }
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
