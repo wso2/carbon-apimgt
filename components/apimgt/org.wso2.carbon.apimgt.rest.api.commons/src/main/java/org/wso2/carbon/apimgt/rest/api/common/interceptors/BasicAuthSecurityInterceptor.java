@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.security.basic.AbstractBasicAuthSecurityInterceptor;
-import org.wso2.msf4j.security.oauth2.OAuth2SecurityInterceptor;
 
 /**
  * Security Interceptor that does basic authentication for REST ApI requests.
