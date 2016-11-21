@@ -1502,6 +1502,12 @@ public abstract class AbstractAPIManager implements APIManager {
         return result;
     }
 
+    /**
+     * gets the swagger definition timestamps as a map
+     * @param apiIdentifier
+     * @return
+     * @throws APIManagementException
+     */
     public Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException {
         String apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
@@ -1525,6 +1531,12 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    /**
+     * get the thumbnailLastUpdatedTime for a thumbnail for a given api
+     * @param apiIdentifier
+     * @return
+     * @throws APIManagementException
+     */
     @Override
     public String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +

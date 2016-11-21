@@ -382,6 +382,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         return swaggerObject.toJSONString();
     }
 
+    /**
+     * gets the createdTime and updatedTime for the swagger definition
+     * @param apiIdentifier
+     * @param registry
+     * @return
+     * @throws APIManagementException
+     */
     @Override
     public Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();

@@ -51,14 +51,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** This is the service implementation class for Store API related operations 
+/** This is the service implementation class for Store API related operations
  *
  */
 public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
-    /** Retrieves APIs qualifying under given search condition 
+    /** Retrieves APIs qualifying under given search condition
      *
      * @param limit maximum number of APIs returns
      * @param offset starting index
@@ -105,7 +105,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) && 
+            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) &&
                     searchContent.equalsIgnoreCase(APIConstants.PROTOTYPED)) {
                 apisMap = apiConsumer.getAllPaginatedAPIsByStatus(requestedTenantDomain, offset, limit,
                         APIConstants.PROTOTYPED, false);
@@ -200,7 +200,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      *  Returns all the documents of the given API identifier that matches to the search condition
-     *  
+     *
      * @param apiId API identifier
      * @param limit max number of records returned
      * @param offset starting index
@@ -252,7 +252,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Returns a specific document by identifier that is belong to the given API identifier
-     * 
+     *
      * @param apiId API identifier
      * @param documentId document identifier
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
@@ -371,7 +371,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the swagger document of an API
-     * 
+     *
      * @param apiId API identifier
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
@@ -379,7 +379,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @return Swagger document of the API
      */
-    @Override 
+    @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
             String xWSO2Tenant) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
@@ -512,41 +512,120 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieves the lastUpdatedTime for the content of a document
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Content of the document/ either inline/file or source url as a redirection
+     */
     @Override
     public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
+    /**
+     * Returns the lastUpdatedTime for  a specific document by identifier that is belong to the given API identifier
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
     @Override
     public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
+    /**
+     *
+     *
+     * @param apiId API identifier
+     * @param limit max number of records returned
+     * @param offset starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
     public String apisApiIdDocumentsGetGetLastUpdatedTime(String apiId, Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
         return null;
     }
 
+    /**
+     * Get lastUpdatedTime for a API with a given ID
+     *
+     * @param apiId  API ID
+     * @param accept accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return API of the given ID
+     */
     @Override
     public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
         return RestAPIStoreUtils.apisApiIdGetLastUpdated(apiId, xWSO2Tenant);
     }
 
+    /**
+     * Retrieves lastUpdatedTime for the Swagger document of an API
+     *
+     * @param apiId API identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return Swagger document of the API
+     */
     @Override
     public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
         return RestAPIStoreUtils.apisApiIdSwaggerGetLastUpdated(xWSO2Tenant,apiId);
     }
 
+    /**
+     * Retrieves the thumbnail image lastUpdatedTime of an API specified by API identifier
+     *
+     * @param apiId API Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
     @Override
     public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
     }
 
+    /**
+     *
+     * @param apiId       API Id
+     * @param language    SDK language
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return SDK for the requested API in a given language
+     */
     @Override
     public String apisGenerateSdkPostGetLastUpdatedTime(String apiId, String language, String xWSO2Tenant) {
         return null;
     }
 
+    /**
+     *
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param query search condition
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched APIs for the given search condition
+     */
     @Override
     public String apisGetGetLastUpdatedTime(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept, String ifNoneMatch) {
         return null;

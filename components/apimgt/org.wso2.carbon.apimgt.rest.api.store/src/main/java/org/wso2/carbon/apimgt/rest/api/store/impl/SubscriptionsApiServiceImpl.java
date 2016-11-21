@@ -285,21 +285,53 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return null;
     }
 
+    /**
+     * Gets the lastUpdated time for subscription collection
+     * @param apiId         api identifier
+     * @param applicationId application identifier
+     * @param groupId       group id
+     * @param offset        starting index of the subscription list
+     * @param limit         max num of subscriptions returned
+     * @param accept        Accept header value
+     * @param ifNoneMatch   If-None-Match header value
+     * @return LastUpdated time for the resource in UNIX time as a {@link String}
+     */
     @Override
     public String subscriptionsGetGetLastUpdatedTime(String apiId, String applicationId, String groupId, Integer offset, Integer limit, String accept, String ifNoneMatch) {
         return null;
     }
 
+    /**
+     * placeholder method
+     * @param body        new subscription details
+     * @param contentType Content-Type header
+     * @return LastUpdated time for the resource in UNIX time as a {@link String}
+     */
     @Override
     public String subscriptionsPostGetLastUpdatedTime(SubscriptionDTO body, String contentType) {
         return null;
     }
 
+    /**
+     * placeholder method
+     * @param subscriptionId    subscription identifier
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return LastUpdated time for the resource in UNIX time as a {@link String}
+     */
     @Override
     public String subscriptionsSubscriptionIdDeleteGetLastUpdatedTime(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
     }
 
+    /**
+     * Gets the lastUpdated time for subscription ID.
+     * @param subscriptionId    {@link SubscribedAPI} identifier
+     * @param accept            accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @return  LastUpdated time for the resource in UNIX time as a {@link String}
+     */
     @Override
     public String subscriptionsSubscriptionIdGetGetLastUpdatedTime(String subscriptionId, String accept, String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
