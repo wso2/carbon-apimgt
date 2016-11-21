@@ -91,14 +91,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
             if (oldApplication != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
-                    //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-                    //groupId of the request body is not honored for now.
-                    // Later we can improve by checking admin privileges of the user.
                     application.setGroupId(oldApplication.getGroupId());
-                    //we do not honor the application id which is sent via the request body
                     application.setUuid(oldApplication.getUuid());
-
                     apiConsumer.updateApplication(oldApplication.getUuid(), application);
 
                     //retrieves the updated application and send as the response
@@ -162,6 +157,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String ifNoneMatch) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
+        Application[] allMatchedApps = null;
         String username = RestApiUtil.getLoggedInUsername();
         String groupId = RestApiUtil.getLoggedInUserGroupId();
 
@@ -169,7 +165,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] allMatchedApps = new Application[0];
+
             if (StringUtils.isBlank(query)) {
                 allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
@@ -208,11 +204,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
 
-            //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-
-            //setting the proper groupId. This is not honored for now.
-            // Later we can honor it by checking admin privileges of the user.
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
             String applicationUUID = apiConsumer.addApplication(application);
