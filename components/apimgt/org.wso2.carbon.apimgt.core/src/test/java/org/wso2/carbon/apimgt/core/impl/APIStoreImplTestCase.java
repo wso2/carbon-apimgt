@@ -115,7 +115,7 @@ public class APIStoreImplTestCase {
     }
 
 
-//    @Test(description = "Add an application")
+    @Test(description = "Add an application")
     public void testAddApplication(){
         try {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
