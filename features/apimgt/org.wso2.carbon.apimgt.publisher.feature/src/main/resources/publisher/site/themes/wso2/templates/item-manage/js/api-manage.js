@@ -109,7 +109,6 @@ function validate_tiers(){
 }
 
 function validateGatewaysSelected(){
-    debugger;
     var atLeastOneIsSelected = false;
     var gateway_error = $("#gateway_error").text();
     $("input[name='gateways']:not(:checked)").each(function() {
