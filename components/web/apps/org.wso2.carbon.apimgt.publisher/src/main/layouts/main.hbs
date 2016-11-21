@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="">
+    <meta name="description" content=""/>
+
+    <title>{{#placeholder "title"}}UUF Foundation{{/placeholder}}</title>
+    <!-- Le fav and touch icons -->
+    {{#placeholder "favicon"}}
+        <link rel="shortcut icon" href="{{public "images/default-favicon.png"}}" type="image/png" />
+    {{/placeholder}}
+    {{placeholder "css"}}
+    {{placeholder "headJs"}}
+    {{placeholder "headOther"}}
+</head>
+<body class="sticky-footer">
+<!-- header -->
+{{defineZone "topbar"}}
+<!-- #page-content-wrapper -->
+<div class="page-content-wrapper">
+    <!-- media-->
+    <div class="media">
+        <!-- media left-->
+        <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="50" data-side="left" data-width="200">
+            <!-- sidebar -->
+            {{defineZone "sidebar"}}
+            <!-- tagCloud -->
+            {{defineZone "tagCloud"}}
+        </div><!-- media left-->
+        <!-- Page Content -->
+        <!-- media body-->
+        <div class="media-body">
+            <!-- navbar -->
+            {{defineZone "contentTop"}}
+            <div class="container-fluid">
+                <div class="body-wrapper">
+                    {{defineZone "content"}}
+                </div>
+            </div>
+        </div><!-- /#media body-->
+    </div><!-- /#media-->
+</div><!-- /#page-content-wrapper -->
+<!-- footer -->
+<footer class="footer">
+    <div class="container-fluid">
+        {{defineZone "footer"}}
+    </div>
+</footer>
+<!-- /footer -->
+{{placeholder "js"}}
+</body>
+</html>
