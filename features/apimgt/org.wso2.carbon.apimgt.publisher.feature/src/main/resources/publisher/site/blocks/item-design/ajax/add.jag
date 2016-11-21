@@ -113,7 +113,7 @@ if(jagg.isCSRFTokenValid())
                 session.put("swagger", swagger);
             }if(wsdl){
                 session.put("ws",null);
-                session.put("swagger",null);
+                session.put("swagger",swagger);
                 session.put("wsdl", wsdl);
             }
 
