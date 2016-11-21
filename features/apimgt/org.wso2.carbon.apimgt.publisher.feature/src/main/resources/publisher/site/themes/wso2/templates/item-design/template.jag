@@ -152,7 +152,7 @@
 												<p id="context_help" class="hide"><%=i18n.localize("URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context")%></p>
 												</label>
 												<div class="col-sm-9">
-													<input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate validateVersionOnlyContext" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
+													<input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate validateVersionOnlyContext tenantContextExists" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
 												</div>
 											</div>
 
