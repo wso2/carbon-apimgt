@@ -173,7 +173,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             if (StringUtils.isBlank(query)) {
                 allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
-                Application application = apiConsumer.getApplicationsByName(username, query, groupId);
+                Application application = apiConsumer.getApplicationByName(username, query, groupId);
                 if (application != null) {
                     allMatchedApps = new Application[1];
                     allMatchedApps[0] = application;
