@@ -1202,7 +1202,6 @@
 
         var submitForm = function(){$("body").on("api_saved", publish_api);
             $('#messageModal').modal('hide');
-            thisID = $(this).attr('id');
                 if(!$("#backend_tps_specify").is(":checked")) {
                 // Setting text field values to null if check box is not selected.
                     $('#productionTps').val(null);
@@ -1213,6 +1212,7 @@
 
         var thisID='';
         $('#publish_api').on("click",function(e){
+            thisID = $(this).attr('id');
             var isChecked = false;
             $("input[name='gateways']:checked").each(function() {
                 isChecked = true;
