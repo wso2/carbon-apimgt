@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -12,7 +14,10 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -22,35 +27,47 @@ public class ApisApiServiceImpl extends ApisApiService {
     
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
-    @Override
-    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
-, String documentId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
-        // do some magic!
+    @Override public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
-    @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId
-, String documentId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+
+    @Override public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
+
+        DocumentDTO documentDTO = null;
+        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
+            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId, e, log);
+        }
+        return Response.ok().entity(documentDTO).build();
     }
-    @Override
-    public Response apisApiIdDocumentsGet(String apiId
-, Integer limit
-, Integer offset
-, String accept
-, String ifNoneMatch
- ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+
+    @Override public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
+            String ifNoneMatch) throws NotFoundException {
+
+        DocumentListDTO documentListDTO = null;
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            DocumentInfoResults documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
+            documentListDTO = DocumentationMappingUtil
+                    .fromDocumentationListToDTO(documentInfoResults.getDocumentInfoList(), offset, limit);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId, e, log);
+        }
+
+        return Response.ok().entity(documentListDTO).build();
     }
     
     /**
@@ -60,7 +77,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @return API of the given ID
      */
     @Override
@@ -97,7 +113,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves APIs qualifying under given search condition 
      * @param limit maximum number of APIs returns
      * @param offset starting index
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value

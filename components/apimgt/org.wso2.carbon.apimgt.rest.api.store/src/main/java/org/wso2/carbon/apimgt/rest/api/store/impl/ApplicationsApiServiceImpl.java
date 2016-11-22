@@ -207,7 +207,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            application.setCreatedTime(LocalDateTime.now());
             String applicationUUID = apiConsumer.addApplication(application);
 
             //retrieves the created application and send as the response
