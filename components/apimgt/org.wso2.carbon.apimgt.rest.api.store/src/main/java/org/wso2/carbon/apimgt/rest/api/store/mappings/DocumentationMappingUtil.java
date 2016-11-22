@@ -65,7 +65,7 @@ public class DocumentationMappingUtil {
         //// TODO: 22/11/16 OtherType,sourceUrl 
         //documentDTO.setOtherTypeName(artifactResourceMetaData.getOtherTypeName());
         if (artifactResourceMetaData.getDataType() != null) {
-            documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(artifactResourceMetaData.getDataType().toString()));
+            documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(artifactResourceMetaData.getDataType()));
         }
         //documentDTO.setSourceUrl(artifactResourceMetaData.getSourceUrl());
         return documentDTO;
