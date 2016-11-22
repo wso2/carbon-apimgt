@@ -158,7 +158,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String ifNoneMatch) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
-        Application[] allMatchedApps = null;
         String username = RestApiUtil.getLoggedInUsername();
         String groupId = RestApiUtil.getLoggedInUserGroupId();
 
@@ -166,7 +165,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-
+            Application[] allMatchedApps = new Application[0];
             if (StringUtils.isBlank(query)) {
                 allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
