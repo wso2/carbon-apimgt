@@ -34,6 +34,7 @@ public final class ArtifactResourceMetaData {
     private final String dataType;
     private final ResourceVisibility visibility;
 
+
     private ArtifactResourceMetaData(Builder builder) {
         id = builder.id;
         name = builder.name;

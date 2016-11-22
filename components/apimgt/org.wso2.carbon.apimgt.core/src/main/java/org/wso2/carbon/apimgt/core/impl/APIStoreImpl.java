@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -134,6 +135,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             }
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
+            application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
             applicationUuid = application.getUuid();
         } catch (SQLException e) {
