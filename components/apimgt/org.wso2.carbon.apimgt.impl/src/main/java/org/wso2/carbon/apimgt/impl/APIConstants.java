@@ -433,6 +433,7 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
+    public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
