@@ -81,7 +81,7 @@ public interface APIStore extends APIManager {
      * @return it will return Application.
      * @throws APIManagementException
      */
-    Application getApplicationsByName(String userId, String applicationName, String groupId)
+    Application getApplicationByName(String userId, String applicationName, String groupId)
             throws APIManagementException;
 
     /**

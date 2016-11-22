@@ -106,7 +106,7 @@ public class APIStoreImplTestCase {
             when(applicationDAO.getApplicationByName(USER_ID, APP_NAME, GROUP_ID))
                     .thenReturn(applicationFromDAO);
 
-            Application application = apiStore.getApplicationsByName(USER_ID, APP_NAME, GROUP_ID);
+            Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
             Assert.assertNotNull(application);
             verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
         } catch (APIManagementException | SQLException e) {
@@ -115,7 +115,7 @@ public class APIStoreImplTestCase {
     }
 
 
-//    @Test(description = "Add an application")
+    @Test(description = "Add an application")
     public void testAddApplication(){
         try {
             ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
