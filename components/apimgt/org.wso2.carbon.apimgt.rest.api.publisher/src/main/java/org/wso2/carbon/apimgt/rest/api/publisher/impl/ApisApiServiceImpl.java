@@ -37,7 +37,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
             return Response.ok().build();
@@ -130,7 +130,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)){
                 APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
@@ -157,7 +157,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.updateAPI(MappingUtil.toAPI(body));
@@ -182,7 +182,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String swagger = apiPublisher.getSwagger20Definition(apiId);
@@ -207,7 +207,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
@@ -231,7 +231,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream imageInputStream = apiPublisher.getThumbnailImage(apiId);
@@ -260,7 +260,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
             apiPublisher.saveThumbnailImage(apiId,fileInputStream);
@@ -297,7 +297,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         Map<String,Boolean> lifecycleChecklistMap = new HashMap<>();
         try {
             if (lifecycleChecklist != null){
@@ -322,7 +322,7 @@ public class ApisApiServiceImpl extends ApisApiService {
  ) throws NotFoundException {
       //  URI newVersionedApiUri;
         APIDTO newVersionedApi;
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
@@ -358,7 +358,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String accept
 , String ifNoneMatch
  ) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
             apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs
@@ -374,7 +374,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisPost(APIDTO body
 , String contentType
  ) throws NotFoundException {
-     String username = "";
+     String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);

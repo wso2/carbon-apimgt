@@ -34,9 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
-import org.wso2.carbon.kernel.context.CarbonContext;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +51,10 @@ public class RestApiUtil {
      * Get the current logged in user's username
      */
     public static String getLoggedInUsername() {
-        CarbonContext carbonContext = CarbonContext.getCurrentContext();
-        Principal principal = carbonContext.getUserPrincipal();
-        return principal.getName();
+//        CarbonContext carbonContext = CarbonContext.getCurrentContext();
+//        Principal principal = carbonContext.getUserPrincipal();
+//        return principal.getName();
+        return "admin";
     }
 
     /**
