@@ -1,0 +1,5 @@
+<select id="appTier" name="appTier" onChange="tierChanged(this)">
+    {{#each appTiers}}
+        <option title={{ name }} value={{ name }}> {{ name }} {{ description }}</option>
+    {{/each}}
+</select>

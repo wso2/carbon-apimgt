@@ -44,7 +44,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    apiConsumer.removeApplication(application);
+                    apiConsumer.deleteApplication(application);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
@@ -99,7 +99,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     //we do not honor the application id which is sent via the request body
                     application.setUuid(oldApplication.getUuid());
 
-                    apiConsumer.updateApplication(application);
+                    apiConsumer.updateApplication(oldApplication.getUuid(), application);
 
                     //retrieves the updated application and send as the response
                     Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);

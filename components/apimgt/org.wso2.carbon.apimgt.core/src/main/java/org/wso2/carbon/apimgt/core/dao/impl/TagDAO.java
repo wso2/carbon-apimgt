@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,8 +34,9 @@ import java.util.List;
  */
 public class TagDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-     static List<Integer> addTagsIfNotExist(Connection connection, List<String> tags) throws SQLException {
-        List<Integer> tagIDs =  new ArrayList<>();
+    static List<Integer> addTagsIfNotExist(
+            Connection connection, List<String> tags) throws SQLException {
+        List<Integer> tagIDs = new ArrayList<>();
 
         if (!tags.isEmpty()) {
             final String query = "SELECT TAG_ID, TAG_NAME FROM AM_TAGS WHERE TAG_NAME IN (" +
@@ -67,13 +67,13 @@ public class TagDAO {
         return tagIDs;
     }
 
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<String> getTagsByIDs(Connection connection, List<Integer> tagIDs) throws SQLException {
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING") static List<String> getTagsByIDs(
+            Connection connection, List<Integer> tagIDs) throws SQLException {
         List<String> tags = new ArrayList<>();
 
         if (!tagIDs.isEmpty()) {
             final String query = "SELECT TAG_NAME FROM AM_TAGS WHERE TAG_ID IN (" +
-                                            DAOUtil.getParameterString(tagIDs.size()) + ")";
+                    DAOUtil.getParameterString(tagIDs.size()) + ")";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (int i = 0; i < tagIDs.size(); ++i) {
@@ -91,7 +91,8 @@ public class TagDAO {
         return tags;
     }
 
-    private static void insertNewTags(Connection connection, List<String> tags, List<Integer> tagIDs) throws SQLException {
+    private static void insertNewTags(Connection connection, List<String> tags, List<Integer> tagIDs)
+            throws SQLException {
         final String maxTagIDQuery = "SELECT MAX(TAG_ID) AS TAG_ID FROM AM_TAGS";
         int maxTagID = -1;
         try (PreparedStatement statement = connection.prepareStatement(maxTagIDQuery)) {
@@ -106,7 +107,7 @@ public class TagDAO {
 
         final String query = "INSERT INTO AM_TAGS (TAG_NAME) VALUES (?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query, new String[]{"tag_id"})) {
+        try (PreparedStatement statement = connection.prepareStatement(query, new String[] { "tag_id" })) {
             for (String tag : tags) {
                 statement.setString(1, tag);
                 statement.addBatch();

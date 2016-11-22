@@ -22,12 +22,9 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.List;
 import javax.annotation.CheckForNull;
 
@@ -109,7 +106,6 @@ public interface ApiDAO {
     /**
      * Add a new instance of an API
      * @param api The {@link API} object to be added
-     * @return The newly added {@link API} object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
@@ -164,10 +160,11 @@ public interface ApiDAO {
      * Update swagger definition of a given API
      * @param apiID The UUID of the respective API
      * @param image Image stream
+     * @param dataType Data Type of image
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void updateImage(String apiID, OutputStream image) throws APIMgtDAOException;
+    void updateImage(String apiID, InputStream image, String dataType) throws APIMgtDAOException;
 
     /**
      * Change the lifecycle status of a given API
@@ -179,65 +176,78 @@ public interface ApiDAO {
     void changeLifeCycleStatus(String apiID, String status) throws APIMgtDAOException;
 
     /**
-     * Return list of all Document info belonging to a given API. This method supports result pagination
+     * Return list of all Document info belonging to a given API.
+     *
      * @param apiID The UUID of the respective API
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @return {@link DocumentInfoResults} matching results
+     * @return {@link List<ArtifactResourceMetaData>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    DocumentInfoResults getDocumentsInfoList(String apiID, int offset, int limit) throws APIMgtDAOException;
+    List<ArtifactResourceMetaData> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
 
     /**
      *
-     * @param docID The UUID of the respective Document
-     * @return {@link DocumentInfo} Document Info object
+     * @param resourceID The UUID of the respective resource
+     * @return {@link ArtifactResourceMetaData} ArtifactResource meta data object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException;
+    @CheckForNull
+    ArtifactResourceMetaData getResourceMetaData(String resourceID) throws APIMgtDAOException;
 
     /**
      *
-     * @param docID The UUID of the respective Document
-     * @return {@link InputStream} Document Info object
+     * @param resourceID The UUID of the respective resource
+     * @return {@link InputStream} Resource binary content
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    InputStream getDocumentContent(String docID) throws APIMgtDAOException;
+    InputStream getBinaryResourceContent(String resourceID) throws APIMgtDAOException;
 
     /**
-     * Attach Documentation (without content) to an API
      *
-     * @param apiId         UUID of API
-     * @param documentation Documentat Summary
+     * @param resourceID The UUID of the respective resource
+     * @return {@link String} Resource text content
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIMgtDAOException;
+    String getTextResourceContent(String resourceID) throws APIMgtDAOException;
 
     /**
-     * Add a document (of source type FILE) with a file
+     * Add artifact resource meta data to an API
      *
-     * @param apiId         UUID of API
-     * @param documentation Document Summary
-     * @param filename      name of the file
-     * @param content       content of the file as an Input Stream
-     * @param contentType   content type of the file
+     * @param apiId    UUID of API
+     * @param metaData {@link ArtifactResourceMetaData} ArtifactResource meta data
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                  String contentType) throws APIMgtDAOException;
+    void addArtifactResourceMetaData(String apiId, ArtifactResourceMetaData metaData) throws APIMgtDAOException;
 
     /**
-     * Removes a given documentation
+     * Update binary resource
      *
-     * @param id   Document Id
+     * @param resourceID         UUID of resource
+     * @param content            Binary content as an Input Stream
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void removeDocumentation(String id) throws APIMgtDAOException;
+    void updateBinaryResourceContent(String resourceID, InputStream content) throws APIMgtDAOException;
+
+    /**
+     * Update text resource
+     *
+     * @param resourceID         UUID of resource
+     * @param content            Text content as a String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateTextResourceContent(String resourceID, String content) throws APIMgtDAOException;
+
+    /**
+     * Delete a resource
+     *
+     * @param resourceID   UUID of resource
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void deleteResource(String resourceID) throws APIMgtDAOException;
 
     /**
      * used to deprecate older versions of the api
      * @param identifier
      */
     void deprecateOlderVersions(String identifier);
-}
+    }

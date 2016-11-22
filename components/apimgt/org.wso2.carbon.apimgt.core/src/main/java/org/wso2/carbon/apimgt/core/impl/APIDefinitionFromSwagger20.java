@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-
 import com.google.gson.Gson;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
@@ -31,20 +30,26 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.omg.PortableInterceptor.ServerRequestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.URITemplate;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Implementation for Swagger 2.0
+ */
 public class APIDefinitionFromSwagger20 implements APIDefinition {
-
 
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
 
@@ -55,44 +60,44 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        Set<URITemplate> uriTemplateSet = new HashSet<>();
+    public Set<UriTemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
+        Set<UriTemplate> uriTemplateSet = new HashSet<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         Map<String, Path> resourceList = swagger.getPaths();
         Map<String, Scope> scopeMap = getScopes(resourceConfigsJSON);
         for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
             Path resource = resourceEntry.getValue();
-            URITemplate.URITemplateBuilder uriTemplateBuilder = new URITemplate.URITemplateBuilder();
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
             uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
             for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
                 Operation operation = operationEntry.getValue();
-                Map<String, Object> vendorExtensions =operation.getVendorExtensions();
+                Map<String, Object> vendorExtensions = operation.getVendorExtensions();
                 String authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
-                if (authType == null){
+                if (authType == null) {
                     uriTemplateBuilder.authType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-                }else{
+                } else {
                     uriTemplateBuilder.authType(authType);
                 }
                 String policy = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-                if (policy == null){
+                if (policy == null) {
                     uriTemplateBuilder.policy(APIConstants.DEFAULT_API_POLICY);
-                }else{
+                } else {
                     uriTemplateBuilder.policy(policy);
                 }
                 List<String> producesList = operation.getProduces();
-                if (producesList != null){
+                if (producesList != null) {
                     String produceSeparatedString = "\"";
                     produceSeparatedString += String.join("\",\"", producesList) + "\"";
                     uriTemplateBuilder.produces(produceSeparatedString);
                 }
                 List<String> consumesList = operation.getConsumes();
-                if (consumesList != null){
+                if (consumesList != null) {
                     String consumesSeparatedString = "\"";
                     consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
                     uriTemplateBuilder.produces(consumesSeparatedString);
                 }
-                if (operation.getOperationId() != null){
+                if (operation.getOperationId() != null) {
                     uriTemplateBuilder.templateId(operation.getOperationId());
                 }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
@@ -110,11 +115,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         try {
             if (swagger.getVendorExtensions() != null) {
                 JSONObject scopesJson;
-                scopesJson = (JSONObject) new JSONParser().parse(swagger.getVendorExtensions().get
-                        (APIConstants.SWAGGER_X_WSO2_SECURITY).toString());
-                Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson.get(APIConstants
-                        .SWAGGER_OBJECT_NAME_APIM)).get
-                        (APIConstants.SWAGGER_X_WSO2_SCOPES)).iterator();
+                scopesJson = (JSONObject) new JSONParser()
+                        .parse(swagger.getVendorExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY).toString());
+                Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
+                        .get(APIConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIConstants.SWAGGER_X_WSO2_SCOPES))
+                        .iterator();
                 while (scopesIterator.hasNext()) {
                     Scope scope = new Gson().fromJson(scopesIterator.next().toJSONString(), Scope.class);
                     scopeMap.put(scope.getKey(), scope);

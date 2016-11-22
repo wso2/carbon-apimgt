@@ -149,11 +149,10 @@
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
                             <!--Exclude generated sources-->
                             <excludes>**/gen/**/*</excludes>
                             <!--skip for generated resources-->
-                            <skip>true</skip>
                         </configuration>
                         <goals>
                             <goal>check</goal>
@@ -165,40 +164,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-
-<!--<plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <executions>
-        <execution>
-            <id>prepare-agent</id>
-            <goals>
-                <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-                <propertyName>jcoverage.command</propertyName>
-                <includes>
-                    <include>org.wso2.carbon.apimgt.core.impl*</include>
-                </includes>
-                <append>true</append>
-            </configuration>
-        </execution>
-        <execution>
-            <id>default-check</id>
-            <goals>
-                <goal>check</goal>
-            </goals>
-            <configuration>
-                <rules>
-                    <rule>
-                    </rule>
-                </rules>
-            </configuration>
-        </execution>
-    </executions>
-</plugin> -->
-
-
         </plugins>
     </build>
 

@@ -69,6 +69,17 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testIsApplicationNameExists() throws Exception {
+        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //check for a non-existing application
+        Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
+        //add new app
+        Application app = addTestApplication();
+        //check for the existing application
+        Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName()));
+    }
+
+    @Test
     public void testGetApplicationsForUser() throws Exception {
 
     }
@@ -88,11 +99,6 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
-    @Test
-    public void testGetApplicationById() throws Exception {
-
-    }
-
     private void validateApp(Application appFromDB, Application expectedApp) {
         Assert.assertEquals(appFromDB.getName(), expectedApp.getName());
         Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
@@ -104,7 +110,6 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000,
                           "Application created time is not the same!");
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
-        Assert.assertEquals(appFromDB.getUpdatedTime(), expectedApp.getUpdatedTime());
         Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000,
                           "Application updated time is not the same!");
     }

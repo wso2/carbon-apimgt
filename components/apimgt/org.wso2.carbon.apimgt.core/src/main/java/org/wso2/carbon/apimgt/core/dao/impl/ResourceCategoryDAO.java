@@ -20,29 +20,62 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import javax.annotation.CheckForNull;
+import org.wso2.carbon.apimgt.core.models.ResourceCategory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 /**
  * Provides access to Resource Categories which maybe shared across multiple entities
  */
 class ResourceCategoryDAO {
 
-    @CheckForNull
-    static String getResourceCategoryID(Connection connection, String resourceCategory) throws SQLException {
-        final String query = "SELECT RESOURCE_CATEGORY_ID FROM AM_RESOURCE_CATEGORIES WHERE RESOURCE_CATEGORY = ?";
-        String resourceTypeID = null;
+    static boolean isResourceCategoryExists(Connection connection, ResourceCategory resourceCategory)
+                                                                                            throws SQLException {
+        final String query = "SELECT 1 FROM AM_RESOURCE_CATEGORIES WHERE RESOURCE_CATEGORY = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceCategory);
+            statement.setString(1, resourceCategory.toString());
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    resourceTypeID = rs.getString("RESOURCE_CATEGORY_ID");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    static boolean isResourceCategoriesExist(Connection connection) throws SQLException {
+        final String query = "SELECT 1 FROM AM_RESOURCE_CATEGORIES";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    static int getResourceCategoryID(Connection connection, ResourceCategory resourceCategory) throws SQLException {
+        final String query = "SELECT RESOURCE_CATEGORY_ID FROM AM_RESOURCE_CATEGORIES WHERE RESOURCE_CATEGORY = ?";
+        int resourceTypeID;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, resourceCategory.toString());
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    resourceTypeID = rs.getInt("RESOURCE_CATEGORY_ID");
+                } else {
+                    throw new SQLException("Resource category does not exist");
                 }
             }
         }
@@ -50,54 +83,74 @@ class ResourceCategoryDAO {
         return resourceTypeID;
     }
 
-    static void addResourceCategory(Connection connection, String resourceCategory, String dataType)
-                                                                                                throws SQLException {
-        String resourceCategoryID = UUID.randomUUID().toString();
-
-        String dataTypeID = getDataTypeID(connection, dataType);
-
-        if (dataTypeID == null) {
-            dataTypeID = UUID.randomUUID().toString();
-            addDataType(connection, dataTypeID, dataType);
-        }
-
-        final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY_ID, DATA_TYPE_ID, " +
-                "RESOURCE_CATEGORY) VALUES (?,?,?)";
+    static void addResourceCategory(Connection connection, ResourceCategory resourceCategory) throws SQLException {
+        final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY) VALUES (?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceCategoryID);
-            statement.setString(2, dataTypeID);
-            statement.setString(3, resourceCategory);
+            statement.setString(1, resourceCategory.toString());
             statement.execute();
         }
     }
 
-    @CheckForNull
-    private static String getDataTypeID(Connection connection, String dataType) throws SQLException {
-        final String query = "SELECT DATA_TYPE_ID FROM AM_RESOURCE_DATA_TYPES WHERE DATA_TYPE_NAME = ?";
-        String dataTypeID = null;
+    static void addResourceCategories(Connection connection) throws SQLException {
+        final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY) VALUES (?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, dataType);
+            statement.setString(1, ResourceCategory.SWAGGER.toString());
+            statement.addBatch();
 
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    dataTypeID = rs.getString("DATA_TYPE_ID");
-                }
-            }
-        }
+            statement.setString(1, ResourceCategory.WSDL_URI.toString());
+            statement.addBatch();
 
-        return dataTypeID;
-    }
+            statement.setString(1, ResourceCategory.IMAGE.toString());
+            statement.addBatch();
 
-    private static void addDataType(Connection connection, String dataTypeID, String dataType) throws SQLException {
-        final String query = "INSERT INTO AM_RESOURCE_DATA_TYPES (DATA_TYPE_ID, DATA_TYPE_NAME) VALUES (?,?)";
+            statement.setString(1, ResourceCategory.DOC_HOW_TO_FILE.toString());
+            statement.addBatch();
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, dataTypeID);
-            statement.setString(2, dataType);
+            statement.setString(1, ResourceCategory.DOC_HOW_TO_INLINE.toString());
+            statement.addBatch();
 
-            statement.execute();
+            statement.setString(1, ResourceCategory.DOC_HOW_TO_URL.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_OTHER_FILE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_OTHER_INLINE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_OTHER_URL.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_FILE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_INLINE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_URL.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_FILE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_INLINE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_URL.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_FILE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_INLINE.toString());
+            statement.addBatch();
+
+            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_URL.toString());
+            statement.addBatch();
+
+            statement.executeBatch();
         }
     }
 }

@@ -14,20 +14,17 @@
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  *  KIND, either express or implied.  See the License for the
  *  specific language governing permissions and limitations
+ *  under the License.
+ *
  */
-package org.wso2.carbon.apimgt.core.impl;
 
-import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+package org.wso2.carbon.apimgt.core.models;
 
 /**
- * This class used to check the permissions for users
+ * Resource visibility options
  */
- class UserAwareAPIPublisher extends APIPublisherImpl {
-
-    public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, new APILifeCycleManagerImpl());
-    }
+public enum ResourceVisibility {
+    RESOURCE_LEVEL,
+    OWNER,
+    SHARED
 }

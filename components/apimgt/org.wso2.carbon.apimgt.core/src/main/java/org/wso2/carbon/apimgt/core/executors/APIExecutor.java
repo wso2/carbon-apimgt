@@ -35,6 +35,9 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.util.Map;
 
+/**
+ * Used to execute lifecycle state changes
+ */
 public class APIExecutor implements Executor {
     private static final Logger log = LoggerFactory.getLogger(APIExecutor.class);
 

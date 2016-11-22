@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -16,14 +17,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -181,8 +182,23 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String swagger = apiPublisher.getSwagger20Definition(apiId);
+            return Response.ok().entity(swagger).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving swagger of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+
     }
     @Override
     public Response apisApiIdSwaggerPut(String apiId
@@ -191,8 +207,23 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
+            String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdThumbnailGet(String apiId
@@ -200,8 +231,27 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            InputStream imageInputStream = apiPublisher.getThumbnailImage(apiId);
+            if (imageInputStream != null) {
+                return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header
+                        ("Content-Disposition", "attachment; filename=\"thename.jpg\"").build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdThumbnailPost(String apiId
@@ -210,8 +260,35 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = "";
+        try {
+            APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
+            apiPublisher.saveThumbnailImage(apiId, fileInputStream, contentType);
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
+                    .replace(RestApiConstants.APIID_PARAM, apiId);
+//            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(MediaType.APPLICATION_OCTET_STREAM);
+/*
+            return Response.created(uri).entity(infoDTO).build();
+*/
+            return Response.status(Response.Status.CREATED).entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+//        catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
+        return null;
     }
     @Override
     public Response apisChangeLifecyclePost(String action

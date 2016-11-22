@@ -66,14 +66,23 @@ public final class BusinessInformation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         BusinessInformation that = (BusinessInformation) o;
 
-        if (!businessOwner.equals(that.businessOwner)) return false;
-        if (!businessOwnerEmail.equals(that.businessOwnerEmail)) return false;
-        if (!technicalOwner.equals(that.technicalOwner)) return false;
+        if (!businessOwner.equals(that.businessOwner)) {
+            return false;
+        }
+        if (!businessOwnerEmail.equals(that.businessOwnerEmail)) {
+            return false;
+        }
+        if (!technicalOwner.equals(that.technicalOwner)) {
+            return false;
+        }
         return technicalOwnerEmail.equals(that.technicalOwnerEmail);
 
     }

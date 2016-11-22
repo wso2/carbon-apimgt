@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 

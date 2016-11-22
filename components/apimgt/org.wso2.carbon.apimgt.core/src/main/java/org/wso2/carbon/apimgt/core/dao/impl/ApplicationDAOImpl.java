@@ -66,11 +66,37 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
                     application.setUpdatedUser(rs.getString("UPDATED_BY"));
                     application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-                    application.setTier(getSubscriptionTierName(conn, rs.getInt("APPLICATION_POLICY_ID")));
+                    application.setTier(getSubscriptionTierName(conn, rs.getString("APPLICATION_POLICY_ID")));
                 }
             }
         }
         return application;
+    }
+
+    /**
+     * Fetches an Application by name.
+     *
+     * @param applicationName Name of the Application
+     * @param userId          Name of the User.
+     * @throws SQLException
+     */
+    @Override
+    public Application getApplicationByName(String userId, String applicationName, String groupId)
+            throws SQLException {
+        return null;
+    }
+
+    /**
+     * Retrieves summary data of all available Applications that belongs to a user or a groups.
+     *
+     * @param createdUser Username of user
+     * @param groupingId  Id of group
+     * @return An array of {@link Application}
+     * @throws SQLException
+     */
+    @Override
+    public Application[] getApplications(String createdUser, String groupingId) throws SQLException {
+        return new Application[0];
     }
 
     /**
@@ -150,30 +176,30 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public void addApplication(Application application) throws SQLException {
-        final String addAppQuery = "INSERT INTO AM_APPLICATION (NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
+        final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
                              "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
-                             "LAST_UPDATED_TIME, UUID) VALUES (?, (SELECT POLICY_ID FROM AM_POLICY_APPLICATION " +
-                             "WHERE NAME = ?),?,?,?,?,?,?,?,?,?)";
+                             "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
+                             "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
             conn.setAutoCommit(false);
-            ps.setString(1, application.getName());
-            ps.setString(2, application.getTier());
-            ps.setString(3, application.getCallbackUrl());
-            ps.setString(4, application.getDescription());
+            ps.setString(1, application.getUuid());
+            ps.setString(2, application.getName());
+            ps.setString(3, application.getTier());
+            ps.setString(4, application.getCallbackUrl());
+            ps.setString(5, application.getDescription());
 
             if (APIConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
-                ps.setString(5, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+                ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
             } else {
-                ps.setString(5, APIConstants.ApplicationStatus.APPLICATION_CREATED);
+                ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_CREATED);
             }
 
-            ps.setString(6, application.getGroupId());
-            ps.setString(7, application.getCreatedUser());
-            ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
-            ps.setString(9, application.getCreatedUser());
-            ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
-            ps.setString(11, application.getUuid());
+            ps.setString(7, application.getGroupId());
+            ps.setString(8, application.getCreatedUser());
+            ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
+            ps.setString(10, application.getCreatedUser());
+            ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
             ps.executeUpdate();
             conn.commit();
         }
@@ -190,7 +216,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void updateApplication(String appID, Application updatedApp)
                                                                         throws SQLException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
-                                "(SELECT POLICY_ID FROM AM_POLICY_APPLICATION WHERE NAME=?), " +
+                                "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
                                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
                                 "LAST_UPDATED_TIME=?";
         try (Connection conn = DAOUtil.getConnection();
@@ -228,44 +254,33 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
-     * Fetches an Application by name.
+     * Check whether given application name is already available in the system
      *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @throws SQLException
+     * @param appName application name
+     * @return true if application name is already available
+     * @throws SQLException if failed to get applications for given subscriber
      */
     @Override
-    public Application getApplicationByName(String userId, String applicationName, String groupId)
-            throws SQLException {
-        return null;
-    }
+    public boolean isApplicationNameExists(String appName) throws SQLException {
+        final String query = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, appName);
+            statement.execute();
 
-    /**
-     * Retrieves the Application which is corresponding to the given UUID String
-     *
-     * @param uuid UUID of Application
-     * @return
-     * @throws SQLException
-     */
-    @Override
-    public Application getApplicationByUUID(String uuid) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean isApplicationExists(String appName, String username, String groupId) throws SQLException {
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
-    @Override
-    public Application[] getApplications(String subscriber, String groupingId) throws SQLException {
-        return new Application[0];
-    }
-
-    private String getSubscriptionTierName(Connection connection, int policyID) throws SQLException {
-        final String query = "SELECT NAME FROM AM_POLICY_APPLICATION WHERE POLICY_ID = ?";
+    private String getSubscriptionTierName(Connection connection, String policyID) throws SQLException {
+        final String query = "SELECT NAME FROM AM_APPLICATION_POLICY WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, policyID);
+            statement.setString(1, policyID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {

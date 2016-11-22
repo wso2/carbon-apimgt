@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -177,7 +176,7 @@ public final class API {
         return lifecycleState;
     }
 
-    public Set<URITemplate> getUriTemplates() {
+    public Set<UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
 
@@ -185,7 +184,7 @@ public final class API {
      * Visibility options
      */
     public enum Visibility {
-        PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
+        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
     }
 
     private final String id;
@@ -215,10 +214,9 @@ public final class API {
     private final String createdBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final Set<URITemplate> uriTemplates ;
+    private final Set<UriTemplate> uriTemplates;
 
-    @Override
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -230,8 +228,7 @@ public final class API {
         return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int result = name.hashCode();
         result = 31 * result + provider.hashCode();
         result = 31 * result + version.hashCode();
@@ -241,8 +238,7 @@ public final class API {
     /**
      * {@code API} builder static inner class.
      */
-    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
-    public static final class APIBuilder implements ManagedLifecycle{
+    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY") public static final class APIBuilder implements ManagedLifecycle {
         private String id;
         private String provider;
         private String name;
@@ -355,13 +351,14 @@ public final class API {
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<URITemplate> uriTemplates;
+        private Set<UriTemplate> uriTemplates;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
             this.version = version;
         }
+
         public APIBuilder(API copy) {
             this.id = copy.id;
             this.provider = copy.provider;
@@ -405,7 +402,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param provider the {@code provider} to set
          * @return a reference to this APIBuilder
@@ -427,7 +425,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param version the {@code version} to set
          * @return a reference to this APIBuilder
@@ -438,7 +437,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param context the {@code context} to set
          * @return a reference to this APIBuilder
@@ -449,7 +449,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param description the {@code description} to set
          * @return a reference to this APIBuilder
@@ -460,7 +461,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lifeCycleStatus the {@code lifeCycleStatus} to set
          * @return a reference to this APIBuilder
@@ -471,7 +473,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lifecycleInstanceId the {@code lifeCycleInstanceID} to set
          * @return a reference to this APIBuilder
@@ -487,13 +490,14 @@ public final class API {
          * @param lifecycleState
          * @return a reference to APIBuilder
          */
-        public APIBuilder lifecycleState(LifecycleState lifecycleState){
+        public APIBuilder lifecycleState(LifecycleState lifecycleState) {
             this.lifecycleState = lifecycleState;
             return this;
         }
 
         /**
-         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param apiDefinition the {@code apiDefinition} to set
          * @return a reference to this APIBuilder
@@ -504,7 +508,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code wsdlUri} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code wsdlUri} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param wsdlUri the {@code wsdlUri} to set
          * @return a reference to this APIBuilder
@@ -515,7 +520,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods can
+         * be chained together.
          *
          * @param isResponseCachingEnabled the {@code isResponseCachingEnabled} to set
          * @return a reference to this APIBuilder
@@ -526,7 +532,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param cacheTimeout the {@code cacheTimeout} to set
          * @return a reference to this APIBuilder
@@ -537,7 +544,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param isDefaultVersion the {@code isDefaultVersion} to set
          * @return a reference to this APIBuilder
@@ -548,7 +556,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code apiPolicy} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code apiPolicy} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param apiPolicy the {@code apiPolicy} to set
          * @return a reference to this APIBuilder
@@ -559,7 +568,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param transport the {@code transport} to set
          * @return a reference to this APIBuilder
@@ -581,7 +591,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param policies the {@code policies} to set
          * @return a reference to this APIBuilder
@@ -592,18 +603,20 @@ public final class API {
         }
 
         /**
-         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(Set<URITemplate> uriTemplates) {
+        public APIBuilder uriTemplates(Set<UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
 
         /**
-         * Sets the {@code visibility} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code visibility} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param visibility the {@code visibility} to set
          * @return a reference to this APIBuilder
@@ -614,7 +627,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code visibleRoles} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code visibleRoles} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param visibleRoles the {@code visibleRoles} to set
          * @return a reference to this APIBuilder
@@ -625,7 +639,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param endpoints the {@code endpoints} to set
          * @return a reference to this APIBuilder
@@ -636,7 +651,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param gatewayEnvironments the {@code gatewayEnvironments} to set
          * @return a reference to this APIBuilder
@@ -647,7 +663,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param businessInformation the {@code businessInformation} to set
          * @return a reference to this APIBuilder
@@ -658,7 +675,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param corsConfiguration the {@code corsConfiguration} to set
          * @return a reference to this APIBuilder
@@ -669,7 +687,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this APIBuilder
@@ -680,7 +699,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param createdBy the {@code createdBy} to set
          * @return a reference to this APIBuilder
@@ -691,7 +711,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this APIBuilder
@@ -719,8 +740,7 @@ public final class API {
          *
          * @param lifecycleState Lifecycle state object.
          */
-        @Override
-        public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
+        @Override public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
             lifecycleInstanceId = lifecycleState.getLifecycleId();
             lifeCycleStatus = lifecycleState.getState();
             this.lifecycleState = lifecycleState;
@@ -733,8 +753,7 @@ public final class API {
          *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
          *               method.
          */
-        @Override
-        public void dissociateLifecycle(String lcName) throws LifecycleException {
+        @Override public void dissociateLifecycle(String lcName) throws LifecycleException {
         }
 
         /**
@@ -743,8 +762,7 @@ public final class API {
          *                       operation and check list
          *                       item operation
          */
-        @Override
-        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
+        @Override public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
             lifeCycleStatus = lifecycleState.getState();
             this.lifecycleState = lifecycleState;
         }
@@ -769,7 +787,7 @@ public final class API {
             return lastUpdatedTime;
         }
 
-        public Set<URITemplate> getUriTemplates() {
+        public Set<UriTemplate> getUriTemplates() {
             return uriTemplates;
         }
 
