@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -207,6 +208,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
+            application.setCreatedTime(LocalDateTime.now());
             String applicationUUID = apiConsumer.addApplication(application);
 
             //retrieves the created application and send as the response
@@ -223,7 +225,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         "An application already exists with name " + body.getName(), e,
                         log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
+                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + "fazlan",
                         e, log);
             }
         }

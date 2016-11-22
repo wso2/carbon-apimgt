@@ -232,11 +232,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplicationByUUID(String uuid) throws APIManagementException {
         Application application = null;
         try {
-           getApplicationDAO().getApplication(uuid);
+           application = getApplicationDAO().getApplication(uuid);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
-        return  application;
+        return application;
     }
 
     protected ApiDAO getApiDAO() {
