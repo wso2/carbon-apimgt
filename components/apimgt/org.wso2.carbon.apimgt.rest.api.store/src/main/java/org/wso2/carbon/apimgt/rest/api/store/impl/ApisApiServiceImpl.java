@@ -5,8 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -40,8 +39,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
-            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
+            ArtifactResourceMetaData artifactResourceMetaData = apiStore.getDocumentationSummary(documentId);
+            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(artifactResourceMetaData);
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId, e, log);
@@ -59,9 +58,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            DocumentInfoResults documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
+            List<ArtifactResourceMetaData> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
             documentListDTO = DocumentationMappingUtil
-                    .fromDocumentationListToDTO(documentInfoResults.getDocumentInfoList(), offset, limit);
+                    .fromDocumentationListToDTO(documentInfoResults, offset, limit);
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId, e, log);
