@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -383,13 +384,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API
-     * @param documentation Documentat Summary
+     * @param metaData      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
+    public void addDocumentationInfo(String apiId, ArtifactResourceMetaData metaData) throws APIManagementException {
         try {
-            getApiDAO().addDocumentationInfo(apiId, documentation);
+            getApiDAO().addArtifactResourceMetaData(apiId, metaData);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
@@ -398,18 +399,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param apiId         UUID of API
-     * @param documentation Document Summary
-     * @param filename      name of the file
+     * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
-     * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                         String contentType) throws APIManagementException {
+    public void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
         try {
-            getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
+            getApiDAO().updateBinaryResourceContent(resourceId, content);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
@@ -424,7 +421,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void removeDocumentation(String docId) throws APIManagementException {
         try {
-            getApiDAO().removeDocumentation(docId);
+            getApiDAO().deleteResource(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
@@ -686,9 +683,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public void saveThumbnailImage(String apiId, InputStream inputStream) throws APIManagementException {
+    public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
+                                                                            throws APIManagementException {
         try {
-            getApiDAO().addThumbnailImage(apiId, inputStream);
+            getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't save the thumbnail image", e, log);
         }

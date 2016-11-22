@@ -263,7 +263,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
-            apiPublisher.saveThumbnailImage(apiId,fileInputStream);
+            apiPublisher.saveThumbnailImage(apiId, fileInputStream, contentType);
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
 //            URI uri = new URI(uriString);

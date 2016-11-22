@@ -33,13 +33,14 @@ public class DAOIntegrationTestBase {
     @org.testng.annotations.BeforeMethod
     public void setUp() throws Exception {
         dataSource = new InMemoryDataSource();
+        ((InMemoryDataSource) dataSource).resetDB();
         DAOUtil.initialize(dataSource);
         try (Connection connection = DAOUtil.getConnection()) {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
     }
 
-    @org.testng.annotations.AfterMethod
+    @org.testng.annotations.AfterClass
     public void tempDBCleanup() throws SQLException, IOException {
         ((InMemoryDataSource) dataSource).resetDB();
     }

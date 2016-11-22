@@ -27,9 +27,9 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -60,7 +60,7 @@ public class APIManagerFactory {
         try {
             return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Provider", e, log);
         }
         return null;
@@ -73,7 +73,7 @@ public class APIManagerFactory {
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Consumer", e, log);
         }
         return null;
