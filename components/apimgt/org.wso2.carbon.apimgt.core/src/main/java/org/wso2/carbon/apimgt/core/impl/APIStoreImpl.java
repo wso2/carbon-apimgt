@@ -64,7 +64,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public Application getApplicationsByName(String userId, String applicationName, java.lang.String groupId)
+    @Override public Application getApplicationByName(String userId, String applicationName, java.lang.String groupId)
             throws APIManagementException {
         Application application = null;
         try {

@@ -57,6 +57,10 @@
             <artifactId>jackson-jaxrs-base</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
             <exclusions>
@@ -241,6 +245,10 @@
                                 <bundle>
                                     <symbolicName>com.google.gson</symbolicName>
                                     <version>${google.code.gson.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.commons.lang3</symbolicName>
+                                    <version>${apache.commons.lang3.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

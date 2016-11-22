@@ -1,0 +1,32 @@
+<header class="header header-default">
+    <div class="container-fluid">
+        <div class="pull-left brand float-remove-xs text-center-xs">
+            <a href="{{@contextPath}}/">
+                <img src="{{public "images/logo-white.png"}}" class="logo" />
+                <h1>{{@config.appName}}</h1>
+            </a>
+        </div>
+
+        <ul class="nav navbar-right float-remove-xs text-center-xs">
+            <li class="visible-inline-block">
+                <a title="user account" href="#" class="dropdown" data-toggle="dropdown">
+					            <span class="icon fw-stack fw-lg">
+					               <i class="fw fw-circle-outline fw-stack-2x"></i>
+					               <i class="fw fw-user fw-stack-1x"></i>
+					            </span>
+                    <span class="hidden-xs"> &nbsp; {{user.username}}<span class="caret"></span></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+                    <li class="dropdown-header visible-xs">&nbsp; admin <span class="caret"></span></li>
+
+                    <li><a title="My Account" href="/store/site/pages/user-info.jag"><i class="fw fw-settings"></i> &nbsp; My Account</a></li>
+
+                    <li class="divider visible-xs"></li>
+                    <li><a title="Sign Out" href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Sign Out</a></li>
+                </ul>
+            </li>
+        </ul>
+        <!-- TODO: Check and include relevant -->
+        <!--  -->
+    </div>
+</header>

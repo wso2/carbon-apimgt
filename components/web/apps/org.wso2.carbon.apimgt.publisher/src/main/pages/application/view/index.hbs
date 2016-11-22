@@ -1,0 +1,104 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Applications | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    <!-- navbar -->
+    <div class="navbar-wrapper ">
+        <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
+            <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="false" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
+                        </span>
+            </a>
+
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+
+                        <li>
+                            <a title="Add Application" href="/store/site/pages/application-add.jag">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                                Add Application
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div><!--/.nav-collapse -->
+            </div>
+
+        </nav>
+    </div>
+
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header" id="Message">
+        <h2 id="application_name">Default Application</h2>
+    </div>
+    <!-- Nav tabs -->
+    <div class="white-wrapper">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" id="details-tab" class="active"><a title="Details" href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>
+
+            <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
+            <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>
+            <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
+
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="details">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Status</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static"><strong>APPROVED</strong></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Per Token Quota</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static"><strong>Unlimited</strong>&nbsp;&nbsp;&nbsp;Unlimited Access</p>
+                            <p>This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Description</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static">Not Given</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div role="tabpanel" class="tab-pane fade production-keys" id="production">
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="subscription">
+
+            </div>
+
+        </div>
+    </div>
+
+{{/fillZone}}

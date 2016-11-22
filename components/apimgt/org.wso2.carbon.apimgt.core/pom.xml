@@ -129,6 +129,10 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -183,6 +187,7 @@
             com.google.gson.*,
             io.swagger.parser.*,
             org.json.simple.*,
+            org.apache.commons.lang3.*,
             org.apache.commons.io.*;
         </import.package>
         <export.package>
