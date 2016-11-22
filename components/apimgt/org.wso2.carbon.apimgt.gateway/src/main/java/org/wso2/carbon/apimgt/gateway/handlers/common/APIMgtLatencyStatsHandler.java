@@ -33,8 +33,6 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, Long.toString(System
                     .currentTimeMillis()));
         }
-        long currentTime = System.currentTimeMillis();
-        messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
         return true;
     }
 
