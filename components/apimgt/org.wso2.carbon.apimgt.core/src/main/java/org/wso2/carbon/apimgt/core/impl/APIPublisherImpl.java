@@ -163,12 +163,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         API createdAPI;
-        if (apiBuilder.getId() == null) {
+        if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
-        if (apiBuilder.getApiDefinition() == null) {
-            APIUtils.logAndThrowException("Couldn't find swagger definition of API " + apiBuilder.getName(), log);
+        if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+            APIUtils.logAndThrowException("Couldn't find swagger definition of API ", log);
         }
+        if (StringUtils.isEmpty(apiBuilder.getName())) {
+            APIUtils.logAndThrowException("Couldn't find Name of API ", log);
+        }
+        if (StringUtils.isEmpty(apiBuilder.getContext())) {
+            APIUtils.logAndThrowException("Couldn't find Context of API ", log);
+        }
+        if (StringUtils.isEmpty(apiBuilder.getVersion())) {
+            APIUtils.logAndThrowException("Couldn't find Version of API ", log);
+        }
+        if (apiBuilder.getTransport().isEmpty()) {
+            APIUtils.logAndThrowException("Couldn't find Transport of API ", log);
+        }
+        if (apiBuilder.getPolicies().isEmpty()) {
+            APIUtils.logAndThrowException("Couldn't find Policies of API ", log);
+        }
+        if (apiBuilder.getVisibility() != null) {
+            APIUtils.logAndThrowException("Couldn't find Visibility of API ", log);
+        }
+
+        apiBuilder.provider(getUsername());
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -216,6 +236,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         apiBuilder.lastUpdatedTime(LocalDateTime.now());
+        apiBuilder.provider(getUsername());
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {

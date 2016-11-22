@@ -156,7 +156,7 @@ public class APIPublisherImplTestCase {
     void updateAPIWithStatusUnchanged() throws APIManagementException, APIMgtDAOException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, null,
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
                 apiLifecycleManager);
         Mockito.when(apiDAO.updateAPI(uuid, new API.APIBuilder(user, "Sample",
                 "1.0.0").build())).thenReturn(new API.APIBuilder(user, "Sample", "1.0.0").build());
