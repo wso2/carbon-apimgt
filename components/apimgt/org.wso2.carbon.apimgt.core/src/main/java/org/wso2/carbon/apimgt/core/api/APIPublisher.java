@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -145,23 +146,19 @@ public interface APIPublisher extends APIManager {
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API
-     * @param documentation Documentat Summary
+     * @param metaData      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException;
+    void addDocumentationInfo(String apiId, ArtifactResourceMetaData metaData) throws APIManagementException;
 
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param apiId         UUID of API
-     * @param documentation Document Summary
-     * @param filename      name of the file
+     * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
-     * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
-    void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                  String contentType) throws APIManagementException;
+    void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException;
 
     /**
      * Removes a given documentation
@@ -304,7 +301,7 @@ public interface APIPublisher extends APIManager {
      * @param inputStream inputStream of image
      * @throws APIManagementException
      */
-   void saveThumbnailImage(String apiId, InputStream inputStream) throws APIManagementException;
+   void saveThumbnailImage(String apiId, InputStream inputStream, String dataType) throws APIManagementException;
 
 
     /**

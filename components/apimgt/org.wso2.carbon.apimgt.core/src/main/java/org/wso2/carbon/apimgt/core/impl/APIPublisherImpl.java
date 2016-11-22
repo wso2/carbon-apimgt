@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -163,12 +164,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         API createdAPI;
-        if (apiBuilder.getId() == null) {
+        if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
-        if (apiBuilder.getApiDefinition() == null) {
-            APIUtils.logAndThrowException("Couldn't find swagger definition of API " + apiBuilder.getName(), log);
+        if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+            APIUtils.logAndThrowException("Couldn't find swagger definition of API ", log);
         }
+        if (StringUtils.isEmpty(apiBuilder.getName())) {
+            APIUtils.logAndThrowException("Couldn't find Name of API ", log);
+        }
+        if (StringUtils.isEmpty(apiBuilder.getContext())) {
+            APIUtils.logAndThrowException("Couldn't find Context of API ", log);
+        }
+        if (StringUtils.isEmpty(apiBuilder.getVersion())) {
+            APIUtils.logAndThrowException("Couldn't find Version of API ", log);
+        }
+        if (apiBuilder.getTransport().isEmpty()) {
+            APIUtils.logAndThrowException("Couldn't find Transport of API ", log);
+        }
+        if (apiBuilder.getPolicies().isEmpty()) {
+            APIUtils.logAndThrowException("Couldn't find Policies of API ", log);
+        }
+        if (apiBuilder.getVisibility() != null) {
+            APIUtils.logAndThrowException("Couldn't find Visibility of API ", log);
+        }
+
+        apiBuilder.provider(getUsername());
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -216,6 +237,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         apiBuilder.lastUpdatedTime(LocalDateTime.now());
+        apiBuilder.provider(getUsername());
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
@@ -362,13 +384,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API
-     * @param documentation Documentat Summary
+     * @param metaData      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(String apiId, DocumentInfo documentation) throws APIManagementException {
+    public void addDocumentationInfo(String apiId, ArtifactResourceMetaData metaData) throws APIManagementException {
         try {
-            getApiDAO().addDocumentationInfo(apiId, documentation);
+            getApiDAO().addArtifactResourceMetaData(apiId, metaData);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
@@ -377,18 +399,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param apiId         UUID of API
-     * @param documentation Document Summary
-     * @param filename      name of the file
+     * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
-     * @param contentType   content type of the file
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void addDocumentationWithFile(String apiId, DocumentInfo documentation, String filename, InputStream content,
-                                         String contentType) throws APIManagementException {
+    public void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
         try {
-            getApiDAO().addDocumentationWithFile(apiId, documentation, filename, content, contentType);
+            getApiDAO().updateBinaryResourceContent(resourceId, content);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
@@ -403,7 +421,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void removeDocumentation(String docId) throws APIManagementException {
         try {
-            getApiDAO().removeDocumentation(docId);
+            getApiDAO().deleteResource(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
@@ -665,9 +683,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException
      */
     @Override
-    public void saveThumbnailImage(String apiId, InputStream inputStream) throws APIManagementException {
+    public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
+                                                                            throws APIManagementException {
         try {
-            getApiDAO().addThumbnailImage(apiId, inputStream);
+            getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't save the thumbnail image", e, log);
         }

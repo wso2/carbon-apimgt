@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.Arrays;
 
 
 public class SampleObjectCreator {
@@ -271,7 +271,8 @@ public class SampleObjectCreator {
                 "    name: John Doe\n" +
                 "    url: 'http://www.pizzashack.com'\n" +
                 "  version: 1.0.0").createdTime(LocalDateTime.now()).lastUpdatedTime
-                (LocalDateTime.now());
+                (LocalDateTime.now()).transport(Arrays.asList(new String[]{"HTTP"})).policies(Arrays.asList(new
+                String[]{"Unlimited"}));
     }
 
     public static LifecycleState getMockLifecycleStateObject() {

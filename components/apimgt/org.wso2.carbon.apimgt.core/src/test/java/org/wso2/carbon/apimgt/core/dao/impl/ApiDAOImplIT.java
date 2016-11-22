@@ -34,7 +34,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddGetAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 
@@ -49,7 +49,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testDeleteAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 
@@ -63,7 +63,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testUpdateAPI() throws Exception {
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
 

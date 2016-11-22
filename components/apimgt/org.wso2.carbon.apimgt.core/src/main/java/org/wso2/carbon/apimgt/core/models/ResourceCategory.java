@@ -18,19 +18,29 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao.impl;
+package org.wso2.carbon.apimgt.core.models;
 
 /**
- * This class represent Resource Constants.
+ * This class represents Resource Categories supported for {@code ArtifactResourceMetaData}.
  */
-public class ResourceConstants {
 
-    /**
-     * Enum for Resource Types.
-     */
-    public enum ResourceType {
-        SWAGGER,
-        WSDL_URI,
-        IMAGE
-    }
+public enum ResourceCategory {
+    SWAGGER,
+    WSDL_URI,
+    IMAGE,
+    DOC_HOW_TO_INLINE,
+    DOC_HOW_TO_URL,
+    DOC_HOW_TO_FILE,
+    DOC_SAMPLE_AND_SDK_INLINE,
+    DOC_SAMPLE_AND_SDK_URL,
+    DOC_SAMPLE_AND_SDK_FILE,
+    DOC_PUBLIC_FORUM_INLINE,
+    DOC_PUBLIC_FORUM_URL,
+    DOC_PUBLIC_FORUM_FILE,
+    DOC_SUPPORT_FORUM_INLINE,
+    DOC_SUPPORT_FORUM_URL,
+    DOC_SUPPORT_FORUM_FILE,
+    DOC_OTHER_INLINE,
+    DOC_OTHER_URL,
+    DOC_OTHER_FILE
 }
