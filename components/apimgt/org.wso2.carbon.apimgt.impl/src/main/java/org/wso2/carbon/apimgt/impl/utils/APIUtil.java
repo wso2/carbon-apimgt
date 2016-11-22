@@ -6247,33 +6247,22 @@ public final class APIUtil {
         }
     }
 
-    public static boolean isQueryParamDataPublishingEnabled() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                                            getThrottleProperties().isEnableQueryParamConditions();
-    }
+    /**
+     * Create the Cache object from the given parameters
+     * @param cacheManagerName - Name of the Cache Manager
+     * @param cacheName - Name of the Cache
+     * @param modifiedExp - Value of the MODIFIED Expiry Type
+     * @param accessExp - Value of the ACCESSED Expiry Type
+     * @return - The cache object
+     */
+    public static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
+                          final long accessExp){
 
-    public static boolean isHeaderDataPublishingEnabled() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getThrottleProperties().isEnableHeaderConditions();
-    }
-
-    public static boolean isJwtTokenPublishingEnabled() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getThrottleProperties().isEnableJwtConditions();
-    }
-
-    public static String getAnalyticsServerURL() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
-                getDasServerUrl();
-    }
-
-    public static String getAnalyticsServerUserName() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
-                getDasReceiverServerUser();
-    }
-
-    public static String getAnalyticsServerPassword() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
-                getDasReceiverServerPassword();
+        return Caching.getCacheManager(
+                cacheManagerName).createCacheBuilder(cacheName).
+                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                        modifiedExp)).
+                setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                        accessExp)).setStoreByValue(false).build();
     }
 }
