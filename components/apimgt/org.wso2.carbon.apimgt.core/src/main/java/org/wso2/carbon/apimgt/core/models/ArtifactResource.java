@@ -21,28 +21,36 @@
 package org.wso2.carbon.apimgt.core.models;
 
 /**
- * Meta data of a generic resource associated with an artifact such as an API(For example: images, documents,
- * text). Only immutable instances of this class can be created via the provided inner static {@code Builder} class
+ * Generic resource associated with an artifact such as an API(For example: images, documents, text).
+ * Resources with text values are transported as part of the class. But in the case of a file resource, the actual file
+ * needs to be obtained separately as a stream(This has been done so that the REST API can support file downloads and
+ * uploads separately as application/octet-stream where the rest of the meta data associated with the resource can be
+ * transported as application/json).
+ *
+ * Only immutable instances of this class can be created via the provided inner static {@code Builder} class
  * which implements the builder pattern as outlined in "Effective Java 2nd Edition by Joshua Bloch(Item 2)"
  */
 
-public final class ArtifactResourceMetaData {
+public final class ArtifactResource {
     private final String id;
     private final String name;
     private final String description;
     private final ResourceCategory category;
+    private final String customCategory;
     private final String dataType;
+    private final String textValue;
     private final ResourceVisibility visibility;
 
-    private ArtifactResourceMetaData(Builder builder) {
+    private ArtifactResource(Builder builder) {
         id = builder.id;
         name = builder.name;
         description = builder.description;
         category = builder.category;
+        customCategory = builder.customCategory;
         dataType = builder.dataType;
+        textValue = builder.textValue;
         visibility = builder.visibility;
     }
-
 
     public String getId() {
         return id;
@@ -60,8 +68,16 @@ public final class ArtifactResourceMetaData {
         return category;
     }
 
+    public String getCustomCategory() {
+        return customCategory;
+    }
+
     public String getDataType() {
         return dataType;
+    }
+
+    public String getTextValue() {
+        return textValue;
     }
 
     public ResourceVisibility getVisibility() {
@@ -69,25 +85,29 @@ public final class ArtifactResourceMetaData {
     }
 
     /**
-     * {@code ArtifactResourceMetaData} builder static inner class.
+     * {@code ArtifactResource} builder static inner class.
      */
     public static final class Builder {
         private String id;
         private String name;
         private String description;
         private ResourceCategory category;
+        private String customCategory;
         private String dataType;
+        private String textValue;
         private ResourceVisibility visibility;
 
         public Builder() {
         }
 
-        public Builder(ArtifactResourceMetaData copy) {
+        public Builder(ArtifactResource copy) {
             this.id = copy.id;
             this.name = copy.name;
             this.description = copy.description;
             this.category = copy.category;
+            this.customCategory = copy.customCategory;
             this.dataType = copy.dataType;
+            this.textValue = copy.textValue;
             this.visibility = copy.visibility;
         }
 
@@ -138,6 +158,18 @@ public final class ArtifactResourceMetaData {
         }
 
         /**
+         * Sets the {@code customCategory} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param customCategory the {@code customCategory} to set
+         * @return a reference to this Builder
+         */
+        public Builder customCategory(String customCategory) {
+            this.customCategory = customCategory;
+            return this;
+        }
+
+        /**
          * Sets the {@code dataType} and returns a reference to this Builder
          * so that the methods can be chained together.
          *
@@ -146,6 +178,18 @@ public final class ArtifactResourceMetaData {
          */
         public Builder dataType(String dataType) {
             this.dataType = dataType;
+            return this;
+        }
+
+        /**
+         * Sets the {@code textValue} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param textValue the {@code textValue} to set
+         * @return a reference to this Builder
+         */
+        public Builder textValue(String textValue) {
+            this.textValue = textValue;
             return this;
         }
 
@@ -162,13 +206,12 @@ public final class ArtifactResourceMetaData {
         }
 
         /**
-         * Returns a {@code ArtifactResourceMetaData} built from the parameters previously set.
+         * Returns a {@code ArtifactResource} built from the parameters previously set.
          *
-         * @return a {@code ArtifactResourceMetaData} built with parameters
-         * of this {@code ArtifactResourceMetaData.Builder}
+         * @return a {@code ArtifactResource} built with parameters of this {@code ArtifactResource.Builder}
          */
-        public ArtifactResourceMetaData build() {
-            return new ArtifactResourceMetaData(this);
+        public ArtifactResource build() {
+            return new ArtifactResource(this);
         }
     }
 }
