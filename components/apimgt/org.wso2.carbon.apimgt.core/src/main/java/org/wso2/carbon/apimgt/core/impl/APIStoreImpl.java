@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +69,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         Application application = null;
         try {
             application = getApplicationDAO().getApplicationByName(applicationName, ownerId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException(
                     "Error occurred while fetching application for the given applicationName - " + applicationName
                             + " with groupId - " + groupId, e, log);
@@ -82,7 +81,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         Application[] applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException(
                     "Error occurred while fetching applications for the given subscriber - " + subscriber
                             + " with groupId - " + groupId, e, log);
@@ -93,7 +92,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
             getApplicationDAO().updateApplication(uuid, application);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while updating application - " + application.getName(), e,
                     log);
         }
@@ -121,7 +120,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public void deleteApplication(Application application) throws APIManagementException {
         try {
             getApplicationDAO().deleteApplication(application.getUuid());
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while deleting application - " + application.getName(), e,
                     log);
         }
@@ -138,8 +137,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application.setUuid(generatedUuid);
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
+            APIUtils.logDebug("successfully added application with appId " + application.getUuid(), log);
             applicationUuid = application.getUuid();
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
         }
         return applicationUuid;

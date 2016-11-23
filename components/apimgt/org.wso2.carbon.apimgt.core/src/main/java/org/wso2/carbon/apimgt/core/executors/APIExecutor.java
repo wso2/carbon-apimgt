@@ -20,14 +20,16 @@
 
 package org.wso2.carbon.apimgt.core.executors;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -92,8 +94,31 @@ public class APIExecutor implements Executor {
                 }
                 apiPublisher.updateAPIForStateChange(api.getId(), targetState, deprecateOlderVersions,
                         requireReSubscriptions);
+
+                gatewayPublishing(api, targetState);
             } catch (APIManagementException e) {
                 throw new LifecycleException("Couldn't create APIPublisher from user", e);
+            }
+        }
+    }
+
+    /**
+     * Publishing new API configurations to the subscribers
+     *
+     * @param api         API object
+     * @param targetState target state
+     */
+    private void gatewayPublishing(API api, String targetState) {
+        if (targetState.equalsIgnoreCase(APIStatus.PUBLISHED.getStatus())) {
+            APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
+            boolean isPublished = gateway.publishToGateway(api);
+            if (isPublished) {
+                APIUtils.logDebug(
+                        "API " + api.getName() + "-" + api.getVersion() + " was published to gateway successfully.",
+                        log);
+            } else {
+                APIUtils.logDebug(
+                        "Error when publishing API " + api.getName() + "-" + api.getVersion() + " to gateway.", log);
             }
         }
     }

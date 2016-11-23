@@ -24,8 +24,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -67,7 +65,7 @@ public class AbstractAPIManagerTestCase {
 
             Assert.assertNotNull(application);
             verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.assertTrue(false);
         }
     }
