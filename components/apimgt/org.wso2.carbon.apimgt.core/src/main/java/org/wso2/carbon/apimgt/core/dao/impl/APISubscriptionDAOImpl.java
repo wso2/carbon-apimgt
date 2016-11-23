@@ -123,10 +123,10 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      */
     @Override
     public void addAPISubscription(APISubscription subscription) throws APIMgtDAOException {
-        final String CHECK_EXISTING_SUBSCRIPTION_SQL = " SELECT UUID FROM AM_SUBSCRIPTION WHERE API_ID = ? " +
+        final String checkExistingSubscriptionSql = " SELECT UUID FROM AM_SUBSCRIPTION WHERE API_ID = ? " +
                 "AND APPLICATION_ID = ?";
         try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(CHECK_EXISTING_SUBSCRIPTION_SQL)) {
+             PreparedStatement ps = conn.prepareStatement(checkExistingSubscriptionSql)) {
             ps.setString(1, subscription.getApiId());
             ps.setString(2, subscription.getApplication().getUuid());
             try (ResultSet rs = ps.executeQuery()) {
@@ -140,11 +140,11 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             throw new APIMgtDAOException(e);
         }
 
-        final String ADD_SUBSCRIPTION_SQL = "INSERT INTO AM_SUBSCRIPTION (UUID, TIER_ID, API_ID, APPLICATION_ID," +
+        final String addSubscriptionSql = "INSERT INTO AM_SUBSCRIPTION (UUID, TIER_ID, API_ID, APPLICATION_ID," +
                 "SUB_STATUS, SUBS_TYPE, CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?,?)";
 
         try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(ADD_SUBSCRIPTION_SQL)) {
+             PreparedStatement ps = conn.prepareStatement(addSubscriptionSql)) {
             ps.setString(1, subscription.getId());
             ps.setString(2, subscription.getApplication().getTier());
             ps.setString(3, subscription.getApplication().getUuid());

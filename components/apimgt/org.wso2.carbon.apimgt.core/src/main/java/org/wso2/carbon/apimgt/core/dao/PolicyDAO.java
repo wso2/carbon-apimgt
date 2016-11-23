@@ -30,7 +30,7 @@ public interface PolicyDAO {
     /**
      * Retrieves the name of Subscription Policy
      *
-     * @param policyID  Subscription policy ID
+     * @param policyId  Subscription policy ID
      * @return Tier name of given Subscription policy ID
      * @throws SQLException
      */
