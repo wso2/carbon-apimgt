@@ -1,5 +1,5 @@
 appName : API Publisher
-theme : "org.wso2.carbon.apimgt.web.store.theme.default"
+theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
 title : "API Publisher Application"
 menu :
   main :
