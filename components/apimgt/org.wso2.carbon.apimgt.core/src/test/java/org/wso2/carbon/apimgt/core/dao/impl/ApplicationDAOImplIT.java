@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
 import java.time.Duration;
 
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
@@ -80,6 +80,35 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testGetAllApplications() throws Exception {
+        //add 4 apps
+        String username = "admin";
+        Application app1 = addCustomApplication("App1", username);
+        Application app2 = addCustomApplication("App2", username);
+        Application app3 = addCustomApplication("App3", username);
+        Application app4 = addCustomApplication("App4", username);
+        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //get added apps
+        Application[] appsFromDB = applicationDAO.getApplications(username);
+        Assert.assertNotNull(appsFromDB);
+        Assert.assertEquals(appsFromDB.length, 4);
+        for (Application application : appsFromDB) {
+            Assert.assertNotNull(application);
+            if (application.getName().equals(app1.getName())) {
+                validateApp(application, app1);
+            } else if (application.getName().equals(app2.getName())) {
+                validateApp(application, app2);
+            } else if (application.getName().equals(app3.getName())) {
+                validateApp(application, app3);
+            } else if (application.getName().equals(app4.getName())) {
+                validateApp(application, app4);
+            } else {
+                Assert.fail("Invalid Application returned.");
+            }
+        }
+    }
+
+    @Test
     public void testGetApplicationsForUser() throws Exception {
 
     }
@@ -108,15 +137,22 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
         Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000L,
-                          "Application created time is not the same!");
+                "Application created time is not the same!");
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
         Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000L,
-                          "Application updated time is not the same!");
+                "Application updated time is not the same!");
     }
 
-    private Application addTestApplication() throws SQLException {
+    private Application addTestApplication() throws APIMgtDAOException {
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application application = SampleTestObjectCreator.createDefaultApplication();
+        applicationDAO.addApplication(application);
+        return application;
+    }
+
+    private Application addCustomApplication(String applicationName, String owner) throws APIMgtDAOException {
+        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
         applicationDAO.addApplication(application);
         return application;
     }

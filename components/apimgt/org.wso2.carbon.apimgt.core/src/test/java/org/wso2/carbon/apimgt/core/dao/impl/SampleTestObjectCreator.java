@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.core.models.Environment;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -238,6 +237,20 @@ public class SampleTestObjectCreator {
         application.setStatus("APPROVED");
         application.setTier("silver");
         application.setUpdatedUser("admin2");
+        application.setUpdatedTime(LocalDateTime.now());
+        return application;
+    }
+
+    static Application createCustomApplication(String applicationName, String owner){
+        Application application = new Application(applicationName, owner);
+        application.setUuid(UUID.randomUUID().toString());
+        application.setCallbackUrl("http://localhost/myapp");
+        application.setDescription("This is a test application");
+        application.setGroupId("groupx");
+        application.setStatus("CREATED");
+        application.setTier("gold");
+        application.setCreatedTime(LocalDateTime.now());
+        application.setUpdatedUser("admin");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
     }

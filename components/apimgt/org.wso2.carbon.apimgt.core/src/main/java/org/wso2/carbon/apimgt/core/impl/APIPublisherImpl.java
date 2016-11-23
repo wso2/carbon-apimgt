@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +143,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
        long subscriptionCount = 0;
         try {
             subscriptionCount =  getApiSubscriptionDAO().getAPISubscriptionCountByAPI(id);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't retrieve Subscriptions for API " + id, e, log);
         }
         return subscriptionCount;
@@ -647,8 +646,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
 
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
-        } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
         }
     }

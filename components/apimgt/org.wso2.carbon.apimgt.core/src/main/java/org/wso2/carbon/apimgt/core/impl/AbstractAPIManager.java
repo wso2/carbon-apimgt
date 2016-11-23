@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 /**
@@ -235,7 +234,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Application application = null;
         try {
            application = getApplicationDAO().getApplication(uuid, userId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return application;
