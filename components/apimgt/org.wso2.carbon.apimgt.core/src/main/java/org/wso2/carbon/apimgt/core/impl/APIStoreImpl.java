@@ -82,6 +82,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         Application[] applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
+
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
                     "Error occurred while fetching applications for the given subscriber - " + subscriber
@@ -93,6 +94,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
             getApplicationDAO().updateApplication(uuid, application);
+            APIUtils.logDebug("successfully updated application with appId " + uuid, log);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while updating application - " + application.getName(), e,
                     log);
@@ -121,6 +123,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public void deleteApplication(Application application) throws APIManagementException {
         try {
             getApplicationDAO().deleteApplication(application.getUuid());
+            APIUtils.logDebug("successfully deleted application with appId " + application.getUuid(), log);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while deleting application - " + application.getName(), e,
                     log);
@@ -138,6 +141,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application.setUuid(generatedUuid);
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
+            APIUtils.logDebug("successfully added application with appId " + application.getUuid(), log);
             applicationUuid = application.getUuid();
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
