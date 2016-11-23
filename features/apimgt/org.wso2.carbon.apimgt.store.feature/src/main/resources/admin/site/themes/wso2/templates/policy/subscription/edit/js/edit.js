@@ -5,6 +5,7 @@ var addSubscriptionPolicy = function () {
         return;
     }
     var attributes =  getCustomAttributesArray();
+    $('#add-tier-btn').buttonLoader('start');
     jagg.post("/site/blocks/policy/subscription/edit/ajax/subscription-policy-edit.jag", {
         action:$('#policyAction').val(),
         policyName:$('#policyName').val(),
@@ -27,6 +28,7 @@ var addSubscriptionPolicy = function () {
             if (result.error == false) {
                 location.href = 'subscription-policy-manage'
             } else {
+                $('#add-tier-btn').buttonLoader('stop');
                 jagg.message({content:result.message,type:"error"});
             }
         },

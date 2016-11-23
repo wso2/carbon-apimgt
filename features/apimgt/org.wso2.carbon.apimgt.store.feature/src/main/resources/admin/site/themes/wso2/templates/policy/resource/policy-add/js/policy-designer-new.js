@@ -608,6 +608,7 @@ var addPolicyToBackend = function () {
     }
 
     var value = $("#action").val();
+    $('#addThrottleBtn').buttonLoader('start');
     var action;
     if(value == "new") {
        action =  "addApiPolicy";
@@ -622,6 +623,7 @@ var addPolicyToBackend = function () {
         if (!data.error) {
             location.href = 'api-policy-list';
         } else {
+            $('#addThrottleBtn').buttonLoader('stop');
             jagg.message({content:data.error.message,type:"error"});
         }
     }, "json");
