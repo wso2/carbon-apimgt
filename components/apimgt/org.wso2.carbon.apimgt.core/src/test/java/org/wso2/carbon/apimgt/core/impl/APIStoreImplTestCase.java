@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -37,6 +38,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -58,20 +60,17 @@ public class APIStoreImplTestCase {
     private static final String GROUP_ID = "groupdid";
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
+    public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
     @Test(description = "Search APIs")
-    public void searchAPIs() {
-        try {
-            ApiDAO apiDAO = mock(ApiDAO.class);
-            APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
-            List<API> apimResultsFromDAO = new ArrayList<>();
-            when(apiDAO.searchAPIs("")).thenReturn(apimResultsFromDAO);
-            List<API> apis = apiStore.searchAPIs("", 1, 2);
-            Assert.assertNotNull(apis);
-            verify(apiDAO, atLeastOnce()).searchAPIs("");
-        } catch (APIManagementException | APIMgtDAOException e) {
-            Assert.fail(e.getMessage());
-        }
+    public void searchAPIs() throws APIMgtDAOException, APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
+        List<API> apimResultsFromDAO = new ArrayList<>();
+        when(apiDAO.searchAPIs("")).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIs("", 1, 2);
+        Assert.assertNotNull(apis);
+        verify(apiDAO, atLeastOnce()).searchAPIs("");
     }
     
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
@@ -91,43 +90,51 @@ public class APIStoreImplTestCase {
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
         List<API> expectedAPIs = new ArrayList<API>();
         when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED ))).thenReturn(expectedAPIs);
-
         List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] { STATUS_CREATED, STATUS_PUBLISHED });
         Assert.assertNotNull(actualAPIs);
         verify(apiDAO, times(1)).getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED ));
     }
 
     @Test(description = "Retrieve an application by name")
-    public void testGetApplicationByName () {
-        try {
-            ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-            APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
-            Application applicationFromDAO = new Application(APP_NAME, null);
-            when(applicationDAO.getApplicationByName(USER_ID, APP_NAME))
-                    .thenReturn(applicationFromDAO);
-
-            Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
-            Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME);
-        } catch (APIManagementException | SQLException e) {
-            Assert.assertTrue(false);
-        }
+    public void testGetApplicationByName () throws SQLException, APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
+        Application applicationFromDAO = new Application(APP_NAME, null);
+        when(applicationDAO.getApplicationByName(USER_ID, APP_NAME))
+                .thenReturn(applicationFromDAO);
+        Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
+        Assert.assertNotNull(application);
+        verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME);
     }
 
-
     @Test(description = "Add an application")
-    public void testAddApplication(){
-        try {
-            ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-            APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
-            Application application = new Application(APP_NAME, USER_NAME);
-            when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-            String applicationUuid = apiStore.addApplication(application);
-            Assert.assertNotNull(applicationUuid);
-            verify(applicationDAO, times(1)).addApplication(application);
-        } catch (APIManagementException | SQLException e) {
-            Assert.assertTrue(false);
-        }
+    public void testAddApplication() throws SQLException, APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        String applicationUuid = apiStore.addApplication(application);
+        Assert.assertNotNull(applicationUuid);
+        verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add application with duplicate name", expectedExceptions =  APIMgtResourceAlreadyExistsException.class)
+    public void testAddApplicationWithDuplicateName() throws APIManagementException, SQLException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(true);
+        apiStore.addApplication(application);
+    }
+
+    @Test(description = "Delete application")
+    public void testDeleteApplication() throws APIManagementException, SQLException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO , null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setUuid(UUID);
+        apiStore.deleteApplication(application);
+        verify(applicationDAO, times(1)).deleteApplication(UUID);
     }
 
 }
