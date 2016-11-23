@@ -45,7 +45,7 @@
         <!--UUF Themes-->
         <dependency>
             <groupId>org.wso2.carbon.apimgt.web</groupId>
-            <artifactId>org.wso2.carbon.apimgt.web.store.theme.default</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.web.publisher.theme.default</artifactId>
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>

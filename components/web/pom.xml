@@ -37,6 +37,7 @@
     <modules>
         <module>components/org.wso2.carbon.apimgt.foundation</module>
         <module>themes/org.wso2.carbon.apimgt.theme.store</module>
+        <module>themes/org.wso2.carbon.apimgt.theme.publisher</module>
         <module>apps/org.wso2.carbon.apimgt.store</module>
         <module>apps/org.wso2.carbon.apimgt.publisher</module>
     </modules>
