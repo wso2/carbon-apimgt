@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 
@@ -51,10 +52,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param appId   The UUID that uniquely identifies an Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application getApplication(String appId, String ownerId) throws SQLException {
+    public Application getApplication(String appId, String ownerId) throws APIMgtDAOException {
         final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ? AND CREATED_BY = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
@@ -62,8 +63,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(1, appId);
             ps.setString(2, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                application = this.createApplicationFromResultSet(rs, conn);
+                application = this.createApplicationFromResultSet(rs);
             }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
         return application;
     }
@@ -74,10 +77,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param appName Name of the Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application getApplicationByName(String appName, String ownerId) throws SQLException {
+    public Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException {
         final String completeGetAppQuery = GET_APPS_QUERY + " WHERE NAME = ? AND CREATED_BY = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
@@ -85,8 +88,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(1, appName);
             ps.setString(2, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                application = this.createApplicationFromResultSet(rs, conn);
+                application = this.createApplicationFromResultSet(rs);
             }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
         return application;
     }
@@ -96,18 +101,20 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param ownerId Username of user
      * @return An array of {@link Application}
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application[] getApplications(String ownerId) throws SQLException {
+    public Application[] getApplications(String ownerId) throws APIMgtDAOException {
         final String completeGetAppsQuery = GET_APPS_QUERY + " WHERE CREATED_BY = ?";
         Application[] applications;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppsQuery)) {
             ps.setString(1, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                applications = this.createApplicationsFromResultSet(rs, conn);
+                applications = this.createApplicationsFromResultSet(rs);
             }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
         return applications;
     }
@@ -120,10 +127,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application[] getApplicationsForUser(int offset, int limit, String userName) throws SQLException {
+    public Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException {
         return new Application[0];
     }
 
@@ -135,10 +142,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws SQLException {
+    public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException {
         return new Application[0];
     }
 
@@ -148,11 +155,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param searchString The search string provided
      * @return An array of matching {@link Application} objects
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
     public Application[] searchApplicationsForUser(String searchString, String userId)
-            throws SQLException {
+            throws APIMgtDAOException {
         //TODO
         return new Application[0];
     }
@@ -164,10 +171,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param searchString The search string provided
      * @param groupID      The Group ID to filter results by
      * @return An array of matching {@link Application} objects
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public Application[] searchApplicationsForGroup(String searchString, String groupID) throws SQLException {
+    public Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException {
         //TODO
         return new Application[0];
     }
@@ -176,10 +183,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public void addApplication(Application application) throws SQLException {
+    public void addApplication(Application application) throws APIMgtDAOException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
                 "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
                 "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
@@ -206,6 +213,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
             ps.executeUpdate();
             conn.commit();
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
     }
 
@@ -214,11 +223,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
     public void updateApplication(String appID, Application updatedApp)
-            throws SQLException {
+            throws APIMgtDAOException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
                 "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
@@ -236,6 +245,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
             ps.executeUpdate();
             conn.commit();
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
     }
 
@@ -243,10 +254,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Remove an existing Application
      *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @Override
-    public void deleteApplication(String appID) throws SQLException {
+    public void deleteApplication(String appID) throws APIMgtDAOException {
         final String query = "DELETE FROM AM_APPLICATION WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
@@ -254,6 +265,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             statement.setString(1, appID);
             statement.execute();
             conn.commit();
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
     }
 
@@ -262,10 +275,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param appName application name
      * @return true if application name is already available
-     * @throws SQLException if failed to get applications for given subscriber
+     * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
     @Override
-    public boolean isApplicationNameExists(String appName) throws SQLException {
+    public boolean isApplicationNameExists(String appName) throws APIMgtDAOException {
         final String query = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -277,36 +290,23 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     return true;
                 }
             }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
         }
         return false;
     }
 
-    private String getSubscriptionTierName(Connection connection, String policyID) throws SQLException {
-        final String query = "SELECT NAME FROM AM_APPLICATION_POLICY WHERE UUID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policyID);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("NAME");
-                }
-            }
-        }
-        return null;
-    }
-
-    private Application[] createApplicationsFromResultSet(ResultSet rs, Connection conn) throws SQLException {
+    private Application[] createApplicationsFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {
         List<Application> appList = new ArrayList<>();
         Application application;
-        while ((application = createApplicationFromResultSet(rs, conn)) != null) {
+        while ((application = createApplicationFromResultSet(rs)) != null) {
             appList.add(application);
         }
         Application[] apps = new Application[appList.size()];
         return appList.toArray(apps);
     }
 
-    private Application createApplicationFromResultSet(ResultSet rs, Connection conn) throws SQLException {
+    private Application createApplicationFromResultSet(ResultSet rs) throws APIMgtDAOException, SQLException {
         Application application = null;
         if (rs.next()) {
             String createdUser = rs.getString("CREATED_BY");
@@ -319,7 +319,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
             application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-            application.setTier(getSubscriptionTierName(conn, rs.getString("APPLICATION_POLICY_ID")));
+            application.setTier(DAOFactory.getPolicyDAO().getSubscriptionTierName(
+                    rs.getString("APPLICATION_POLICY_ID")));
         }
         return application;
     }

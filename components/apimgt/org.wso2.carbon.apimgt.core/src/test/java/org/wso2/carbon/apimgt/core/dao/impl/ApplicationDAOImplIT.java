@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
 import java.time.Duration;
 
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
@@ -143,14 +143,14 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
                 "Application updated time is not the same!");
     }
 
-    private Application addTestApplication() throws SQLException {
+    private Application addTestApplication() throws APIMgtDAOException {
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application application = SampleTestObjectCreator.createDefaultApplication();
         applicationDAO.addApplication(application);
         return application;
     }
 
-    private Application addCustomApplication(String applicationName, String owner) throws SQLException {
+    private Application addCustomApplication(String applicationName, String owner) throws APIMgtDAOException {
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
         applicationDAO.addApplication(application);

@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -109,7 +108,7 @@ public class APIStoreImplTestCase {
             Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
             Assert.assertNotNull(application);
             verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME);
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.assertTrue(false);
         }
     }
@@ -125,7 +124,7 @@ public class APIStoreImplTestCase {
             String applicationUuid = apiStore.addApplication(application);
             Assert.assertNotNull(applicationUuid);
             verify(applicationDAO, times(1)).addApplication(application);
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.assertTrue(false);
         }
     }
