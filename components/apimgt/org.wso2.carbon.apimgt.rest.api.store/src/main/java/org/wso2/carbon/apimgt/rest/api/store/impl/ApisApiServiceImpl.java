@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -39,7 +39,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            ArtifactResourceMetaData artifactResourceMetaData = apiStore.getDocumentationSummary(documentId);
+            ArtifactResource artifactResourceMetaData = apiStore.getDocumentationSummary(documentId);
             documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(artifactResourceMetaData);
         } catch (APIManagementException e) {
             RestApiUtil
@@ -58,7 +58,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            List<ArtifactResourceMetaData> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
+            List<ArtifactResource> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
             documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentInfoResults, offset, limit);
         } catch (APIManagementException e) {

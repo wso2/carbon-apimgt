@@ -20,19 +20,21 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Provides access to Resource Categories which maybe shared across multiple entities
  */
 class ResourceCategoryDAO {
 
-    static boolean isResourceCategoryExists(Connection connection, ResourceCategory resourceCategory)
+    private static boolean isResourceCategoryExists(Connection connection, ResourceCategory resourceCategory)
                                                                                             throws SQLException {
         final String query = "SELECT 1 FROM AM_RESOURCE_CATEGORIES WHERE RESOURCE_CATEGORY = ?";
 
@@ -49,7 +51,7 @@ class ResourceCategoryDAO {
         return false;
     }
 
-    static boolean isResourceCategoriesExist(Connection connection) throws SQLException {
+    static boolean isStandardResourceCategoriesExist(Connection connection) throws SQLException {
         final String query = "SELECT 1 FROM AM_RESOURCE_CATEGORIES";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -64,12 +66,32 @@ class ResourceCategoryDAO {
         return false;
     }
 
-    static int getResourceCategoryID(Connection connection, ResourceCategory resourceCategory) throws SQLException {
+    static int findResourceCategory(Connection connection, ArtifactResource resource) throws SQLException {
+        ResourceCategory category = resource.getCategory();
+        int categoryID;
+
+        if (!isResourceCategoryExists(connection, category)) {
+            if (category == ResourceCategory.OTHER) {
+                String customCategory = resource.getCustomCategory();
+                ResourceCategoryDAO.addResourceCategory(connection, customCategory);
+                categoryID = ResourceCategoryDAO.getResourceCategoryID(connection, customCategory);
+            } else {
+                throw new IllegalStateException("Resource Category is not type OTHER, " +
+                        "but has not been added as a standard category type to table AM_RESOURCE_CATEGORIES");
+            }
+        } else {
+            categoryID = ResourceCategoryDAO.getResourceCategoryID(connection, category.toString());
+        }
+
+        return categoryID;
+    }
+
+    static int getResourceCategoryID(Connection connection, String resourceCategory) throws SQLException {
         final String query = "SELECT RESOURCE_CATEGORY_ID FROM AM_RESOURCE_CATEGORIES WHERE RESOURCE_CATEGORY = ?";
         int resourceTypeID;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceCategory.toString());
+            statement.setString(1, resourceCategory);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -83,11 +105,11 @@ class ResourceCategoryDAO {
         return resourceTypeID;
     }
 
-    static void addResourceCategory(Connection connection, ResourceCategory resourceCategory) throws SQLException {
+    static void addResourceCategory(Connection connection, String resourceCategory) throws SQLException {
         final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY) VALUES (?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceCategory.toString());
+            statement.setString(1, resourceCategory);
             statement.execute();
         }
     }
@@ -95,60 +117,13 @@ class ResourceCategoryDAO {
     static void addResourceCategories(Connection connection) throws SQLException {
         final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY) VALUES (?)";
 
+        final Map<String, ResourceCategory> standardCategories = ResourceCategory.getStandardCategories();
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ResourceCategory.SWAGGER.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.WSDL_URI.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.IMAGE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_HOW_TO_FILE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_HOW_TO_INLINE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_HOW_TO_URL.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_OTHER_FILE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_OTHER_INLINE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_OTHER_URL.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_FILE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_INLINE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_PUBLIC_FORUM_URL.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_FILE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_INLINE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SAMPLE_AND_SDK_URL.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_FILE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_INLINE.toString());
-            statement.addBatch();
-
-            statement.setString(1, ResourceCategory.DOC_SUPPORT_FORUM_URL.toString());
-            statement.addBatch();
+            for (ResourceCategory category : standardCategories.values()) {
+                statement.setString(1, category.toString());
+                statement.addBatch();
+            }
 
             statement.executeBatch();
         }

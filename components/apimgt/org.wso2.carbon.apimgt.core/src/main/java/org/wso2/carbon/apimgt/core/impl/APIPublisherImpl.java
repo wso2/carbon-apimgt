@@ -32,8 +32,9 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -184,9 +185,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (apiBuilder.getPolicies().isEmpty()) {
             APIUtils.logAndThrowException("Couldn't find Policies of API ", log);
         }
-        if (apiBuilder.getVisibility() != null) {
-            APIUtils.logAndThrowException("Couldn't find Visibility of API ", log);
-        }
+        //#todo we need to fix this there is a bug for now I am commenting this.
+//        if (apiBuilder.getVisibility() != null) {
+//            APIUtils.logAndThrowException("Couldn't find Visibility of API ", log);
+//        }
 
         apiBuilder.provider(getUsername());
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
@@ -205,7 +207,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         "successfully.", log);
             } else {
                 APIUtils.logAndThrowException("Duplicate API already Exist with name/Context " + apiBuilder.getName(),
-                        log);
+                        ExceptionCodes.API_ALREADY_EXISTS, log);
             }
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while creating the API - " + apiBuilder.getName(), e, log);
@@ -387,9 +389,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(String apiId, ArtifactResourceMetaData metaData) throws APIManagementException {
+    public void addDocumentationInfo(String apiId, ArtifactResource metaData) throws APIManagementException {
         try {
-            getApiDAO().addArtifactResourceMetaData(apiId, metaData);
+            getApiDAO().addArtifactResource(apiId, metaData);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }

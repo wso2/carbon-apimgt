@@ -116,6 +116,7 @@ public class MappingUtil {
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getTiers()).
                 tags(apidto.getTags()).
+                transport(apidto.getTransport()).
                 cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getTiers()).

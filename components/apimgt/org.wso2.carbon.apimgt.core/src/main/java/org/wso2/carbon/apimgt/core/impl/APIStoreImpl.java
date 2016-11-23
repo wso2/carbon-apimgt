@@ -137,6 +137,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application.setUuid(generatedUuid);
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
+            APIUtils.logDebug("successfully added application with appId " + application.getUuid(), log);
             applicationUuid = application.getUuid();
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
