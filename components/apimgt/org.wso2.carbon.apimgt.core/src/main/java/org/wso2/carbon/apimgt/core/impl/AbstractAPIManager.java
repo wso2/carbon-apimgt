@@ -226,13 +226,15 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns the corresponding application given the uuid
      * @param uuid uuid of the Application
+     * @param userId  Name of the User.
+     * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
      */
-    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+    public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           getApplicationDAO().getApplication(uuid);
+           getApplicationDAO().getApplication(uuid, userId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }

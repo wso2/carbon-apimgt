@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 
 import java.sql.Connection;
@@ -30,6 +29,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -37,82 +38,93 @@ import java.sql.Timestamp;
  */
 public class ApplicationDAOImpl implements ApplicationDAO {
 
-    ApplicationDAOImpl() {}
+    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, DESCRIPTION, " +
+            "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
+            "FROM AM_APPLICATION";
+
+    ApplicationDAOImpl() {
+    }
 
     /**
      * Retrieve a given instance of an Application
      *
-     * @param appID The UUID that uniquely identifies an Application
+     * @param appId   The UUID that uniquely identifies an Application
+     * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
      * @throws SQLException
      */
     @Override
-    public Application getApplication(String appID) throws SQLException {
-        final String getAppQuery = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
-        "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
-        "LAST_UPDATED_TIME, UUID FROM AM_APPLICATION";
-        Application application = null;
+    public Application getApplication(String appId, String ownerId) throws SQLException {
+        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ? AND CREATED_BY = ?";
+        Application application;
         try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(getAppQuery)) {
+             PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
+            ps.setString(1, appId);
+            ps.setString(2, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String createdUser = rs.getString("CREATED_BY");
-                    application = new Application(rs.getString("NAME"), createdUser);
-                    application.setUuid(rs.getString("UUID"));
-                    application.setCallbackUrl(rs.getString("CALLBACK_URL"));
-                    application.setDescription(rs.getString("DESCRIPTION"));
-                    application.setGroupId(rs.getString("GROUP_ID"));
-                    application.setStatus(rs.getString("APPLICATION_STATUS"));
-                    application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
-                    application.setUpdatedUser(rs.getString("UPDATED_BY"));
-                    application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-                    application.setTier(getSubscriptionTierName(conn, rs.getString("APPLICATION_POLICY_ID")));
-                }
+                application = this.createApplicationFromResultSet(rs, conn);
             }
         }
         return application;
     }
 
     /**
-     * Fetches an Application by name.
+     * Retrieve a given instance of an Application
      *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
+     * @param appName Name of the Application
+     * @param ownerId ID of the application owner.
+     * @return valid {@link Application} object or null
      * @throws SQLException
      */
     @Override
-    public Application getApplicationByName(String userId, String applicationName, String groupId)
-            throws SQLException {
-        return null;
+    public Application getApplicationByName(String appName, String ownerId) throws SQLException {
+        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE NAME = ? AND CREATED_BY = ?";
+        Application application;
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
+            ps.setString(1, appName);
+            ps.setString(2, ownerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                application = this.createApplicationFromResultSet(rs, conn);
+            }
+        }
+        return application;
     }
 
     /**
-     * Retrieves summary data of all available Applications that belongs to a user or a groups.
+     * Retrieves all available Applications that belong to a user.
      *
-     * @param createdUser Username of user
-     * @param groupingId  Id of group
+     * @param ownerId Username of user
      * @return An array of {@link Application}
      * @throws SQLException
      */
     @Override
-    public Application[] getApplications(String createdUser, String groupingId) throws SQLException {
-        return new Application[0];
+    public Application[] getApplications(String ownerId) throws SQLException {
+        final String completeGetAppsQuery = GET_APPS_QUERY + " WHERE CREATED_BY = ?";
+        Application[] applications;
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(completeGetAppsQuery)) {
+            ps.setString(1, ownerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                applications = this.createApplicationsFromResultSet(rs, conn);
+            }
+        }
+        return applications;
     }
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     *
+     * @param offset   The number of results from the beginning that is to be ignored
+     * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
      * @throws SQLException
-     *
      */
     @Override
-    public ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
-                                                                            throws SQLException {
-        return null;
+    public Application[] getApplicationsForUser(int offset, int limit, String userName) throws SQLException {
+        return new Application[0];
     }
 
     /**
@@ -126,60 +138,52 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @throws SQLException
      */
     @Override
-    public ApplicationSummaryResults getApplicationsForGroup(int offset, int limit, String groupID)
-                                                                            throws SQLException {
-        return null;
+    public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws SQLException {
+        return new Application[0];
     }
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param userName The username to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
      *
+     * @param searchString The search string provided
+     * @return An array of matching {@link Application} objects
+     * @throws SQLException
      */
     @Override
-    public ApplicationSummaryResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                         int limit, String userName) throws SQLException {
-        return null;
+    public Application[] searchApplicationsForUser(String searchString, String userId)
+            throws SQLException {
+        //TODO
+        return new Application[0];
     }
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
      *
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString    The search string provided
-     * @param offset          The number of results from the beginning that is to be ignored
-     * @param limit           The maximum number of results to be returned after the offset
-     * @param groupID         The Group ID to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
+     * @param searchString The search string provided
+     * @param groupID      The Group ID to filter results by
+     * @return An array of matching {@link Application} objects
      * @throws SQLException
      */
     @Override
-    public ApplicationSummaryResults searchApplicationsForGroup(String searchAttribute, String searchString,
-                                              int offset, int limit, String groupID) throws SQLException {
-        return null;
+    public Application[] searchApplicationsForGroup(String searchString, String groupID) throws SQLException {
+        //TODO
+        return new Application[0];
     }
 
     /**
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @return UUID of created {@link Application}
      * @throws SQLException
      */
     @Override
     public void addApplication(Application application) throws SQLException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
-                             "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
-                             "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
-                             "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
+                "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
+                "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
+                "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
             conn.setAutoCommit(false);
@@ -208,17 +212,17 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     /**
      * Update an existing Application
      *
-     * @param appID                 The UUID of the Application that needs to be updated
+     * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
      * @throws SQLException
      */
     @Override
     public void updateApplication(String appID, Application updatedApp)
-                                                                        throws SQLException {
+            throws SQLException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
-                                "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
-                                "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
-                                "LAST_UPDATED_TIME=?";
+                "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
+                "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
+                "LAST_UPDATED_TIME=?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
             conn.setAutoCommit(false);
@@ -290,5 +294,33 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
         }
         return null;
+    }
+
+    private Application[] createApplicationsFromResultSet(ResultSet rs, Connection conn) throws SQLException {
+        List<Application> appList = new ArrayList<>();
+        Application application;
+        while ((application = createApplicationFromResultSet(rs, conn)) != null) {
+            appList.add(application);
+        }
+        Application[] apps = new Application[appList.size()];
+        return appList.toArray(apps);
+    }
+
+    private Application createApplicationFromResultSet(ResultSet rs, Connection conn) throws SQLException {
+        Application application = null;
+        if (rs.next()) {
+            String createdUser = rs.getString("CREATED_BY");
+            application = new Application(rs.getString("NAME"), createdUser);
+            application.setUuid(rs.getString("UUID"));
+            application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+            application.setDescription(rs.getString("DESCRIPTION"));
+            application.setGroupId(rs.getString("GROUP_ID"));
+            application.setStatus(rs.getString("APPLICATION_STATUS"));
+            application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            application.setUpdatedUser(rs.getString("UPDATED_BY"));
+            application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+            application.setTier(getSubscriptionTierName(conn, rs.getString("APPLICATION_POLICY_ID")));
+        }
+        return application;
     }
 }

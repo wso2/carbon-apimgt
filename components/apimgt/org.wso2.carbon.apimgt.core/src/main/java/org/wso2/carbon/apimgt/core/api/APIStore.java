@@ -75,13 +75,13 @@ public interface APIStore extends APIManager {
     /**
      * This will return APIM application by giving name and subscriber
      *
-     * @param userId          APIM subscriber ID.
-     * @param applicationName APIM application name.
+     * @param applicationName APIM application name
+     * @param ownerId          Application owner ID.
      * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException
      */
-    Application getApplicationsByName(String userId, String applicationName, String groupId)
+    Application getApplicationByName(String applicationName, String ownerId, String groupId)
             throws APIManagementException;
 
     /**
@@ -118,7 +118,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-            String tokenType, java.lang.String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
 }

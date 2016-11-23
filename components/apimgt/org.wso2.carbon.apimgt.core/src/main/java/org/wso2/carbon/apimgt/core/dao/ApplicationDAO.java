@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.dao;
 
 
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
 
 import java.sql.SQLException;
 import javax.annotation.CheckForNull;
@@ -31,119 +30,114 @@ import javax.annotation.CheckForNull;
  * Provides access to Application data layer
  */
 public interface ApplicationDAO {
+
     /**
      * Retrieve a given instance of an Application
-     * @param appID The UUID that uniquely identifies an Application
+     *
+     * @param appId   The UUID that uniquely identifies an Application
+     * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
      * @throws SQLException
-     *
      */
     @CheckForNull
-    Application getApplication(String appID) throws SQLException;
+    Application getApplication(String appId, String ownerId) throws SQLException;
 
     /**
-     * Fetches an Application by name.
+     * Retrieve a given instance of an Application
      *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
+     * @param appName Name of the Application
+     * @param ownerId ID of the application owner.
+     * @return valid {@link Application} object or null
      * @throws SQLException
      */
-    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
+    @CheckForNull
+    Application getApplicationByName(String appName, String ownerId) throws SQLException;
 
     /**
-     * Retrieves summary data of all available Applications that belongs to a user or a groups.
+     * Retrieves all available Applications that belong to a user.
      *
-     * @param createdUser Username of user
-     * @param groupingId Id of group
+     * @param ownerId Username of user
      * @return An array of {@link Application}
      * @throws SQLException
      */
-    Application[] getApplications(String createdUser, String groupingId) throws SQLException;
+    Application[] getApplications(String ownerId) throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     *
+     * @param offset   The number of results from the beginning that is to be ignored
+     * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
      * @throws SQLException
      */
-    ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
-                                                                                throws SQLException;
+    Application[] getApplicationsForUser(int offset, int limit, String userName) throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified Group ID
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     *
+     * @param offset  The number of results from the beginning that is to be ignored
+     * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
      * @throws SQLException
-     *
      */
-    ApplicationSummaryResults getApplicationsForGroup(int offset, int limit, String groupID)
-            throws SQLException;
+    Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param userName The username to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
      *
+     * @param searchString The search string provided
+     * @return An array of matching {@link Application} objects
+     * @throws SQLException
      */
-    ApplicationSummaryResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                        int limit, String userName) throws SQLException;
+    Application[] searchApplicationsForUser(String searchString, String userId)
+            throws SQLException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param groupID The Group ID to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
      *
+     * @param searchString The search string provided
+     * @param groupID      The Group ID to filter results by
+     * @return An array of matching {@link Application} objects
+     * @throws SQLException
      */
-    ApplicationSummaryResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
-                                                        int limit, String groupID) throws SQLException;
+    Application[] searchApplicationsForGroup(String searchString, String groupID)
+            throws SQLException;
 
     /**
      * Add a new instance of an Application
+     *
      * @param application The {@link Application} object to be added
      * @throws SQLException
-     *
      */
     void addApplication(Application application) throws SQLException;
 
     /**
      * Update an existing Application
-     * @param appID The UUID of the Application that needs to be updated
+     *
+     * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
      * @throws SQLException
-     *
      */
     void updateApplication(String appID, Application updatedApp) throws SQLException;
 
     /**
      * Remove an existing Application
+     *
      * @param appID The UUID of the Application that needs to be deleted
      * @throws SQLException
-     *
      */
     void deleteApplication(String appID) throws SQLException;
 
     /**
      * Check whether given application name is already available in the system
      *
-     * @param appName  application name
+     * @param appName application name
      * @return true if application name is already available
      * @throws SQLException if failed to get applications for given subscriber
      */
