@@ -130,6 +130,34 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
@@ -185,10 +213,16 @@
             org.wso2.carbon.apimgt.lifecycle.manager.*,
             io.swagger.models.*,
             com.google.gson.*,
+            com.google.common.*;
             io.swagger.parser.*,
             org.json.simple.*,
             org.apache.commons.lang3.*,
             org.apache.commons.io.*;
+            org.apache.commons.*;
+            org.apache.velocity.*;
+            org.wso2.andes.*;
+            javax.jms.*;
+            org.wso2.securevault.*;
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.dao.internal,
