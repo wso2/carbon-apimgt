@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 
 import java.io.InputStream;
 import java.util.List;
@@ -179,20 +179,20 @@ public interface ApiDAO {
      * Return list of all Document info belonging to a given API.
      *
      * @param apiID The UUID of the respective API
-     * @return {@link List<ArtifactResourceMetaData>} matching results
+     * @return {@link List< ArtifactResource >} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<ArtifactResourceMetaData> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
+    List<ArtifactResource> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
 
     /**
      *
      * @param resourceID The UUID of the respective resource
-     * @return {@link ArtifactResourceMetaData} ArtifactResource meta data object
+     * @return {@link ArtifactResource} ArtifactResource meta data object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @CheckForNull
-    ArtifactResourceMetaData getResourceMetaData(String resourceID) throws APIMgtDAOException;
+    ArtifactResource getResource(String resourceID) throws APIMgtDAOException;
 
     /**
      *
@@ -203,21 +203,13 @@ public interface ApiDAO {
     InputStream getBinaryResourceContent(String resourceID) throws APIMgtDAOException;
 
     /**
-     *
-     * @param resourceID The UUID of the respective resource
-     * @return {@link String} Resource text content
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    String getTextResourceContent(String resourceID) throws APIMgtDAOException;
-
-    /**
      * Add artifact resource meta data to an API
      *
      * @param apiId    UUID of API
-     * @param metaData {@link ArtifactResourceMetaData} ArtifactResource meta data
+     * @param resource {@link ArtifactResource}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addArtifactResourceMetaData(String apiId, ArtifactResourceMetaData metaData) throws APIMgtDAOException;
+    void addArtifactResource(String apiId, ArtifactResource resource) throws APIMgtDAOException;
 
     /**
      * Update binary resource
@@ -232,10 +224,10 @@ public interface ApiDAO {
      * Update text resource
      *
      * @param resourceID         UUID of resource
-     * @param content            Text content as a String
+     * @param resource           {@link ArtifactResource}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateTextResourceContent(String resourceID, String content) throws APIMgtDAOException;
+    void updateArtifactResource(String resourceID, ArtifactResource resource) throws APIMgtDAOException;
 
     /**
      * Delete a resource

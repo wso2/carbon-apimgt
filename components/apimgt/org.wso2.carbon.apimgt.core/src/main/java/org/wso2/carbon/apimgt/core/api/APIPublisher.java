@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -149,7 +149,7 @@ public interface APIPublisher extends APIManager {
      * @param metaData      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationInfo(String apiId, ArtifactResourceMetaData metaData) throws APIManagementException;
+    void addDocumentationInfo(String apiId, ArtifactResource metaData) throws APIManagementException;
 
     /**
      * Add a document (of source type FILE) with a file

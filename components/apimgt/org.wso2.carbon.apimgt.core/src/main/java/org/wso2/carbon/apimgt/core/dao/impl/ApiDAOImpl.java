@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
@@ -46,7 +46,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Default implementation of the ApiDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -312,9 +314,15 @@ public class ApiDAOImpl implements ApiDAO {
             String wsdlUri = api.getWsdlUri();
 
             if (wsdlUri != null) {
-                ApiResourceDAO.addUniqueTextResourceForCategory(connection, apiPrimaryKey,
-                        ResourceCategory.WSDL_URI.toString(), null, ResourceCategory.WSDL_URI,
-                        ResourceVisibility.RESOURCE_LEVEL.toString(), wsdlUri);
+                ArtifactResource resource = new ArtifactResource.Builder().
+                                            id(UUID.randomUUID().toString()).
+                                            name(ResourceCategory.WSDL_URI.toString()).
+                                            category(ResourceCategory.WSDL_URI).
+                                            dataType(MediaType.TEXT_PLAIN).
+                                            textValue(wsdlUri).
+                                            visibility(ResourceVisibility.RESOURCE_LEVEL).build();
+
+                ApiResourceDAO.addResource(connection, apiPrimaryKey, resource);
             }
             addTagsMapping(connection, apiPrimaryKey, api.getTags());
             addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(),
@@ -379,16 +387,22 @@ public class ApiDAOImpl implements ApiDAO {
 
             String wsdlUri = substituteAPI.getWsdlUri();
             if (wsdlUri.isEmpty()) {
-                ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiID, ResourceCategory.WSDL_URI);
+                ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiID, ResourceCategory.WSDL_URI.toString());
             } else {
-                if (ApiResourceDAO.getUniqueTextResourceForCategory(connection,
-                                                                    apiID, ResourceCategory.WSDL_URI) == null) {
-                    ApiResourceDAO.addUniqueTextResourceForCategory(connection, apiID,
-                            ResourceCategory.WSDL_URI.toString(), null, ResourceCategory.WSDL_URI,
-                            ResourceVisibility.RESOURCE_LEVEL.toString(), wsdlUri);
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                                                                    ResourceCategory.WSDL_URI.toString())) {
+                    ArtifactResource resource = new ArtifactResource.Builder().
+                            id(UUID.randomUUID().toString()).
+                            name(ResourceCategory.WSDL_URI.toString()).
+                            category(ResourceCategory.WSDL_URI).
+                            dataType(MediaType.TEXT_PLAIN).
+                            textValue(wsdlUri).
+                            visibility(ResourceVisibility.RESOURCE_LEVEL).build();
+
+                    ApiResourceDAO.addResource(connection, apiID, resource);
                 } else {
-                    ApiResourceDAO.updateUniqueTextResourceForCategory(connection, apiID,
-                                                                        ResourceCategory.WSDL_URI, wsdlUri);
+                    ApiResourceDAO.updateTextValueForCategory(connection, apiID,
+                                                                        ResourceCategory.WSDL_URI.toString(), wsdlUri);
                 }
             }
 
@@ -470,14 +484,14 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override public InputStream getImage(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getUniqueBinaryResourceForCategory(connection, apiID, ResourceCategory.IMAGE);
+            return ApiResourceDAO.getBinaryValueForCategory(connection, apiID, ResourceCategory.IMAGE.toString());
         } catch (SQLException e) {
             throw new APIMgtDAOException("Couldn't retrieve api thumbnail for api " + apiID, e);
         }
     }
 
     /**
-     * Update swagger definition of a given API
+     * Update image of a given API
      *
      * @param apiID The UUID of the respective API
      * @param image Image stream
@@ -488,8 +502,21 @@ public class ApiDAOImpl implements ApiDAO {
     public void updateImage(String apiID, InputStream image, String dataType) throws APIMgtDAOException {
         if (image != null) {
             try (Connection connection = DAOUtil.getConnection()) {
-                ApiResourceDAO.addUniqueBinaryResourceForCategory(connection, apiID, ResourceCategory.IMAGE.toString(),
-                        null, ResourceCategory.IMAGE, ResourceVisibility.RESOURCE_LEVEL.toString(), image);
+
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                                                                    ResourceCategory.WSDL_URI.toString())) {
+                    ArtifactResource resource = new ArtifactResource.Builder().
+                            id(UUID.randomUUID().toString()).
+                            name(ResourceCategory.IMAGE.toString()).
+                            category(ResourceCategory.IMAGE).
+                            dataType(dataType).
+                            visibility(ResourceVisibility.RESOURCE_LEVEL).build();
+
+                    ApiResourceDAO.addUniqueBinaryResourceForCategory(connection, apiID, resource, image);
+                } else {
+                    ApiResourceDAO.updateUniqueBinaryResourceForCategory(connection, apiID,
+                                                                    ResourceCategory.IMAGE.toString(), image);
+                }
             } catch (SQLException e) {
                 throw new APIMgtDAOException(e);
             }
@@ -523,7 +550,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public List<ArtifactResourceMetaData> getDocumentsInfoList(String apiID) throws APIMgtDAOException {
+    public List<ArtifactResource> getDocumentsInfoList(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getDocResourceMetaDataList(connection, apiID);
         } catch (SQLException e) {
@@ -535,14 +562,14 @@ public class ApiDAOImpl implements ApiDAO {
      * Return Document info object
      *
      * @param resourceID The UUID of the respective Document
-     * @return {@link ArtifactResourceMetaData} Resource meta data
+     * @return {@link ArtifactResource} Resource meta data
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public ArtifactResourceMetaData getResourceMetaData(String resourceID) throws APIMgtDAOException {
+    public ArtifactResource getResource(String resourceID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getResourceMetaData(connection, resourceID);
+            return ApiResourceDAO.getResource(connection, resourceID);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -563,30 +590,16 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @param resourceID The UUID of the respective resource
-     * @return {@link String} Resource text content
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    @Override
-    public String getTextResourceContent(String resourceID) throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getTextResource(connection, resourceID);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-    /**
      * Add artifact resource meta data to an API
      *
      * @param apiId    UUID of API
-     * @param metaData {@link ArtifactResourceMetaData} ArtifactResource meta data
+     * @param resource {@link ArtifactResource}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addArtifactResourceMetaData(String apiId, ArtifactResourceMetaData metaData) throws APIMgtDAOException {
+    public void addArtifactResource(String apiId, ArtifactResource resource) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            ApiResourceDAO.addResourceMetaData(connection, apiId, metaData);
+            ApiResourceDAO.addResource(connection, apiId, resource);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -612,13 +625,13 @@ public class ApiDAOImpl implements ApiDAO {
      * Update text resource
      *
      * @param resourceID UUID of resource
-     * @param content    Text content as a String
+     * @param resource {@link ArtifactResource}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void updateTextResourceContent(String resourceID, String content) throws APIMgtDAOException {
+    public void updateArtifactResource(String resourceID, ArtifactResource resource) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            ApiResourceDAO.updateTextResource(connection, resourceID, content);
+            ApiResourceDAO.updateResource(connection, resourceID, resource);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -681,7 +694,8 @@ public class ApiDAOImpl implements ApiDAO {
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.
-                                getUniqueTextResourceForCategory(connection, apiPrimaryKey, ResourceCategory.WSDL_URI)).
+                                getTextValueForCategory(connection, apiPrimaryKey,
+                                        ResourceCategory.WSDL_URI.toString())).
                         transport(getTransports(connection, apiPrimaryKey)).
                         apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
@@ -826,20 +840,26 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAPIDefinition(Connection connection, String apiID, String apiDefinition, String visibility)
                                                                                                 throws SQLException {
         if (!apiDefinition.isEmpty()) {
-            ApiResourceDAO.addUniqueBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER.toString(),
-                    null, ResourceCategory.SWAGGER, visibility,
+            ArtifactResource resource = new ArtifactResource.Builder().
+                    id(UUID.randomUUID().toString()).
+                    name(ResourceCategory.SWAGGER.toString()).
+                    category(ResourceCategory.SWAGGER).
+                    dataType(MediaType.APPLICATION_JSON).
+                    visibility(ResourceVisibility.RESOURCE_LEVEL).build();
+
+            ApiResourceDAO.addUniqueBinaryResourceForCategory(connection, apiID, resource,
                     new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         }
     }
 
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
-        ApiResourceDAO.updateUniqueBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
+        ApiResourceDAO.updateUniqueBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER.toString(),
                                         new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
     }
 
     private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
-        InputStream apiDefinition = ApiResourceDAO.getUniqueBinaryResourceForCategory(connection, apiID,
-                                                                ResourceCategory.SWAGGER);
+        InputStream apiDefinition = ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
+                                                                ResourceCategory.SWAGGER.toString());
 
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
@@ -1028,7 +1048,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     void initResourceCategories() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            if (!ResourceCategoryDAO.isResourceCategoriesExist(connection)) {
+            if (!ResourceCategoryDAO.isStandardResourceCategoriesExist(connection)) {
                 ResourceCategoryDAO.addResourceCategories(connection);
                 connection.commit();
             }
