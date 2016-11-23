@@ -31,8 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -179,12 +178,13 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link DocumentInfoResults} Document list
+     * @return {@link List<ArtifactResourceMetaData>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
-    public DocumentInfoResults getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException {
+    public List<ArtifactResourceMetaData> getAllDocumentation(String apiId, int offset, int limit)
+                                                                                throws APIManagementException {
         try {
-            return getApiDAO().getDocumentsInfoList(apiId, offset, limit);
+            return getApiDAO().getDocumentsInfoList(apiId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving documents", e, log);
         }
@@ -195,12 +195,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * Get a summary of documentation by doc Id
      *
      * @param docId Document ID
-     * @return {@link DocumentInfo} Documentation summary
+     * @return {@link ArtifactResourceMetaData} Documentation meta data
      * @throws APIManagementException if it failed to fetch Documentation
      */
-    public DocumentInfo getDocumentationSummary(String docId) throws APIManagementException {
+    public ArtifactResourceMetaData getDocumentationSummary(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getDocumentInfo(docId);
+            return getApiDAO().getResourceMetaData(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document", e, log);
         }
@@ -216,7 +216,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public InputStream getDocumentationContent(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getDocumentContent(docId);
+            return getApiDAO().getBinaryResourceContent(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
@@ -234,11 +234,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           getApplicationDAO().getApplication(uuid, userId);
+           application = getApplicationDAO().getApplication(uuid, userId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
-        return  application;
+        return application;
     }
 
     protected ApiDAO getApiDAO() {

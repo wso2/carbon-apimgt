@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,7 +37,7 @@ import java.sql.SQLException;
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 
-    public static ApiDAO getApiDAO() throws SQLException {
+    public static ApiDAO getApiDAO() throws APIMgtDAOException {
         ApiDAO apiDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -53,14 +54,20 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                throw new SQLException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB Type detected");
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+        if (apiDAO != null) {
+            ((ApiDAOImpl) apiDAO).initResourceCategories();
         }
 
         return apiDAO;
     }
 
-    public static ApplicationDAO getApplicationDAO() throws SQLException {
+    public static ApplicationDAO getApplicationDAO() throws APIMgtDAOException {
         ApplicationDAO appDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -77,14 +84,16 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                throw new SQLException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB Type detected");
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
 
         return appDAO;
     }
 
-    public static APISubscriptionDAO getAPISubscriptionDAO() throws SQLException {
+    public static APISubscriptionDAO getAPISubscriptionDAO() throws APIMgtDAOException {
         APISubscriptionDAO apiSubscriptionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
@@ -101,8 +110,10 @@ public class DAOFactory {
             } else if (driverName.contains("Oracle")) {
 
             } else {
-                throw new SQLException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB Type detected");
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
 
         return apiSubscriptionDAO;

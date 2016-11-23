@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
@@ -91,14 +92,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application oldApplication = apiConsumer.getApplication(applicationId, username, null);
             if (oldApplication != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
-                    //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-                    //groupId of the request body is not honored for now.
-                    // Later we can improve by checking admin privileges of the user.
                     application.setGroupId(oldApplication.getGroupId());
-                    //we do not honor the application id which is sent via the request body
                     application.setUuid(oldApplication.getUuid());
-
                     apiConsumer.updateApplication(oldApplication.getUuid(), application);
 
                     //retrieves the updated application and send as the response
@@ -208,11 +204,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
 
-            //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-
-            //setting the proper groupId. This is not honored for now.
-            // Later we can honor it by checking admin privileges of the user.
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
             String applicationUUID = apiConsumer.addApplication(application);
@@ -231,7 +223,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         "An application already exists with name " + body.getName(), e,
                         log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
+                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + "fazlan",
                         e, log);
             }
         }
