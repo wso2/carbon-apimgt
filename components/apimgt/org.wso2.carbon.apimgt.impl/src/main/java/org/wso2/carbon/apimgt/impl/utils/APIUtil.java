@@ -6247,6 +6247,36 @@ public final class APIUtil {
         }
     }
 
+    public static boolean isQueryParamDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableQueryParamConditions();
+    }
+
+    public static boolean isHeaderDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableHeaderConditions();
+    }
+
+    public static boolean isJwtTokenPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableJwtConditions();
+    }
+
+    public static String getAnalyticsServerURL() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasServerUrl();
+    }
+
+    public static String getAnalyticsServerUserName() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasReceiverServerUser();
+    }
+
+    public static String getAnalyticsServerPassword() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasReceiverServerPassword();
+    }
+
     /**
      * Create the Cache object from the given parameters
      * @param cacheManagerName - Name of the Cache Manager
