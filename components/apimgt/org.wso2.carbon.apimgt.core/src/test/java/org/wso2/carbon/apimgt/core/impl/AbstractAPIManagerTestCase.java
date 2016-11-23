@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -26,7 +25,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -64,11 +62,11 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
-            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-            Application application = apiStore.getApplicationByUUID(UUID);
+            when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);
+            Application application = apiStore.getApplication(UUID, USER_NAME, null);
 
             Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplication(UUID);
+            verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
         } catch (APIManagementException | SQLException e) {
             Assert.assertTrue(false);
         }

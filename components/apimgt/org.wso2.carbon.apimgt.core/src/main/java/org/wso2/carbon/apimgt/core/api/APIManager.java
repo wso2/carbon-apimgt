@@ -131,10 +131,13 @@ public interface APIManager {
 
     /**
      * Returns the corresponding application given the uuid
+     *
      * @param uuid uuid of the Application
+     * @param userId  Name of the User.
+     * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
      */
-    Application getApplicationByUUID(String uuid) throws APIManagementException;
+    Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
 }
