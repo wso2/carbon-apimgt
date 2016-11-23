@@ -23,20 +23,64 @@ package org.wso2.carbon.apimgt.core.exception;
  * Top level exception class of API Management exceptions
  */
 public class APIManagementException extends Exception {
+
+    private long errorCode;
+    private String errorMsg;
+
+    public long getErrorCode() {
+        return errorCode;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+
+    /**
+     * @param message Error message
+     * @param cause Error cause
+     */
     public APIManagementException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     *
+     * @param cause Error cause
+     */
     public APIManagementException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     *
+     * @param message Error message
+     * @param cause Error cause
+     * @param enableSuppression whether you need enable suppressions
+     * @param writableStackTrace Writable error stack trace.
+     */
     protected APIManagementException(String message, Throwable cause, boolean enableSuppression,
-                                     boolean writableStackTrace) {
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
+    /**
+     *
+     * @param message Error message
+     */
     public APIManagementException(String message) {
         super(message);
     }
+
+    /**
+     * This is a default constructure where you can pass error code to error DTO
+     * @param message Error message
+     * @param code Exception code that need to pass to the error DTO
+     */
+    public APIManagementException(String message, ExceptionCodes code) {
+        super(message);
+        this.errorMsg = code.getMsg();
+        this.errorCode = code.getErrorCode();
+    }
+
 }

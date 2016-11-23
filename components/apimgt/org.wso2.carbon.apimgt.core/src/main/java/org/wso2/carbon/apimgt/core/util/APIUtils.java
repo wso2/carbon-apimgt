@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.util;
 
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.core.models.Scope;
 
@@ -42,6 +43,19 @@ public class APIUtils {
     public static void logAndThrowException(String msg, Logger log) throws APIManagementException {
         log.error(msg);
         throw new APIManagementException(msg);
+    }
+
+    /**
+     *
+     * @param msg Error message
+     * @param codes Exception code that need to pass in error DTO.
+     * @param log Logger to be used to log the error message
+     * @throws APIManagementException
+     */
+    public static void logAndThrowException(String msg, ExceptionCodes codes, Logger log) throws
+            APIManagementException {
+        log.error(msg);
+        throw new APIManagementException(msg, codes);
     }
 
     /**
