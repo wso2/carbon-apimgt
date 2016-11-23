@@ -22,12 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
-import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
-
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,8 +48,8 @@ import javax.naming.Context;
 /**
  * API gateway related functions
  */
-public class APIGatewayImpl implements APIGateway {
-    private static final Logger log = LoggerFactory.getLogger(APIGatewayImpl.class);
+public class APIGatewayPublisherImpl implements APIGatewayPublisher {
+    private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
     private static final String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
     private static final String CF_NAME_PREFIX = "connectionfactory.";
     private static final String CF_NAME = "qpidConnectionfactory";

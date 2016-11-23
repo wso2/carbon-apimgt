@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -110,7 +110,7 @@ public class APIExecutor implements Executor {
      */
     private void gatewayPublishing(API api, String targetState) {
         if (targetState.equalsIgnoreCase(APIStatus.PUBLISHED.getStatus())) {
-            APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+            APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
             boolean isPublished = gateway.publishToGateway(api);
             if (isPublished) {
                 APIUtils.logDebug(

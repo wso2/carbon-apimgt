@@ -23,6 +23,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 /**
  * Used to define Gateway related operations
  */
-public interface APIGateway {
+public interface APIGatewayPublisher {
     boolean publishToGateway(API api);
 }
