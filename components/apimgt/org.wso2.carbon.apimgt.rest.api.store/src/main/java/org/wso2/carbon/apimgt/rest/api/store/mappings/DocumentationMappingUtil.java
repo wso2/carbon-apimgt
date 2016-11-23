@@ -16,7 +16,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 
@@ -32,7 +32,7 @@ public class DocumentationMappingUtil {
      * @param offset         starting index
      * @return DocumentListDTO object containing Document DTOs
      */
-    public static DocumentListDTO fromDocumentationListToDTO(List<ArtifactResourceMetaData> artifactResourceMetaDatas, int offset,
+    public static DocumentListDTO fromDocumentationListToDTO(List<ArtifactResource> artifactResourceMetaDatas, int offset,
             int limit) {
         DocumentListDTO documentListDTO = new DocumentListDTO();
         List<DocumentDTO> documentDTOs = documentListDTO.getList();
@@ -56,7 +56,7 @@ public class DocumentationMappingUtil {
      * @param artifactResourceMetaData ArtifactResourceMetaData object
      * @return a new DocumentDTO object corresponding to given ArtifactResourceMetaData object
      */
-    public static DocumentDTO fromDocumentationToDTO(ArtifactResourceMetaData artifactResourceMetaData) {
+    public static DocumentDTO fromDocumentationToDTO(ArtifactResource artifactResourceMetaData) {
         DocumentDTO documentDTO = new DocumentDTO();
         documentDTO.setDocumentId(artifactResourceMetaData.getId());
         documentDTO.setName(artifactResourceMetaData.getName());
