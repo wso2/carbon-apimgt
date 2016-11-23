@@ -34,7 +34,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //get added app
-        Application appFromDB = applicationDAO.getApplication(app.getUuid());
+        Application appFromDB = applicationDAO.getApplication(app.getUuid(), app.getCreatedUser());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, app);
@@ -51,7 +51,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         //update app
         applicationDAO.updateApplication(currentApp.getUuid(), newApp);
         //get app
-        Application appFromDB = applicationDAO.getApplication(newApp.getUuid());
+        Application appFromDB = applicationDAO.getApplication(newApp.getUuid(), newApp.getCreatedUser());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, newApp);
@@ -64,7 +64,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //delete app
         applicationDAO.deleteApplication(app.getUuid());
-        Application appFromDB = applicationDAO.getApplication(app.getUuid());
+        Application appFromDB = applicationDAO.getApplication(app.getUuid(), app.getCreatedUser());
         Assert.assertNull(appFromDB);
     }
 
@@ -107,10 +107,10 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(appFromDB.getUuid(), expectedApp.getUuid());
         Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
-        Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000,
+        Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000L,
                           "Application created time is not the same!");
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
-        Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000,
+        Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000L,
                           "Application updated time is not the same!");
     }
 

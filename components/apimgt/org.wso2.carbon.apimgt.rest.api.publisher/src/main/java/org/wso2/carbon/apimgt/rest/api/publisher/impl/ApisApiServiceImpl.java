@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -386,13 +387,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,
+                    e.getErrorCode(), RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
+            log.error(errorMessage,e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
 //                    body.getName() + "-" + body.getVersion();
 //            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 //        }
-        return null;
+
     }
 }

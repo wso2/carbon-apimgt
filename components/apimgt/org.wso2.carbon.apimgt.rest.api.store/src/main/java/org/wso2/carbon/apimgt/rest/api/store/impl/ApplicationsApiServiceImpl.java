@@ -24,11 +24,11 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
@@ -42,7 +42,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     apiConsumer.deleteApplication(application);
@@ -66,7 +66,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
@@ -89,7 +89,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
+            Application oldApplication = apiConsumer.getApplication(applicationId, username, null);
             if (oldApplication != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
@@ -98,7 +98,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     apiConsumer.updateApplication(oldApplication.getUuid(), application);
 
                     //retrieves the updated application and send as the response
-                    Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
+                    Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
                     updatedApplicationDTO = ApplicationMappingUtil
                             .fromApplicationtoDTO(updatedApplication);
                 } else {
@@ -120,7 +120,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
@@ -207,11 +207,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            application.setCreatedTime(LocalDateTime.now());
             String applicationUUID = apiConsumer.addApplication(application);
 
             //retrieves the created application and send as the response
-            Application createdApplication = apiConsumer.getApplicationByUUID(applicationUUID);
+            Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header

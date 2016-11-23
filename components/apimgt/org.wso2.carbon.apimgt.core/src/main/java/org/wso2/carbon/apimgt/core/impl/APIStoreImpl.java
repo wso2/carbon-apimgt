@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,11 +65,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public Application getApplicationByName(String userId, String applicationName, java.lang.String groupId)
+    @Override public Application getApplicationByName(String applicationName, String ownerId, String groupId)
             throws APIManagementException {
         Application application = null;
         try {
-            application = getApplicationDAO().getApplicationByName(userId, applicationName, groupId);
+            application = getApplicationDAO().getApplicationByName(applicationName, ownerId);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
                     "Error occurred while fetching application for the given applicationName - " + applicationName
@@ -80,7 +81,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
         Application[] applicationList = null;
         try {
-            applicationList = getApplicationDAO().getApplications(subscriber, groupId);
+            applicationList = getApplicationDAO().getApplications(subscriber);
         } catch (SQLException e) {
             APIUtils.logAndThrowException(
                     "Error occurred while fetching applications for the given subscriber - " + subscriber
@@ -98,7 +99,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
     }
 
-    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+    @Override
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
@@ -134,6 +136,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             }
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
+            application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
             applicationUuid = application.getUuid();
         } catch (SQLException e) {
