@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ArtifactResource;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 
 import java.io.InputStream;
 import java.util.List;
@@ -105,20 +105,20 @@ public interface APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link List< ArtifactResource >} Document meta data list
+     * @return {@link List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
-    List<ArtifactResource> getAllDocumentation(String apiId, int offset, int limit)
+    List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit)
                                                                         throws APIManagementException;
 
     /**
      * Get a summary of documentation by doc Id
      *
      * @param docId Document ID
-     * @return {@link ArtifactResource} Documentation meta data
+     * @return {@link DocumentInfo} Documentation meta data
      * @throws APIManagementException if it failed to fetch Documentation
      */
-    ArtifactResource getDocumentationSummary(String docId) throws APIManagementException;
+    DocumentInfo getDocumentationSummary(String docId) throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
