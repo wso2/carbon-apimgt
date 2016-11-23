@@ -94,6 +94,38 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -231,8 +263,8 @@
                                     <version>${json-simple.wso2.version}</version>
                                 </bundle>
                                 <bundle>
-                                        <symbolicName>commons-io</symbolicName>
-                                        <version>${commons-io.version}</version>
+                                    <symbolicName>commons-io</symbolicName>
+                                    <version>${commons-io.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>io.swagger.core</symbolicName>
@@ -249,6 +281,30 @@
                                 <bundle>
                                     <symbolicName>org.apache.commons.lang3</symbolicName>
                                     <version>${apache.commons.lang3.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>velocity</symbolicName>
+                                    <version>${velocity.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-lang</symbolicName>
+                                    <version>${commons-lang.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-collections</symbolicName>
+                                    <version>${version.commons-collections}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>geronimo-jms_1.1_spec</symbolicName>
+                                    <version>1.1.0.wso2v1</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>andes-client</symbolicName>
+                                    <version>${andes.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.wso2.securevault</symbolicName>
+                                    <version>${securevault.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>
