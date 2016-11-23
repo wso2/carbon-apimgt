@@ -5,6 +5,7 @@ var addAppPolicy = function () {
         return;
     }
     var attributes =  getCustomAttributesArray();
+    $('#add-tier-btn').buttonLoader('start');
     jagg.post("/site/blocks/policy/app/edit/ajax/app-policy-edit.jag", {
         action:$('#policyAction').val(),
         policyName:$('#policyName').val(),
@@ -23,6 +24,7 @@ var addAppPolicy = function () {
             if (result.error == false) {
                 location.href = 'app-policy-manage'
             } else {
+                $('#add-tier-btn').buttonLoader('stop');
                 jagg.message({content:result.message,type:"error"});
             }
         },

@@ -129,6 +129,7 @@ var user = jagg.getUser();
     <script>
         var siteRoot = '<%=jagg.getAbsoluteUrl("/site/themes/"+jagg.getUserTheme().base)%>';
     </script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>
 
 </body>
 </html>
