@@ -176,7 +176,7 @@ public class MappingUtil {
         documentDTO.setSourceUrl(documentDTO.getSourceUrl());
         documentDTO.setSummary(documentDTO.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
-        documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType()));
+        documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType().toString()));
         return documentDTO;
     }
 
@@ -186,16 +186,15 @@ public class MappingUtil {
      * @return
      */
     public  static DocumentInfo toDocumentInfo(DocumentDTO documentDTO){
-        DocumentInfo documentInfo = new DocumentInfo();
-        documentInfo.setId(documentDTO.getDocumentId());
-        documentInfo.setSummary(documentDTO.getSummary());
-        documentInfo.setName(documentDTO.getName());
-        documentInfo.setOtherType(documentDTO.getOtherTypeName());
-        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString()));
-        documentInfo.setSourceURL(documentInfo.getSourceURL());
-        documentInfo.setType(documentDTO.getType().toString());
-        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString()));
-        return documentInfo;
+        return new DocumentInfo.Builder().
+                id(documentDTO.getDocumentId()).
+                summary(documentDTO.getSummary()).
+                name(documentDTO.getName()).
+                otherType(documentDTO.getOtherTypeName()).
+                sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
+                sourceURL(documentDTO.getSourceUrl()).
+                type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
+                visibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString())).build();
     }
 
     /**

@@ -26,10 +26,53 @@ package org.wso2.carbon.apimgt.core.models;
 
 public final class DocumentInfo {
 
+    private DocumentInfo(Builder builder) {
+        sourceType = builder.sourceType;
+        sourceURL = builder.sourceURL;
+        otherType = builder.otherType;
+        id = builder.id;
+        summary = builder.summary;
+        name = builder.name;
+        type = builder.type;
+        visibility = builder.visibility;
+    }
+
+    public SourceType getSourceType() {
+        return sourceType;
+    }
+
+    public String getSourceURL() {
+        return sourceURL;
+    }
+
+    public String getOtherType() {
+        return otherType;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public DocType getType() {
+        return type;
+    }
+
+    public Visibility getVisibility() {
+        return visibility;
+    }
+
     /**
      *Document Types
      */
-    public enum DocumentationType {
+    public enum DocType {
         HOWTO("How To"),
         SAMPLES("Samples"),
         PUBLIC_FORUM("Public Forum"),
@@ -40,7 +83,7 @@ public final class DocumentInfo {
 
         private String type;
 
-        private DocumentationType(String type) {
+        DocType(String type) {
             this.type = type;
         }
 
@@ -95,85 +138,142 @@ public final class DocumentInfo {
         }
     }
 
-    private SourceType sourceType;
-    private String sourceURL;
-    private String otherType;
-    private String id;
-    private String summary;
-    private String name;
-    private String type;
-    private Visibility visibility;
-    private String inlineContent;
+    private final SourceType sourceType;
+    private final String sourceURL;
+    private final String otherType;
+    private final String id;
+    private final String summary;
+    private final String name;
+    private final DocType type;
+    private final Visibility visibility;
 
-    public SourceType getSourceType() {
-        return sourceType;
-    }
+    /**
+     * {@code DocumentInfo} builder static inner class.
+     */
+    public static final class Builder {
+        private SourceType sourceType;
+        private String sourceURL;
+        private String otherType;
+        private String id;
+        private String summary;
+        private String name;
+        private DocType type;
+        private Visibility visibility;
 
-    public void setSourceType(SourceType sourceType) {
-        this.sourceType = sourceType;
-    }
+        public Builder() {
+        }
 
-    public String getSourceURL() {
-        return sourceURL;
-    }
+        public Builder(DocumentInfo copy) {
+            this.sourceType = copy.sourceType;
+            this.sourceURL = copy.sourceURL;
+            this.otherType = copy.otherType;
+            this.id = copy.id;
+            this.summary = copy.summary;
+            this.name = copy.name;
+            this.type = copy.type;
+            this.visibility = copy.visibility;
+        }
 
-    public void setSourceURL(String sourceURL) {
-        this.sourceURL = sourceURL;
-    }
+        /**
+         * Sets the {@code sourceType} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param sourceType the {@code sourceType} to set
+         * @return a reference to this Builder
+         */
+        public Builder sourceType(SourceType sourceType) {
+            this.sourceType = sourceType;
+            return this;
+        }
 
-    public String getId() {
-        return id;
-    }
+        /**
+         * Sets the {@code sourceURL} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param sourceURL the {@code sourceURL} to set
+         * @return a reference to this Builder
+         */
+        public Builder sourceURL(String sourceURL) {
+            this.sourceURL = sourceURL;
+            return this;
+        }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+        /**
+         * Sets the {@code otherType} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param otherType the {@code otherType} to set
+         * @return a reference to this Builder
+         */
+        public Builder otherType(String otherType) {
+            this.otherType = otherType;
+            return this;
+        }
 
-    public String getOtherType() {
-        return otherType;
-    }
+        /**
+         * Sets the {@code id} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param id the {@code id} to set
+         * @return a reference to this Builder
+         */
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
 
-    public void setOtherType(String otherType) {
-        this.otherType = otherType;
-    }
+        /**
+         * Sets the {@code summary} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param summary the {@code summary} to set
+         * @return a reference to this Builder
+         */
+        public Builder summary(String summary) {
+            this.summary = summary;
+            return this;
+        }
 
-    public String getSummary() {
-        return summary;
-    }
+        /**
+         * Sets the {@code name} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param name the {@code name} to set
+         * @return a reference to this Builder
+         */
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
+        /**
+         * Sets the {@code type} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param type the {@code type} to set
+         * @return a reference to this Builder
+         */
+        public Builder type(DocType type) {
+            this.type = type;
+            return this;
+        }
 
-    public String getName() {
-        return name;
-    }
+        /**
+         * Sets the {@code visibility} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param visibility the {@code visibility} to set
+         * @return a reference to this Builder
+         */
+        public Builder visibility(Visibility visibility) {
+            this.visibility = visibility;
+            return this;
+        }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Visibility getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(Visibility visibility) {
-        this.visibility = visibility;
-    }
-
-    public String getInlineContent() {
-        return inlineContent;
-    }
-
-    public void setInlineContent(String inlineContent) {
-        this.inlineContent = inlineContent;
+        /**
+         * Returns a {@code DocumentInfo} built from the parameters previously set.
+         *
+         * @return a {@code DocumentInfo} built with parameters of this {@code DocumentInfo.Builder}
+         */
+        public DocumentInfo build() {
+            return new DocumentInfo(this);
+        }
     }
 }
