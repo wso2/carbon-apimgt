@@ -793,7 +793,7 @@
                     <%}%>
                 <div class="panel-collapse">
                     <div class="panel-body">
-                         <%if(isWSAPI){%>
+                         <%if(!isWSAPI){%>
                     <!-- Resources Information -->
                         <div id="api_designer">
                             <div id ="apidoc_details"></div>
