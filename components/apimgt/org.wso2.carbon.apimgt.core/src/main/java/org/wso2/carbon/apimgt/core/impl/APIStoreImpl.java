@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.time.LocalDateTime;
