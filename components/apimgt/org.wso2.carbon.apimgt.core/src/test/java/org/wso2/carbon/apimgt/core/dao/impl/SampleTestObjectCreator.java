@@ -212,6 +212,15 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
+    static API copyAPISummary(API api) {
+        return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                id(api.getId()).
+                context(api.getContext()).
+                description(api.getDescription()).
+                lifeCycleStatus(api.getLifeCycleStatus()).
+                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+    }
+
     static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
