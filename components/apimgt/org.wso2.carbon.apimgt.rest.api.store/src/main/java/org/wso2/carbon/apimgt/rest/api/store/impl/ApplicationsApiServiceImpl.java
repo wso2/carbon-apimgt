@@ -24,11 +24,9 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.util.Map;
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
@@ -193,40 +191,28 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
-            if (tierName != null) {
-                Map<String, Policy> appTierMap = APIUtils.getPolicies(APIConstants.POLICY_APPLICATION_TYPE);
-                if (appTierMap == null || RestApiUtil.findPolicy(appTierMap.values(), tierName) == null) {
-                    RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
-                }
-            } else {
-                RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-            }
-
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
             String applicationUUID = apiConsumer.addApplication(application);
 
-            //retrieves the created application and send as the response
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
-
-            //to be set as the Location header
-            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
-                    createdApplicationDTO.getApplicationId());
-
-        } catch (APIManagementException | URISyntaxException e) {
+            //MSf4j support needed
+//            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
+//                    createdApplicationDTO.getApplicationId());
+        } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "An application already exists with name " + body.getName(), e,
-                        log);
+                RestApiUtil
+                        .handleResourceAlreadyExistsError("An application already exists with name " + body.getName(),
+                                e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + "fazlan",
+                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
                         e, log);
             }
         }
-        return Response.created(location).entity(createdApplicationDTO).build();
+
+//        return Response.created(location).entity(createdApplicationDTO).build();
+          return Response.status(Response.Status.CREATED).entity(createdApplicationDTO).build();
     }
 }
