@@ -90,6 +90,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     application.setGroupId(oldApplication.getGroupId());
                     application.setUuid(oldApplication.getUuid());
+                    application.setUpdatedUser(username);
                     apiConsumer.updateApplication(oldApplication.getUuid(), application);
 
                     //retrieves the updated application and send as the response
