@@ -5796,7 +5796,7 @@ public final class APIUtil {
                     String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
                     if(!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
                             applicationPolicy.getTenantId(), true);
@@ -5856,7 +5856,7 @@ public final class APIUtil {
                     String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
                                                                                 "_" + subscriptionPolicy.getPolicyName();
                     if(!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
                                                                                           subscriptionPolicy.getTenantId(), true);
@@ -5913,7 +5913,7 @@ public final class APIUtil {
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
                     if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
                             apiPolicy.getTenantId(), true);
