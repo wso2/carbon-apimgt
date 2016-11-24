@@ -90,6 +90,8 @@ public class APIKeyValidator {
         this.getGatewayKeyCache();
 
         this.getResourceCache();
+
+        this.getGatewayTokenCache();
     }
 
     protected Cache getGatewayKeyCache() {
