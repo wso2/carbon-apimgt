@@ -1307,6 +1307,23 @@ public final class APIUtil {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
                 setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+            } else {
+                byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
+                if (isWSDL2Resource(wsdl)) {
+                    wsdlContentEle = wsdlReader.updateWSDL2(wsdl, api);
+                    wsdlResource.setContent(wsdlContentEle.toString());
+                } else {
+                    wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
+                    wsdlResource.setContent(wsdlContentEle.toString());
+                }
+
+                registry.put(wsdlResourcePath, wsdlResource);
+                //set the anonymous role for wsld resource to avoid basicauth security.
+                String[] visibleRoles = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.
@@ -1371,6 +1388,19 @@ public final class APIUtil {
             }
         }
         return isWsdl2;
+    }
+
+    /**
+     * Given a wsdl resource, this method checks if the underlying document is a WSDL2
+     *
+     * @param wsdl byte array of wsdl definition saved in registry
+     * @return true if wsdl2 definition
+     * @throws APIManagementException
+     */
+    private static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
+        String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
+        String wsdlContent = new String(wsdl);
+        return wsdlContent.indexOf(wsdl2NameSpace) > 0;
     }
 
     /**
@@ -4528,7 +4558,8 @@ public final class APIUtil {
      */
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
-            if (wsdlURL.contains("http:") || wsdlURL.contains("https:") || wsdlURL.contains("file:")) {
+            if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
+                wsdlURL.startsWith("file:") || wsdlURL.startsWith("/registry")) {
                 return true;
             }
         } else if (!required) {
