@@ -624,7 +624,7 @@ var addPolicyToBackend = function () {
             location.href = 'api-policy-list';
         } else {
             $('#addThrottleBtn').buttonLoader('stop');
-            jagg.message({content:data.error.message,type:"error"});
+            jagg.message({content:data.message,type:"error"});
         }
     }, "json");
 };
