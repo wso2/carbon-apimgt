@@ -406,15 +406,23 @@ public class APIGatewayManager {
 
         String context = api.getContext();
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                     "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
-                     context.replace('/', '-') + "\">\n" +
-                     "   <send>\n" +
-                     "      <endpoint>\n" +
-                     "         <http method=\"GET\"\n" +
-                     "               uri-template=\"" + url + "\"/>\n" +
-                     "      </endpoint>\n" +
-                     "   </send>\n" +
-                     "</sequence>";
+                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
+                context.replace('/', '-') + "\">\n" +
+                "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
+                "   <switch source=\"get-property('websocket.source.handshake.present')\">\n" +
+                "       <case regex=\"true\">\n" +
+                "           <drop/>\n" +
+                "       </case>\n" +
+                "       <default>\n" +
+                "           <call>\n" +
+                "               <endpoint>\n" +
+                "                   <address uri=\"" + url + "\"/>\n" +
+                "               </endpoint>\n" +
+                "           </call>\n" +
+                "           <respond/>\n" +
+                "       </default>\n" +
+                "   </switch>\n" +
+                "</sequence>\n";
         return seq;
     }
 
