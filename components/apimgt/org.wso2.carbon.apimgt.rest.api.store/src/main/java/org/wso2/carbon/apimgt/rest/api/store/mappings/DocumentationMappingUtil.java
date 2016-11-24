@@ -15,8 +15,7 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-
-import org.wso2.carbon.apimgt.core.models.ArtifactResource;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 
@@ -27,12 +26,12 @@ public class DocumentationMappingUtil {
     /**
      * Converts a List object of ArtifactResourceMetaData into a DTO
      *
-     * @param artifactResourceMetaDatas List of ArtifactResourceMetaData
+     * @param documentInfoList List of ArtifactResourceMetaData
      * @param limit          maximum number of APIs returns
      * @param offset         starting index
      * @return DocumentListDTO object containing Document DTOs
      */
-    public static DocumentListDTO fromDocumentationListToDTO(List<ArtifactResource> artifactResourceMetaDatas, int offset,
+    public static DocumentListDTO fromDocumentationListToDTO(List<DocumentInfo> documentInfoList, int offset,
             int limit) {
         DocumentListDTO documentListDTO = new DocumentListDTO();
         List<DocumentDTO> documentDTOs = documentListDTO.getList();
@@ -42,10 +41,10 @@ public class DocumentationMappingUtil {
         }
 
         //add the required range of objects to be returned
-        int start = offset < artifactResourceMetaDatas.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= artifactResourceMetaDatas.size() - 1 ? offset + limit - 1 : artifactResourceMetaDatas.size() - 1;
+        int start = offset < documentInfoList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= documentInfoList.size() - 1 ? offset + limit - 1 : documentInfoList.size() - 1;
         for (int i = start; i <= end; i++) {
-            documentDTOs.add(fromDocumentationToDTO(artifactResourceMetaDatas.get(i)));
+            documentDTOs.add(fromDocumentationToDTO(documentInfoList.get(i)));
         }
         documentListDTO.setCount(documentDTOs.size());
         return documentListDTO;
@@ -53,21 +52,19 @@ public class DocumentationMappingUtil {
 
     /** Converts an ArtifactResourceMetaData object into corresponding REST API Document DTO object
      *
-     * @param artifactResourceMetaData ArtifactResourceMetaData object
+     * @param documentInfo DocumentInfo object
      * @return a new DocumentDTO object corresponding to given ArtifactResourceMetaData object
      */
-    public static DocumentDTO fromDocumentationToDTO(ArtifactResource artifactResourceMetaData) {
+    public static DocumentDTO fromDocumentationToDTO(DocumentInfo documentInfo) {
         DocumentDTO documentDTO = new DocumentDTO();
-        documentDTO.setDocumentId(artifactResourceMetaData.getId());
-        documentDTO.setName(artifactResourceMetaData.getName());
-        documentDTO.setSummary(artifactResourceMetaData.getDescription());
-        documentDTO.setType(DocumentDTO.TypeEnum.valueOf(artifactResourceMetaData.getCategory().toString()));
-        //// TODO: 22/11/16 OtherType,sourceUrl 
-        //documentDTO.setOtherTypeName(artifactResourceMetaData.getOtherTypeName());
-        if (artifactResourceMetaData.getDataType() != null) {
-            documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(artifactResourceMetaData.getDataType()));
-        }
-        //documentDTO.setSourceUrl(artifactResourceMetaData.getSourceUrl());
+        documentDTO.setDocumentId(documentInfo.getId());
+        documentDTO.setName(documentInfo.getName());
+        documentDTO.setSummary(documentInfo.getSummary());
+        documentDTO.setType(DocumentDTO.TypeEnum.valueOf(documentInfo.getType().toString()));
+        documentDTO.setOtherTypeName(documentInfo.getOtherType());
+        documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(documentInfo.getSourceType().toString()));
+        documentDTO.setSourceUrl(documentInfo.getSourceURL());
+
         return documentDTO;
     }
 }

@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResource;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -385,13 +384,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API
-     * @param metaData      Document Summary
+     * @param documentInfo      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(String apiId, ArtifactResource metaData) throws APIManagementException {
+    public void addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            getApiDAO().addArtifactResource(apiId, metaData);
+            getApiDAO().addDocumentInfo(apiId, documentInfo);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
@@ -407,7 +406,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
         try {
-            getApiDAO().updateBinaryResourceContent(resourceId, content);
+            getApiDAO().addDocumentFileContent(resourceId, content);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
@@ -422,7 +421,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void removeDocumentation(String docId) throws APIManagementException {
         try {
-            getApiDAO().deleteResource(docId);
+            getApiDAO().deleteDocument(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation with file", e, log);
         }
