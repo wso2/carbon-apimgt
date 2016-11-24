@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Policy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.time.LocalDateTime;
@@ -133,6 +134,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
+            //todo validate tiers here
+
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
             application.setCreatedTime(LocalDateTime.now());

@@ -193,17 +193,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
-            if (tierName != null) {
-                Map<String, Policy> appTierMap = APIUtils.getPolicies(APIConstants.POLICY_APPLICATION_TYPE);
-                if (appTierMap == null || RestApiUtil.findPolicy(appTierMap.values(), tierName) == null) {
-                    RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
-                }
-            } else {
-                RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-            }
-
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
