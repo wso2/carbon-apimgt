@@ -133,6 +133,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
+            //todo validate tiers here
+
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
             application.setCreatedTime(LocalDateTime.now());
