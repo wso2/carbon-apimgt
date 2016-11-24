@@ -1,0 +1,84 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Applications | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/application/edit/application-edit.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    <!-- navbar -->
+    <div class="navbar-wrapper ">
+        <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
+            <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar"
+               data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true"
+               aria-expanded="false" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
+                        </span>
+            </a>
+
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                            aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+
+                        <li>
+                            <a title="Go Back List" href="/store/application/">
+                                   <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                                Go Back
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+
+        </nav>
+    </div>
+
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header" id="Message">
+        <h2>Edit Application</h2>
+    </div>
+    <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a
+        collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication
+        is pre-created and allows unlimited access by default.</p>
+
+    <div class="alert alert-success" id="appAddMessage" style="display:none">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Application "<span id="applicationShowName"></span>" Successfully added!</strong>
+    </div>
+    <div class="alert alert-success" id="appAddPendingMessage" style="display:none">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Congratulations! Your application creation request for - "<span id="applicationPendingShowName"></span>"
+            has been submitted and is now awaiting approval.</strong>
+    </div>
+
+    <br/>
+    <div class="white-wrapper add-padding-5x">
+        <form class="form-horizontal" id="appEditForm">
+            <input type="hidden" id="apiPath" value=""/>
+            <input type="hidden" id="goBack" value=""/>
+            <input type="hidden" id="applicationId" value="{{applicationId}}"/>
+
+           <div id="editAppContent"/>
+        </form>
+    </div>
+
+{{/fillZone}}

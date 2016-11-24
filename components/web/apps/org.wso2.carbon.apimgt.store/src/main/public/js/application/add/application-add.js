@@ -4,23 +4,6 @@ $(function () {
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function (swaggerData) {
-
-            //Delete Application
-            $('#application-table').on('click', 'a.deleteApp', function () {
-                alert("Are you sure you want to delete Application");
-
-                var appId = $(this).attr("data-id")
-                client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-                client["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
-                    function (success) {
-                        //TODO: Reload element only
-                        window.location.reload(true);
-                    },
-                    function (error) {
-                        alert("Error occurred while deleting application")
-                    });
-            });
-
             //Get available tiers
             client["Tier Collection"].get_tiers_tierLevel({"tierLevel": "application"},
                 function (jsonData) {
@@ -47,35 +30,33 @@ $(function () {
 
             $("#appAddForm").validate({
                 submitHandler: function (form) {
-                    applicationAdd();
+                    addApplication();
                 }
             });
 
-            var applicationAdd = function () {
+            var addApplication = function () {
                 var applicationName = $("#application-name").val();
                 var tier = $("#appTier").val();
                 var goBack = $("#goBack").val();
                 var description = $("#description").val();
 
-                var application = {
-                    name: applicationName,
-                    throttlingTier: tier,
-                    description: description
-                };
+                var application = {};
+                application.name = applicationName;
+                application.throttlingTier = tier;
+                application.description = description;
+                application.callbackUrl = "";
 
                 client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
                 client["Application (individual)"].post_applications({
                         "body": application,
                         "Content-Type": "application/json"
                     },
-                    function (success) {
-                        window.location = "/store/application/" + applicationName;
+                    function (jsonData) {
+                        window.location = "/store/application/" + jsonData.obj.applicationId;
                     },
                     function (error) {
                         alert("Error occurred while adding Application : " + applicationName);
                     });
-
-
             };
         }
     });
