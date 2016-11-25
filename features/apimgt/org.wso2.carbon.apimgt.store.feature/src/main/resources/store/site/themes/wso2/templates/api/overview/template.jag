@@ -57,19 +57,28 @@
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x">
-                            <a data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
-                            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
+                            <a data-clipboard-text=
+                                <%if (api.type.toUpperCase() != "WS") {%>
+                                    "<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
+                                <%} else {%>
+                                    "ws://localhost:9099<%=encode.forHtml(api.context)%>"
+                                <%}%>
+                                class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
                             </a>
-	    	                <%if(api.type.toUpperCase() != "WS"){%>
+	    	                <%if (api.type.toUpperCase() != "WS") {%>
                                 <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
-                            <%}else{%>
+                            <%} else {%>
                                 ws://localhost:9099<%=encode.forHtml(api.context)%>
                             <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%><br/>
-	                            <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
+                                <%if (api.type.toUpperCase() != "WS") {%>
+                                    <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
+                                <%} else {%>
+                                    ws://localhost:9099<%=encode.forHtml(apiContext)%>
+                                <%}%>
 	                        <%}%>
 	                    </div>
 
