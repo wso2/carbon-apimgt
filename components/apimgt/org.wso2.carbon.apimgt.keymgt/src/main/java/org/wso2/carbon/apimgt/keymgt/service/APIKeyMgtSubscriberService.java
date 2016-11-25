@@ -154,7 +154,28 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             //set username to avoid issues with email user name login
             oAuthConsumerAppDTO.setUsername(userName);
 
-            String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+            //check whether grant types are provided
+            String[] allowedGrantTypes = null;
+            String jsonPayload = oauthApplicationInfo.getJsonString();
+            if(jsonPayload != null){
+                
+                String grantTypesString = null;
+                JSONObject jsonObj = new JSONObject(jsonPayload);
+                if(jsonObj != null && jsonObj.has("grant_types")){
+                    grantTypesString = (String) jsonObj.get("grant_types");
+                }
+                if(grantTypesString !=  null){
+                    allowedGrantTypes = grantTypesString.split(",");
+                } else {
+                  //set allowed grant types if grant types are not provided
+                    allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+                }
+                
+            } else {
+                //set allowed grant types if grant types are not provided
+                allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+            }
+            
             // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
             // simply remove those grant types from the list
             StringBuilder grantTypeString = new StringBuilder();
