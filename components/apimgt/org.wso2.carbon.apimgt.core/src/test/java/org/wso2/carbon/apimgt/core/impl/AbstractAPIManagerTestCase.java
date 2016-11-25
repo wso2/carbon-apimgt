@@ -42,7 +42,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test public void testSearchAPIByUUID() {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         try {
             when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
@@ -57,7 +57,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
             when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);

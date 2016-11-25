@@ -60,7 +60,7 @@ public class APIManagerFactory {
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
             return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO());
+                    DAOFactory.getAPISubscriptionDAO() ,DAOFactory.getPolicyDAO());
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Provider", e, log);
         }
@@ -73,7 +73,7 @@ public class APIManagerFactory {
         // }
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO());
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't Create API Consumer", e, log);
         }
