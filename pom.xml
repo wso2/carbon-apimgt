@@ -500,7 +500,7 @@
         <carbon.transport.version>2.1.9-SNAPSHOT</carbon.transport.version>
         <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)</carbon.transport.package.import.version.range>
 
-        <carbon.messaging.version>1.0.8-SNAPSHOT</carbon.messaging.version>
+        <carbon.messaging.version>1.0.10</carbon.messaging.version>
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
 
