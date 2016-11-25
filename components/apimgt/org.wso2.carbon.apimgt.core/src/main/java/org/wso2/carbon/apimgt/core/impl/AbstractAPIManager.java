@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -256,7 +255,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSubscriptionDAO;
     }
 
-    protected PolicyDAO getPolicyDAO() { return policyDAO;}
+    protected PolicyDAO getPolicyDAO() {
+        return policyDAO;
+    }
 
     protected String getUsername() {
         return username;

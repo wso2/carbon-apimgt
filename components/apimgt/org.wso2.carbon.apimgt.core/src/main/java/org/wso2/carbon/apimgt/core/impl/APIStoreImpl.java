@@ -140,11 +140,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
             //Tier validation
             String tierName = application.getTier();
-            if(tierName == null) {
+            if (tierName == null) {
                 APIUtils.logAndThrowException("Tier name cannot be null - " + application.getName(), log);
             } else {
                 Policy policy = getPolicyDAO().getPolicy(APIConstants.POLICY_APPLICATION_TYPE, tierName);
-                if(policy == null) {
+                if (policy == null) {
                     APIUtils.logAndThrowException("Specified tier " + tierName + " is invalid", log);
                 }
             }
