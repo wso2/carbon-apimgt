@@ -1436,6 +1436,11 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+
+                Timestamp createdTime = resultSet.getTimestamp("CREATED_TIME");
+                Timestamp updatedTime = resultSet.getTimestamp("UPDATED_TIME");
+                subscribedAPI.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
+                subscribedAPI.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                 subscribedAPI.setApplication(application);
             }
             return subscribedAPI;
@@ -5955,6 +5960,11 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                Timestamp updatedTime = rs.getTimestamp("UPDATED_TIME");
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setLastUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 for (APIKey key : keys) {

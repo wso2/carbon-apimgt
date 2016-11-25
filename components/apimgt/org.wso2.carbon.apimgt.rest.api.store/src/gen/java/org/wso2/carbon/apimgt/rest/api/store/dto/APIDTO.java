@@ -1,14 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
-
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
@@ -66,7 +65,34 @@ public class APIDTO  {
   
   private APIBusinessInformationDTO businessInformation = null;
 
-  
+
+  private String lastUpdatedTime = null;
+
+  private String createdTime = null;
+
+  /**
+  * gets and sets the lastUpdatedTime for APIDTO
+  **/
+  @JsonIgnore
+  public String getLastUpdatedTime(){
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime){
+    this.lastUpdatedTime=lastUpdatedTime;
+  }
+
+  /**
+  * gets and sets the createdTime for a APIDTO
+  **/
+
+  @JsonIgnore
+  public String getCreatedTime(){
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime){
+    this.createdTime=createdTime;
+  }
+
   /**
    * UUID of the api registry artifact\n
    **/
@@ -79,8 +105,7 @@ public class APIDTO  {
     this.id = id;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
@@ -91,8 +116,7 @@ public class APIDTO  {
     this.name = name;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("description")
@@ -103,8 +127,7 @@ public class APIDTO  {
     this.description = description;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("context")
@@ -115,8 +138,7 @@ public class APIDTO  {
     this.context = context;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("version")
@@ -127,8 +149,7 @@ public class APIDTO  {
     this.version = version;
   }
 
-  
-  /**
+    /**
    * If the provider value is not given user invoking the api will be used as the provider.\n
    **/
   @ApiModelProperty(required = true, value = "If the provider value is not given user invoking the api will be used as the provider.\n")
@@ -140,8 +161,7 @@ public class APIDTO  {
     this.provider = provider;
   }
 
-  
-  /**
+    /**
    * Swagger definition of the API which contains details about URI templates and scopes\n
    **/
   @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes\n")
@@ -153,8 +173,7 @@ public class APIDTO  {
     this.apiDefinition = apiDefinition;
   }
 
-  
-  /**
+    /**
    * WSDL URL if the API is based on a WSDL endpoint\n
    **/
   @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
@@ -166,8 +185,7 @@ public class APIDTO  {
     this.wsdlUri = wsdlUri;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("status")
@@ -178,8 +196,7 @@ public class APIDTO  {
     this.status = status;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("isDefaultVersion")
@@ -190,8 +207,7 @@ public class APIDTO  {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("transport")
@@ -202,8 +218,7 @@ public class APIDTO  {
     this.transport = transport;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("tags")
@@ -214,8 +229,7 @@ public class APIDTO  {
     this.tags = tags;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("tiers")
@@ -226,8 +240,7 @@ public class APIDTO  {
     this.tiers = tiers;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("thumbnailUrl")
@@ -238,8 +251,7 @@ public class APIDTO  {
     this.thumbnailUrl = thumbnailUrl;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("endpointURLs")
@@ -250,8 +262,7 @@ public class APIDTO  {
     this.endpointURLs = endpointURLs;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")

@@ -152,4 +152,11 @@ public final class RestApiConstants {
     // common attributes
     public static final String PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String SANDBOX_ENDPOINTS = "sandbox_endpoints";
+
+
+    public static final String GET_LAST_UPDATED = "GetLastUpdatedTime";
+    public static final String GET = "GET";
+    public static final String ETAG = "ETag";
+    public static final String PUT = "PUT";
+    public static final String DELETE = "DELETE";
 }

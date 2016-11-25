@@ -24,9 +24,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.doc.model.Operation;
-import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -420,5 +417,10 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
 
         return mainAPIJson.toJSONString();
+    }
+
+    @Override
+    public Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
+        return null;
     }
 }
