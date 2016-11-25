@@ -23,7 +23,11 @@ package org.wso2.carbon.apimgt.core.exception;
 /**
  *  This is the Exception class for DAO related exceptions.
  */
-public class APIMgtDAOException extends Exception {
+public class APIMgtDAOException extends APIManagementException {
+
+   public APIMgtDAOException(String msg , ExceptionCodes code) {
+       super(msg, code);
+   }
 
     public APIMgtDAOException(String msg) {
         super(msg);
@@ -36,4 +40,6 @@ public class APIMgtDAOException extends Exception {
     public APIMgtDAOException(Throwable throwable) {
         super(throwable);
     }
+
+
 }

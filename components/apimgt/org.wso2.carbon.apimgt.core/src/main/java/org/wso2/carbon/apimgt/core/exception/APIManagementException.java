@@ -26,6 +26,7 @@ public class APIManagementException extends Exception {
 
     private long errorCode;
     private String errorMsg;
+    private int httpStatusCode;
 
     public long getErrorCode() {
         return errorCode;
@@ -56,7 +57,7 @@ public class APIManagementException extends Exception {
      *
      * @param message Error message
      * @param cause Error cause
-     * @param enableSuppression whether you need enable suppressions
+     * @param enableSuppression whether you need enable suppression
      * @param writableStackTrace Writable error stack trace.
      */
     protected APIManagementException(String message, Throwable cause, boolean enableSuppression,
@@ -81,6 +82,14 @@ public class APIManagementException extends Exception {
         super(message);
         this.errorMsg = code.getMsg();
         this.errorCode = code.getErrorCode();
+        this.httpStatusCode = code.getHttpStatusCode();
     }
 
+    public int getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    public void setHttpStatusCode(int httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
 }
