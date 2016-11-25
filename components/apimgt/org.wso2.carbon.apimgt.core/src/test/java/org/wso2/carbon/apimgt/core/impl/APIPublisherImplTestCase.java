@@ -53,8 +53,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIConstants.API_LIFECYCLE, user)).thenReturn(new
                 LifecycleState());
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(SampleObjectCreator.getMockAPIObject());
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(SampleObjectCreator.getMockAPIObject().build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIConstants.API_LIFECYCLE, user);
@@ -71,8 +70,7 @@ public class APIPublisherImplTestCase {
                 LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("/sample/v1")).thenReturn(true);
         Mockito.when(apiDAO.isAPINameExists("Sample")).thenReturn(false);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(SampleObjectCreator.getMockAPIObject());
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(SampleObjectCreator.getMockAPIObject().build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIConstants.API_LIFECYCLE, user);
@@ -86,8 +84,7 @@ public class APIPublisherImplTestCase {
                 LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("/sample/v1")).thenReturn(false);
         Mockito.when(apiDAO.isAPINameExists("Sample")).thenReturn(true);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(SampleObjectCreator.getMockAPIObject());
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(SampleObjectCreator.getMockAPIObject().build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIConstants.API_LIFECYCLE, user);
@@ -101,8 +98,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIConstants.API_LIFECYCLE, user)).thenThrow(new
                 LifecycleException
                 ("Couldn't add api lifecycle"));
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(SampleObjectCreator.getMockAPIObject());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIConstants.API_LIFECYCLE, user);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(SampleObjectCreator.getMockAPIObject().build());
@@ -112,8 +108,7 @@ public class APIPublisherImplTestCase {
     void getApi() throws APIManagementException, APIMgtDAOException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(new API.APIBuilder(user, "1" +
                 ".0.0", "Calculator").build());
         apiPublisher.getAPIbyUUID(uuid);
@@ -127,7 +122,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionCountByAPI(uuid))
                 .thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, apiSubscriptionDAO,
+        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, apiSubscriptionDAO, null,
                 apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(new API.APIBuilder(user, "1" +
                 ".0.0", "Calculator").lifecycleInstanceId(uuid).build());
@@ -146,7 +141,7 @@ public class APIPublisherImplTestCase {
                 .getMockAPIObject().lifecycleInstanceId(uuid).build());
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionCountByAPI(uuid))
                 .thenReturn(2L);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO,
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null,
                 apiLifecycleManager);
 
         apiPublisher.deleteAPI(uuid);
@@ -156,8 +151,7 @@ public class APIPublisherImplTestCase {
     void updateAPIWithStatusUnchanged() throws APIManagementException, APIMgtDAOException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.updateAPI(uuid, new API.APIBuilder(user, "Sample",
                 "1.0.0").build())).thenReturn(new API.APIBuilder(user, "Sample", "1.0.0").build());
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn
@@ -173,8 +167,7 @@ public class APIPublisherImplTestCase {
     void updateAPIWithStatusChanged() throws APIMgtDAOException, APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.updateAPI(uuid, new API.APIBuilder(user, "Sample",
                 "1.0.0").build())).thenReturn(new API.APIBuilder(user, "Sample", "1.0.0").build());
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(new API.APIBuilder(user, "1" +
@@ -189,8 +182,7 @@ public class APIPublisherImplTestCase {
     void updateAPIStatus() throws APIManagementException, APIMgtDAOException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         API mockAPI = new API.APIBuilder(user, "Sample", "1.0.0")
                 .lifecycleInstanceId(uuid).id
                         (uuid).build();
@@ -217,8 +209,7 @@ public class APIPublisherImplTestCase {
                         (SampleObjectCreator.getMockLifecycleStateObject());
         Mockito.doThrow(new APIMgtDAOException("Couldn't change the status of api ID ")).when(apiDAO)
                 .changeLifeCycleStatus(uuid, "PUBLISH");
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", Collections.emptyMap());
     }
 
@@ -234,8 +225,7 @@ public class APIPublisherImplTestCase {
                         (uuid).build()))
                 .thenReturn
                         (SampleObjectCreator.getMockLifecycleStateObject());
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", Collections.emptyMap());
     }
 
@@ -243,8 +233,7 @@ public class APIPublisherImplTestCase {
     void CreateNewAPIVersion() throws APIMgtDAOException, APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null,
-                apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(SampleObjectCreator
                 .getMockAPIObject().build());
         Mockito.when(apiLifecycleManager.addLifecycle(APIConstants.API_LIFECYCLE, user)).thenReturn(new
@@ -259,7 +248,7 @@ public class APIPublisherImplTestCase {
     void CreateNewAPIVersionWithInvalidUUID() throws APIMgtDAOException, APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(null);
         apiPublisher.createNewAPIVersion(uuid, "2.0.0");
     }
@@ -270,7 +259,7 @@ public class APIPublisherImplTestCase {
             LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(SampleObjectCreator
                 .getMockAPIObject().build());
         Mockito.when(apiLifecycleManager.addLifecycle(APIConstants.API_LIFECYCLE, user)).thenThrow(new
@@ -285,7 +274,7 @@ public class APIPublisherImplTestCase {
             LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenThrow(new APIMgtDAOException(""));
         apiPublisher.createNewAPIVersion(uuid, "2.0.0");
     }
@@ -294,7 +283,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Check if api exist with valid uuid")
     void CheckIfAPIExistForValidUuid() throws APIMgtDAOException, APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null);
         Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(SampleObjectCreator
                 .getMockApiSummaryObject());
         Assert.assertTrue(apiPublisher.checkIfAPIExists(uuid));
@@ -303,7 +292,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Check if api exist with invalid uuid")
     void CheckIfAPIExistForInValidUuid() throws APIMgtDAOException, APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null);
         Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(null);
         Assert.assertFalse(apiPublisher.checkIfAPIExists(uuid));
     }
@@ -312,7 +301,7 @@ public class APIPublisherImplTestCase {
             APIManagementException.class})
     void CheckIfAPIExistWhileGettingJDBCConnectionFailure() throws APIMgtDAOException, APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null);
         Mockito.when(apiDAO.getAPISummary(uuid)).thenThrow(new APIMgtDAOException(""));
         apiPublisher.checkIfAPIExists(uuid);
     }

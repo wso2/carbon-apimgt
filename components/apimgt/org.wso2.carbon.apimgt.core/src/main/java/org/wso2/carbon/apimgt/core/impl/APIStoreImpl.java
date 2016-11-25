@@ -26,10 +26,13 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.time.LocalDateTime;
@@ -48,8 +51,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, new APILifeCycleManagerImpl());
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl());
     }
 
     @Override public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
@@ -134,10 +137,22 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 handleResourceAlreadyExistsException(
                         "An application already exists with a duplicate name - " + application.getName());
             }
-            //todo validate tiers here
 
+            //Tier validation
+            String tierName = application.getTier();
+            if (tierName == null) {
+                APIUtils.logAndThrowException("Tier name cannot be null - " + application.getName(), log);
+            } else {
+                Policy policy = getPolicyDAO().getPolicy(APIConstants.POLICY_APPLICATION_TYPE, tierName);
+                if (policy == null) {
+                    APIUtils.logAndThrowException("Specified tier " + tierName + " is invalid", log);
+                }
+            }
+
+            // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
+
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
             APIUtils.logDebug("successfully added application with appId " + application.getUuid(), log);

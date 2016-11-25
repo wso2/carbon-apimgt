@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -47,15 +48,17 @@ public abstract class AbstractAPIManager implements APIManager {
     private ApiDAO apiDAO;
     private ApplicationDAO applicationDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
+    private PolicyDAO policyDAO;
     private String username;
     private APILifecycleManager apiLifecycleManager;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager)  {
+            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
     }
 
@@ -250,6 +253,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected APISubscriptionDAO getApiSubscriptionDAO() {
         return apiSubscriptionDAO;
+    }
+
+    protected PolicyDAO getPolicyDAO() {
+        return policyDAO;
     }
 
     protected String getUsername() {

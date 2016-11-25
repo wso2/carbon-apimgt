@@ -57,6 +57,7 @@ public class APIConstants {
     public static final String DEFAULT_API_POLICY = "Unlimited";
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
+    public static final String POLICY_APPLICATION_TYPE = "2";
 
     /**
      *  Application status related constants.
@@ -171,6 +172,8 @@ public class APIConstants {
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
         public static final String RESOURCE_LEVEL = "resource";
+
+
     }
 
 }
