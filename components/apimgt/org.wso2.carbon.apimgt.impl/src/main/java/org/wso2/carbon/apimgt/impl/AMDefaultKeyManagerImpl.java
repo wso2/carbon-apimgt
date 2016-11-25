@@ -90,12 +90,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
 
-
+        
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
         tokenScopes[0] = tokenScope;
 
-        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
+        
+        
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
@@ -105,6 +106,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
             applicationToCreate.setClientName(applicationName);
             applicationToCreate.setAppOwner(userId);
+            applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());
             info = keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
@@ -117,6 +119,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     new APIManagementException("OAuth app does not contains required data"));
         }
 
+        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
         oAuthApplicationInfo.setClientName(info.getClientName());
         oAuthApplicationInfo.setClientId(info.getClientId());
         oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
