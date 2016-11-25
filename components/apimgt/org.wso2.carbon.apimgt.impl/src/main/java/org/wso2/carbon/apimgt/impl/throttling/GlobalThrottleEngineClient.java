@@ -100,12 +100,11 @@ public class GlobalThrottleEngineClient {
      * 2. If execution plan exist with same name edit it
      * 3. Else deploy new execution plan
      *
-     * @param name          Name of execution plan
      * @param executionPlan execution query plan
      * @param sessionCookie session cookie to use established connection
      * @throws RemoteException
      */
-    private void deploy(String name, String executionPlan, String sessionCookie) throws RemoteException {
+    private void deploy(String executionPlan, String sessionCookie) throws RemoteException {
         ServiceClient serviceClient;
         Options options;
 
@@ -115,24 +114,29 @@ public class GlobalThrottleEngineClient {
         options = serviceClient.getOptions();
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, sessionCookie);
+        eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
+    }
 
+    /**
+     *  Updates a deployed execution plan
+     *
+     * @param name          Name of execution plan
+     * @param executionPlan execution query plan
+     * @param sessionCookie session cookie to use established connection
+     * @throws RemoteException
+     */
+    private void update(String name, String executionPlan, String sessionCookie) throws RemoteException {
+        ServiceClient serviceClient;
+        Options options;
+
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+        serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+        options = serviceClient.getOptions();
+        options.setManageSession(true);
+        options.setProperty(HTTPConstants.COOKIE_STRING, sessionCookie);
         eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
-        ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
-                .getAllActiveExecutionPlanConfigurations();
-        boolean isUpdateRequest = false;
-        if (executionPlanConfigurationDtos != null) {
-            for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-                if (executionPlanConfigurationDto.getName().trim().equals(name)) {
-                    eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
-                    isUpdateRequest = true;
-                    break;
-                }
-            }
-        }
-        if (!isUpdateRequest) {
-            eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
-        }
-
+        eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
     }
 
 
@@ -140,12 +144,40 @@ public class GlobalThrottleEngineClient {
         authenticationAdminStub.logout();
     }
 
-
-    public void deployExecutionPlan(String name, String executionPlan)
+    /**
+     * Deploys an execution plan
+     *
+     * @param executionPlan execution plan
+     * @throws Exception
+     */
+    public void deployExecutionPlan(String executionPlan)
             throws Exception {
         try {
             String sessionID = login();
-            deploy(name, executionPlan, sessionID);
+            deploy(executionPlan, sessionID);
+        } finally {
+            try {
+                logout();
+            } catch (RemoteException e) {
+                log.error("Error when logging out from global throttling engine. " + e.getMessage(), e);
+            } catch (LogoutAuthenticationExceptionException e) {
+                log.error("Error when logging out from global throttling engine. " + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * This method will be used to update deployed execution plan
+     *
+     * @param name          execution plan name
+     * @param executionPlan execution plan
+     * @throws Exception
+     */
+    public void updateExecutionPlan(String name, String executionPlan)
+            throws Exception {
+        try {
+            String sessionID = login();
+            update(name, executionPlan, sessionID);
         } finally {
             try {
                 logout();

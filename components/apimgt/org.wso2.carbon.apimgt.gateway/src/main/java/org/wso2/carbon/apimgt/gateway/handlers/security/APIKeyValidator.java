@@ -66,6 +66,12 @@ public class APIKeyValidator {
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
 
+    private static boolean gatewayKeyCacheInit = false;
+
+    private static boolean gatewayTokenCacheInit = false;
+
+    private static boolean resourceCacheInit = false;
+
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
@@ -84,44 +90,64 @@ public class APIKeyValidator {
         this.getGatewayKeyCache();
 
         this.getResourceCache();
+
+        this.getGatewayTokenCache();
     }
 
     protected Cache getGatewayKeyCache() {
         String apimGWCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                                             getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if(apimGWCacheExpiry != null ) {
-            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME,
-                             Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-        } else {
-            long defaultCacheTimeout =
-                    Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                            * 60;
-            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME,
-                    defaultCacheTimeout, defaultCacheTimeout);
+        if(!gatewayKeyCacheInit){
+            gatewayKeyCacheInit = true;
+            if(apimGWCacheExpiry != null){
+                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME,
+                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+            }
+            else{
+                long defaultCacheTimeout =
+                        Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
+                                * 60;
+                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME,
+                        defaultCacheTimeout, defaultCacheTimeout);
+            }
         }
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
     }
 
     protected Cache getGatewayTokenCache() {
         String apimGWCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if(apimGWCacheExpiry != null ) {
-            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
-                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-        } else {
-            long defaultCacheTimeout =
-                    Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                            * 60;
-            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
-                    defaultCacheTimeout, defaultCacheTimeout);
+
+        if(!gatewayTokenCacheInit){
+            gatewayTokenCacheInit = true;
+            if(apimGWCacheExpiry != null ) {
+                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
+                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+            } else {
+                long defaultCacheTimeout =
+                        Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
+                                * 60;
+                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
+                        defaultCacheTimeout, defaultCacheTimeout);
+            }
         }
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
     }
 
     protected Cache getResourceCache() {
-        long defaultCacheTimeout =
-                Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                        * 60;
-        return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
-                defaultCacheTimeout, defaultCacheTimeout);
+
+        if(!resourceCacheInit){
+            resourceCacheInit = true;
+            long defaultCacheTimeout =
+                    Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
+                            * 60;
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
     }
 
     /**

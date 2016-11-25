@@ -37,9 +37,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
 import javax.xml.namespace.QName;
-
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import java.util.*;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;

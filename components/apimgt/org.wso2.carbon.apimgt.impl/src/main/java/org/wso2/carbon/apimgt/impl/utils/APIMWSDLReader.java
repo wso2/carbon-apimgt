@@ -23,10 +23,14 @@ import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.woden.WSDLSource;
 import org.apache.woden.wsdl20.Endpoint;
 import org.apache.woden.wsdl20.xml.EndpointElement;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.xml.sax.InputSource;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
@@ -36,6 +40,8 @@ import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -126,6 +132,80 @@ public class APIMWSDLReader {
         }
 
     }
+
+	/**
+	 * Update WSDL 1.0 service definitions saved in registry
+	 *
+	 * @param wsdl 	byte array of registry content
+	 * @param api 	API object
+	 * @return 		the OMElemnt of the new WSDL content
+	 * @throws APIManagementException
+     */
+	public OMElement updateWSDL(byte[] wsdl, API api) throws APIManagementException {
+
+		try {
+			// Generate wsdl document from registry data
+			WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
+			// switch off the verbose mode
+			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+			wsdlReader.setFeature("javax.wsdl.importDocuments", false);
+			Definition wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdl)));
+
+			// Update transports
+			setServiceDefinition(wsdlDefinition, api);
+
+			WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
+			return APIUtil.buildOMElement(byteArrayInputStream);
+
+		} catch (Exception e) {
+			String msg = " Error occurs when updating WSDL ";
+			log.error(msg);
+			throw new APIManagementException(msg, e);
+		}
+	}
+
+	/**
+	 * Update WSDL 2.0 service definitions saved in registry
+	 *
+	 * @param wsdl 	byte array of wsdl definition saved in registry
+	 * @param api 	API object
+	 * @return 		the OMElemnt of the new WSDL content
+	 * @throws APIManagementException
+	 */
+	public OMElement updateWSDL2(byte[] wsdl, API api) throws APIManagementException {
+
+		try {
+			// Generate wsdl document from registry data
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			org.apache.woden.WSDLFactory wsdlFactory = org.apache.woden.WSDLFactory.newInstance();
+			org.apache.woden.WSDLReader reader = wsdlFactory.newWSDLReader();
+			reader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, false);
+			Document dom = builder.parse(new ByteArrayInputStream(wsdl));
+			Element domElement = dom.getDocumentElement();
+			WSDLSource wsdlSource = reader.createWSDLSource();
+			wsdlSource.setSource(domElement);
+			org.apache.woden.wsdl20.Description wsdlDefinition = reader.readWSDL(wsdlSource);
+
+			// Update transports
+			setServiceDefinitionForWSDL2(wsdlDefinition, api);
+
+			org.apache.woden.WSDLWriter writer = org.apache.woden.WSDLFactory.newInstance().newWSDLWriter();
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
+			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+			return APIUtil.buildOMElement(byteArrayInputStream);
+
+		} catch (Exception e) {
+			String msg = " Error occurs when updating WSDL ";
+			log.error(msg);
+			throw new APIManagementException(msg, e);
+		}
+	}
 
     private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
         WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
