@@ -20970,6 +20970,13 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
       pre = $('<pre class="json" />').append(code);
     }
     var response_body = pre;
+
+    var status = url.endsWith("/*");
+    //remove the star sign at the end (if there are wildcard resources)
+    if(status) {
+        url = url.substring(0, url.length - 1);
+    }
+
     $('.request_url', $(this.el)).html('<pre></pre>');
     $('.request_url pre', $(this.el)).text(url);
     $('.response_code', $(this.el)).html('<pre>' + response.status + '</pre>');
