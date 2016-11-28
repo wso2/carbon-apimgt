@@ -256,6 +256,8 @@ GrantTypes.prototype.getMap = function(selected){
             var validity_time = this.element.find(".validity_time").val();
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
+            var scopes = $('#scopes option:selected')
+                            .map(function(){ return $( this ).val();}).get().join(" ");
             
             this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
@@ -264,7 +266,7 @@ GrantTypes.prototype.getMap = function(selected){
                 keytype: this.type,
                 callbackUrl: this.app.callbackUrl,
                 validityTime: validity_time,
-                tokenScope:"",
+                tokenScope: scopes,
                 jsonParams:'{"grant_types":"'+selected+'"}',
             }, $.proxy(function (result) {
                 this.element.find('.generatekeys').buttonLoader('stop');
