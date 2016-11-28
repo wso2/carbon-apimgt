@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.util;
 /**
  * This class represents the constants that are used for APIManager implementation
  */
-public class APIConstants {
+public class APIMgtConstants {
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
     //Swagger v2.0 constants
@@ -57,7 +57,6 @@ public class APIConstants {
     public static final String DEFAULT_API_POLICY = "Unlimited";
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
-    public static final String POLICY_APPLICATION_TYPE = "2";
 
     /**
      *  Application status related constants.

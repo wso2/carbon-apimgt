@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
@@ -85,10 +85,10 @@ public class APIExecutor implements Executor {
             try {
                 APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(api.getProvider());
                 for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
-                    if (APIConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
+                    if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
                         deprecateOlderVersions = checkItemBean.isValue();
                     }
-                    if (APIConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
+                    if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
                         requireReSubscriptions = checkItemBean.isValue();
                     }
                 }

@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.time.LocalDateTime;
@@ -143,7 +143,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             if (tierName == null) {
                 APIUtils.logAndThrowException("Tier name cannot be null - " + application.getName(), log);
             } else {
-                Policy policy = getPolicyDAO().getPolicy(APIConstants.POLICY_APPLICATION_TYPE, tierName);
+                Policy policy = getPolicyDAO()
+                        .getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, tierName);
                 if (policy == null) {
                     APIUtils.logAndThrowException("Specified tier " + tierName + " is invalid", log);
                 }

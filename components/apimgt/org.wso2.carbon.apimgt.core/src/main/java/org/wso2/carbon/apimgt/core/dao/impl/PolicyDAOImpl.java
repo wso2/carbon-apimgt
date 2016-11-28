@@ -14,7 +14,7 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException {
-        if (APIConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel)) {
+        if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel)) {
             try {
                 return getAPIPolicy(policyName);
             } catch (SQLException e) {
@@ -64,9 +64,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, policyName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    policy = new APIPolicy(resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    policy = new APIPolicy(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
                     setCommonPolicyDetails(policy, resultSet);
-                    policy.setUserLevel(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    policy.setUserLevel(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_APPLICABLE_LEVEL));
                     policy.setPipelines(getPipelines(policy.getPolicyId(), connection));
                 }
@@ -91,31 +91,34 @@ public class PolicyDAOImpl implements PolicyDAO {
             prefix = "DEFAULT_";
         }
 
-        quotaPolicy.setType(resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants
+        quotaPolicy.setType(resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants
                 .COLUMN_QUOTA_POLICY_TYPE));
-        if (resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+        if (resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
                 .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
             RequestCountLimit reqLimit = new RequestCountLimit();
-            reqLimit.setUnitTime(resultSet.getInt(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-            reqLimit.setTimeUnit(resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-            reqLimit.setRequestCount(resultSet.getInt(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
+            reqLimit.setUnitTime(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setTimeUnit(
+                    resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            reqLimit.setRequestCount(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
             quotaPolicy.setLimit(reqLimit);
-        } else if (resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+        } else if (resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
                 .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
             BandwidthLimit bandLimit = new BandwidthLimit();
-            bandLimit.setUnitTime(resultSet.getInt(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-            bandLimit.setTimeUnit(resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-            bandLimit.setDataAmount(resultSet.getInt(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
-            bandLimit.setDataUnit(resultSet.getString(prefix + APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+            bandLimit.setUnitTime(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setTimeUnit(
+                    resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            bandLimit.setDataAmount(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
+            bandLimit.setDataUnit(
+                    resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
             quotaPolicy.setLimit(bandLimit);
         }
 
-        policy.setUuid(resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_UUID));
-        policy.setDescription(resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-        policy.setDisplayName(resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
-        policy.setPolicyId(resultSet.getInt(APIConstants.ThrottlePolicyConstants.COLUMN_POLICY_ID));
+        policy.setUuid(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UUID));
+        policy.setDescription(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+        policy.setDisplayName(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
+        policy.setPolicyId(resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_POLICY_ID));
         policy.setDefaultQuotaPolicy(quotaPolicy);
-        policy.setDeployed(resultSet.getBoolean(APIConstants.ThrottlePolicyConstants.COLUMN_DEPLOYED));
+        policy.setDeployed(resultSet.getBoolean(APIMgtConstants.ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
 
     /**
@@ -143,15 +146,15 @@ public class PolicyDAOImpl implements PolicyDAO {
                     Pipeline pipeline = new Pipeline();
                     ArrayList<Condition> conditions;
                     QuotaPolicy quotaPolicy = new QuotaPolicy();
-                    quotaPolicy.setType(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    quotaPolicy.setType(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_QUOTA_POLICY_TYPE));
 
-                    timeUnit = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT);
-                    quotaUnit = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA_UNIT);
-                    unitTime = resultSet.getInt(APIConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME);
-                    quota = resultSet.getInt(APIConstants.ThrottlePolicyConstants.COLUMN_QUOTA);
-                    pipelineId = resultSet.getInt(APIConstants.ThrottlePolicyConstants.COLUMN_CONDITION_ID);
-                    description = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_DESCRIPTION);
+                    timeUnit = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT);
+                    quotaUnit = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_UNIT);
+                    unitTime = resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME);
+                    quota = resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA);
+                    pipelineId = resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_CONDITION_ID);
+                    description = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_DESCRIPTION);
                     if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
                         RequestCountLimit requestCountLimit = new RequestCountLimit();
                         requestCountLimit.setUnitTime(unitTime);
@@ -199,10 +202,10 @@ public class PolicyDAOImpl implements PolicyDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 while (resultSet.next()) {
-                    startingIP = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_STARTING_IP);
-                    endingIP = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_ENDING_IP);
-                    specificIP = resultSet.getString(APIConstants.ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
-                    invert = resultSet.getBoolean(APIConstants.ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
+                    startingIP = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_STARTING_IP);
+                    endingIP = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_ENDING_IP);
+                    specificIP = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
+                    invert = resultSet.getBoolean(APIMgtConstants.ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
 
                     if (specificIP != null && !"".equals(specificIP)) {
                         IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
@@ -248,11 +251,11 @@ public class PolicyDAOImpl implements PolicyDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     HeaderCondition headerCondition = new HeaderCondition();
-                    headerCondition.setHeader(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    headerCondition.setHeader(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_HEADER_FIELD_NAME));
-                    headerCondition.setValue(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    headerCondition.setValue(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_HEADER_FIELD_VALUE));
-                    headerCondition.setInvertCondition(resultSet.getBoolean(APIConstants.ThrottlePolicyConstants
+                    headerCondition.setInvertCondition(resultSet.getBoolean(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_IS_HEADER_FIELD_MAPPING));
                     conditions.add(headerCondition);
                 }
@@ -278,12 +281,12 @@ public class PolicyDAOImpl implements PolicyDAO {
                 while (resultSet.next()) {
                     QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
                     queryParameterCondition
-                            .setParameter(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                            .setParameter(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                                     .COLUMN_PARAMETER_NAME));
-                    queryParameterCondition.setValue(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    queryParameterCondition.setValue(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_PARAMETER_VALUE));
-                    queryParameterCondition.setInvertCondition(resultSet.getBoolean(APIConstants.ThrottlePolicyConstants
-                            .COLUMN_IS_PARAM_MAPPING));
+                    queryParameterCondition.setInvertCondition(
+                            resultSet.getBoolean(APIMgtConstants.ThrottlePolicyConstants.COLUMN_IS_PARAM_MAPPING));
                     conditions.add(queryParameterCondition);
                 }
             }
@@ -307,11 +310,11 @@ public class PolicyDAOImpl implements PolicyDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
-                    jwtClaimsCondition.setClaimUrl(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    jwtClaimsCondition.setClaimUrl(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_CLAIM_URI));
-                    jwtClaimsCondition.setAttribute(resultSet.getString(APIConstants.ThrottlePolicyConstants
+                    jwtClaimsCondition.setAttribute(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_CLAIM_ATTRIBUTE));
-                    jwtClaimsCondition.setInvertCondition(resultSet.getBoolean(APIConstants.ThrottlePolicyConstants
+                    jwtClaimsCondition.setInvertCondition(resultSet.getBoolean(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_IS_CLAIM_MAPPING));
                     conditions.add(jwtClaimsCondition);
                 }
