@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.util;
 /**
  * This class represents the constants that are used for APIManager implementation
  */
-public class APIConstants {
+public class APIMgtConstants {
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
     //Swagger v2.0 constants
@@ -78,5 +78,101 @@ public class APIConstants {
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
     }
 
+    /**
+     * Throttle policy related constants
+     */
+    public static class ThrottlePolicyConstants {
+        public static final String COLUMN_POLICY_ID = "POLICY_ID";
+
+        public static final String COLUMN_UUID = "UUID";
+
+        public static final String COLUMN_NAME = "NAME";
+
+        public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
+
+        public static final String COLUMN_DISPLAY_NAME = "DISPLAY_NAME";
+
+        public static final String COLUMN_TENANT_ID = "TENANT_ID";
+
+        public static final String COLUMN_RATE_LIMIT_COUNT = "RATE_LIMIT_COUNT";
+
+        public static final String COLUMN_RATE_LIMIT_TIME_UNIT = "RATE_LIMIT_TIME_UNIT";
+
+        public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_TYPE";
+
+        public static final String COLUMN_QUOTA = "QUOTA";
+
+        public static final String COLUMN_QUOTA_UNIT = "QUOTA_UNIT";
+
+        public static final String COLUMN_UNIT_TIME = "UNIT_TIME";
+
+        public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
+
+        public static final String COLUMN_APPLICABLE_LEVEL = "APPLICABLE_LEVEL";
+
+        public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_TYPE";
+
+        public static final String COLUMN_DEFAULT_UNIT_TIME = "DEFAULT_UNIT_TIME";
+
+        public static final String COLUMN_DEFAULT_TIME_UNIT = "DEFAULT_TIME_UNIT";
+
+        public static final String COLUMN_DEFAULT_QUOTA = "DEFAULT_QUOTA";
+
+        public static final String COLUMN_DEFAULT_QUOTA_UNIT = "DEFAULT_QUOTA_UNIT";
+
+        public static final String COLUMN_SPECIFIC_DATE = "SPECIFIC_DATE";
+
+        public static final String COLUMN_STARTING_DATE = "STARTING_DATE";
+
+        public static final String COLUMN_ENDING_DATE = "ENDING_DATE";
+
+        public static final String COLUMN_SPECIFIC_IP = "SPECIFIC_IP";
+
+        public static final String COLUMN_STARTING_IP = "STARTING_IP";
+
+        public static final String COLUMN_ENDING_IP = "ENDING_IP";
+
+        public static final String COLUMN_HTTP_VERB = "HTTP_VERB";
+
+        public static final String COLUMN_CONDITION_ID = "CONDITION_GROUP_ID";
+
+        public static final String COLUMN_PARAMETER_NAME = "PARAMETER_NAME";
+
+        public static final String COLUMN_PARAMETER_VALUE = "PARAMETER_VALUE";
+
+        public static final String COLUMN_CLAIM_URI = "CLAIM_URI";
+
+        public static final String COLUMN_CLAIM_ATTRIBUTE = "CLAIM_ATTRIB";
+
+        public static final String COLUMN_HEADER_FIELD_NAME = "HEADER_FIELD_NAME";
+
+        public static final String COLUMN_HEADER_FIELD_VALUE = "HEADER_FIELD_VALUE";
+
+        public static final String COLUMN_SIDDHI_QUERY = "SIDDHI_QUERY";
+
+        public static final String COLUMN_KEY_TEMPLATE  = "KEY_TEMPLATE";
+
+        public static final String COLUMN_DEPLOYED = "IS_DEPLOYED";
+
+        public static final String COLUMN_WITHIN_IP_RANGE = "WITHIN_IP_RANGE";
+
+        public static final String COLUMN_IS_HEADER_FIELD_MAPPING = "IS_HEADER_FIELD_MAPPING";
+
+        public static final String COLUMN_IS_CLAIM_MAPPING = "IS_CLAIM_MAPPING";
+
+        public static final String COLUMN_IS_PARAM_MAPPING = "IS_PARAM_MAPPING";
+
+        public static final String COLUMN_STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
+
+        public static final String COLUMN_BILLING_PLAN = "BILLING_PLAN";
+
+        public static final String COLUMN_CUSTOM_ATTRIB = "CUSTOM_ATTRIBUTES";
+        public static final String API_LEVEL = "api";
+        public static final String APPLICATION_LEVEL = "application";
+        public static final String SUBSCRIPTION_LEVEL = "subscription";
+        public static final String RESOURCE_LEVEL = "resource";
+
+
+    }
 
 }

@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 
 import java.io.InputStream;
 import java.util.List;
@@ -179,71 +179,73 @@ public interface ApiDAO {
      * Return list of all Document info belonging to a given API.
      *
      * @param apiID The UUID of the respective API
-     * @return {@link List<ArtifactResourceMetaData>} matching results
+     * @return {@link List<DocumentInfo>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<ArtifactResourceMetaData> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
+    List<DocumentInfo> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
 
     /**
      *
      * @param resourceID The UUID of the respective resource
-     * @return {@link ArtifactResourceMetaData} ArtifactResource meta data object
+     * @return {@link DocumentInfo} DocumentInfo meta data
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @CheckForNull
-    ArtifactResourceMetaData getResourceMetaData(String resourceID) throws APIMgtDAOException;
+    DocumentInfo getDocumentInfo(String resourceID) throws APIMgtDAOException;
 
     /**
      *
      * @param resourceID The UUID of the respective resource
-     * @return {@link InputStream} Resource binary content
+     * @return {@link InputStream} Document File content
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    InputStream getBinaryResourceContent(String resourceID) throws APIMgtDAOException;
+    @CheckForNull
+    InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException;
 
     /**
      *
      * @param resourceID The UUID of the respective resource
-     * @return {@link String} Resource text content
+     * @return {@link String} Document inline content
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    String getTextResourceContent(String resourceID) throws APIMgtDAOException;
+    @CheckForNull
+    String getDocumentInlineContent(String resourceID) throws APIMgtDAOException;
 
     /**
-     * Add artifact resource meta data to an API
+     * Add document info meta data to an API
      *
      * @param apiId    UUID of API
-     * @param metaData {@link ArtifactResourceMetaData} ArtifactResource meta data
+     * @param documentInfo {@link DocumentInfo}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addArtifactResourceMetaData(String apiId, ArtifactResourceMetaData metaData) throws APIMgtDAOException;
+    void addDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
 
     /**
-     * Update binary resource
+     * Add Document File content
      *
      * @param resourceID         UUID of resource
-     * @param content            Binary content as an Input Stream
+     * @param content            File content as an InputStream
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateBinaryResourceContent(String resourceID, InputStream content) throws APIMgtDAOException;
+    void addDocumentFileContent(String resourceID, InputStream content) throws APIMgtDAOException;
 
     /**
-     * Update text resource
+     * Add Document File content
      *
      * @param resourceID         UUID of resource
-     * @param content            Text content as a String
+     * @param content            Inline content as a String
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateTextResourceContent(String resourceID, String content) throws APIMgtDAOException;
+    void addDocumentInlineContent(String resourceID, String content) throws APIMgtDAOException;
 
     /**
-     * Delete a resource
+     * Delete a document
      *
      * @param resourceID   UUID of resource
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void deleteResource(String resourceID) throws APIMgtDAOException;
+    void deleteDocument(String resourceID) throws APIMgtDAOException;
 
     /**
      * used to deprecate older versions of the api

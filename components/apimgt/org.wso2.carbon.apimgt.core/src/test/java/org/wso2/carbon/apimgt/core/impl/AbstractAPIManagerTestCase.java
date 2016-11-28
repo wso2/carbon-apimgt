@@ -24,8 +24,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -44,8 +42,8 @@ public class AbstractAPIManagerTestCase {
 
     @Test public void testSearchAPIByUUID() {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null);
-        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
+        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).buildApi();
         try {
             when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
             API api = apiStore.getAPIbyUUID(API_ID);
@@ -59,7 +57,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
             when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);
@@ -67,7 +65,7 @@ public class AbstractAPIManagerTestCase {
 
             Assert.assertNotNull(application);
             verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
-        } catch (APIManagementException | SQLException e) {
+        } catch (APIManagementException | APIMgtDAOException e) {
             Assert.assertTrue(false);
         }
     }

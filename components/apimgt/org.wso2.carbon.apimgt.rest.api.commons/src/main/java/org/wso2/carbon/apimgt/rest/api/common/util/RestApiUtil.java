@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
@@ -393,7 +393,7 @@ public class RestApiUtil {
      */
      public static Policy findPolicy(Collection<Policy> policies, String tierName) {
         for (Policy policy : policies) {
-            if (policy.getName() != null && tierName != null && policy.getName().equals(tierName)) {
+            if (policy.getPolicyName() != null && tierName != null && policy.getPolicyName().equals(tierName)) {
                 return policy;
             }
         }

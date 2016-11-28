@@ -21,9 +21,9 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.sql.SQLException;
 import javax.annotation.CheckForNull;
 
 /**
@@ -37,10 +37,10 @@ public interface ApplicationDAO {
      * @param appId   The UUID that uniquely identifies an Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @CheckForNull
-    Application getApplication(String appId, String ownerId) throws SQLException;
+    Application getApplication(String appId, String ownerId) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of an Application
@@ -48,19 +48,19 @@ public interface ApplicationDAO {
      * @param appName Name of the Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
     @CheckForNull
-    Application getApplicationByName(String appName, String ownerId) throws SQLException;
+    Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException;
 
     /**
      * Retrieves all available Applications that belong to a user.
      *
      * @param ownerId Username of user
      * @return An array of {@link Application}
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    Application[] getApplications(String ownerId) throws SQLException;
+    Application[] getApplications(String ownerId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
@@ -70,9 +70,9 @@ public interface ApplicationDAO {
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    Application[] getApplicationsForUser(int offset, int limit, String userName) throws SQLException;
+    Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
@@ -82,9 +82,9 @@ public interface ApplicationDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws SQLException;
+    Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
@@ -92,10 +92,9 @@ public interface ApplicationDAO {
      *
      * @param searchString The search string provided
      * @return An array of matching {@link Application} objects
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    Application[] searchApplicationsForUser(String searchString, String userId)
-            throws SQLException;
+    Application[] searchApplicationsForUser(String searchString, String userId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
@@ -104,43 +103,42 @@ public interface ApplicationDAO {
      * @param searchString The search string provided
      * @param groupID      The Group ID to filter results by
      * @return An array of matching {@link Application} objects
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    Application[] searchApplicationsForGroup(String searchString, String groupID)
-            throws SQLException;
+    Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException;
 
     /**
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    void addApplication(Application application) throws SQLException;
+    void addApplication(Application application) throws APIMgtDAOException;
 
     /**
      * Update an existing Application
      *
      * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    void updateApplication(String appID, Application updatedApp) throws SQLException;
+    void updateApplication(String appID, Application updatedApp) throws APIMgtDAOException;
 
     /**
      * Remove an existing Application
      *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    void deleteApplication(String appID) throws SQLException;
+    void deleteApplication(String appID) throws APIMgtDAOException;
 
     /**
      * Check whether given application name is already available in the system
      *
      * @param appName application name
      * @return true if application name is already available
-     * @throws SQLException if failed to get applications for given subscriber
+     * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
-    boolean isApplicationNameExists(String appName) throws SQLException;
+    boolean isApplicationNameExists(String appName) throws APIMgtDAOException;
 
 }

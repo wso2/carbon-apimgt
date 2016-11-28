@@ -17,7 +17,7 @@ $(function () {
                         window.location.reload(true);
                     },
                     function (error) {
-                       alert("Error occurred while deleting application")
+                        alert("Error occurred while deleting application")
                     });
             });
 
@@ -60,7 +60,7 @@ $(function () {
                 var application = {
                     name: applicationName,
                     throttlingTier: tier,
-                    description : description
+                    description: description
                 };
 
                 client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
@@ -72,7 +72,7 @@ $(function () {
                         window.location = "/store/application/" + applicationName;
                     },
                     function (error) {
-                        alert("Error occurred while adding Application : "+applicationName);
+                        alert("Error occurred while adding Application : " + applicationName);
                     });
 
 

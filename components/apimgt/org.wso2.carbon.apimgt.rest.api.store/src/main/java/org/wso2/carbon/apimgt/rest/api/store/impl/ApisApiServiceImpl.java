@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.util.List;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -28,7 +29,22 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
             String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        String username = RestApiUtil.getLoggedInUsername();
+        InputStream documentContent = null;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            documentContent = apiStore.getDocumentationContent(documentId);
+            if (documentContent == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error while retrieving content of documentation for given apiId " + apiId + "with docId "
+                            + documentId, e, log);
+        }
+        return Response.ok().entity(documentContent)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_OCTET_STREAM).build();
     }
 
 
@@ -39,8 +55,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            ArtifactResourceMetaData artifactResourceMetaData = apiStore.getDocumentationSummary(documentId);
-            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(artifactResourceMetaData);
+            DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
+            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId, e, log);
@@ -58,7 +74,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String apiConsumer = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
-            List<ArtifactResourceMetaData> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
+            List<DocumentInfo> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
             documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentInfoResults, offset, limit);
         } catch (APIManagementException e) {

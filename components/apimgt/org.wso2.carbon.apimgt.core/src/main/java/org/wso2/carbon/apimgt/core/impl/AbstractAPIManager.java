@@ -26,16 +26,16 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ArtifactResourceMetaData;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 /**
@@ -48,15 +48,17 @@ public abstract class AbstractAPIManager implements APIManager {
     private ApiDAO apiDAO;
     private ApplicationDAO applicationDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
+    private PolicyDAO policyDAO;
     private String username;
     private APILifecycleManager apiLifecycleManager;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager)  {
+            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
     }
 
@@ -178,10 +180,10 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link List<ArtifactResourceMetaData>} Document meta data list
+     * @return {@link List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
-    public List<ArtifactResourceMetaData> getAllDocumentation(String apiId, int offset, int limit)
+    public List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit)
                                                                                 throws APIManagementException {
         try {
             return getApiDAO().getDocumentsInfoList(apiId);
@@ -195,12 +197,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * Get a summary of documentation by doc Id
      *
      * @param docId Document ID
-     * @return {@link ArtifactResourceMetaData} Documentation meta data
+     * @return {@link DocumentInfo} Documentation meta data
      * @throws APIManagementException if it failed to fetch Documentation
      */
-    public ArtifactResourceMetaData getDocumentationSummary(String docId) throws APIManagementException {
+    public DocumentInfo getDocumentationSummary(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getResourceMetaData(docId);
+            return getApiDAO().getDocumentInfo(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document", e, log);
         }
@@ -216,7 +218,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public InputStream getDocumentationContent(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getBinaryResourceContent(docId);
+            return getApiDAO().getDocumentFileContent(docId);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
@@ -235,7 +237,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Application application = null;
         try {
            application = getApplicationDAO().getApplication(uuid, userId);
-        } catch (SQLException e) {
+        } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return application;
@@ -251,6 +253,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected APISubscriptionDAO getApiSubscriptionDAO() {
         return apiSubscriptionDAO;
+    }
+
+    protected PolicyDAO getPolicyDAO() {
+        return policyDAO;
     }
 
     protected String getUsername() {
