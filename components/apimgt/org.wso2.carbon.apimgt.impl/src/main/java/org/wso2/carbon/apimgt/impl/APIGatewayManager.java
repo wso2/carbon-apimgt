@@ -409,19 +409,11 @@ public class APIGatewayManager {
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
                 "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
-                "   <switch source=\"get-property('websocket.source.handshake.present')\">\n" +
-                "       <case regex=\"true\">\n" +
-                "           <drop/>\n" +
-                "       </case>\n" +
-                "       <default>\n" +
-                "           <call>\n" +
-                "               <endpoint>\n" +
-                "                   <address uri=\"" + url + "\"/>\n" +
-                "               </endpoint>\n" +
-                "           </call>\n" +
-                "           <respond/>\n" +
-                "       </default>\n" +
-                "   </switch>\n" +
+                "   <send>\n" +
+                "       <endpoint>\n" +
+                "           <address uri=\"" + url + "\"/>\n" +
+                "       </endpoint>\n" +
+                "   </send>\n" +
                 "</sequence>\n";
         return seq;
     }
