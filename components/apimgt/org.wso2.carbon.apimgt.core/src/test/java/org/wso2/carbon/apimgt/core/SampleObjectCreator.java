@@ -31,7 +31,7 @@ public class SampleObjectCreator {
 
     public static API.APIBuilder getMockAPIObject() {
         return new API.APIBuilder("admin", "Sample", "1.0.0").context("/sample/v1").lifecycleInstanceId
-                ("7a2298c4-c905-403f-8fac-38c73301631f").apiDefinition("paths:\n" +
+                ("7a2298c4-c905-403f-8fac-38c73301631f").apiDefinition(new StringBuilder("paths:\n" +
                 "  /order:\n" +
                 "    post:\n" +
                 "      description: Create a new Order\n" +
@@ -270,9 +270,9 @@ public class SampleObjectCreator {
                 "    email: architecture@pizzashack.com\n" +
                 "    name: John Doe\n" +
                 "    url: 'http://www.pizzashack.com'\n" +
-                "  version: 1.0.0").createdTime(LocalDateTime.now()).lastUpdatedTime
+                "  version: 1.0.0")).createdTime(LocalDateTime.now()).lastUpdatedTime
                 (LocalDateTime.now()).transport(Arrays.asList(new String[]{"HTTP"})).policies(Arrays.asList(new
-                String[]{"Unlimited"}));
+                String[]{"Unlimited"})).visibility(API.Visibility.PUBLIC);
     }
 
     public static LifecycleState getMockLifecycleStateObject() {
@@ -283,6 +283,6 @@ public class SampleObjectCreator {
         return lifecycleState;
     }
     public static API getMockApiSummaryObject(){
-        return new API.APIBuilder("admin","Sample","1.0.0").build();
+        return new API.APIBuilder("admin","Sample","1.0.0").buildApi();
     }
 }

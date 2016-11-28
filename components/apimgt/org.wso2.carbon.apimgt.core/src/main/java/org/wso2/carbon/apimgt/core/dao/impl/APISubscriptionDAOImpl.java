@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -70,6 +70,17 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      */
     @Override
     public Subscription getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
+        final String getSubscriptionCountOfApiSql = "SELECT TIER_ID, API_ID, APPLICATION_ID, SUB_STATUS, " +
+                "SUB_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME FROM AM_SUBSCRIPTION WHERE UUID = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionCountOfApiSql)) {
+            ps.setString(1, apiId);
+            try (ResultSet rs = ps.executeQuery()) {
+                createSubscriptionsWithApiInformation(rs);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
         return null;
     }
 
@@ -195,8 +206,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 ps.setString(2, tier);
                 ps.setString(3, apiId);
                 ps.setString(4, appId);
-                ps.setString(5, status != null ? status : APIConstants.SubscriptionStatus.ACTIVE);
-                ps.setString(6, APIConstants.SubscriptionType.SUBSCRIBE);
+                ps.setString(5, status != null ? status : APIMgtConstants.SubscriptionStatus.ACTIVE);
+                ps.setString(6, APIMgtConstants.SubscriptionType.SUBSCRIBE);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();

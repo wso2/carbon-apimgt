@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public final class Application {
     private String name;
-    private Set<Subscription> subscriptions = new LinkedHashSet<Subscription>();
+    private Set<Subscription> subscriptions;
     private String groupId;
     private String uuid;
     private String description;
@@ -43,12 +43,14 @@ public final class Application {
     private LocalDateTime createdTime;
     private String updatedUser;
     private LocalDateTime updatedTime;
-    private List<APIKey> keys = new ArrayList<APIKey>();
+    private List<APIKey> keys;
 
 
     public Application(String name, String createdUser) {
         this.name = name;
         this.createdUser = createdUser;
+        subscriptions = new LinkedHashSet<Subscription>();
+        keys = new ArrayList<APIKey>();
     }
 
     public String getName() {

@@ -46,6 +46,22 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         validateAPIs(apiFromDB, api);
     }
 
+    @Test
+    public void testGetAPISummary() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+
+        apiDAO.addAPI(api);
+
+        API apiFromDB = apiDAO.getAPISummary(api.getId());
+
+        API expectedAPI = SampleTestObjectCreator.copyAPISummary(api);
+
+        Assert.assertNotNull(apiFromDB);
+        validateAPIs(apiFromDB, expectedAPI);
+    }
+
 
     @Test
     public void testDeleteAPI() throws Exception {

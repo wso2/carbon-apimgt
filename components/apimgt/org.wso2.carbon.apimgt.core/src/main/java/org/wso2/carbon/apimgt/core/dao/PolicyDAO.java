@@ -20,20 +20,27 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import java.sql.SQLException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 /**
  * Provides access to Policy data layer
  */
 public interface PolicyDAO {
 
+    Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
     /**
      * Retrieves the name of Subscription Policy
      *
      * @param policyId  Subscription policy ID
      * @return Tier name of given Subscription policy ID
-     * @throws SQLException
+     * @throws APIMgtDAOException
      */
-    public String getSubscriptionTierName(String policyId) throws SQLException;
+    public String getSubscriptionTierName(String policyId) throws APIMgtDAOException;
+
+    void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
+
+    void deletePolicy(String policyName);
+
 
 }

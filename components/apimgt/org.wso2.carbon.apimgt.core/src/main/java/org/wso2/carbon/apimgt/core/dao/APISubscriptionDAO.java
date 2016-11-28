@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
 
 import javax.annotation.CheckForNull;
 
@@ -126,7 +125,8 @@ public interface APISubscriptionDAO {
      * @param status {@link APIConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException
      */
-    void addAPISubscription(String uuid, String apiId, String appId, String tier, String status) throws APIMgtDAOException;
+    void addAPISubscription(String uuid, String apiId, String appId, String tier, String status)
+            throws APIMgtDAOException;
 
     /**
      * Remove an existing API Subscription

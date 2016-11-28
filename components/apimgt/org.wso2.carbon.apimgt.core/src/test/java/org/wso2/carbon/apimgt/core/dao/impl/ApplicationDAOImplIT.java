@@ -34,7 +34,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //get added app
-        Application appFromDB = applicationDAO.getApplication(app.getId(), app.getCreatedUser());
+        Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, app);
@@ -51,7 +51,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         //update app
         applicationDAO.updateApplication(currentApp.getId(), newApp);
         //get app
-        Application appFromDB = applicationDAO.getApplication(newApp.getId(), newApp.getCreatedUser());
+        Application appFromDB = applicationDAO.getApplication(newApp.getId());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, newApp);
@@ -64,7 +64,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //delete app
         applicationDAO.deleteApplication(app.getId());
-        Application appFromDB = applicationDAO.getApplication(app.getId(), app.getCreatedUser());
+        Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNull(appFromDB);
     }
 
