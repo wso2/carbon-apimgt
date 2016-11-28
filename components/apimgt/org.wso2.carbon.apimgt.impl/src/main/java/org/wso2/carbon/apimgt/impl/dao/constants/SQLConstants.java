@@ -2020,6 +2020,15 @@ public class SQLConstants {
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
 
+    public static final String REMOVE_RESOURCE_SCOPE_SQL =
+            " DELETE " +
+                    " FROM " +
+                    "   IDN_OAUTH2_RESOURCE_SCOPE " +
+                    " WHERE " +
+                    "   SCOPE_ID IN ( " +
+                    "       SELECT SCOPE_ID FROM AM_API_SCOPES " + "WHERE API_ID = ? )";
+
+
     public static final String REMOVE_SCOPE_SQL =
             " DELETE " +
             " FROM " +
