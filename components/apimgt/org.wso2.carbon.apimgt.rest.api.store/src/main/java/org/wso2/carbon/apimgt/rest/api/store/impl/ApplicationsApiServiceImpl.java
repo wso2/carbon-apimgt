@@ -353,6 +353,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     /**
      * get the lastUpdatedTime for an application PUT
+     *
      * @param applicationId
      * @param body
      * @param contentType

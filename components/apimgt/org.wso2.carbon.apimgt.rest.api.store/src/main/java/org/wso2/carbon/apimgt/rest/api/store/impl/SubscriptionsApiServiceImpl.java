@@ -25,7 +25,11 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
@@ -38,7 +42,11 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This is the service implementation class for Store subscription related operations
@@ -64,7 +72,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, String groupId, Integer offset,
-            Integer limit, String accept, String ifNoneMatch) {
+                                     Integer limit, String accept, String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
@@ -231,7 +239,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+                                                   String ifModifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
@@ -287,6 +295,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Gets the lastUpdated time for subscription collection
+     *
      * @param apiId         api identifier
      * @param applicationId application identifier
      * @param groupId       group id
@@ -303,6 +312,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * placeholder method
+     *
      * @param body        new subscription details
      * @param contentType Content-Type header
      * @return LastUpdated time for the resource in UNIX time as a {@link String}
@@ -314,6 +324,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * placeholder method
+     *
      * @param subscriptionId    subscription identifier
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
@@ -326,11 +337,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Gets the lastUpdated time for subscription ID.
-     * @param subscriptionId    {@link SubscribedAPI} identifier
-     * @param accept            accept header value
-     * @param ifNoneMatch       If-None-Match header value
-     * @param ifModifiedSince   If-Modified-Since header value
-     * @return  LastUpdated time for the resource in UNIX time as a {@link String}
+     *
+     * @param subscriptionId  {@link SubscribedAPI} identifier
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return LastUpdated time for the resource in UNIX time as a {@link String}
      */
     @Override
     public String subscriptionsSubscriptionIdGetGetLastUpdatedTime(String subscriptionId, String accept, String ifNoneMatch, String ifModifiedSince) {

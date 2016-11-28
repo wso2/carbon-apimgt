@@ -78,10 +78,11 @@ public abstract class APIDefinition {
 
     /**
      * This method returns the timestamps for a given API
+     *
      * @param apiIdentifier
      * @param registry
      * @return
      * @throws APIManagementException
      */
-    public abstract Map<String ,String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
+    public abstract Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
 }

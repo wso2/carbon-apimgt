@@ -35,18 +35,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/** 
+/**
  * This is the service implementation class for Store tag related operations
  */
 public class TagsApiServiceImpl extends TagsApiService {
 
     private static final Log log = LogFactory.getLog(TagsApiService.class);
 
-    /** Retrieves all tags
+    /**
+     * Retrieves all tags
      *
-     * @param limit max number of objects returns
-     * @param offset starting index
-     * @param accept accepted media type of the client
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param accept      accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted tags
      */

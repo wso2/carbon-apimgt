@@ -29,15 +29,17 @@ import java.security.NoSuchAlgorithmException;
  */
 public class ETagGenerator {
     private static final Log log = LogFactory.getLog(ETagGenerator.class);
+
     /**
      * This generates the ETag value using the given algorithm
+     *
      * @param updatedTimeInMillis the updated/created time of the resource in UNIX time
      * @return String
      */
     private static String getETag(long updatedTimeInMillis) {
-        String eTagValue=null;
+        String eTagValue = null;
         try {
-            eTagValue= getHash(updatedTimeInMillis) ;
+            eTagValue = getHash(updatedTimeInMillis);
         } catch (NoSuchAlgorithmException e) {
             log.error("Failed to generate E-Tag due to " + e.getMessage(), e);
         }
@@ -47,8 +49,9 @@ public class ETagGenerator {
 
     /**
      * If some other hashing algorithm is needed use this method.
+     *
      * @param updatedTimeInMillis, the updated/created time of the resource in UNIX time
-     * @param algorithm the algorithm used for hashing
+     * @param algorithm            the algorithm used for hashing
      * @return String
      * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
      */
@@ -61,7 +64,7 @@ public class ETagGenerator {
         for (byte aDigest : digest) {
             sb.append(Integer.toString((aDigest & 0xff) + 0x100, 16).substring(1)); // not quite necessary
         }
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("ETag generated in HEX :: " + sb.toString());
         }
         return sb.toString();
@@ -69,6 +72,7 @@ public class ETagGenerator {
 
     /**
      * Method returns the hashed value for the updatedTimeInMillis using MD5 hashing as default
+     *
      * @param updatedTimeInMillis the updated/created time of the resource in UNIX time
      * @return String
      * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
@@ -76,11 +80,12 @@ public class ETagGenerator {
     private static String getHash(long updatedTimeInMillis) throws NoSuchAlgorithmException {
         return getHash(updatedTimeInMillis, "MD5");
     }
-    public static String getETag(String lastUpdatedTimeInMillis){
+
+    public static String getETag(String lastUpdatedTimeInMillis) {
         try {
             return getETag(Long.parseLong(lastUpdatedTimeInMillis));
-        }catch (NumberFormatException e){
-            log.error("Error in ETagGenerator due to "+ e.getMessage(),e);
+        } catch (NumberFormatException e) {
+            log.error("Error in ETagGenerator due to " + e.getMessage(), e);
         }
         return null;
     }

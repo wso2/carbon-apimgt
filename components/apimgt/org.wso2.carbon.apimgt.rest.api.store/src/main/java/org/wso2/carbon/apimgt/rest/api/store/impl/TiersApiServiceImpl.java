@@ -28,8 +28,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TierMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -39,25 +39,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/** 
+/**
  * This is the service implementation class for Store tier related operations
  */
 public class TiersApiServiceImpl extends TiersApiService {
 
     private static final Log log = LogFactory.getLog(TiersApiServiceImpl.class);
 
-    /** Retrieves all the Tiers
+    /**
+     * Retrieves all the Tiers
      *
      * @param tierLevel   tier level (api/application or resource)
-     * @param limit max number of objects returns
-     * @param offset starting index
-     * @param accept accepted media type of the client
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param accept      accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted tiers
      */
     @Override
     public Response tiersTierLevelGet(String tierLevel, Integer limit, Integer offset, String xWSO2Tenant,
-            String accept, String ifNoneMatch) {
+                                      String accept, String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -82,7 +83,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                     tierList.addAll(apiTierMap.values());
                 }
             } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)) {
-                Map<String, Tier> appTierMap = 
+                Map<String, Tier> appTierMap =
                         APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
                 if (appTierMap != null) {
                     tierList.addAll(appTierMap.values());
@@ -105,18 +106,19 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Returns the matched tier to the given name
-     * 
-     * @param tierLevel   tier level (api/application or resource)
-     * @param tierName name of the tier
-     * @param accept accepted media type of the client
-     * @param ifNoneMatch If-None-Match header value
+    /**
+     * Returns the matched tier to the given name
+     *
+     * @param tierLevel       tier level (api/application or resource)
+     * @param tierName        name of the tier
+     * @param accept          accepted media type of the client
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return TierDTO matched to the given tier name
      */
     @Override
-    public Response tiersTierLevelTierNameGet(String tierName, String tierLevel, String xWSO2Tenant, String accept, 
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response tiersTierLevelTierNameGet(String tierName, String tierLevel, String xWSO2Tenant, String accept,
+                                              String ifNoneMatch, String ifModifiedSince) {
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
