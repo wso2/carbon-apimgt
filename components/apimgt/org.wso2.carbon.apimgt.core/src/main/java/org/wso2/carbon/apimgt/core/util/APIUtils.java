@@ -109,4 +109,9 @@ public class APIUtils {
     public static Map<String, Policy> getPolicies(int policyType) throws APIManagementException {
         return null;
     }
+
+    public static String getDefaultAPIPolicy() {
+        // TODO: 11/25/16 need to implement logic
+        return "Unlimited";
+    }
 }

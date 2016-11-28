@@ -26,6 +26,7 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -60,12 +61,12 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    public Set<UriTemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
+    public Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
         Set<UriTemplate> uriTemplateSet = new HashSet<>();
         SwaggerParser swaggerParser = new SwaggerParser();
-        Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
+        Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
-        Map<String, Scope> scopeMap = getScopes(resourceConfigsJSON);
+        Map<String, Scope> scopeMap = getScopes(resourceConfigsJSON.toString());
         for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
             Path resource = resourceEntry.getValue();
             UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
@@ -76,12 +77,15 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 String authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                 if (authType == null) {
                     uriTemplateBuilder.authType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    vendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, APIConstants
+                            .AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
                 } else {
                     uriTemplateBuilder.authType(authType);
                 }
                 String policy = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                 if (policy == null) {
-                    uriTemplateBuilder.policy(APIConstants.DEFAULT_API_POLICY);
+                    uriTemplateBuilder.policy(APIUtils.getDefaultAPIPolicy());
+                    vendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, APIUtils.getDefaultAPIPolicy());
                 } else {
                     uriTemplateBuilder.policy(policy);
                 }
@@ -101,10 +105,15 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                     uriTemplateBuilder.templateId(operation.getOperationId());
                 }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
-                uriTemplateBuilder.scope(scopeMap.get(vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE)));
+                String scope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+                if (StringUtils.isNotEmpty(scope)) {
+                    uriTemplateBuilder.scope(scopeMap.get(scope));
+                }
                 uriTemplateSet.add(uriTemplateBuilder.build());
             }
         }
+        resourceConfigsJSON.setLength(0);
+        resourceConfigsJSON.append(swagger.getSwagger());
         return uriTemplateSet;
     }
 
@@ -114,15 +123,16 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         Map<String, Scope> scopeMap = new HashMap<>();
         try {
             if (swagger.getVendorExtensions() != null) {
-                JSONObject scopesJson;
-                scopesJson = (JSONObject) new JSONParser()
-                        .parse(swagger.getVendorExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY).toString());
-                Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
-                        .get(APIConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIConstants.SWAGGER_X_WSO2_SCOPES))
-                        .iterator();
-                while (scopesIterator.hasNext()) {
-                    Scope scope = new Gson().fromJson(scopesIterator.next().toJSONString(), Scope.class);
-                    scopeMap.put(scope.getKey(), scope);
+                String scopes = (String) swagger.getVendorExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                if (StringUtils.isNotEmpty(scopes)) {
+                    JSONObject scopesJson = (JSONObject) new JSONParser().parse(scopes);
+                    Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
+                            .get(APIConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIConstants.SWAGGER_X_WSO2_SCOPES))
+                            .iterator();
+                    while (scopesIterator.hasNext()) {
+                        Scope scope = new Gson().fromJson(scopesIterator.next().toJSONString(), Scope.class);
+                        scopeMap.put(scope.getKey(), scope);
+                    }
                 }
             }
         } catch (ParseException e) {
