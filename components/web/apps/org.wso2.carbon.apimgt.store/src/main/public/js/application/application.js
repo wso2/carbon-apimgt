@@ -43,50 +43,8 @@ $(function () {
                 function (error) {
                     console.log('failed with the following: ' + error.statusText);
                 });
-
-
-            $("#appAddForm").validate({
-                submitHandler: function (form) {
-                    applicationAdd();
-                }
-            });
-
-            var applicationAdd = function () {
-                var applicationName = $("#application-name").val();
-                var tier = $("#appTier").val();
-                var goBack = $("#goBack").val();
-                var description = $("#description").val();
-
-                var application = {
-                    name: applicationName,
-                    throttlingTier: tier,
-                    description: description
-                };
-
-                client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-                client["Application (individual)"].post_applications({
-                        "body": application,
-                        "Content-Type": "application/json"
-                    },
-                    function (success) {
-                        window.location = "/store/application/" + applicationName;
-                    },
-                    function (error) {
-                        alert("Error occurred while adding Application : " + applicationName);
-                    });
-
-
-            };
         }
     });
-
-    $("#application-name").charCount({
-        allowed: 70,
-        warning: 50,
-        counterText: i18n.t('Characters left: ')
-    });
-    $("#application-name").val('');
-
 });
 
 

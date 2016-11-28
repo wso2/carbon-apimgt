@@ -5,21 +5,21 @@
 {{js "js/left-navigation.js"}}
 {{js "js/script.js"}}
 {{js "js/common.js"}}
-{{js "js/api/api.js"}}
+{{js "js/api/{id}.js"}}
 {{css "css/custom.css"}}
 {{#fillZone "contentTop"}}
     {{fragment "searchBar"}}
 {{/fillZone}}
 {{#fillZone "content"}}
+    <input type="hidden" id="apiId" value="{{apiId}}"/>
     <div class="page-header">
-        <h1>{{t "api-store.api.list"}}</h1>
+        <h2 class="truncate-children"><span>6666666666666666666</span></h2>
     </div>
     <div class="page-content">
-        <div class="row" id="api-list-content">
+        <div class="row">
+            <div class="row-height">
 
-
+            </div>
         </div>
     </div>
-
-
 {{/fillZone}}

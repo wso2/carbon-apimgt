@@ -36,7 +36,7 @@ $(function () {
                         var theCompiledHtml = template(context);
 
                         // Add the compiled html to the page
-                        $('#api-content').html(theCompiledHtml);
+                        $('#api-list-content').html(theCompiledHtml);
                     }, 'html');
 
                 }
