@@ -66,7 +66,7 @@ public class SampleTestObjectCreator {
                 context("weather").
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
+                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
                         "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
                         "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
                         "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
@@ -93,7 +93,7 @@ public class SampleTestObjectCreator {
                         "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
                         "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
                         "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
-                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}").
+                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
                 wsdlUri("").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
@@ -157,7 +157,7 @@ public class SampleTestObjectCreator {
                 context("yummy").
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
+                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
                         "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
                         "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
                         "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
@@ -184,7 +184,7 @@ public class SampleTestObjectCreator {
                         "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
                         "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
                         "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
-                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}").
+                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -210,6 +210,15 @@ public class SampleTestObjectCreator {
         }
 
         return apiBuilder;
+    }
+
+    static API copyAPISummary(API api) {
+        return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                id(api.getId()).
+                context(api.getContext()).
+                description(api.getDescription()).
+                lifeCycleStatus(api.getLifeCycleStatus()).
+                lifecycleInstanceId(api.getLifecycleInstanceId()).buildApi();
     }
 
     static Application createDefaultApplication(){

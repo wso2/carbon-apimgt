@@ -34,6 +34,26 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway.extension</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -67,6 +87,18 @@
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.apimgt.gateway.extension</symbolicName>
                                     <version>${project.parent.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>geronimo-jms_1.1_spec</symbolicName>
+                                    <version>1.1.0.wso2v1</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>andes-client</symbolicName>
+                                    <version>${andes.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.wso2.securevault</symbolicName>
+                                    <version>${securevault.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

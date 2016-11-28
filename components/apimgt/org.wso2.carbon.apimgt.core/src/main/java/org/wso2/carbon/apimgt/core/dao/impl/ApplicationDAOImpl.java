@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -200,10 +200,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(4, application.getCallbackUrl());
             ps.setString(5, application.getDescription());
 
-            if (APIConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
-                ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+            if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
+                ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
             } else {
-                ps.setString(6, APIConstants.ApplicationStatus.APPLICATION_CREATED);
+                ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
             }
 
             ps.setString(7, application.getGroupId());

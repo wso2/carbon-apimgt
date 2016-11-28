@@ -50,7 +50,26 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.datasources</groupId>
+            <artifactId>org.wso2.carbon.datasource.core</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -61,11 +80,25 @@
         <slf4j.version>1.7.5</slf4j.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range-->
         <export.package>
-            org.wso2.carbon.apimgt.gateway.extension.*; version="${carbon.apimgt.exp.pkg.version}"
+            <!--!org.wso2.carbon.apimgt.gateway.internal,-->
+            org.wso2.carbon.apimgt.gateway.*; version="${carbon.apimgt.exp.pkg.version}"
+            !com.google.common.base.internal,com.google.common.*
         </export.package>
         <import.package>
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
+            org.wso2.carbon.datasource.*,
+            com.google.common.*,
+            org.apache.commons.lang3.*,
+            org.apache.commons.io.*,
+            org.apache.commons.*,
+            org.apache.velocity.*,
+            org.wso2.andes.*,
+            javax.jms.*,
+            org.wso2.securevault.*,
+            org.osgi.framework.*,
+            javax.annotation;resolution:=optional,
+            sun.misc.*;resolution:=optional
         </import.package>
     </properties>
 </project>
