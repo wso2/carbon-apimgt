@@ -83,7 +83,7 @@
             this.render();
             if(this._get_production_endpoint_type())
                 this._set_selected_ep(this._get_production_endpoint_type());
-            if(ws)
+            if(ws == true || ws == "true")
                 this._set_selected_ep("ws");
             this.attach_events();
         },        
