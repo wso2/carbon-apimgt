@@ -69,7 +69,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @Override
-    public Subscription getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
+    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
         final String getSubscriptionCountOfApiSql = "SELECT TIER_ID, API_ID, APPLICATION_ID, SUB_STATUS, " +
                 "SUB_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME FROM AM_SUBSCRIPTION WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection();
@@ -279,14 +279,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
          */
     }
 
-    private Subscription[] createSubscriptionsWithApiInformation(ResultSet rs) throws SQLException, APIMgtDAOException {
+    private List<Subscription> createSubscriptionsWithApiInformation(ResultSet rs) throws SQLException,
+            APIMgtDAOException {
         List<Subscription> subscriptionList = new ArrayList<>();
         Subscription subscription;
         while ((subscription = createSubscriptionFromResultSet(rs)) != null) {
             subscriptionList.add(subscription);
         }
-        Subscription[] subscriptions = new Subscription[subscriptionList.size()];
-        return subscriptionList.toArray(subscriptions);
+        return subscriptionList;
     }
 
     private Subscription createSubscriptionFromResultSet(ResultSet rs) throws APIMgtDAOException, SQLException {
