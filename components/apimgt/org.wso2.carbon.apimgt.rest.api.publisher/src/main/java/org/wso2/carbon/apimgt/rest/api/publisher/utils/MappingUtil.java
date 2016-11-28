@@ -110,7 +110,7 @@ public class MappingUtil {
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                apiDefinition(apidto.getApiDefinition()).
+                apiDefinition(new StringBuilder(apidto.getApiDefinition())).
                 lifeCycleStatus(apidto.getStatus()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).

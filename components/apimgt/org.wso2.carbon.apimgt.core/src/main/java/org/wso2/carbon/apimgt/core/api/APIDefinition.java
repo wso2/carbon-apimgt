@@ -37,7 +37,7 @@ public interface APIDefinition {
      *
      * @return URI templates
      */
-    Set<UriTemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
+    Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition

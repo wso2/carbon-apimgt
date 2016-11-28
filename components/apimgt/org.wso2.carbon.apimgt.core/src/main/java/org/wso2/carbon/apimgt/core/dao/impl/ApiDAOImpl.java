@@ -730,7 +730,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException,
-                                                                                                        IOException {
+            IOException {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 BusinessInformation businessInformation = new BusinessInformation();
@@ -762,7 +762,7 @@ public class ApiDAOImpl implements ApiDAO {
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
-                        apiDefinition(getAPIDefinition(connection, apiPrimaryKey)).
+                        apiDefinition(new StringBuilder(getAPIDefinition(connection, apiPrimaryKey))).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -772,7 +772,7 @@ public class ApiDAOImpl implements ApiDAO {
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).
-                        build();
+                        buildApi();
             }
         }
 
@@ -788,7 +788,7 @@ public class ApiDAOImpl implements ApiDAO {
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).lifecycleInstanceId(rs.getString
-                        ("LIFECYCLE_INSTANCE_ID")).build();
+                        ("LIFECYCLE_INSTANCE_ID")).buildApi();
             }
         }
 
@@ -804,7 +804,7 @@ public class ApiDAOImpl implements ApiDAO {
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).build();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).buildApi();
 
                 apiList.add(apiSummary);
             }

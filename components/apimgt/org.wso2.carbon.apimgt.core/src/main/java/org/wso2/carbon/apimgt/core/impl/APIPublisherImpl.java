@@ -164,31 +164,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         API createdAPI;
-        if (StringUtils.isEmpty(apiBuilder.getId())) {
-            apiBuilder.id(UUID.randomUUID().toString());
-        }
-        if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
-            APIUtils.logAndThrowException("Couldn't find swagger definition of API ", log);
-        }
-        if (StringUtils.isEmpty(apiBuilder.getName())) {
-            APIUtils.logAndThrowException("Couldn't find Name of API ", log);
-        }
-        if (StringUtils.isEmpty(apiBuilder.getContext())) {
-            APIUtils.logAndThrowException("Couldn't find Context of API ", log);
-        }
-        if (StringUtils.isEmpty(apiBuilder.getVersion())) {
-            APIUtils.logAndThrowException("Couldn't find Version of API ", log);
-        }
-        if (apiBuilder.getTransport().isEmpty()) {
-            APIUtils.logAndThrowException("Couldn't find Transport of API ", log);
-        }
-        if (apiBuilder.getPolicies().isEmpty()) {
-            APIUtils.logAndThrowException("Couldn't find Policies of API ", log);
-        }
-        //#todo we need to fix this there is a bug for now I am commenting this.
-//        if (apiBuilder.getVisibility() != null) {
-//            APIUtils.logAndThrowException("Couldn't find Visibility of API ", log);
-//        }
 
         apiBuilder.provider(getUsername());
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
