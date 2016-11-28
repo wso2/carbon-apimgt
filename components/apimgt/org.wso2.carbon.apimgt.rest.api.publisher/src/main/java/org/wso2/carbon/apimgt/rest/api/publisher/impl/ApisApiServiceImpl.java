@@ -392,10 +392,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             paramList.put("API_NAME", body.getProvider());
             paramList.put("API_VERSION", body.getVersion());
 
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,
-                    e.getErrorCode(), RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler().getErrorMessage(),
+                    e.getErrorHandler().getErrorCode(), e.getErrorHandler().getErrorDescription(),paramList);
             log.error(errorMessage,e);
-            return Response.status(e.getHttpStatusCode()).entity(errorDTO).build();
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +

@@ -24,18 +24,11 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class APIManagementException extends Exception {
 
-    private long errorCode;
-    private String errorMsg;
-    private int httpStatusCode;
+    private ErrorHandler errorHandler;
 
-    public long getErrorCode() {
-        return errorCode;
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
     }
-
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
 
     /**
      * @param message Error message
@@ -78,18 +71,9 @@ public class APIManagementException extends Exception {
      * @param message Error message
      * @param code Exception code that need to pass to the error DTO
      */
-    public APIManagementException(String message, ExceptionCodes code) {
+    public APIManagementException(String message, ErrorHandler code) {
         super(message);
-        this.errorMsg = code.getMsg();
-        this.errorCode = code.getErrorCode();
-        this.httpStatusCode = code.getHttpStatusCode();
+        this.errorHandler = code;
     }
 
-    public int getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
-    public void setHttpStatusCode(int httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
-    }
 }
