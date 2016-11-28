@@ -272,6 +272,9 @@
     "tasks": "tasks",
     "tenants": "Visible to Tenants",
     "keys should be separated by colon and each attribute should start with" : "keys should be separated by colon and each attribute should start with",
-    "Allowed keys" : "Allowed keys"
+    "Allowed keys" : "Allowed keys",
+    "Type an Email and press Enter":"Type an Email and press Enter",
+    "API State Approval" : "API State Change",
+    "Suspended" : "Suspended"
 
 }

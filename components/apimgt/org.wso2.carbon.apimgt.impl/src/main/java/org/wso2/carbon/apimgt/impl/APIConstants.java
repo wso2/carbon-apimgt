@@ -201,6 +201,7 @@ public final class APIConstants {
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
+    public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
     public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
@@ -265,7 +266,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS = "overview_tenants";
     
     public static final String API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED = "overview_destinationStatsEnabled";
-    
+    public static final String API_OVERVIEW_WEBSOCKET = "overview_ws";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME= "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -431,6 +433,7 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
+    public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
@@ -472,6 +475,10 @@ public final class APIConstants {
     public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
     public static final String API_RESTAPI_WHITELISTED_URI_URI = API_RESTAPI_WHITELISTED_URI + "URI";
     public static final String API_RESTAPI_WHITELISTED_URI_HTTPMethods = API_RESTAPI_WHITELISTED_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ETAG_SKIP_LIST = API_RESTAPI + "ETagSkipList.";
+    public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
+    public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
+    public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
@@ -740,6 +747,7 @@ public final class APIConstants {
 
     public static final String EVERYONE_ROLE = "internal/everyone";
     public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
+    public static final String SUBSCRIBER_ROLE = "Internal/subscriber";
 
     // Anonymous end user, to be used with ACCESS_TOKEN_USER_TYPE_APPLICATION
     public static final String END_USER_ANONYMOUS = "anonymous";
@@ -1023,6 +1031,8 @@ public final class APIConstants {
     public static final String API_DATA_TOT_LENGTH = "totalLength";
     public static final String API_DATA_LENGTH = "length";
     public static final String API_DATA_ISMORE = "isMore";
+    public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
+    public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1082,7 +1092,10 @@ public final class APIConstants {
     public static final String CPS_SERVER_PASSWORD = "CPSServerPassword";
     public static final String POLICY_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
             "server" + File.separator + "throttle-config";
+    public static final String SEQUENCE_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
+            "server" + File.separator + "synapse-configs" + File.separator + "default" + File.separator + "sequences";
     public static final String POLICY_FILE_LOCATION = POLICY_FILE_FOLDER + File.separator;
+    public static final String SEQUENCE_FILE_LOCATION = SEQUENCE_FILE_FOLDER + File.separator;
 
     public static final String ELIGIBILITY_QUERY_ELEM= "eligibilityQuery";
     public static final String POLICY_NAME_ELEM = "name";
@@ -1232,5 +1245,29 @@ public final class APIConstants {
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
     }
+    
+    public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";
+ 
+    public static class WorkflowConfigConstants {
+        public static final String WORKFLOW = "WorkflowConfigurations";
+        public static final String WORKFLOW_ENABLED = "Enabled";
+        public static final String WORKFLOW_SERVER_URL = "ServerUrl";
+        public static final String WORKFLOW_SERVER_USER = "ServerUser";
+        public static final String WORKFLOW_SERVER_PASSWORD = "ServerPassword";
+        public static final String WORKFLOW_CALLBACK = "WorkflowCallbackAPI";
+        public static final String WORKFLOW_TOKEN_EP = "TokenEndPoint";
+        public static final String WORKFLOW_DCR_EP = "DCREndPoint";
+        public static final String WORKFLOW_DCR_EP_USER = "DCREndPointUser";
+        public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
+
+    } 
+    public static class APIEndpointSecurityConstants {
+        public static final String BASIC_AUTH = "BasicAuth";
+        public static final String DIGEST_AUTH = "DigestAuth";
+    }
+
+    public enum APIType {
+        HTTP, WS,
+    };
 
 }

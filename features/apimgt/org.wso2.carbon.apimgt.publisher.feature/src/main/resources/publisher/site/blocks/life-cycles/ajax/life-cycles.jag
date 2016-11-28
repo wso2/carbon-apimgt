@@ -64,6 +64,8 @@ if(jagg.isCSRFTokenValid())
         var result=mod.updateAPIStatus(apiData);
         var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),
         															version:request.getParameter("version")}).lcs;
+        var wfdto = mod.getAPILCWorkflowStatus(apiData);
+        
 
      	if (result.error == true) {
             obj = {
@@ -71,13 +73,25 @@ if(jagg.isCSRFTokenValid())
                 message:result.message
             };
         } else {
+
+            var jsonResponse = {};
+            jsonResponse.workflowResponse = {};
+            jsonResponse.stateChangeStatus = result.getStateChangeStatus();
+            jsonResponse.workflowResponse.jsonPayload = result.getWorkflowResponse().getJSONPayload();
+
+            var apiWFStatus = null;
+            if(wfdto != null && wfdto.status != null){
+                apiWFStatus = wfdto.status;
+            } 
             obj = {
                 error:false,
-                lcs:lcs
+                lcs:lcs,
+                wfstatus:apiWFStatus,    
+                status:jsonResponse
             }
         }
         print(obj);
-
+        
     } else if (action === "isAPIOlderVersionExist") {
         mod = jagg.module("api");
         var apiData = {};
@@ -132,7 +146,25 @@ if(jagg.isCSRFTokenValid())
             }
             print(obj);
 
-    }else {
+    } else if (action === "deleteTask") {
+            mod = jagg.module("api");
+            var apiData = {};
+            apiData.provider= request.getParameter("provider");
+            apiData.name = request.getParameter("name");
+            apiData.version = request.getParameter("version");
+            result = mod.deleteWorkflowTask(apiData); 
+            
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = result;
+            }
+            print(obj);
+
+    } else {
         print({
                   error:true,
                   message:msg.error.invalidAction(action)

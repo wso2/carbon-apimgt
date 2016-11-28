@@ -423,7 +423,7 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
-
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
 
@@ -447,7 +447,7 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
-
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
 
@@ -545,11 +545,10 @@ public final class APIUtil {
             }
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            String environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
-            api.setGatewayUrls(environmentConfig);
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
@@ -595,7 +594,7 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
-
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -795,7 +794,7 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
-
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
 
@@ -1153,6 +1152,11 @@ public final class APIUtil {
                 default:
                     throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
             }
+            //Documentation Source URL is a required field in the documentation.rxt for migrated setups
+            //Therefore setting a default value if it is not set. 
+            if (documentation.getSourceUrl() == null) {
+                documentation.setSourceUrl(" ");
+            }
             artifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, sourceType.name());
             artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
             artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
@@ -1304,6 +1308,23 @@ public final class APIUtil {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
                 setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+            } else {
+                byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
+                if (isWSDL2Resource(wsdl)) {
+                    wsdlContentEle = wsdlReader.updateWSDL2(wsdl, api);
+                    wsdlResource.setContent(wsdlContentEle.toString());
+                } else {
+                    wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
+                    wsdlResource.setContent(wsdlContentEle.toString());
+                }
+
+                registry.put(wsdlResourcePath, wsdlResource);
+                //set the anonymous role for wsld resource to avoid basicauth security.
+                String[] visibleRoles = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.
@@ -1368,6 +1389,19 @@ public final class APIUtil {
             }
         }
         return isWsdl2;
+    }
+
+    /**
+     * Given a wsdl resource, this method checks if the underlying document is a WSDL2
+     *
+     * @param wsdl byte array of wsdl definition saved in registry
+     * @return true if wsdl2 definition
+     * @throws APIManagementException
+     */
+    private static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
+        String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
+        String wsdlContent = new String(wsdl);
+        return wsdlContent.indexOf(wsdl2NameSpace) > 0;
     }
 
     /**
@@ -2229,7 +2263,10 @@ public final class APIUtil {
                 }
             }
         } catch (AxisFault axisFault) {
-            handleException(errorMsg + username, axisFault);
+            //here we are going to log the error message and return because in this case, current user cannot fetch
+            //profile of another user (due to cross tenant isolation, not allowed to access user details etc.)
+            log.error("Cannot access user profile of : " + username);
+            return null;
         } catch (RemoteException e) {
             handleException(errorMsg + username, e);
         } catch (UserProfileMgtServiceUserProfileExceptionException e) {
@@ -4167,9 +4204,15 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
 
         } catch (GovernanceException e) {
-            String msg = "Failed to get API fro artifact ";
+            String msg = "Failed to get API from artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
             throw new APIManagementException(msg, e);
         }
         return api;
@@ -4522,7 +4565,8 @@ public final class APIUtil {
      */
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
-            if (wsdlURL.contains("http:") || wsdlURL.contains("https:") || wsdlURL.contains("file:")) {
+            if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
+                wsdlURL.startsWith("file:") || wsdlURL.startsWith("/registry")) {
                 return true;
             }
         } else if (!required) {
@@ -4801,19 +4845,7 @@ public final class APIUtil {
         }
         return environmentStringSet;
     }
-    /**
-     * This method used to get environment values of API from database.     *
-     * @param api API object
-     * @throws APIManagementException
-     */
-    public static String getAPIUrls(API api) throws APIManagementException {
-        String environmentConfig = null;
-        int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
-        if (api.getEnvironments() != null) {
-            environmentConfig = ApiMgtDAO.getInstance().getAPIEnvironmentUrls(api.getId(), apiId);
-        }
-        return environmentConfig;
-    }
+
     /**
      * This method used to set environment values to governance artifact of API .
      *
@@ -5802,7 +5834,7 @@ public final class APIUtil {
                     String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
                     if(!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
                             applicationPolicy.getTenantId(), true);
@@ -5862,7 +5894,7 @@ public final class APIUtil {
                     String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
                                                                                 "_" + subscriptionPolicy.getPolicyName();
                     if(!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
                                                                                           subscriptionPolicy.getTenantId(), true);
@@ -5919,7 +5951,7 @@ public final class APIUtil {
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
                     if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
-                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                        deploymentManager.deployPolicyToGlobalCEP(policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
                             apiPolicy.getTenantId(), true);
@@ -6122,7 +6154,7 @@ public final class APIUtil {
         }
         return null;
     }
-
+    
     /**
      * Generates solr compatible search criteria synatax from user entered query criteria. 
      * Ex: From version:1.0.0, this returns version=*1.0.0*
@@ -6255,7 +6287,7 @@ public final class APIUtil {
 
     public static boolean isQueryParamDataPublishingEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                                            getThrottleProperties().isEnableQueryParamConditions();
+                getThrottleProperties().isEnableQueryParamConditions();
     }
 
     public static boolean isHeaderDataPublishingEnabled() {
@@ -6281,5 +6313,24 @@ public final class APIUtil {
     public static String getAnalyticsServerPassword() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
                 getDasReceiverServerPassword();
+    }
+
+    /**
+     * Create the Cache object from the given parameters
+     * @param cacheManagerName - Name of the Cache Manager
+     * @param cacheName - Name of the Cache
+     * @param modifiedExp - Value of the MODIFIED Expiry Type
+     * @param accessExp - Value of the ACCESSED Expiry Type
+     * @return - The cache object
+     */
+    public static Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
+                          final long accessExp){
+
+        return Caching.getCacheManager(
+                cacheManagerName).createCacheBuilder(cacheName).
+                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                        modifiedExp)).
+                setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                        accessExp)).setStoreByValue(false).build();
     }
 }

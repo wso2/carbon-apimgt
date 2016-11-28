@@ -840,6 +840,11 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
+                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
+                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
+                if (lastModified != null) {
+                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
+                }
             }
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
@@ -1495,5 +1500,60 @@ public abstract class AbstractAPIManager implements APIManager {
         result.put("length",totalLength);
         result.put("isMore", isMore);
         return result;
+    }
+
+    /**
+     * gets the swagger definition timestamps as a map
+     * @param apiIdentifier
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException {
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                        apiTenantDomain);
+                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            return definitionFromSwagger20.getAPISwaggerDefinitionTimeStamps(apiIdentifier,registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            e.printStackTrace();
+        } catch (RegistryException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * get the thumbnailLastUpdatedTime for a thumbnail for a given api
+     * @param apiIdentifier
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException {
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+
+        String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+        try {
+            if (registry.resourceExists(thumbPath)) {
+                Resource res = registry.get(thumbPath);
+                Date lastModifiedTime = res.getLastModified();
+                return lastModifiedTime == null ? String.valueOf(res.getCreatedTime().getTime()) : String.valueOf(lastModifiedTime.getTime());
+            }
+        } catch (RegistryException e) {
+            handleException("Error while loading API icon from the registry", e);
+        }
+        return null;
+
     }
 }

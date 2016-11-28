@@ -38,14 +38,14 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDT
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store application related operations
@@ -67,7 +67,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsGet(String groupId, String query, Integer limit, Integer offset, String accept,
-            String ifNoneMatch) {
+                                    String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
@@ -172,7 +172,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     @SuppressWarnings("unchecked")
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+                                                 String contentType, String ifMatch, String ifUnmodifiedSince) {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -225,7 +225,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+                                                 String ifModifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -258,7 +258,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType,
-            String ifMatch, String ifUnmodifiedSince) {
+                                                 String ifMatch, String ifUnmodifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -303,7 +303,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     @SuppressWarnings("unchecked")
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
-            String ifUnmodifiedSince) {
+                                                    String ifUnmodifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -323,4 +323,61 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
         return null;
     }
+
+    /**
+     * get the lastUpdatedTime for an application DELETE
+     *
+     * @param applicationId
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @return
+     */
+    @Override
+    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    /**
+     * get the lastUpdatedTime for an application
+     *
+     * @param applicationId
+     * @param accept
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @return
+     */
+    @Override
+    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    /**
+     * get the lastUpdatedTime for an application PUT
+     * @param applicationId
+     * @param body
+     * @param contentType
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @return
+     */
+    @Override
+    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId, ApplicationKeyGenerateRequestDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        return null;
+    }
+
+    @Override
+    public String applicationsGetGetLastUpdatedTime(String groupId, String query, Integer limit, Integer offset, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    @Override
+    public String applicationsPostGetLastUpdatedTime(ApplicationDTO body, String contentType) {
+        return null;
+    }
+
 }

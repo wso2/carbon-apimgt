@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -74,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
+import org.wso2.carbon.apimgt.impl.workflow.UserSignUpWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -96,6 +96,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
@@ -2055,7 +2056,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
                         row.put("isDefaultVersion", row,api.isDefaultVersion());
                         row.put("transports", row,api.getTransports());
-
+                        row.put("type", row, api.getType());
                         myn.put(0, myn, row);
 
                     } else {
@@ -3390,7 +3391,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 Subscriber subscriber = new Subscriber(username);
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
-                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, null);
+                Set<SubscribedAPI> subscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, applicationName, groupingId);
 
                 int i = 0;
                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
@@ -3687,16 +3688,9 @@ public class APIStoreHostObject extends ScriptableObject {
                     userDTO.setUserName(username);
                     userDTO.setPassword(password);
 
-                    UserRegistrationAdminServiceStub stub = new UserRegistrationAdminServiceStub(null, serverURL +
-                                                                                       "UserRegistrationAdminService");
-                    ServiceClient client = stub._getServiceClient();
-                    Options option = client.getOptions();
-                    option.setManageSession(true);
-
-                    stub.addUser(userDTO);
-
                     WorkflowExecutor userSignUpWFExecutor = WorkflowExecutorFactory.getInstance()
                                                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+                    ((UserSignUpWorkflowExecutor) userSignUpWFExecutor).addUserToUserStore(serverURL, userDTO);
 
                     WorkflowDTO signUpWFDto = new WorkflowDTO();
                     signUpWFDto.setWorkflowReference(username);
@@ -3977,6 +3971,53 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (UserStoreException e) {
             handleException("Error while checking user existence for " + username, e);
         }
+        return exists;
+    }
+
+
+    /**
+     * check whether the given user is existing in one of the given roles
+     * @param username
+     * @param rolenames
+     * @return
+     */
+    public static boolean jsFunction_isUserExistsInRole(Context cx, Scriptable thisObj,
+                                                        Object[] args, Function funObj)
+            throws ScriptException,
+            APIManagementException, org.wso2.carbon.user.api.UserStoreException {
+        if (args == null || args.length == 0) {
+            handleException("Invalid input parameters to the isUserExists method");
+        }
+
+        String username = (String) args[0];
+        String roleNames = (String) args[1];
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        //add user storage info
+        username = SelfSignUpUtil.getDomainSpecificUserName(username, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        boolean exists = false;
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            //UserRealm realm = realmService.getBootstrapRealm();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            UserStoreManager manager = realm.getUserStoreManager();
+
+            String[] roleNamesArr = roleNames.split(",");
+            for (String roleName : roleNamesArr) {
+                AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+                if (abstractManager.isUserInRole(tenantAwareUserName, roleName)) {
+                    exists = true;
+                    break;
+                }
+            }
+
+        } catch (UserStoreException e) {
+            handleException("Error while checking user existence for " + username + " roles" + roleNames, e);
+        }
+
         return exists;
     }
 
@@ -4622,43 +4663,13 @@ public class APIStoreHostObject extends ScriptableObject {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
                 JSONObject jsonObject = new JSONObject();
-                List<String> environmentUrls = new ArrayList<String>();
-                boolean useDefaultContext = true;
-
-                if (api.getGatewayUrls() != null) {
-                    String gatewayUrls = api.getGatewayUrls();
-                    JSONParser parser = new JSONParser();
-                    Object object  = null;
-                    try {
-                        object = parser.parse(gatewayUrls);
-                        JSONObject gatewayUrlsJson = (JSONObject) object;
-                        JSONObject urlsFromPublisherJson = (JSONObject) gatewayUrlsJson.get(environmentName);
-                        // if both http and https are default
-                        if (urlsFromPublisherJson.get("https").equals("default") && urlsFromPublisherJson.get("http")
-                                .equals("default")) {
-                            environmentUrls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
-                        } else { //if both are not default
-                            environmentUrls.add((String) urlsFromPublisherJson.get("https"));
-                            environmentUrls.add((String) urlsFromPublisherJson.get("http"));
-                        }
-                        if (urlsFromPublisherJson.get("useDefaultContext").toString().equals("true")) {
-                            useDefaultContext = true;
-                        } else {
-                            useDefaultContext = false;
-                        }
-                    } catch (ParseException e) {
-                        log.error("Cannot Parse the gatewayUrls to JSON for API", e);
-                    }
-                } else {
-                    environmentUrls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
-                    useDefaultContext = true;
-                }
+                List<String> environmenturls = new ArrayList<String>();
+                environmenturls.addAll(Arrays.asList((environment.getApiGatewayEndpoint().split(","))));
                 List<String> transports = new ArrayList<String>();
                 transports.addAll(Arrays.asList((api.getTransports().split(","))));
-                jsonObject.put("http", filterUrlsByTransport(environmentUrls, transports, "http"));
-                jsonObject.put("https", filterUrlsByTransport(environmentUrls, transports, "https"));
+                jsonObject.put("http", filterUrlsByTransport(environmenturls, transports, "http"));
+                jsonObject.put("https", filterUrlsByTransport(environmenturls, transports, "https"));
                 jsonObject.put("showInConsole", environment.isShowInConsole());
-                jsonObject.put("useDefaultContext", useDefaultContext);
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     productionEnvironmentObject.put(environment.getName(), jsonObject);
                 } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {

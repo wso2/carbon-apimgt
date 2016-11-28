@@ -375,7 +375,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
-        String gatewayUrls  = (String) apiData.get("gatewayUrls", apiData);
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -422,7 +421,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
-        api.setGatewayUrls(gatewayUrls);
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
@@ -476,7 +474,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         api.setLastUpdated(new Date());
 
-        if (apiData.get("swagger", apiData) != null) {
+        if (!apiData.get("swagger", apiData).equals("null")) {
 
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
@@ -635,10 +633,10 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointUTPassword(null);
         }
 
-
-        if (apiData.get("swagger", apiData) != null) {
+        if (!apiData.get("swagger", apiData).equals("null")) {
             //Read swagger from the registry todo: check why was this done
             //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+
 
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
@@ -747,7 +745,7 @@ public class APIProviderHostObject extends ScriptableObject {
 		String provider = String.valueOf(apiData.get("provider", apiData));
 		String name = (String) apiData.get("apiName", apiData);
 		String version = (String) apiData.get("version", apiData);
-		
+
 		if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }
@@ -803,7 +801,7 @@ public class APIProviderHostObject extends ScriptableObject {
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
 //        String contextVal = (String) apiData.get("context", apiData);
         String description = (String) apiData.get("description", apiData);
-
+        String type = (String) apiData.get("type", apiData);
         /* Business Information*/
         String techOwner = (String) apiData.get("techOwner", apiData);
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
@@ -889,6 +887,7 @@ public class APIProviderHostObject extends ScriptableObject {
         deletedTags.removeAll(tag);
         api.removeTags(deletedTags);
         api.addTags(tag);
+        api.setType(type);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
         api.setTechnicalOwner(techOwner);
@@ -925,7 +924,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String contextVal = (String) apiData.get("context", apiData);
-
+        String type = (String) apiData.get("type", apiData);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
@@ -951,12 +950,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
         API api = new API(apiId);
         api.setStatus(APIStatus.CREATED);
-
+        api.setType(type);
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
         context = checkAndSetVersionParam(context);
         api.setContextTemplate(context);
-
         context = updateContextWithVersion(version, contextVal, context);
 
         api.setContext(context);
@@ -1184,7 +1182,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
-
+        String type = (String) apiData.get("type", apiData);
         if (contextVal.isEmpty()) {
             handleException("Context not defined for API");
         }
@@ -1467,6 +1465,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setStatus(APIStatus.CREATED);
         api.setContext(context);
+        api.setType(type);
         api.setContextTemplate(contextTemplate);
         api.setBusinessOwner(bizOwner);
         api.setBusinessOwnerEmail(bizOwnerEmail);
@@ -1770,6 +1769,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
         String contextVal = (String) apiData.get("context", apiData);
+        String type = (String) apiData.get("type", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && !context.contains("/t/"+ providerDomain))
@@ -1922,6 +1922,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSandboxUrl(sandboxUrl);
         api.addTags(tag);
         api.setContext(context);
+        api.setType(type);
         api.setContextTemplate(contextTemplate);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
@@ -2688,8 +2689,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 myn.put(50, myn, checkValue(policiesSet.toString()));
                 myn.put(51, myn, checkValue(api.getApiLevelPolicy()));
-                myn.put(52, myn, api.getGatewayUrls());
-
+                myn.put(52, myn, checkValue(api.getType()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                                 "-" + version);
@@ -4767,6 +4767,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         HttpClient client = new DefaultHttpClient();
         HttpHead head = new HttpHead(urlVal);
+        // extract the host name and add the Host http header for sanity
+        head.addHeader("Host", urlVal.replaceAll("https?://", "").replaceAll("(/.*)?", ""));
         client.getParams().setParameter("http.socket.timeout", 4000);
         client.getParams().setParameter("http.connection.timeout", 4000);
 
@@ -4934,7 +4936,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
                 row.put("serverURL", row, environment.getServerURL());
-                row.put("gatewayEndpoints", row, environment.getApiGatewayEndpoint());
                 row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;

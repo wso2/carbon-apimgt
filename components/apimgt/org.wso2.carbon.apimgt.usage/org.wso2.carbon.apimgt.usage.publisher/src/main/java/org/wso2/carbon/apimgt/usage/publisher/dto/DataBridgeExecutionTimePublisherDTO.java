@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherDTO {

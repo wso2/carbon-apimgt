@@ -1,4 +1,20 @@
-package org.wso2.carbon.apimgt.usage.publisher;
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -21,8 +37,11 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
@@ -146,14 +165,14 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         String httpMethod =
                             (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
                                                                    .getProperty(Constants.Configuration.HTTP_METHOD);
-		
+
 		GoogleAnalyticsData data = new GoogleAnalyticsData
                 .DataBuilder(account, GOOGLE_ANALYTICS_TRACKER_VERSION , visitorId , GoogleAnalyticsConstants.HIT_TYPE_PAGEVIEW)
                 .setDocumentPath(documentPath)
                 .setDocumentHostName(domainName)
                 .setDocumentTitle(httpMethod)
                 .setSessionControl("end")
-                .setCacheBuster(getCacheBusterId())
+                .setCacheBuster(APIMgtGoogleAnalyticsUtils.getCacheBusterId())
                 .setIPOverride(userIP)
                 .build();
 
@@ -233,33 +252,4 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	public void setConfigKey(String configKey) {
 		this.configKey = configKey;
 	}
-	
-    /**
-     * Generates a 32 character length random number for cacheBusterId
-     * @return cacheBusterId
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    private static String getCacheBusterId() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String message = getRandomNumber() + UUID.randomUUID().toString();
-        MessageDigest m = MessageDigest.getInstance("MD5");
-        m.update(message.getBytes("UTF-8"), 0, message.length());
-        byte[] sum = m.digest();
-        BigInteger messageAsNumber = new BigInteger(1, sum);
-        String md5String = messageAsNumber.toString(16);
-        /* Pad to make sure id is 32 characters long. */
-        while (md5String.length() < 32) {
-            md5String = "0" + md5String;
-        }
-        return "0x" + md5String.substring(0, 16);
-    }
-
-    /**
-     * Generate a random number
-     * @return random number
-     */
-    private static String getRandomNumber() {
-        return Integer.toString((int) (Math.random() * 0x7fffffff));
-    }
-
 }

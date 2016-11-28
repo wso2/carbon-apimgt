@@ -6,22 +6,28 @@ $(document).ready(function() {
         var contextExist = false;
         var oldContext=$('#spanContext').text();
         jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"isContextExist", context:value,oldContext:oldContext },
-            function (result) {
-                if (!result.error) {
-                    contextExist = result.exist;
-                }
-            });
+                      function (result) {
+                          if (!result.error) {
+                              contextExist = result.exist;
+                          }
+                      });
         return this.optional(element) || contextExist != "true";
     }, i18n.t('Duplicate context value.'));
-
+    $.validator.addMethod('tenantContextExists', function(value, element) {
+        if (value.charAt(0) != "/") {
+            value = "/" + value;
+        }
+        var illegalChars = /(\/t\/|\/t$)/;
+        return !illegalChars.test(value)
+    }, '/t/ not allowed in the context field.');
     $.validator.addMethod('apiNameExists', function(value, element) {
         var apiNameExist = false;
         jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"isAPINameExist", apiName:value },
-            function (result) {
-                if (!result.error) {
-                    apiNameExist = result.exist;
-                }
-            });
+                      function (result) {
+                          if (!result.error) {
+                              apiNameExist = result.exist;
+                          }
+                      });
         return this.optional(element) || apiNameExist != "true";
     }, i18n.t('Duplicate API name.'));
 
@@ -30,9 +36,9 @@ $(document).ready(function() {
     }, i18n.t('Select a value for the tier.'));
 
     $.validator.addMethod('validRegistryName', function(value, element) {
-        var illegalChars = /([~!@#;%^&*+={}\|\\<>\"\',]&)/;
+        var illegalChars = /([~!@#;%^*()+={}|\<>"',&])/;
         return !illegalChars.test(value);
-    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .'));
+    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } () | &lt; &gt;, \' " \\ ) .'));
 
     $.validator.addMethod('validContextTemplate', function(value, element) {
         var illegalChars = /([~!@#;%^&*+=\|\\<>\"\',])/;
@@ -63,22 +69,6 @@ $(document).ready(function() {
         return !/\s/g.test(value);
     },i18n.t('Name contains white spaces.'));
 
-    $.validator.addMethod('validGatewayUrl', function(value, element) {
-
-        var gatewayUrlBodyWithoutProtocol = /\w+(:[0-9]*)?(\.\w+)?/;
-        var spaceRegex = /^[^\/\s]+[^\s]{2,}$/;
-        if (value.trim() != "") {
-            if (!gatewayUrlBodyWithoutProtocol.test(value.trim()) || !spaceRegex.test(value.trim())) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-        return true;
-    },i18n.t('Please enter a valid URL without white spaces.'));
-
     $.validator.addMethod('validInput', function(value, element) {
         var illegalChars = /([<>\"\'])/;
         return !illegalChars.test(value);
@@ -88,11 +78,11 @@ $(document).ready(function() {
         var valid = false;
         var oldContext=$('#spanContext').text();
         jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"validateRoles", roles:value },
-            function (result) {
-                if (!result.error) {
-                    valid = result.response;
-                }
-            });
+                      function (result) {
+                          if (!result.error) {
+                              valid = result.response;
+                          }
+                      });
         return this.optional(element) || valid == true;
     }, i18n.t('Invalid role name[s]'));
 
@@ -111,33 +101,33 @@ $(document).ready(function() {
         }
         return true;
     }, i18n.t('You must upload or select a message mediation policy'));
-
+    
     $.validator.addMethod('validateProdWSDLService', function (value, element){
-        if (APP.is_production_endpoint_specified()) {
-            return APP.is_production_wsdl_endpoint_service_specified();
-        }
-        return true;
+    	if (APP.is_production_endpoint_specified()) {
+    		return APP.is_production_wsdl_endpoint_service_specified();
+    	} 
+    	return true;        
     }, i18n.t('Service Name must be provided for WSDL endpoint.'));
-
+    
     $.validator.addMethod('validateProdWSDLPort', function (value, element){
-        if (APP.is_production_endpoint_specified()) {
-            return APP.is_production_wsdl_endpoint_port_specified();
-        }
-        return true;
+    	if (APP.is_production_endpoint_specified()) {
+    		return APP.is_production_wsdl_endpoint_port_specified();
+    	} 
+    	return true;   
     }, i18n.t('Service Port must be provided for WSDL endpoint.'));
-
+    
     $.validator.addMethod('validateSandboxWSDLService', function (value, element){
-        if (APP.is_sandbox_endpoint_specified()) {
-            return APP.is_sandbox_wsdl_endpoint_service_specified();
-        }
+    	if (APP.is_sandbox_endpoint_specified()) {
+    		return APP.is_sandbox_wsdl_endpoint_service_specified();
+    	}
         return true;
     }, i18n.t('Service Name must be provided for WSDL endpoint.'));
-
+    
     $.validator.addMethod('validateSandboxWSDLPort', function (value, element){
-        if (APP.is_sandbox_endpoint_specified()) {
-            return APP.is_sandbox_wsdl_endpoint_port_specified();
-        }
-        return true;
+    	if (APP.is_sandbox_endpoint_specified()) {
+    		return APP.is_sandbox_wsdl_endpoint_port_specified();
+    	}
+    	return true;
     }, i18n.t('Service Port must be provided for WSDL endpoint.'));
 
     $.validator.addMethod('validateImageFile', function (value, element) {
@@ -165,18 +155,4 @@ $(document).ready(function() {
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;
     }, i18n.t('maximum support 20000 characters only'));
-
-    // override jquery validate plugin defaults
-    $.validator.setDefaults({
-        errorElement: 'span',
-        errorClass: 'help-block',
-        errorPlacement: function(error, element) {
-            error.addClass('error');
-            if(element.parent('.input-group').length) {
-                error.insertAfter(element.parent());
-            } else {
-                error.insertAfter(element);
-            }
-        }
-    });
 });

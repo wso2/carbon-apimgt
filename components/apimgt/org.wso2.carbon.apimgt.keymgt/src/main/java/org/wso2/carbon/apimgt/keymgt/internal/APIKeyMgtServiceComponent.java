@@ -195,8 +195,6 @@ public class APIKeyMgtServiceComponent {
             log.debug("ThriftAuthenticatorService set in Entitlement bundle");
         }
         this.thriftAuthenticationService = authenticationService;
-        //log.info("STUBHUB " + authenticationService + " received.");
-
     }
 
     /**

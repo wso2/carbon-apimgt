@@ -298,7 +298,7 @@ APIDesigner.prototype.get_scopes = function() {
 }
 
 APIDesigner.prototype.has_resources = function(){
-    if(Object.keys(this.api_doc.paths).length == 0) 
+    if(Object.keys(this.api_doc.paths).length == 0)
         return false;
     else
         return true;
@@ -652,11 +652,12 @@ APIDesigner.prototype.render_resource = function(container){
 
 
     if(container.find('.editor').length){
-        var textarea = container.find('.editor').ace({ theme: 'textmate', lang: 'javascript' ,fontSize: "10pt"});
-        var decorator = container.find('.editor').data('ace');
-        var aceInstance = decorator.editor.ace;
-        aceInstance.getSession().on('change', function(e) {   
-            operation[0]["x-mediation-script"] = aceInstance.getValue();
+        var textarea = container.find('.editor')[0];
+        var editor = CodeMirror.fromTextArea(textarea, {
+            lineNumbers: true,
+            mode: "javascript",
+            gutters: ["CodeMirror-lint-markers"],
+            lint: true
         });
     }
 
@@ -926,7 +927,7 @@ $(document).ready(function(){
         submitHandler: function(form) {
         var designer = APIDesigner();
 
-        if(designer.has_resources() == false){
+        if(designer.has_resources() == false && !ws ){
         	$("#messageModal div.modal-footer").html("");
             jagg.message({
                 content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),

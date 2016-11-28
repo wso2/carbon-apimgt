@@ -143,7 +143,11 @@ var drawTopAPIUsersTable = function () {
         "columnDefs": [{
             "targets": 0,
             "render": function (data, type, full, meta) {
-                return '<a href="#" class="show-model-user" data-user="' + data + '">' + data + '</a>';
+                if (hasTenants) {
+                    return data;
+                } else {
+                    return '<a href="#" class="show-model-user" data-user="' + data + '">' + data + '</a>';
+                }
             }
         },{
             "targets": 1,
@@ -183,6 +187,11 @@ var drawTopAPIUsersTable = function () {
                         }
                     }
                     $("#userProfileModel").modal();
+                } else {
+                    jagg.message({
+                        content: json.message,
+                        type: "info"
+                    });
                 }
             }
         );

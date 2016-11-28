@@ -32,6 +32,7 @@ jagg.initializer("page/base", {
         jagg.addHeaderJS("page/base","cloud-enjoyhint-script-data.js", "libs/enjoyhint-3.1.0/js/cloud-enjoyhint-script-data.js");
         jagg.addHeaderJS("page/base","cloud-enjoyhint-functions.js", "libs/enjoyhint-3.1.0/js/cloud-enjoyhint-functions.js");
         jagg.addHeaderJS("page/base", "jagg", "templates/page/base/js/jagg.js");
+        jagg.addHeaderJS("page/base","workflow-dialog.js", "templates/utils/dialog/workflow-dialog.js");
         jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
 
 

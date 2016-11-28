@@ -39,7 +39,7 @@ public class APIDTO  {
   
   private String provider = null;
   
-  @NotNull
+  
   private String apiDefinition = null;
   
   
@@ -59,6 +59,12 @@ public class APIDTO  {
   
   @NotNull
   private Boolean isDefaultVersion = null;
+  
+  public enum TypeEnum {
+     HTTP,  WS, 
+  };
+  @NotNull
+  private TypeEnum type = TypeEnum.HTTP;
   
   @NotNull
   private List<String> transport = new ArrayList<String>();
@@ -192,7 +198,7 @@ public class APIDTO  {
   /**
    * Swagger definition of the API which contains details about URI templates and scopes\n
    **/
-  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes\n")
+  @ApiModelProperty(value = "Swagger definition of the API which contains details about URI templates and scopes\n")
   @JsonProperty("apiDefinition")
   public String getApiDefinition() {
     return apiDefinition;
@@ -272,6 +278,18 @@ public class APIDTO  {
   }
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
+  }
+  public void setType(TypeEnum type) {
+    this.type = type;
   }
 
   
@@ -488,6 +506,7 @@ public class APIDTO  {
     sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
     sb.append("  destinationStatsEnabled: ").append(destinationStatsEnabled).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
+    sb.append("  type: ").append(type).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");

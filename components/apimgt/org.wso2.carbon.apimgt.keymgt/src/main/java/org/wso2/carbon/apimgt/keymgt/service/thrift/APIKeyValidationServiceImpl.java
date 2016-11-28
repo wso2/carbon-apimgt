@@ -287,6 +287,93 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         template.setApplicableLevel(dto.getApplicableLevel());
         return template;
     }
+    public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version, String accessToken,
+                                               String sessionId)
+            throws org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException, APIManagementException, TException {
+        APIKeyValidationInfoDTO thriftKeyValidationInfoDTO = null;
+        try {
+            if (thriftAuthenticatorService != null && apiKeyValidationService != null) {
 
+                if (thriftAuthenticatorService.isAuthenticated(sessionId)) {
+
+                    //obtain the thrift session for this session id
+                    ThriftSession currentSession = thriftAuthenticatorService.getSessionInfo(sessionId);
+
+                    //obtain a dummy carbon context holder
+                    PrivilegedCarbonContext carbonContextHolder = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+                    //start tenant flow to stack up any existing carbon context holder base,
+                    //and initialize a raw one
+                    PrivilegedCarbonContext.startTenantFlow();
+                    if (tenantDomain == null) {
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,true);
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+                    } else {
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+                    }
+
+                    try {
+
+                        // need to populate current carbon context from the one created at
+                        // authentication
+                        populateCurrentCarbonContextFromAuthSession(carbonContextHolder,
+                                                                    currentSession);
+
+                        org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO keyValidationInfoDTO =
+                                apiKeyValidationService.validateKeyforHandshake(context, version, accessToken);
+
+                        thriftKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                        thriftKeyValidationInfoDTO.setAuthorized(keyValidationInfoDTO.isAuthorized());
+                        thriftKeyValidationInfoDTO.setSubscriber(keyValidationInfoDTO.getSubscriber());
+                        thriftKeyValidationInfoDTO.setTier(keyValidationInfoDTO.getTier());
+                        thriftKeyValidationInfoDTO.setType(keyValidationInfoDTO.getType());
+                        thriftKeyValidationInfoDTO.setEndUserToken(keyValidationInfoDTO.getEndUserToken());
+                        thriftKeyValidationInfoDTO.setEndUserName(keyValidationInfoDTO.getEndUserName());
+                        thriftKeyValidationInfoDTO.setApplicationName(keyValidationInfoDTO.getApplicationName());
+                        thriftKeyValidationInfoDTO.setValidationStatus(keyValidationInfoDTO.getValidationStatus());
+                        thriftKeyValidationInfoDTO.setApplicationId(keyValidationInfoDTO.getApplicationId());
+                        thriftKeyValidationInfoDTO.setApplicationTier(keyValidationInfoDTO.getApplicationTier());
+                        thriftKeyValidationInfoDTO.setApiPublisher(keyValidationInfoDTO.getApiPublisher());
+                        thriftKeyValidationInfoDTO.setConsumerKey(keyValidationInfoDTO.getConsumerKey());
+                        thriftKeyValidationInfoDTO.setApiName(keyValidationInfoDTO.getApiName());
+                        thriftKeyValidationInfoDTO.setIssuedTime(keyValidationInfoDTO.getIssuedTime());
+                        thriftKeyValidationInfoDTO.setValidityPeriod(keyValidationInfoDTO.getValidityPeriod());
+                        thriftKeyValidationInfoDTO.setAuthorizedDomains(keyValidationInfoDTO.getAuthorizedDomains());
+                        thriftKeyValidationInfoDTO.setIsContentAware(keyValidationInfoDTO.isContentAware());
+                        thriftKeyValidationInfoDTO.setApiTier(keyValidationInfoDTO.getApiTier());
+                        thriftKeyValidationInfoDTO.setThrottlingDataList(keyValidationInfoDTO.getThrottlingDataList());
+                        thriftKeyValidationInfoDTO.setSubscriberTenantDomain(keyValidationInfoDTO.getSubscriberTenantDomain());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestUnit(keyValidationInfoDTO.getSpikeArrestUnit());
+                        thriftKeyValidationInfoDTO.setStopOnQuotaReach(keyValidationInfoDTO.isStopOnQuotaReach());
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+
+                } else {
+                    String authErrorMsg = "Invalid session id for thrift authenticator.";
+                    log.warn(authErrorMsg);
+                    throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(authErrorMsg);
+                }
+
+            } else {
+                String initErrorMsg = "Thrift Authenticator or APIKeyValidationService is not initialized.";
+                log.error(initErrorMsg);
+                throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(initErrorMsg);
+            }
+
+        } catch (APIKeyMgtException e) {
+            log.error("Error in invoking validate key via thrift..");
+            throw new org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException(e.getMessage());
+        } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {
+            log.error("Error in invoking validate key via thrift..");
+            throw new APIManagementException(e.getMessage());
+        }
+        return thriftKeyValidationInfoDTO;
+    }
 
 }

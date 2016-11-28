@@ -1,25 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
 
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Path("/apis")
 @Consumes({ "application/json" })
@@ -54,6 +43,11 @@ public class ApisApi  {
     {
     return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
     }
+
+    public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(apiId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    }
     @GET
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -76,6 +70,11 @@ public class ApisApi  {
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    }
+
+    public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(apiId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
     }
     @GET
     @Path("/{apiId}/documents")
@@ -100,6 +99,11 @@ public class ApisApi  {
     {
     return delegate.apisApiIdDocumentsGet(apiId,limit,offset,xWSO2Tenant,accept,ifNoneMatch);
     }
+
+    public String apisApiIdDocumentsGetGetLastUpdatedTime(String apiId,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch)
+    {
+        return delegate.apisApiIdDocumentsGetGetLastUpdatedTime(apiId,limit,offset,xWSO2Tenant,accept,ifNoneMatch);
+    }
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -121,6 +125,11 @@ public class ApisApi  {
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant)
     {
     return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
+    }
+
+    public String apisApiIdGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant)
+    {
+        return delegate.apisApiIdGetGetLastUpdatedTime(apiId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
     }
     @GET
     @Path("/{apiId}/swagger")
@@ -144,6 +153,11 @@ public class ApisApi  {
     {
     return delegate.apisApiIdSwaggerGet(apiId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
     }
+
+    public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant)
+    {
+        return delegate.apisApiIdSwaggerGetGetLastUpdatedTime(apiId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
+    }
     @GET
     @Path("/{apiId}/thumbnail")
     @Consumes({ "application/json" })
@@ -165,6 +179,11 @@ public class ApisApi  {
     {
     return delegate.apisApiIdThumbnailGet(apiId,accept,ifNoneMatch,ifModifiedSince);
     }
+
+    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.apisApiIdThumbnailGetGetLastUpdatedTime(apiId,accept,ifNoneMatch,ifModifiedSince);
+    }
     @POST
     @Path("/generate-sdk/")
     @Consumes({ "application/json" })
@@ -184,6 +203,11 @@ public class ApisApi  {
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant)
     {
     return delegate.apisGenerateSdkPost(apiId,language,xWSO2Tenant);
+    }
+
+    public String apisGenerateSdkPostGetLastUpdatedTime(String apiId,String language,String xWSO2Tenant)
+    {
+        return delegate.apisGenerateSdkPostGetLastUpdatedTime(apiId,language,xWSO2Tenant);
     }
     @GET
     
@@ -205,6 +229,11 @@ public class ApisApi  {
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.apisGet(limit,offset,xWSO2Tenant,query,accept,ifNoneMatch);
+    }
+
+    public String apisGetGetLastUpdatedTime(Integer limit,Integer offset,String xWSO2Tenant,String query,String accept,String ifNoneMatch)
+    {
+        return delegate.apisGetGetLastUpdatedTime(limit,offset,xWSO2Tenant,query,accept,ifNoneMatch);
     }
 }
 

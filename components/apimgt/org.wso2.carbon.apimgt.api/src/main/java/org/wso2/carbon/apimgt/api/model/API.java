@@ -17,10 +17,13 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.io.Serializable;
-import java.util.*;
-
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provider's & system's view of API
@@ -39,6 +42,7 @@ public class API implements Serializable{
     private String sandboxUrl;
     private String wsdlUrl;
     private String wadlUrl;
+    private String type;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -88,12 +92,12 @@ public class API implements Serializable{
     private boolean advertiseOnly;
     private String apiOwner;
     private String redirectURL;
-    
+
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
-    
+
     private String responseCache;
     private int cacheTimeout;
 
@@ -106,8 +110,9 @@ public class API implements Serializable{
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
 
-    private String gatewayUrls;
     private Set<String> environments;
+
+    private String createdTime;
 
     public Set<String> getEnvironments() {
         return environments;
@@ -117,19 +122,6 @@ public class API implements Serializable{
         this.environments = environments;
     }
 
-    /**
-     * @param gatewayUrls Custom environments given by the Publisher of the API
-     */
-    public void setGatewayUrls(String gatewayUrls) {
-        this.gatewayUrls = gatewayUrls;
-    }
-    /**
-     * Contains Custom Environments given by the Publisher of the API
-     * @return
-     */
-    public String getGatewayUrls() {
-        return gatewayUrls;
-    }
     /**
      * Contains flag indicating whether dummy backend or not
      * @return
@@ -194,7 +186,7 @@ public class API implements Serializable{
     public void setApiOwner(String apiOwner) {
         this.apiOwner = apiOwner;
     }
-    
+
     public String getRedirectURL() {
         return redirectURL;
     }
@@ -210,7 +202,7 @@ public class API implements Serializable{
     public APIIdentifier getId() {
         return id;
     }
-    
+
 	public String getTransports() {
         return transports;
     }
@@ -250,7 +242,7 @@ public class API implements Serializable{
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
         this.businessOwnerEmail = businessOwnerEmail;
     }
-   
+
 
     public String getDescription() {
         return description;
@@ -362,7 +354,7 @@ public class API implements Serializable{
     public void removeAllTiers(){
         availableTiers.clear();
     }
-    
+
     /**
      * Removes all Policies from the API object.
      */
@@ -440,11 +432,11 @@ public class API implements Serializable{
     public void setVisibleRoles(String visibleRoles) {
         this.visibleRoles = visibleRoles;
     }
-    
+
     public String getVisibleTenants() {
     	return visibleTenants;
     }
-    
+
     public void setVisibleTenants(String visibleTenants) {
     	this.visibleTenants = visibleTenants;
     }
@@ -464,7 +456,7 @@ public class API implements Serializable{
     public void setApiResourcePatternsChanged(boolean apiResourcePatternsChanged) {
         this.apiResourcePatternsChanged = apiResourcePatternsChanged;
     }
-    
+
     /**
   	 * @return the endpointUTUsername
   	 */
@@ -492,7 +484,7 @@ public class API implements Serializable{
   	public void setEndpointUTPassword(String endpointUTPassword) {
   		this.endpointUTPassword = endpointUTPassword;
   	}
-  	
+
  	/**
  	 * @return the endpointSecured
  	 */
@@ -516,13 +508,13 @@ public class API implements Serializable{
      * @param endpointAuthDigest the endpointAuthDigest to set
      */
     public void setEndpointAuthDigest(boolean endpointAuthDigest) { this.endpointAuthDigest = endpointAuthDigest; }
- 	
+
     public String getInSequence() {
  		return inSequence;
  	}
 
     /**
-     * 
+     *
      * @param inSeq  insequence for the API
      */
  	public void setInSequence(String inSeq) {
@@ -534,13 +526,13 @@ public class API implements Serializable{
   	}
 
      /**
-      * 
+      *
       * @param outSeq outSequence for the API
       */
   	public void setOutSequence(String outSeq) {
   		this.outSequence = outSeq;
   	}
-  	
+
   	/**
   	 * remove custom sequences from api object
   	 */
@@ -581,7 +573,7 @@ public class API implements Serializable{
 	public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
 		this.subscriptionAvailableTenants = subscriptionAvailableTenants;
 	}
-    
+
     public String getEndpointConfig() {
         return endpointConfig;
     }
@@ -666,5 +658,22 @@ public class API implements Serializable{
         this.apiLevelPolicy = apiLevelPolicy;
     }
 
+    public String getType() {
+        return type;
+    }
 
+    public void setType(String type) {
+        if (type != null && type != "") {
+            this.type = type.toUpperCase();
+        } else {
+            this.type = "HTTP";
+        }
+    }
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
 }

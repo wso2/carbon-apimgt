@@ -22,7 +22,14 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
-
+    public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
+            " SELECT " +
+            "   API.API_NAME," +
+            "   API.API_PROVIDER" +
+            " FROM " +
+            "   AM_API API" +
+            " WHERE " +
+            "   API.CONTEXT_TEMPLATE = ? ";
     public static final String GET_ACCESS_KEY_FOR_API_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
@@ -465,6 +472,8 @@ public class SQLConstants {
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUBS.CREATED_TIME AS CREATED_TIME, "+
+            "   SUBS.UPDATED_TIME AS UPDATED_TIME, "+
             "   SUBS.UUID AS UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -1512,13 +1521,6 @@ public class SQLConstants {
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +
             " VALUES (?,?,?,?,?,?,?,?)";
-    public static final String ADD_API_ENVIRONMENTS_SQL = " INSERT INTO AM_API_ENVIRONMENTS (ENVIRONMENT_NAME," +
-            "API_ID, HTTP_URL,HTTPS_URL,APPEND_CONTEXT)" +
-            " VALUES (?,?,?,?,?)";
-    public static final String REMOVE_API_ENVIRONMENTS_SQL = "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
-
-    public static final String GET_API_ENVIRONMENTS_SQL =
-            "SELECT ENVIRONMENT_NAME,HTTP_URL,HTTPS_URL,APPEND_CONTEXT FROM AM_API_ENVIRONMENTS WHERE API_ID = ? ";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1539,6 +1541,9 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_ENTRY_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
+    
+    public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
+            "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +
@@ -1615,6 +1620,8 @@ public class SQLConstants {
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_STATUS, " +
             "   APP.GROUP_ID, " +
+            "   APP.UPDATED_TIME, "+
+            "   APP.CREATED_TIME, "+
             "   APP.UUID," +
             "   SUB.USER_ID " +
             " FROM " +
@@ -1655,6 +1662,7 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 
@@ -1678,9 +1686,6 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
-
-    public static final String REMOVE_FROM_API_ENVIRONMENTS_SQL =
-            "DELETE FROM AM_API_ENVIRONMENTS WHERE API_ID = ?";
 
     public static final String REMOVE_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
@@ -1829,6 +1834,9 @@ public class SQLConstants {
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_SQL =
             "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
+    
+    public static final String REMOVE_WORKFLOW_ENTRY_SQL =
+            "DELETE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_EXTERNAL_REFERENCE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL =
             "SELECT " +

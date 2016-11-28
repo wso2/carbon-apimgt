@@ -1,34 +1,28 @@
 /*
-*  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
-package org.wso2.carbon.apimgt.usage.publisher;
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /*
@@ -65,7 +59,12 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 }
 
                 ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
-                throttlePublisherDTO.setAccessToken(authContext.getApiKey());
+                String consumerKey = authContext.getApiKey();
+                int hashCode = -1; //set -1 for non auth users
+                if (consumerKey != null) {
+                    hashCode = consumerKey.hashCode();
+                }
+                throttlePublisherDTO.setAccessToken(String.valueOf(hashCode));
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
                 throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(

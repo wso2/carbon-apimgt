@@ -18,29 +18,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -52,12 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.*;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
@@ -71,17 +52,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,6 +63,7 @@ public class RestApiUtil {
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
 
     public static void setThreadLocalRequestedTenant(String user) {
@@ -1167,5 +1139,63 @@ public class RestApiUtil {
             result = base.replace("\"", "");
         }
         return result.trim();
+    }
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getETagSkipListToMethodsMapFromConfig()
+            throws APIManagementException {
+        Hashtable<org.wso2.uri.template.URITemplate, List<String>> uriToMethodsMap = new Hashtable<>();
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        List<String> uriList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_ETAG_SKIP_URI_URI);
+        List<String> methodsList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD);
+
+        if (uriList != null && methodsList != null) {
+            if (uriList.size() != methodsList.size()) {
+                String errorMsg = "Provided ETag skip list URIs for Store REST API are invalid.";
+                log.error(errorMsg);
+                return new Hashtable<>();
+            }
+
+            for (int i = 0; i < uriList.size(); i++) {
+                String uri = uriList.get(i);
+                try {
+                    org.wso2.uri.template.URITemplate uriTemplate = new org.wso2.uri.template.URITemplate(uri);
+                    String methodsForUri = methodsList.get(i);
+                    List<String> methodListForUri = Arrays.asList(methodsForUri.split(","));
+                    uriToMethodsMap.put(uriTemplate, methodListForUri);
+                } catch (URITemplateException e) {
+                    String msg = "Error in parsing uri " + uri + " when retrieving ETag skip URIs for REST API";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+        }
+        return uriToMethodsMap;
+    }
+    public static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getETagSkipListToMethodsMap()
+            throws APIManagementException {
+        if (ETagSkipListURIToHttpMethodsMap==null){
+            ETagSkipListURIToHttpMethodsMap = getETagSkipListToMethodsMapFromConfig();
+        }
+        return ETagSkipListURIToHttpMethodsMap;
+    }
+    public static Boolean checkETagSkipList(String path, String httpMethod) {
+        //Check if the accessing URI is ETag skipped
+        try {
+            Dictionary<org.wso2.uri.template.URITemplate, List<String>> eTagSkipListToMethodsMap = RestApiUtil.getETagSkipListToMethodsMap();
+            Enumeration<org.wso2.uri.template.URITemplate> uriTemplateSet = eTagSkipListToMethodsMap.keys();
+
+            while (uriTemplateSet.hasMoreElements()) {
+                org.wso2.uri.template.URITemplate uriTemplate = uriTemplateSet.nextElement();
+                if (uriTemplate.matches(path, new HashMap<String, String>())) {
+                    List<String> ETagDisableHttpVerbs = eTagSkipListToMethodsMap.get(uriTemplate);
+                    return ETagDisableHttpVerbs.contains(httpMethod);
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Unable to resolve ETag skip list in api-manager.xml", e, log);
+        }
+        return false;
     }
 }

@@ -9,6 +9,7 @@
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     var apiStatus = api.status;
+    var isWSAPI = api.type.toUpperCase() == "WS";
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
@@ -32,6 +33,7 @@
     var apiProvider = "<%=api.provider%>"
     var apiVersion = "<%=api.version%>"
     var apiName = "<%=api.name%>"
+    var ws = "<%=isWSAPI%>"
 </script>
 <div id="item-add">
 <%
@@ -105,7 +107,7 @@
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-
+                                                    <input type="hidden" id="type" name="type" value="<%=api.type%>"/>
 													<div id="endpoint-ui">													
 
 													</div>
@@ -157,6 +159,7 @@
 															</div>
 							                            </div>
 							                            {{/inline}}
+                                                        <%if(api.type.toUpperCase() != "WS") {%>
 								                        <div class="form-group">
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
@@ -174,6 +177,7 @@
 							                                    </select>
 							                                </div>
 							                            </div>
+                                                                    <%}%>
 							                            {{#if default }}
 							                            <div class="form-group">
 							                            	<div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"></div>
@@ -185,6 +189,7 @@
 															</div>
 														</div>
 							                            {{else}}
+                                                          <%if(api.type.toUpperCase() != "WS"){%>
 							                            <div class="form-group">    
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
 								                            </label>
@@ -199,6 +204,7 @@
 																</label>																
 							                                </div>
 								                        </div>
+                                                                  <%}%>
 								                        <br />
 								                        {{#each production_endpoints}}
 								                        	{{#if ../load_balance}}
@@ -329,14 +335,14 @@
 								                         <strong>Load Balance</strong><p><%= i18n.localize("The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.")%></p-->
 								                         <Strong>Dynamic Endpoint</strong><p><%= i18n.localize("The dynamic endpoint will send the message to the address specified in the 'To' header.")%></p>
 							                        </div>							
-							
+							<%if(api.type.toUpperCase() != "WS"){%>
 							                         <div class="form-group">
 							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
 							                                <a href="#" class="more-options but" ref="more-options-endpoints" title="<%=i18n.localize("Show More Options")%>" ><%=i18n.localize("Show More Options")%></a>
 							                             </div>
 							                         </div>
 							                        <div id="more-options-endpoints"  style="display:none">
-							
+
 							
 							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("Endpoint Security Scheme")%>:<span class="requiredAstrix">*</span>
@@ -384,10 +390,11 @@
 							                            </div>
 							                        </div>
 
-							                        </div><!-- more option endpoint -->
+							                        </div><!-- more option endpoint --><%}%>
 												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
+                                                        <%if(api.type.toUpperCase() != "WS"){%>
 							                        <legend ><%=i18n.localize("Message Mediation Policies")%></legend>
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("Enable Message Mediation")%></label>
@@ -400,6 +407,7 @@
 							                                    </label>							                                    
 							                                </div>
 							                            </div>
+                                                             <%}%>           
 							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 														<div class="form-group">
@@ -468,10 +476,11 @@
 														 %>
 														<br/><br/>
 														<div id="corsConfigsManaged">
+                                                            <%if(api.type.toUpperCase() != "WS"){%>
 															<legend><%=i18n.localize("CORS configuration")%> </legend>
-                                                            <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+                                                            <%}%>
 															<div class="cors-ui-container"></div>
-
+                                                                    <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
 															   <div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
@@ -499,8 +508,8 @@
 							                    </form>
 							                </div>
 							            </div>
-							            </div>							
-							            <div class="panel panel-default">
+							            </div>
+							            <div class="panel panel-default"><%if(api.type.toUpperCase() != "WS"){%>
 							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
 								                    <div>
@@ -646,6 +655,7 @@
 							            </div>
 
 							            </div>
+							            <%}%>
 							            </div>
 							            </div>
 							            </div>
@@ -1003,7 +1013,7 @@
 </script>
 
 <script id="cors-ui-template" type="text/x-handlebars-template">
-
+<%if(api.type.toUpperCase() != "WS"){%>
     <div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("Enable API based CORS Configuration")%></label>
 			<div class="controls col-sm-8">
@@ -1013,6 +1023,7 @@
 			</label>
 	    </div>
 	</div>
+                <%}%>
 	{{#if corsConfigurationEnabled }}
 	<div id="corsFormElements">
 		<div class="form-group">

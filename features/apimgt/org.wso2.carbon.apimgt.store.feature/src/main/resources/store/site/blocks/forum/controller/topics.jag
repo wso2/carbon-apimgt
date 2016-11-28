@@ -244,12 +244,18 @@ if(validation_errors != true){
     anonPutPermission.setPermissions(new HashSet());
     anonPutPermission.getPermissions().add(ForumPermission.PUT);
 
+    var subscriberDeletePermission = new ForumPermissionDTO();
+    subscriberDeletePermission.setRole(APIConstants.SUBSCRIBER_ROLE);
+    subscriberDeletePermission.setPermissions(new HashSet());
+    subscriberDeletePermission.getPermissions().add(ForumPermission.DELETE);
+    
     var allowedRoles = new HashSet();
 	var deniedRoles = new HashSet();
 
     if("common" == data.parentId){ // Common topics
         allowedRoles.add(everyOnePermission);
         allowedRoles.add(anonGetPermission);
+        allowedRoles.add(subscriberDeletePermission);
     }else{ // API level topis
 		var apiStore = jagg.module("manager").getAPIStoreObj();
 		var apiIdentifiers = data.parentId.split(":");		
@@ -258,10 +264,12 @@ if(validation_errors != true){
 		var visibilityLevel = api[0].visibility;
 		if(visibilityLevel == "public"){
 			allowedRoles.add(everyOnePermission);
+            allowedRoles.add(subscriberDeletePermission);
         	allowedRoles.add(anonGetPermission);
 		}else if(visibilityLevel == "private"){ // When the API is in 'Visible to my domain' visibility level.
 			allowedRoles.add(everyOnePermission);
-			deniedRoles.add(anonGetPermission);
+            allowedRoles.add(subscriberDeletePermission);
+            deniedRoles.add(anonGetPermission);
 		}else if(visibilityLevel == "restricted"){ // When the API is in 'Restricted by role' visibility level.
 			var visibleRoles = api[0].visibleRoles;
 
@@ -274,7 +282,8 @@ if(validation_errors != true){
     				roleBasedPermission.setRole(roles[i]);
     				roleBasedPermission.setPermissions(new HashSet());
     				roleBasedPermission.getPermissions().add(ForumPermission.GET);
-    				roleBasedPermission.getPermissions().add(ForumPermission.PUT);
+                    roleBasedPermission.getPermissions().add(ForumPermission.PUT);
+                    roleBasedPermission.getPermissions().add(ForumPermission.DELETE);
 
 					allowedRoles.add(roleBasedPermission);
 				}

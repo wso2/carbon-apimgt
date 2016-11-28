@@ -37,7 +37,13 @@ public class OAuthApplicationInfo {
     private Map<String,Object> parameters = new HashMap<String, Object>();
     private boolean isSaasApplication;
     private String appOwner;
+    private String jsonString;
+    
+    
 
+    public void setJsonString(String jsonString) {
+        this.jsonString = jsonString;
+    }
     /**
      * get client Id (consumer id)
      * @return clientId
@@ -86,8 +92,11 @@ public class OAuthApplicationInfo {
     }
 
     public String getJsonString(){
-
-        return JSONObject.toJSONString(parameters);
+        if(jsonString != null){
+            return jsonString;
+        } else {
+            return JSONObject.toJSONString(parameters);
+        }  
 
     }
 

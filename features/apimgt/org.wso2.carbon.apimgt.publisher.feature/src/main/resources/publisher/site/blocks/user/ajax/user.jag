@@ -11,6 +11,14 @@ if(jagg.isCSRFTokenValid())
         if (action === "getUserDefaultProfile") {
             username = request.getParameter("username");
             var defaultProfile = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil.getUserDefaultProfile(username);
+            if (defaultProfile == null) {
+                print({
+                    error: true,
+                    message: "Cannot access this user profile from the current tenant. "+
+                    "Please login to the same tenant of this user to view their profile information."
+                });
+                return;
+            }
             var fieldValues = defaultProfile.getFieldValues();
             var profileData = {
                 "First Name": "-",

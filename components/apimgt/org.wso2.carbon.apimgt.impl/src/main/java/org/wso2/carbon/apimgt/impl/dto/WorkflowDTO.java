@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl.dto;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is the DTO that will be used for storing workflow related contextual information.
@@ -52,6 +54,9 @@ public class WorkflowDTO implements Serializable {
     private String externalWorkflowReference;
 
     private String callbackUrl;
+    
+    //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
+    private Map<String, String> attributes = new HashMap<String, String>();
 
     public String getCallbackUrl() {
         return callbackUrl;
@@ -144,4 +149,22 @@ public class WorkflowDTO implements Serializable {
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
     }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public String toString() {
+        return "WorkflowDTO [workflowReference=" + workflowReference + ", workflowType=" + workflowType + ", status="
+                + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
+                + workflowDescription + ", tenantId=" + tenantId + ", tenantDomain=" + tenantDomain
+                + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackUrl=" + callbackUrl
+                + ", attributes=" + attributes + "]";
+    }    
+    
 }
