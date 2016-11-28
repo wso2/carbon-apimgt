@@ -247,17 +247,19 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param sequence - The sequence element , which to be deployed in synapse
      * @throws AxisFault
      */
-    public void addSequence(String sequence) throws AxisFault {
+    public boolean addSequence(String sequence) throws AxisFault {
         SequenceAdminServiceClient client = new SequenceAdminServiceClient();
         if (sequence != null && !sequence.isEmpty()) {
             OMElement element = null;
             try {
                 element = AXIOMUtil.stringToOM(sequence);
                 client.addSequence(element);
+                return true;
             } catch (XMLStreamException e) {
                 log.error("Exception occurred while converting String to an OM.", e);
             }
         }
+        return false;
     }
 
     /**
@@ -267,17 +269,19 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param tenantDomain
      * @throws AxisFault
      */
-    public void addSequenceForTenant(String sequence, String tenantDomain) throws AxisFault {
+    public boolean addSequenceForTenant(String sequence, String tenantDomain) throws AxisFault {
         SequenceAdminServiceClient client = new SequenceAdminServiceClient();
         if (sequence != null && !sequence.isEmpty()) {
             OMElement element = null;
             try {
                 element = AXIOMUtil.stringToOM(sequence);
                 client.addSequenceForTenant(element, tenantDomain);
+                return true;
             } catch (XMLStreamException e) {
                 log.error("Exception occurred while converting String to an OM.", e);
             }
         }
+        return false;
     }
 
     /**
@@ -286,14 +290,16 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
      * @throws AxisFault
      */
-    public void deleteSequence(String sequenceName) throws AxisFault {
+    public boolean deleteSequence(String sequenceName) throws AxisFault {
         SequenceAdminServiceClient client = new SequenceAdminServiceClient();
         client.deleteSequence(sequenceName);
+        return true;
     }
 
-    public void deleteSequenceForTenant(String sequenceName, String tenantDomain) throws AxisFault {
+    public boolean deleteSequenceForTenant(String sequenceName, String tenantDomain) throws AxisFault {
         SequenceAdminServiceClient client = new SequenceAdminServiceClient();
         client.deleteSequenceForTenant(sequenceName, tenantDomain);
+        return true;
     }
 
     /**
@@ -348,7 +354,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @param fileName name of the file
      * @throws AxisFault
      */
-    public void deployPolicy(String content, String fileName) throws AxisFault {
+    public boolean deployPolicy(String content, String fileName) throws AxisFault {
         File file = new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
         //if directory doesn't exist, make onee
         if (!file.exists()) {
@@ -365,6 +371,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             byte[] contentInBytes = content.getBytes();
             fos.write(contentInBytes);
             fos.flush();
+            return true;
         } catch (IOException e) {
             log.error("Error occurred writing to " + fileName + ":", e);
         } finally {
@@ -376,6 +383,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 log.error("Error occurred closing file output stream", e);
             }
         }
+        return false;
     }
 
     /**
@@ -383,7 +391,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      *
      * @param fileNames file names to be deleted
      */
-    public void undeployPolicy(String[] fileNames) {
+    public boolean undeployPolicy(String[] fileNames) {
 
         for (int i = 0; i < fileNames.length; i++) {
             File file = new File(APIConstants.POLICY_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
@@ -394,5 +402,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 log.error("Error occurred in deleting file: " + fileNames[i]);
             }
         }
+        return true;
     }
 }
