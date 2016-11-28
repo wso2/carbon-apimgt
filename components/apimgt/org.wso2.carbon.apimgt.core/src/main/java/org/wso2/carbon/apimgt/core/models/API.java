@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -46,7 +49,11 @@ public final class API {
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
         lifecycleInstanceId = builder.lifecycleInstanceId;
-        apiDefinition = builder.apiDefinition;
+        if (builder.apiDefinition != null) {
+            apiDefinition = builder.apiDefinition.toString();
+        } else {
+            apiDefinition = "";
+        }
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
@@ -216,7 +223,8 @@ public final class API {
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -228,7 +236,8 @@ public final class API {
         return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         int result = name.hashCode();
         result = 31 * result + provider.hashCode();
         result = 31 * result + version.hashCode();
@@ -238,7 +247,8 @@ public final class API {
     /**
      * {@code API} builder static inner class.
      */
-    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY") public static final class APIBuilder implements ManagedLifecycle {
+    @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
+    public static final class APIBuilder implements ManagedLifecycle {
         private String id;
         private String provider;
         private String name;
@@ -271,7 +281,7 @@ public final class API {
             return lifecycleInstanceId;
         }
 
-        public String getApiDefinition() {
+        public StringBuilder getApiDefinition() {
             return apiDefinition;
         }
 
@@ -332,7 +342,7 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
-        private String apiDefinition;
+        private StringBuilder apiDefinition;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
@@ -368,7 +378,11 @@ public final class API {
             this.description = copy.description;
             this.lifeCycleStatus = copy.lifeCycleStatus;
             this.lifecycleInstanceId = copy.lifecycleInstanceId;
-            this.apiDefinition = copy.apiDefinition;
+            if (copy.apiDefinition != null) {
+                this.apiDefinition = new StringBuilder(copy.apiDefinition);
+            } else {
+                this.apiDefinition = new StringBuilder();
+            }
             this.wsdlUri = copy.wsdlUri;
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
@@ -502,7 +516,7 @@ public final class API {
          * @param apiDefinition the {@code apiDefinition} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiDefinition(String apiDefinition) {
+        public APIBuilder apiDefinition(StringBuilder apiDefinition) {
             this.apiDefinition = apiDefinition;
             return this;
         }
@@ -727,7 +741,32 @@ public final class API {
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
-        public API build() {
+
+        public API build() throws APIManagementException {
+            if (StringUtils.isEmpty(this.getId())) {
+                this.id(UUID.randomUUID().toString());
+            }
+            if (StringUtils.isEmpty(this.getApiDefinition())) {
+                throw new APIManagementException("Couldn't find swagger definition of API");
+            }
+            if (StringUtils.isEmpty(this.getName())) {
+                throw new APIManagementException("Couldn't find Name of API ");
+            }
+            if (StringUtils.isEmpty(this.getContext())) {
+                throw new APIManagementException("Couldn't find Context of API ");
+            }
+            if (StringUtils.isEmpty(this.getVersion())) {
+                throw new APIManagementException("Couldn't find Version of API ");
+            }
+            if (this.getTransport().isEmpty()) {
+                throw new APIManagementException("Couldn't find Transport of API ");
+            }
+            if (this.getPolicies().isEmpty()) {
+                throw new APIManagementException("Couldn't find Policies of API ");
+            }
+            if (this.getVisibility() == null) {
+                throw new APIManagementException("Couldn't find Visibility of API ");
+            }
             return new API(this);
         }
 
@@ -740,7 +779,8 @@ public final class API {
          *
          * @param lifecycleState Lifecycle state object.
          */
-        @Override public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
+        @Override
+        public void associateLifecycle(LifecycleState lifecycleState) throws LifecycleException {
             lifecycleInstanceId = lifecycleState.getLifecycleId();
             lifeCycleStatus = lifecycleState.getState();
             this.lifecycleState = lifecycleState;
@@ -753,7 +793,8 @@ public final class API {
          *               Persisted lifecycle state id (say stored in database) should be removed by implementing this
          *               method.
          */
-        @Override public void dissociateLifecycle(String lcName) throws LifecycleException {
+        @Override
+        public void dissociateLifecycle(String lcName) throws LifecycleException {
         }
 
         /**
@@ -762,7 +803,8 @@ public final class API {
          *                       operation and check list
          *                       item operation
          */
-        @Override public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
+        @Override
+        public void setLifecycleStateInfo(LifecycleState lifecycleState) throws LifecycleException {
             lifeCycleStatus = lifecycleState.getState();
             this.lifecycleState = lifecycleState;
         }
@@ -791,6 +833,9 @@ public final class API {
             return uriTemplates;
         }
 
+        public API buildApi() {
+            return new API(this);
+        }
     }
 
 }
