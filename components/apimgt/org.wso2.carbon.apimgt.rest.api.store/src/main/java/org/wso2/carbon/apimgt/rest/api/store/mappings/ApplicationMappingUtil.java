@@ -59,7 +59,7 @@ public class ApplicationMappingUtil {
 
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setApplicationId(application.getUuid());
+        applicationDTO.setApplicationId(application.getId());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
@@ -109,7 +109,7 @@ public class ApplicationMappingUtil {
 
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
-        applicationInfoDTO.setApplicationId(application.getUuid());
+        applicationInfoDTO.setApplicationId(application.getId());
         applicationInfoDTO.setThrottlingTier(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());

@@ -60,11 +60,11 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
-            when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);
+            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
             Application application = apiStore.getApplication(UUID, USER_NAME, null);
 
             Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
+            verify(applicationDAO, times(1)).getApplication(UUID);
         } catch (APIManagementException | APIMgtDAOException e) {
             Assert.assertTrue(false);
         }

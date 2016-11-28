@@ -118,7 +118,7 @@ public class APIPublisherImplTestCase {
     void deleteApiWithZeroSubscriptions() throws APIManagementException, APIMgtDAOException, LifecycleException, SQLException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        Mockito.when(apiSubscriptionDAO.getAPISubscriptionCountByAPI(uuid))
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid))
                 .thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl("", apiDAO, null, apiSubscriptionDAO, null,
@@ -137,7 +137,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(SampleObjectCreator
                 .getMockAPIObject().lifecycleInstanceId(uuid).build());
-        Mockito.when(apiSubscriptionDAO.getAPISubscriptionCountByAPI(uuid))
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid))
                 .thenReturn(2L);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null,
                 apiLifecycleManager);

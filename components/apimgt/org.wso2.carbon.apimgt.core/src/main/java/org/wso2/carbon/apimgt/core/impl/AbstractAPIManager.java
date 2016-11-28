@@ -236,7 +236,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           application = getApplicationDAO().getApplication(uuid, userId);
+           application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }

@@ -142,7 +142,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
        long subscriptionCount = 0;
         try {
-            subscriptionCount =  getApiSubscriptionDAO().getAPISubscriptionCountByAPI(id);
+            subscriptionCount =  getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't retrieve Subscriptions for API " + id, e, log);
         }

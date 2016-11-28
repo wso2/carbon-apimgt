@@ -89,9 +89,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     application.setGroupId(oldApplication.getGroupId());
-                    application.setUuid(oldApplication.getUuid());
+                    application.setUuid(oldApplication.getId());
                     application.setUpdatedUser(username);
-                    apiConsumer.updateApplication(oldApplication.getUuid(), application);
+                    apiConsumer.updateApplication(oldApplication.getId(), application);
 
                     //retrieves the updated application and send as the response
                     Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
