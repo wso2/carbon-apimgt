@@ -50,18 +50,16 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Retrieve a given instance of an Application
      *
      * @param appId   The UUID that uniquely identifies an Application
-     * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
      * @throws APIMgtDAOException
      */
     @Override
-    public Application getApplication(String appId, String ownerId) throws APIMgtDAOException {
+    public Application getApplication(String appId) throws APIMgtDAOException {
         final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ? AND CREATED_BY = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
             ps.setString(1, appId);
-            ps.setString(2, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
                 application = this.createApplicationFromResultSet(rs);
             }
@@ -194,7 +192,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
             conn.setAutoCommit(false);
-            ps.setString(1, application.getUuid());
+            ps.setString(1, application.getId());
             ps.setString(2, application.getName());
             ps.setString(3, application.getTier());
             ps.setString(4, application.getCallbackUrl());

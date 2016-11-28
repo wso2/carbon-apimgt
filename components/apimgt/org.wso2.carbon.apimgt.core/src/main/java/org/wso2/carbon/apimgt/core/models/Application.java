@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public final class Application {
     private String name;
-    private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
+    private Set<Subscription> subscriptions = new LinkedHashSet<Subscription>();
     private String groupId;
     private String uuid;
     private String description;
@@ -55,7 +55,7 @@ public final class Application {
         return name;
     }
 
-    public String getUuid() {
+    public String getId() {
         return uuid;
     }
 
@@ -95,12 +95,12 @@ public final class Application {
         this.updatedTime = updatedTime;
     }
 
-    public Set<APISubscription> getAPISubscriptions() {
-        return apiSubscriptions;
+    public Set<Subscription> getAPISubscriptions() {
+        return subscriptions;
     }
 
-    public void addAPISubscriptions(Set<APISubscription> apiSubscriptions) {
-        this.apiSubscriptions.addAll(apiSubscriptions);
+    public void addAPISubscriptions(Set<Subscription> subscriptions) {
+        this.subscriptions.addAll(subscriptions);
     }
 
     public String getDescription() {

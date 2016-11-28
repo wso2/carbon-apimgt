@@ -24,8 +24,10 @@ package org.wso2.carbon.apimgt.core.util;
  * This class represents the constants that are used for APIManager implementation
  */
 public class APIConstants {
+
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
+
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
@@ -55,11 +57,12 @@ public class APIConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
+
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
 
     /**
-     *  Application status related constants.
+     * Application statuses.
      */
     public static class ApplicationStatus {
         public static final String APPLICATION_CREATED = "CREATED";
@@ -69,13 +72,38 @@ public class APIConstants {
     }
 
     /**
-     *  Application registration status related constants.
+     * Application registration statuses.
      */
     public static class AppRegistrationStatus {
         public static final String REGISTRATION_CREATED = "CREATED";
         public static final String REGISTRATION_APPROVED = "APPROVED";
         public static final String REGISTRATION_REJECTED = "REJECTED";
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
+    }
+
+    /**
+     * Subscription statuses.
+     */
+    public static class SubscriptionStatus {
+        public static final String BLOCKED = "BLOCKED";
+        public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
+        public static final String ACTIVE = "ACTIVE";
+        public static final String ON_HOLD = "ON_HOLD";
+        public static final String REJECTED = "REJECTED";
+
+        private SubscriptionStatus() {
+        }
+    }
+
+    /**
+     * Subscription types
+     */
+    public static class SubscriptionType {
+        public static final String SUBSCRIBE = "SUBSCRIBE";
+        public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
+
+        private SubscriptionType() {
+        }
     }
 
 

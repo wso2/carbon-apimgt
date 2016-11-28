@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
@@ -94,8 +93,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     application.setGroupId(oldApplication.getGroupId());
-                    application.setUuid(oldApplication.getUuid());
-                    apiConsumer.updateApplication(oldApplication.getUuid(), application);
+                    application.setUuid(oldApplication.getId());
+                    apiConsumer.updateApplication(oldApplication.getId(), application);
 
                     //retrieves the updated application and send as the response
                     Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
