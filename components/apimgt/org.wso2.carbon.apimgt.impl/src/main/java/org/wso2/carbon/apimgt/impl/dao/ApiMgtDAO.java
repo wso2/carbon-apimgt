@@ -7899,7 +7899,9 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         int apiId = -1;
 
+        String deleteResourceScopes = SQLConstants.REMOVE_RESOURCE_SCOPE_SQL;
         String deleteScopes = SQLConstants.REMOVE_SCOPE_SQL;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -7909,6 +7911,10 @@ public class ApiMgtDAO {
                 //application addition has failed
                 return;
             }
+
+            prepStmt = connection.prepareStatement(deleteResourceScopes);
+            prepStmt.setInt(1, apiId);
+            prepStmt.execute();
 
             prepStmt = connection.prepareStatement(deleteScopes);
             prepStmt.setInt(1, apiId);
