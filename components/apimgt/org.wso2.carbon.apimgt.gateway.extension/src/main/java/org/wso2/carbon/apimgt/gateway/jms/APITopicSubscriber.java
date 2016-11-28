@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
+import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,13 +46,6 @@ import javax.naming.NamingException;
  */
 public class APITopicSubscriber {
     private static final Logger log = LoggerFactory.getLogger(APITopicSubscriber.class);
-    private String userName = "admin";
-    private String password = "admin";
-    private static final String CARBON_CLIENT_ID = "carbon";
-    private static final String CARBON_VIRTUAL_HOST_NAME = "carbon";
-    private static final String CARBON_DEFAULT_HOSTNAME = "localhost";
-    private static final String CARBON_DEFAULT_PORT = "5672";
-    private String topicName = "MYTopic";
     private TopicConnection topicConnection;
     private TopicSession topicSession;
 
@@ -65,12 +59,13 @@ public class APITopicSubscriber {
      */
     public TopicSubscriber subscribe() throws NamingException, JMSException, URLSyntaxException {
         // Lookup connection factory
-        TopicConnectionFactory connFactory = new AMQConnectionFactory(getTCPConnectionURL(userName, password));
+        TopicConnectionFactory connFactory = new AMQConnectionFactory(
+                getTCPConnectionURL(APIMConfigurations.USERNAME, APIMConfigurations.PASSWORD));
         topicConnection = connFactory.createTopicConnection();
         topicConnection.start();
         topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = topicSession.createTopic(topicName);
+        Topic topic = topicSession.createTopic(APIMConfigurations.TOPIC_NAME);
         TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
         return topicSubscriber;
     }
@@ -128,8 +123,10 @@ public class APITopicSubscriber {
     private String getTCPConnectionURL(String username, String password) {
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
         return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(CARBON_CLIENT_ID).append("/").append(CARBON_VIRTUAL_HOST_NAME).append("?brokerlist='tcp://")
-                .append(CARBON_DEFAULT_HOSTNAME).append(":").append(CARBON_DEFAULT_PORT).append("'").toString();
+                .append(APIMConfigurations.CARBON_CLIENT_ID).append("/")
+                .append(APIMConfigurations.CARBON_VIRTUAL_HOST_NAME).append("?brokerlist='tcp://")
+                .append(APIMConfigurations.CARBON_DEFAULT_HOSTNAME).append(":")
+                .append(APIMConfigurations.CARBON_DEFAULT_PORT).append("'").toString();
     }
 
     /**
