@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
@@ -36,9 +35,9 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -51,30 +50,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-/** This is the service implementation class for Store API related operations 
- *
+/**
+ * This is the service implementation class for Store API related operations
  */
 public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
-    /** Retrieves APIs qualifying under given search condition 
+    /**
+     * Retrieves APIs qualifying under given search condition
      *
-     * @param limit maximum number of APIs returns
-     * @param offset starting index
+     * @param limit       maximum number of APIs returns
+     * @param offset      starting index
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param query search condition
-     * @param accept Accept header value
+     * @param query       search condition
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
     @Override
     @SuppressWarnings("unchecked")
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept,
-            String ifNoneMatch) {
+                            String ifNoneMatch) {
         Map<String, Object> apisMap;
         int size = 0;
         //pre-processing
@@ -108,7 +106,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) && 
+            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) &&
                     searchContent.equalsIgnoreCase(APIConstants.PROTOTYPED)) {
                 apisMap = apiConsumer.getAllPaginatedAPIsByStatus(requestedTenantDomain, offset, limit,
                         APIConstants.PROTOTYPED, false);
@@ -121,7 +119,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //APIConstants.API_DATA_LENGTH is returned by executing searchPaginatedAPIs()
             if (apisMap.containsKey(APIConstants.API_DATA_LENGTH)) {
                 size = (int) apisMap.get(APIConstants.API_DATA_LENGTH);
-            //APIConstants.API_DATA_TOT_LENGTH is returned by executing getAllPaginatedAPIsByStatus()
+                //APIConstants.API_DATA_TOT_LENGTH is returned by executing getAllPaginatedAPIsByStatus()
             } else if (apisMap.containsKey(APIConstants.API_DATA_TOT_LENGTH)) {
                 size = (int) apisMap.get(APIConstants.API_DATA_TOT_LENGTH);
             } else {
@@ -129,7 +127,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             if (apisResult != null) {
-                Set<API> apiSet = (Set)apisResult;
+                Set<API> apiSet = (Set) apisResult;
                 apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
                 APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, size);
             }
@@ -157,16 +155,16 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Get API of given ID
      *
-     * @param apiId  API ID
-     * @param accept accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API ID
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
      * @return API of the given ID
      */
     @Override
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String xWSO2Tenant) {
+                                 String xWSO2Tenant) {
         APIDTO apiToReturn;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -202,19 +200,19 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     *  Returns all the documents of the given API identifier that matches to the search condition
-     *  
-     * @param apiId API identifier
-     * @param limit max number of records returned
-     * @param offset starting index
+     * Returns all the documents of the given API identifier that matches to the search condition
+     *
+     * @param apiId       API identifier
+     * @param limit       max number of records returned
+     * @param offset      starting index
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param accept Accept header value
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
-            String accept, String ifNoneMatch) {
+                                          String accept, String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -255,18 +253,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Returns a specific document by identifier that is belong to the given API identifier
-     * 
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return returns the matched document
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
-            String accept, String ifNoneMatch, String ifModifiedSince) {
+                                                    String accept, String ifNoneMatch, String ifModifiedSince) {
         Documentation documentation;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -304,17 +302,17 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrieves the content of a document
      *
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Content of the document/ either inline/file or source url as a redirection
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
-            String accept, String ifNoneMatch, String ifModifiedSince) {
+                                                           String accept, String ifNoneMatch, String ifModifiedSince) {
 
         Documentation documentation;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
@@ -327,7 +325,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
             if (documentation == null) {
@@ -374,17 +372,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the swagger document of an API
-     * 
-     * @param apiId API identifier
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           API identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
      * @return Swagger document of the API
      */
-    @Override 
+    @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String xWSO2Tenant) {
+                                        String xWSO2Tenant) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -394,7 +392,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
             apiSwagger = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwagger);
@@ -418,20 +416,20 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrieves the thumbnail image of an API specified by API identifier
      *
-     * @param apiId API Id
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API Id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Thumbnail image of the API
      */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+                                          String ifModifiedSince) {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiIdentifier);
 
             if (thumbnailResource != null) {
@@ -512,6 +510,121 @@ public class ApisApiServiceImpl extends ApisApiService {
             String errorMessage = "SDK generation failed. Unable to fetch location of the SDK.";
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
+        return null;
+    }
+
+    /**
+     * Retrieves the lastUpdatedTime for the content of a document
+     *
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Content of the document/ either inline/file or source url as a redirection
+     */
+    @Override
+    public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
+    }
+
+    /**
+     * Returns the lastUpdatedTime for  a specific document by identifier that is belong to the given API identifier
+     *
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
+    @Override
+    public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
+    }
+
+    /**
+     * @param apiId       API identifier
+     * @param limit       max number of records returned
+     * @param offset      starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param accept      Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
+    @Override
+    public String apisApiIdDocumentsGetGetLastUpdatedTime(String apiId, Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
+        return null;
+    }
+
+    /**
+     * Get lastUpdatedTime for a API with a given ID
+     *
+     * @param apiId           API ID
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @return API of the given ID
+     */
+    @Override
+    public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
+        return RestAPIStoreUtils.apisApiIdGetLastUpdated(apiId, xWSO2Tenant);
+    }
+
+    /**
+     * Retrieves lastUpdatedTime for the Swagger document of an API
+     *
+     * @param apiId           API identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @return Swagger document of the API
+     */
+    @Override
+    public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
+        return RestAPIStoreUtils.apisApiIdSwaggerGetLastUpdated(xWSO2Tenant, apiId);
+    }
+
+    /**
+     * Retrieves the thumbnail image lastUpdatedTime of an API specified by API identifier
+     *
+     * @param apiId           API Id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
+    @Override
+    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
+    }
+
+    /**
+     * @param apiId       API Id
+     * @param language    SDK language
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return SDK for the requested API in a given language
+     */
+    @Override
+    public String apisGenerateSdkPostGetLastUpdatedTime(String apiId, String language, String xWSO2Tenant) {
+        return null;
+    }
+
+    /**
+     * @param limit       maximum number of APIs returns
+     * @param offset      starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param query       search condition
+     * @param accept      Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched APIs for the given search condition
+     */
+    @Override
+    public String apisGetGetLastUpdatedTime(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept, String ifNoneMatch) {
         return null;
     }
 

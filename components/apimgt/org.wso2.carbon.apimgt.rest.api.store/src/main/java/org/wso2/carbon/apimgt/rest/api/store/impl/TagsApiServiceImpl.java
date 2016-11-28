@@ -25,28 +25,29 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TagMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.ws.rs.core.Response;
 
-/** 
+/**
  * This is the service implementation class for Store tag related operations
  */
 public class TagsApiServiceImpl extends TagsApiService {
 
     private static final Log log = LogFactory.getLog(TagsApiService.class);
 
-    /** Retrieves all tags
+    /**
+     * Retrieves all tags
      *
-     * @param limit max number of objects returns
-     * @param offset starting index
-     * @param accept accepted media type of the client
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param accept      accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted tags
      */
@@ -79,6 +80,11 @@ public class TagsApiServiceImpl extends TagsApiService {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        return null;
+    }
+
+    @Override
+    public String tagsGetGetLastUpdatedTime(Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
         return null;
     }
 

@@ -1,25 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
 
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Path("/applications")
 @Consumes({ "application/json" })
@@ -41,11 +30,16 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
 
-    public Response applicationsApplicationIdDelete(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
+    public Response applicationsApplicationIdDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
     return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince);
+    }
+
+    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId,String ifMatch,String ifUnmodifiedSince)
+    {
+        return delegate.applicationsApplicationIdDeleteGetLastUpdatedTime(applicationId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/{applicationId}")
@@ -61,12 +55,17 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response applicationsApplicationIdGet(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
+    public Response applicationsApplicationIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.applicationsApplicationIdGet(applicationId,accept,ifNoneMatch,ifModifiedSince);
+    }
+
+    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId,String accept,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.applicationsApplicationIdGetGetLastUpdatedTime(applicationId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/{applicationId}")
@@ -82,13 +81,18 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
 
-    public Response applicationsApplicationIdPut(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
+    public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId") String applicationId,
     @ApiParam(value = "Application object that needs to be updated\n" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
     return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
+    }
+
+    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    {
+        return delegate.applicationsApplicationIdPutGetLastUpdatedTime(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @POST
     @Path("/generate-keys")
@@ -104,13 +108,18 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
 
-    public Response applicationsGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.\n",required=true) @QueryParam("applicationId") String applicationId,
+    public Response applicationsGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true) @QueryParam("applicationId") String applicationId,
     @ApiParam(value = "Application object the keys of which are to be generated\n" ,required=true ) ApplicationKeyGenerateRequestDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
     return delegate.applicationsGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
+    }
+
+    public String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId,ApplicationKeyGenerateRequestDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    {
+        return delegate.applicationsGenerateKeysPostGetLastUpdatedTime(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @GET
     
@@ -135,6 +144,11 @@ public class ApplicationsApi  {
     {
     return delegate.applicationsGet(groupId,query,limit,offset,accept,ifNoneMatch);
     }
+
+    public String applicationsGetGetLastUpdatedTime(String groupId,String query,Integer limit,Integer offset,String accept,String ifNoneMatch)
+    {
+        return delegate.applicationsGetGetLastUpdatedTime(groupId,query,limit,offset,accept,ifNoneMatch);
+    }
     @POST
     
     @Consumes({ "application/json" })
@@ -153,6 +167,11 @@ public class ApplicationsApi  {
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.applicationsPost(body,contentType);
+    }
+
+    public String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType)
+    {
+        return delegate.applicationsPostGetLastUpdatedTime(body,contentType);
     }
 }
 

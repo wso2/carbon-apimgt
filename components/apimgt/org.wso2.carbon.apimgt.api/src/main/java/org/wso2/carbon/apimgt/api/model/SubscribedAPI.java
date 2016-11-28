@@ -38,6 +38,9 @@ public class SubscribedAPI {
     private List<APIKey> keys = new ArrayList<APIKey>();
     private String uuid;
 
+    private String createdTime;
+    private String updatedTime;
+
     private boolean isBlocked;   //TODO: what is the difference & usage of revoking & blocking users
 
     public SubscribedAPI(Subscriber subscriber, APIIdentifier apiId) {
@@ -45,7 +48,7 @@ public class SubscribedAPI {
         this.apiId = apiId;
     }
 
-    public SubscribedAPI (String uuid) {
+    public SubscribedAPI(String uuid) {
         this.uuid = uuid;
     }
 
@@ -147,5 +150,21 @@ public class SubscribedAPI {
         result = 31 * result + apiId.hashCode();
         result = 31 * result + application.hashCode();
         return result;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
     }
 }

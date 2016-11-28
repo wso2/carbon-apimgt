@@ -26,7 +26,7 @@ import java.util.Date;
  * @see DocumentationType
  */
 @SuppressWarnings("unused")
-public class Documentation implements Serializable{
+public class Documentation implements Serializable {
     private String id;
     private DocumentationType type;
     private String name;
@@ -36,6 +36,7 @@ public class Documentation implements Serializable{
     private DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
+    private Date createdDate;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -137,8 +138,9 @@ public class Documentation implements Serializable{
             this.type = type;
         }
     }
+
     public enum DocumentVisibility {
-        OWNER_ONLY("owner_only"), PRIVATE("private"),API_LEVEL("api_level");
+        OWNER_ONLY("owner_only"), PRIVATE("private"), API_LEVEL("api_level");
 
         private String visibility;
 
@@ -154,4 +156,13 @@ public class Documentation implements Serializable{
     public void setId(String id) {
         this.id = id;
     }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
 }

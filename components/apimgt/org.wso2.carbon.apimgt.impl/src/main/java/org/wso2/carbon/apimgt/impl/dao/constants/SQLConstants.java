@@ -472,6 +472,8 @@ public class SQLConstants {
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUBS.CREATED_TIME AS CREATED_TIME, "+
+            "   SUBS.UPDATED_TIME AS UPDATED_TIME, "+
             "   SUBS.UUID AS UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -1618,6 +1620,8 @@ public class SQLConstants {
             "   APP.SUBSCRIBER_ID," +
             "   APP.APPLICATION_STATUS, " +
             "   APP.GROUP_ID, " +
+            "   APP.UPDATED_TIME, "+
+            "   APP.CREATED_TIME, "+
             "   APP.UUID," +
             "   SUB.USER_ID " +
             " FROM " +

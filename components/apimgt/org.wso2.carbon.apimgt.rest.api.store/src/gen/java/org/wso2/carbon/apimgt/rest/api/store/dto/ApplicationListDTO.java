@@ -6,7 +6,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
-
 import javax.validation.constraints.NotNull;
 
 
@@ -29,7 +28,34 @@ public class ApplicationListDTO  {
   
   private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
 
-  
+
+  private String lastUpdatedTime = null;
+
+  private String createdTime = null;
+
+  /**
+  * gets and sets the lastUpdatedTime for ApplicationListDTO
+  **/
+  @JsonIgnore
+  public String getLastUpdatedTime(){
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime){
+    this.lastUpdatedTime=lastUpdatedTime;
+  }
+
+  /**
+  * gets and sets the createdTime for a ApplicationListDTO
+  **/
+
+  @JsonIgnore
+  public String getCreatedTime(){
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime){
+    this.createdTime=createdTime;
+  }
+
   /**
    * Number of applications returned.\n
    **/
@@ -42,8 +68,7 @@ public class ApplicationListDTO  {
     this.count = count;
   }
 
-  
-  /**
+    /**
    * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
    **/
   @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
@@ -55,8 +80,7 @@ public class ApplicationListDTO  {
     this.next = next;
   }
 
-  
-  /**
+    /**
    * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
    **/
   @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
@@ -68,8 +92,7 @@ public class ApplicationListDTO  {
     this.previous = previous;
   }
 
-  
-  /**
+    /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")

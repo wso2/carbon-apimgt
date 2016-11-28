@@ -17,16 +17,19 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.io.Serializable;
-import java.util.*;
-
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provider's & system's view of API
  */
 @SuppressWarnings("unused")
-public class API implements Serializable{
+public class API implements Serializable {
 
     private APIIdentifier id;
 
@@ -105,9 +108,11 @@ public class API implements Serializable{
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
-    private boolean isPublishedDefaultVersion=false;
+    private boolean isPublishedDefaultVersion = false;
 
     private Set<String> environments;
+
+    private String createdTime;
 
     public Set<String> getEnvironments() {
         return environments;
@@ -119,6 +124,7 @@ public class API implements Serializable{
 
     /**
      * Contains flag indicating whether dummy backend or not
+     *
      * @return
      */
     public String getImplementation() {
@@ -127,6 +133,7 @@ public class API implements Serializable{
 
     /**
      * Returns flag indicating whether dummy backend or not
+     *
      * @param implementation
      */
     public void setImplementation(String implementation) {
@@ -198,7 +205,7 @@ public class API implements Serializable{
         return id;
     }
 
-	public String getTransports() {
+    public String getTransports() {
         return transports;
     }
 
@@ -346,14 +353,14 @@ public class API implements Serializable{
     /**
      * Removes all Tiers from the API object.
      */
-    public void removeAllTiers(){
+    public void removeAllTiers() {
         availableTiers.clear();
     }
 
     /**
      * Removes all Policies from the API object.
      */
-    public void removeAllPolicies(){
+    public void removeAllPolicies() {
         availableSubscriptionLevelPolicies.clear();
     }
 
@@ -429,11 +436,11 @@ public class API implements Serializable{
     }
 
     public String getVisibleTenants() {
-    	return visibleTenants;
+        return visibleTenants;
     }
 
     public void setVisibleTenants(String visibleTenants) {
-    	this.visibleTenants = visibleTenants;
+        this.visibleTenants = visibleTenants;
     }
 
     public boolean isApiHeaderChanged() {
@@ -453,89 +460,91 @@ public class API implements Serializable{
     }
 
     /**
-  	 * @return the endpointUTUsername
-  	 */
-  	public String getEndpointUTUsername() {
-  		return endpointUTUsername;
-  	}
+     * @return the endpointUTUsername
+     */
+    public String getEndpointUTUsername() {
+        return endpointUTUsername;
+    }
 
-  	/**
-  	 * @param endpointUTUsername the endpointUTUsername to set
-  	 */
-  	public void setEndpointUTUsername(String endpointUTUsername) {
-  		this.endpointUTUsername = endpointUTUsername;
-  	}
+    /**
+     * @param endpointUTUsername the endpointUTUsername to set
+     */
+    public void setEndpointUTUsername(String endpointUTUsername) {
+        this.endpointUTUsername = endpointUTUsername;
+    }
 
-  	/**
-  	 * @return the endpointUTPassword
-  	 */
-  	public String getEndpointUTPassword() {
-  		return endpointUTPassword;
-  	}
+    /**
+     * @return the endpointUTPassword
+     */
+    public String getEndpointUTPassword() {
+        return endpointUTPassword;
+    }
 
-  	/**
-  	 * @param endpointUTPassword the endpointUTPassword to set
-  	 */
-  	public void setEndpointUTPassword(String endpointUTPassword) {
-  		this.endpointUTPassword = endpointUTPassword;
-  	}
+    /**
+     * @param endpointUTPassword the endpointUTPassword to set
+     */
+    public void setEndpointUTPassword(String endpointUTPassword) {
+        this.endpointUTPassword = endpointUTPassword;
+    }
 
- 	/**
- 	 * @return the endpointSecured
- 	 */
- 	public boolean isEndpointSecured() {
- 		return endpointSecured;
- 	}
+    /**
+     * @return the endpointSecured
+     */
+    public boolean isEndpointSecured() {
+        return endpointSecured;
+    }
 
- 	/**
- 	 * @param endpointSecured the endpointSecured to set
- 	 */
- 	public void setEndpointSecured(boolean endpointSecured) {
- 		this.endpointSecured = endpointSecured;
- 	}
+    /**
+     * @param endpointSecured the endpointSecured to set
+     */
+    public void setEndpointSecured(boolean endpointSecured) {
+        this.endpointSecured = endpointSecured;
+    }
 
     /**
      * @return the endpointAuthDigest
      */
-    public boolean isEndpointAuthDigest() { return endpointAuthDigest; }
+    public boolean isEndpointAuthDigest() {
+        return endpointAuthDigest;
+    }
 
     /**
      * @param endpointAuthDigest the endpointAuthDigest to set
      */
-    public void setEndpointAuthDigest(boolean endpointAuthDigest) { this.endpointAuthDigest = endpointAuthDigest; }
+    public void setEndpointAuthDigest(boolean endpointAuthDigest) {
+        this.endpointAuthDigest = endpointAuthDigest;
+    }
 
     public String getInSequence() {
- 		return inSequence;
- 	}
+        return inSequence;
+    }
 
     /**
-     *
-     * @param inSeq  insequence for the API
+     * @param inSeq insequence for the API
      */
- 	public void setInSequence(String inSeq) {
- 		this.inSequence = inSeq;
- 	}
+    public void setInSequence(String inSeq) {
+        this.inSequence = inSeq;
+    }
 
- 	 public String getOutSequence() {
-  		return outSequence;
-  	}
+    public String getOutSequence() {
+        return outSequence;
+    }
 
-     /**
-      *
-      * @param outSeq outSequence for the API
-      */
-  	public void setOutSequence(String outSeq) {
-  		this.outSequence = outSeq;
-  	}
+    /**
+     * @param outSeq outSequence for the API
+     */
+    public void setOutSequence(String outSeq) {
+        this.outSequence = outSeq;
+    }
 
-  	/**
-  	 * remove custom sequences from api object
-  	 */
-  	public void removeCustomSequences(){
-  		this.inSequence=null;
-  		this.outSequence=null;
-  		this.faultSequence=null;
-  	}
+    /**
+     * remove custom sequences from api object
+     */
+    public void removeCustomSequences() {
+        this.inSequence = null;
+        this.outSequence = null;
+        this.faultSequence = null;
+    }
 
     public String getOldInSequence() {
         return oldInSequence;
@@ -553,21 +562,21 @@ public class API implements Serializable{
         this.oldOutSequence = oldOutSequence;
     }
 
-	public String getSubscriptionAvailability() {
-		return subscriptionAvailability;
-	}
+    public String getSubscriptionAvailability() {
+        return subscriptionAvailability;
+    }
 
-	public void setSubscriptionAvailability(String subscriptionAvailability) {
-		this.subscriptionAvailability = subscriptionAvailability;
-	}
+    public void setSubscriptionAvailability(String subscriptionAvailability) {
+        this.subscriptionAvailability = subscriptionAvailability;
+    }
 
-	public String getSubscriptionAvailableTenants() {
-		return subscriptionAvailableTenants;
-	}
+    public String getSubscriptionAvailableTenants() {
+        return subscriptionAvailableTenants;
+    }
 
-	public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
-		this.subscriptionAvailableTenants = subscriptionAvailableTenants;
-	}
+    public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
+        this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+    }
 
     public String getEndpointConfig() {
         return endpointConfig;
@@ -577,21 +586,21 @@ public class API implements Serializable{
         this.endpointConfig = endpointConfig;
     }
 
-	public String getResponseCache() {
-		return responseCache;
-	}
+    public String getResponseCache() {
+        return responseCache;
+    }
 
-	public void setResponseCache(String responseCache) {
-		this.responseCache = responseCache;
-	}
+    public void setResponseCache(String responseCache) {
+        this.responseCache = responseCache;
+    }
 
-	public int getCacheTimeout() {
-		return cacheTimeout;
-	}
+    public int getCacheTimeout() {
+        return cacheTimeout;
+    }
 
-	public void setCacheTimeout(int cacheTimeout) {
-		this.cacheTimeout = cacheTimeout;
-	}
+    public void setCacheTimeout(int cacheTimeout) {
+        this.cacheTimeout = cacheTimeout;
+    }
 
     public String getFaultSequence() {
         return faultSequence;
@@ -617,19 +626,19 @@ public class API implements Serializable{
         this.scopes = scopes;
     }
 
-    public void setAsDefaultVersion(boolean value){
-        isDefaultVersion =value;
+    public void setAsDefaultVersion(boolean value) {
+        isDefaultVersion = value;
     }
 
-    public void setAsPublishedDefaultVersion(boolean value){
-        isPublishedDefaultVersion =value;
+    public void setAsPublishedDefaultVersion(boolean value) {
+        isPublishedDefaultVersion = value;
     }
 
-    public boolean isDefaultVersion(){
+    public boolean isDefaultVersion() {
         return isDefaultVersion;
     }
 
-    public boolean isPublishedDefaultVersion(){
+    public boolean isPublishedDefaultVersion() {
         return isPublishedDefaultVersion;
     }
 
@@ -641,9 +650,13 @@ public class API implements Serializable{
         this.corsConfiguration = corsConfiguration;
     }
 
-    public String getMonetizationCategory() { return this.monetizationCategory; }
+    public String getMonetizationCategory() {
+        return this.monetizationCategory;
+    }
 
-    public void setMonetizationCategory(String monetizationCategory) { this.monetizationCategory = monetizationCategory; }
+    public void setMonetizationCategory(String monetizationCategory) {
+        this.monetizationCategory = monetizationCategory;
+    }
 
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
@@ -663,5 +676,13 @@ public class API implements Serializable{
         } else {
             this.type = "HTTP";
         }
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 }

@@ -26,7 +26,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -37,8 +40,10 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 
 import java.nio.charset.Charset;
-import java.util.Iterator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -379,5 +384,40 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         swaggerObject.put("securityDefinitions",securityDefinitionAttr);//++++++
 
         return swaggerObject.toJSONString();
+    }
+
+    /**
+     * gets the createdTime and updatedTime for the swagger definition
+     *
+     * @param apiIdentifier
+     * @param registry
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
+        Map<String, String> timeStampMap = new HashMap<String, String>();
+        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiIdentifier.getApiName(),
+                apiIdentifier.getVersion(), apiIdentifier.getProviderName());
+        try {
+            if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
+                Date lastModified = apiDocResource.getLastModified();
+                Date createdTime = apiDocResource.getCreatedTime();
+                if (lastModified != null) {
+                    timeStampMap.put("UPDATED_TIME", String.valueOf(lastModified.getTime()));
+                } else {
+                    timeStampMap.put("CREATED_TIME", String.valueOf(createdTime.getTime()));
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource " + SWAGGER_2_0_FILE_NAME + " not found at " + resourcePath);
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error while retrieving Swagger v2.0 updated time for " + apiIdentifier.getApiName() + '-' +
+                    apiIdentifier.getVersion(), e);
+        }
+        return timeStampMap;
     }
 }

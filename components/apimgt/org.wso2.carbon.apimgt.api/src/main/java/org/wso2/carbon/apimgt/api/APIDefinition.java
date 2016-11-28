@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.registry.api.Registry;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -75,4 +76,13 @@ public abstract class APIDefinition {
      */
     public abstract String generateAPIDefinition(API api) throws APIManagementException;
 
+    /**
+     * This method returns the timestamps for a given API
+     *
+     * @param apiIdentifier
+     * @param registry
+     * @return
+     * @throws APIManagementException
+     */
+    public abstract Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
 }
