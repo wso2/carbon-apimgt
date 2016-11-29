@@ -471,7 +471,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->
-        <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
+        <!-- downgraded from 2.5.4 to 2.5.3 as per CARBON-15374-->
+        <maven.bundle.plugin.version>2.5.3</maven.bundle.plugin.version>
 
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
