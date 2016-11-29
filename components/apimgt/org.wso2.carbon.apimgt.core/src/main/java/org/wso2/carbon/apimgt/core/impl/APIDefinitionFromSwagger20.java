@@ -26,6 +26,7 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -113,7 +114,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             }
         }
         resourceConfigsJSON.setLength(0);
-        resourceConfigsJSON.append(swagger.getSwagger());
+        resourceConfigsJSON.append(Json.pretty(swagger));
         return uriTemplateSet;
     }
 

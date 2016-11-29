@@ -20,35 +20,48 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
 /**
  * Subscriber's view of the API
  */
+public final class Subscription {
 
-public final class APISubscription {
-
-    private String apiId;
+    private String uuid;
+    private API api;
     private Application application;
-    private String id;
+    private String subscriptionTier;
+    private APIMgtConstants.SubscriptionStatus status;
 
-    public APISubscription(Application application, String apiId) {
+    public Subscription(String uuid, Application application, API api, String subscriptionTier) {
+        this.uuid = uuid;
         this.application = application;
-        this.apiId = apiId;
+        this.api = api;
+        this.subscriptionTier = subscriptionTier;
     }
 
     public Application getApplication() {
         return application;
     }
 
-    public String getApiId() {
-        return apiId;
+    public API getApi() {
+        return api;
     }
 
     public String getId() {
-        return id;
+        return uuid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getSubscriptionTier() {
+        return subscriptionTier;
+    }
+
+    public APIMgtConstants.SubscriptionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(APIMgtConstants.SubscriptionStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -59,19 +72,14 @@ public final class APISubscription {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        APISubscription that = (APISubscription) o;
-        return apiId.equals(that.apiId) && application.equals(that.application);
+        Subscription that = (Subscription) o;
+        return api.equals(that.api) && application.equals(that.application);
     }
 
     @Override
     public int hashCode() {
-        int result = apiId.hashCode();
+        int result = api.hashCode();
         result = 31 * result + application.hashCode();
         return result;
-    }
-
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
     }
 }

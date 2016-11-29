@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -236,11 +237,27 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           application = getApplicationDAO().getApplication(uuid, userId);
+           application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return application;
+    }
+
+    /**
+     * Returns the subscriptions for api
+     *
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException {
+        try {
+            return apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't find subscriptions for apiId " + apiId, e);
+        }
     }
 
     protected ApiDAO getApiDAO() {

@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 
 import java.io.InputStream;
 import java.util.List;
@@ -140,4 +141,11 @@ public interface APIManager {
      */
     Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
+    /**
+     * Returns the subscriptions for api
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException;
 }

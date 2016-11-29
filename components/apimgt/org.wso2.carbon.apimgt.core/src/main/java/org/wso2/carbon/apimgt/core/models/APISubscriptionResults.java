@@ -26,7 +26,7 @@ import java.util.List;
  * Matching results related to API Subscription details
  */
 public final class APISubscriptionResults {
-    private List<APISubscription> apiSubscriptionList;
+    private List<Subscription> subscriptionList;
     private boolean isMoreResultsExist;
     private int nextOffset;
 
@@ -46,11 +46,11 @@ public final class APISubscriptionResults {
         this.nextOffset = nextOffset;
     }
 
-    public List<APISubscription> getApiSubscriptionList() {
-        return apiSubscriptionList;
+    public List<Subscription> getSubscriptionList() {
+        return subscriptionList;
     }
 
-    public void setApiSubscriptionList(List<APISubscription> apiSubscriptionList) {
-        this.apiSubscriptionList = apiSubscriptionList;
+    public void setSubscriptionList(List<Subscription> subscriptionList) {
+        this.subscriptionList = subscriptionList;
     }
 }

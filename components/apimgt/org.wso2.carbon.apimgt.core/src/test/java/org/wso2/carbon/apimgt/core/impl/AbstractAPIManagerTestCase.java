@@ -49,7 +49,7 @@ public class AbstractAPIManagerTestCase {
             API api = apiStore.getAPIbyUUID(API_ID);
             Assert.assertEquals(api.getName(), API_NAME);
             verify(apiDAO, atLeastOnce()).getAPI(API_ID);
-        } catch (APIManagementException | APIMgtDAOException e) {
+        } catch (APIManagementException  e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -60,12 +60,12 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
-            when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);
+            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
             Application application = apiStore.getApplication(UUID, USER_NAME, null);
 
             Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
-        } catch (APIManagementException | APIMgtDAOException e) {
+            verify(applicationDAO, times(1)).getApplication(UUID);
+        } catch (APIManagementException e) {
             Assert.assertTrue(false);
         }
     }
