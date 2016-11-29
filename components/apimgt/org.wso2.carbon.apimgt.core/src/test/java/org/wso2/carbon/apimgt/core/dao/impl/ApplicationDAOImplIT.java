@@ -34,7 +34,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //get added app
-        Application appFromDB = applicationDAO.getApplication(app.getUuid(), app.getCreatedUser());
+        Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, app);
@@ -46,12 +46,12 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application currentApp = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
-        newApp.setUuid(currentApp.getUuid());
+        newApp.setUuid(currentApp.getId());
         newApp.setCreatedTime(currentApp.getCreatedTime());
         //update app
-        applicationDAO.updateApplication(currentApp.getUuid(), newApp);
+        applicationDAO.updateApplication(currentApp.getId(), newApp);
         //get app
-        Application appFromDB = applicationDAO.getApplication(newApp.getUuid(), newApp.getCreatedUser());
+        Application appFromDB = applicationDAO.getApplication(newApp.getId());
         Assert.assertNotNull(appFromDB);
         //compare
         validateApp(appFromDB, newApp);
@@ -63,8 +63,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app = addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
         //delete app
-        applicationDAO.deleteApplication(app.getUuid());
-        Application appFromDB = applicationDAO.getApplication(app.getUuid(), app.getCreatedUser());
+        applicationDAO.deleteApplication(app.getId());
+        Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNull(appFromDB);
     }
 
@@ -133,7 +133,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
         Assert.assertEquals(appFromDB.getGroupId(), expectedApp.getGroupId());
         Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus());
-        Assert.assertEquals(appFromDB.getUuid(), expectedApp.getUuid());
+        Assert.assertEquals(appFromDB.getId(), expectedApp.getId());
         Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
         Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000L,

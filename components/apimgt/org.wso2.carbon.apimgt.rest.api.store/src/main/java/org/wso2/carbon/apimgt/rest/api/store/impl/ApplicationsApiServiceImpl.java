@@ -8,9 +8,6 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -92,9 +89,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
                     application.setGroupId(oldApplication.getGroupId());
-                    application.setUuid(oldApplication.getUuid());
+                    application.setUuid(oldApplication.getId());
                     application.setUpdatedUser(username);
-                    apiConsumer.updateApplication(oldApplication.getUuid(), application);
+                    apiConsumer.updateApplication(oldApplication.getId(), application);
 
                     //retrieves the updated application and send as the response
                     Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
@@ -195,6 +192,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
+            String tierName = body.getThrottlingTier();
+            application.setTier(tierName);
             String applicationUUID = apiConsumer.addApplication(application);
 
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);

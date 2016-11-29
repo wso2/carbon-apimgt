@@ -26,12 +26,14 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
@@ -47,15 +49,17 @@ public abstract class AbstractAPIManager implements APIManager {
     private ApiDAO apiDAO;
     private ApplicationDAO applicationDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
+    private PolicyDAO policyDAO;
     private String username;
     private APILifecycleManager apiLifecycleManager;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager)  {
+            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
     }
 
@@ -233,11 +237,27 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           application = getApplicationDAO().getApplication(uuid, userId);
+           application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
         }
         return application;
+    }
+
+    /**
+     * Returns the subscriptions for api
+     *
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException {
+        try {
+            return apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't find subscriptions for apiId " + apiId, e);
+        }
     }
 
     protected ApiDAO getApiDAO() {
@@ -250,6 +270,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected APISubscriptionDAO getApiSubscriptionDAO() {
         return apiSubscriptionDAO;
+    }
+
+    protected PolicyDAO getPolicyDAO() {
+        return policyDAO;
     }
 
     protected String getUsername() {

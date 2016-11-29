@@ -23,17 +23,15 @@ package org.wso2.carbon.apimgt.core.executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
-import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.util.Map;
 
@@ -77,26 +75,13 @@ public class APIExecutor implements Executor {
     @Override
     public void execute(Object resource, String currentState, String targetState) throws LifecycleException {
         API api = (API) resource;
-        LifecycleState lifecycleState = api.getLifecycleState();
-        boolean deprecateOlderVersions = false;
-        boolean requireReSubscriptions = false;
         if (!currentState.equals(targetState)) {
             //todo:This place need to write how to handle Gateway publishing
             try {
-                APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(api.getProvider());
-                for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
-                    if (APIConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
-                        deprecateOlderVersions = checkItemBean.isValue();
-                    }
-                    if (APIConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
-                        requireReSubscriptions = checkItemBean.isValue();
-                    }
-                }
-                apiPublisher.updateAPIForStateChange(api.getId(), targetState, deprecateOlderVersions,
-                        requireReSubscriptions);
-
+                ApiDAO apiDAO = DAOFactory.getApiDAO();
+                apiDAO.changeLifeCycleStatus(api.getId(), targetState);
                 gatewayPublishing(api, targetState);
-            } catch (APIManagementException e) {
+            } catch (APIMgtDAOException e) {
                 throw new LifecycleException("Couldn't create APIPublisher from user", e);
             }
         }
