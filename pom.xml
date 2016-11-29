@@ -471,7 +471,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->
-        <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
+        <!-- downgraded from 2.5.4 to 2.5.3 as per CARBON-15374-->
+        <maven.bundle.plugin.version>2.5.3</maven.bundle.plugin.version>
 
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
@@ -500,7 +501,7 @@
         <carbon.transport.version>2.1.9-SNAPSHOT</carbon.transport.version>
         <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)</carbon.transport.package.import.version.range>
 
-        <carbon.messaging.version>1.0.8-SNAPSHOT</carbon.messaging.version>
+        <carbon.messaging.version>1.0.10</carbon.messaging.version>
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
 
