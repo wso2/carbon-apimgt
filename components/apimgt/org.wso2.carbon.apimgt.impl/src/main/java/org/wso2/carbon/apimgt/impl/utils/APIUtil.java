@@ -6047,6 +6047,12 @@ public final class APIUtil {
                     tier.setDisplayName(policy.getDisplayName());
                     tier.setRequestsPerMin(Integer.MAX_VALUE);
                     tier.setRequestCount(Integer.MAX_VALUE);
+                    if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+                        tier.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
+                    } else {
+                        tier.setTierPlan(APIConstants.BILLING_PLAN_FREE);
+                    }
+
                     tierMap.put(policy.getPolicyName(), tier);
                 }
             }
