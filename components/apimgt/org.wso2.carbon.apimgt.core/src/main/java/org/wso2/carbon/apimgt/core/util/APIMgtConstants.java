@@ -207,4 +207,12 @@ public class APIMgtConstants {
 
     }
 
+    /**
+     * Exceptions related constance will be put here
+     */
+    public static class ExceptionsConstants {
+
+        public static final String API_NAME = "API_NAME";
+        public static final String API_VERSION = "API_VERSION";
+    }
 }
