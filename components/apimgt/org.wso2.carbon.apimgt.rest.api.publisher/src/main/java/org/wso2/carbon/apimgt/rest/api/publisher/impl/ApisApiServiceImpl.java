@@ -396,7 +396,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             HashMap<String, String> paramList = new HashMap<String, String>();
 
             paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getVersion());
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, body.getVersion());
 
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler().getErrorMessage(),
                     e.getErrorHandler().getErrorCode(), e.getErrorHandler().getErrorDescription(),paramList);
