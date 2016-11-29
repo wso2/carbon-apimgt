@@ -369,4 +369,32 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             ps.execute();
         }
     }
+
+    /**
+     * Update Subscription Status
+     *
+     * @param subId
+     * @param subStatus
+     * @param policy
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
+            throws APIMgtDAOException {
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+                preparedStatement.setString(1, policy);
+                preparedStatement.setString(2, subStatus.getStatus());
+                preparedStatement.setString(3, subId);
+                preparedStatement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
 }
