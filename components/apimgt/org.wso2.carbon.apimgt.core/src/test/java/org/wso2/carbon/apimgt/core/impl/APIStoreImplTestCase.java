@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -138,18 +139,17 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Delete application")
-    public void testDeleteApplication()
-            throws APIManagementException, APIMgtDAOException {
+    public void testDeleteApplication() throws APIManagementException, APIMgtDAOException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setUuid(UUID);
-        apiStore.deleteApplication(application);
+        apiStore.deleteApplication(UUID);
         verify(applicationDAO, times(1)).deleteApplication(UUID);
     }
 
-    @Test(description = "Update an application") public void testUpdateApplication()
-            throws APIManagementException, APIMgtDAOException {
+    @Test(description = "Update an application")
+    public void testUpdateApplication() throws APIManagementException, APIMgtDAOException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
