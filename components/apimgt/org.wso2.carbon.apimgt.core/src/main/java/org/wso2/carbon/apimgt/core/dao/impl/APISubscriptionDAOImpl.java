@@ -73,11 +73,11 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Retrieve the list of subscriptions of an API
      *
      * @param apiId The UUID of API
-     * @return An array of {@link Subscription} objects
+     * @return A list of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
     @Override
-    public Subscription[] getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
+    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
         final String getSubscriptionCountOfApiSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, APP.NAME AS APP_NAME, APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, " +
@@ -100,11 +100,11 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Retrieve the list of subscriptions of an Application
      *
      * @param applicationId The UUID of Application
-     * @return An array of {@link Subscription} objects
+     * @return A list of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
     @Override
-    public Subscription[] getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
         final String getSubscriptionCountOfApiSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
@@ -287,7 +287,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         }
     }
 
-    private Subscription[] createSubscriptionsFromResultSet(ResultSet rs) throws APIMgtDAOException {
+    private List<Subscription> createSubscriptionsFromResultSet(ResultSet rs) throws APIMgtDAOException {
         List<Subscription> subscriptionList = new ArrayList<>();
         Subscription subscription;
         while ((subscription = createSubscriptionFromResultSet(rs)) != null) {
@@ -330,6 +330,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         }
         return subscription;
     }
+
     private void createSubscription(String apiId, String appId, String uuid, String tier, APIMgtConstants
             .SubscriptionStatus status, Connection conn) throws APIMgtDAOException, SQLException {
         //check for existing subscriptions
@@ -353,16 +354,16 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String addSubscriptionSql = "INSERT INTO AM_SUBSCRIPTION (UUID, TIER_ID, API_ID, APPLICATION_ID," +
                 "SUB_STATUS, SUBS_TYPE, CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?,?)";
 
-            try (PreparedStatement ps = conn.prepareStatement(addSubscriptionSql)) {
-                conn.setAutoCommit(false);
-                ps.setString(1, uuid);
-                ps.setString(2, tier);
-                ps.setString(3, apiId);
-                ps.setString(4, appId);
-                ps.setString(5, status != null ? status.getStatus() : APIMgtConstants.SubscriptionStatus.ACTIVE
-                        .getStatus());
-                ps.setString(6, APIMgtConstants.SubscriptionType.SUBSCRIBE);
-                ps.execute();
-            }
+        try (PreparedStatement ps = conn.prepareStatement(addSubscriptionSql)) {
+            conn.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, tier);
+            ps.setString(3, apiId);
+            ps.setString(4, appId);
+            ps.setString(5, status != null ? status.getStatus() : APIMgtConstants.SubscriptionStatus.ACTIVE
+                    .getStatus());
+            ps.setString(6, APIMgtConstants.SubscriptionType.SUBSCRIBE);
+            ps.execute();
+        }
     }
 }

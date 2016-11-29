@@ -80,8 +80,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
-        Application[] applicationList = null;
+    @Override public List<Application> getApplications(String subscriber, String groupId)
+            throws APIManagementException {
+        List<Application> applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
         } catch (APIMgtDAOException e) {

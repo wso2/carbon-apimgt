@@ -49,10 +49,10 @@ public interface APISubscriptionDAO {
      * Retrieve the list of subscriptions of an API
      *
      * @param apiId The UUID of API
-     * @return An array of {@link Subscription} objects
+     * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
-    public Subscription[] getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
+    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Retrieve the list of subscriptions of an Application
@@ -61,7 +61,7 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
-    public Subscription[] getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results

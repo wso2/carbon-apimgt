@@ -132,7 +132,7 @@ public class SampleTestObjectCreator {
         return new API.APIBuilder("admin","Sample","1.0.0").buildApi();
     }
 
-    static API.APIBuilder createAlternativeAPI() {
+    public static API.APIBuilder createAlternativeAPI() {
         List<String> transport = new ArrayList<>();
         transport.add("http");
 
@@ -225,7 +225,7 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
-    static API copyAPISummary(API api) {
+    public static API copyAPISummary(API api) {
         return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
                 id(api.getId()).
                 context(api.getContext()).

@@ -21,9 +21,11 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
@@ -131,21 +133,21 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] allMatchedApps = new Application[0];
+            List<Application> allMatchedApps = new ArrayList<>();
             if (StringUtils.isBlank(query)) {
                 allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
                 Application application = apiConsumer.getApplicationByName(username, query, groupId);
                 if (application != null) {
-                    allMatchedApps = new Application[1];
-                    allMatchedApps[0] = application;
+                    allMatchedApps = new ArrayList<>();
+                    allMatchedApps.add(application);
                 }
             }
 
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
-                    allMatchedApps.length);
+                    allMatchedApps.size());
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);

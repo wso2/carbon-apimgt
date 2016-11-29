@@ -38,7 +38,7 @@ public class ApplicationMappingUtil {
      * @param offset starting index
      * @return ApplicationListDTO object corresponding to Application[] array
      */
-    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
+    public static ApplicationListDTO fromApplicationsToDTO(List<Application> applications, int limit, int offset) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
         if (applicationInfoDTOs == null) {
@@ -47,11 +47,11 @@ public class ApplicationMappingUtil {
         }
 
         //identifying the proper start and end indexes
-        int start = offset < applications.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= applications.length - 1 ? offset + limit - 1 : applications.length - 1;
+        int start = offset < applications.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= applications.size() - 1 ? offset + limit - 1 : applications.size() - 1;
 
         for (int i = start; i <= end; i++) {
-            applicationInfoDTOs.add(fromApplicationToInfoDTO(applications[i]));
+            applicationInfoDTOs.add(fromApplicationToInfoDTO(applications.get(i)));
         }
         applicationListDTO.setCount(applicationInfoDTOs.size());
         return applicationListDTO;

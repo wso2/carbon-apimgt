@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.time.Duration;
+import java.util.List;
 
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
@@ -90,9 +91,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application app4 = TestUtil.addCustomApplication("App4", username);
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //get added apps
-        Application[] appsFromDB = applicationDAO.getApplications(username);
+        List<Application> appsFromDB = applicationDAO.getApplications(username);
         Assert.assertNotNull(appsFromDB);
-        Assert.assertEquals(appsFromDB.length, 4);
+        Assert.assertEquals(appsFromDB.size(), 4);
         for (Application application : appsFromDB) {
             Assert.assertNotNull(application);
             if (application.getName().equals(app1.getName())) {

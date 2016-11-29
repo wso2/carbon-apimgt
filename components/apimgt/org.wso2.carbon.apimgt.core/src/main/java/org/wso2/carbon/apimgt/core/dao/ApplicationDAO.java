@@ -24,6 +24,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
+import java.util.List;
 import javax.annotation.CheckForNull;
 
 /**
@@ -56,10 +57,10 @@ public interface ApplicationDAO {
      * Retrieves all available Applications that belong to a user.
      *
      * @param ownerId Username of user
-     * @return An array of {@link Application}
+     * @return A list of {@link Application}
      * @throws APIMgtDAOException
      */
-    Application[] getApplications(String ownerId) throws APIMgtDAOException;
+    List<Application> getApplications(String ownerId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
