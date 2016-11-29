@@ -77,7 +77,7 @@ public class ApiDAOImpl implements ApiDAO {
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME,PREVIOUS_ID FROM AM_API WHERE UUID = ?";
+                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, PARENT_API_ID FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -771,8 +771,8 @@ public class ApiDAOImpl implements ApiDAO {
                         createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
-                        policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).previousId(rs.getString
-                        ("PREVIOUS_ID")).
+                        policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).parentApiId(rs.getString
+                        ("PARENT_API_ID")).
                         buildApi();
             }
         }
@@ -1087,8 +1087,8 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
-        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
-                "AM_SUBSCRIPTION_POLICY as amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING apimsubmapping," +
+                "AM_SUBSCRIPTION_POLICY amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
                 "AND apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1096,7 +1096,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     policies.add(rs.getString("NAME"));
                 }
             }
