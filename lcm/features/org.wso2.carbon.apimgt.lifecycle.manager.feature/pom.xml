@@ -59,6 +59,7 @@
                         </goals>
                         <configuration>
                             <target>
+                                <delete file="resources/database/WSO2LIFECYCLE_DB.h2.db" />
                                 <delete file="resources/database/WSO2LIFECYCLE_DB.mv.db" />
                                 <delete file="resources/database/WSO2LIFECYCLE_DB.trace.db" />
                             </target>
