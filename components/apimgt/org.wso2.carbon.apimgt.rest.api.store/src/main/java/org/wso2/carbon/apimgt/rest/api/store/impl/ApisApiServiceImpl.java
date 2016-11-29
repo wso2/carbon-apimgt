@@ -105,10 +105,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
+            if (RestApiUtil.isDueToAuthorizationFailure(e) || RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while retrieving API : " + apiId, e, log);
             }
