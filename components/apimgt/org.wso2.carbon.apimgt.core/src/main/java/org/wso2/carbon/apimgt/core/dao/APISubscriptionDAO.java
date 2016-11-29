@@ -61,7 +61,7 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
-    public Subscription getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results

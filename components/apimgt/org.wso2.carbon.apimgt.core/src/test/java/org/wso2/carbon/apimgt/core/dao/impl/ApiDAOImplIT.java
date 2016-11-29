@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 

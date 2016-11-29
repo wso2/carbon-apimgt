@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.dao.impl;
+package org.wso2.carbon.apimgt.core;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Environment;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.UUID;
 
 public class SampleTestObjectCreator {
 
-    static API.APIBuilder createDefaultAPI() {
+    public static API.APIBuilder createDefaultAPI() {
         List<String> transport = new ArrayList<>();
         transport.add("http");
         transport.add("https");
@@ -119,7 +120,19 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
-    static API.APIBuilder createAlternativeAPI() {
+    public static LifecycleState getMockLifecycleStateObject() {
+        LifecycleState lifecycleState = new LifecycleState();
+        lifecycleState.setLcName("API_LIFECYCLE");
+        lifecycleState.setLifecycleId("7a2298c4-c905-403f-8fac-38c73301631f");
+        lifecycleState.setState("PUBLISH");
+        return lifecycleState;
+    }
+
+    public static API getMockApiSummaryObject(){
+        return new API.APIBuilder("admin","Sample","1.0.0").buildApi();
+    }
+
+    public static API.APIBuilder createAlternativeAPI() {
         List<String> transport = new ArrayList<>();
         transport.add("http");
 
@@ -212,7 +225,7 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
-    static API copyAPISummary(API api) {
+    public static API copyAPISummary(API api) {
         return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
                 id(api.getId()).
                 context(api.getContext()).
@@ -221,7 +234,7 @@ public class SampleTestObjectCreator {
                 lifecycleInstanceId(api.getLifecycleInstanceId()).buildApi();
     }
 
-    static Application createDefaultApplication(){
+    public static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
         application.setUuid(UUID.randomUUID().toString());
@@ -236,7 +249,7 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    static Application createAlternativeApplication(){
+    public static Application createAlternativeApplication(){
         //created by admin and updated by admin2
         Application application = new Application("TestApp2", "admin");
         application.setUuid(UUID.randomUUID().toString());
@@ -250,7 +263,7 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    static Application createCustomApplication(String applicationName, String owner){
+    public static Application createCustomApplication(String applicationName, String owner){
         Application application = new Application(applicationName, owner);
         application.setUuid(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
