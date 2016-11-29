@@ -89,10 +89,78 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(apiList.size() == 2);
 
         for (int i = 0; i < apiList.size(); ++i) {
-            validateAPIs(apiList.get(0), expectedAPIs.get(0));
+            validateAPIs(apiList.get(i), expectedAPIs.get(i));
         }
     }
 
+    @Test
+    public void testGetAPIsForProvider() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        String provider1 = "Watson";
+        String provider2 = "Holmes";
+
+        List<API> apiList = apiDAO.getAPIsForProvider(provider1);
+        Assert.assertTrue(apiList.isEmpty());
+        apiList = apiDAO.getAPIsForProvider(provider2);
+        Assert.assertTrue(apiList.isEmpty());
+
+        // Add APIs belonging to provider1
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.provider(provider1);
+        API api1 = builder.build();
+
+        apiDAO.addAPI(api1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        builder.provider(provider1);
+        API api2 = builder.build();
+
+        apiDAO.addAPI(api2);
+
+        // Add APIs belonging to provider2
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        builder.provider(provider2).
+        context("sleuth");
+        API api3 = builder.build();
+
+        apiDAO.addAPI(api3);
+
+        // Get APIs belonging to provider1
+        apiList = apiDAO.getAPIsForProvider(provider1);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api2));
+
+        Assert.assertTrue(apiList.size() == 2);
+
+        for (int i = 0; i < apiList.size(); ++i) {
+            validateAPIs(apiList.get(i), expectedAPIs.get(i));
+        }
+
+        // Get APIs belonging to provider2
+        apiList = apiDAO.getAPIsForProvider(provider2);
+
+        API expectedAPI = SampleTestObjectCreator.copyAPISummary(api3);
+
+        Assert.assertTrue(apiList.size() == 1);
+
+        validateAPIs(apiList.get(0), expectedAPI);
+    }
+
+    @Test
+    public void testGetAPIsByStatus() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        List<String> singleStatus = new ArrayList<>();
+        singleStatus.add("PUBLISHED");
+
+        List<String> multipleStatus = new ArrayList<>();
+        multipleStatus.add("PUBLISHED");
+        multipleStatus.add("CREATED");
+        multipleStatus.add("BLOCKED");
+
+    }
 
     @Test
     public void testDeleteAPI() throws Exception {

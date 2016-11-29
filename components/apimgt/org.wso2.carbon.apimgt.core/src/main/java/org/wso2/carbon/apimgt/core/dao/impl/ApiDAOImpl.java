@@ -267,8 +267,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
                 "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
-                "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, PARENT_API_ID) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
@@ -306,6 +306,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(22, api.getCreatedBy());
                 statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
                 statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
+                statement.setString(25, api.getParentApiId());
 
                 statement.execute();
 
