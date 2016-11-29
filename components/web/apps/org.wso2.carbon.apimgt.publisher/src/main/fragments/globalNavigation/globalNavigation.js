@@ -15,9 +15,8 @@
  */
 
 function onRequest(env) {
-
     var user = {
         username: "marcus"
     };
-    return {user: user,logo:"../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg"};
+    return {user: user,logo:"../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg",env:env};
 }

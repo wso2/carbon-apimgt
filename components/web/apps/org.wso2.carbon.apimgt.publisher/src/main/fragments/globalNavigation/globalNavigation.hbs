@@ -1,7 +1,7 @@
 <header class="header header-default">
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
-            <a href="/publisher/apis" title="apiPublisherHomePage"
+            <a href="{{env.contextPath}}/apis" title="apiPublisherHomePage"
                onclick="jagg.sessionAwareJS({redirect:'/publisher/apis',e:event})" > <img
                     src="{{public logo}}"
                     alt="WSO2 API Publisher Home" class="logo"><h1>API Publisher</h1>
@@ -17,18 +17,18 @@
 	                   <i class="fw fw-user fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
 					<span class="hidden-xs">
-							admin
+							<span class="userNameContainer">admin</span>
 							 <span class="caret"></span>
 					</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
                     <li class="dropdown-header visible-xs">
-                        admin
+                        <span class="userNameContainer">admin</span>
                         <span class="caret"></span>
                     </li>
                     <li class="divider visible-xs"></li>
                     <li><a title="Logout"
-                           href="/publisher/site/pages/logout.jag">Logout</a></li>
+                           href="{{env.contextPath}}/logout">Logout</a></li>
                 </ul>
             </li>
         </ul>

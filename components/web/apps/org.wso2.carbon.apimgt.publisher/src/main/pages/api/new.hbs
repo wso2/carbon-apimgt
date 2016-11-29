@@ -1,0 +1,97 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Listing | " @config.appName}}
+{{js "js/api/api.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "actionMenu"}}
+    {{fragment "actionMenuApiNew"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header" id="apiTitleContainer">
+                <h2>Add New API</h2>
+            </div>
+            <form class="create_form">
+
+                    <!-- Text input-->
+                    <div class="form-inline">
+                        <div class="form-group right_pad_10">
+                            <label class="control-label" for="name">Name</label>
+                            <div class="">
+                                <input id="name" name="name" placeholder="Ex: MyAPI" class="form-control input-md" required="" type="text">
+                                <span class="help-block">Display Name of the API</span>
+                            </div>
+                        </div>
+                        <!-- Text input-->
+                        <div class="form-group right_pad_10">
+                            <label class="control-label" for="context">Context</label>
+                            <div class="">
+                                <input id="context" name="context" placeholder="Ex: myapi" class="form-control input-md" required="" type="text">
+                                <span class="help-block">API Context should be unique</span>
+                            </div>
+                        </div>
+                        <!-- Text input-->
+                        <div class="form-group right_pad_10">
+                            <label class="control-label" for="version">Version</label>
+                            <div class="">
+                                <input id="version" name="version" placeholder="Ex: 1.0.0" class="form-control input-md" required="" type="text">
+                                <span class="help-block">Version of the API</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Multiple Radios (inline) -->
+                    <div class="form-group">
+                        <hr>
+                        <h4>Implementation Method</h4>
+                        <div class="">
+                            <label class="radio-inline" for="radios-0">
+                                <input name="radios" id="radios-0" value="Endpoint" checked="checked" type="radio">
+                                Endpoint
+                            </label>
+                            <label class="radio-inline" for="radios-1">
+                                <input name="radios" id="radios-1" value="ImportSwagger" type="radio">
+                                Import Swagger
+                            </label>
+                            <label class="radio-inline" for="radios-2">
+                                <input name="radios" id="radios-2" value="Mock" type="radio">
+                                Mock
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group impl_method" id="Endpoint">
+                        <label class="control-label" for="endpoint">Endpoint</label>
+                        <div class="input-group max_width">
+                            <input id="endpoint" name="endpoint" placeholder="URL of the endpoint." class="form-control input-md" type="text">
+    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#myModal">Test</button>
+    </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group impl_method" style="display:none" id="ImportSwagger">
+                        <label for="exampleInputFile">Upload Swagger File</label>
+                        <input type="file" id="exampleInputFile">
+                        <p class="help-block">Supports Swagger 2</p>
+                        <label class="control-label" for="endpoint">Or Provide Swagger URL</label>
+                        <div class="input-group max_width">
+                            <input id="endpoint" name="endpoint" placeholder="Ex: http://petstore.swagger.io/v2/swagger.json" class="form-control input-md" type="text">
+    <span class="input-group-btn">
+        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#myModal">Test</button>
+    </span>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="form-group">
+                        <button id="create" name="create" class="btn btn-primary" data-toggle="modal" data-target="#myModal2">Create API</button>
+                    </div>
+
+
+            </form>
+        </div>
+    </div>
+
+{{/fillZone}}
