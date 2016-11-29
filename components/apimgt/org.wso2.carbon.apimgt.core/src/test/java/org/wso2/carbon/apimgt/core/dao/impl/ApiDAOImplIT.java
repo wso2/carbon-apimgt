@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,36 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertNotNull(apiFromDB);
         validateAPIs(apiFromDB, expectedAPI);
+    }
+
+    @Test
+    public void testGetAPIs() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        List<API> apiList = apiDAO.getAPIs();
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api1 = builder.build();
+
+        apiDAO.addAPI(api1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        API api2 = builder.build();
+
+        apiDAO.addAPI(api2);
+
+        apiList = apiDAO.getAPIs();
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api2));
+
+        Assert.assertTrue(apiList.size() == 2);
+
+        for (int i = 0; i < apiList.size(); ++i) {
+            validateAPIs(apiList.get(0), expectedAPIs.get(0));
+        }
     }
 
 
@@ -201,10 +232,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());
         Assert.assertEquals(actualAPI.getCacheTimeout(), expectedAPI.getCacheTimeout());
         Assert.assertEquals(actualAPI.isDefaultVersion(), expectedAPI.isDefaultVersion());
-        //Assert.assertEquals(actualAPI.getApiPolicy(), expectedAPI.getApiPolicy());
         Assert.assertTrue(equalLists(actualAPI.getTransport(), expectedAPI.getTransport()));
         Assert.assertTrue(equalLists(actualAPI.getTags(), expectedAPI.getTags()));
-        //Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
+        Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
         Assert.assertEquals(actualAPI.getVisibility(), expectedAPI.getVisibility());
         Assert.assertTrue(equalLists(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles()));
         //Assert.assertEquals(actualAPI.getEndpoints(), expectedAPI.getEndpoints());

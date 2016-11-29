@@ -1086,8 +1086,8 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
-        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING as apimsubmapping," +
-                "AM_SUBSCRIPTION_POLICY as amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING apimsubmapping," +
+                "AM_SUBSCRIPTION_POLICY amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
                 "AND apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1095,7 +1095,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     policies.add(rs.getString("NAME"));
                 }
             }

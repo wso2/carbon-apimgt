@@ -51,7 +51,6 @@ public final class API {
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
         isDefaultVersion = builder.isDefaultVersion;
-        apiPolicy = builder.apiPolicy;
         transport = builder.transport;
         tags = builder.tags;
         policies = builder.policies;
@@ -118,10 +117,6 @@ public final class API {
 
     public boolean isDefaultVersion() {
         return isDefaultVersion;
-    }
-
-    public String getApiPolicy() {
-        return apiPolicy;
     }
 
     public List<String> getTransport() {
@@ -200,7 +195,6 @@ public final class API {
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
     private final boolean isDefaultVersion;
-    private final String apiPolicy;
     private final List<String> transport;
     private final List<String> tags;
     private final List<String> policies;
@@ -373,7 +367,6 @@ public final class API {
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
             this.isDefaultVersion = copy.isDefaultVersion;
-            this.apiPolicy = copy.apiPolicy;
             this.transport = copy.transport;
             this.tags = copy.tags;
             this.policies = copy.policies;
