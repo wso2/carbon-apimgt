@@ -84,15 +84,20 @@ public class APIMgtConstants {
     /**
      * Subscription statuses.
      */
-    public static class SubscriptionStatus {
-        public static final String BLOCKED = "BLOCKED";
-        public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
-        public static final String ACTIVE = "ACTIVE";
-        public static final String ON_HOLD = "ON_HOLD";
-        public static final String REJECTED = "REJECTED";
+    public enum SubscriptionStatus {
+        BLOCKED("BLOCKED"), PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"), ACTIVE("ACTIVE"), ON_HOLD("ON_HOLD"), REJECTED
+                ("REJECTED");
+        private String status;
 
-        private SubscriptionStatus() {
+        SubscriptionStatus(String status) {
+            this.status = status;
         }
+
+        public String getStatus() {
+            return status;
+        }
+
+
     }
 
     /**

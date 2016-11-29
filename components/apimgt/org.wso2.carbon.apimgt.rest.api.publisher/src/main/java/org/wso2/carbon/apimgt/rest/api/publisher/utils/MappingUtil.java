@@ -267,7 +267,7 @@ public class MappingUtil {
     public static SubscriptionDTO fromSubscription(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setApplicationId(subscription.getId());
-        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.fromValue(subscription.getStatus()));
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.fromValue(subscription.getStatus().getStatus()));
         subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
         subscriptionDTO.setTier(subscription.getSubscriptionTier());

@@ -330,15 +330,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (StringUtils.isNotEmpty(api.getParentApiId())) {
                         List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
                                 .getParentApiId());
+                        List<Subscription> subscriptionList = new ArrayList<>();
                         for (Subscription subscription : subscriptions) {
                             if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
                                 if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
-                                    getApiSubscriptionDAO().addAPISubscription(UUID.randomUUID().toString(), api
-                                                    .getId(),
-                                            subscription.getApplication().getId(), subscription.getSubscriptionTier(),
-                                            subscription.getStatus());
+                                    subscriptionList.add(new Subscription(UUID.randomUUID().toString(), subscription
+                                            .getApplication(), subscription.getApi(), subscription
+                                            .getSubscriptionTier()));
                                 }
                             }
+                            getApiSubscriptionDAO().copySubscriptions(subscriptionList);
                         }
                     }
                 }
@@ -591,7 +592,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException If failed to update subscription status
      */
     @Override
-    public void updateSubscription(String apiId, String subStatus, int appId) throws APIManagementException {
+    public void updateSubscription(String apiId, APIMgtConstants.SubscriptionStatus subStatus, String appId) throws
+            APIManagementException {
 
     }
 
@@ -634,34 +636,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIUtils.logAndThrowException("Couldn't retrieve API Lifecycle for " + apiId, e, log);
         }
         return null;
-    }
-
-
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     *
-     * @param identifier
-     * @param newStatus  accepted if changes are not pushed to a gateway
-     * @param deprecateOlderVersions
-     *@param requireReSubscriptions @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    @Override
-    public void updateAPIForStateChange(String identifier, String newStatus, boolean deprecateOlderVersions, boolean
-            requireReSubscriptions) throws
-            APIManagementException {
-        try {
-            getApiDAO().changeLifeCycleStatus(identifier, newStatus);
-            if (deprecateOlderVersions) {
-                getApiDAO().deprecateOlderVersions(identifier);
-            }
-            if (!requireReSubscriptions) {
-                getApiSubscriptionDAO().copySubscriptions(identifier);
-            }
-
-        } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't change the API Status to " + newStatus, e, log);
-        }
     }
 
     /**
@@ -719,5 +693,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIUtils.logAndThrowException("Couldn't retrieve thumbnail for api " + apiId, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscription(subId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
+        }
     }
 }
