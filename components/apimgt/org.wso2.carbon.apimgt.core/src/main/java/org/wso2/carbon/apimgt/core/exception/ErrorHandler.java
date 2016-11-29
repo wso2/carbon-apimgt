@@ -21,25 +21,36 @@
 package org.wso2.carbon.apimgt.core.exception;
 
 /**
- *  This is the Exception class for DAO related exceptions.
+ * This error handler interface must use in all exceptions class, for example please see APIManagementException class.
  */
-public class APIMgtDAOException extends APIManagementException {
+public interface ErrorHandler {
+    /**
+     * Get error code that defined in the enum
+     * @return error code
+     */
+    long getErrorCode();
 
-   public APIMgtDAOException(String msg , ExceptionCodes code) {
-       super(msg, code);
-   }
+    /**
+     * Get error message that defined in the enum
+     * @return
+     */
+    String getErrorMessage();
 
-    public APIMgtDAOException(String msg) {
-        super(msg);
+    /**
+     * Get error description that defined in the enum
+     *
+     * @return
+     */
+    default String getErrorDescription() {
+        return null;
     }
 
-    public APIMgtDAOException(String msg, Throwable e) {
-        super(msg, e);
+    /**
+     * Get Http status code that defined in the enum
+     *
+     * @return
+     */
+    default int getHttpStatusCode() {
+        return 500;
     }
-
-    public APIMgtDAOException(Throwable throwable) {
-        super(throwable);
-    }
-
-
 }

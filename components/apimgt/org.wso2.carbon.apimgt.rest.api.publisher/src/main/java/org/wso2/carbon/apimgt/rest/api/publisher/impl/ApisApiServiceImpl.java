@@ -391,10 +391,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT,
-                    e.getErrorCode(), RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
+            HashMap<String, String> paramList = new HashMap<String, String>();
+
+            paramList.put("API_NAME", body.getProvider());
+            paramList.put("API_VERSION", body.getVersion());
+
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler().getErrorMessage(),
+                    e.getErrorHandler().getErrorCode(), e.getErrorHandler().getErrorDescription(),paramList);
             log.error(errorMessage,e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
