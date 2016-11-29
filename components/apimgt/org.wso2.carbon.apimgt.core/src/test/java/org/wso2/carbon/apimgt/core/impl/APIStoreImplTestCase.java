@@ -52,7 +52,6 @@ import static org.mockito.Mockito.when;
  * Test class for APIStore
  *
  */
-@PrepareForTest(APIUtils.class)
 public class APIStoreImplTestCase {
 
     private static final String USER_NAME = "username";
