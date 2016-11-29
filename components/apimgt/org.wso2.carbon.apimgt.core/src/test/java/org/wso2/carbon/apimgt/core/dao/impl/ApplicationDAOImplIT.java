@@ -20,8 +20,9 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.time.Duration;
@@ -31,8 +32,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddAndGetApplication() throws Exception {
         //add new app
-        Application app = addTestApplication();
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        Application app = TestUtil.addTestApplication();
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //get added app
         Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
@@ -43,8 +44,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testUpdateApplication() throws Exception {
         //add new app
-        Application currentApp = addTestApplication();
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        Application currentApp = TestUtil.addTestApplication();
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
         newApp.setUuid(currentApp.getId());
         newApp.setCreatedTime(currentApp.getCreatedTime());
@@ -60,8 +61,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testDeleteApplication() throws Exception {
         // add app
-        Application app = addTestApplication();
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        Application app = TestUtil.addTestApplication();
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //delete app
         applicationDAO.deleteApplication(app.getId());
         Application appFromDB = applicationDAO.getApplication(app.getId());
@@ -70,11 +71,11 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testIsApplicationNameExists() throws Exception {
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //check for a non-existing application
         Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
         //add new app
-        Application app = addTestApplication();
+        Application app = TestUtil.addTestApplication();
         //check for the existing application
         Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName()));
     }
@@ -83,11 +84,11 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     public void testGetAllApplications() throws Exception {
         //add 4 apps
         String username = "admin";
-        Application app1 = addCustomApplication("App1", username);
-        Application app2 = addCustomApplication("App2", username);
-        Application app3 = addCustomApplication("App3", username);
-        Application app4 = addCustomApplication("App4", username);
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        Application app1 = TestUtil.addCustomApplication("App1", username);
+        Application app2 = TestUtil.addCustomApplication("App2", username);
+        Application app3 = TestUtil.addCustomApplication("App3", username);
+        Application app4 = TestUtil.addCustomApplication("App4", username);
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //get added apps
         Application[] appsFromDB = applicationDAO.getApplications(username);
         Assert.assertNotNull(appsFromDB);
@@ -141,20 +142,6 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
         Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000L,
                 "Application updated time is not the same!");
-    }
-
-    private Application addTestApplication() throws APIMgtDAOException {
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
-        Application application = SampleTestObjectCreator.createDefaultApplication();
-        applicationDAO.addApplication(application);
-        return application;
-    }
-
-    private Application addCustomApplication(String applicationName, String owner) throws APIMgtDAOException {
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
-        Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
-        applicationDAO.addApplication(application);
-        return application;
     }
 
 }
