@@ -58,10 +58,10 @@ public interface APIStore extends APIManager {
     /**
      * Function to remove an Application from the API Store
      *
-     * @param application - The Application Object that represents the Application
+     * @param appId - The Application id of the Application
      * @throws APIManagementException
      */
-    void deleteApplication(Application application) throws APIManagementException;
+    void deleteApplication(String appId) throws APIManagementException;
 
     /**
      * Adds an application

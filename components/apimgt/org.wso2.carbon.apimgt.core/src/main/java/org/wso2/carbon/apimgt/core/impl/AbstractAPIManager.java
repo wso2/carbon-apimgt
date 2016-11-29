@@ -238,7 +238,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
            application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
+            APIUtils.logAndThrowException("Error occurred while retrieving application - " + uuid, e, log);
         }
         return application;
     }
