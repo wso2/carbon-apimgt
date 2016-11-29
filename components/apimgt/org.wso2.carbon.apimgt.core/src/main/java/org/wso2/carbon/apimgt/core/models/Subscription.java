@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
 /**
  * Subscriber's view of the API
  */
@@ -29,6 +31,7 @@ public final class Subscription {
     private API api;
     private Application application;
     private String subscriptionTier;
+    private APIMgtConstants.SubscriptionStatus status;
 
     public Subscription(String uuid, Application application, API api, String subscriptionTier) {
         this.uuid = uuid;
@@ -51,6 +54,14 @@ public final class Subscription {
 
     public String getSubscriptionTier() {
         return subscriptionTier;
+    }
+
+    public APIMgtConstants.SubscriptionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(APIMgtConstants.SubscriptionStatus status) {
+        this.status = status;
     }
 
     @Override

@@ -58,7 +58,6 @@ public final class API {
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
         isDefaultVersion = builder.isDefaultVersion;
-        apiPolicy = builder.apiPolicy;
         transport = builder.transport;
         tags = builder.tags;
         policies = builder.policies;
@@ -73,6 +72,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
+        parentApiId = builder.parentApiId;
     }
 
     public String getId() {
@@ -125,10 +125,6 @@ public final class API {
 
     public boolean isDefaultVersion() {
         return isDefaultVersion;
-    }
-
-    public String getApiPolicy() {
-        return apiPolicy;
     }
 
     public List<String> getTransport() {
@@ -207,7 +203,6 @@ public final class API {
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
     private final boolean isDefaultVersion;
-    private final String apiPolicy;
     private final List<String> transport;
     private final List<String> tags;
     private final List<String> policies;
@@ -222,6 +217,7 @@ public final class API {
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
+    private String parentApiId;
 
     @Override
     public boolean equals(Object o) {
@@ -362,6 +358,7 @@ public final class API {
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<UriTemplate> uriTemplates;
+        private String parentApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -387,7 +384,6 @@ public final class API {
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
             this.isDefaultVersion = copy.isDefaultVersion;
-            this.apiPolicy = copy.apiPolicy;
             this.transport = copy.transport;
             this.tags = copy.tags;
             this.policies = copy.policies;
@@ -402,6 +398,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
+            this.parentApiId = copy.parentApiId;
         }
 
         /**
@@ -737,6 +734,19 @@ public final class API {
         }
 
         /**
+         * Sets the {@code parentApiId} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param parentApiId the {@code parentApiId} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder parentApiId(String parentApiId) {
+            this.parentApiId = parentApiId;
+            return this;
+        }
+
+
+        /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
@@ -836,6 +846,21 @@ public final class API {
         public API buildApi() {
             return new API(this);
         }
+
+        public String getParentApiId() {
+            return parentApiId;
+        }
+
+        public void setParentApiId(String parentApiId) {
+            this.parentApiId = parentApiId;
+        }
     }
 
+    public String getParentApiId() {
+        return parentApiId;
+    }
+
+    public void setParentApiId(String parentApiId) {
+        this.parentApiId = parentApiId;
+    }
 }
