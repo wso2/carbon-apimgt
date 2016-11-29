@@ -222,6 +222,7 @@ public final class API {
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
+    private String previousId;
 
     @Override
     public boolean equals(Object o) {
@@ -362,6 +363,7 @@ public final class API {
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<UriTemplate> uriTemplates;
+        private String previousId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -402,6 +404,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
+            this.previousId = copy.previousId;
         }
 
         /**
@@ -737,6 +740,19 @@ public final class API {
         }
 
         /**
+         * Sets the {@code previousId} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param previousId the {@code previousId} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder previousId(String previousId) {
+            this.previousId = previousId;
+            return this;
+        }
+
+
+        /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
@@ -836,6 +852,21 @@ public final class API {
         public API buildApi() {
             return new API(this);
         }
+
+        public String getPreviousId() {
+            return previousId;
+        }
+
+        public void setPreviousId(String previousId) {
+            this.previousId = previousId;
+        }
     }
 
+    public String getPreviousId() {
+        return previousId;
+    }
+
+    public void setPreviousId(String previousId) {
+        this.previousId = previousId;
+    }
 }

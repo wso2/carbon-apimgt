@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 
+import java.util.List;
 import javax.annotation.CheckForNull;
 
 
@@ -50,7 +51,7 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
-    public Subscription getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
+    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Retrieve the list of subscriptions of an Application

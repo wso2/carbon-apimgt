@@ -35,9 +35,11 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -291,6 +293,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
             APIManagementException {
+        boolean requireReSubscriptions = false;
+        boolean deprecateOlderVersion = false;
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
@@ -298,12 +302,46 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
                         .getLifecycleInstanceId()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
-                    apiBuilder.lifecycleState(getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
-                            (), status, checkListItem.getKey(), checkListItem.getValue()));
+                    if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkListItem.getKey())) {
+                        deprecateOlderVersion = checkListItem.getValue();
+                    } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkListItem.getKey())) {
+                        requireReSubscriptions = checkListItem.getValue();
+                    } else {
+                        apiBuilder.lifecycleState(getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                                (), status, checkListItem.getKey(), checkListItem.getValue()));
+                    }
                 }
                 API originalAPI = apiBuilder.build();
                 getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
+                if (deprecateOlderVersion) {
+                    if (StringUtils.isNotEmpty(api.getPreviousId())) {
+                        API oldAPI = getApiDAO().getAPI(api.getPreviousId());
+                        if (oldAPI != null) {
+                            API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
+                            previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
+                                    (previousAPI.getLifecycleInstanceId()));
+                            getApiLifecycleManager().executeLifecycleEvent(APIStatus.DEPRECATED.getStatus(), previousAPI
+                                    .getLifecycleInstanceId(), getUsername(), previousAPI.build());
+                        }
+                    }
+                }
+                if (!requireReSubscriptions) {
+                    if (StringUtils.isNotEmpty(api.getPreviousId())) {
+                        List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
+                                .getPreviousId());
+                        for (Subscription subscription : subscriptions) {
+                            if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
+                                if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
+                                    getApiSubscriptionDAO().addAPISubscription(UUID.randomUUID().toString(), api
+                                                    .getId(),
+                                            subscription.getApplication().getId(), subscription.getSubscriptionTier(),
+                                            subscription.getStatus());
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
@@ -336,6 +374,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
+                apiBuilder.previousId(api.getPreviousId());
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {

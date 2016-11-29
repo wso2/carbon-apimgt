@@ -29,6 +29,7 @@ public final class Subscription {
     private API api;
     private Application application;
     private String subscriptionTier;
+    private String status;
 
     public Subscription(String uuid, Application application, API api, String subscriptionTier) {
         this.uuid = uuid;
@@ -51,6 +52,14 @@ public final class Subscription {
 
     public String getSubscriptionTier() {
         return subscriptionTier;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
