@@ -35,6 +35,14 @@ public enum ExceptionCodes implements ErrorHandler {
     private final int httpStatusCode;
     private final String errorDescription;
 
+    /**
+     *
+     * @param errorCode This is unique error code that pass to upper level.
+     * @param msg The error message that you need to pass along with the error code.
+     * @param httpErrorCode This HTTP status code which should return from REST API layer. If you don't want to pass a
+     *                      http status code keep it blank.
+     * @param errorDescription The error description.
+     */
     ExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
         this.errorCode = errorCode;
         this.errorMessage = msg;

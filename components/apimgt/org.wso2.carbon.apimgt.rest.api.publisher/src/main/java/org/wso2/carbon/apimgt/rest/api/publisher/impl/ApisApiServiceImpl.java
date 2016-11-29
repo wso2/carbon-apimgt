@@ -6,6 +6,8 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -393,8 +395,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                     body.getName() + "-" + body.getVersion();
             HashMap<String, String> paramList = new HashMap<String, String>();
 
-            paramList.put("API_NAME", body.getProvider());
-            paramList.put("API_VERSION", body.getVersion());
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getVersion());
 
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler().getErrorMessage(),
                     e.getErrorHandler().getErrorCode(), e.getErrorHandler().getErrorDescription(),paramList);

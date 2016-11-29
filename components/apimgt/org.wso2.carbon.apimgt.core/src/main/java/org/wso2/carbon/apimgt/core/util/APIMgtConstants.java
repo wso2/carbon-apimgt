@@ -208,5 +208,6 @@ public class APIMgtConstants {
     public static class ExceptionsConstants {
 
         public static final String API_NAME = "API_NAME";
+        public static final String API_VERSION = "API_NAME";
     }
 }
