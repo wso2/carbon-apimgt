@@ -94,7 +94,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
-            application.setUuid(application.getId());
+            application.setUuid(uuid);
             application.setUpdatedUser(getUsername());
             application.setUpdatedTime(LocalDateTime.now());
             getApplicationDAO().updateApplication(uuid, application);
