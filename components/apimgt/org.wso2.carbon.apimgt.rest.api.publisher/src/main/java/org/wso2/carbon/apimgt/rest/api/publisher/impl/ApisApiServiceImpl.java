@@ -125,6 +125,50 @@ public class ApisApiServiceImpl extends ApisApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+    @Override
+    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String gatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
+            return Response.ok().entity(gatewayConfig).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving gateway config of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
+            String ifUnmodifiedSince) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
+            String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
+            return Response.ok().entity(apiGatewayConfig).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
     @Override
     public Response apisApiIdGet(String apiId
 , String accept
@@ -352,6 +396,33 @@ public class ApisApiServiceImpl extends ApisApiService {
 //        }
         return null;
     }
+
+    @Override
+    public Response apisFindApiByAttributeHead(String context, String apiName, String accept) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            boolean status;
+            if (context != null) {
+                status = apiPublisher.checkIfAPIContextExists(context);
+            } else if (apiName != null) {
+                status = apiPublisher.checkIfAPINameExists(apiName);
+            } else {
+                status = false;
+            }
+
+            if (status) {
+                return Response.status(Response.Status.OK).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while checking status.";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     @Override
     public Response apisGet(Integer limit
 , Integer offset

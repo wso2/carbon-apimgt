@@ -1,16 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
 public class DocumentDTO   {
   @JsonProperty("documentId")
   private String documentId = null;
@@ -103,6 +103,9 @@ public class DocumentDTO   {
 
   @JsonProperty("sourceUrl")
   private String sourceUrl = null;
+
+  @JsonProperty("inlineContent")
+  private String inlineContent = null;
 
   @JsonProperty("otherTypeName")
   private String otherTypeName = null;
@@ -251,6 +254,24 @@ public class DocumentDTO   {
     this.sourceUrl = sourceUrl;
   }
 
+  public DocumentDTO inlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+    return this;
+  }
+
+   /**
+   * Get inlineContent
+   * @return inlineContent
+  **/
+  @ApiModelProperty(example = "This is doc content. This can have many lines.", value = "")
+  public String getInlineContent() {
+    return inlineContent;
+  }
+
+  public void setInlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+  }
+
   public DocumentDTO otherTypeName(String otherTypeName) {
     this.otherTypeName = otherTypeName;
     return this;
@@ -303,13 +324,14 @@ public class DocumentDTO   {
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
         Objects.equals(this.sourceUrl, document.sourceUrl) &&
+        Objects.equals(this.inlineContent, document.inlineContent) &&
         Objects.equals(this.otherTypeName, document.otherTypeName) &&
         Objects.equals(this.visibility, document.visibility);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, otherTypeName, visibility);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, visibility);
   }
 
   @Override
@@ -323,6 +345,7 @@ public class DocumentDTO   {
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
+    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("}");

@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_endpointSecurityDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
 public class API_endpointSecurityDTO   {
   /**
    * Gets or Sets type
@@ -115,10 +115,10 @@ public class API_endpointSecurityDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_endpointSecurityDTO aPIEndpointSecurity = (API_endpointSecurityDTO) o;
-    return Objects.equals(this.type, aPIEndpointSecurity.type) &&
-        Objects.equals(this.username, aPIEndpointSecurity.username) &&
-        Objects.equals(this.password, aPIEndpointSecurity.password);
+    API_endpointSecurityDTO apIEndpointSecurity = (API_endpointSecurityDTO) o;
+    return Objects.equals(this.type, apIEndpointSecurity.type) &&
+        Objects.equals(this.username, apIEndpointSecurity.username) &&
+        Objects.equals(this.password, apIEndpointSecurity.password);
   }
 
   @Override

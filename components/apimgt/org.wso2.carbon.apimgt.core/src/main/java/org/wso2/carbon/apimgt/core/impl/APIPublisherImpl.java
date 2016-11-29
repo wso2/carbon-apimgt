@@ -426,6 +426,30 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * Checks if a given API Context exists in the registry
+     *
+     * @param context
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    @Override
+    public boolean checkIfAPIContextExists(String context) throws APIManagementException {
+        return isContextExist(context);
+    }
+
+    /**
+     * Checks if a given API name exists in the registry
+     *
+     * @param name
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    @Override
+    public boolean checkIfAPINameExists(String name) throws APIManagementException {
+        return isApiNameExist(name);
+    }
+
+    /**
      * This method used to save the documentation content
      *
      * @param api
@@ -680,5 +704,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIUtils.logAndThrowException("Couldn't retrieve thumbnail for api " + apiId, e, log);
         }
         return null;
+    }
+
+    @Override
+    public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
+        //TODO implement logic here
+    }
+
+    @Override
+    public String getApiGatewayConfig(String apiId) throws APIManagementException {
+        //TODO implement logic here
+        return "Not yet implement";
     }
 }

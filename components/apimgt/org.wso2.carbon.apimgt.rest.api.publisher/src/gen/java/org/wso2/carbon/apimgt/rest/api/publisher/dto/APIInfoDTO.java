@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIInfoDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
 public class APIInfoDTO   {
   @JsonProperty("id")
   private String id = null;
@@ -29,8 +29,8 @@ public class APIInfoDTO   {
   @JsonProperty("provider")
   private String provider = null;
 
-  @JsonProperty("status")
-  private String status = null;
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -140,22 +140,22 @@ public class APIInfoDTO   {
     this.provider = provider;
   }
 
-  public APIInfoDTO status(String status) {
-    this.status = status;
+  public APIInfoDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
   **/
   @ApiModelProperty(example = "CREATED", value = "")
-  public String getStatus() {
-    return status;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
 
@@ -167,19 +167,19 @@ public class APIInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIInfoDTO aPIInfo = (APIInfoDTO) o;
-    return Objects.equals(this.id, aPIInfo.id) &&
-        Objects.equals(this.name, aPIInfo.name) &&
-        Objects.equals(this.description, aPIInfo.description) &&
-        Objects.equals(this.context, aPIInfo.context) &&
-        Objects.equals(this.version, aPIInfo.version) &&
-        Objects.equals(this.provider, aPIInfo.provider) &&
-        Objects.equals(this.status, aPIInfo.status);
+    APIInfoDTO apIInfo = (APIInfoDTO) o;
+    return Objects.equals(this.id, apIInfo.id) &&
+        Objects.equals(this.name, apIInfo.name) &&
+        Objects.equals(this.description, apIInfo.description) &&
+        Objects.equals(this.context, apIInfo.context) &&
+        Objects.equals(this.version, apIInfo.version) &&
+        Objects.equals(this.provider, apIInfo.provider) &&
+        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, status);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus);
   }
 
   @Override
@@ -193,7 +193,7 @@ public class APIInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

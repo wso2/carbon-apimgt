@@ -1,13 +1,28 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+
+import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.Response;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+
 import java.io.InputStream;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
@@ -55,6 +70,17 @@ public abstract class ApisApiService {
  ,DocumentDTO body
  ,String contentType
  ) throws NotFoundException;
+    public abstract Response apisApiIdGatewayConfigGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ) throws NotFoundException;
+    public abstract Response apisApiIdGatewayConfigPut(String apiId
+ ,String gatewayConfig
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ ) throws NotFoundException;
     public abstract Response apisApiIdGet(String apiId
  ,String accept
  ,String ifNoneMatch
@@ -96,6 +122,10 @@ public abstract class ApisApiService {
  ) throws NotFoundException;
     public abstract Response apisCopyApiPost(String newVersion
  ,String apiId
+ ) throws NotFoundException;
+    public abstract Response apisFindApiByAttributeHead(String context
+ ,String apiName
+ ,String accept
  ) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset

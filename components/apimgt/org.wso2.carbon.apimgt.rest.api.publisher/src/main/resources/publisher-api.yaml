@@ -546,6 +546,150 @@ paths:
             $ref: '#/definitions/Error'
 
 ################################################################
+# The gateway config resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/gateway-config:
+#-----------------------------------------------------
+# Retrieve the API gateway configuration
+#-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get gateway definition
+      description: |
+        This operation can be used to retrieve the gateway configuration of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested gateway configuration of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update the API gateway config
+#-----------------------------------------------------
+    put:
+      consumes:
+        - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\""
+      x-wso2-request: |
+       PUT https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger
+       Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
+       Content-Length: 477
+       Content-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99
+
+       --------------------------4f51e636c0003d99
+       Content-Disposition: form-data; name="apiDefinition"
+
+       {"paths":{"\/*":{"get":{"x-auth-type":"Application","x-throttling-policy":"Unlimited","responses":{"200":{"description":"OK"}}}}},"x-wso2-security":{"apim":{"x-wso2-scopes":[]}},"swagger":"2.0","info":{"title":"PhoneVerification","description":"Verify a phone number","contact":{"email":"xx@ee.com","name":"xx"},"version":"1.0.0"}}
+       --------------------------4f51e636c0003d99--
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Update gateway configuration
+      description: |
+        This operation can be used to update the gateway configuration of an existing API. gateway configuration to be updated is passed as a form data parameter `gatewayConfig`.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: formData
+          name: gatewayConfig
+          description: gateway configuration of the API
+          type: string
+          required: true
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated gateway configuration
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+################################################################
 # The thumbnail resource of "Individual API" resource APIs
 ################################################################
 
@@ -686,6 +830,63 @@ paths:
           description: |
             Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+################################################################
+# The attibutes of the API existance check resource
+################################################################
+  /apis/find-api-by-attribute:
+
+#-----------------------------------------------------
+# Retrieve existence of a API using attibutes
+#-----------------------------------------------------
+    head:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v0.10/apis/find-api-by-attribute?context=contextName"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/find-api-by-attribute?context=contextName
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Check given API attibute name is already exist
+      description: |
+        Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
+      parameters:
+        - name : context
+          in: query
+          description: |
+            You can provide the API attibute and check whether it is already defined.
+          required: true
+          type: string
+        - name : apiName
+          in: query
+          description: |
+            You can provide the API attibute and check whether it is already defined.
+          required: true
+          type: string
+        - $ref : "#/parameters/Accept"
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API attibute status is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested API attribute does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
 
