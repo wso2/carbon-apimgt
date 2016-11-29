@@ -315,8 +315,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
                 if (deprecateOlderVersion) {
-                    if (StringUtils.isNotEmpty(api.getPreviousId())) {
-                        API oldAPI = getApiDAO().getAPI(api.getPreviousId());
+                    if (StringUtils.isNotEmpty(api.getParentApiId())) {
+                        API oldAPI = getApiDAO().getAPI(api.getParentApiId());
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
@@ -327,9 +327,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
                 if (!requireReSubscriptions) {
-                    if (StringUtils.isNotEmpty(api.getPreviousId())) {
+                    if (StringUtils.isNotEmpty(api.getParentApiId())) {
                         List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
-                                .getPreviousId());
+                                .getParentApiId());
                         for (Subscription subscription : subscriptions) {
                             if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
                                 if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
@@ -374,7 +374,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
-                apiBuilder.previousId(api.getPreviousId());
+                apiBuilder.parentApiId(api.getParentApiId());
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {

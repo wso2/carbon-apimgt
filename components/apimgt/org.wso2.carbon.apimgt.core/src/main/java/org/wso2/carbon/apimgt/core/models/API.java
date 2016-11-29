@@ -72,6 +72,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
+        parentApiId = builder.parentApiId;
     }
 
     public String getId() {
@@ -216,7 +217,7 @@ public final class API {
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
-    private String previousId;
+    private String parentApiId;
 
     @Override
     public boolean equals(Object o) {
@@ -357,7 +358,7 @@ public final class API {
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<UriTemplate> uriTemplates;
-        private String previousId;
+        private String parentApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -397,7 +398,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
-            this.previousId = copy.previousId;
+            this.parentApiId = copy.parentApiId;
         }
 
         /**
@@ -733,14 +734,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code previousId} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code parentApiId} and returns a reference to this APIBuilder so that the methods can be
          * chained together.
          *
-         * @param previousId the {@code previousId} to set
+         * @param parentApiId the {@code parentApiId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder previousId(String previousId) {
-            this.previousId = previousId;
+        public APIBuilder parentApiId(String parentApiId) {
+            this.parentApiId = parentApiId;
             return this;
         }
 
@@ -846,20 +847,20 @@ public final class API {
             return new API(this);
         }
 
-        public String getPreviousId() {
-            return previousId;
+        public String getParentApiId() {
+            return parentApiId;
         }
 
-        public void setPreviousId(String previousId) {
-            this.previousId = previousId;
+        public void setParentApiId(String parentApiId) {
+            this.parentApiId = parentApiId;
         }
     }
 
-    public String getPreviousId() {
-        return previousId;
+    public String getParentApiId() {
+        return parentApiId;
     }
 
-    public void setPreviousId(String previousId) {
-        this.previousId = previousId;
+    public void setParentApiId(String parentApiId) {
+        this.parentApiId = parentApiId;
     }
 }
