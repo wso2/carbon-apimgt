@@ -1,8 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -28,6 +25,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -291,22 +289,28 @@ public class ApisApiServiceImpl extends ApisApiService {
 //        }
         return null;
     }
+
     @Override
     public Response apisChangeLifecyclePost(String action
-, String apiId
-, String lifecycleChecklist
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String apiId
+            , String lifecycleChecklist
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
-        Map<String,Boolean> lifecycleChecklistMap = new HashMap<>();
+        Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
         try {
-            if (lifecycleChecklist != null){
-                lifecycleChecklistMap = (JSONObject)new JSONParser().parse(lifecycleChecklist);
+            if (lifecycleChecklist != null) {
+                String[] checkList = lifecycleChecklist.split(",");
+                for (String checkList1 : checkList) {
+                    String attributeName = new StringTokenizer(checkList1, ":").nextToken();
+                    Boolean attributeValue = Boolean.valueOf(new StringTokenizer(checkList1, ":").nextToken());
+                    lifecycleChecklistMap.put(attributeName, attributeValue);
+                }
             }
             RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
             return Response.ok().build();
-        } catch (APIManagementException | ParseException e) {
+        } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

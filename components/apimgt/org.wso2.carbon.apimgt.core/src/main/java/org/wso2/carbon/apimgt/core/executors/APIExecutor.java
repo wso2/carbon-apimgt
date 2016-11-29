@@ -75,8 +75,6 @@ public class APIExecutor implements Executor {
     @Override
     public void execute(Object resource, String currentState, String targetState) throws LifecycleException {
         API api = (API) resource;
-        boolean deprecateOlderVersions = false;
-        boolean requireReSubscriptions = false;
         if (!currentState.equals(targetState)) {
             //todo:This place need to write how to handle Gateway publishing
             try {

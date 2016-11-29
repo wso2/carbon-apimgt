@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtCopySubscriptionSkippedException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
@@ -296,7 +295,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         boolean requireReSubscriptions = false;
         boolean deprecateOlderVersion = false;
-        List<Subscription> skippedSubscriptionList = new ArrayList<>();
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
@@ -328,7 +326,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         }
                     }
                 }
-                if (requireReSubscriptions) {
+                if (!requireReSubscriptions) {
                     if (StringUtils.isNotEmpty(api.getPreviousId())) {
                         List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
                                 .getPreviousId());
@@ -340,18 +338,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                             subscription.getApplication().getId(), subscription.getSubscriptionTier(),
                                             subscription.getStatus());
                                 }
-                            } else {
-                                skippedSubscriptionList.add(subscription);
                             }
                         }
                     }
                 }
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
-            }
-            if (!skippedSubscriptionList.isEmpty()) {
-                //TODO: message need to be set correctly
-                throw new APIMgtCopySubscriptionSkippedException("Some subscriptions will missed");
             }
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Couldn't change the status of api ID " + apiId, e, log);

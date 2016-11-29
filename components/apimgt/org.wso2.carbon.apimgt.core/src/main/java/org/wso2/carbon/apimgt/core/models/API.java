@@ -853,6 +853,13 @@ public final class API {
             return new API(this);
         }
 
+        public String getPreviousId() {
+            return previousId;
+        }
+
+        public void setPreviousId(String previousId) {
+            this.previousId = previousId;
+        }
     }
 
     public String getPreviousId() {
