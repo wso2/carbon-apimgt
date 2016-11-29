@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
@@ -239,7 +241,8 @@ public interface APIPublisher extends APIManager {
      * @param appId     Application Id              *
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String apiId, String subStatus, int appId) throws APIManagementException;
+    void updateSubscription(String apiId, APIMgtConstants.SubscriptionStatus subStatus, String appId) throws
+            APIManagementException;
 
 
     /**
@@ -263,17 +266,7 @@ public interface APIPublisher extends APIManager {
     LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException;
 
 
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     *
-     * @param identifier
-     * @param newStatus  accepted if changes are not pushed to a gateway
-     * @param deprecateOlderVersions
-     *@param requireReSubscriptions @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    void updateAPIForStateChange(String identifier, String newStatus, boolean deprecateOlderVersions, boolean
-            requireReSubscriptions) throws APIManagementException;
+
 
     /**
      * Get the current lifecycle status of the api
@@ -310,4 +303,11 @@ public interface APIPublisher extends APIManager {
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
+    /**
+     * Return {@link Subscription} of subscription id
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 }

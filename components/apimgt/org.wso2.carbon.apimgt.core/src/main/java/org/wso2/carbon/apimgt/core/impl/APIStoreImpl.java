@@ -80,8 +80,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public Application[] getApplications(String subscriber, String groupId) throws APIManagementException {
-        Application[] applicationList = null;
+    @Override public List<Application> getApplications(String subscriber, String groupId)
+            throws APIManagementException {
+        List<Application> applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
         } catch (APIMgtDAOException e) {
@@ -94,6 +95,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
+            application.setUuid(uuid);
+            application.setUpdatedUser(getUsername());
             application.setUpdatedTime(LocalDateTime.now());
             getApplicationDAO().updateApplication(uuid, application);
         } catch (APIMgtDAOException e) {
@@ -121,11 +124,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public void deleteApplication(Application application) throws APIManagementException {
+    @Override public void deleteApplication(String appId) throws APIManagementException {
         try {
-            getApplicationDAO().deleteApplication(application.getId());
+            getApplicationDAO().deleteApplication(appId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while deleting application - " + application.getName(), e,
+            APIUtils.logAndThrowException("Error occurred while deleting application - " + appId, e,
                     log);
         }
     }

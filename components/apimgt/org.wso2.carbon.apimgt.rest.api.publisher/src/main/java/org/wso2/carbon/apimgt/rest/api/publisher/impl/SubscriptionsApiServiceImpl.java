@@ -5,11 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -27,8 +29,20 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            apiPublisher.updateSubscription(subscription.getApi().getId(), APIMgtConstants.SubscriptionStatus.valueOf(blockState), subscription.getApplication()
+                    .getId());
+            Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException e) {
+            String msg = "Error while blocking the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
     }
     @Override
     public Response subscriptionsGet(String apiId

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -60,7 +61,7 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException
      */
-    public Subscription getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results
@@ -126,8 +127,8 @@ public interface APISubscriptionDAO {
      * @param status {@link APIConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException
      */
-    void addAPISubscription(String uuid, String apiId, String appId, String tier, String status)
-            throws APIMgtDAOException;
+    void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants.SubscriptionStatus
+            status) throws APIMgtDAOException;
 
     /**
      * Remove an existing API Subscription
@@ -149,9 +150,8 @@ public interface APISubscriptionDAO {
 
     /**
      * Copy existing subscriptions on one of the API versions into latest version
-     *
-     * @param identifier uuid of newly created version
+     * @param subscriptionList {@link List<Subscription>}
      * @throws APIMgtDAOException
      */
-    void copySubscriptions(String identifier) throws APIMgtDAOException;
+    void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException;
 }

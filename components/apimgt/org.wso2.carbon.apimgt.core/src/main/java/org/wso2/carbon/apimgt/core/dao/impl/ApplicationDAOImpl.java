@@ -49,7 +49,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     /**
      * Retrieve a given instance of an Application
      *
-     * @param appId   The UUID that uniquely identifies an Application
+     * @param appId The UUID that uniquely identifies an Application
      * @return valid {@link Application} object or null
      * @throws APIMgtDAOException
      */
@@ -98,23 +98,21 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Retrieves all available Applications that belong to a user.
      *
      * @param ownerId Username of user
-     * @return An array of {@link Application}
+     * @return A list of {@link Application}
      * @throws APIMgtDAOException
      */
     @Override
-    public Application[] getApplications(String ownerId) throws APIMgtDAOException {
+    public List<Application> getApplications(String ownerId) throws APIMgtDAOException {
         final String completeGetAppsQuery = GET_APPS_QUERY + " WHERE CREATED_BY = ?";
-        Application[] applications;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppsQuery)) {
             ps.setString(1, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                applications = this.createApplicationsFromResultSet(rs);
+                return this.createApplicationsFromResultSet(rs);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
-        return applications;
     }
 
     /**
@@ -294,14 +292,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return false;
     }
 
-    private Application[] createApplicationsFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {
+    private List<Application> createApplicationsFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {
         List<Application> appList = new ArrayList<>();
         Application application;
         while ((application = createApplicationFromResultSet(rs)) != null) {
             appList.add(application);
         }
-        Application[] apps = new Application[appList.size()];
-        return appList.toArray(apps);
+        return appList;
     }
 
     private Application createApplicationFromResultSet(ResultSet rs) throws APIMgtDAOException, SQLException {

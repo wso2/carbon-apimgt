@@ -280,10 +280,25 @@ public class RestApiUtil {
      * @param message specifies the error message
      * @return A generic errorDTO with the specified details
      */
+    public static ErrorDTO
+    getErrorDTO(String message, Long code, String description, HashMap<String, String> paramList) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMoreInfo(paramList);
+        errorDTO.setMessage(message);
+        errorDTO.setDescription(description);
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO
+     *
+     * @param message specifies the error message
+     * @return A generic errorDTO with the specified details
+     */
     public static ErrorDTO getErrorDTO(String message, Long code, String description) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
-        errorDTO.setMoreInfo("");
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
         return errorDTO;
