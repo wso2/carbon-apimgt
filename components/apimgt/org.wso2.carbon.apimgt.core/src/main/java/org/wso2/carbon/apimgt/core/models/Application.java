@@ -35,6 +35,7 @@ public final class Application {
     private Set<Subscription> subscriptions;
     private String groupId;
     private String uuid;
+    private String policyId;
     private String description;
     private String tier;
     private String status;
@@ -151,6 +152,14 @@ public final class Application {
 
     public void addKey(APIKey key) {
         keys.add(key);
+    }
+
+    public String getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(String policyId) {
+        this.policyId = policyId;
     }
 
     @Override

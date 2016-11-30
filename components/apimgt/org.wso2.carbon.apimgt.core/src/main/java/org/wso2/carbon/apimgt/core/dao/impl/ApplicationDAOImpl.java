@@ -55,7 +55,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplication(String appId) throws APIMgtDAOException {
-        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ? AND CREATED_BY = ?";
+        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
