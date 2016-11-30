@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag;
 
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -43,7 +42,9 @@ public class ETagOutInterceptor extends AbstractPhaseInterceptor<Message> {
     public void handleMessage(Message message) throws Fault {
         if (checkETagSkipList(message.getExchange().getInMessage().get(Message.PATH_INFO).toString(),
                 message.getExchange().getInMessage().get(Message.HTTP_REQUEST_METHOD).toString())) {
-            log.info("Skipping ETagOutInterceptor for URI : " + message.getExchange().getInMessage().get(Message.PATH_INFO).toString());
+            if (log.isDebugEnabled()){
+                log.debug("Skipping ETagOutInterceptor for URI : " + message.getExchange().getInMessage().get(Message.PATH_INFO).toString());
+            }
             return;
 
         }
@@ -51,8 +52,6 @@ public class ETagOutInterceptor extends AbstractPhaseInterceptor<Message> {
         if (headers == null) {
             headers = new MetadataMap<>();
         }
-        MessageContext currentMessageContext = MessageContext.getCurrentMessageContext();
-
         if (message.getExchange().containsKey(ETAG)) {
             String eTag = (String) message.getExchange().get(ETAG);
             setOutBoundHeaders(message, headers, eTag);
