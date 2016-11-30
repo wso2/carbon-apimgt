@@ -22,20 +22,54 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
+import java.util.UUID;
 
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
-    public void testAddAndGetApplication() throws Exception {
+    public void testAddAndGetSubscription() throws Exception {
         //add new app
         Application app = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
+        //add new api
+        API api = TestUtil.addTestAPI();
+        //add subscription
+        String subscriptionTier = "Gold";
+        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        String uuid = UUID.randomUUID().toString();
+        apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), subscriptionTier,
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        //get subscription
+        Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        //validate
+        Assert.assertEquals(subscription.getId(), uuid);
+        Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
+        Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionTier);
+        validateApp(subscription.getApplication(), app);
+        validateAPI(subscription.getApi(), api);
     }
 
     @Test
-    public void testUpdateApplication() throws Exception {
+    public void testGetSubscriptionByAPI() throws Exception {
+        //add 4 apps
+        String username = "admin";
+        Application app1 = TestUtil.addCustomApplication("App1", username);
+        Application app2 = TestUtil.addCustomApplication("App2", username);
+        Application app3 = TestUtil.addCustomApplication("App3", username);
+        Application app4 = TestUtil.addCustomApplication("App4", username);
+
+        //add api
+        API api  = TestUtil.addTestAPI();
+    }
+
+    @Test
+    public void testGetSubscriptionByApplication() throws Exception {
         //add new app
         Application currentApp = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = new ApplicationDAOImpl();
@@ -57,6 +91,21 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testIsApplicationNameExists() throws Exception {
 
+    }
+
+    private void validateAPI(API actualAPI, API expectedAPI) {
+        Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
+        Assert.assertEquals(actualAPI.getName(), expectedAPI.getName());
+        Assert.assertEquals(actualAPI.getVersion(), expectedAPI.getVersion());
+        Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
+        Assert.assertEquals(actualAPI.getProvider(), expectedAPI.getProvider());
+    }
+
+    private void validateApp(Application appFromDB, Application expectedApp) {
+        Assert.assertEquals(appFromDB.getId(), expectedApp.getId());
+        Assert.assertEquals(appFromDB.getName(), expectedApp.getName());
+        Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
+        Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus());
     }
 
 }
