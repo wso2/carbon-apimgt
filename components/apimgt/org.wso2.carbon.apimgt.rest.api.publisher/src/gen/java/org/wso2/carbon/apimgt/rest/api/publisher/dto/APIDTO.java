@@ -17,7 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class APIDTO   {
   @JsonProperty("id")
   private String id = null;
@@ -43,8 +43,8 @@ public class APIDTO   {
   @JsonProperty("wsdlUri")
   private String wsdlUri = null;
 
-  @JsonProperty("status")
-  private String status = null;
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
 
   @JsonProperty("responseCaching")
   private String responseCaching = null;
@@ -64,8 +64,8 @@ public class APIDTO   {
   @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
 
-  @JsonProperty("tiers")
-  private List<String> tiers = new ArrayList<String>();
+  @JsonProperty("policies")
+  private List<String> policies = new ArrayList<String>();
 
   @JsonProperty("maxTps")
   private API_maxTpsDTO maxTps = null;
@@ -276,22 +276,22 @@ public class APIDTO   {
     this.wsdlUri = wsdlUri;
   }
 
-  public APIDTO status(String status) {
-    this.status = status;
+  public APIDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
   **/
   @ApiModelProperty(example = "CREATED", value = "")
-  public String getStatus() {
-    return status;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
   public APIDTO responseCaching(String responseCaching) {
@@ -412,27 +412,27 @@ public class APIDTO   {
     this.tags = tags;
   }
 
-  public APIDTO tiers(List<String> tiers) {
-    this.tiers = tiers;
+  public APIDTO policies(List<String> policies) {
+    this.policies = policies;
     return this;
   }
 
-  public APIDTO addTiersItem(String tiersItem) {
-    this.tiers.add(tiersItem);
+  public APIDTO addPoliciesItem(String policiesItem) {
+    this.policies.add(policiesItem);
     return this;
   }
 
    /**
-   * Get tiers
-   * @return tiers
+   * Get policies
+   * @return policies
   **/
   @ApiModelProperty(required = true, value = "")
-  public List<String> getTiers() {
-    return tiers;
+  public List<String> getPolicies() {
+    return policies;
   }
 
-  public void setTiers(List<String> tiers) {
-    this.tiers = tiers;
+  public void setPolicies(List<String> policies) {
+    this.policies = policies;
   }
 
   public APIDTO maxTps(API_maxTpsDTO maxTps) {
@@ -648,14 +648,14 @@ public class APIDTO   {
         Objects.equals(this.provider, API.provider) &&
         Objects.equals(this.apiDefinition, API.apiDefinition) &&
         Objects.equals(this.wsdlUri, API.wsdlUri) &&
-        Objects.equals(this.status, API.status) &&
+        Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(this.responseCaching, API.responseCaching) &&
         Objects.equals(this.cacheTimeout, API.cacheTimeout) &&
         Objects.equals(this.destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(this.transport, API.transport) &&
         Objects.equals(this.tags, API.tags) &&
-        Objects.equals(this.tiers, API.tiers) &&
+        Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.maxTps, API.maxTps) &&
         Objects.equals(this.visibility, API.visibility) &&
         Objects.equals(this.visibleRoles, API.visibleRoles) &&
@@ -670,7 +670,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, status, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, tiers, maxTps, visibility, visibleRoles, visibleTenants, endpointConfig, endpointSecurity, gatewayEnvironments, sequences, businessInformation, corsConfiguration);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, maxTps, visibility, visibleRoles, visibleTenants, endpointConfig, endpointSecurity, gatewayEnvironments, sequences, businessInformation, corsConfiguration);
   }
 
   @Override
@@ -686,14 +686,14 @@ public class APIDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
-    sb.append("    tiers: ").append(toIndentedString(tiers)).append("\n");
+    sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");

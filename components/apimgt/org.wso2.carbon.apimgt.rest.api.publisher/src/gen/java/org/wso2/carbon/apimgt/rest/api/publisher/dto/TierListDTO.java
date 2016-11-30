@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 /**
  * TierListDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class TierListDTO   {
   @JsonProperty("count")
   private Integer count = null;
@@ -53,7 +53,7 @@ public class TierListDTO   {
    * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    * @return next
   **/
-  @ApiModelProperty(example = "/tiers/api?limit&#x3D;1&amp;offset&#x3D;2", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @ApiModelProperty(example = "/policies/api?limit&#x3D;1&amp;offset&#x3D;2", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   public String getNext() {
     return next;
   }
@@ -71,7 +71,7 @@ public class TierListDTO   {
    * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    * @return previous
   **/
-  @ApiModelProperty(example = "/tiers/api?limit&#x3D;1&amp;offset&#x3D;0", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(example = "/policies/api?limit&#x3D;1&amp;offset&#x3D;0", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   public String getPrevious() {
     return previous;
   }

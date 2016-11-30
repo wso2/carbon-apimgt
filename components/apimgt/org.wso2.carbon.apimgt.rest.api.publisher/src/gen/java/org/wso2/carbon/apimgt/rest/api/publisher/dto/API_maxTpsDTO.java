@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_maxTpsDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class API_maxTpsDTO   {
   @JsonProperty("production")
   private Long production = null;
@@ -62,9 +62,9 @@ public class API_maxTpsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_maxTpsDTO aPIMaxTps = (API_maxTpsDTO) o;
-    return Objects.equals(this.production, aPIMaxTps.production) &&
-        Objects.equals(this.sandbox, aPIMaxTps.sandbox);
+    API_maxTpsDTO apIMaxTps = (API_maxTpsDTO) o;
+    return Objects.equals(this.production, apIMaxTps.production) &&
+        Objects.equals(this.sandbox, apIMaxTps.sandbox);
   }
 
   @Override
