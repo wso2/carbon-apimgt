@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.models.policy;
  * Contains the common model attributes for policy
  */
 public class Policy {
-    private int policyId;
     private String uuid;
     private String policyName;
     private String displayName;
@@ -32,7 +31,6 @@ public class Policy {
 
     public Policy(String name) {
         this.policyName = name;
-        this.policyId = -1;
         this.isDeployed = false;
     }
 
@@ -66,14 +64,6 @@ public class Policy {
 
     public QuotaPolicy getDefaultQuotaPolicy() {
         return defaultQuotaPolicy;
-    }
-
-    public int getPolicyId() {
-        return policyId;
-    }
-
-    public void setPolicyId(int policyId) {
-        this.policyId = policyId;
     }
 
     public boolean isDeployed() {

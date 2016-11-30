@@ -164,8 +164,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            String tierName = body.getThrottlingTier();
-            application.setTier(tierName);
             String applicationUUID = apiConsumer.addApplication(application);
 
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
