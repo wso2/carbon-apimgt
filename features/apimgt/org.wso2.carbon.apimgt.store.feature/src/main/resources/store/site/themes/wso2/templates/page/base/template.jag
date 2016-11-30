@@ -74,7 +74,7 @@
     <!-- footer -->
     <footer class="footer">
       <div class="container-fluid">
-        <p>WSO2 API Manager 2.0.0 | &copy; <script>document.write(new Date().getFullYear());</script> <a title="WSO2" href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.</p>
+        <p>WSO2 API Manager 2.1.0 | &copy; <script>document.write(new Date().getFullYear());</script> <a title="WSO2" href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.</p>
       </div>
     </footer>
     
