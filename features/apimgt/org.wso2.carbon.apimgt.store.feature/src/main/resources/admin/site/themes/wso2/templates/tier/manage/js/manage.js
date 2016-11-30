@@ -1,4 +1,5 @@
 var deleteTier = function (tierObject) {
+    $("#messageModal div.modal-footer").html("");
     jagg.message({
         content: i18n.t('Tier deletion might affect current subscriptions. Are you sure you want to delete this tier? '),
         title: i18n.t('Confirm Deletion'),
