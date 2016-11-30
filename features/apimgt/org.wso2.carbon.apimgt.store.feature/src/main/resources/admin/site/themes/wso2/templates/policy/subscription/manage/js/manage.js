@@ -1,4 +1,5 @@
 var deleteSubscriptionPolicy = function (policyObject) {
+    $("#messageModal div.modal-footer").html("");
     jagg.message({
         content:i18n.t('Policy deletion might affect current subscriptions. Are you sure you want to delete this policy?'),
         title:i18n.t('Confirm Deletion'),
