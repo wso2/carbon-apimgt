@@ -159,3 +159,32 @@ input.ep-field{
 .btn-sequenceUpload{
     min-width:155px;
 }
+/* wso2 theme overrides */
+.btn-default, a.btn-default{
+    background-color: #ccc;
+    border: medium none;
+    color: #000;
+}
+.btn-default, a.btn-default:hover{
+    background-color: #ccc;
+    border: medium none;
+    color: #000;
+}
+.tab-content{
+    border:none;
+    padding-left:5px;
+}
+.form-horizontal.api-custom-forms .control-label{
+    padding-top:0;
+    text-align: left;
+}
+.form-horizontal.api-custom-forms .form-group{
+    border-bottom: solid 1px #efefef;
+    padding-bottom:5px;
+}
+.form-horizontal.api-custom-forms.edit div.view{
+    display: none;
+}
+.form-horizontal.api-custom-forms.view div.edit{
+    display: none;
+}
