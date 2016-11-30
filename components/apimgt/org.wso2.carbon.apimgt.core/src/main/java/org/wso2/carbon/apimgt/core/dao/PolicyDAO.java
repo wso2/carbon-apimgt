@@ -21,7 +21,9 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 /**
  * Provides access to Policy data layer
@@ -29,18 +31,28 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 public interface PolicyDAO {
 
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
-    /**
-     * Retrieves the name of Subscription Policy
-     *
-     * @param policyId  Subscription policy ID
-     * @return Tier name of given Subscription policy ID
-     * @throws APIMgtDAOException
-     */
-    public String getSubscriptionTierName(String policyId) throws APIMgtDAOException;
 
     void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
     void deletePolicy(String policyName);
+
+    /**
+     * Retrieves Subscription Policy by UUID
+     *
+     * @param policyId  Subscription policy ID
+     * @return {@link SubscriptionPolicy} of given UUID
+     * @throws APIMgtDAOException
+     */
+    public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves Application Policy by UUID
+     *
+     * @param policyId  Application policy ID
+     * @return {@link ApplicationPolicy} of given UUID
+     * @throws APIMgtDAOException
+     */
+    public ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException;
 
 
 }

@@ -242,7 +242,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
         application.setStatus("CREATED");
-        application.setTier("gold");
+        application.setTier("50PerMin");
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser("admin");
         application.setUpdatedTime(LocalDateTime.now());
@@ -257,7 +257,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is test application 2");
         application.setGroupId("groupx2");
         application.setStatus("APPROVED");
-        application.setTier("silver");
+        application.setTier("20PerMin");
         application.setUpdatedUser("admin2");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
@@ -270,7 +270,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
         application.setStatus("CREATED");
-        application.setTier("gold");
+        application.setTier("50PerMin");
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser("admin");
         application.setUpdatedTime(LocalDateTime.now());

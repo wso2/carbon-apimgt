@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
@@ -357,14 +358,68 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws APIMgtDAOException
      */
     public String getSubscriptionTierName(String policyId) throws APIMgtDAOException {
-        final String query = "SELECT NAME FROM AM_APPLICATION_POLICY WHERE UUID = ?";
+
+        return null;
+    }
+
+    /**
+     * Retrieves Subscription Policy by UUID
+     *
+     * @param policyId Subscription policy ID
+     * @return {@link SubscriptionPolicy} of given UUID
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
+                "FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
+        SubscriptionPolicy subscriptionPolicy;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, policyId);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getString("NAME");
+                    subscriptionPolicy = new SubscriptionPolicy(rs.getString("NAME"));
+                    subscriptionPolicy.setUuid(rs.getString("UUID"));
+                    subscriptionPolicy.setDisplayName(rs.getString("DISPLAY_NAME"));
+                    subscriptionPolicy.setDescription(rs.getString("DESCRIPTION"));
+                    subscriptionPolicy.setDeployed(rs.getBoolean("IS_DEPLOYED"));
+                    subscriptionPolicy.setCustomAttributes(rs.getString("CUSTOM_ATTRIBUTES"));
+                    return subscriptionPolicy;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Couldn't retrieve subscription tier for id : " + policyId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves Application Policy by UUID
+     *
+     * @param policyId Application policy ID
+     * @return {@link ApplicationPolicy} of given UUID
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
+                "FROM AM_APPLICATION_POLICY WHERE UUID = ?";
+        ApplicationPolicy applicationPolicy;
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, policyId);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    applicationPolicy = new ApplicationPolicy(rs.getString("NAME"));
+                    applicationPolicy.setUuid(rs.getString("UUID"));
+                    applicationPolicy.setDisplayName(rs.getString("DISPLAY_NAME"));
+                    applicationPolicy.setDescription(rs.getString("DESCRIPTION"));
+                    applicationPolicy.setDeployed(rs.getBoolean("IS_DEPLOYED"));
+                    applicationPolicy.setCustomAttributes(rs.getString("CUSTOM_ATTRIBUTES"));
+                    return applicationPolicy;
                 }
             }
         } catch (SQLException e) {

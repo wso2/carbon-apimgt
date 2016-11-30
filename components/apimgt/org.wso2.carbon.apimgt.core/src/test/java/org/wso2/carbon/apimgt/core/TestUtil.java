@@ -19,9 +19,12 @@
 
 package org.wso2.carbon.apimgt.core;
 
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 public class TestUtil {
@@ -38,5 +41,19 @@ public class TestUtil {
         Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
         applicationDAO.addApplication(application);
         return application;
+    }
+
+    public static API addTestAPI() throws APIManagementException {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        return api;
+    }
+
+    public static API addAlternativeTestAPI() throws APIManagementException {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createAlternativeAPI().build();
+        apiDAO.addAPI(api);
+        return api;
     }
 }
