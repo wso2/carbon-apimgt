@@ -22,7 +22,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
@@ -123,13 +123,13 @@ public abstract class ApisApiService {
     public abstract Response apisCopyApiPost(String newVersion
  ,String apiId
  ) throws NotFoundException;
-    public abstract Response apisFindApiByAttributeHead(String context
- ,String apiName
- ,String accept
- ) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
  ,String query
+ ,String accept
+ ,String ifNoneMatch
+ ) throws NotFoundException;
+    public abstract Response apisHead(String query
  ,String accept
  ,String ifNoneMatch
  ) throws NotFoundException;

@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher;
 import javax.xml.bind.annotation.XmlTransient;
 
 @javax.xml.bind.annotation.XmlRootElement
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class ApiResponseMessage {
     public static final int ERROR = 1;
     public static final int WARNING = 2;

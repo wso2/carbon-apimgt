@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -404,32 +405,6 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisFindApiByAttributeHead(String context, String apiName, String accept) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            boolean status;
-            if (context != null) {
-                status = apiPublisher.checkIfAPIContextExists(context);
-            } else if (apiName != null) {
-                status = apiPublisher.checkIfAPINameExists(apiName);
-            } else {
-                status = false;
-            }
-
-            if (status) {
-                return Response.status(Response.Status.OK).build();
-            } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while checking status.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    @Override
     public Response apisGet(Integer limit
 , Integer offset
 , String query
@@ -448,6 +423,43 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return null;
     }
+
+    @Override
+    public Response apisHead(String query, String accept, String ifNoneMatch) throws NotFoundException {
+        //TODO improve the query parameters searching options
+        String username = RestApiUtil.getLoggedInUsername();
+        String context = "context";
+        String name = "name";
+        boolean status;
+
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String[] words = query.split(":");
+
+            if (words.length > 1) {
+                if (context.equalsIgnoreCase(words[0])) {
+                    status = apiPublisher.checkIfAPIContextExists(words[1]);
+                } else if (name.equalsIgnoreCase(words[0])) {
+                    status = apiPublisher.checkIfAPINameExists(words[1]);
+                } else {
+                    status = false;
+                }
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            if (status) {
+                return Response.status(Response.Status.OK).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while checking status.";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     @Override
     public Response apisPost(APIDTO body
 , String contentType

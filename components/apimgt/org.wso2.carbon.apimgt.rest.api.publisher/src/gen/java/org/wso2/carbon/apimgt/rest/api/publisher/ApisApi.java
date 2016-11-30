@@ -32,7 +32,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-29T15:29:39.232+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -429,24 +429,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisCopyApiPost(newVersion,apiId);
     }
-    @HEAD
-    @Path("/find-api-by-attribute")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Check given API attibute name is already exist", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = void.class, tags={ "API (Individual)", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested API attibute status is returned ", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API attribute does not exist. ", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
-    public Response apisFindApiByAttributeHead(@ApiParam(value = "You can provide the API attibute and check whether it is already defined. ",required=true) @QueryParam("context") String context
-,@ApiParam(value = "You can provide the API attibute and check whether it is already defined. ",required=true) @QueryParam("apiName") String apiName
-,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-)
-    throws NotFoundException {
-        return delegate.apisFindApiByAttributeHead(context,apiName,accept);
-    }
     @GET
     
     @Consumes({ "application/json" })
@@ -466,6 +448,24 @@ public class ApisApi implements Microservice  {
 )
     throws NotFoundException {
         return delegate.apisGet(limit,offset,query,accept,ifNoneMatch);
+    }
+    @HEAD
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Check given API attibute name is already exist ", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = void.class, tags={ "API (Collection)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested API attibute status is returned ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API attribute does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
+    public Response apisHead(@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+)
+    throws NotFoundException {
+        return delegate.apisHead(query,accept,ifNoneMatch);
     }
     @POST
     
