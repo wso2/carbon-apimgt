@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
@@ -32,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -344,29 +342,6 @@ public final class API {
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
     private String parentApiId;
-
-    /*
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        API that = (API) o;
-        return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + provider.hashCode();
-        result = 31 * result + version.hashCode();
-        return result;
-    }
-    */
 
     /**
      * {@code API} builder static inner class.
@@ -845,6 +820,7 @@ public final class API {
          */
 
         public API build() throws APIManagementException {
+            /*
             if (StringUtils.isEmpty(this.getId())) {
                 this.id(UUID.randomUUID().toString());
             }
@@ -869,6 +845,7 @@ public final class API {
             if (this.getVisibility() == null) {
                 throw new APIManagementException("Couldn't find Visibility of API ");
             }
+            */
             return new API(this);
         }
 

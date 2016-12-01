@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,7 +119,7 @@ public class APIUtils {
     }
 
     /**
-     * Checks to String lists for equality independent of the order of elements in the lists.
+     * Checks String lists for equality independent of the order of elements in the lists.
      *
      * Note that order of the elements in the lists will be changed as a result of sorting,
      * but this is not a concern usually since the order does not matter.
@@ -137,6 +138,29 @@ public class APIUtils {
         // the order does not matter
         Collections.sort(list1);
         Collections.sort(list2);
+        return list1.equals(list2);
+    }
+
+    /**
+     * Checks generic lists for equality independent of the order of elements in the lists.
+     *
+     * Note that order of the elements in the lists will be changed as a result of sorting,
+     * but this is not a concern usually since the order does not matter.
+     */
+    public static <T> boolean isListsEqualIgnoreOrder(List<T> list1, List<T> list2, Comparator<T> comparator) {
+        if (list1 == null && list2 == null) {
+            return true;
+        }
+
+        if (list1 == null || list2 == null || list1.size() != list2.size()) {
+            return false;
+        }
+
+        // Sort lists so that the order of elements don't affect the equal check.
+        // Note that order of the elements in the lists will be changed as a result but this is not a concern since
+        // the order does not matter
+        Collections.sort(list1, comparator);
+        Collections.sort(list2, comparator);
         return list1.equals(list2);
     }
 }

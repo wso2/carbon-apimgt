@@ -25,6 +25,8 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,24 +169,24 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         multipleStatus.add(blockedStatus);
 
         // Add APIs
-        List<API> publishedAPIs = new ArrayList<>();
+        List<API> publishedAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfPublished; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).build();
-            publishedAPIs.add(api);
+            publishedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
 
-        List<API> createdAPIs = new ArrayList<>();
+        List<API> createdAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfCreated; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus).build();
-            createdAPIs.add(api);
+            createdAPIsSummary.add(api);
             apiDAO.addAPI(api);
         }
 
-        List<API> blockedAPIs = new ArrayList<>();
+        List<API> blockedAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfBlocked; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).build();
-            blockedAPIs.add(api);
+            blockedAPIsSummary.add(api);
             apiDAO.addAPI(api);
         }
 
@@ -194,8 +196,29 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         List<API> apiList = apiDAO.getAPIsByStatus(singleStatus);
 
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummary, new APIComparator()));
 
+        // Filter APIs by two statuses
+        List<String> twoStatuses = new ArrayList<>();
+        twoStatuses.add(publishedStatus);
+        twoStatuses.add(blockedStatus);
 
+        apiList = apiDAO.getAPIsByStatus(multipleStatus);
+
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
+
+        for (API api : publishedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+        }
+        /*
+        for (Iterator<API> iterator = list.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.isEmpty()) {
+                // Remove the current element from the iterator and the list.
+                iterator.remove();
+            }
+        }
+        */
 
     }
 
@@ -227,13 +250,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        API expectedAPI = builder.provider(api.getProvider()).
-                id(api.getId()).
-                name(api.getName()).
-                version(api.getVersion()).
-                context(api.getContext()).
-                createdTime(api.getCreatedTime()).
-                createdBy(api.getCreatedBy()).build();
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
 
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI);

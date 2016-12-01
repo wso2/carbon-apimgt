@@ -111,6 +111,41 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
+    public static API getSummaryFromAPI(API api) {
+        try {
+            return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                    id(api.getId()).
+                    context(api.getContext()).
+                    description(api.getDescription()).
+                    lifeCycleStatus(api.getLifeCycleStatus()).
+                    lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
+        API.APIBuilder builder = new API.APIBuilder(toAPI);
+        try {
+            return builder.provider(fromAPI.getProvider()).
+                    id(fromAPI.getId()).
+                    name(fromAPI.getName()).
+                    version(fromAPI.getVersion()).
+                    context(fromAPI.getContext()).
+                    createdTime(fromAPI.getCreatedTime()).
+                    createdBy(fromAPI.getCreatedBy()).
+                    lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
+                    lifeCycleStatus(fromAPI.getLifeCycleStatus()).
+                    parentApiId(fromAPI.getParentApiId()).build();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
         LifecycleState lifecycleState = new LifecycleState();
         lifecycleState.setLcName("API_LIFECYCLE");
