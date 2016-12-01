@@ -179,6 +179,24 @@ public interface APIPublisher extends APIManager {
     boolean checkIfAPIExists(String apiId) throws APIManagementException;
 
     /**
+     * Checks if a given API name exists in the registry
+     *
+     * @param name
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    boolean checkIfAPINameExists(String name) throws APIManagementException;
+
+    /**
+     * Checks if a given API context exists in the registry
+     *
+     * @param context
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    boolean checkIfAPIContextExists(String context) throws APIManagementException;
+
+    /**
      * This method used to save the documentation content
      *
      * @param api               API
@@ -236,12 +254,11 @@ public interface APIPublisher extends APIManager {
     /**
      * Update the subscription status
      *
-     * @param apiId     API Identifier
+     * @param subId     Subscription ID
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String apiId, APIMgtConstants.SubscriptionStatus subStatus, String appId) throws
+    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
             APIManagementException;
 
 
@@ -310,4 +327,21 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
+    /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
 }

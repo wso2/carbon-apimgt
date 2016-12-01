@@ -32,9 +32,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            apiPublisher.updateSubscription(subscription.getApi().getId(), APIMgtConstants.SubscriptionStatus.valueOf(blockState), subscription.getApplication()
-                    .getId());
+            apiPublisher.updateSubscription(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf(blockState));
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
@@ -76,8 +74,21 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            if (subscription != null) {
+                SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
+                return Response.ok().entity(subscriptionDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+        } catch (APIManagementException e) {
+            String msg = "Error while getting the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
     }
     @Override
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId

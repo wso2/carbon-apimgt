@@ -66,10 +66,10 @@ public class MappingUtil {
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
-        apidto.setStatus(api.getLifeCycleStatus());
+        apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
         apidto.setTransport(api.getTransport());
-        api.getPolicies().forEach(apidto::addTiersItem);
+        api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -111,20 +111,20 @@ public class MappingUtil {
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
 
-		API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+        API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
                 apiDefinition(new StringBuilder(apidto.getApiDefinition())).
-                lifeCycleStatus(apidto.getStatus()).
+                lifeCycleStatus(apidto.getLifeCycleStatus()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
-                policies(apidto.getTiers()).
+                policies(apidto.getPolicies()).
                 tags(apidto.getTags()).
                 transport(apidto.getTransport()).
                 cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
-                policies(apidto.getTiers()).
+                policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration);
         return apiBuilder;
@@ -145,7 +145,7 @@ public class MappingUtil {
             apiInfo.setDescription(apiSummary.getDescription());
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setStatus(apiSummary.getLifeCycleStatus());
+            apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfoList.add(apiInfo);
         }
@@ -267,10 +267,11 @@ public class MappingUtil {
     public static SubscriptionDTO fromSubscription(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setApplicationId(subscription.getId());
-        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.fromValue(subscription.getStatus().getStatus()));
+        subscriptionDTO.setLifeCycleStatus(
+                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().getStatus()));
         subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
-        subscriptionDTO.setTier(subscription.getSubscriptionTier());
+        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
         return subscriptionDTO;
     }
 }

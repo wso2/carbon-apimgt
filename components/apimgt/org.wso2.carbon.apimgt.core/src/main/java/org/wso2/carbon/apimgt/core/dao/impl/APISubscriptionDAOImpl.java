@@ -32,6 +32,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,14 +52,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      */
     @Override
     public Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException {
-        final String getSubscriptionCountOfApiSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
-                "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
-                "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
-                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERTION, APP.NAME AS APP_NAME, " +
-                "APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, APP.CALLBACK_URL AS APP_CALLBACK_URL, " +
-                "APP.APPLICATION_STATUS AS APP_STATUS, APP.CREATED_BY AS APP_OWNER " +
-                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP " +
-                "WHERE SUBS.UUID = ? AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID";
+        final String getSubscriptionCountOfApiSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.API_ID AS API_ID, " +
+                "SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, " +
+                "API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
+                "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
+                "WHERE SUBS.UUID = ? AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND " +
+                "SUBS.TIER_ID = POLICY.UUID";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionCountOfApiSql)) {
             ps.setString(1, subscriptionId);
@@ -209,6 +211,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 createSubscription(apiId, appId, uuid, tier, status, conn);
                 conn.commit();
             } catch (SQLException e) {
+                conn.rollback();
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
@@ -301,7 +304,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         try {
             if (rs.next()) {
                 String subscriptionId = rs.getString("SUBS_UUID");
-                String subscriptionTier = rs.getString("TIER");
+                String subscriptionTier = rs.getString("SUBS_POLICY");
 
                 API api = null;
                 //if API information is available
@@ -318,12 +321,12 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 if (rs.getString("APP_NAME") != null) {
                     app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
                     app.setUuid(rs.getString("APPLICATION_ID"));
-                    app.setTier(rs.getString("APP_POLICY_ID"));
                     app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
                     app.setStatus(rs.getString("APP_STATUS"));
                 }
 
                 subscription = new Subscription(subscriptionId, app, api, subscriptionTier);
+                subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -352,7 +355,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
         //add new subscription
         final String addSubscriptionSql = "INSERT INTO AM_SUBSCRIPTION (UUID, TIER_ID, API_ID, APPLICATION_ID," +
-                "SUB_STATUS, SUBS_TYPE, CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?,?)";
+                "SUB_STATUS, CREATED_TIME) VALUES (?,(SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?),?,?,?,?)";
 
         try (PreparedStatement ps = conn.prepareStatement(addSubscriptionSql)) {
             conn.setAutoCommit(false);
@@ -360,10 +363,38 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             ps.setString(2, tier);
             ps.setString(3, apiId);
             ps.setString(4, appId);
-            ps.setString(5, status != null ? status.getStatus() : APIMgtConstants.SubscriptionStatus.ACTIVE
-                    .getStatus());
-            ps.setString(6, APIMgtConstants.SubscriptionType.SUBSCRIBE);
+            ps.setString(5, status != null ? status.getStatus() : APIMgtConstants.SubscriptionStatus
+                    .ACTIVE.getStatus());
+            ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
             ps.execute();
+        }
+    }
+
+    /**
+     * Update Subscription Status
+     *
+     * @param subId
+     * @param subStatus
+     * @param policy
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
+            throws APIMgtDAOException {
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+                preparedStatement.setString(1, policy);
+                preparedStatement.setString(2, subStatus.getStatus());
+                preparedStatement.setString(3, subId);
+                preparedStatement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 }

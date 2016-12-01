@@ -12,7 +12,7 @@ import java.util.List;
  * CORS configuration for the API 
  */
 @ApiModel(description = "CORS configuration for the API ")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:27.156+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
 public class API_corsConfigurationDTO   {
   @JsonProperty("corsConfigurationEnabled")
   private Boolean corsConfigurationEnabled = false;
@@ -143,12 +143,12 @@ public class API_corsConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_corsConfigurationDTO aPICorsConfiguration = (API_corsConfigurationDTO) o;
-    return Objects.equals(this.corsConfigurationEnabled, aPICorsConfiguration.corsConfigurationEnabled) &&
-        Objects.equals(this.accessControlAllowOrigins, aPICorsConfiguration.accessControlAllowOrigins) &&
-        Objects.equals(this.accessControlAllowCredentials, aPICorsConfiguration.accessControlAllowCredentials) &&
-        Objects.equals(this.accessControlAllowHeaders, aPICorsConfiguration.accessControlAllowHeaders) &&
-        Objects.equals(this.accessControlAllowMethods, aPICorsConfiguration.accessControlAllowMethods);
+    API_corsConfigurationDTO apICorsConfiguration = (API_corsConfigurationDTO) o;
+    return Objects.equals(this.corsConfigurationEnabled, apICorsConfiguration.corsConfigurationEnabled) &&
+        Objects.equals(this.accessControlAllowOrigins, apICorsConfiguration.accessControlAllowOrigins) &&
+        Objects.equals(this.accessControlAllowCredentials, apICorsConfiguration.accessControlAllowCredentials) &&
+        Objects.equals(this.accessControlAllowHeaders, apICorsConfiguration.accessControlAllowHeaders) &&
+        Objects.equals(this.accessControlAllowMethods, apICorsConfiguration.accessControlAllowMethods);
   }
 
   @Override

@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -124,6 +125,50 @@ public class ApisApiServiceImpl extends ApisApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+    @Override
+    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String gatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
+            return Response.ok().entity(gatewayConfig).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving gateway config of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
+            String ifUnmodifiedSince) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
+            String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
+            return Response.ok().entity(apiGatewayConfig).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
     @Override
     public Response apisApiIdGet(String apiId
 , String accept
@@ -357,6 +402,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 //        }
         return null;
     }
+
     @Override
     public Response apisGet(Integer limit
 , Integer offset
@@ -376,6 +422,43 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return null;
     }
+
+    @Override
+    public Response apisHead(String query, String accept, String ifNoneMatch) throws NotFoundException {
+        //TODO improve the query parameters searching options
+        String username = RestApiUtil.getLoggedInUsername();
+        String context = "context";
+        String name = "name";
+        boolean status;
+
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String[] words = query.split(":");
+
+            if (words.length > 1) {
+                if (context.equalsIgnoreCase(words[0])) {
+                    status = apiPublisher.checkIfAPIContextExists(words[1]);
+                } else if (name.equalsIgnoreCase(words[0])) {
+                    status = apiPublisher.checkIfAPINameExists(words[1]);
+                } else {
+                    status = false;
+                }
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            if (status) {
+                return Response.status(Response.Status.OK).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while checking status.";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     @Override
     public Response apisPost(APIDTO body
 , String contentType
