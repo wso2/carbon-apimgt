@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
@@ -69,7 +70,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
-        parentApiId = builder.parentApiId;
+        copiedFromApiId = builder.copiedFromApiId;
     }
 
     public String getId() {
@@ -269,8 +270,8 @@ public final class API {
         if (!uriTemplates.equals(api.uriTemplates)) {
             return false;
         }
-        if ((parentApiId != null) ?
-                !parentApiId.equals(api.parentApiId) : (api.parentApiId != null)) {
+        if ((copiedFromApiId != null) ?
+                !copiedFromApiId.equals(api.copiedFromApiId) : (api.copiedFromApiId != null)) {
             return false;
         }
 
@@ -304,7 +305,7 @@ public final class API {
         result = 31 * result + (lastUpdatedTime != null ? lastUpdatedTime.hashCode() : 0);
         result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
         result = 31 * result + (uriTemplates != null ? uriTemplates.hashCode() : 0);
-        result = 31 * result + (parentApiId != null ? parentApiId.hashCode() : 0);
+        result = 31 * result + (copiedFromApiId != null ? copiedFromApiId.hashCode() : 0);
         return result;
     }
 
@@ -341,7 +342,7 @@ public final class API {
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
-    private String parentApiId;
+    private String copiedFromApiId;
 
     /**
      * {@code API} builder static inner class.
@@ -451,7 +452,7 @@ public final class API {
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<UriTemplate> uriTemplates = Collections.emptySet();
-        private String parentApiId;
+        private String copiedFromApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -489,7 +490,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
-            this.parentApiId = copy.parentApiId;
+            this.copiedFromApiId = copy.copiedFromApiId;
         }
 
         /**
@@ -801,14 +802,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code parentApiId} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
          * chained together.
          *
-         * @param parentApiId the {@code parentApiId} to set
+         * @param copiedFromApiId the {@code copiedFromApiId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder parentApiId(String parentApiId) {
-            this.parentApiId = parentApiId;
+        public APIBuilder copiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
             return this;
         }
 
@@ -819,10 +820,17 @@ public final class API {
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
 
-        public API build() throws APIManagementException {
-            /*
+        public API build()  {
+            return new API(this);
+        }
+
+        /**
+         * Validate the API object
+         * @throws APIManagementException
+         */
+        public void validate() throws APIManagementException {
             if (StringUtils.isEmpty(this.getId())) {
-                this.id(UUID.randomUUID().toString());
+                throw new APIManagementException("Couldn't find UUID of API");
             }
             if (StringUtils.isEmpty(this.getApiDefinition())) {
                 throw new APIManagementException("Couldn't find swagger definition of API");
@@ -845,8 +853,6 @@ public final class API {
             if (this.getVisibility() == null) {
                 throw new APIManagementException("Couldn't find Visibility of API ");
             }
-            */
-            return new API(this);
         }
 
         /**
@@ -912,24 +918,20 @@ public final class API {
             return uriTemplates;
         }
 
-        public API buildApi() {
-            return new API(this);
+        public String getCopiedFromApiId() {
+            return copiedFromApiId;
         }
 
-        public String getParentApiId() {
-            return parentApiId;
-        }
-
-        public void setParentApiId(String parentApiId) {
-            this.parentApiId = parentApiId;
+        public void setCopiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
         }
     }
 
-    public String getParentApiId() {
-        return parentApiId;
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
     }
 
-    public void setParentApiId(String parentApiId) {
-        this.parentApiId = parentApiId;
+    public void setCopiedFromApiId(String copiedFromApiId) {
+        this.copiedFromApiId = copiedFromApiId;
     }
 }
