@@ -193,13 +193,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(message, ExceptionCodes.API_ALREADY_EXISTS);
             }
         } catch (APIMgtDAOException e) {
-            log.error("Error occurred while creating the API - " + apiBuilder.getName());
-            throw new APIMgtDAOException("Error occurred while creating the API - " + apiBuilder.getName(), e,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            log.error("Error occurred while Associating the API - " + apiBuilder.getName());
-            throw new APIManagementException("Error occurred while Associating the API - " + apiBuilder.getName(),
-                     e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+            String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return apiBuilder.getId();
     }
