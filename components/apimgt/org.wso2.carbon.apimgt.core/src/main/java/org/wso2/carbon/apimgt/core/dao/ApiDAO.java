@@ -247,9 +247,4 @@ public interface ApiDAO {
      */
     void deleteDocument(String resourceID) throws APIMgtDAOException;
 
-    /**
-     * used to deprecate older versions of the api
-     * @param identifier
-     */
-    void deprecateOlderVersions(String identifier);
-    }
+}

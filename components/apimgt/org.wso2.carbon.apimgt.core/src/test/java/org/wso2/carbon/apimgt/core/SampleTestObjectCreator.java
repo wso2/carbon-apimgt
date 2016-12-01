@@ -51,14 +51,6 @@ public class SampleTestObjectCreator {
         policies.add("Silver");
         policies.add("Bronze");
 
-        Endpoint endpoint = new Endpoint();
-        List<Endpoint> endpointList = new ArrayList<>();
-        endpointList.add(endpoint);
-
-        Environment environment =  new Environment();
-        List<Environment> environmentList = new ArrayList<>();
-        environmentList.add(environment);
-
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration =  new CorsConfiguration();
 
@@ -106,8 +98,6 @@ public class SampleTestObjectCreator {
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new ArrayList<>()).
-                endpoints(endpointList).
-                gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
@@ -119,6 +109,41 @@ public class SampleTestObjectCreator {
             e.printStackTrace();
         }
         return apiBuilder;
+    }
+
+    public static API getSummaryFromAPI(API api) {
+        try {
+            return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                    id(api.getId()).
+                    context(api.getContext()).
+                    description(api.getDescription()).
+                    lifeCycleStatus(api.getLifeCycleStatus()).
+                    lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
+        API.APIBuilder builder = new API.APIBuilder(toAPI);
+        try {
+            return builder.provider(fromAPI.getProvider()).
+                    id(fromAPI.getId()).
+                    name(fromAPI.getName()).
+                    version(fromAPI.getVersion()).
+                    context(fromAPI.getContext()).
+                    createdTime(fromAPI.getCreatedTime()).
+                    createdBy(fromAPI.getCreatedBy()).
+                    lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
+                    lifeCycleStatus(fromAPI.getLifeCycleStatus()).
+                    parentApiId(fromAPI.getParentApiId()).build();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
@@ -144,14 +169,6 @@ public class SampleTestObjectCreator {
         List<String> policies = new ArrayList<>();
         policies.add("Silver");
         policies.add("Bronze");
-
-        Endpoint endpoint = new Endpoint();
-        List<Endpoint> endpointList = new ArrayList<>();
-        endpointList.add(endpoint);
-
-        Environment environment =  new Environment();
-        List<Environment> environmentList = new ArrayList<>();
-        environmentList.add(environment);
 
         BusinessInformation businessInformation = new BusinessInformation();
         businessInformation.setBusinessOwner("John Doe");
@@ -209,8 +226,6 @@ public class SampleTestObjectCreator {
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
                 visibleRoles(Arrays.asList("customer", "manager", "employee")).
-                endpoints(endpointList).
-                gatewayEnvironments(environmentList).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
@@ -225,6 +240,90 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
+
+    public static API.APIBuilder createUniqueAPI() {
+        List<String> transport = new ArrayList<>();
+        transport.add("http");
+
+        List<String> tags = new ArrayList<>();
+        tags.add("food");
+        tags.add("beverage");
+
+        List<String> policies = new ArrayList<>();
+        policies.add("Silver");
+        policies.add("Bronze");
+
+        BusinessInformation businessInformation = new BusinessInformation();
+        businessInformation.setBusinessOwner("John Doe");
+        businessInformation.setBusinessOwnerEmail("john.doe@annonymous.com");
+        businessInformation.setTechnicalOwner("Jane Doe");
+        businessInformation.setBusinessOwnerEmail("jane.doe@annonymous.com");
+
+        CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        corsConfiguration.setEnabled(true);
+        corsConfiguration.setAllowMethods(Arrays.asList("GET", "POST", "DELETE"));
+        corsConfiguration.setAllowHeaders(Arrays.asList("Authorization", "X-Custom"));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "1.0.0").
+                id(UUID.randomUUID().toString()).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                lifeCycleStatus("CREATED").
+                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
+                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
+                        "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
+                        "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
+                        "\"in\":\"body\"}],\"responses\":{\"201\":{\"headers\":{\"Location\":" +
+                        "{\"description\":\"The URL of the newly created resource.\",\"type\":\"string\"}}," +
+                        "\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created.\"}}}}," +
+                        "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\"," +
+                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"" +
+                        "Return a list of available menu items\",\"parameters\":[]," +
+                        "\"responses\":{\"200\":{\"headers\":{},\"schema\":{\"title\":\"Menu\"," +
+                        "\"properties\":{\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"}," +
+                        "\"type\":\"array\"}},\"type\":\"object\"},\"description\":\"OK.\"}}}}}," +
+                        "\"schemes\":[\"https\"],\"produces\":[\"application/json\"],\"swagger\":\"2.0\"," +
+                        "\"definitions\":{\"MenuItem\":{\"title\":\"Pizza menu Item\"," +
+                        "\"properties\":{\"price\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}," +
+                        "\"name\":{\"type\":\"string\"},\"image\":{\"type\":\"string\"}},\"required\":[\"name\"]}," +
+                        "\"Order\":{\"title\":\"Pizza Order\",\"properties\":{\"customerName\":{\"type\":\"string\"}," +
+                        "\"delivered\":{\"type\":\"boolean\"},\"address\":{\"type\":\"string\"}," +
+                        "\"pizzaType\":{\"type\":\"string\"},\"creditCardNumber\":{\"type\":\"string\"}," +
+                        "\"quantity\":{\"type\":\"number\"},\"orderId\":{\"type\":\"integer\"}}," +
+                        "\"required\":[\"orderId\"]}},\"consumes\":[\"application/json\"]," +
+                        "\"info\":{\"title\":\"PizzaShackAPI\"," +
+                        "\"description\":\"This document describe a RESTFul API for Pizza Shack " +
+                        "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
+                        "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
+                        "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
+                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
+                wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
+                isResponseCachingEnabled(true).
+                cacheTimeout(120).
+                isDefaultVersion(true).
+                apiPolicy("Gold").
+                transport(transport).
+                tags(tags).
+                policies(policies).
+                visibility(API.Visibility.RESTRICTED).
+                visibleRoles(Arrays.asList("customer", "manager", "employee")).
+                businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
+                createdTime(LocalDateTime.now()).
+                createdBy("Adam Doe").
+                lastUpdatedTime(LocalDateTime.now());
+
+        try {
+            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+
+        return apiBuilder;
+    }
+
 
     public static API copyAPISummary(API api) {
         return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).

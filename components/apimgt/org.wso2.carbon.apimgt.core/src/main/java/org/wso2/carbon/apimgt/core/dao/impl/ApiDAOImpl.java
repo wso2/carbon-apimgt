@@ -105,7 +105,12 @@ public class ApiDAOImpl implements ApiDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
 
-            return constructAPISummary(statement);
+            List<API> apiResults = constructAPISummaryList(statement);
+            if (apiResults.isEmpty()) {
+                return null;
+            }
+
+            return apiResults.get(0);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -267,8 +272,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
                 "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, " +
-                "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, PARENT_API_ID) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
@@ -306,6 +311,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(22, api.getCreatedBy());
                 statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
                 statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
+                statement.setString(25, api.getParentApiId());
 
                 statement.execute();
 
@@ -717,18 +723,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * Used to deprecate older versions of the api
-     *
-     * @param identifier
-     */
-    @Override
-    public void deprecateOlderVersions(String identifier) {
-        /**
-         * todo:
-         */
-    }
-
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException,
             IOException {
         try (ResultSet rs = statement.executeQuery()) {
@@ -780,22 +774,6 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
-    private API constructAPISummary(PreparedStatement statement) throws SQLException {
-        try (ResultSet rs = statement.executeQuery()) {
-            if (rs.next()) {
-                return new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
-                        rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
-                        context(rs.getString("CONTEXT")).
-                        description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).lifecycleInstanceId(rs.getString
-                        ("LIFECYCLE_INSTANCE_ID")).buildApi();
-            }
-        }
-
-        return null;
-    }
-
     private List<API> constructAPISummaryList(PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
@@ -805,7 +783,8 @@ public class ApiDAOImpl implements ApiDAO {
                         id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).buildApi();
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).buildApi();
 
                 apiList.add(apiSummary);
             }

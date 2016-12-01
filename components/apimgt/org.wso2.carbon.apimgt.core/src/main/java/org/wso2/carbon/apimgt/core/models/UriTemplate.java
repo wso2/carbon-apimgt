@@ -69,6 +69,66 @@ public final class UriTemplate {
         return scope;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        UriTemplate that = (UriTemplate) o;
+
+        if ((uriTemplate != null) ?
+                !uriTemplate.equals(that.uriTemplate) : (that.uriTemplate != null)) {
+            return false;
+        }
+        if ((httpVerb != null) ?
+                !httpVerb.equals(that.httpVerb) : (that.httpVerb != null)) {
+            return false;
+        }
+        if ((authType != null) ?
+                !authType.equals(that.authType) : (that.authType != null)) {
+            return false;
+        }
+        if ((policy != null) ?
+                !policy.equals(that.policy) : (that.policy != null)) {
+            return false;
+        }
+        if ((scope != null) ?
+                !scope.equals(that.scope) : (that.scope != null)) {
+            return false;
+        }
+        if ((templateId != null) ?
+                !templateId.equals(that.templateId) : (that.templateId != null)) {
+            return false;
+        }
+        if ((produces != null) ?
+                !produces.equals(that.produces) : (that.produces != null)) {
+            return false;
+        }
+        if ((consumes != null) ?
+                !consumes.equals(that.consumes) : (that.consumes != null)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
+        result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
+        result = 31 * result + (authType != null ? authType.hashCode() : 0);
+        result = 31 * result + (policy != null ? policy.hashCode() : 0);
+        result = 31 * result + (scope != null ? scope.hashCode() : 0);
+        result = 31 * result + (templateId != null ? templateId.hashCode() : 0);
+        result = 31 * result + (produces != null ? produces.hashCode() : 0);
+        result = 31 * result + (consumes != null ? consumes.hashCode() : 0);
+        return result;
+    }
+
     /**
      *  Builder class for getInstance
      */
