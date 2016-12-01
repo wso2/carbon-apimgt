@@ -14,7 +14,7 @@ jagg.initializer("item-design", {
         jagg.addFooterJS("jquery-ace", "jagg", "libs/jquery-ace.min.js");
         //jagg.addFooterJS("bootstrap-min", "jagg", "lib/bootstrap/js/bootstrap.min.js");
 
-        jagg.addFooterJS("jsonpath-0.8.0", "jagg", "libs/jsonpath-0.8.0.js");
+        jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");
 
         jagg.addHeaderCSS("tagscss", "jagg", "libs/bootstrap-taginput/bootstrap-tagsinput.css");
 
