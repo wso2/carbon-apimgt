@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.models;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -63,8 +64,6 @@ public final class API {
         policies = builder.policies;
         visibility = builder.visibility;
         visibleRoles = builder.visibleRoles;
-        endpoints = builder.endpoints;
-        gatewayEnvironments = builder.gatewayEnvironments;
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
@@ -147,14 +146,6 @@ public final class API {
         return visibleRoles;
     }
 
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public List<Environment> getGatewayEnvironments() {
-        return gatewayEnvironments;
-    }
-
     public BusinessInformation getBusinessInformation() {
         return businessInformation;
     }
@@ -183,6 +174,143 @@ public final class API {
         return uriTemplates;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        API api = (API) o;
+
+        if (isResponseCachingEnabled != api.isResponseCachingEnabled) {
+            return false;
+        }
+        if (cacheTimeout != api.cacheTimeout) {
+            return false;
+        }
+        if (isDefaultVersion != api.isDefaultVersion) {
+            return false;
+        }
+        if (!id.equals(api.id)) {
+            return false;
+        }
+        if (!provider.equals(api.provider)) {
+            return false;
+        }
+        if (!name.equals(api.name)) {
+            return false;
+        }
+        if (!version.equals(api.version)) {
+            return false;
+        }
+        if (!context.equals(api.context)) {
+            return false;
+        }
+        if ((description != null) ?
+                !description.equals(api.description) : (api.description != null)) {
+            return false;
+        }
+        if ((lifeCycleStatus != null) ?
+                !lifeCycleStatus.equals(api.lifeCycleStatus) : (api.lifeCycleStatus != null)) {
+            return false;
+        }
+        if (lifecycleInstanceId != null ?
+                !lifecycleInstanceId.equals(api.lifecycleInstanceId) : api.lifecycleInstanceId != null) {
+            return false;
+        }
+        if ((apiDefinition != null) ?
+                !apiDefinition.equals(api.apiDefinition) : (api.apiDefinition != null)) {
+            return false;
+        }
+        if ((wsdlUri != null) ?
+                !wsdlUri.equals(api.wsdlUri) : (api.wsdlUri != null)) {
+            return false;
+        }
+        if (!APIUtils.isListsEqualIgnoreOrder(transport, api.transport)) {
+            return false;
+        }
+        if (!APIUtils.isListsEqualIgnoreOrder(tags, api.tags)) {
+            return false;
+        }
+        if (!APIUtils.isListsEqualIgnoreOrder(policies, api.policies)) {
+            return false;
+        }
+        if (visibility != api.visibility) {
+            return false;
+        }
+        if (!APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles)) {
+            return false;
+        }
+        if ((businessInformation != null) ?
+                !businessInformation.equals(api.businessInformation) : (api.businessInformation != null)) {
+            return false;
+        }
+        if ((corsConfiguration != null) ?
+                !corsConfiguration.equals(api.corsConfiguration) : (api.corsConfiguration != null)) {
+            return false;
+        }
+        if ((createdTime != null) ?
+                !createdTime.equals(api.createdTime) : (api.createdTime != null)) {
+            return false;
+        }
+        if ((createdBy != null) ?
+                !createdBy.equals(api.createdBy) : (api.createdBy != null)) {
+            return false;
+        }
+        if ((lastUpdatedTime != null) ?
+                !lastUpdatedTime.equals(api.lastUpdatedTime) : (api.lastUpdatedTime != null)) {
+            return false;
+        }
+        if ((lifecycleState != null) ?
+                !lifecycleState.equals(api.lifecycleState) : (api.lifecycleState != null)) {
+            return false;
+        }
+        if (!uriTemplates.equals(api.uriTemplates)) {
+            return false;
+        }
+        if ((parentApiId != null) ?
+                !parentApiId.equals(api.parentApiId) : (api.parentApiId != null)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + provider.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + version.hashCode();
+        result = 31 * result + context.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (lifeCycleStatus != null ? lifeCycleStatus.hashCode() : 0);
+        result = 31 * result + (lifecycleInstanceId != null ? lifecycleInstanceId.hashCode() : 0);
+        result = 31 * result + (apiDefinition != null ? apiDefinition.hashCode() : 0);
+        result = 31 * result + (wsdlUri != null ? wsdlUri.hashCode() : 0);
+        result = 31 * result + (isResponseCachingEnabled ? 1 : 0);
+        result = 31 * result + cacheTimeout;
+        result = 31 * result + (isDefaultVersion ? 1 : 0);
+        result = 31 * result + (transport != null ? transport.hashCode() : 0);
+        result = 31 * result + (tags != null ? tags.hashCode() : 0);
+        result = 31 * result + (policies != null ? policies.hashCode() : 0);
+        result = 31 * result + (visibility != null ? visibility.hashCode() : 0);
+        result = 31 * result + (visibleRoles != null ? visibleRoles.hashCode() : 0);
+        result = 31 * result + (businessInformation != null ? businessInformation.hashCode() : 0);
+        result = 31 * result + (corsConfiguration != null ? corsConfiguration.hashCode() : 0);
+        result = 31 * result + (createdTime != null ? createdTime.hashCode() : 0);
+        result = 31 * result + (createdBy != null ? createdBy.hashCode() : 0);
+        result = 31 * result + (lastUpdatedTime != null ? lastUpdatedTime.hashCode() : 0);
+        result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
+        result = 31 * result + (uriTemplates != null ? uriTemplates.hashCode() : 0);
+        result = 31 * result + (parentApiId != null ? parentApiId.hashCode() : 0);
+        return result;
+    }
+
+
     /**
      * Visibility options
      */
@@ -208,8 +336,6 @@ public final class API {
     private final List<String> policies;
     private final Visibility visibility;
     private final List<String> visibleRoles;
-    private final List<Endpoint> endpoints;
-    private final List<Environment> gatewayEnvironments;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
     private final LocalDateTime createdTime;
@@ -219,6 +345,7 @@ public final class API {
     private final Set<UriTemplate> uriTemplates;
     private String parentApiId;
 
+    /*
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -239,6 +366,7 @@ public final class API {
         result = 31 * result + version.hashCode();
         return result;
     }
+    */
 
     /**
      * {@code API} builder static inner class.
@@ -321,14 +449,6 @@ public final class API {
             return visibleRoles;
         }
 
-        public List<Endpoint> getEndpoints() {
-            return endpoints;
-        }
-
-        public List<Environment> getGatewayEnvironments() {
-            return gatewayEnvironments;
-        }
-
         public BusinessInformation getBusinessInformation() {
             return businessInformation;
         }
@@ -349,15 +469,13 @@ public final class API {
         private List<String> policies;
         private Visibility visibility;
         private List<String> visibleRoles = Collections.emptyList();
-        private List<Endpoint> endpoints = Collections.emptyList();
-        private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private LocalDateTime createdTime;
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<UriTemplate> uriTemplates;
+        private Set<UriTemplate> uriTemplates = Collections.emptySet();
         private String parentApiId;
 
         public APIBuilder(String provider, String name, String version) {
@@ -389,8 +507,6 @@ public final class API {
             this.policies = copy.policies;
             this.visibility = copy.visibility;
             this.visibleRoles = copy.visibleRoles;
-            this.endpoints = copy.endpoints;
-            this.gatewayEnvironments = copy.gatewayEnvironments;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
             this.createdTime = copy.createdTime;
@@ -646,30 +762,6 @@ public final class API {
          */
         public APIBuilder visibleRoles(List<String> visibleRoles) {
             this.visibleRoles = visibleRoles;
-            return this;
-        }
-
-        /**
-         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained
-         * together.
-         *
-         * @param endpoints the {@code endpoints} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder endpoints(List<Endpoint> endpoints) {
-            this.endpoints = endpoints;
-            return this;
-        }
-
-        /**
-         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param gatewayEnvironments the {@code gatewayEnvironments} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder gatewayEnvironments(List<Environment> gatewayEnvironments) {
-            this.gatewayEnvironments = gatewayEnvironments;
             return this;
         }
 

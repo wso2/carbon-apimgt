@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,5 +115,28 @@ public class APIUtils {
     public static String getDefaultAPIPolicy() {
         // TODO: 11/25/16 need to implement logic
         return "Unlimited";
+    }
+
+    /**
+     * Checks to String lists for equality independent of the order of elements in the lists.
+     *
+     * Note that order of the elements in the lists will be changed as a result of sorting,
+     * but this is not a concern usually since the order does not matter.
+     */
+    public static boolean isListsEqualIgnoreOrder(List<String> list1, List<String> list2) {
+        if (list1 == null && list2 == null) {
+            return true;
+        }
+
+        if (list1 == null || list2 == null || list1.size() != list2.size()) {
+            return false;
+        }
+
+        // Sort lists so that the order of elements don't affect the equal check.
+        // Note that order of the elements in the lists will be changed as a result but this is not a concern since
+        // the order does not matter
+        Collections.sort(list1);
+        Collections.sort(list2);
+        return list1.equals(list2);
     }
 }

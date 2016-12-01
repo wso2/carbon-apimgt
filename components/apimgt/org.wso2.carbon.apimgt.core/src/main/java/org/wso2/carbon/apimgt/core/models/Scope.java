@@ -72,5 +72,49 @@ public class Scope {
     public void setId(int id) {
         this.id = id;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Scope scope = (Scope) o;
+
+        if (id != scope.id) {
+            return false;
+        }
+        if ((key != null) ?
+                !key.equals(scope.key) : (scope.key != null)) {
+            return false;
+        }
+        if ((name != null) ?
+                !name.equals(scope.name) : (scope.name != null)) {
+            return false;
+        }
+        if ((roles != null) ?
+                !roles.equals(scope.roles) : (scope.roles != null)) {
+            return false;
+        }
+        if ((description != null) ?
+                !description.equals(scope.description) : (scope.description != null)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (roles != null ? roles.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + id;
+        return result;
+    }
 }
 
