@@ -62,7 +62,7 @@ public class APIManagerFactory {
             return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
         } catch (APIMgtDAOException e) {
-            log.error("Couldn't Create API Provider");
+            log.error("Couldn't Create API Provider", e);
             throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
@@ -77,7 +77,7 @@ public class APIManagerFactory {
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
         } catch (APIMgtDAOException e) {
-            log.error("Couldn't Create API Consumer");
+            log.error("Couldn't Create API Consumer", e);
             throw new APIMgtDAOException("Couldn't Create API Consumer", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }

@@ -169,6 +169,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         API createdAPI;
 
         apiBuilder.provider(getUsername());
+        if (StringUtils.isEmpty(apiBuilder.getId())) {
+            apiBuilder.id(UUID.randomUUID().toString());
+        }
+        apiBuilder.validate();
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -189,13 +193,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(message, ExceptionCodes.API_ALREADY_EXISTS);
             }
         } catch (APIMgtDAOException e) {
-            log.error("Error occurred while creating the API - " + apiBuilder.getName());
+            log.error("Error occurred while creating the API - " + apiBuilder.getName(), e);
             throw new APIMgtDAOException("Error occurred while creating the API - " + apiBuilder.getName(),
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            log.error("Error occurred while Associating the API - " + apiBuilder.getName());
+            log.error("Error occurred while Associating the API - " + apiBuilder.getName(), e);
             throw new APIManagementException("Error occurred while Associating the API - " + apiBuilder.getName(),
-                    ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+                     e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return apiBuilder.getId();
     }

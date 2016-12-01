@@ -352,7 +352,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            apiPublisher.updateAPI(MappingUtil.toAPI(body));
+            API.APIBuilder api   = MappingUtil.toAPI(body).id(apiId);
+            apiPublisher.updateAPI(api);
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
             return Response.ok().entity(apidto).build();
         } catch (APIManagementException e) {

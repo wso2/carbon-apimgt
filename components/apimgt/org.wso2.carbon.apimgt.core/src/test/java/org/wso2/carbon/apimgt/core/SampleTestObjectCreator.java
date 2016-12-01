@@ -110,24 +110,18 @@ public class SampleTestObjectCreator {
     }
 
     public static API getSummaryFromAPI(API api) {
-        try {
             return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
                     id(api.getId()).
                     context(api.getContext()).
                     description(api.getDescription()).
                     lifeCycleStatus(api.getLifeCycleStatus()).
                     lifecycleInstanceId(api.getLifecycleInstanceId()).build();
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
         API.APIBuilder builder = new API.APIBuilder(toAPI);
-        try {
-            return builder.provider(fromAPI.getProvider()).
+
+        return builder.provider(fromAPI.getProvider()).
                     id(fromAPI.getId()).
                     name(fromAPI.getName()).
                     version(fromAPI.getVersion()).
@@ -137,11 +131,7 @@ public class SampleTestObjectCreator {
                     lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
                     lifeCycleStatus(fromAPI.getLifeCycleStatus()).
                     copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
 
-        return null;
     }
 
     public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
@@ -153,7 +143,7 @@ public class SampleTestObjectCreator {
     }
 
     public static API getMockApiSummaryObject(){
-        return new API.APIBuilder("admin","Sample","1.0.0").buildApi();
+        return new API.APIBuilder("admin","Sample","1.0.0").build();
     }
 
     public static API.APIBuilder createAlternativeAPI() {
@@ -337,7 +327,7 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).buildApi();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
 
     public static Application createDefaultApplication(){
