@@ -247,4 +247,18 @@ public interface ApiDAO {
      */
     void deleteDocument(String resourceID) throws APIMgtDAOException;
 
+    /**
+     * used to deprecate older versions of the api
+     * @param identifier
+     */
+    void deprecateOlderVersions(String identifier);
+
+    /**
+     * Check if document Exist
+     * @param apiId
+     * @param documentInfo
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
 }

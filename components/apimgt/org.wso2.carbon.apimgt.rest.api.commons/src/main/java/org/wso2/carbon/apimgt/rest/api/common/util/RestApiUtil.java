@@ -414,4 +414,9 @@ public class RestApiUtil {
         }
         return null;
     }
+
+    public static boolean isURL(String sourceUrl) {
+        //TODO: to be implemented
+        return true;
+    }
 }

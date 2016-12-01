@@ -90,6 +90,32 @@ class DocMetaDataDAO {
         return null;
     }
 
+    static DocumentInfo checkDocument(Connection connection, String docID) throws SQLException {
+        final String query = "SELECT UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, SOURCE_URL, SOURCE_TYPE, VISIBILITY " +
+                "FROM AM_API_DOC_META_DATA WHERE UUID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, docID);
+            statement.execute();
+
+            try (ResultSet rs =  statement.getResultSet()) {
+                while (rs.next()) {
+                    return new DocumentInfo.Builder().
+                            id(rs.getString("UUID")).
+                            name(rs.getString("NAME")).
+                            summary(rs.getString("SUMMARY")).
+                            type(DocumentInfo.DocType.valueOf(rs.getString("TYPE"))).
+                            otherType(rs.getString("OTHER_TYPE_NAME")).
+                            sourceURL(rs.getString("SOURCE_URL")).
+                            sourceType(DocumentInfo.SourceType.valueOf(rs.getString("SOURCE_TYPE"))).
+                            visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).build();
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     static void addDocumentInfo(Connection connection, DocumentInfo documentInfo) throws SQLException {
         final String query = "INSERT INTO AM_API_DOC_META_DATA (UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +

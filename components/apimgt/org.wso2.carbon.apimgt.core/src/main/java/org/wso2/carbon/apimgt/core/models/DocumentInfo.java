@@ -35,6 +35,7 @@ public final class DocumentInfo {
         name = builder.name;
         type = builder.type;
         visibility = builder.visibility;
+        fileName = builder.fileName;
     }
 
     public SourceType getSourceType() {
@@ -67,6 +68,10 @@ public final class DocumentInfo {
 
     public Visibility getVisibility() {
         return visibility;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     /**
@@ -146,6 +151,7 @@ public final class DocumentInfo {
     private final String name;
     private final DocType type;
     private final Visibility visibility;
+    private final String fileName;
 
     /**
      * {@code DocumentInfo} builder static inner class.
@@ -159,6 +165,43 @@ public final class DocumentInfo {
         private String name;
         private DocType type;
         private Visibility visibility;
+        private  String fileName;
+
+        public SourceType getSourceType() {
+            return sourceType;
+        }
+
+        public String getSourceURL() {
+            return sourceURL;
+        }
+
+        public String getOtherType() {
+            return otherType;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getSummary() {
+            return summary;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public DocType getType() {
+            return type;
+        }
+
+        public Visibility getVisibility() {
+            return visibility;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
 
         public Builder() {
         }
@@ -172,6 +215,7 @@ public final class DocumentInfo {
             this.name = copy.name;
             this.type = copy.type;
             this.visibility = copy.visibility;
+            this.fileName = copy.fileName;
         }
 
         /**
@@ -264,6 +308,18 @@ public final class DocumentInfo {
          */
         public Builder visibility(Visibility visibility) {
             this.visibility = visibility;
+            return this;
+        }
+
+        /**
+         * Sets the {@code fileName} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param fileName the {@code fileName} to set
+         * @return a reference to this Builder
+         */
+        public Builder fileName(String fileName) {
+            this.fileName = fileName;
             return this;
         }
 
