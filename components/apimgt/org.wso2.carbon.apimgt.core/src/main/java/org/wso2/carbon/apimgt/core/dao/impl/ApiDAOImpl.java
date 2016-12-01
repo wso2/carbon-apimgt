@@ -801,8 +801,7 @@ public class ApiDAOImpl implements ApiDAO {
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).parentApiId(rs.getString
-                        ("PARENT_API_ID")).
-                        buildApi();
+                        ("PARENT_API_ID")).build();
             }
         }
 
@@ -819,7 +818,7 @@ public class ApiDAOImpl implements ApiDAO {
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).buildApi();
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).build();
 
                 apiList.add(apiSummary);
             }
