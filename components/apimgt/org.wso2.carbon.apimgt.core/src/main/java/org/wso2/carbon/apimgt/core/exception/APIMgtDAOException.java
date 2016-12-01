@@ -33,6 +33,11 @@ public class APIMgtDAOException extends APIManagementException {
        super(msg, code);
    }
 
+    public APIMgtDAOException(String msg , Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
+    }
+
+
     public APIMgtDAOException(String msg) {
         super(msg);
     }
