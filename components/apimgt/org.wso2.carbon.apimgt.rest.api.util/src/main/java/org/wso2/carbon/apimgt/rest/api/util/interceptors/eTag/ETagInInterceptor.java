@@ -51,7 +51,9 @@ public class ETagInInterceptor extends AbstractPhaseInterceptor<Message> {
 
         if (checkETagSkipList(message.get(Message.PATH_INFO).toString(),
                 message.get(Message.HTTP_REQUEST_METHOD).toString())) {
-            log.info("Skipping ETagInInterceptor for URI : " + message.get(Message.PATH_INFO).toString());
+            if (log.isDebugEnabled()){
+                log.debug("Skipping ETagInInterceptor for URI : " + message.get(Message.PATH_INFO).toString());
+            }
             return;
         }
 
