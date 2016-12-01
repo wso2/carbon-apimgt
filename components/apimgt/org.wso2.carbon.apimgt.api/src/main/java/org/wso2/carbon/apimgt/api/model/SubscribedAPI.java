@@ -48,7 +48,7 @@ public class SubscribedAPI {
         this.apiId = apiId;
     }
 
-    public SubscribedAPI (String uuid) {
+    public SubscribedAPI(String uuid) {
         this.uuid = uuid;
     }
 

@@ -40,7 +40,11 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -384,6 +388,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
     /**
      * gets the createdTime and updatedTime for the swagger definition
+     *
      * @param apiIdentifier
      * @param registry
      * @return

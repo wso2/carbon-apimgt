@@ -17,7 +17,12 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represent the Application in api model
@@ -30,7 +35,7 @@ public class Application {
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
-    private Map<String,OAuthApplicationInfo> oauthApps = new HashMap<String, OAuthApplicationInfo>();
+    private Map<String, OAuthApplicationInfo> oauthApps = new HashMap<String, OAuthApplicationInfo>();
     private String tier;
     private String callbackUrl;
     private String description;
@@ -57,9 +62,11 @@ public class Application {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 
-    /**Holds workflow status**/
-    private String applicationWorkFlowStatus; 
-    
+    /**
+     * Holds workflow status
+     **/
+    private String applicationWorkFlowStatus;
+
     public Application(String name, Subscriber subscriber) {
         this.name = name;
         this.subscriber = subscriber;
@@ -114,15 +121,15 @@ public class Application {
         this.subscribedAPIs.removeAll(subscribedAPIs);
     }
 
-    protected Map<String,OAuthApplicationInfo> getOAuthApp(){
-     return oauthApps;
+    protected Map<String, OAuthApplicationInfo> getOAuthApp() {
+        return oauthApps;
     }
 
-    public OAuthApplicationInfo getOAuthApp(String keyType){
-       return oauthApps.get(keyType);
+    public OAuthApplicationInfo getOAuthApp(String keyType) {
+        return oauthApps.get(keyType);
     }
 
-    public void addOAuthApp(String keyType, OAuthApplicationInfo oAuthApplication){
+    public void addOAuthApp(String keyType, OAuthApplicationInfo oAuthApplication) {
         oauthApps.put(keyType, oAuthApplication);
     }
 
@@ -150,16 +157,16 @@ public class Application {
         this.tier = tier;
     }
 
-    
+
     public String getCallbackUrl() {
-		return callbackUrl;
-	}
+        return callbackUrl;
+    }
 
-	public void setCallbackUrl(String callbackUrl) {
-		this.callbackUrl = callbackUrl;
-	}
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -176,12 +183,12 @@ public class Application {
         return result;
     }
 
-	public String getApplicationWorkFlowStatus() {
-	    return applicationWorkFlowStatus;
+    public String getApplicationWorkFlowStatus() {
+        return applicationWorkFlowStatus;
     }
 
-	public void setApplicationWorkFlowStatus(String applicationWorkFlowStatus) {
-	    this.applicationWorkFlowStatus = applicationWorkFlowStatus;
+    public void setApplicationWorkFlowStatus(String applicationWorkFlowStatus) {
+        this.applicationWorkFlowStatus = applicationWorkFlowStatus;
     }
 
     public String getGroupId() {
@@ -200,13 +207,13 @@ public class Application {
         return uuid;
     }
 
-	public Boolean getIsBlackListed() {
-		return isBlackListed;
-	}
+    public Boolean getIsBlackListed() {
+        return isBlackListed;
+    }
 
-	public void setIsBlackListed(Boolean isBlackListed) {
-		this.isBlackListed = isBlackListed;
-	}
-    
-    
+    public void setIsBlackListed(Boolean isBlackListed) {
+        this.isBlackListed = isBlackListed;
+    }
+
+
 }
