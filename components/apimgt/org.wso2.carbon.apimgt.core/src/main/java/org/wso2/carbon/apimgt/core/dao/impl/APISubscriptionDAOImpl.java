@@ -64,7 +64,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
              PreparedStatement ps = conn.prepareStatement(getSubscriptionCountOfApiSql)) {
             ps.setString(1, subscriptionId);
             try (ResultSet rs = ps.executeQuery()) {
-                return createSubscriptionFromResultSet(rs);
+                return createSubscriptionWithApiAndAppInformation(rs);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -84,14 +84,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, APP.NAME AS APP_NAME, APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, " +
                 "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
-                "APP.CREATED_BY AS APP_OWNER " +
-                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP " +
-                "WHERE SUBS.API_ID = ? AND SUBS.APPLICATION_ID = APP.UUID";
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
+                "WHERE SUBS.API_ID = ? AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionCountOfApiSql)) {
             ps.setString(1, apiId);
             try (ResultSet rs = ps.executeQuery()) {
-                return createSubscriptionsFromResultSet(rs);
+                return createSubscriptionsWithAppInformationOnly(rs);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -110,15 +110,15 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String getSubscriptionCountOfApiSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
-                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERTION, APP.NAME AS APP_NAME, " +
-                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP " +
-                "WHERE SUBS.APPLICATION_ID = ? AND SUBS.APPLICATION_ID = APP.UUID";
+                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, POLICY.NAME AS SUBS_POLICY " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_SUBSCRIPTION_POLICY POLICY  " +
+                "WHERE SUBS.APPLICATION_ID = ? AND SUBS.API_ID = API.UUID AND SUBS.TIER_ID = POLICY.UUID";
         ;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionCountOfApiSql)) {
             ps.setString(1, applicationId);
             try (ResultSet rs = ps.executeQuery()) {
-                return createSubscriptionsFromResultSet(rs);
+                return createSubscriptionsWithApiInformationOnly(rs);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -138,6 +138,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     @Override
     public APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName)
             throws APIMgtDAOException {
+        //todo: implement
+        createSubscriptionsFromResultSet(null);
         return null;
     }
 
@@ -293,37 +295,32 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     private List<Subscription> createSubscriptionsFromResultSet(ResultSet rs) throws APIMgtDAOException {
         List<Subscription> subscriptionList = new ArrayList<>();
         Subscription subscription;
-        while ((subscription = createSubscriptionFromResultSet(rs)) != null) {
+        if (rs == null) {
+            return new ArrayList<>();
+        }
+        while ((subscription = createSubscriptionWithApiAndAppInformation(rs)) != null) {
             subscriptionList.add(subscription);
         }
         return subscriptionList;
     }
 
-    private Subscription createSubscriptionFromResultSet(ResultSet rs) throws APIMgtDAOException {
+    private Subscription createSubscriptionWithApiAndAppInformation(ResultSet rs) throws APIMgtDAOException {
         Subscription subscription = null;
         try {
             if (rs.next()) {
                 String subscriptionId = rs.getString("SUBS_UUID");
                 String subscriptionTier = rs.getString("SUBS_POLICY");
 
-                API api = null;
-                //if API information is available
-                if (rs.getString("API_NAME") != null) {
-                    API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
-                            rs.getString("API_NAME"), rs.getString("API_VERSION"));
-                    apiBuilder.id(rs.getString("API_ID"));
-                    apiBuilder.context(rs.getString("API_CONTEXT"));
-                    api = apiBuilder.buildApi();
-                }
+                API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
+                        rs.getString("API_NAME"), rs.getString("API_VERSION"));
+                apiBuilder.id(rs.getString("API_ID"));
+                apiBuilder.context(rs.getString("API_CONTEXT"));
+                API api = apiBuilder.buildApi();
 
-                Application app = null;
-                //if Application information is available
-                if (rs.getString("APP_NAME") != null) {
-                    app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
-                    app.setUuid(rs.getString("APPLICATION_ID"));
-                    app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
-                    app.setStatus(rs.getString("APP_STATUS"));
-                }
+                Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
+                app.setId(rs.getString("APPLICATION_ID"));
+                app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
+                app.setStatus(rs.getString("APP_STATUS"));
 
                 subscription = new Subscription(subscriptionId, app, api, subscriptionTier);
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
@@ -332,6 +329,53 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             throw new APIMgtDAOException(e);
         }
         return subscription;
+    }
+
+    private List<Subscription> createSubscriptionsWithApiInformationOnly(ResultSet rs) throws APIMgtDAOException {
+        List<Subscription> subscriptionList = new ArrayList<>();
+        try {
+            Subscription subscription;
+            while (rs.next()) {
+                String subscriptionId = rs.getString("SUBS_UUID");
+                String subscriptionTier = rs.getString("SUBS_POLICY");
+
+                API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
+                        rs.getString("API_NAME"), rs.getString("API_VERSION"));
+                apiBuilder.id(rs.getString("API_ID"));
+                apiBuilder.context(rs.getString("API_CONTEXT"));
+                API api = apiBuilder.buildApi();
+
+                subscription = new Subscription(subscriptionId, null, api, subscriptionTier);
+                subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
+                subscriptionList.add(subscription);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return subscriptionList;
+    }
+
+    private List<Subscription> createSubscriptionsWithAppInformationOnly(ResultSet rs) throws APIMgtDAOException {
+        List<Subscription> subscriptionList = new ArrayList<>();
+        try {
+            Subscription subscription;
+            while (rs.next()) {
+                String subscriptionId = rs.getString("SUBS_UUID");
+                String subscriptionTier = rs.getString("SUBS_POLICY");
+
+                Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
+                app.setId(rs.getString("APPLICATION_ID"));
+                app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
+                app.setStatus(rs.getString("APP_STATUS"));
+
+                subscription = new Subscription(subscriptionId, app, null, subscriptionTier);
+                subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
+                subscriptionList.add(subscription);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return subscriptionList;
     }
 
     private void createSubscription(String apiId, String appId, String uuid, String tier, APIMgtConstants

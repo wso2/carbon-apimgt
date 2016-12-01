@@ -325,6 +325,14 @@ public class SampleTestObjectCreator {
     }
 
 
+    public static API.APIBuilder createCustomAPI(String name, String version, String context) {
+        API.APIBuilder apiBuilder = createDefaultAPI();
+        apiBuilder.name(name);
+        apiBuilder.version(version);
+        apiBuilder.context(context);
+        return apiBuilder;
+    }
+
     public static API copyAPISummary(API api) {
         return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
                 id(api.getId()).
@@ -337,7 +345,7 @@ public class SampleTestObjectCreator {
     public static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
-        application.setUuid(UUID.randomUUID().toString());
+        application.setId(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
@@ -352,7 +360,7 @@ public class SampleTestObjectCreator {
     public static Application createAlternativeApplication(){
         //created by admin and updated by admin2
         Application application = new Application("TestApp2", "admin");
-        application.setUuid(UUID.randomUUID().toString());
+        application.setId(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp2");
         application.setDescription("This is test application 2");
         application.setGroupId("groupx2");
@@ -365,7 +373,7 @@ public class SampleTestObjectCreator {
 
     public static Application createCustomApplication(String applicationName, String owner){
         Application application = new Application(applicationName, owner);
-        application.setUuid(UUID.randomUUID().toString());
+        application.setId(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");

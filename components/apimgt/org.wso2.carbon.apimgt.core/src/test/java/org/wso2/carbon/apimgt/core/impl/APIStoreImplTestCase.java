@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -137,7 +136,7 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
-        application.setUuid(UUID);
+        application.setId(UUID);
         apiStore.deleteApplication(UUID);
         verify(applicationDAO, times(1)).deleteApplication(UUID);
     }
