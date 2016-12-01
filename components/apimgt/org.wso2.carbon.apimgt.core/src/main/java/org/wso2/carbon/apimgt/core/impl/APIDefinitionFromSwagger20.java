@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -137,7 +138,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 }
             }
         } catch (ParseException e) {
-            APIUtils.logAndThrowException("Couldn't extract scopes from swagger ", e, log);
+            log.error("Couldn't extract scopes from swagger ");
+            throw new APIManagementException("Couldn't extract scopes from swagger ",
+                    ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
         return scopeMap;
     }

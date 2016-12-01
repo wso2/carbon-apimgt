@@ -254,12 +254,11 @@ public interface APIPublisher extends APIManager {
     /**
      * Update the subscription status
      *
-     * @param apiId     API Identifier
+     * @param subId     Subscription ID
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String apiId, APIMgtConstants.SubscriptionStatus subStatus, String appId) throws
+    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
             APIManagementException;
 
 

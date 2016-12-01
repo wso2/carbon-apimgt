@@ -154,4 +154,14 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException;
+
+    /**
+     * Update Subscription Status
+     * @param subId
+     * @param subStatus
+     * @param policy
+     * @throws APIMgtDAOException
+     */
+    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy) throws
+            APIMgtDAOException;
 }

@@ -32,7 +32,7 @@ public enum ExceptionCodes implements ErrorHandler {
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Life cycle exception occurred", 500, " This is error description"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
-    SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json");;
+    SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json");
 
     private final long errorCode;
     private final String errorMessage;
