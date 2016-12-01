@@ -138,7 +138,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 }
             }
         } catch (ParseException e) {
-            log.error("Couldn't extract scopes from swagger ");
+            log.error("Couldn't extract scopes from swagger ", e);
             throw new APIManagementException("Couldn't extract scopes from swagger ",
                     ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
