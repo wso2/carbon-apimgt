@@ -67,6 +67,7 @@ public class SampleTestObjectCreator {
                 context("weather").
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
+                lifecycleInstanceId(UUID.randomUUID().toString()).
                 apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
                         "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
                         "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
@@ -120,10 +121,10 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
-    public static LifecycleState getMockLifecycleStateObject() {
+    public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
         LifecycleState lifecycleState = new LifecycleState();
         lifecycleState.setLcName("API_LIFECYCLE");
-        lifecycleState.setLifecycleId("7a2298c4-c905-403f-8fac-38c73301631f");
+        lifecycleState.setLifecycleId(lifecycleId);
         lifecycleState.setState("PUBLISH");
         return lifecycleState;
     }

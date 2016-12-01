@@ -379,7 +379,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @Override
-    public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
+    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
             throws APIMgtDAOException {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {

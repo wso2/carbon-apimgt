@@ -162,6 +162,6 @@ public interface APISubscriptionDAO {
      * @param policy
      * @throws APIMgtDAOException
      */
-    void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy) throws
+    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy) throws
             APIMgtDAOException;
 }

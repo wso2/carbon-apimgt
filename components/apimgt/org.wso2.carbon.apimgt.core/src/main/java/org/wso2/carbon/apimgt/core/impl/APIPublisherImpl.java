@@ -624,7 +624,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         try {
             Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subId);
-            getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus, subscription.getSubscriptionTier());
+            if (subscription != null) {
+                getApiSubscriptionDAO().updateSubscription(subId, subStatus, subscription.getSubscriptionTier());
+            }
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
         }
