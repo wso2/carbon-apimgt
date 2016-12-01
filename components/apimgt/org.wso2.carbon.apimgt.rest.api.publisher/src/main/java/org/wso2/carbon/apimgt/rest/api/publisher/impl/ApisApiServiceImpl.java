@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -25,7 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -62,8 +63,45 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+//        String username = RestApiUtil.getLoggedInUsername();
+//        try {
+//            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+//            DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
+//            if (documentInfo == null) {
+//                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+//                return null;
+//            }
+//            //gets the content depending on the type of the document
+//            if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
+//
+//                InputStream fileDataStream =apiPublisher.getDocumentationContent(documentId);
+//                String contentType = documentInfo.
+//                return Response.ok(fileDataStream)
+//                        .header(javax.ws.rs.core.HttpHeaders.CONTENT_TYPE, )
+//                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+//                        .build();
+//            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+//                String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
+//                return Response.ok(content)
+//                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+//                        .build();
+//            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
+//                String sourceUrl = documentation.getSourceUrl();
+//                return Response.seeOther(new URI(sourceUrl)).build();
+//            }
+//        } catch (APIManagementException e) {
+//            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+//            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+//                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+//            } else {
+//                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+//                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//            }
+//        } catch (URISyntaxException e) {
+//            String errorMessage = "Error while retrieving source URI location of " + documentId;
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
+        return null;
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId
@@ -74,8 +112,51 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
+
+            if (fileInputStream != null && inlineContent != null) {
+                RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
+            }
+
+            //retrieves the document and send 404 if not found
+            DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentation);
+            //add content depending on the availability of either input stream or inline content
+            if (fileInputStream != null) {
+                if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
+                }
+                docBuilder = docBuilder.fileName(fileDetail.getFileName());
+                apiProvider.uploadDocumentationFile(documentId, fileInputStream);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                }
+                apiProvider.addDocumentationContent(documentId, inlineContent);
+            } else {
+                RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
+            }
+            apiProvider.updateDocumentation(apiId, docBuilder.build());
+            //retrieving the updated doc and the URI
+            DocumentInfo updatedDoc = apiProvider.getDocumentationSummary(documentId);
+            DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
+            return Response.status(Response.Status.CREATED).entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId
@@ -104,8 +185,46 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
+            DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
+            //validation checks for existence of the document
+            if (documentInfoOld == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
+                return null;
+            }
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (StringUtils.isBlank(body.getSourceUrl()) || !RestApiUtil.isURL(body.getSourceUrl()))) {
+                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+                return null;
+            }
+
+            //overriding some properties
+            body.setName(documentInfoOld.getName());
+            //this will fail if user does not have access to the API or the API does not exist
+            apiPublisher.updateDocumentation(apiId, documentInfo);
+
+            //retrieve the updated documentation
+            DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
+            return Response.ok().entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response apisApiIdDocumentsGet(String apiId
@@ -122,8 +241,36 @@ public class ApisApiServiceImpl extends ApisApiService {
 , DocumentDTO body
 , String contentType
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
+            DocumentInfo documentation = MappingUtil.toDocumentInfo(body);
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
+            }
+            String sourceUrl = body.getSourceUrl();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+            }
+            //this will fail if user does not have access to the API or the API does not exist
+            String docid = apiProvider.addDocumentationInfo(apiId, documentation);
+            documentation = apiProvider.getDocumentationSummary(docid);
+            DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
+            return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            }else if(RestApiUtil.isDueToResourceAlreadyExists(e)){
+                RestApiUtil.handleResourceAlreadyExistsError(RestApiConstants.RESOURCE_DOCUMENTATION, e, log);
+            } else{
+                String errorMessage = "Error while adding the document for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
