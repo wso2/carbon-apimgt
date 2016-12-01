@@ -162,12 +162,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final int numberOfCreated = 2;
         final int numberOfBlocked = 1;
 
-        // Define Status lists to use as filter
-        List<String> multipleStatus = new ArrayList<>();
-        multipleStatus.add(publishedStatus);
-        multipleStatus.add(createdStatus);
-        multipleStatus.add(blockedStatus);
-
         // Add APIs
         List<API> publishedAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfPublished; ++i) {
@@ -179,14 +173,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<API> createdAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfCreated; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus).build();
-            createdAPIsSummary.add(api);
+            createdAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
 
         List<API> blockedAPIsSummary = new ArrayList<>();
         for (int i = 0; i < numberOfBlocked; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).build();
-            blockedAPIsSummary.add(api);
+            blockedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
 
@@ -203,23 +197,49 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         twoStatuses.add(publishedStatus);
         twoStatuses.add(blockedStatus);
 
-        apiList = apiDAO.getAPIsByStatus(multipleStatus);
+        apiList = apiDAO.getAPIsByStatus(twoStatuses);
 
         Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
         }
-        /*
-        for (Iterator<API> iterator = list.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
-            if (string.isEmpty()) {
-                // Remove the current element from the iterator and the list.
-                iterator.remove();
-            }
-        }
-        */
 
+        for (API api : blockedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        Assert.assertTrue(apiList.isEmpty());
+
+        // Filter APIs by multiple statuses
+        List<String> multipleStatuses = new ArrayList<>();
+        multipleStatuses.add(publishedStatus);
+        multipleStatuses.add(createdStatus);
+        multipleStatuses.add(blockedStatus);
+
+        apiList = apiDAO.getAPIsByStatus(multipleStatuses);
+
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() +
+                                            blockedAPIsSummary.size() + createdAPIsSummary.size());
+
+        for (API api : publishedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        for (API api : blockedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        for (API api : createdAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        Assert.assertTrue(apiList.isEmpty());
     }
 
     @Test
