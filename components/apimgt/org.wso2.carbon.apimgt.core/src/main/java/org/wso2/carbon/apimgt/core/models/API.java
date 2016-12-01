@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
@@ -819,10 +820,17 @@ public final class API {
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
 
-        public API build() throws APIManagementException {
-            /*
+        public API build()  {
+            return new API(this);
+        }
+
+        /**
+         * Validate the API object
+         * @throws APIManagementException
+         */
+        public void validate() throws APIManagementException {
             if (StringUtils.isEmpty(this.getId())) {
-                this.id(UUID.randomUUID().toString());
+                throw new APIManagementException("Couldn't find UUID of API");
             }
             if (StringUtils.isEmpty(this.getApiDefinition())) {
                 throw new APIManagementException("Couldn't find swagger definition of API");
@@ -845,8 +853,6 @@ public final class API {
             if (this.getVisibility() == null) {
                 throw new APIManagementException("Couldn't find Visibility of API ");
             }
-            */
-            return new API(this);
         }
 
         /**
@@ -910,10 +916,6 @@ public final class API {
 
         public Set<UriTemplate> getUriTemplates() {
             return uriTemplates;
-        }
-
-        public API buildApi() {
-            return new API(this);
         }
 
         public String getParentApiId() {

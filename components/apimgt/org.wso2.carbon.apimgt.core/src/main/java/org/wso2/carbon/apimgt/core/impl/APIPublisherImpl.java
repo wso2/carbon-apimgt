@@ -169,6 +169,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         API createdAPI;
 
         apiBuilder.provider(getUsername());
+        if (StringUtils.isEmpty(apiBuilder.getId())) {
+            apiBuilder.id(UUID.randomUUID().toString());
+        }
+        apiBuilder.validate();
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
