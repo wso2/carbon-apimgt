@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 
 import java.util.Map;
 
@@ -62,9 +62,10 @@ public class APIManagerFactory {
             return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't Create API Provider", e, log);
+            log.error("Couldn't Create API Provider");
+            throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
+
     }
 
     private APIStore newConsumer(String username) throws APIManagementException {
@@ -74,11 +75,11 @@ public class APIManagerFactory {
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
-        } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't Create API Consumer", e, log);
-        }
-        return null;
 
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't Create API Consumer");
+            throw new APIMgtDAOException("Couldn't Create API Consumer", ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     public APIPublisher getAPIProvider(String username) throws APIManagementException {
