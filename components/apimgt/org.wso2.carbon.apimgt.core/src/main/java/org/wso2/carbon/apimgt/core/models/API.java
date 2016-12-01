@@ -69,7 +69,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
-        parentApiId = builder.parentApiId;
+        copiedFromApiId = builder.copiedFromApiId;
     }
 
     public String getId() {
@@ -269,8 +269,8 @@ public final class API {
         if (!uriTemplates.equals(api.uriTemplates)) {
             return false;
         }
-        if ((parentApiId != null) ?
-                !parentApiId.equals(api.parentApiId) : (api.parentApiId != null)) {
+        if ((copiedFromApiId != null) ?
+                !copiedFromApiId.equals(api.copiedFromApiId) : (api.copiedFromApiId != null)) {
             return false;
         }
 
@@ -304,7 +304,7 @@ public final class API {
         result = 31 * result + (lastUpdatedTime != null ? lastUpdatedTime.hashCode() : 0);
         result = 31 * result + (lifecycleState != null ? lifecycleState.hashCode() : 0);
         result = 31 * result + (uriTemplates != null ? uriTemplates.hashCode() : 0);
-        result = 31 * result + (parentApiId != null ? parentApiId.hashCode() : 0);
+        result = 31 * result + (copiedFromApiId != null ? copiedFromApiId.hashCode() : 0);
         return result;
     }
 
@@ -341,7 +341,7 @@ public final class API {
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Set<UriTemplate> uriTemplates;
-    private String parentApiId;
+    private String copiedFromApiId;
 
     /**
      * {@code API} builder static inner class.
@@ -451,7 +451,7 @@ public final class API {
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Set<UriTemplate> uriTemplates = Collections.emptySet();
-        private String parentApiId;
+        private String copiedFromApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -489,7 +489,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
-            this.parentApiId = copy.parentApiId;
+            this.copiedFromApiId = copy.copiedFromApiId;
         }
 
         /**
@@ -801,14 +801,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code parentApiId} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
          * chained together.
          *
-         * @param parentApiId the {@code parentApiId} to set
+         * @param copiedFromApiId the {@code copiedFromApiId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder parentApiId(String parentApiId) {
-            this.parentApiId = parentApiId;
+        public APIBuilder copiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
             return this;
         }
 
@@ -916,20 +916,20 @@ public final class API {
             return new API(this);
         }
 
-        public String getParentApiId() {
-            return parentApiId;
+        public String getCopiedFromApiId() {
+            return copiedFromApiId;
         }
 
-        public void setParentApiId(String parentApiId) {
-            this.parentApiId = parentApiId;
+        public void setCopiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
         }
     }
 
-    public String getParentApiId() {
-        return parentApiId;
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
     }
 
-    public void setParentApiId(String parentApiId) {
-        this.parentApiId = parentApiId;
+    public void setCopiedFromApiId(String copiedFromApiId) {
+        this.copiedFromApiId = copiedFromApiId;
     }
 }

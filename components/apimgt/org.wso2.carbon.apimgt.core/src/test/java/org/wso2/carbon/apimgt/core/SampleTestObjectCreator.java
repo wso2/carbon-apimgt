@@ -26,8 +26,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Environment;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
@@ -138,7 +136,7 @@ public class SampleTestObjectCreator {
                     createdBy(fromAPI.getCreatedBy()).
                     lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
                     lifeCycleStatus(fromAPI.getLifeCycleStatus()).
-                    parentApiId(fromAPI.getParentApiId()).build();
+                    copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
