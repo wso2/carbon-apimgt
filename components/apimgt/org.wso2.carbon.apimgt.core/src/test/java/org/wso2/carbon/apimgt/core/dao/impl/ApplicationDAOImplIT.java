@@ -48,7 +48,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application currentApp = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application newApp = SampleTestObjectCreator.createAlternativeApplication();
-        newApp.setUuid(currentApp.getId());
+        newApp.setId(currentApp.getId());
         newApp.setCreatedTime(currentApp.getCreatedTime());
         //update app
         applicationDAO.updateApplication(currentApp.getId(), newApp);

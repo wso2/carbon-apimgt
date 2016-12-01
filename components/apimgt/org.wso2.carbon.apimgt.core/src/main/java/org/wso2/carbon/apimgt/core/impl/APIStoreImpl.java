@@ -101,7 +101,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
-            application.setUuid(uuid);
+            application.setId(uuid);
             application.setUpdatedUser(getUsername());
             application.setUpdatedTime(LocalDateTime.now());
             getApplicationDAO().updateApplication(uuid, application);
@@ -167,7 +167,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             }
             // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
-            application.setUuid(generatedUuid);
+            application.setId(generatedUuid);
 
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);

@@ -125,7 +125,7 @@ public class ApplicationMappingUtil {
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
-        application.setUuid(applicationDTO.getApplicationId());
+        application.setId(applicationDTO.getApplicationId());
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;

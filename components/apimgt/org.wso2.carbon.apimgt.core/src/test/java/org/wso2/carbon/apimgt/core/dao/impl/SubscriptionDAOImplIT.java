@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -29,6 +28,8 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
@@ -51,30 +52,168 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
         Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionTier);
-        validateApp(subscription.getApplication(), app);
-        validateAPI(subscription.getApi(), api);
+        Assert.assertEquals(subscription.getApi(), api);
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
     }
 
     @Test
-    public void testGetSubscriptionByAPI() throws Exception {
-        //add 4 apps
-        String username = "admin";
-        Application app1 = TestUtil.addCustomApplication("App1", username);
-        Application app2 = TestUtil.addCustomApplication("App2", username);
-        Application app3 = TestUtil.addCustomApplication("App3", username);
-        Application app4 = TestUtil.addCustomApplication("App4", username);
+    public void testGetSubscriptionByAPIAndApp() throws Exception {
+        //add test apis, apps and subscriptions
+        ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
-        //add api
-        API api  = TestUtil.addTestAPI();
+        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+
+        API api1 = apisAndApps.getApis().get(0);
+        API api2 = apisAndApps.getApis().get(1);
+        API api3 = apisAndApps.getApis().get(2);
+        API api4 = apisAndApps.getApis().get(3);
+
+        Application app1 = apisAndApps.getApps().get(0);
+        Application app2 = apisAndApps.getApps().get(1);
+        Application app3 = apisAndApps.getApps().get(2);
+        Application app4 = apisAndApps.getApps().get(3);
+
+        //get subscriptions of api1 (app2, app4)
+        List<Subscription> subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api1.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 2, "There should be 2 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApplication().getId().equals(app2.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+            } else if (subscription.getApplication().getId().equals(app4.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of api2 (app1, app2, app4)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api2.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 3, "There should be 3 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApplication().getId().equals(app1.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app1));
+            } else if (subscription.getApplication().getId().equals(app2.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+            } else if (subscription.getApplication().getId().equals(app4.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of api3 (app2, app3, app4)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api3.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 3, "There should be 3 subscription (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApplication().getId().equals(app2.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+            } else if (subscription.getApplication().getId().equals(app3.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app3));
+            } else if (subscription.getApplication().getId().equals(app4.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of api4 (app4)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api4.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 1, "There should be 1 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApplication().getId().equals(app4.getId())) {
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
     }
 
     @Test
     public void testGetSubscriptionByApplication() throws Exception {
-        //add new app
-        Application currentApp = TestUtil.addTestApplication();
-        ApplicationDAO applicationDAO = new ApplicationDAOImpl();
-        Application newApp = SampleTestObjectCreator.createAlternativeApplication();
-        newApp.setUuid(currentApp.getId());
+        //add test apis, apps and subscriptions
+        ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
+
+        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+
+        API api1 = apisAndApps.getApis().get(0);
+        API api2 = apisAndApps.getApis().get(1);
+        API api3 = apisAndApps.getApis().get(2);
+        API api4 = apisAndApps.getApis().get(3);
+
+        Application app1 = apisAndApps.getApps().get(0);
+        Application app2 = apisAndApps.getApps().get(1);
+        Application app3 = apisAndApps.getApps().get(2);
+        Application app4 = apisAndApps.getApps().get(3);
+
+        //get subscriptions of app1 (api2)
+        List<Subscription> subscriptions = subscriptionDAO.getAPISubscriptionsByApplication(app1.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 1, "There should be 1 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApi().getId().equals(api2.getId())) {
+                Assert.assertEquals(subscription.getApi(), api2);
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of app2 (api1, api2, api3)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByApplication(app2.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 3, "There should be 3 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApi().getId().equals(api1.getId())) {
+                Assert.assertEquals(subscription.getApi(), api1);
+            } else if (subscription.getApi().getId().equals(api2.getId())) {
+                Assert.assertEquals(subscription.getApi(), api2);
+            } else if (subscription.getApi().getId().equals(api3.getId())) {
+                Assert.assertEquals(subscription.getApi(), api3);
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of app3 (api3)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByApplication(app3.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 1, "There should be 1 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApi().getId().equals(api3.getId())) {
+                Assert.assertEquals(subscription.getApi(), api3);
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
+
+        //get subscriptions of app4 (api1, api2, api3, api4)
+        subscriptions = subscriptionDAO.getAPISubscriptionsByApplication(app4.getId());
+        //validate subscriptions
+        Assert.assertEquals(subscriptions.size(), 4, "There should be 4 subscriptions (only).");
+        for (Subscription subscription : subscriptions) {
+            Assert.assertNotNull(subscription);
+            if (subscription.getApi().getId().equals(api1.getId())) {
+                Assert.assertEquals(subscription.getApi(), api1);
+            } else if (subscription.getApi().getId().equals(api2.getId())) {
+                Assert.assertEquals(subscription.getApi(), api2);
+            } else if (subscription.getApi().getId().equals(api3.getId())) {
+                Assert.assertEquals(subscription.getApi(), api3);
+            } else if (subscription.getApi().getId().equals(api4.getId())) {
+                Assert.assertEquals(subscription.getApi(), api4);
+            } else {
+                Assert.fail("Invalid subscription found!!!");
+            }
+        }
     }
 
     @Test
@@ -93,19 +232,78 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
-    private void validateAPI(API actualAPI, API expectedAPI) {
-        Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
-        Assert.assertEquals(actualAPI.getName(), expectedAPI.getName());
-        Assert.assertEquals(actualAPI.getVersion(), expectedAPI.getVersion());
-        Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
-        Assert.assertEquals(actualAPI.getProvider(), expectedAPI.getProvider());
+    public ApisAndApps createApisAppsAndSubscriptions() throws Exception {
+        List<Application> apps = new ArrayList<>();
+        //add 4 apps
+        String username = "admin";
+        Application app1 = TestUtil.addCustomApplication("App1", username);
+        apps.add(app1);
+        Application app2 = TestUtil.addCustomApplication("App2", username);
+        apps.add(app2);
+        Application app3 = TestUtil.addCustomApplication("App3", username);
+        apps.add(app3);
+        Application app4 = TestUtil.addCustomApplication("App4", username);
+        apps.add(app4);
+
+        //add 4 apis
+        List<API> apis = new ArrayList<>();
+        API api1 = TestUtil.addCustomAPI("API1", "1.0.0", "api1");
+        apis.add(api1);
+        API api2 = TestUtil.addCustomAPI("API2", "1.0.0", "api2");
+        apis.add(api2);
+        API api3 = TestUtil.addCustomAPI("API3", "1.0.0", "api3");
+        apis.add(api3);
+        API api4 = TestUtil.addCustomAPI("API4", "1.0.0", "api4");
+        apis.add(api4);
+
+        //Add subscriptions
+        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+
+        //app1: api2
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app1.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+
+        //app2: api1, api2, api3
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app2.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app2.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app2.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+
+        //app3: api3
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app3.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+
+        //app4: api1, api2, api3, api4
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app4.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app4.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app4.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api4.getId(), app4.getId(), "Gold",
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+
+        return new ApisAndApps(apis, apps);
     }
 
-    private void validateApp(Application appFromDB, Application expectedApp) {
-        Assert.assertEquals(appFromDB.getId(), expectedApp.getId());
-        Assert.assertEquals(appFromDB.getName(), expectedApp.getName());
-        Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
-        Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus());
+    private class ApisAndApps {
+        private List<API> apis;
+        private List<Application> apps;
+
+        public ApisAndApps(List<API> apis, List<Application> apps) {
+            this.apis = apis;
+            this.apps = apps;
+        }
+
+        public List<API> getApis() {
+            return apis;
+        }
+
+        public List<Application> getApps() {
+            return apps;
+        }
     }
 
 }
