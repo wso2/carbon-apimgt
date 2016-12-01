@@ -8,8 +8,10 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -23,6 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
@@ -41,7 +44,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
+            String errorMessage = "Error while deleting application: " + applicationId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
+                            e.getErrorHandler().getErrorDescription(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().build();
     }
@@ -60,7 +70,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+            String errorMessage = "Error while retrieving application: " + applicationId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
+                            e.getErrorHandler().getErrorDescription(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(applicationDTO).build();
     }
@@ -80,7 +97,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
 
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+            String errorMessage = "Error while updating application: " + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
+                            e.getErrorHandler().getErrorDescription(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(updatedApplicationDTO).build();
     }
@@ -149,8 +173,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
                     allMatchedApps.size());
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);
+            String errorMessage = "Error while retrieving applications";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, query);
+            ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
+                            e.getErrorHandler().getErrorDescription(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(applicationListDTO).build();
     }
@@ -172,14 +202,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 //            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
 //                    createdApplicationDTO.getApplicationId());
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil
-                        .handleResourceAlreadyExistsError("An application already exists with name " + body.getName(),
-                                e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
-                        e, log);
-            }
+            String errorMessage = "Error while adding new application : " + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
+                            e.getErrorHandler().getErrorDescription(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
 //        return Response.created(location).entity(createdApplicationDTO).build();
