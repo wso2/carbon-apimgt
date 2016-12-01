@@ -195,7 +195,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (LifecycleException e) {
             log.error("Error occurred while Associating the API - " + apiBuilder.getName(), e);
             throw new APIManagementException("Error occurred while Associating the API - " + apiBuilder.getName(),
-                    ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+                     e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return apiBuilder.getId();
     }
