@@ -15,7 +15,7 @@ jagg.initializer("item-manage", {
 
 
         jagg.addFooterJS("multiselect", "jagg", "libs/bootstrap-multiselect.js");               
-        jagg.addFooterJS("jsonpath-0.8.0", "jagg", "libs/jsonpath-0.8.0.js");        
+        jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");        
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
         jagg.addFooterJS("manage-api", "jagg", "templates/item-manage/js/api-manage.js");    
     }

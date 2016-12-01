@@ -723,7 +723,7 @@ APIDesigner.prototype.render_resource = function(container){
 };
 
 APIDesigner.prototype.query = function(path){
-    return jsonPath(this.api_doc,path);
+    return JSONPath(path, this.api_doc);
 }
 
 APIDesigner.prototype.add_resource = function(resource, path){    
