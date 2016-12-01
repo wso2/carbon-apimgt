@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -147,7 +148,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
                 String message =  "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
-                throw new APIManagementException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
+                throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             //Tier validation
             String tierName = application.getTier();
