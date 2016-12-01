@@ -627,8 +627,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
             paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, body.getVersion());
 
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler().getErrorMessage(),
-                    e.getErrorHandler().getErrorCode(), e.getErrorHandler().getErrorDescription(),paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(),paramList);
             log.error(errorMessage,e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
