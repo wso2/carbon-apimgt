@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -44,7 +45,6 @@ import java.util.UUID;
 
 /**
  * Implementation of API Store operations.
- *
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
@@ -61,8 +61,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         try {
             apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException(
-                    "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses), e, log);
+            String errorMsg =
+                    "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses);
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiResults;
     }
@@ -73,9 +75,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         try {
             application = getApplicationDAO().getApplicationByName(applicationName, ownerId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException(
+            String errorMsg =
                     "Error occurred while fetching application for the given applicationName - " + applicationName
-                            + " with groupId - " + groupId, e, log);
+                            + " with groupId - " + groupId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return application;
     }
@@ -86,9 +90,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException(
-                    "Error occurred while fetching applications for the given subscriber - " + subscriber
-                            + " with groupId - " + groupId, e, log);
+            String errorMsg = "Error occurred while fetching applications for the given subscriber - " + subscriber
+                    + " with groupId - " + groupId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return applicationList;
     }
@@ -100,13 +105,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application.setUpdatedTime(LocalDateTime.now());
             getApplicationDAO().updateApplication(uuid, application);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while updating application - " + application.getName(), e,
-                    log);
+            String errorMsg = "Error occurred while updating the application - " + uuid;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
-    @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
@@ -118,7 +123,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         try {
             apiResults = getApiDAO().searchAPIs(query);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while updating searching APIs - " + query, e, log);
+            String errorMsg = "Error occurred while updating searching APIs - " + query;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
         return apiResults;
@@ -128,8 +135,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         try {
             getApplicationDAO().deleteApplication(appId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while deleting application - " + appId, e,
-                    log);
+            String errorMsg = "Error occurred while deleting the application - " + appId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -137,22 +145,25 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
-                handleResourceAlreadyExistsException(
-                        "An application already exists with a duplicate name - " + application.getName());
+                String message =  "An application already exists with a duplicate name - " + application.getName();
+                log.error(message);
+                throw new APIManagementException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
-
             //Tier validation
             String tierName = application.getTier();
             if (tierName == null) {
-                APIUtils.logAndThrowException("Tier name cannot be null - " + application.getName(), log);
+                String message =  "Tier name cannot be null - " + application.getName();
+                log.error(message);
+                throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
                 Policy policy = getPolicyDAO()
                         .getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, tierName);
                 if (policy == null) {
-                    APIUtils.logAndThrowException("Specified tier " + tierName + " is invalid", log);
+                    String message = "Specified tier " + tierName + " is invalid";
+                    log.error(message);
+                    throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
                 }
             }
-
             // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
             application.setUuid(generatedUuid);
@@ -162,7 +173,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
             applicationUuid = application.getId();
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while adding application - " + application.getName(), e, log);
+            String errorMsg = "Error occurred while creating the application - " + application.getName();
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
