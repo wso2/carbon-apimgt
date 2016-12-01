@@ -28,7 +28,8 @@ public enum ExceptionCodes implements ErrorHandler {
 
     API_ALREADY_EXISTS(900300, "The API already exists.", 400, " This is error description"),
     APIMGT_DAO_EXCEPTION(900301, "Something wrong in DAO layer.", 500, " This is error description"),
-    APIMGT_LIFECYCLE_EXCEPTION(900302, "Life cycle exception occurred", 500, " This is error description");
+    APIMGT_LIFECYCLE_EXCEPTION(900302, "Life cycle exception occurred", 500, " This is error description"),
+    SWAGGER_PARSE_EXCEPTION(900303, "Error while parsing swagger json", 500, "Error while parsing swagger json");
 
     private final long errorCode;
     private final String errorMessage;
@@ -50,18 +51,22 @@ public enum ExceptionCodes implements ErrorHandler {
         this.errorDescription = errorDescription;
     }
 
+    @Override
     public long getErrorCode() {
         return this.errorCode;
     }
 
+    @Override
     public String getErrorMessage() {
         return this.errorMessage;
     }
 
+    @Override
     public int getHttpStatusCode() {
         return this.httpStatusCode;
     }
 
+    @Override
     public String getErrorDescription() {
         return this.errorDescription;
     }
