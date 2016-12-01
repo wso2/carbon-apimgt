@@ -18,7 +18,16 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.util.List;
@@ -44,6 +53,7 @@ public interface APIManager {
      * @throws APIManagementException on error
      */
     List<API> getAllAPIs() throws APIManagementException;
+
     /**
      * Returns details of an API
      *
@@ -52,10 +62,11 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPI(String apiPath) throws APIManagementException;
+
     /**
      * Returns details of an API
      *
-     * @param uuid UUID of the API's registry artifact
+     * @param uuid                  UUID of the API's registry artifact
      * @param requestedTenantDomain tenantDomain for the registry
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
@@ -65,19 +76,21 @@ public interface APIManager {
     /**
      * Get minimal details of API by registry artifact id
      *
-     * @param uuid  Registry artifact id
+     * @param uuid Registry artifact id
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
     API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
 
-    /** 
+    /**
      * Get minimal details of API by API identifier
+     *
      * @param identifier APIIdentifier object
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
+
     /**
      * Returns details of an API
      *
@@ -137,7 +150,7 @@ public interface APIManager {
      * Checks whether the given document already exists for the given api
      *
      * @param identifier API Identifier
-     * @param docName Name of the document
+     * @param docName    Name of the document
      * @return true if document already exists for the given api
      * @throws APIManagementException if failed to check existence of the documentation
      */
@@ -159,7 +172,7 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUserName)
+    List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUserName)
             throws APIManagementException;
 
     /**
@@ -202,7 +215,8 @@ public interface APIManager {
      */
     Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
-    /** returns the SubscribedAPI object which is related to the UUID
+    /**
+     * returns the SubscribedAPI object which is related to the UUID
      *
      * @param uuid UUID of Subscription
      * @return SubscribedAPI object which is related to the UUID
@@ -213,7 +227,7 @@ public interface APIManager {
     /**
      * Creates a new subscriber given the username and the grouping Id
      *
-     * @param username Username of the subscriber to be added
+     * @param username   Username of the subscriber to be added
      * @param groupingId - the groupId to which the subscriber belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
@@ -249,7 +263,7 @@ public interface APIManager {
      * Associates the given icon image with the specified path.
      *
      * @param resourcePath a String representing the relative path of a resource.
-     * @param resourceFile         to be saved
+     * @param resourceFile to be saved
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
@@ -274,6 +288,7 @@ public interface APIManager {
 
     /**
      * Returns the corresponding application given the uuid
+     *
      * @param uuid uuid of the Application
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
@@ -347,11 +362,11 @@ public interface APIManager {
     Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException;
 
     /**
-    * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-    *
-    * @return Set<Tier>
-    * @throws APIManagementException if failed to get the predefined tiers
-    */
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
     Set<Tier> getTiers() throws APIManagementException;
 
     /**
@@ -378,7 +393,7 @@ public interface APIManager {
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    Map<String,String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
+    Map<String, String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already available under given tenant
@@ -389,13 +404,13 @@ public interface APIManager {
      * @throws APIManagementException if failed to check the context availability
      */
     boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
-    
+
     /**
      * Check whether the given scope key is already assigned to an API under given tenant
      *
-     * @param identifier API Identifier 
-     * @param scopeKey candidate scope key
-     * @param tenantid tenant id
+     * @param identifier API Identifier
+     * @param scopeKey   candidate scope key
+     * @param tenantid   tenant id
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
@@ -403,6 +418,7 @@ public interface APIManager {
 
     /**
      * Check if a given context template already exists
+     *
      * @param contextTemplate - The contextTemplate to be checked for
         *                        <p>
         *                        Ex: /foo/{version}/bar
@@ -415,37 +431,41 @@ public interface APIManager {
 
     /**
      * Get policy object for given level and user name
+     *
      * @param username
      * @param level
      * @return
      * @throws APIManagementException
      */
     Policy[] getPolicies(String username, String level) throws APIManagementException;
-    
+
     /**
-     * Returns API Search result based on the provided query. This search method supports '&' based concatenate 
-     * search in multiple fields. 
-     * @param searchQuery search query. Ex: provider=*admin*&version=*1*
-     * @param tenantDomain tenant domain 
-     * @param start starting number
-     * @param end ending number
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
+     * search in multiple fields.
+     *
+     * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
      * @param limitAttributes whether or not to limit attributes in the search result
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
-                                           boolean limitAttributes) throws APIManagementException;
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
+                                            boolean limitAttributes) throws APIManagementException;
 
     /**
      * fetches the lastUpdated timestamp for the API swagger resource
+     *
      * @param apiIdentifier
      * @return long
      * @throws APIManagementException
      */
-    Map<String,String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException;
+    Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException;
 
     /**
      * gets the updated timestamp for the API swagger resource
+     *
      * @param apiIdentifier
      * @return long
      * @throws APIManagementException
