@@ -24,6 +24,10 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class APIMgtResourceAlreadyExistsException extends APIManagementException {
 
+    public APIMgtResourceAlreadyExistsException(String msg , ExceptionCodes code) {
+        super(msg, code);
+    }
+
     public APIMgtResourceAlreadyExistsException(String msg) {
         super(msg);
     }

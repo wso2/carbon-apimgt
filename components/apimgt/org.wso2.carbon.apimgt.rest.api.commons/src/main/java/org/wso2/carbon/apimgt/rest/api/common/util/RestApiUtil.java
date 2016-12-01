@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -277,16 +278,16 @@ public class RestApiUtil {
     /**
      * Returns a generic errorDTO
      *
-     * @param message specifies the error message
+     * @param errorHandler The error handler object.
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO
-    getErrorDTO(String message, Long code, String description, HashMap<String, String> paramList) {
+    getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
         ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setCode(code);
+        errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMoreInfo(paramList);
-        errorDTO.setMessage(message);
-        errorDTO.setDescription(description);
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
         return errorDTO;
     }
 
@@ -413,5 +414,10 @@ public class RestApiUtil {
             }
         }
         return null;
+    }
+
+    public static boolean isURL(String sourceUrl) {
+        //TODO: to be implemented
+        return true;
     }
 }

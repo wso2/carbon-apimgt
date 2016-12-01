@@ -50,10 +50,25 @@ public class TestUtil {
         return api;
     }
 
-    public static API addAlternativeTestAPI() throws APIManagementException {
+    public static API addCustomAPI(String name, String version, String context) throws APIManagementException {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        API api = SampleTestObjectCreator.createAlternativeAPI().build();
+        API api = SampleTestObjectCreator.createCustomAPI(name, version, context).build();
         apiDAO.addAPI(api);
         return api;
+    }
+
+    public static API createSummaryAPI(API api) throws APIManagementException {
+        API.APIBuilder summaryApiBuilder = new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion());
+        summaryApiBuilder.id(api.getId());
+        summaryApiBuilder.context(api.getContext());
+        return summaryApiBuilder.build();
+    }
+
+    public static Application createSummaryApplication(Application app){
+        Application summaryApp = new Application(app.getName(), app.getCreatedUser());
+        summaryApp.setId(app.getId());
+        summaryApp.setCallbackUrl(app.getCallbackUrl());
+        summaryApp.setStatus(app.getStatus());
+        return summaryApp;
     }
 }

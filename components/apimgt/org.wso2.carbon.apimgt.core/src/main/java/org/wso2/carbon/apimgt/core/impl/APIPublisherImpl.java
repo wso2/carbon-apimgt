@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -404,17 +405,29 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Attach Documentation (without content) to an API
      *
-     * @param apiId         UUID of API
-     * @param documentInfo      Document Summary
+     * @param apiId        UUID of API
+     * @param documentInfo Document Summary
+     * @return UUID of document
      * @throws APIManagementException if failed to add documentation
      */
     @Override
-    public void addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
+    public String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            getApiDAO().addDocumentInfo(apiId, documentInfo);
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            DocumentInfo document = null;
+            if (StringUtils.isEmpty(docBuilder.getId())) {
+                document = docBuilder.id(UUID.randomUUID().toString()).build();
+            }
+            if (!getApiDAO().isDocumentExist(apiId, document)) {
+                getApiDAO().addDocumentInfo(apiId, document);
+                return document.getId();
+            } else {
+                throw new APIMgtResourceAlreadyExistsException("Document already exist for the api " + apiId);
+            }
         } catch (APIMgtDAOException e) {
             APIUtils.logAndThrowException("Unable to add documentation", e, log);
         }
+        return null;
     }
 
     /**
@@ -496,13 +509,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method used to save the documentation content
-     *
-     * @param api
-     * @param documentationName
+     *  @param docId
      * @param text              @throws APIManagementException if failed to add the document as a resource to registry
      */
     @Override
-    public void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException {
+    public void addDocumentationContent(String docId, String text) throws APIManagementException {
 
     }
 

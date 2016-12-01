@@ -150,7 +150,7 @@ public interface APIPublisher extends APIManager {
      * @param documentInfo      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
+    String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
 
     /**
      * Add a document (of source type FILE) with a file
@@ -199,12 +199,11 @@ public interface APIPublisher extends APIManager {
     /**
      * This method used to save the documentation content
      *
-     * @param api               API
-     * @param documentationName name of the inline documentation
+     * @param docId name of the inline documentation
      * @param text              content of the inline documentation
      * @throws APIManagementException if failed to add the document as a resource to registry
      */
-    void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException;
+    void addDocumentationContent(String docId, String text) throws APIManagementException;
 
     /**
      * Updates a given documentation

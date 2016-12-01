@@ -47,9 +47,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String errorMessage = "Error while deleting application: " + applicationId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
-            ErrorDTO errorDTO = RestApiUtil
-                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
-                            e.getErrorHandler().getErrorDescription(), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -73,9 +71,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String errorMessage = "Error while retrieving application: " + applicationId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
-            ErrorDTO errorDTO = RestApiUtil
-                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
-                            e.getErrorHandler().getErrorDescription(), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -100,9 +96,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String errorMessage = "Error while updating application: " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
-            ErrorDTO errorDTO = RestApiUtil
-                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
-                            e.getErrorHandler().getErrorDescription(), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -176,9 +170,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String errorMessage = "Error while retrieving applications";
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, query);
-            ErrorDTO errorDTO = RestApiUtil
-                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
-                            e.getErrorHandler().getErrorDescription(), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -205,9 +197,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String errorMessage = "Error while adding new application : " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
-            ErrorDTO errorDTO = RestApiUtil
-                    .getErrorDTO(e.getErrorHandler().getErrorMessage(), e.getErrorHandler().getErrorCode(),
-                            e.getErrorHandler().getErrorDescription(), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }

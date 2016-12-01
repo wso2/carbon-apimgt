@@ -306,7 +306,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         if (rs.next()) {
             String createdUser = rs.getString("CREATED_BY");
             application = new Application(rs.getString("NAME"), createdUser);
-            application.setUuid(rs.getString("UUID"));
+            application.setId(rs.getString("UUID"));
             application.setCallbackUrl(rs.getString("CALLBACK_URL"));
             application.setDescription(rs.getString("DESCRIPTION"));
             application.setGroupId(rs.getString("GROUP_ID"));
