@@ -26,8 +26,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Environment;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
@@ -112,27 +110,28 @@ public class SampleTestObjectCreator {
     }
 
     public static API getSummaryFromAPI(API api) {
-        return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
-                id(api.getId()).
-                context(api.getContext()).
-                description(api.getDescription()).
-                lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
-
+            return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                    id(api.getId()).
+                    context(api.getContext()).
+                    description(api.getDescription()).
+                    lifeCycleStatus(api.getLifeCycleStatus()).
+                    lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
         API.APIBuilder builder = new API.APIBuilder(toAPI);
+
         return builder.provider(fromAPI.getProvider()).
-                id(fromAPI.getId()).
-                name(fromAPI.getName()).
-                version(fromAPI.getVersion()).
-                context(fromAPI.getContext()).
-                createdTime(fromAPI.getCreatedTime()).
-                createdBy(fromAPI.getCreatedBy()).
-                lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
-                lifeCycleStatus(fromAPI.getLifeCycleStatus()).
-                parentApiId(fromAPI.getParentApiId()).build();
+                    id(fromAPI.getId()).
+                    name(fromAPI.getName()).
+                    version(fromAPI.getVersion()).
+                    context(fromAPI.getContext()).
+                    createdTime(fromAPI.getCreatedTime()).
+                    createdBy(fromAPI.getCreatedBy()).
+                    lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
+                    lifeCycleStatus(fromAPI.getLifeCycleStatus()).
+                    copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
+
     }
 
     public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
