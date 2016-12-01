@@ -85,8 +85,7 @@
             <!-- api-console element specifies whether the environment should be listed in API Console or not -->
             <Environment type="hybrid" api-console="true">
                 <Name>Production and Sandbox</Name>
-                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.
-                </Description>
+                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
                 <!-- Admin username for the API gateway. -->
@@ -94,9 +93,7 @@
                 <!-- Admin password for the API gateway.-->
                 <Password>${admin.password}</Password>
                 <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
-                <GatewayEndpoint>
-                    http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}
-                </GatewayEndpoint>
+                <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</GatewayEndpoint>
             </Environment>
         </Environments>
     </APIGateway>
@@ -147,8 +144,7 @@
         <DASPassword>${admin.password}</DASPassword>
 
         <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl
-        </StatsProviderImpl>
+        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatsProviderImpl>
 
         <!-- DAS REST API configuration -->
         <DASRestApiURL>https://localhost:9444</DASRestApiURL>
@@ -234,8 +230,7 @@
         </ConnectionPool-->
         <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a 
              custom KeyValidation Handler -->
-        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler
-        </KeyValidationHandlerClassName>
+        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
     </APIKeyValidator>
 
     <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.
@@ -395,8 +390,7 @@
         <Access-Control-Allow-Methods>GET,PUT,POST,DELETE,PATCH,OPTIONS</Access-Control-Allow-Methods>
 
         <!-- Configure Access-Control-Allow-Headers -->
-        <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction
-        </Access-Control-Allow-Headers>
+        <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction</Access-Control-Allow-Headers>
 
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
@@ -624,14 +618,10 @@
             <Destination>throttleData</Destination>
             <!--InitDelay>300000</InitDelay-->
             <JMSConnectionParameters>
-                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory
-                </transport.jms.ConnectionFactoryJNDIName>
+                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
                 <transport.jms.DestinationType>topic</transport.jms.DestinationType>
-                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory
-                </java.naming.factory.initial>
-                <connectionfactory.TopicConnectionFactory>
-                    amqp://${jms.username}:${jms.password}@clientid/carbon?brokerlist='${jms.url}'
-                </connectionfactory.TopicConnectionFactory>
+                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+                <connectionfactory.TopicConnectionFactory>amqp://${jms.username}:${jms.password}@clientid/carbon?brokerlist='${jms.url}'</connectionfactory.TopicConnectionFactory>
             </JMSConnectionParameters>
             <JMSTaskManager>
                 <MinThreadPoolSize>20</MinThreadPoolSize>
@@ -641,13 +631,12 @@
             </JMSTaskManager>
         </JMSConnectionDetails>
         <JMSEventPublisherParameters>
-            <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory
-            </java.naming.factory.initial>
-            <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
-            <transport.jms.DestinationType>topic</transport.jms.DestinationType>
-            <transport.jms.Destination>throttleData</transport.jms.Destination>
-            <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
-            <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+                <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
+                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+                <transport.jms.Destination>throttleData</transport.jms.Destination>
+                <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
+                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
         </JMSEventPublisherParameters>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
@@ -678,9 +667,7 @@
         <ServerUrl>https://localhost:9445/bpmn</ServerUrl>
         <ServerUser>${admin.username}</ServerUser>
         <ServerPassword>${admin.password}</ServerPassword>
-        <WorkflowCallbackAPI>
-            https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status
-        </WorkflowCallbackAPI>
+        <WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
         <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.10/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>

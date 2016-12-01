@@ -33,7 +33,7 @@
     var apiProvider = "<%=api.provider%>"
     var apiVersion = "<%=api.version%>"
     var apiName = "<%=api.name%>"
-    var ws = "<%=isWSAPI%>"
+    var ws = <%=isWSAPI%>
 </script>
 <div id="item-add">
 <%

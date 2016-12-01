@@ -659,6 +659,10 @@ APIDesigner.prototype.render_resource = function(container){
             gutters: ["CodeMirror-lint-markers"],
             lint: true
         });
+
+        editor.on('change',function(cMirror){
+            operation[0]["x-mediation-script"] = cMirror.getValue();
+        });
     }
 
     container.find('.notes').editable({
