@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -570,6 +571,44 @@ public class APIMgtDAOTest extends TestCase {
         String policyName = "TestGetAPIPolicy";
         apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser(policyName));
         apiMgtDAO.getAPIPolicy(policyName, -1234);
+    }
+
+    public void testValidateSubscriptionDetails() throws APIManagementException {
+
+        Subscriber subscriber = new Subscriber("sub_user1");
+        subscriber.setEmail("user1@wso2.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("APP-10", subscriber);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+
+        APIIdentifier apiId = new APIIdentifier("provider1", "WSO2-Utils", "V1.0.0");
+        apiId.setTier("T10");
+        API api = new API(apiId);
+        api.setContext("/wso2utils");
+        api.setContextTemplate("/wso2utils/{version}");
+        apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscription(apiId, api.getContext(), applicationId, "UNBLOCKED", "sub_user1");
+
+        String policyName = "T10";
+        SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
+        policy.setRateLimitCount(20);
+        policy.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriptionPolicy(policy);
+
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients("password","APP-10","sub_user1","clientId1");
+
+        boolean validation = apiMgtDAO.validateSubscriptionDetails("/wso2utils","V1.0.0","clientId1", infoDTO);
+
+        if(validation) {
+            assertEquals(20, infoDTO.getSpikeArrestLimit());
+        }else{
+            assertTrue("Expected validation for subscription details - true, but found - "+ validation,validation);
+        }
+
     }
 
     private Policy getPolicyAPILevelPerUser(String policyName){
