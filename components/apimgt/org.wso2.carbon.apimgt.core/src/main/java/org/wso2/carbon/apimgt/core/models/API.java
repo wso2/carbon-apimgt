@@ -21,8 +21,6 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -822,37 +820,6 @@ public final class API {
 
         public API build()  {
             return new API(this);
-        }
-
-        /**
-         * Validate the API object
-         * @throws APIManagementException
-         */
-        public void validate() throws APIManagementException {
-            if (StringUtils.isEmpty(this.getId())) {
-                throw new APIManagementException("Couldn't find UUID of API");
-            }
-            if (StringUtils.isEmpty(this.getApiDefinition())) {
-                throw new APIManagementException("Couldn't find swagger definition of API");
-            }
-            if (StringUtils.isEmpty(this.getName())) {
-                throw new APIManagementException("Couldn't find Name of API ");
-            }
-            if (StringUtils.isEmpty(this.getContext())) {
-                throw new APIManagementException("Couldn't find Context of API ");
-            }
-            if (StringUtils.isEmpty(this.getVersion())) {
-                throw new APIManagementException("Couldn't find Version of API ");
-            }
-            if (this.getTransport().isEmpty()) {
-                throw new APIManagementException("Couldn't find Transport of API ");
-            }
-            if (this.getPolicies().isEmpty()) {
-                throw new APIManagementException("Couldn't find Policies of API ");
-            }
-            if (this.getVisibility() == null) {
-                throw new APIManagementException("Couldn't find Visibility of API ");
-            }
         }
 
         /**

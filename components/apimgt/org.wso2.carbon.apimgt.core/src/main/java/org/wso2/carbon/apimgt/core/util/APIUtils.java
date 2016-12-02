@@ -19,9 +19,11 @@
 
 package org.wso2.carbon.apimgt.core.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
@@ -116,6 +118,37 @@ public class APIUtils {
     public static String getDefaultAPIPolicy() {
         // TODO: 11/25/16 need to implement logic
         return "Unlimited";
+    }
+
+    /**
+     * Validate the API object
+     * @throws APIManagementException
+     */
+    public static void validate(API api) throws APIManagementException {
+        if (StringUtils.isEmpty(api.getId())) {
+            throw new APIManagementException("Couldn't find UUID of API");
+        }
+        if (StringUtils.isEmpty(api.getApiDefinition())) {
+            throw new APIManagementException("Couldn't find swagger definition of API");
+        }
+        if (StringUtils.isEmpty(api.getName())) {
+            throw new APIManagementException("Couldn't find Name of API ");
+        }
+        if (StringUtils.isEmpty(api.getContext())) {
+            throw new APIManagementException("Couldn't find Context of API ");
+        }
+        if (StringUtils.isEmpty(api.getVersion())) {
+            throw new APIManagementException("Couldn't find Version of API ");
+        }
+        if (api.getTransport().isEmpty()) {
+            throw new APIManagementException("Couldn't find Transport of API ");
+        }
+        if (api.getPolicies().isEmpty()) {
+            throw new APIManagementException("Couldn't find Policies of API ");
+        }
+        if (api.getVisibility() == null) {
+            throw new APIManagementException("Couldn't find Visibility of API ");
+        }
     }
 
     /**
