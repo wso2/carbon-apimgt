@@ -386,7 +386,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
-                apiBuilder.copiedFromApiId(api.getCopiedFromApiId());
+                apiBuilder.copiedFromApiId(api.getId());
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
@@ -514,12 +514,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method used to save the documentation content
-     *  @param docId
-     * @param text              @throws APIManagementException if failed to add the document as a resource to registry
+     *
+     * @param docId
+     * @param text  @throws APIManagementException if failed to add the document as a resource to registry
      */
     @Override
     public void addDocumentationContent(String docId, String text) throws APIManagementException {
-
+        getApiDAO().addDocumentInlineContent(docId, text);
     }
 
     /**
