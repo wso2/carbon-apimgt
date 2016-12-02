@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -233,8 +235,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String accept
 , String ifNoneMatch
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+           List<DocumentInfo> documentInfos =  apiPublisher.getAllDocumentation(apiId,offset,limit);
+            DocumentListDTO documentListDTO = MappingUtil.toDocumentListDTO(documentInfos);
+            return Response.status(Response.Status.OK).entity(documentListDTO).build();
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     @Override
     public Response apisApiIdDocumentsPost(String apiId
