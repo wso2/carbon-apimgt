@@ -13,7 +13,13 @@ $(document).ready(function() {
                       });
         return this.optional(element) || contextExist != "true";
     }, i18n.t('Duplicate context value.'));
-
+    $.validator.addMethod('tenantContextExists', function(value, element) {
+        if (value.charAt(0) != "/") {
+            value = "/" + value;
+        }
+        var illegalChars = /(\/t\/|\/t$)/;
+        return !illegalChars.test(value)
+    }, '/t/ not allowed in the context field.');
     $.validator.addMethod('apiNameExists', function(value, element) {
         var apiNameExist = false;
         jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"isAPINameExist", apiName:value },
