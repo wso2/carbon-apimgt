@@ -584,7 +584,7 @@
                                                                             {{#each doc.paths}}
                                                                                 {{#each this}}
                                                                                 <tr class="resource_container" data-path="">
-                                                                                    <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
+                                                                                    <td class="resource-method-td resource_expand" data-path="$.paths.['{{ @../key}}'].{{ @key }}">
                                                                                         <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                                                                                     </td>
                                                                                     <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
@@ -934,16 +934,16 @@
 <table style="width:100%">
 {{#each doc.paths}}
     {{# each this}}
-        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
-            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+        <tr class="resource_container" data-path="$.paths.['{{ path }}'].{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
                 <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
             <td class="resource_expand"><a class="resource-path" title="resource_path">{{ path }}</a></td>
-            <td><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}" title="x-auth-type"></a></td>
-            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier" title="x-throttling-tier">{{ x-throttling-tier }}</a></td>
-            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope" title="x-scope">{{ x-scope }}</a></td>        </tr>
-        <tr><td colspan="6" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+            <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}" title="x-auth-type"></a></td>
+            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="x-throttling-tier" title="x-throttling-tier">{{ x-throttling-tier }}</a></td>
+            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="x-scope" title="x-scope">{{ x-scope }}</a></td>        </tr>
+        <tr><td colspan="6" class="resource_body " data-path="$.paths.['{{ path }}'].{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
 </table>

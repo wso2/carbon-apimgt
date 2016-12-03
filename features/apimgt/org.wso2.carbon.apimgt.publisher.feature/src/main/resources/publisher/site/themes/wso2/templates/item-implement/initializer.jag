@@ -23,7 +23,7 @@ jagg.initializer("item-implement", {
         jagg.addHeaderJS("custom-validate", "jagg", "templates/utils/custom-validation/custom-validation.js");
         jagg.addHeaderJS("url-validate", "jagg", "templates/utils/url-validation/url-validation.js");
         jagg.addFooterJS("multiselect", "jagg", "libs/bootstrap-multiselect.js");
-        jagg.addFooterJS("jsonpath-0.8.0", "jagg", "libs/jsonpath-0.8.0.js");
+        jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
         jagg.addFooterJS("endpint-ui-jq", "jagg", "templates/item-implement/js/jquery.endpointUi.js");
         jagg.addFooterJS("implementation-api", "jagg", "templates/item-implement/js/api-implementation.js");
