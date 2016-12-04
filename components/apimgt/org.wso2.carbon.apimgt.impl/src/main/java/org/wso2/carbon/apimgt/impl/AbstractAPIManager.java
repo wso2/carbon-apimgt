@@ -1636,12 +1636,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPINamesMatchingContext(contextTemplate);
     }
 
-    @Override
-    public List<String> getVersionsMatchesContext(String context, String apiName)
-            throws APIManagementException {
-        return apiMgtDAO.getAPIVersionsMatchingContext(context, apiName);
-    }
-
 
     public Policy[] getPolicies(String username, String level) throws APIManagementException {
         Policy[] policies = null;

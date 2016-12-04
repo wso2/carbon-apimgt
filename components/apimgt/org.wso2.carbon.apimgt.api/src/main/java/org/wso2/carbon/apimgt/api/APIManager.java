@@ -440,8 +440,6 @@ public interface APIManager {
      */
     List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException;
 
-    //todo
-    List<String> getVersionsMatchesContext(String context, String apiName) throws APIManagementException;
     /**
      * Get policy object for given level and user name
      *
