@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.JSONException;
+import org.json.XML;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -32,9 +39,11 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -44,18 +53,29 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.RegistryConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +88,13 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
-    /** 
-     * Retrieves APIs qualifying under given search condition 
-     * 
-     * @param limit maximum number of APIs returns
-     * @param offset starting index
-     * @param query search condition
-     * @param accept Accept header value
+    /**
+     * Retrieves APIs qualifying under given search condition
+     *
+     * @param limit       maximum number of APIs returns
+     * @param offset      starting index
+     * @param query       search condition
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
@@ -101,7 +121,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     searchType = querySplit[0];
                     searchContent = querySplit[1];
                 } else if (querySplit.length == 1) {
-                    searchContent = query; 
+                    searchContent = query;
                 } else {
                     RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
                 }
@@ -123,14 +143,14 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Create new API
      *
-     * @param body DTO model of new API to be created
+     * @param body        DTO model of new API to be created
      * @param contentType content type of the payload
      * @return created API
      */
     @Override
     public Response apisPost(APIDTO body,String contentType){
         URI createdApiUri;
-        APIDTO  createdApiDTO;
+        APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -150,14 +170,54 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
-            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "Error occurred while adding the API. A duplicate API context already exists for " + body
-                                .getContext(), log);
+
+            //Get all existing versions of  api been adding
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+            if (apiVersions.size() > 0) {
+                //If any previous version exists
+                for (String version : apiVersions) {
+                    if (version.equalsIgnoreCase(body.getVersion())) {
+                        //If version already exists
+                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
+                                    "adding the API. A duplicate API already exists for "
+                                    + body.getName() + "-" + body.getVersion(), log);
+                        } else {
+                            return Response.status(Response.Status.BAD_REQUEST).
+                                    entity("Error occurred while adding API. API with name " +
+                                            body.getName() + (" already exists with different " +
+                                            "context").toString()).build();
+                        }
+                    }
+                }
+            } else {
+                //If no any previous version exists
+                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    return Response.status(Response.Status.BAD_REQUEST).
+                            entity(("Error occurred while adding the API. A duplicate API context " +
+                                    "already exists for " + body.getContext()).toString()).build();
+                }
             }
+
+            //Check if the user has admin permission before applying a different provider than the current user
+            String provider = body.getProvider();
+            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
+                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("User " + username + " does not have admin permission ("
+                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
+                                provider + ") overridden with current user (" + username + ")");
+                    }
+                    provider = username;
+                }
+            } else {
+                //Set username in case provider is null or empty
+                provider = username;
+            }
+
             List<String> tiersFromDTO = body.getTiers();
             //If tiers are not defined, the api should be a PROTOTYPED one,
-            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) && 
+            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) &&
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
@@ -168,29 +228,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-
-            //check if the user has admin permission before applying a different provider than the current user
-            String provider = body.getProvider();
-            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("User " + username + " does not have admin permission ("
-                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
-                                + ") overridden with current user (" + username + ")");
-                    }
-                    provider = username;
-                }
-            } else {
-                //set username in case provider is null or empty
-                provider = username;
-            }
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
-
-            if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
-                                .getApiName() + "-" + apiToAdd.getId().getVersion(), log);
-            }
             //Overriding some properties:
             //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
             if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
@@ -214,12 +252,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
-                                  body.getName() + "-" + body.getVersion();
+                    body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
-                                  body.getName() + "-" + body.getVersion();
+                    body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (JSONException e) {
             String errorMessage = "Error while validating endpoint configurations : " + body.getProvider() + "-" +
@@ -231,17 +268,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Changes lifecycle state of an API
-     *  
-     * @param apiId API identifier
-     * @param action Action to promote or demote the API state
+     *
+     * @param apiId              API identifier
+     * @param action             Action to promote or demote the API state
      * @param lifecycleChecklist a checklist specifing additional boolean parameters
-     * @param ifMatch If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param ifMatch            If-Match header value
+     * @param ifUnmodifiedSince  If-Unmodified-Since header value
      * @return 200 response if successful
      */
-    @Override 
+    @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch, String ifUnmodifiedSince) {
+                                            String ifMatch, String ifUnmodifiedSince) {
 
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
@@ -286,12 +323,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Copy API and create a new version of the API
      *
-     * @param apiId API Identifier
+     * @param apiId      API Identifier
      * @param newVersion new version of the API to be created
      * @return API new version
      */
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId){
+    public Response apisCopyApiPost(String newVersion, String apiId) {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
@@ -305,7 +342,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //get newly created API to return as response
             APIIdentifier apiNewVersionedIdentifier =
-                new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
             newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
@@ -332,14 +369,14 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Get API of given ID
      *
-     * @param apiId  API ID
-     * @param accept accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API ID
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return API of the given ID
      */
     @Override
-    public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
         APIDTO apiToReturn;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -347,7 +384,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
@@ -359,17 +397,329 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Returns list of API specific Mediation policies
+     *
+     * @param apiId       uuid of the api
+     * @param limit       maximum number of mediation returns
+     * @param offset      starting index
+     * @param query       search condition
+     * @param accept      accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return Matched API specific mediation policies for given search condition
+     */
+    @Override
+    public Response apisApiIdPoliciesMediationGet(String apiId, Integer limit, Integer offset,
+                                                  String query, String accept, String ifNoneMatch) {
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        APIIdentifier apiIdentifier = null;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            //Getting list of API specific mediation policies
+            List<Mediation> mediationList =
+                    apiProvider.getAllApiSpecificMediationPolicies(apiIdentifier);
+            //Converting list of mediation policies to DTO
+            MediationListDTO mediationListDTO =
+                    MediationMappingUtil.fromMediationListToDTO(mediationList, offset, limit);
+            return Response.ok().entity(mediationListDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving all api specific mediation policies" +
+                        " of API : " + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Deletes an existing API specific mediation policy
+     *
+     * @param apiId             API uuid
+     * @param mediationPolicyId Uuid of mediation policy resource
+     * @param ifMatch           If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if deleted successfully
+     */
+    @Override
+    public Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId,
+                                                                      String mediationPolicyId,
+                                                                      String ifMatch,
+                                                                      String ifUnmodifiedSince) {
+        APIIdentifier apiIdentifier = null;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+            //Getting the api base path out apiResourcePath
+            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            boolean deletionStatus = apiProvider.deleteApiSpecificMediationPolicy(apiResourcePath,
+                    mediationPolicyId);
+            if (deletionStatus) {
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource not " +
+                        "found , deletion unsuccessful").build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API specific mediation policy : " +
+                        mediationPolicyId + "of API" + apiIdentifier.getApiName();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a specific mediation policy by identifier that is belong to the given API identifier
+     *
+     * @param apiId             API uuid
+     * @param mediationPolicyId mediation policy uuid
+     * @param accept            Accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @return returns the matched mediation
+     */
+    @Override
+    public Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId,
+                                                                   String mediationPolicyId,
+                                                                   String accept, String ifNoneMatch,
+                                                                   String ifModifiedSince) {
+        APIIdentifier apiIdentifier = null;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+            //Getting the api base path out of apiResourcePath
+            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Getting specified mediation policy
+            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
+                    mediationPolicyId);
+            if (mediation != null) {
+                MediationDTO mediationDTO =
+                        MediationMappingUtil.fromMediationToDTO(mediation);
+                return Response.ok().entity(mediationDTO).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
+                        " not found or does not exists.").build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while getting mediation policy with uuid "
+                        + mediationPolicyId + " of API " + apiIdentifier.getApiName();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates an existing API specific mediation policy
+     *
+     * @param apiId             API identifier
+     * @param mediationPolicyId uuid of mediation policy
+     * @param body              content to update
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated mediation DTO as response
+     */
+    @Override
+    public Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId,
+                                                                   String mediationPolicyId,
+                                                                   MediationDTO body,
+                                                                   String contentType,
+                                                                   String ifMatch,
+                                                                   String ifUnmodifiedSince) {
+        InputStream contentStream = null;
+        APIIdentifier apiIdentifier = null;
+        Mediation updatedMediation;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+            //Getting the api base path out of apiResourcePath
+            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Getting resource correspond to the given uuid
+            Resource mediationResource = apiProvider.getApiSpecificMediationResourceFromUuid
+                    (mediationPolicyId, apiResourcePath);
+            if (mediationResource != null) {
+                //extracting already existing name of the mediation policy
+                String contentString = IOUtils.toString(mediationResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                //Get policy name from the mediation config
+                OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                OMAttribute attribute = omElement.getAttribute(new QName
+                        (PolicyConstants.MEDIATION_NAME_ATTRIBUTE));
+                String existingMediationPolicyName = attribute.getAttributeValue();
+
+                //replacing the name of the body with existing name
+                body.setName(existingMediationPolicyName);
+
+                //Getting mediation policy config to update
+                contentStream = new ByteArrayInputStream(body.getConfig().getBytes
+                        (StandardCharsets.UTF_8));
+                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
+
+                //Getting path to the existing resource
+                String resourcePath = mediationResource.getPath();
+
+                //Updating the existing mediation policy
+                String updatedPolicyUrl = apiProvider.addResourceFile(resourcePath, contentFile);
+                if (StringUtils.isNotBlank(updatedPolicyUrl)) {
+                    String uuid = apiProvider.getCreatedResourceUuid(resourcePath);
+                    //Getting the updated mediation policy
+                    updatedMediation = apiProvider.getApiSpecificMediationPolicy
+                            (apiResourcePath, uuid);
+                    MediationDTO updatedMediationDTO =
+                            MediationMappingUtil.fromMediationToDTO(updatedMediation);
+                    URI uploadedMediationUri = new URI(updatedPolicyUrl);
+                    return Response.ok(uploadedMediationUri).entity(updatedMediationDTO).build();
+                }
+            } else {
+                //If registry resource not exists
+                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
+                        " not fount or does not exists, updating unsuccessful").build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error occurred while updating the mediation policy with uuid " +
+                        mediationPolicyId + " of API " + apiIdentifier.getApiName();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while getting location header for uploaded " +
+                    "mediation policy " + body.getName();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (IOException e) {
+            String errorMessage = " Error occurred while converting content stream in to string";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (XMLStreamException e) {
+            String errorMessage = " Error occurred while getting omelement out of content " +
+                    "of mediation policy";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (RegistryException e) {
+            String errorMessage = " Error while getting content stream of the requested mediation" +
+                    " policy";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(contentStream);
+        }
+        return null;
+    }
+
+    /**
+     * Add a API specific mediation policy
+     *
+     * @param body              Mediation DTO as request body
+     * @param apiId             api identifier
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return created mediation DTO as response
+     */
+    @Override
+    public Response apisApiIdPoliciesMediationPost(MediationDTO body, String apiId, String contentType,
+                                                   String ifMatch, String ifUnmodifiedSince) {
+        APIIdentifier apiIdentifier = null;
+        InputStream contentStream = null;
+        Mediation createdMediation;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String content = body.getConfig();
+            //Getting the mediation policy config from body to create resource file
+            contentStream = new ByteArrayInputStream(content.getBytes
+                    (StandardCharsets.UTF_8));
+            ResourceFile contentFile = new ResourceFile(contentStream, contentType);
+            //Extracting the file name specified in the config
+            String fileName = this.getMediationNameFromConfig(content);
+            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+            //Getting registry Api base path out of apiResourcePath
+            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Constructing mediation resource path
+            String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                    body.getType() + RegistryConstants.PATH_SEPARATOR + fileName;
+            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
+                return Response.status(Response.Status.CONFLICT).entity("Mediation policy already " +
+                        "exists in the given resource path, cannot create new").build();
+            }
+            //Adding api specific mediation policy
+            String mediationPolicyUrl = apiProvider.addResourceFile(mediationResourcePath, contentFile);
+            if (StringUtils.isNotBlank(mediationPolicyUrl)) {
+                //Getting the uuid of created mediation policy
+                String uuid = apiProvider.getCreatedResourceUuid(mediationResourcePath);
+                //Getting created Api specific mediation policy
+                createdMediation = apiProvider.getApiSpecificMediationPolicy
+                        (apiResourcePath, uuid);
+                MediationDTO createdPolicy =
+                        MediationMappingUtil.fromMediationToDTO(createdMediation);
+                URI uploadedMediationUri = new URI(mediationPolicyUrl);
+                return Response.created(uploadedMediationUri).entity(createdPolicy).build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while adding the mediation policy : " + body.getName() +
+                        "of API " + apiIdentifier.getApiName();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while getting location header for created " +
+                    "mediation policy " + body.getName();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(contentStream);
+        }
+        return null;
+    }
+
+    /**
      * Update API of given ID
      *
-     * @param apiId API ID
-     * @param body  Updated API details
-     * @param contentType Request content type
-     * @param ifMatch If-match header value
+     * @param apiId             API ID
+     * @param body              Updated API details
+     * @param contentType       Request content type
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Updated API
      */
     @Override
-    public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdPut(String apiId, APIDTO body, String contentType, String ifMatch,
+                                 String ifUnmodifiedSince) {
         APIDTO updatedApiDTO;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -409,7 +759,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
@@ -426,13 +777,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Delete API
      *
-     * @param apiId API Id
-     * @param ifMatch If-Match header value
+     * @param apiId             API Id
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Status of API Deletion
      */
     @Override
-    public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -463,18 +814,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     *  Returns all the documents of the given API identifier that matches to the search condition
+     * Returns all the documents of the given API identifier that matches to the search condition
      *
-     * @param apiId API identifier
-     * @param limit max number of records returned
-     * @param offset starting index
-     * @param accept Accept header value
+     * @param apiId       API identifier
+     * @param limit       max number of records returned
+     * @param offset      starting index
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
-            String ifNoneMatch) {
+                                          String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -505,9 +856,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Add a documentation to an API
-     * 
-     * @param apiId api identifier
-     * @param body Documentation DTO as request body
+     *
+     * @param apiId       api identifier
+     * @param body        Documentation DTO as request body
      * @param contentType Content-Type header
      * @return created document DTO as response
      */
@@ -562,16 +913,16 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Returns a specific document by identifier that is belong to the given API identifier
      *
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return returns the matched document
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+                                                    String ifModifiedSince) {
         Documentation documentation;
         try {
             RestApiPublisherUtils.checkUserAccessAllowedForAPI(apiId);
@@ -598,18 +949,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Updates an existing document of an API
-     * 
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param body updated document DTO
-     * @param contentType Content-Type header
-     * @param ifMatch If-match header value
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param body              updated document DTO
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return updated document DTO as response
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+                                                    String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -657,16 +1008,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Deletes an existing document of an API
-     * 
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param ifMatch If-match header value
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 response if deleted successfully
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
-            String ifUnmodifiedSince) {
+                                                       String ifUnmodifiedSince) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -695,16 +1046,16 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrieves the content of a document
      *
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Content of the document/ either inline/file or source url as a redirection
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+                                                           String ifNoneMatch, String ifModifiedSince) {
 
         Documentation documentation;
         try {
@@ -713,7 +1064,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
@@ -758,21 +1109,21 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Add content to a document. Content can be inline or File
-     * 
-     * @param apiId API identifier
-     * @param documentId document identifier
-     * @param contentType content type of the payload
-     * @param inputStream file input stream
-     * @param fileDetail file details as Attachment
-     * @param inlineContent inline content for the document
-     * @param ifMatch If-match header value
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param contentType       content type of the payload
+     * @param inputStream       file input stream
+     * @param fileDetail        file details as Attachment
+     * @param inlineContent     inline content for the document
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return updated document as DTO
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            String contentType, InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
-            String ifUnmodifiedSince) {
+                                                            String contentType, InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+                                                            String ifUnmodifiedSince) {
 
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -831,9 +1182,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrieves the swagger document of an API
      *
-     * @param apiId API identifier
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Swagger document of the API
      */
@@ -843,7 +1194,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -860,23 +1211,23 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the thumbnail image of an API specified by API identifier
-     * 
-     * @param apiId API Id
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           API Id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Thumbnail image of the API
      */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+                                          String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             ResourceFile thumbnailResource = apiProvider.getIcon(apiIdentifier);
-            
+
             if (thumbnailResource != null) {
                 return Response
                         .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
@@ -899,18 +1250,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Uploads a thumbnail image into an API
-     * 
-     * @param apiId API Id
-     * @param fileInputStream input stream of thumbnail image
-     * @param fileDetail file details as Attachment
-     * @param contentType content type of the payload
-     * @param ifMatch If-match header value
+     *
+     * @param apiId             API Id
+     * @param fileInputStream   input stream of thumbnail image
+     * @param fileDetail        file details as Attachment
+     * @param contentType       content type of the payload
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return metadata of the uploaded thumbnail image
      */
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+                                           String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -957,35 +1308,163 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Updates the swagger definition of an existing API
-     * 
-     * @param apiId API identifier
-     * @param apiDefinition Swagger definition
+     * Returns the wsdl correspond to the API specified by the identifier
+     *
+     * @param apiId           API id/uuid
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return ok with requested wsdl content , else null
+     */
+    @Override
+    public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch,
+                                     String ifModifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            String wsdlContent = apiProvider.getWsdl(apiIdentifier);
+            return Response.ok().entity(wsdlContent).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving wsdl of API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a new wsdl in to the registry
+     *
+     * @param apiId             API uuid
+     * @param wsdlDefinition    wsdl content
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return added wsdl to the registry
+     */
+    @Override
+    public Response apisApiIdWsdlPost(String apiId, String wsdlDefinition, String contentType,
+                                      String ifMatch, String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.WSDL_FILE_EXTENSION;
+            resourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + resourcePath;
+            if (apiProvider.checkIfResourceExists(resourcePath)) {
+                return Response.status(Response.Status.CONFLICT).entity("wsdl resource already " +
+                        "exists, cannot create a new").build();
+            }
+            apiProvider.uploadWsdl(resourcePath, wsdlDefinition);
+            String created = apiProvider.getWsdl(apiIdentifier);
+            return Response.ok().entity(created).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while uploading wsdl of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdWsdlPut(String apiId, String wsdlDefinision, String contentType,
+                                     String ifMatch, String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.WSDL_FILE_EXTENSION;
+            resourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + resourcePath;
+            if (apiProvider.checkIfResourceExists(resourcePath)) {
+                apiProvider.updateWsdl(resourcePath,wsdlDefinision);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while uploading wsdl of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates the swagger definition of an existing API
+     *
+     * @param apiId             API identifier
+     * @param apiDefinition     Swagger definition
+     * @param contentType       content type of the payload
+     * @param ifMatch           If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return updated swagger document of the API
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
-            String ifUnmodifiedSince) {
+                                        String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             apiProvider.saveSwagger20Definition(apiIdentifier, apiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the mediation policy name specify inside mediation config
+     *
+     * @param config mediation config content
+     * @return name of the mediation policy or null
+     */
+    public String getMediationNameFromConfig(String config) {
+        try {
+            //convert xml content in to json
+            String configInJson = XML.toJSONObject(config).toString();
+            JSONParser parser = new JSONParser();
+            //Extracting mediation policy name from the json string
+            JSONObject jsonObject = (JSONObject) parser.parse(configInJson);
+            JSONObject rootObject = (JSONObject) jsonObject.get(APIConstants.MEDIATION_SEQUENCE_ELEM);
+            String name = rootObject.get(APIConstants.POLICY_NAME_ELEM).toString();
+            return name + APIConstants.MEDIATION_CONFIG_EXT;
+        } catch (JSONException e) {
+            log.error("Error occurred while converting the mediation config string to json", e);
+        } catch (ParseException e) {
+            log.error("Error occurred while parsing config json string in to json object", e);
         }
         return null;
     }
