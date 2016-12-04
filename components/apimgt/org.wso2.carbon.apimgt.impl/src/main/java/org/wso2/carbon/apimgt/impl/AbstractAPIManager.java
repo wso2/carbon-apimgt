@@ -18,8 +18,18 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.entity.ContentType;
+import org.json.JSONException;
+import org.json.XML;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,10 +44,12 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -70,6 +82,9 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -607,6 +622,312 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get versions for API: " + apiName, e);
         }
         return versionSet;
+    }
+
+    /**
+     * Returns list of global mediation policies available
+     *
+     * @return List of Mediation objects of global mediation policies
+     * @throws APIManagementException If failed to get global mediation policies
+     */
+    @Override
+    public List<Mediation> getAllGlobalMediationPolicies() throws APIManagementException {
+        List<Mediation> mediationList = new ArrayList<Mediation>();
+        Mediation mediation;
+        String resourcePath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION;
+        try {
+            //Resource : customsequences
+            Resource resource = registry.get(resourcePath);
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    //Resource : in / out / fault
+                    Resource typeResource = registry.get(type);
+                    if (typeResource instanceof Collection) {
+                        String[] sequenceArray = ((Collection) typeResource).getChildren();
+                        if (sequenceArray.length > 0) {
+                            for (String sequence : sequenceArray) {
+                                //Resource : actual resource eg : log_in_msg.xml
+                                Resource sequenceResource = registry.get(sequence);
+                                String resourceId = sequenceResource.getUUID();
+                                try {
+                                    String contentString = IOUtils.toString
+                                            (sequenceResource.getContentStream(),
+                                            RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                                    OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                                    OMAttribute attribute = omElement.getAttribute(new QName
+                                            (PolicyConstants.MEDIATION_NAME_ATTRIBUTE));
+                                    String mediationPolicyName = attribute.getAttributeValue();
+                                    mediation = new Mediation();
+                                    mediation.setUuid(resourceId);
+                                    mediation.setName(mediationPolicyName);
+                                    //Extract sequence type from the registry resource path
+                                    String resourceType = type.substring(type.lastIndexOf("/") + 1);
+                                    mediation.setType(resourceType);
+                                    //Add mediation to the mediation list
+                                    mediationList.add(mediation);
+                                } catch (XMLStreamException e) {
+                                    //If any exception been caught flow may continue with the next mediation policy
+                                    log.error("Error occurred while getting omElement out of " +
+                                            "mediation content from "+sequence, e);
+                                } catch (IOException e) {
+                                    log.error("Error occurred while converting resource " +
+                                            "contentStream in to string in "+sequence,e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get global mediation policies", e);
+        }
+        return mediationList;
+    }
+
+    /**
+     * Return mediation policy corresponds to the given identifier
+     *
+     * @param mediationPolicyId uuid of the registry resource
+     * @return Mediation object related to the given identifier or null
+     * @throws APIManagementException If failed to get specified mediation policy
+     */
+    @Override
+    public Mediation getGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException {
+        Mediation mediation = null;
+        //Get registry resource correspond to identifier
+        Resource mediationResource = this.getCustomMediationResourceFromUuid(mediationPolicyId);
+        if (mediationResource != null) {
+            //Get mediation config details
+            try {
+                //extracting content stream of mediation policy in to  string
+                String contentString = IOUtils.toString(mediationResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                //Get policy name from the mediation config
+                OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                OMAttribute attribute = omElement.getAttribute(new QName
+                        (PolicyConstants.MEDIATION_NAME_ATTRIBUTE));
+                String mediationPolicyName = attribute.getAttributeValue();
+                mediation = new Mediation();
+                mediation.setUuid(mediationResource.getUUID());
+                mediation.setName(mediationPolicyName);
+                String resourcePath = mediationResource.getPath();
+                //Extracting mediation type from the registry resource path
+                String[] path = resourcePath.split(RegistryConstants.PATH_SEPARATOR);
+                String resourceType = path[(path.length - 2)];
+                mediation.setType(resourceType);
+                mediation.setConfig(contentString);
+
+            } catch (RegistryException e) {
+                log.error("Error occurred while getting content stream of the ,mediation policy ", e);
+            } catch (IOException e) {
+                log.error("Error occurred while converting content stream of mediation policy " +
+                        "into string ", e);
+            } catch (XMLStreamException e) {
+                log.error("Error occurred while getting omElement out of mediation content ", e);
+            }
+        }
+        return mediation;
+    }
+
+    /**
+     * Returns list of wsdls
+     *
+     * @return list of wsdl objects or null
+     * @throws APIManagementException If unable to return satisfied wsdl object list
+     */
+    @Override
+    public List<Wsdl> getAllWsdls() throws APIManagementException {
+
+        List<Wsdl> wsdlList = new ArrayList<Wsdl>();
+        String resourcePath = APIConstants.API_WSDL_RESOURCE;
+        try {
+            if (registry.resourceExists(resourcePath)) {
+                Resource wsdlResource = registry.get(resourcePath);
+                if (wsdlResource instanceof Collection) {
+                    String[] wsdlCollection = ((Collection) wsdlResource).getChildren();
+                    if (wsdlCollection.length > 0) {
+                        for (String wsdlFile : wsdlCollection) {
+                            Resource wsdlResourceFile = registry.get(wsdlFile);
+                            String uuid = wsdlResourceFile.getUUID();
+                            Wsdl wsdl = new Wsdl();
+                            String wsdlName = wsdlFile.substring(wsdlFile.lastIndexOf("/") + 1);
+                            wsdl.setUuid(uuid);
+                            wsdl.setName(wsdlName);
+                            wsdlList.add(wsdl);
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get wsdl list", e);
+        }
+        return wsdlList;
+    }
+
+    /**
+     * Return Wsdl specify by identifier
+     *
+     * @param wsdlId uuid of the wsdl resource
+     * @return A Wsdl object related to the given identifier or null
+     * @throws APIManagementException If failed to get specified wsdl
+     */
+    @Override
+    public Wsdl getWsdlById(String wsdlId) throws APIManagementException {
+        Wsdl wsdl = null;
+        //Get registry resource correspond to identifier
+        Resource wsdlResource = this.getWsdlResourceFromUuid(wsdlId);
+        if (wsdlResource != null) {
+            try {
+                //extracting content stream of wsdl in to  string
+                String contentString = IOUtils.toString(wsdlResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                wsdl = new Wsdl();
+                String resourcePath = wsdlResource.getPath();
+                String wsdlName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1);
+                wsdl.setUuid(wsdlResource.getUUID());
+                wsdl.setName(wsdlName);
+                wsdl.setConfig(contentString);
+            } catch (RegistryException e) {
+                log.error("Error occurred while getting content stream of the wsdl " +
+                        wsdlResource.getPath(), e);
+            } catch (IOException e) {
+                log.error("Error occurred while converting content stream of wsdl " +
+                        wsdlResource.getPath() + " into string ", e);
+            }
+        }
+        return wsdl;
+    }
+
+    /**
+     * Returns the wsdl registry resource correspond to the given identifier
+     *
+     * @param wsdlId uuid of the wsdl resource
+     * @return Registry resource of given identifier or null
+     * @throws APIManagementException If failed to get the registry resource of given uuid
+     */
+    @Override
+    public Resource getWsdlResourceFromUuid(String wsdlId) throws APIManagementException {
+        String resourcePath = APIConstants.API_WSDL_RESOURCE;
+        try {
+            if (registry.resourceExists(resourcePath)) {
+                Resource resource = registry.get(resourcePath);
+                //resource : /_system/governance/apimgt/applicationdata/wsdls
+
+                if (resource instanceof Collection) {
+                    Collection wsdlCollection = (Collection) resource;
+                    String[] wsdlArray = wsdlCollection.getChildren();
+                    for (String wsdl : wsdlArray) {
+                        Resource wsdlResource = registry.get(wsdl);
+                        String resourceId = wsdlResource.getUUID();
+                        if (resourceId.equals(wsdlId)) {
+                            return wsdlResource;
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error while accessing registry objects", e);
+        }
+        return null;
+    }
+
+    /**
+     * Delete an existing wsdl
+     *
+     * @param wsdlId uuid of the wsdl
+     * @return true if deleted successfully
+     * @throws APIManagementException If failed to delete wsdl
+     */
+    @Override
+    public boolean deleteWsdl(String wsdlId) throws APIManagementException {
+        //Get registry resource correspond to the uuid
+        Resource wsdlResource = this.getWsdlResourceFromUuid(wsdlId);
+        if (wsdlResource != null) {
+            //If resource exists
+            String wsdlResourcePath = wsdlResource.getPath();
+            try {
+                if (registry.resourceExists(wsdlResourcePath)) {
+                    ////TODO : validation if wsdl been use by any API
+                    registry.delete(wsdlResourcePath);
+                    //Verify if deleted successfully
+                    if (!registry.resourceExists(wsdlResourcePath)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Wsdl " + wsdlResourcePath + " deleted successfully");
+                        }
+                        return true;
+                    }
+                }
+            } catch (RegistryException e) {
+                handleException("Failed to delete wsdl " + wsdlResourcePath, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the wsdl content in registry specified by the wsdl name
+     *
+     * @param apiId Api Identifier
+     * @return wsdl content matching name if exist else null
+     */
+    @Override
+    public String getWsdl(APIIdentifier apiId) throws APIManagementException {
+        String wsdlDoc = null;
+        String wsdlName = apiId.getProviderName() + "--" + apiId.getApiName() +
+                apiId.getVersion() + ".wsdl";
+        String wsdlResourePath = APIConstants.API_WSDL_RESOURCE_LOCATION + wsdlName;
+        try {
+            if (registry.resourceExists(wsdlResourePath)) {
+                Resource wsdlResource = registry.get(wsdlResourePath);
+                wsdlDoc = IOUtils.toString(wsdlResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+            }
+        } catch (RegistryException e) {
+            handleException("Error while getting wsdl file from the registry ", e);
+        } catch (IOException e) {
+            String error = "Error occurred while getting the content of wsdl " + wsdlName;
+            log.error(error);
+            throw new APIManagementException(error, e);
+        }
+        return wsdlDoc;
+    }
+
+    /**
+     * Create a wsdl in the path specified.
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param wsdlDefinition wsdl content
+     */
+    @Override
+    public void uploadWsdl(String resourcePath, String wsdlDefinition)
+            throws APIManagementException {
+        try {
+            Resource resource = registry.newResource();
+            resource.setContent(wsdlDefinition);
+            resource.setMediaType(String.valueOf(ContentType.APPLICATION_XML));
+            registry.put(resourcePath, resource);
+        } catch (RegistryException e) {
+            handleException("Error while uploading wsdl to from the registry ", e);
+        }
+    }
+
+    /**
+     * Update a existing wsdl in the path specified
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param wsdlDefinition wsdl content
+     */
+    @Override
+    public void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException {
+        try {
+            Resource resource = registry.get(resourcePath);
+            resource.setContent(wsdlDefinition);
+            registry.put(resourcePath,resource);
+        } catch (RegistryException e) {
+            handleException("Error while updating the existing wsdl ", e);
+        }
     }
 
     /**
@@ -1310,6 +1631,18 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
+    @Override
+    public List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException {
+        return apiMgtDAO.getAPINamesMatchingContext(contextTemplate);
+    }
+
+    @Override
+    public List<String> getVersionsMatchesContext(String context, String apiName)
+            throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingContext(context, apiName);
+    }
+
+
     public Policy[] getPolicies(String username, String level) throws APIManagementException {
         Policy[] policies = null;
 
@@ -1326,6 +1659,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return policies;
     }
+
 
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain,
@@ -1390,11 +1724,359 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
-     * search in multiple fields.
+     * Delete an existing global mediation policy
      *
+     * @param mediationPolicyId uuid of the global mediation policy
+     * @return true if deleted successfully
+     * @throws APIManagementException If failed to delete mediation policy
+     */
+    @Override
+    public boolean deleteGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException {
+        //Get registry resource correspond to the uuid
+        Resource mediationResource = this.getCustomMediationResourceFromUuid(mediationPolicyId);
+        if (mediationResource != null) {
+            //If resource exists
+            String mediationPath = mediationResource.getPath();
+            try {
+                if (registry.resourceExists(mediationPath)) {
+                    ////TODO : validation if policy been use by any API
+                    registry.delete(mediationPath);
+                    //Verify if deleted successfully
+                    if (!registry.resourceExists(mediationPath)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Mediation policy deleted successfully");
+                        }
+                        return true;
+                    }
+                }
+            } catch (RegistryException e) {
+                handleException("Failed to delete global mediation policy " + mediationPolicyId, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the uuid of the updated/created mediation policy
+     *
+     * @param mediationPolicyPath path to the registry resource
+     * @return uuid of the given registry resource or null
+     */
+    @Override
+    public String getCreatedResourceUuid(String mediationPolicyPath) {
+        try {
+            Resource resource = registry.get(mediationPolicyPath);
+            return resource.getUUID();
+        } catch (RegistryException e) {
+            log.error("error occurred while getting created mediation policy uuid", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the mediation policy registry resource correspond to the given identifier
+     *
+     * @param mediationPolicyId uuid of the mediation resource
+     * @return Registry resource of given identifier or null
+     * @throws APIManagementException If failed to get the registry resource of given uuid
+     */
+    @Override
+    public Resource getCustomMediationResourceFromUuid(String mediationPolicyId)
+            throws APIManagementException {
+        String resourcePath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION;
+        try {
+            Resource resource = registry.get(resourcePath);
+            //resource : customsequences
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    Resource typeResource = registry.get(type);
+                    //typeResource: in/ out/ fault
+                    if (typeResource instanceof Collection) {
+                        String[] policyArray = ((Collection) typeResource).getChildren();
+                        if (policyArray.length > 0) {
+                            for (String policy : policyArray) {
+                                Resource mediationResource = registry.get(policy);
+                                //mediationResource: eg .log_in_msg.xml
+                                String resourceId = mediationResource.getUUID();
+                                if (resourceId.equals(mediationPolicyId)) {
+                                    //If registry resource id matches given identifier returns that
+                                    // registry resource
+                                    return mediationResource;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error while accessing registry objects", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns Registry resource matching given mediation policy identifier
+     *
+     * @param uuid         mediation policy identifier
+     * @param resourcePath registry path to the API resource
+     * @return Registry resource matches given identifier or null
+     * @throws APIManagementException If fails to get the resource matching given identifier
+     */
+    @Override
+    public Resource getApiSpecificMediationResourceFromUuid
+    (String uuid, String resourcePath) throws APIManagementException {
+        try {
+            Resource resource = registry.get(resourcePath);
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    //Check for mediation policy resource
+                    if ((type.equalsIgnoreCase(resourcePath + RegistryConstants.PATH_SEPARATOR +
+                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN)) ||
+                            (type.equalsIgnoreCase(resourcePath + RegistryConstants.PATH_SEPARATOR +
+                                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT)) ||
+                            (type.equalsIgnoreCase(resourcePath + RegistryConstants.PATH_SEPARATOR +
+                                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
+                        Resource sequenceType = registry.get(type);
+                        //sequenceType eg: in / out /fault
+                        if (sequenceType instanceof Collection) {
+                            String[] mediationPolicyArr = ((Collection) sequenceType).getChildren();
+                            for (String mediationPolicy : mediationPolicyArr) {
+                                Resource mediationResource = registry.get(mediationPolicy);
+                                String resourceId = mediationResource.getUUID();
+                                if (resourceId.equalsIgnoreCase(uuid)) {
+                                    return mediationResource;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error while obtaining registry objects", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of API specific mediation policies from registry
+     *
+     * @param apiIdentifier API identifier
+     * @return List of api specific mediation objects available
+     * @throws APIManagementException If unable to get mediation policies of specified API Id
+     */
+    @Override
+    public List<Mediation> getAllApiSpecificMediationPolicies(APIIdentifier apiIdentifier) throws APIManagementException {
+        List<Mediation> mediationList = new ArrayList<Mediation>();
+        Mediation mediation;
+        String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+        apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+        try {
+            //Getting API registry resource
+            Resource resource = registry.get(apiResourcePath);
+            //resource eg: /_system/governance/apimgt/applicationdata/provider/admin/calculatorAPI/2.0
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    //Check for mediation policy sequences
+                    if ((type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN)) ||
+                            (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT)) ||
+                            (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR +
+                                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
+                        Resource typeResource = registry.get(type);
+                        //typeResource : in / out / fault
+                        if (typeResource instanceof Collection) {
+                            String[] mediationPolicyArr = ((Collection) typeResource).getChildren();
+                            if (mediationPolicyArr.length > 0) {
+                                for (String mediationPolicy : mediationPolicyArr) {
+                                    Resource policyResource = registry.get(mediationPolicy);
+                                    //policyResource eg: custom_in_message
+
+                                    //Get uuid of the registry resource
+                                    String resourceId = policyResource.getUUID();
+
+                                    //Get mediation policy config
+                                    try {
+                                        String contentString = IOUtils.toString
+                                                (policyResource.getContentStream(),
+                                                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                                        //Extract name from the policy config
+                                        OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                                        OMAttribute attribute = omElement.getAttribute(new QName("name"));
+                                        String mediationPolicyName = attribute.getAttributeValue();
+                                        mediation = new Mediation();
+                                        mediation.setUuid(resourceId);
+                                        mediation.setName(mediationPolicyName);
+                                        //Extracting mediation policy type from the registry resource path
+                                        String resourceType = type.substring(type.lastIndexOf("/") + 1);
+                                        mediation.setType(resourceType);
+                                        mediationList.add(mediation);
+                                    } catch (XMLStreamException e) {
+                                        // If exception been caught flow will continue with next mediation policy
+                                        log.error("Error occurred while getting omElement out of" +
+                                                " mediation content", e);
+                                    } catch (IOException e) {
+                                        log.error("Error occurred while converting the content " +
+                                                "stream of mediation " + mediationPolicy + " to string", e);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Error occurred  while getting Api Specific mediation policies ", e);
+        }
+        return mediationList;
+    }
+
+    /**
+     * Returns the mediation policy name specify inside mediation config
+     *
+     * @param config mediation config content
+     * @return name of the mediation policy or null
+     */
+    @Override
+    public String getMediationNameFromConfig(String config) {
+        try {
+            //convert xml content in to json
+            String configInJson = XML.toJSONObject(config).toString();
+            JSONParser parser = new JSONParser();
+            //Extracting mediation policy name from the json string
+            JSONObject jsonObject = (JSONObject) parser.parse(configInJson);
+            JSONObject rootObject = (JSONObject) jsonObject.get(APIConstants.MEDIATION_SEQUENCE_ELEM);
+            String name = rootObject.get(APIConstants.POLICY_NAME_ELEM).toString();
+            //explicitly add .xml extension to the name and return
+            return name + APIConstants.MEDIATION_CONFIG_EXT;
+        } catch (JSONException e) {
+            log.error("Error occurred while converting the mediation config string to json", e);
+        } catch (ParseException e) {
+            log.error("Error occurred while parsing config json string in to json object", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns Mediation policy specify by given identifier
+     *
+     * @param apiResourcePath   registry path to the API resource
+     * @param mediationPolicyId mediation policy identifier
+     * @return Mediation object contains details of the mediation policy or null
+     */
+    @Override
+    public Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException {
+        //Get registry resource correspond to given policy identifier
+        Resource mediationResource = getApiSpecificMediationResourceFromUuid(mediationPolicyId,
+                apiResourcePath);
+        Mediation mediation = null;
+        if (mediationResource != null) {
+            try {
+                //Get mediation policy config content
+                String contentString = IOUtils.toString(mediationResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                //Extracting name specified in the mediation config
+                OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                OMAttribute attribute = omElement.getAttribute(new QName("name"));
+                String mediationPolicyName = attribute.getAttributeValue();
+                mediation = new Mediation();
+                mediation.setUuid(mediationResource.getUUID());
+                mediation.setName(mediationPolicyName);
+                //Extracting mediation policy type from registry path
+                String resourcePath = mediationResource.getPath();
+                String[] path = resourcePath.split(RegistryConstants.PATH_SEPARATOR);
+                String resourceType = path[(path.length - 2)];
+                mediation.setType(resourceType);
+                mediation.setConfig(contentString);
+            } catch (XMLStreamException e) {
+                String errorMsg = "Error occurred while getting omElement out of mediation content";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e);
+            } catch (IOException e) {
+                String errorMsg = "Error occurred while converting content stream into string ";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e);
+            } catch (RegistryException e) {
+                String errorMsg = "Error occurred while accessing content stream of mediation" +
+                        " policy";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e);
+            }
+        }
+        return mediation;
+    }
+
+    /**
+     * Delete existing API specific mediation policy
+     *
+     * @param apiResourcePath   path to the API registry resource
+     * @param mediationPolicyId mediation policy identifier
+     */
+    @Override
+    public Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException {
+        Resource mediationResource = this.getApiSpecificMediationResourceFromUuid(mediationPolicyId,
+                apiResourcePath);
+        if (mediationResource != null) {
+            //If resource exists
+            String mediationPath = mediationResource.getPath();
+            try {
+                if (registry.resourceExists(mediationPath)) {
+                    registry.delete(mediationPath);
+                    if (!registry.resourceExists(mediationPath)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Mediation policy deleted successfully");
+                        }
+                        return true;
+                    }
+                }
+            } catch (RegistryException e) {
+                handleException("Failed to delete specific mediation policy ", e);
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Returns true if resource already exists in registry
+     *
+     * @param mediationPolicyPath resource path
+     * @return true, If resource exists
+     */
+    @Override
+    public boolean checkIfResourceExists(String mediationPolicyPath) throws APIManagementException {
+        boolean value = false;
+        try {
+            if (registry.resourceExists(mediationPolicyPath)) {
+                value = true;
+            }
+        } catch (RegistryException e) {
+            handleException("Error while obtaining registry objects", e);
+        }
+        return value;
+    }
+
+    @Override
+    public List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName,username);
+    }
+
+
+    /**
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate 
+     * search in multiple fields. 
+     * 
      * @param registry
-     * @param searchQuery. Ex: provider=*admin*&version=*1*
+     * @param searchQuery Ex: provider=*admin*&version=*1*
      * @return API result
      * @throws APIManagementException
      */

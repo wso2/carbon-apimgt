@@ -24,11 +24,14 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.registry.api.Resource;
 
 import java.util.List;
 import java.util.Map;
@@ -136,6 +139,7 @@ public interface APIManager {
      * @throws APIManagementException if failed to get version for api
      */
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
+
 
     /**
      * Returns the swagger v2.0 definition as a string
@@ -427,8 +431,17 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
-    
 
+    /**
+     * get a set of API names that matches given context template
+     * @param contextTemplate context in the payload
+     * @return list of API names matches the context
+     * @throws APIManagementException
+     */
+    List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException;
+
+    //todo
+    List<String> getVersionsMatchesContext(String context, String apiName) throws APIManagementException;
     /**
      * Get policy object for given level and user name
      *
@@ -451,8 +464,9 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
-                                            boolean limitAttributes) throws APIManagementException;
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
+                                           boolean limitAttributes) throws APIManagementException;
+
 
     /**
      * fetches the lastUpdated timestamp for the API swagger resource
@@ -471,4 +485,172 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException;
+    
+    /**
+     * Returns list of global mediation policies
+     *
+     * @return list of Mediation objects related to the given identifier or null
+     * @throws APIManagementException if failed to get global mediation policies
+     */
+    List<Mediation> getAllGlobalMediationPolicies() throws APIManagementException;
+
+    /**
+     * Delete existing global mediation policy
+     *
+     * @param mediationPolicyId uuid of the global mediation policy
+     * @return True is deletion successful
+     * @throws APIManagementException If failed to delete mediation policy
+     */
+    boolean deleteGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException;
+
+
+    /**
+     * Return mediation specify by identifier
+     *
+     * @param mediationPolicyId uuid of the mediation policy resource
+     * @return A Mediation object related to the given identifier or null
+     * @throws APIManagementException If failed to get specified mediation policy
+     */
+    Mediation getGlobalMediationPolicy(String mediationPolicyId) throws APIManagementException;
+
+    /**
+     * Return the uuid of the mediation policy in given registry path
+     *
+     * @param mediationPolicyPath path to the registry resource
+     * @return uuid of the resource
+     */
+    String getCreatedResourceUuid(String mediationPolicyPath);
+
+    /**
+     * Returns registry resource specify by the mediation identifier
+     *
+     * @param mediationPolicyId uuid of the resource
+     * @return Registry resource correspond to identifier or null
+     */
+    Resource getCustomMediationResourceFromUuid(String mediationPolicyId) throws APIManagementException;
+
+    /**
+     * Returns Registry resource matching given mediation policy identifier
+     *
+     * @param uuid         mediation policy identifier
+     * @param resourcePath registry path to the API resource
+     * @return Registry resource matches given identifier or null
+     * @throws APIManagementException If fails to get the resource matching given identifier
+     */
+    Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath)
+            throws APIManagementException;
+
+    /**
+     * Returns list of API specific mediation policies
+     *
+     * @param apiIdentifier API identifier
+     * @return list of mediation policy objects or null
+     * @throws APIManagementException If unable to return satisfied mediation object list
+     */
+    List<Mediation> getAllApiSpecificMediationPolicies(APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Returns the mediation policy name specify inside mediation config
+     *
+     * @param config mediation config content
+     * @return name of the mediation policy or null
+     */
+    String getMediationNameFromConfig(String config);
+
+    /**
+     * Returns API specific mediation policy specified by the identifier
+     *
+     * @param apiResourcePath   registry path to the API resource
+     * @param mediationPolicyId mediation policy identifier
+     * @return Mediation object of given identifier or null
+     */
+    Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException;
+
+    /**
+     * Delete a API specific mediation policy identified by the identifier
+     *
+     * @param apiResourcePath   registry path to the API resource
+     * @param mediationPolicyId mediation policy identifier
+     * @throws APIManagementException If failed to delete the given mediation policy
+     */
+    Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException;
+
+    /**
+     * Returns true if resource already exists in registry
+     *
+     * @param mediationPolicyPath resource path
+     * @return true, If resource exists
+     */
+    boolean checkIfResourceExists(String mediationPolicyPath) throws APIManagementException;
+
+    /**
+     * Returns a list of api versions that matches the given context template
+     *
+     * @param apiName api name in the payload
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException;
+
+    /**
+     * Returns list of wsdls
+     *
+     * @return list of wsdl objects or null
+     * @throws APIManagementException If unable to return satisfied wsdl object list
+     */
+    List<Wsdl> getAllWsdls() throws APIManagementException;
+
+    /**
+     * Return Wsdl specify by identifier
+     *
+     * @param wsdlId uuid of the wsdl resource
+     * @return A Wsdl object related to the given identifier or null
+     * @throws APIManagementException If failed to get specified wsdl
+     */
+    Wsdl getWsdlById(String wsdlId) throws APIManagementException;
+
+    /**
+     * Returns Registry resource matching given wsdl identifier
+     *
+     * @param wsdlId wsdl identifier
+     * @return Registry resource matches given identifier or null
+     * @throws APIManagementException If fails to get the resource matching given identifier
+     */
+    Resource getWsdlResourceFromUuid(String wsdlId) throws APIManagementException;
+
+    /**
+     * Delete an existing wsdl
+     *
+     * @param wsdlId uuid of the wsdl
+     * @return true if deleted successfully
+     * @throws APIManagementException If failed to delete wsdl
+     */
+    boolean deleteWsdl(String wsdlId) throws APIManagementException;
+
+    /**
+     * Returns the wsdl content in registry specified by the wsdl name
+     *
+     * @param apiId api identifier of the API
+     * @return wsdl content matching name if exist else null
+     */
+    String getWsdl(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Create a wsdl in the path specified.
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param wsdlDefinition wsdl content
+     */
+    void uploadWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
+
+    /**
+     * Update a existing wsdl in the path specified
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param wsdlDefinition wsdl content
+     */
+    void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
 }

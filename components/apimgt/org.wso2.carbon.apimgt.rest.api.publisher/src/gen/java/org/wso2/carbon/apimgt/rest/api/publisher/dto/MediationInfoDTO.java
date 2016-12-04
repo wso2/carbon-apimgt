@@ -11,20 +11,20 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class SequenceDTO  {
+public class MediationInfoDTO  {
   
   
   @NotNull
   private String name = null;
   
-  
-  private String type = null;
-  
-  
+  @NotNull
   private String id = null;
   
-  
-  private Boolean shared = null;
+  public enum TypeEnum {
+     in,  out,  fault, 
+  };
+  @NotNull
+  private TypeEnum type = null;
 
   
   /**
@@ -41,19 +41,7 @@ public class SequenceDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public String getType() {
-    return type;
-  }
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -65,13 +53,13 @@ public class SequenceDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("shared")
-  public Boolean getShared() {
-    return shared;
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
   }
-  public void setShared(Boolean shared) {
-    this.shared = shared;
+  public void setType(TypeEnum type) {
+    this.type = type;
   }
 
   
@@ -79,12 +67,11 @@ public class SequenceDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SequenceDTO {\n");
+    sb.append("class MediationInfoDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  id: ").append(id).append("\n");
-    sb.append("  shared: ").append(shared).append("\n");
+    sb.append("  type: ").append(type).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
