@@ -28,8 +28,9 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 /**
  * 
@@ -51,10 +52,14 @@ public class UserAwareAPIStore extends APIStoreImpl {
             if (application != null && application.getCreatedUser().equals(getUsername())) {
                 super.deleteApplication(appId);
             } else {
-                APIUtils.logAndThrowException("Could not find application - " + appId, log);
+                String errorMsg = "Could not find application - " + appId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while deleting application - " + appId, e, log);
+            String errorMsg = "Error occurred while deleting application - " + appId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APPLICATION_NOT_FOUND);
         }
     }
 
@@ -65,10 +70,14 @@ public class UserAwareAPIStore extends APIStoreImpl {
             if (oldApplication != null && oldApplication.getCreatedUser().equals(getUsername())) {
                 super.updateApplication(uuid, application);
             } else {
-                APIUtils.logAndThrowException("Could not find Application - " + uuid, log);
+                String errorMsg = "Could not find application - " + uuid;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while updating application - " + uuid, e, log);
+            String errorMsg = "Error occurred while updating application - " + uuid;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APPLICATION_NOT_FOUND);
         }
     }
 }

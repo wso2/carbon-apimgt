@@ -6,7 +6,9 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
@@ -20,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -52,9 +55,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
 
         DocumentDTO documentDTO = null;
-        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
             documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
         } catch (APIManagementException e) {
@@ -71,9 +74,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         DocumentListDTO documentListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             List<DocumentInfo> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
             documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentInfoResults, offset, limit);
@@ -100,16 +103,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         APIDTO apiToReturn = null;
         try {
-            String apiConsumer = RestApiUtil.getLoggedInUsername();
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e) || RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving API : " + apiId, e, log);
-            }
+            String errorMessage = "Error while retrieving API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(apiToReturn).build();
     }
@@ -138,13 +142,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {
-            String apiConsumer = RestApiUtil.getLoggedInUsername();
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             apisResult = apiStore.searchAPIs(query, offset, limit);
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(" Error while retrieving APIs ", e, log);
+            String errorMessage = "Error while retrieving APIs ";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, query);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(apiListDTO).build();
     }
