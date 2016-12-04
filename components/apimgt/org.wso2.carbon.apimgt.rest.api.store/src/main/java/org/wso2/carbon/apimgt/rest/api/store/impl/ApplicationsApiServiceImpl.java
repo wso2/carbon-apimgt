@@ -41,7 +41,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;
@@ -60,7 +60,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         ApplicationDTO applicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
@@ -84,7 +84,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         ApplicationDTO updatedApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             apiConsumer.updateApplication(applicationId, application);
 
@@ -109,7 +109,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         ApplicationKeyDTO applicationKeyDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
@@ -150,7 +150,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             List<Application> allMatchedApps = new ArrayList<>();
             if (StringUtils.isBlank(query)) {
                 allMatchedApps = apiConsumer.getApplications(username, groupId);
@@ -182,7 +182,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         ApplicationDTO createdApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
