@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -46,16 +45,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-//Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the
-// resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while deleting API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while deleting  API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     @Override
@@ -150,15 +146,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
             return Response.status(Response.Status.CREATED).entity(documentDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
-            }
+            String errorMessage = "Error while adding content to document" + documentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId
@@ -170,10 +165,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.removeDocumentation(documentId);
+            return Response.ok().build();
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            String errorMessage = "Error while deleting document" + documentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().build();
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId
@@ -182,8 +183,25 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifNoneMatch
 , String ifModifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
+            if (documentInfo != null) {
+                return Response.ok().entity(MappingUtil.toDocumentDTO(documentInfo)).build();
+            }else{
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while getting document" + documentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId
@@ -248,9 +266,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentListDTO documentListDTO = MappingUtil.toDocumentListDTO(documentInfos);
             return Response.status(Response.Status.OK).entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            String errorMessage = "Error while getting list of documents" + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
     @Override
     public Response apisApiIdDocumentsPost(String apiId
@@ -276,17 +298,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            }else if(RestApiUtil.isDueToResourceAlreadyExists(e)){
-                RestApiUtil.handleResourceAlreadyExistsError(RestApiConstants.RESOURCE_DOCUMENTATION, e, log);
-            } else{
-                String errorMessage = "Error while adding the document for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            String errorMessage = "Error while create  document for api " + apiId;
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
-        }
-        return null;
     }
 
     @Override
@@ -347,14 +365,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             }
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while retrieving API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
         }
         return null;
     }
@@ -373,17 +390,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
             return Response.ok().entity(apidto).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
         }
-        return null;
     }
     @Override
     public Response apisApiIdSwaggerGet(String apiId
@@ -397,16 +411,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             String swagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(swagger).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
 
     }
     @Override
@@ -423,16 +434,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+                String errorMessage = "Error while put swagger for API : " + apiId;
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
     @Override
     public Response apisApiIdThumbnailGet(String apiId
@@ -451,16 +459,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.noContent().build();
             }
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
     @Override
     public Response apisApiIdThumbnailPost(String apiId
@@ -484,20 +489,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 */
             return Response.status(Response.Status.CREATED).entity(infoDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+                String errorMessage = "Error while uploading image" + apiId;
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
 //            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 //        }
-        return null;
     }
 
     @Override
@@ -521,15 +523,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
-            }
+                String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
     @Override
     public Response apisCopyApiPost(String newVersion
@@ -548,23 +548,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 //            // return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
             return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
-                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-                // existence of the resource
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while copying API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while create new API version " + apiId ;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, newVersion);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList,e);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving API location of " + apiId;
 //            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 //        }
-        return null;
     }
 
     @Override
@@ -582,9 +577,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     @Override
