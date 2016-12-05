@@ -23,15 +23,16 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
@@ -243,6 +244,89 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testSearchAPIs() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        // Sample API names
+        final String mixedCaseString = "MixedCase";
+        final String lowerCaseString = "lowercase";
+        final String upperCaseString = "UPPERCASE";
+        final String charSymbolNumString = "mi^-@123";
+        final String spaceDelimitingString = " Sp ace ";
+        final String symbolSpaceString = "_under & Score_";
+
+        // Search string cases
+        final String commonMixedCaseSearchString = "CaSe";
+        final String commonLowerCaseSearchString = "case";
+        final String commonUpperCaseSearchString = "CASE";
+        final String symbolSearchString = "^-@";
+        final String numberSearchString = "12";
+        final String spaceIncludedSearchString = "p a";
+
+        // Create test data
+        Map<String, API> apis = new HashMap<>();
+        apis.put(mixedCaseString, SampleTestObjectCreator.createUniqueAPI().name(mixedCaseString).build());
+        apis.put(lowerCaseString, SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).build());
+        apis.put(upperCaseString, SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).build());
+        apis.put(charSymbolNumString, SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).build());
+        apis.put(spaceDelimitingString, SampleTestObjectCreator.createUniqueAPI().name(spaceDelimitingString).build());
+        apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
+
+        // Add APIs
+        for (Map.Entry<String, API> entry : apis.entrySet()) {
+            API api = entry.getValue();
+            apiDAO.addAPI(api);
+            // Replace with summary object for validation
+            apis.put(entry.getKey(), SampleTestObjectCreator.getSummaryFromAPI(api));
+        }
+
+        // Expected common string search result
+        List<API> commonStringResult = new ArrayList<>();
+        commonStringResult.add(apis.get(mixedCaseString));
+        commonStringResult.add(apis.get(lowerCaseString));
+        commonStringResult.add(apis.get(upperCaseString));
+
+        // Search by common mixed case
+        List<API> apiList = apiDAO.searchAPIs(commonMixedCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by common lower case
+        apiList = apiDAO.searchAPIs(commonLowerCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by common upper case
+        apiList = apiDAO.searchAPIs(commonUpperCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by symbol
+        apiList = apiDAO.searchAPIs(symbolSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        API actualAPI = apiList.get(0);
+        API expectedAPI = apis.get(charSymbolNumString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+
+        // Search by number
+        apiList = apiDAO.searchAPIs(numberSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        actualAPI = apiList.get(0);
+        expectedAPI = apis.get(charSymbolNumString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+
+        // Search with spaces
+        apiList = apiDAO.searchAPIs(spaceIncludedSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        actualAPI = apiList.get(0);
+        expectedAPI = apis.get(spaceDelimitingString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+    }
+
+    @Test
     public void testDeleteAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -275,36 +359,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI);
     }
-
-    /*
-    private void validateAPIs(API actualAPI, API expectedAPI) {
-        Assert.assertEquals(actualAPI.getProvider(), expectedAPI.getProvider());
-        Assert.assertEquals(actualAPI.getVersion(), expectedAPI.getVersion());
-        Assert.assertEquals(actualAPI.getName(), expectedAPI.getName());
-        Assert.assertEquals(actualAPI.getDescription(), expectedAPI.getDescription());
-        Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
-        Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
-        Assert.assertEquals(actualAPI.getLifeCycleStatus(), expectedAPI.getLifeCycleStatus());
-        Assert.assertEquals(actualAPI.getLifecycleInstanceId(), expectedAPI.getLifecycleInstanceId());
-        Assert.assertEquals(actualAPI.getApiDefinition(), expectedAPI.getApiDefinition());
-        Assert.assertEquals(actualAPI.getWsdlUri(), expectedAPI.getWsdlUri());
-        Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());
-        Assert.assertEquals(actualAPI.getCacheTimeout(), expectedAPI.getCacheTimeout());
-        Assert.assertEquals(actualAPI.isDefaultVersion(), expectedAPI.isDefaultVersion());
-        Assert.assertTrue(equalLists(actualAPI.getTransport(), expectedAPI.getTransport()));
-        Assert.assertTrue(equalLists(actualAPI.getTags(), expectedAPI.getTags()));
-        Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
-        Assert.assertEquals(actualAPI.getVisibility(), expectedAPI.getVisibility());
-        Assert.assertTrue(equalLists(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles()));
-        //Assert.assertEquals(actualAPI.getEndpoint(), expectedAPI.getEndpoint());
-        //Assert.assertEquals(actualAPI.getGatewayEnvironments(), expectedAPI.getGatewayEnvironments());
-        Assert.assertEquals(actualAPI.getBusinessInformation(), expectedAPI.getBusinessInformation());
-        Assert.assertEquals(actualAPI.getCorsConfiguration(), expectedAPI.getCorsConfiguration());
-        Assert.assertEquals(actualAPI.getCreatedTime(), expectedAPI.getCreatedTime());
-        Assert.assertEquals(actualAPI.getCreatedBy(), expectedAPI.getCreatedBy());
-        Assert.assertEquals(actualAPI.getLastUpdatedTime(), expectedAPI.getLastUpdatedTime());
-    }
-    */
 
 
 
