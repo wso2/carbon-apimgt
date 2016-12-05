@@ -169,15 +169,24 @@
 		  <div class="col-md-12 col-lg-9">
 		  	  {{> grants this}}
 		  	  {{> callback_url this}}
-			  <div class="form-group">	    
-			    <label><%=i18n.localize("Access token validity period")%> </label>
-			    <div class="input-group col-sm-6">
-                  <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control form-control-md validity_time">
-                  <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+		  	  <form class="add-margin-top-5x well">
+                <div class="form-group">
+                    <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
+                      <select id="scopes" class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
+                        {{#each Scopes}}
+                            <option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
+                        {{/each}}
+                      </select>
                 </div>
-
-			  </div>
-			  <button  class="btn btn-primary generatekeys" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Generate keys")%></button>
+                <div class="form-group">
+                    <label><%=i18n.localize("Access token validity period")%> </label>
+                    <div class="input-group col-sm-6">
+                      <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control form-control-md validity_time">
+                      <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+                    </div>
+                </div>
+			    <button  class="btn btn-primary generatekeys" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Generate keys")%></button>
+			  </form>
 		  </div>
 	    </div>
 	  {{/unless}}
