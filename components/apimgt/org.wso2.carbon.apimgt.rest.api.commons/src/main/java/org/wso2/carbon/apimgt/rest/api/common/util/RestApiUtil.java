@@ -292,6 +292,28 @@ public class RestApiUtil {
     }
 
     /**
+     * Return errorDTO object. This method accept APIMGTException as a parameter so we can set the e.getMessage
+     * directly to the errorDTO.
+     * @param errorHandler Error Handler object.
+     * @param paramList Parameter list
+     * @param e APIMGTException object.
+     * @return ErrorDTO Object.
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList,
+            APIManagementException e) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMoreInfo(paramList);
+        if (e.getMessage() == null) {
+            errorDTO.setMessage(errorHandler.getErrorMessage());
+        } else {
+            errorDTO.setMessage(e.getMessage());
+        }
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
+    }
+
+    /**
      * Returns a generic errorDTO
      *
      * @param message specifies the error message
