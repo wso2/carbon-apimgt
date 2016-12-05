@@ -216,6 +216,7 @@ public class APIMgtConstants {
         public static final String API_VERSION = "API_VERSION";
         public static final String APPLICATION_NAME = "APPLICATION_NAME";
         public static final String APPLICATION_ID = "APPLICATION_ID";
-        public static final String APPLICATION_QUERY = "APPLICATION_VERSION_QUERY";
+        public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
+        public static final String API_ID = "API_ID";
     }
 }

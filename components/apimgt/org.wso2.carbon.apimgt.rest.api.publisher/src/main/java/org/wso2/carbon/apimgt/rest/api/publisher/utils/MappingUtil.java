@@ -207,11 +207,11 @@ public class MappingUtil {
      * @param documentInfoResults
      * @return
      */
-    public static DocumentListDTO toDocumentListDTO(DocumentInfoResults documentInfoResults){
+    public static DocumentListDTO toDocumentListDTO(List<DocumentInfo> documentInfoResults){
         DocumentListDTO documentListDTO = new DocumentListDTO();
-        List<DocumentDTO> documentDTOList = documentInfoResults.getDocumentInfoList().stream().map
-                (MappingUtil::toDocumentDTO).collect(Collectors.toList());
-        documentListDTO.setList(documentDTOList);
+        for (DocumentInfo documentInfo : documentInfoResults){
+            documentListDTO.addListItem(toDocumentDTO(documentInfo));
+        }
         return documentListDTO;
     }
 

@@ -169,6 +169,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         API createdAPI;
 
         apiBuilder.provider(getUsername());
+        if (StringUtils.isEmpty(apiBuilder.getId())) {
+            apiBuilder.id(UUID.randomUUID().toString());
+        }
+
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -180,6 +184,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
                 createdAPI = apiBuilder.build();
+                APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
@@ -189,13 +194,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(message, ExceptionCodes.API_ALREADY_EXISTS);
             }
         } catch (APIMgtDAOException e) {
-            log.error("Error occurred while creating the API - " + apiBuilder.getName());
-            throw new APIMgtDAOException("Error occurred while creating the API - " + apiBuilder.getName(),
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            log.error("Error occurred while Associating the API - " + apiBuilder.getName());
-            throw new APIManagementException("Error occurred while Associating the API - " + apiBuilder.getName(),
-                    ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+            String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return apiBuilder.getId();
     }
@@ -321,8 +326,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
                 if (deprecateOlderVersion) {
-                    if (StringUtils.isNotEmpty(api.getParentApiId())) {
-                        API oldAPI = getApiDAO().getAPI(api.getParentApiId());
+                    if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
+                        API oldAPI = getApiDAO().getAPI(api.getCopiedFromApiId());
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
@@ -333,9 +338,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
                 if (!requireReSubscriptions) {
-                    if (StringUtils.isNotEmpty(api.getParentApiId())) {
+                    if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
                         List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
-                                .getParentApiId());
+                                .getCopiedFromApiId());
                         List<Subscription> subscriptionList = new ArrayList<>();
                         for (Subscription subscription : subscriptions) {
                             if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
@@ -381,7 +386,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
-                apiBuilder.parentApiId(api.getParentApiId());
+                apiBuilder.copiedFromApiId(api.getId());
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
@@ -509,12 +514,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method used to save the documentation content
-     *  @param docId
-     * @param text              @throws APIManagementException if failed to add the document as a resource to registry
+     *
+     * @param docId
+     * @param text  @throws APIManagementException if failed to add the document as a resource to registry
      */
     @Override
     public void addDocumentationContent(String docId, String text) throws APIManagementException {
-
+        getApiDAO().addDocumentInlineContent(docId, text);
     }
 
     /**

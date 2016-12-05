@@ -343,7 +343,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                         rs.getString("API_NAME"), rs.getString("API_VERSION"));
                 apiBuilder.id(rs.getString("API_ID"));
                 apiBuilder.context(rs.getString("API_CONTEXT"));
-                API api = apiBuilder.buildApi();
+                API api = apiBuilder.build();
 
                 Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
                 app.setId(rs.getString("APPLICATION_ID"));
@@ -371,7 +371,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                         rs.getString("API_NAME"), rs.getString("API_VERSION"));
                 apiBuilder.id(rs.getString("API_ID"));
                 apiBuilder.context(rs.getString("API_CONTEXT"));
-                API api = apiBuilder.buildApi();
+                API api = apiBuilder.build();
 
                 subscription = new Subscription(subscriptionId, null, api, subscriptionTier);
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));

@@ -43,7 +43,7 @@ public class AbstractAPIManagerTestCase {
     @Test public void testSearchAPIByUUID() {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
-        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).buildApi();
+        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         try {
             when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
             API api = apiStore.getAPIbyUUID(API_ID);

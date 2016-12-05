@@ -253,6 +253,7 @@ public class APIPublisherImplTestCase {
                 LifecycleState());
         String newUUid = apiPublisher.createNewAPIVersion(uuid, "2.0.0");
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiDAO, Mockito.times(0)).addAPI(api);
         Assert.assertNotEquals(uuid, newUUid);
     }
 
