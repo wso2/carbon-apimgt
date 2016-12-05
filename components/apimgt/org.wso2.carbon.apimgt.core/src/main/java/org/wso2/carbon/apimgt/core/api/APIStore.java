@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 
 import java.util.List;
 import java.util.Map;
@@ -121,4 +122,7 @@ public interface APIStore extends APIManager {
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
+    Application getApplicationByUuid(String uuid) throws APIManagementException;
+
+    List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
 }

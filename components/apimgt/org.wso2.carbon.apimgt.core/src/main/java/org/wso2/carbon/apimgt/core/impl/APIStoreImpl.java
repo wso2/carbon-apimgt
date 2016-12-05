@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -116,6 +117,32 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
+    }
+
+    @Override public Application getApplicationByUuid(String uuid) throws APIManagementException{
+        Application application = null;
+        try {
+            application = getApplicationDAO().getApplication(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving application - " + uuid;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return application;
+    }
+
+    @Override public List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException{
+        List<Subscription> subscriptionsList = null;
+        try {
+            getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving subscriptions for application - " + application.getName();
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return subscriptionsList;
     }
 
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
