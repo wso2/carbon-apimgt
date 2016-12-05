@@ -234,6 +234,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             try (PreparedStatement ps = conn.prepareStatement(deleteSubscriptionSql)) {
                 conn.setAutoCommit(false);
                 ps.setString(1, subscriptionId);
+                ps.execute();
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -276,19 +277,47 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      */
     @Override
     public void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException {
-        for (Subscription subscription : subscriptionList) {
-            try (Connection conn = DAOUtil.getConnection()) {
-                try {
+        try (Connection conn = DAOUtil.getConnection()) {
+            try {
+                for (Subscription subscription : subscriptionList) {
                     createSubscription(subscription.getApi().getId(), subscription.getApplication().getId(),
                             subscription.getId(), subscription.getSubscriptionTier(), subscription.getStatus(), conn);
-                    conn.commit();
-                } catch (SQLException e) {
-                    conn.rollback();
-                    throw new APIMgtDAOException(e);
                 }
+                conn.commit();
             } catch (SQLException e) {
+                conn.rollback();
                 throw new APIMgtDAOException(e);
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Update Subscription Status
+     *
+     * @param subId
+     * @param subStatus
+     * @param policy
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
+            throws APIMgtDAOException {
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+                preparedStatement.setString(1, policy);
+                preparedStatement.setString(2, subStatus.getStatus());
+                preparedStatement.setString(3, subId);
+                preparedStatement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -411,34 +440,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                     .ACTIVE.getStatus());
             ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
             ps.execute();
-        }
-    }
-
-    /**
-     * Update Subscription Status
-     *
-     * @param subId
-     * @param subStatus
-     * @param policy
-     * @throws APIMgtDAOException
-     */
-    @Override
-    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
-            throws APIMgtDAOException {
-        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
-        try (Connection connection = DAOUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
-                preparedStatement.setString(1, policy);
-                preparedStatement.setString(2, subStatus.getStatus());
-                preparedStatement.setString(3, subId);
-                preparedStatement.execute();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new APIMgtDAOException(e);
-            }
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
         }
     }
 }
