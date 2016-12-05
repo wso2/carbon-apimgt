@@ -346,11 +346,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID      The {@link String} of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
-     * @return true if update is successful else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
+    public void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
                 "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
@@ -424,8 +423,6 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
-
-        return null;
     }
 
     /**

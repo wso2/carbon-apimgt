@@ -157,11 +157,20 @@ public interface APISubscriptionDAO {
 
     /**
      * Update Subscription Status
-     * @param subId
-     * @param subStatus
-     * @param policy
+     *
+     * @param subId     ID of the Subscription
+     * @param subStatus New Subscription Status
      * @throws APIMgtDAOException
      */
-    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy) throws
+    void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
             APIMgtDAOException;
+
+    /**
+     * Update Subscription Policy
+     *
+     * @param subId  ID of the Subscription
+     * @param policy New Subscription Policy
+     * @throws APIMgtDAOException
+     */
+    void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException;
 }

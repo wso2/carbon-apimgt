@@ -296,20 +296,44 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Update Subscription Status
      *
-     * @param subId
-     * @param subStatus
-     * @param policy
+     * @param subId     ID of the Subscription
+     * @param subStatus New Subscription Status
      * @throws APIMgtDAOException
      */
     @Override
-    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus, String policy)
+    public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus)
             throws APIMgtDAOException {
-        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = ?,SUB_STATUS = ? WHERE UUID = ?";
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+                preparedStatement.setString(1, subStatus.getStatus());
+                preparedStatement.setString(2, subId);
+                preparedStatement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Update Subscription Policy
+     *
+     * @param subId  ID of the Subscription
+     * @param policy New Subscription Policy
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException {
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = " +
+                "(SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?) WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, policy);
-                preparedStatement.setString(2, subStatus.getStatus());
-                preparedStatement.setString(3, subId);
+                preparedStatement.setString(2, subId);
                 preparedStatement.execute();
                 connection.commit();
             } catch (SQLException e) {

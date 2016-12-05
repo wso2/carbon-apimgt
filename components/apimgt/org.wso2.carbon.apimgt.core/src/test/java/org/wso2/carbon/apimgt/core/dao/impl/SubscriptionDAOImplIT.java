@@ -48,9 +48,57 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //get subscription
         Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
         //validate
+        Assert.assertNotNull(subscription);
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
         Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionTier);
+        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
+    }
+
+    @Test
+    public void testUpdateSubscription() throws Exception {
+        //add new app
+        Application app = TestUtil.addTestApplication();
+        //add new api
+        API api = TestUtil.addTestAPI();
+        //add subscription
+        String subscriptionPolicy = "Gold";
+        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        String uuid = UUID.randomUUID().toString();
+        apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), subscriptionPolicy,
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        //get subscription
+        Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        //validate tier and status
+        Assert.assertNotNull(subscription);
+        Assert.assertEquals(subscription.getId(), uuid);
+        Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
+        Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionPolicy);
+
+        //update subscription policy
+        String newSubscriptionPolicy = "Silver";
+        apiSubscriptionDAO.updateSubscriptionPolicy(uuid, newSubscriptionPolicy);
+        //get subscription
+        subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        //validate
+        Assert.assertNotNull(subscription);
+        Assert.assertEquals(subscription.getId(), uuid);
+        Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
+        Assert.assertEquals(subscription.getSubscriptionTier(), newSubscriptionPolicy);
+        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
+
+        //update subscription status
+        APIMgtConstants.SubscriptionStatus newSubscriptionStatus = APIMgtConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+        apiSubscriptionDAO.updateSubscriptionStatus(uuid, newSubscriptionStatus);
+        //get subscription
+        subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        //validate
+        Assert.assertNotNull(subscription);
+        Assert.assertEquals(subscription.getId(), uuid);
+        Assert.assertEquals(subscription.getStatus(), newSubscriptionStatus);
+        Assert.assertEquals(subscription.getSubscriptionTier(), newSubscriptionPolicy);
         Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
         Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
     }
@@ -76,7 +124,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         List<Subscription> subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api1.getId());
         //validate subscription count
         Assert.assertEquals(subscriptions.size(), 2, "There should be 2 subscriptions (only).");
-        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api1.getId()), 2,
+        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api1.getId()), 2L,
                 "There should be 2 subscriptions (only).");
         //validate subscriptions
         for (Subscription subscription : subscriptions) {
@@ -94,7 +142,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api2.getId());
         //validate subscription count
         Assert.assertEquals(subscriptions.size(), 3, "There should be 3 subscriptions (only).");
-        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api2.getId()), 3,
+        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api2.getId()), 3L,
                 "There should be 3 subscriptions (only).");
         //validate subscriptions
         for (Subscription subscription : subscriptions) {
@@ -114,7 +162,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api3.getId());
         //validate subscription count
         Assert.assertEquals(subscriptions.size(), 3, "There should be 3 subscription (only).");
-        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api3.getId()), 3,
+        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api3.getId()), 3L,
                 "There should be 3 subscription (only).");
         //validate subscriptions
         for (Subscription subscription : subscriptions) {
@@ -134,7 +182,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         subscriptions = subscriptionDAO.getAPISubscriptionsByAPI(api4.getId());
         //validate subscription count
         Assert.assertEquals(subscriptions.size(), 1, "There should be 1 subscriptions (only).");
-        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api4.getId()), 1,
+        Assert.assertEquals(subscriptionDAO.getSubscriptionCountByAPI(api4.getId()), 1L,
                 "There should be 1 subscriptions (only).");
         //validate subscriptions
         for (Subscription subscription : subscriptions) {
@@ -305,20 +353,20 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         return new ApisAndApps(apis, apps);
     }
 
-    private class ApisAndApps {
+    private static class ApisAndApps {
         private List<API> apis;
         private List<Application> apps;
 
-        public ApisAndApps(List<API> apis, List<Application> apps) {
+        ApisAndApps(List<API> apis, List<Application> apps) {
             this.apis = apis;
             this.apps = apps;
         }
 
-        public List<API> getApis() {
+        List<API> getApis() {
             return apis;
         }
 
-        public List<Application> getApps() {
+        List<Application> getApps() {
             return apps;
         }
     }

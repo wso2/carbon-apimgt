@@ -637,13 +637,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException If failed to update subscription status
      */
     @Override
-    public void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
+    public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
             APIManagementException {
         try {
-            Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subId);
-            if (subscription != null) {
-                getApiSubscriptionDAO().updateSubscription(subId, subStatus, subscription.getSubscriptionTier());
-            }
+            getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+    /**
+     * Update the subscription Policy
+     *
+     * @param subId     Subscription ID
+     * @param newPolicy New Subscription Policy
+     * @throws APIManagementException If failed to update subscription policy
+     */
+    @Override
+    public void updateSubscriptionPolicy(String subId, String newPolicy) throws APIManagementException {
+        try {
+            getApiSubscriptionDAO().updateSubscriptionPolicy(subId, newPolicy);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
         }
