@@ -57,6 +57,13 @@ public class TestUtil {
         return api;
     }
 
+    /**
+     * Creates a summary API object which has only API ID, Name, Provider, Version and Context
+     *
+     * @param api Complete API Object
+     * @return Summary API object
+     * @throws APIManagementException
+     */
     public static API createSummaryAPI(API api) throws APIManagementException {
         API.APIBuilder summaryApiBuilder = new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion());
         summaryApiBuilder.id(api.getId());
@@ -64,6 +71,12 @@ public class TestUtil {
         return summaryApiBuilder.build();
     }
 
+    /**
+     * Create a summary Applocation only with Application ID, Name, Callback URL, Application Owner and Status
+     *
+     * @param app Complete Application object
+     * @return Summary Application object
+     */
     public static Application createSummaryApplication(Application app){
         Application summaryApp = new Application(app.getName(), app.getCreatedUser());
         summaryApp.setId(app.getId());

@@ -115,11 +115,10 @@ public interface ApiDAO {
      * Update an existing API
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
-     * @return The updated {@link API} object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException;
+    void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException;
 
     /**
      * Remove an existing API
