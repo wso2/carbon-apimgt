@@ -234,6 +234,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             try (PreparedStatement ps = conn.prepareStatement(deleteSubscriptionSql)) {
                 conn.setAutoCommit(false);
                 ps.setString(1, subscriptionId);
+                ps.execute();
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
