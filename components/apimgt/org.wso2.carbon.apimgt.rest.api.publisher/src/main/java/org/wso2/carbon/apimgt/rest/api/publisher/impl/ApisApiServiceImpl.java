@@ -166,8 +166,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 , String ifMatch
 , String ifUnmodifiedSince
  ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.removeDocumentation(documentId);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+        return Response.ok().build();
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId

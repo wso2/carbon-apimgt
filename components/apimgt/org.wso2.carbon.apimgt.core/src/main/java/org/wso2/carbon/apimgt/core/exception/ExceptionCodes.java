@@ -33,7 +33,12 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
     SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json"),
-    APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json");
+    APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json"),
+    SUBSCRIPTION_NOT_FOUND(900308, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
+    UPDATE_STATE_CHANGE(900308, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
+            "done"),
+    API_DOES_NOT_EXIST(900309, "The API does not exist", 400, "Couldn't find the API "),
+    DOCUMENT_ALREADY_EXISTS(900310, "Document already exists", 400, "Document Already Exists");
 
     private final long errorCode;
     private final String errorMessage;
