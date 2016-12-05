@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core;
 
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +37,17 @@ import java.util.List;
 import java.util.UUID;
 
 public class SampleTestObjectCreator {
+    static String apiDefinition;
+    static {
+        byte[] bytes = new byte[0];
+        try {
+            apiDefinition =  IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("swagger.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public static API.APIBuilder createDefaultAPI() {
         List<String> transport = new ArrayList<>();
@@ -58,34 +71,7 @@ public class SampleTestObjectCreator {
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
                 lifecycleInstanceId(UUID.randomUUID().toString()).
-                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
-                        "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
-                        "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
-                        "\"in\":\"body\"}],\"responses\":{\"201\":{\"headers\":{\"Location\":" +
-                        "{\"description\":\"The URL of the newly created resource.\",\"type\":\"string\"}}," +
-                        "\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created.\"}}}}," +
-                        "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"" +
-                        "Return a list of available menu items\",\"parameters\":[]," +
-                        "\"responses\":{\"200\":{\"headers\":{},\"schema\":{\"title\":\"Menu\"," +
-                        "\"properties\":{\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"}," +
-                        "\"type\":\"array\"}},\"type\":\"object\"},\"description\":\"OK.\"}}}}}," +
-                        "\"schemes\":[\"https\"],\"produces\":[\"application/json\"],\"swagger\":\"2.0\"," +
-                        "\"definitions\":{\"MenuItem\":{\"title\":\"Pizza menu Item\"," +
-                        "\"properties\":{\"price\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}," +
-                        "\"name\":{\"type\":\"string\"},\"image\":{\"type\":\"string\"}},\"required\":[\"name\"]}," +
-                        "\"Order\":{\"title\":\"Pizza Order\",\"properties\":{\"customerName\":{\"type\":\"string\"}," +
-                        "\"delivered\":{\"type\":\"boolean\"},\"address\":{\"type\":\"string\"}," +
-                        "\"pizzaType\":{\"type\":\"string\"},\"creditCardNumber\":{\"type\":\"string\"}," +
-                        "\"quantity\":{\"type\":\"number\"},\"orderId\":{\"type\":\"integer\"}}," +
-                        "\"required\":[\"orderId\"]}},\"consumes\":[\"application/json\"]," +
-                        "\"info\":{\"title\":\"PizzaShackAPI\"," +
-                        "\"description\":\"This document describe a RESTFul API for Pizza Shack " +
-                        "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
-                        "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
-                        "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
-                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
+                apiDefinition(new StringBuilder(apiDefinition)).
                 wsdlUri("").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
@@ -176,34 +162,7 @@ public class SampleTestObjectCreator {
                 context("yummy").
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
-                        "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
-                        "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
-                        "\"in\":\"body\"}],\"responses\":{\"201\":{\"headers\":{\"Location\":" +
-                        "{\"description\":\"The URL of the newly created resource.\",\"type\":\"string\"}}," +
-                        "\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created.\"}}}}," +
-                        "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"" +
-                        "Return a list of available menu items\",\"parameters\":[]," +
-                        "\"responses\":{\"200\":{\"headers\":{},\"schema\":{\"title\":\"Menu\"," +
-                        "\"properties\":{\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"}," +
-                        "\"type\":\"array\"}},\"type\":\"object\"},\"description\":\"OK.\"}}}}}," +
-                        "\"schemes\":[\"https\"],\"produces\":[\"application/json\"],\"swagger\":\"2.0\"," +
-                        "\"definitions\":{\"MenuItem\":{\"title\":\"Pizza menu Item\"," +
-                        "\"properties\":{\"price\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}," +
-                        "\"name\":{\"type\":\"string\"},\"image\":{\"type\":\"string\"}},\"required\":[\"name\"]}," +
-                        "\"Order\":{\"title\":\"Pizza Order\",\"properties\":{\"customerName\":{\"type\":\"string\"}," +
-                        "\"delivered\":{\"type\":\"boolean\"},\"address\":{\"type\":\"string\"}," +
-                        "\"pizzaType\":{\"type\":\"string\"},\"creditCardNumber\":{\"type\":\"string\"}," +
-                        "\"quantity\":{\"type\":\"number\"},\"orderId\":{\"type\":\"integer\"}}," +
-                        "\"required\":[\"orderId\"]}},\"consumes\":[\"application/json\"]," +
-                        "\"info\":{\"title\":\"PizzaShackAPI\"," +
-                        "\"description\":\"This document describe a RESTFul API for Pizza Shack " +
-                        "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
-                        "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
-                        "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
-                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
+                apiDefinition(new StringBuilder(apiDefinition)).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -259,34 +218,7 @@ public class SampleTestObjectCreator {
                 context(UUID.randomUUID().toString()).
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder("{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"Create a new Order\"," +
-                        "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"}," +
-                        "\"description\":\"Order object that needs to be added\",\"name\":\"body\",\"required\":true," +
-                        "\"in\":\"body\"}],\"responses\":{\"201\":{\"headers\":{\"Location\":" +
-                        "{\"description\":\"The URL of the newly created resource.\",\"type\":\"string\"}}," +
-                        "\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created.\"}}}}," +
-                        "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\"," +
-                        "\"x-throttling-tier\":\"Unlimited\",\"description\":\"" +
-                        "Return a list of available menu items\",\"parameters\":[]," +
-                        "\"responses\":{\"200\":{\"headers\":{},\"schema\":{\"title\":\"Menu\"," +
-                        "\"properties\":{\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"}," +
-                        "\"type\":\"array\"}},\"type\":\"object\"},\"description\":\"OK.\"}}}}}," +
-                        "\"schemes\":[\"https\"],\"produces\":[\"application/json\"],\"swagger\":\"2.0\"," +
-                        "\"definitions\":{\"MenuItem\":{\"title\":\"Pizza menu Item\"," +
-                        "\"properties\":{\"price\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}," +
-                        "\"name\":{\"type\":\"string\"},\"image\":{\"type\":\"string\"}},\"required\":[\"name\"]}," +
-                        "\"Order\":{\"title\":\"Pizza Order\",\"properties\":{\"customerName\":{\"type\":\"string\"}," +
-                        "\"delivered\":{\"type\":\"boolean\"},\"address\":{\"type\":\"string\"}," +
-                        "\"pizzaType\":{\"type\":\"string\"},\"creditCardNumber\":{\"type\":\"string\"}," +
-                        "\"quantity\":{\"type\":\"number\"},\"orderId\":{\"type\":\"integer\"}}," +
-                        "\"required\":[\"orderId\"]}},\"consumes\":[\"application/json\"]," +
-                        "\"info\":{\"title\":\"PizzaShackAPI\"," +
-                        "\"description\":\"This document describe a RESTFul API for Pizza Shack " +
-                        "online pizza delivery store.\\n\",\"license\":{\"name\":\"Apache 2.0\"," +
-                        "\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}," +
-                        "\"contact\":{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\"," +
-                        "\"url\":\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}")).
+                apiDefinition(new StringBuilder(apiDefinition)).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
