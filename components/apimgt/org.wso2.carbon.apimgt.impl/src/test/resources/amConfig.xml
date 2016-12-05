@@ -55,4 +55,8 @@
         <EncryptPersistedTokens>false</EncryptPersistedTokens>
     </APIKeyValidator>
 
+    <ThrottlingConfigurations>
+        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
+    </ThrottlingConfigurations>
+
 </APIManager>
