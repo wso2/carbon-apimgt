@@ -301,7 +301,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 String msg = "Couldn't found API with ID " + apiBuilder.getId();
                 log.error(msg);
-                throw new APIManagementException(msg, ExceptionCodes.API_DOES_NOT_EXIST);
+                throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while updating the API - " + apiBuilder.getName();
@@ -783,15 +783,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIUtils.logAndThrowException("Couldn't retrieve thumbnail for api " + apiId, e, log);
         }
         return null;
-    }
-
-    @Override
-    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
-        try {
-            return getApiSubscriptionDAO().getAPISubscription(subId);
-        } catch (APIMgtDAOException e) {
-            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
-        }
     }
 
     @Override
