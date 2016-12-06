@@ -188,3 +188,18 @@ input.ep-field{
 .form-horizontal.api-custom-forms.view div.edit{
     display: none;
 }
+.apim-pub-new-api {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    /*border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    border-right-color: white;
+    border-collapse: collapse;
+    margin-right: 0px;
+    padding-right: 0px !*TODO: tmkb optimize padding *!*/
+}
+.apim-pub-nested-method-selection {
+    padding-left: 55px;
+}
