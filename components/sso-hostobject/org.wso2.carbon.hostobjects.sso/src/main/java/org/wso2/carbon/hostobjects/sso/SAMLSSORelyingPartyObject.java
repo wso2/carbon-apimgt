@@ -1516,6 +1516,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      */
     private boolean validateAssertionValidityPeriod(Assertion assertion) throws ScriptException {
 
+        if(assertion == null){
+            return false;
+        }
         DateTime validFrom = assertion.getConditions().getNotBefore();
         DateTime validTill = assertion.getConditions().getNotOnOrAfter();
 
