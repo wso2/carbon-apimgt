@@ -17,12 +17,13 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * APIDefinition is responsible for providing uri templates, scopes and
@@ -37,7 +38,7 @@ public interface APIDefinition {
      *
      * @return URI templates
      */
-    Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException;
+    List<Pair<UriTemplate, Scope>> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition

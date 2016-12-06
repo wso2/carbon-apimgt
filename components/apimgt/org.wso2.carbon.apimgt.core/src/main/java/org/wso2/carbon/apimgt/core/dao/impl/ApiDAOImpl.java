@@ -42,9 +42,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -1013,7 +1011,7 @@ public class ApiDAOImpl implements ApiDAO {
         return new ArrayList<>();
     }
 
-    private void addUrlMappings(Connection connection, Set<UriTemplate> uriTemplates, String apiID)
+    private void addUrlMappings(Connection connection, List<UriTemplate> uriTemplates, String apiID)
             throws SQLException {
         final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, "
                 + "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
@@ -1038,10 +1036,10 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private Set<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
+    private List<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
         String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE"
                 + " API_ID = ?";
-        Set<UriTemplate> uriTemplateSet = new HashSet<>();
+        List<UriTemplate> uriTemplateSet = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
