@@ -18,7 +18,6 @@
 class API {
 
     constructor(access_key) {
-        console.log("tmkasun debug: Initializing constructor");
         this.client = new SwaggerClient({
             url: 'https://apis.wso2.com/api/am/publisher/v0.10/swagger.json',
             usePromise: true
