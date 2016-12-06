@@ -159,6 +159,7 @@
 	                                <%=i18n.localize("Create New Version")%>
 	                            </a>
 	                        </li>
+	                        <%if (api.type != "WS") { %>
 	                        <li>
 	                            <a download="swagger.json" href="<%=swaggerAPI%>" title="<%=i18n.localize("Download Source")%>">
 	                                <span class="icon fw-stack">
@@ -168,7 +169,8 @@
 	                                <%=i18n.localize("Download Source")%>
 	                            </a>
 	                        </li>
-	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        
+	                        <%}
+                                } else if(api && isPublishPermitted && api.endpointConfig) {%>
 	                        <li>
 	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>" title="<%=i18n.localize("Manage API")%>">
 	                                <span class="icon fw-stack">
