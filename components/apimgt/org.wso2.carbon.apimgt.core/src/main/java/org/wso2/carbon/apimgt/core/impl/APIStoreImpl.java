@@ -119,7 +119,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
-    @Override public Application getApplicationByUuid(String uuid) throws APIManagementException{
+    @Override public Application getApplicationByUuid(String uuid) throws APIManagementException {
         Application application = null;
         try {
             application = getApplicationDAO().getApplication(uuid);
@@ -132,12 +132,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException{
+    @Override public List<Subscription> getAPISubscriptionsByApplication(Application application)
+            throws APIManagementException {
         List<Subscription> subscriptionsList = null;
         try {
             getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving subscriptions for application - " + application.getName();
+            String errorMsg =
+                    "Error occurred while retrieving subscriptions for application - " + application.getName();
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }

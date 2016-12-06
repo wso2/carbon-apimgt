@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -33,8 +36,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String accept, String ifNoneMatch) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
+        SubscriptionListDTO subscriptionListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
-        Subscriber subscriber = new Subscriber(username);
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -43,11 +46,25 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             if(!StringUtils.isEmpty(apiId)) {
                 subscribedApiList = apiStore.getSubscriptionsByAPI(apiId);
-
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
+                        offset);
             } else if(!StringUtils.isEmpty(applicationId)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
-                subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                if (application != null) {
+                    subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
+                            offset);
+                }
+
+            } else {
+                String errorMsg =
+                        "Error occurred while retrieving subscriptions";
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
+
+
+
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving subscriptions";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -58,8 +75,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        SubscriptionListDTO subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
-                offset);
+
 
         return Response.ok().entity(subscriptionListDTO).build();
     }

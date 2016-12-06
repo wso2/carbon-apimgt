@@ -122,7 +122,21 @@ public interface APIStore extends APIManager {
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
+    /**
+     * Retrieve an application given the uuid.
+     *
+     * @param uuid
+     * @return Application object of the given uuid
+     * @throws APIManagementException
+     */
     Application getApplicationByUuid(String uuid) throws APIManagementException;
 
+    /**
+     * Retrieve list of subscriptions given the application.
+     *
+     * @param application
+     * @return List of subscriptions objects of the given application.
+     * @throws APIManagementException
+     */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
 }
