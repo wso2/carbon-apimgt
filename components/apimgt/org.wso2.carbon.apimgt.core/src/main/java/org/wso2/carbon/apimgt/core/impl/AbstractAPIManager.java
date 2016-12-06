@@ -254,6 +254,21 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscription(subId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
+        }
+    }
+
+    /**
      * Returns the subscriptions for api
      *
      * @param apiId

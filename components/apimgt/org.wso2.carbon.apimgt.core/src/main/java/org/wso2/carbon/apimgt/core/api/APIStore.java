@@ -140,5 +140,7 @@ public interface APIStore extends APIManager {
      */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
 
-    void addApiSubscription(String apiId, String applicationId, String tier) throws APIManagementException;
+    String addApiSubscription(String apiId, String applicationId, String tier) throws APIManagementException;
+
+    void deleteApiSubscription(String subscriptionId) throws APIManagementException;
 }

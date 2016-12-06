@@ -330,13 +330,6 @@ public interface APIPublisher extends APIManager {
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
     /**
-     * Return {@link Subscription} of subscription id
-     * @param subId
-     * @return
-     * @throws APIManagementException
-     */
-    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
-    /**
      * This method updates gateway config in the database
      *
      * @param apiId        id of the String

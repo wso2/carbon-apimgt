@@ -761,15 +761,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
-        try {
-            return getApiSubscriptionDAO().getAPISubscription(subId);
-        } catch (APIMgtDAOException e) {
-            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
-        }
-    }
-
-    @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         //TODO implement logic here
     }

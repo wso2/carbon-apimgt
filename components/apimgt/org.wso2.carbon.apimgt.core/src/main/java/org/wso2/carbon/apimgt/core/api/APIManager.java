@@ -148,4 +148,13 @@ public interface APIManager {
      * @throws APIManagementException
      */
     List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException;
+
+    /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 }

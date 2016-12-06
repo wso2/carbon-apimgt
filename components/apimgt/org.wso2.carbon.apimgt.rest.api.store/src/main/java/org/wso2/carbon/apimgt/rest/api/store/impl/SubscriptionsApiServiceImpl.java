@@ -31,8 +31,23 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiServiceImpl.class);
 
-
-    @Override public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
+    /**
+     * Get all subscriptions.
+     * <p/>
+     * If apiId is specified this will return the subscribed applications of that api
+     * If application id is specified this will return the api subscriptions of that application
+     *
+     * @param apiId
+     * @param applicationId
+     * @param offset
+     * @param limit
+     * @param accept
+     * @param ifNoneMatch
+     * @return
+     * @throws NotFoundException
+     */
+    @Override
+    public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
             String accept, String ifNoneMatch) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
@@ -84,19 +99,24 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().entity(subscriptionListDTO).build();
     }
 
-    @Override public Response subscriptionsPost(SubscriptionDTO body, String contentType) throws NotFoundException {
+    @Override
+    public Response subscriptionsPost(SubscriptionDTO body, String contentType) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
+        SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String apiId = body.getApiIdentifier();
             String tier = body.getTier();
 
+
             if (!StringUtils.isEmpty(applicationId) && !StringUtils.isEmpty(apiId) && !StringUtils.isEmpty(tier)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
                 API api = apiStore.getAPIbyUUID(apiId);
                 if (application != null && api != null) {
-                    apiStore.addApiSubscription(apiId, applicationId, tier);
+                    String subscriptionId = apiStore.addApiSubscription(apiId, applicationId, tier);
+                    Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+                    subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
                 } else {
                     String errorMessage = null;
                     ExceptionCodes exceptionCode = null;
@@ -116,13 +136,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 }
             } else {
                 //mandatory parameters not provided
-                String errorMessage = "Some mandatory parameters were not provided";
+                String errorMessage = "Some mandatory parameters are not provided";
                 ErrorHandler errorHandler = ExceptionCodes.PARAMETER_NOT_PROVIDED;
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
                 log.error(errorMessage);
                 return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
             }
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -134,21 +153,40 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(Response.Status.CREATED).entity(subscriptionDTO).build();
     }
 
-    @Override public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-            String ifUnmodifiedSince) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince) throws NotFoundException {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            apiStore.deleteApiSubscription(subscriptionId);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting subscription";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
+            String ifModifiedSince) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        SubscriptionDTO subscriptionDTO = null;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+            subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+        return Response.ok().entity(subscriptionDTO).build();
     }
 }
