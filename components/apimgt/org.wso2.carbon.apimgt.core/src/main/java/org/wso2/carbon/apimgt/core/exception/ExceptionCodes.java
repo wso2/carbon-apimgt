@@ -33,7 +33,9 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
     SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json"),
-    APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json");
+    APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json"),
+    PARAMETER_NOT_PROVIDED(900308, "Parameter value missing", 400, "Some of the parameter values were missing"),
+    API_NOT_FOUND(900309, "API not found", 400, "API could not be found");
 
     private final long errorCode;
     private final String errorMessage;

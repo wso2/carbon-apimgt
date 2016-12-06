@@ -147,6 +147,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return subscriptionsList;
     }
 
+    @Override public void addApiSubscription(String apiId, String applicationId, String tier)
+            throws APIManagementException {
+
+    }
+
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;
