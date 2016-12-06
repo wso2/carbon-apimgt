@@ -40,6 +40,8 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.UriPair;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -175,7 +177,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
 
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-        apiBuilder.uriTemplates(apiDefinition.getURITemplates(apiBuilder.getApiDefinition()));
+        List<UriTemplate> uriTemplateList = new ArrayList<>();
+        for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
+            uriTemplateList.add(uriPair.getLeft());
+        }
+        apiBuilder.uriTemplates(uriTemplateList);
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
@@ -237,8 +243,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         .getVersion().equals(apiBuilder.getVersion())) && (originalAPI.getProvider().equals
                         (apiBuilder.getProvider())) && originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder
                         .getLifeCycleStatus())) {
-                    apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder
-                            .getApiDefinition()));
+                    APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+                    List<UriTemplate> uriTemplateList = new ArrayList<>();
+                    for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
+                        uriTemplateList.add(uriPair.getLeft());
+                    }
+                    apiBuilder.uriTemplates(uriTemplateList);
+
                     API api = apiBuilder.build();
                     getApiDAO().updateAPI(api.getId(), api);
                     if (log.isDebugEnabled()) {

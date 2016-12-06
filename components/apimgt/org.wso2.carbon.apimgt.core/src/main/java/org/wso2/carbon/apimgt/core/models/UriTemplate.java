@@ -23,16 +23,18 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.io.Serializable;
+
 /**
  * This Class contains the model of Uri Templates
  */
-public final class UriTemplate {
+public final class UriTemplate implements Serializable {
 
+    private static final long serialVersionUID = 2829155480731229681L;
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
     private final String policy;
-    private final Scope scope;
     private final String templateId;
     private final String produces;
     private final String consumes;
@@ -43,7 +45,6 @@ public final class UriTemplate {
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
-        scope = uriTemplateBuilder.scope;
         templateId = uriTemplateBuilder.templateId;
         produces = uriTemplateBuilder.produces;
         consumes = uriTemplateBuilder.consumes;
@@ -65,9 +66,6 @@ public final class UriTemplate {
         return policy;
     }
 
-    public Scope getScope() {
-        return scope;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -96,10 +94,6 @@ public final class UriTemplate {
                 !policy.equals(that.policy) : (that.policy != null)) {
             return false;
         }
-        if ((scope != null) ?
-                !scope.equals(that.scope) : (that.scope != null)) {
-            return false;
-        }
         if ((templateId != null) ?
                 !templateId.equals(that.templateId) : (that.templateId != null)) {
             return false;
@@ -122,7 +116,6 @@ public final class UriTemplate {
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
         result = 31 * result + (authType != null ? authType.hashCode() : 0);
         result = 31 * result + (policy != null ? policy.hashCode() : 0);
-        result = 31 * result + (scope != null ? scope.hashCode() : 0);
         result = 31 * result + (templateId != null ? templateId.hashCode() : 0);
         result = 31 * result + (produces != null ? produces.hashCode() : 0);
         result = 31 * result + (consumes != null ? consumes.hashCode() : 0);
@@ -140,7 +133,6 @@ public final class UriTemplate {
         private String templateId;
         private String produces;
         private String consumes;
-        private Scope scope;
 
         public UriTemplateBuilder() {
         }
@@ -166,11 +158,6 @@ public final class UriTemplate {
 
         public UriTemplateBuilder policy(String policy) {
             this.policy = policy;
-            return this;
-        }
-
-        public UriTemplateBuilder scope(Scope scope) {
-            this.scope = scope;
             return this;
         }
 

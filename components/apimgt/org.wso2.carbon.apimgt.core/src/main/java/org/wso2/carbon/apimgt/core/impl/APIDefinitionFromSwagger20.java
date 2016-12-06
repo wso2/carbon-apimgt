@@ -38,16 +38,16 @@ import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.UriPair;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Implementation for Swagger 2.0
@@ -60,11 +60,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * This method returns URI templates according to the given swagger file
      *
      * @param resourceConfigsJSON swaggerJSON
-     * @return URI Templates
+     * @return UriPair
      * @throws APIManagementException
      */
-    public Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
-        Set<UriTemplate> uriTemplateSet = new HashSet<>();
+    public List<UriPair> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
+        List<UriPair> uriPairList = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
@@ -109,14 +109,13 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
                 String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
                 if (StringUtils.isNotEmpty(scope)) {
-                    uriTemplateBuilder.scope(scopeMap.get(scope));
+                    uriPairList.add(new UriPair(uriTemplateBuilder.build(), scopeMap.get(scope)));
                 }
-                uriTemplateSet.add(uriTemplateBuilder.build());
             }
         }
         resourceConfigsJSON.setLength(0);
         resourceConfigsJSON.append(Json.pretty(swagger));
-        return uriTemplateSet;
+        return uriPairList;
     }
 
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {

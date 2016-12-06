@@ -21,12 +21,15 @@
 package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.io.IOUtils;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.UriPair;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -88,7 +91,13 @@ public class SampleTestObjectCreator {
                 createdBy("admin").
                 lastUpdatedTime(LocalDateTime.now());
         try {
-            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+            List<UriTemplate> uriTemplateList = new ArrayList<>();
+            for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(uriPair.getLeft());
+            }
+            apiBuilder.uriTemplates(uriTemplateList);
+
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
@@ -180,7 +189,12 @@ public class SampleTestObjectCreator {
                 lastUpdatedTime(LocalDateTime.now());
 
         try {
-            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+            List<UriTemplate> uriTemplateList = new ArrayList<>();
+            for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(uriPair.getLeft());
+            }
+            apiBuilder.uriTemplates(uriTemplateList);
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
@@ -236,7 +250,12 @@ public class SampleTestObjectCreator {
                 lastUpdatedTime(LocalDateTime.now());
 
         try {
-            apiBuilder.uriTemplates(new APIDefinitionFromSwagger20().getURITemplates(apiBuilder.getApiDefinition()));
+            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+            List<UriTemplate> uriTemplateList = new ArrayList<>();
+            for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(uriPair.getLeft());
+            }
+            apiBuilder.uriTemplates(uriTemplateList);
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
