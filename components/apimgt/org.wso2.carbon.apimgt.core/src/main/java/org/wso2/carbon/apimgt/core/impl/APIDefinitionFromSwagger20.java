@@ -42,12 +42,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation for Swagger 2.0
@@ -63,8 +58,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    public Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
-        Set<UriTemplate> uriTemplateSet = new HashSet<>();
+    public List<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
+        List<UriTemplate> uriTemplateSet = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
