@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 "use strict";
-
+/**
+ * An abstract representation of an API
+ */
 class API {
-
+    /**
+     * @constructor
+     * @param {string} access_key - Access key for invoking the backend REST API call.
+     */
     constructor(access_key) {
         this.client = new SwaggerClient({
             url: 'https://apis.wso2.com/api/am/publisher/v0.10/swagger.json',
@@ -45,10 +50,18 @@ class API {
         };
     }
 
+    /**
+     * Get the template of new API placeholder
+     * @returns {*}
+     */
     get_template() {
         return this.template;
     }
 
+    /**
+     * Update the API template with given parameter values.
+     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
+     */
     update_template(api_data) {
         var current = this.get_template();
         var user_keys = Object.keys(api_data);
@@ -60,6 +73,11 @@ class API {
         this.template = Object.assign(current, api_data);
     }
 
+    /**
+     * Create an API with the given parameters in template and call the callback method given optional.
+     * @param {function} callback - An optional callback method
+     * @returns {Promise} Promise after creating and optionally calling the callback method.
+     */
     create(callback) {
         var promise_create = this.client.then(
             (client) => {
