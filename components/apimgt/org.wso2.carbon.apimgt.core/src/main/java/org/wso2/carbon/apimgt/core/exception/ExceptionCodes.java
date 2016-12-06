@@ -36,7 +36,11 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json"),
     PARAMETER_NOT_PROVIDED(900308, "Parameter value missing", 400,
             "Some of the mandatory parameter values were missing"),
-    API_NOT_FOUND(900309, "API not found", 400, "API could not be found");
+    API_NOT_FOUND(900309, "API not found", 400, "API could not be found"),
+    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
+    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
+            "done"),
+    DOCUMENT_ALREADY_EXISTS(90031, "Document already exists", 400, "Document Already Exists");
 
     private final long errorCode;
     private final String errorMessage;
