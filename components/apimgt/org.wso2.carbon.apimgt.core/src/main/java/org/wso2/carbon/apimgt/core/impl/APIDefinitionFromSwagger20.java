@@ -28,6 +28,8 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,7 +40,6 @@ import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.UriPair;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -63,8 +64,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return UriPair
      * @throws APIManagementException
      */
-    public List<UriPair> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
-        List<UriPair> uriPairList = new ArrayList<>();
+    public List<Pair<UriTemplate, Scope>> getURITemplates(StringBuilder resourceConfigsJSON) throws
+            APIManagementException {
+        List<Pair<UriTemplate, Scope>> uriPairList = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
@@ -109,7 +111,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
                 String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
                 if (StringUtils.isNotEmpty(scope)) {
-                    uriPairList.add(new UriPair(uriTemplateBuilder.build(), scopeMap.get(scope)));
+                    uriPairList.add(new ImmutablePair<UriTemplate, Scope>(uriTemplateBuilder.build(), scopeMap.get
+                            (scope)));
                 }
             }
         }

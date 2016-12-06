@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -39,8 +40,8 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.UriPair;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -178,7 +179,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         List<UriTemplate> uriTemplateList = new ArrayList<>();
-        for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
+        for (Pair<UriTemplate, Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
             uriTemplateList.add(uriPair.getLeft());
         }
         apiBuilder.uriTemplates(uriTemplateList);
@@ -245,7 +246,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         .getLifeCycleStatus())) {
                     APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                     List<UriTemplate> uriTemplateList = new ArrayList<>();
-                    for (UriPair uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
+                    for (Pair<UriTemplate, Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition
+                            ())) {
                         uriTemplateList.add(uriPair.getLeft());
                     }
                     apiBuilder.uriTemplates(uriTemplateList);
