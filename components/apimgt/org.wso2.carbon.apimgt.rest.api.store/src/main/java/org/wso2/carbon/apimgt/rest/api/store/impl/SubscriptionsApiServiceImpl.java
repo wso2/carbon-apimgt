@@ -163,7 +163,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            apiStore.deleteApiSubscription(subscriptionId);
+            apiStore.deleteAPISubscription(subscriptionId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
             HashMap<String, String> paramList = new HashMap<String, String>();

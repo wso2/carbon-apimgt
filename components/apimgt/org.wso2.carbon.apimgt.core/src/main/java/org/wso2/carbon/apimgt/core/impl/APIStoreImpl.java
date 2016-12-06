@@ -152,7 +152,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return null;
     }
 
-    @Override public void deleteApiSubscription(String subscriptionId) throws APIMgtDAOException {
+    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         try {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
