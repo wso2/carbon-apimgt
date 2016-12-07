@@ -90,7 +90,7 @@ public class TestUtil {
         return summaryApp;
     }
 
-    public static String printDiff(Object obj1, Object obj2) {
+    public static String printDiff(Object obj1, Object obj2) throws IllegalAccessException {
         if (obj1.getClass() != obj2.getClass()) {
             throw new IllegalArgumentException("The types of the objects supplied do not match");
         }
@@ -98,39 +98,33 @@ public class TestUtil {
         Field[] fields = FieldUtils.getAllFields(obj1.getClass());
 
         for (Field field : fields) {
-            try {
-                Object obj1Value = FieldUtils.readField(field, obj1, true);
-                Object obj2Value = FieldUtils.readField(field, obj2, true);
+            Object obj1Value = FieldUtils.readField(field, obj1, true);
+            Object obj2Value = FieldUtils.readField(field, obj2, true);
 
-                String obj1ValueString = "null";
-                String obj2ValueString = "null";
-                if (obj1Value != null) {
-                    obj1ValueString = obj1Value.toString();
-                }
-                if (obj2Value != null) {
-                    obj2ValueString = obj2Value.toString();
-                }
-
-                if (!Objects.equals(obj1Value, obj2Value)) {
-                    return "Diff detected for '" + field.getName() + "' " + System.lineSeparator() +
-                            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System.lineSeparator() +
-                            obj1ValueString + System.lineSeparator() +
-                            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + System.lineSeparator() +
-                            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System.lineSeparator() +
-                            obj2ValueString + System.lineSeparator() +
-                            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-                }
-
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            String obj1ValueString = "null";
+            String obj2ValueString = "null";
+            if (obj1Value != null) {
+                obj1ValueString = obj1Value.toString();
+            }
+            if (obj2Value != null) {
+                obj2ValueString = obj2Value.toString();
             }
 
+            if (!Objects.equals(obj1Value, obj2Value)) {
+                return "Diff detected for '" + field.getName() + "' " + System.lineSeparator() +
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System.lineSeparator() +
+                        obj1ValueString + System.lineSeparator() +
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + System.lineSeparator() +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System.lineSeparator() +
+                        obj2ValueString + System.lineSeparator() +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+            }
         }
 
         return null;
     }
 
-    public static <T> String printListDiff(List<T> list1, List<T> list2) {
+    public static <T> String printListDiff(List<T> list1, List<T> list2) throws IllegalAccessException {
         if (list1.size() != list2.size()) {
             throw new IllegalArgumentException("The size of the list types are not the same");
         }
