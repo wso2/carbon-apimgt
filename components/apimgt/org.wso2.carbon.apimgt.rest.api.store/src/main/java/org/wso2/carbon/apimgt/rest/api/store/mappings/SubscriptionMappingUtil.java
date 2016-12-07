@@ -62,10 +62,11 @@ public class SubscriptionMappingUtil {
      */
     public static SubscriptionDTO fromSubscriptionToDTO(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
-        subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
+        subscriptionDTO.setSubscriptionId(subscription.getId());
         subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
-        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubscriptionTier()));
+        subscriptionDTO.setTier(subscription.getSubscriptionTier());
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getStatus().toString()));
         return subscriptionDTO;
     }
 }

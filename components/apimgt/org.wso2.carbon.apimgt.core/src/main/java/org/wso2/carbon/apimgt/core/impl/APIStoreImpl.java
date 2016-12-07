@@ -149,7 +149,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     @Override public String addApiSubscription(String apiId, String applicationId, String tier)
             throws APIManagementException {
-        return null;
+        // Generate UUID for application
+        String subscriptionId = UUID.randomUUID().toString();
+        try {
+            getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
+                    APIMgtConstants.SubscriptionStatus.ACTIVE);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding api subscription for api - " + apiId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return subscriptionId;
     }
 
     @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
