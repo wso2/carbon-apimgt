@@ -212,12 +212,13 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE NAME = ?";
+    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE LOWER(NAME) = ? AND PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, apiName);
+            statement.setString(1, apiName.toLowerCase(Locale.ENGLISH));
+            statement.setString(2, providerName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
