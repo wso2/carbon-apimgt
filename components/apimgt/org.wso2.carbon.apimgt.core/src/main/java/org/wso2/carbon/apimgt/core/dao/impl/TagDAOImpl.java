@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,7 +34,7 @@ import java.util.List;
 /**
  * Provides access to Tags which maybe shared across multiple entities
  */
-public class TagDAO {
+public class TagDAOImpl implements TagDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     static List<Integer> addTagsIfNotExist(
             Connection connection, List<String> tags) throws SQLException {
@@ -129,5 +131,26 @@ public class TagDAO {
             }
         }
 
+    }
+
+    @Override
+    public List<String> getTags() throws APIMgtDAOException {
+        final String query = "SELECT TAG_NAME FROM AM_TAGS";
+
+        List<String> tags = new ArrayList<>();
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    tags.add(rs.getString("TAG_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+        return tags;
     }
 }

@@ -139,7 +139,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
-            return getApiDAO().isAPINameExists(apiName);
+            return getApiDAO().isAPINameExists(apiName, username);
 
         } catch (APIMgtDAOException e) {
             log.error("Couldn't check API Name " + apiName + "Exists", e);

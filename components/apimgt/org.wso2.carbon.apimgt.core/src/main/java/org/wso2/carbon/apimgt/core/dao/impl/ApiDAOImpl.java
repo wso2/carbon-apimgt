@@ -212,12 +212,13 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE NAME = ?";
+    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE LOWER(NAME) = ? AND PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, apiName);
+            statement.setString(1, apiName.toLowerCase(Locale.ENGLISH));
+            statement.setString(2, providerName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -825,7 +826,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addTagsMapping(Connection connection, String apiID, List<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
-            List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
+            List<Integer> tagIDs = TagDAOImpl.addTagsIfNotExist(connection, tags);
 
             final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
 
@@ -865,7 +866,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 if (!tagIDs.isEmpty()) {
-                    tags = TagDAO.getTagsByIDs(connection, tagIDs);
+                    tags = TagDAOImpl.getTagsByIDs(connection, tagIDs);
                 }
             }
         }

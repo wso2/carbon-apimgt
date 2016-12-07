@@ -93,7 +93,7 @@ public interface ApiDAO {
      * @return true if providerName, apiName, version combination already exists else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    boolean isAPINameExists(String apiName) throws APIMgtDAOException;
+    boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException;
 
     /**
      * Checks if a given API Context already exists
