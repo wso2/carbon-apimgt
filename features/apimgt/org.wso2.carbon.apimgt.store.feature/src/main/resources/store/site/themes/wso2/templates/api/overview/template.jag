@@ -55,20 +55,30 @@
                 // The reason is that the context will have the version now
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
-	                    if(environmenturls[urltype] != ""){ %>
+	                    if(environmenturls[urltype] != ""){
+                            if (api.type.toUpperCase() == "WS") {
+                                var url = environmenturls[urltype];
+                                var cut = url.match(":(.*):");
+                                if (cut){
+                                    var host = cut[1];
+                                } else {
+                                    var host = "host";
+                                }
+                            }
+                        %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x">
                             <a data-clipboard-text=
                                 <%if (api.type.toUpperCase() != "WS") {%>
                                     "<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
                                 <%} else {%>
-                                    "ws://localhost:9099<%=encode.forHtml(api.context)%>"
+                                    "ws:<%=host%>:9099<%=encode.forHtml(api.context)%>"
                                 <%}%>
                                 class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
                             </a>
 	    	                <%if (api.type.toUpperCase() != "WS") {%>
                                 <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
                             <%} else {%>
-                                ws://localhost:9099<%=encode.forHtml(api.context)%>
+                                ws:<%=host%>:9099<%=encode.forHtml(api.context)%>
                             <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
@@ -77,7 +87,7 @@
                                 <%if (api.type.toUpperCase() != "WS") {%>
                                     <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
                                 <%} else {%>
-                                    ws://localhost:9099<%=encode.forHtml(apiContext)%>
+                                    ws:<%=host%>:9099<%=encode.forHtml(apiContext)%>
                                 <%}%>
 	                        <%}%>
 	                    </div>
