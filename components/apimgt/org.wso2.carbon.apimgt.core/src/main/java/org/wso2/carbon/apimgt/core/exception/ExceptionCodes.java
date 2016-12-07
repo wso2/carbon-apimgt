@@ -40,7 +40,15 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
             "done"),
-    DOCUMENT_ALREADY_EXISTS(90031, "Document already exists", 400, "Document Already Exists");
+    API_DOES_NOT_EXIST(900309, "The API does not exist", 400, "Couldn't find the API "),
+    DOCUMENT_ALREADY_EXISTS(900310, "Document already exists", 400, "Document Already Exists"),
+    AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
+    ACCESS_TOKEN_INACTIVE(900304, "Invalid Credentials", 401, " Access token is inactive."),
+    ACCESS_TOKEN_EXPIRED(900903, "Invalid Credentials", 401, " Access token is expired."),
+    MISSING_CREDENTIALS(900902, "Missing Credentials", 401, " Please provide an active access token to proceed"),
+    INVALID_SCOPE(900910, "Invalid Scope", 401, " You are not authorized to access the resource."),
+    INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
+            " Please provide the Authorization : Bearer <> token to proceed.");
 
     private final long errorCode;
     private final String errorMessage;

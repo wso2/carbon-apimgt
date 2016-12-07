@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.apimgt.rest.api.common.util;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
@@ -36,6 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +50,9 @@ import java.util.Map;
 public class RestApiUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
+    private static String publisherRestAPIDefinition;
+    private static String storeRestAPIDefinition;
+    private static String adminRestAPIDefinition;
 
     /**
      * Get the current logged in user's username
@@ -456,4 +462,78 @@ public class RestApiUtil {
         //TODO: to be implemented
         return true;
     }
+
+
+    /**
+     * This is static method to return API definition of API Publisher REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return String associated with API Manager publisher REST API
+     */
+    public static String getPublisherRestAPIResource() throws APIManagementException {
+
+        if (publisherRestAPIDefinition == null) {
+            //if(basePath.contains("/api/am/store/")){
+            //this is store API and pick resources accordingly
+            try {
+                publisherRestAPIDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+            } catch (IOException e) {
+                APIUtils.logAndThrowException("Error while reading the swagger definition of Publisher Rest API", log);
+                log.error("", e);
+            }
+
+        }
+        return publisherRestAPIDefinition;
+    }
+
+    /**
+     * This is static method to return API definition of API Publisher REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return String associated with API Manager store REST API
+     */
+    public static String getStoreRestAPIResource() throws APIManagementException {
+
+        if (storeRestAPIDefinition == null) {
+            //if(basePath.contains("/api/am/store/")){
+            //this is store API and pick resources accordingly
+            try {
+                storeRestAPIDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+            } catch (IOException e) {
+                APIUtils.logAndThrowException("Error while reading the swagger definition of Store Rest API", log);
+                log.error("", e);
+            }
+
+        }
+        return storeRestAPIDefinition;
+    }
+
+    /**
+     * This is static method to return API definition of API Publisher REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return String associated with API Manager Admin REST API
+     */
+    public static String getAdminRestAPIResource() throws APIManagementException {
+
+        if (adminRestAPIDefinition == null) {
+            //if(basePath.contains("/api/am/store/")){
+            //this is store API and pick resources accordingly
+            try {
+                adminRestAPIDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+            } catch (IOException e) {
+                APIUtils.logAndThrowException("Error while reading the swagger definition of Store Rest API", log);
+                log.error("", e);
+            }
+
+        }
+        return adminRestAPIDefinition;
+    }
+
 }

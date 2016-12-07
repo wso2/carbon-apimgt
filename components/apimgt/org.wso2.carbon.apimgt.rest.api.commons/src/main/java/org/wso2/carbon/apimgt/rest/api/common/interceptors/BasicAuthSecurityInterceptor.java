@@ -18,20 +18,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.interceptors;
 
-import org.osgi.service.component.annotations.Component;
+//import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.msf4j.Interceptor;
+//import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.security.basic.AbstractBasicAuthSecurityInterceptor;
 
-/**
- * Security Interceptor that does basic authentication for REST ApI requests.
- */
-@Component(
+
+/*@Component(
         name = "org.wso2.carbon.apimgt.rest.api.common.interceptors.BasicAuthSecurityInterceptor",
         service = Interceptor.class,
         immediate = true
-)
+)*/
+/**
+ * Security Interceptor that does basic authentication for REST ApI requests.
+ */
 public class BasicAuthSecurityInterceptor extends AbstractBasicAuthSecurityInterceptor {
     private static final Logger log = LoggerFactory.getLogger(BasicAuthSecurityInterceptor.class);
 
