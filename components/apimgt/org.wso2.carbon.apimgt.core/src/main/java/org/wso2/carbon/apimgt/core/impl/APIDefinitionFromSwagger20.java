@@ -28,8 +28,6 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -39,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -58,15 +57,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
 
     /**
-     * This method returns URI templates according to the given swagger file
+     * This method extracts the API resource related data which includes URI templates from the Swagger API definition
      *
-     * @param resourceConfigsJSON swaggerJSON
-     * @return UriPair
-     * @throws APIManagementException
+     * @return SwaggerAPIResourceData
      */
-    public List<Pair<UriTemplate, Scope>> getURITemplates(StringBuilder resourceConfigsJSON) throws
-            APIManagementException {
-        List<Pair<UriTemplate, Scope>> uriPairList = new ArrayList<>();
+    @Override
+    public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
+                                                                                throws APIManagementException {
+        List<APIResource> apiResources = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
@@ -93,34 +91,37 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 } else {
                     uriTemplateBuilder.policy(policy);
                 }
+                APIResource.Builder apiResourceBuilder = new APIResource.Builder();
                 List<String> producesList = operation.getProduces();
                 if (producesList != null) {
                     String produceSeparatedString = "\"";
                     produceSeparatedString += String.join("\",\"", producesList) + "\"";
-                    uriTemplateBuilder.produces(produceSeparatedString);
+                    apiResourceBuilder.produces(produceSeparatedString);
                 }
                 List<String> consumesList = operation.getConsumes();
                 if (consumesList != null) {
                     String consumesSeparatedString = "\"";
                     consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
-                    uriTemplateBuilder.produces(consumesSeparatedString);
+                    apiResourceBuilder.consumes(consumesSeparatedString);
                 }
                 if (operation.getOperationId() != null) {
-                    uriTemplateBuilder.templateId(operation.getOperationId());
+                    apiResourceBuilder.templateId(operation.getOperationId());
                 }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
                 String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
                 if (StringUtils.isNotEmpty(scope)) {
-                    uriPairList.add(new ImmutablePair<UriTemplate, Scope>(uriTemplateBuilder.build(), scopeMap.get
-                            (scope)));
+                    apiResourceBuilder.scope(scopeMap.get(scope));
+                    apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
+                    apiResources.add(apiResourceBuilder.build());
                 }
             }
         }
         resourceConfigsJSON.setLength(0);
         resourceConfigsJSON.append(Json.pretty(swagger));
-        return uriPairList;
+        return apiResources;
     }
 
+    @Override
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);

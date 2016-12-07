@@ -43,6 +43,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -190,12 +191,12 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIs(String searchString) throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
+        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1, '%' + searchString + '%');
+            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
