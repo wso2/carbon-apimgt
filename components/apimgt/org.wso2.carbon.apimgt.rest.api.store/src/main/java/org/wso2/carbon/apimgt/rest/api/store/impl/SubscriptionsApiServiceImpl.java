@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -15,7 +15,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
@@ -109,39 +108,30 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String apiId = body.getApiIdentifier();
             String tier = body.getTier();
 
-
-            if (!StringUtils.isEmpty(applicationId) && !StringUtils.isEmpty(apiId) && !StringUtils.isEmpty(tier)) {
-                Application application = apiStore.getApplicationByUuid(applicationId);
-                API api = apiStore.getAPIbyUUID(apiId);
-                if (application != null && api != null) {
-                    String subscriptionId = apiStore.addApiSubscription(apiId, applicationId, tier);
-                    Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
-                    subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
-                } else {
-                    String errorMessage = null;
-                    ExceptionCodes exceptionCode = null;
-                    if (application == null) {
-                        exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
-                        errorMessage = "Application not found";
-                    } else if (api == null) {
-                        exceptionCode = ExceptionCodes.API_NOT_FOUND;
-                        errorMessage = "Api not found";
-                    }
-                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                            exceptionCode);
-                    HashMap<String, String> paramList = new HashMap<String, String>();
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                    log.error(errorMessage, e);
-                    return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-                }
+            Application application = apiStore.getApplicationByUuid(applicationId);
+            API api = apiStore.getAPIbyUUID(apiId);
+            if (application != null && api != null) {
+                String subscriptionId = apiStore.addApiSubscription(apiId, applicationId, tier);
+                Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+                subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
             } else {
-                //mandatory parameters not provided
-                String errorMessage = "Some mandatory parameters are not provided";
-                ErrorHandler errorHandler = ExceptionCodes.PARAMETER_NOT_PROVIDED;
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
-                log.error(errorMessage);
-                return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+                String errorMessage = null;
+                ExceptionCodes exceptionCode = null;
+                if (application == null) {
+                    exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
+                    errorMessage = "Application not found";
+                } else if (api == null) {
+                    exceptionCode = ExceptionCodes.API_NOT_FOUND;
+                    errorMessage = "Api not found";
+                }
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        exceptionCode);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
+
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -185,7 +175,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
             subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            String errorMessage = "Error while retrieving subscription information - " + subscriptionId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(subscriptionDTO).build();
     }
