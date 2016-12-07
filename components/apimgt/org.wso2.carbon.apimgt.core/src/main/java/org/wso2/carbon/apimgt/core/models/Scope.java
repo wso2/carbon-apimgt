@@ -22,11 +22,14 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.io.Serializable;
+
 /**
  * This class contains the model of scope
  */
-public class Scope {
+public class Scope implements Serializable {
 
+    private static final long serialVersionUID = 5737132983639722942L;
     String key;
     String name;
     String roles;

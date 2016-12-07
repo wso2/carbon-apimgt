@@ -25,6 +25,10 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import java.io.Serializable;
 import java.util.Comparator;
 
+/**
+ * Comparator which takes into account the resource url template and http verb for UriTemplates
+ */
+
 public class URITemplateComparator implements Comparator<UriTemplate>, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -74,12 +78,10 @@ public class URITemplateComparator implements Comparator<UriTemplate>, Serializa
         if (o1.getUriTemplate().equalsIgnoreCase(o2.getUriTemplate()) &&
                 o1.getHttpVerb().equalsIgnoreCase(o2.getHttpVerb())) {
             return 0;
-        }
-        else {
+        } else {
             if (o1.getUriTemplate().equalsIgnoreCase(o2.getUriTemplate())) {
                 return o1.getHttpVerb().compareToIgnoreCase(o2.getHttpVerb());
-            }
-            else {
+            } else {
                 return o1.getUriTemplate().compareToIgnoreCase(o2.getUriTemplate());
             }
         }
