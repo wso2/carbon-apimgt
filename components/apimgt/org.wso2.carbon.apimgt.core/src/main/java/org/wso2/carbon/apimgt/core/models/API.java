@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -264,7 +265,7 @@ public final class API {
                 !lifecycleState.equals(api.lifecycleState) : (api.lifecycleState != null)) {
             return false;
         }
-        if (!uriTemplates.equals(api.uriTemplates)) {
+        if (!APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator())) {
             return false;
         }
         if ((copiedFromApiId != null) ?

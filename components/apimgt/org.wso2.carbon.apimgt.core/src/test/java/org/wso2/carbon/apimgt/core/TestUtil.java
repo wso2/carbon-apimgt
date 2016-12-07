@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.core;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
@@ -26,6 +27,10 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Objects;
 
 public class TestUtil {
 
@@ -83,5 +88,61 @@ public class TestUtil {
         summaryApp.setCallbackUrl(app.getCallbackUrl());
         summaryApp.setStatus(app.getStatus());
         return summaryApp;
+    }
+
+    public static String printDiff(Object obj1, Object obj2) {
+        if (obj1.getClass() != obj2.getClass()) {
+            throw new IllegalArgumentException("The types of the objects supplied do not match");
+        }
+
+        Field[] fields = FieldUtils.getAllFields(obj1.getClass());
+
+        for (Field field : fields) {
+            try {
+                Object obj1Value = FieldUtils.readField(field, obj1, true);
+                Object obj2Value = FieldUtils.readField(field, obj2, true);
+
+                String obj1ValueString = "null";
+                String obj2ValueString = "null";
+                if (obj1Value != null) {
+                    obj1ValueString = obj1Value.toString();
+                }
+                if (obj2Value != null) {
+                    obj2ValueString = obj2Value.toString();
+                }
+
+                if (!Objects.equals(obj1Value, obj2Value)) {
+                    return "Diff detected for '" + field.getName() + "' " + System.lineSeparator() +
+                            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System.lineSeparator() +
+                            obj1ValueString + System.lineSeparator() +
+                            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + System.lineSeparator() +
+                            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System.lineSeparator() +
+                            obj2ValueString + System.lineSeparator() +
+                            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+                }
+
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return null;
+    }
+
+    public static <T> String printListDiff(List<T> list1, List<T> list2) {
+        if (list1.size() != list2.size()) {
+            throw new IllegalArgumentException("The size of the list types are not the same");
+        }
+
+        for (int i = 0; i < list1.size(); ++i) {
+            String diff = printDiff(list1.get(i), list2.get(i));
+
+            if (diff != null) {
+                return diff;
+            }
+        }
+
+        return null;
     }
 }

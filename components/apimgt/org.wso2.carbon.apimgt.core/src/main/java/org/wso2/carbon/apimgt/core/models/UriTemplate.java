@@ -35,9 +35,6 @@ public final class UriTemplate implements Serializable {
     private final String httpVerb;
     private final String authType;
     private final String policy;
-    private final String templateId;
-    private final String produces;
-    private final String consumes;
 
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
@@ -45,9 +42,6 @@ public final class UriTemplate implements Serializable {
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
-        templateId = uriTemplateBuilder.templateId;
-        produces = uriTemplateBuilder.produces;
-        consumes = uriTemplateBuilder.consumes;
     }
 
     public String getUriTemplate() {
@@ -94,18 +88,6 @@ public final class UriTemplate implements Serializable {
                 !policy.equals(that.policy) : (that.policy != null)) {
             return false;
         }
-        if ((templateId != null) ?
-                !templateId.equals(that.templateId) : (that.templateId != null)) {
-            return false;
-        }
-        if ((produces != null) ?
-                !produces.equals(that.produces) : (that.produces != null)) {
-            return false;
-        }
-        if ((consumes != null) ?
-                !consumes.equals(that.consumes) : (that.consumes != null)) {
-            return false;
-        }
 
         return true;
     }
@@ -116,10 +98,17 @@ public final class UriTemplate implements Serializable {
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
         result = 31 * result + (authType != null ? authType.hashCode() : 0);
         result = 31 * result + (policy != null ? policy.hashCode() : 0);
-        result = 31 * result + (templateId != null ? templateId.hashCode() : 0);
-        result = 31 * result + (produces != null ? produces.hashCode() : 0);
-        result = 31 * result + (consumes != null ? consumes.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "UriTemplate{" +
+                "uriTemplate='" + uriTemplate + '\'' +
+                ", httpVerb='" + httpVerb + '\'' +
+                ", authType='" + authType + '\'' +
+                ", policy='" + policy + '\'' +
+                '}';
     }
 
     /**
@@ -130,9 +119,6 @@ public final class UriTemplate implements Serializable {
         private String httpVerb;
         private String authType;
         private String policy;
-        private String templateId;
-        private String produces;
-        private String consumes;
 
         public UriTemplateBuilder() {
         }
@@ -161,33 +147,8 @@ public final class UriTemplate implements Serializable {
             return this;
         }
 
-        public UriTemplateBuilder produces(String produces) {
-            this.produces = produces;
-            return this;
-        }
-        public UriTemplateBuilder consumes(String consumes) {
-            this.consumes = consumes;
-            return this;
-        }
-        public UriTemplateBuilder templateId(String templateId) {
-            this.templateId = templateId;
-            return this;
-        }
         public UriTemplate build() {
-
             return new UriTemplate(this);
         }
-    }
-
-    public String getTemplateId() {
-        return templateId;
-    }
-
-    public String getProduces() {
-        return produces;
-    }
-
-    public String getConsumes() {
-        return consumes;
     }
 }

@@ -21,16 +21,10 @@
 package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -94,8 +88,8 @@ public class SampleTestObjectCreator {
         try {
             APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
             List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (Pair<UriTemplate,Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(uriPair.getLeft());
+            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(apiResource.getUriTemplate());
             }
             apiBuilder.uriTemplates(uriTemplateList);
 
@@ -192,8 +186,8 @@ public class SampleTestObjectCreator {
         try {
             APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
             List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (Pair<UriTemplate,Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(uriPair.getLeft());
+            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(apiResource.getUriTemplate());
             }
             apiBuilder.uriTemplates(uriTemplateList);
         } catch (APIManagementException e) {
@@ -253,8 +247,8 @@ public class SampleTestObjectCreator {
         try {
             APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
             List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (Pair<UriTemplate,Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(uriPair.getLeft());
+            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
+                uriTemplateList.add(apiResource.getUriTemplate());
             }
             apiBuilder.uriTemplates(uriTemplateList);
         } catch (APIManagementException e) {

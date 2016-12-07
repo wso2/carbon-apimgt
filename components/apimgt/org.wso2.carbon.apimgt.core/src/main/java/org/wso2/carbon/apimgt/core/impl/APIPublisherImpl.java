@@ -20,7 +20,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -36,11 +35,11 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -179,8 +178,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         List<UriTemplate> uriTemplateList = new ArrayList<>();
-        for (Pair<UriTemplate, Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition())) {
-            uriTemplateList.add(uriPair.getLeft());
+        for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())) {
+            uriTemplateList.add(apiResource.getUriTemplate());
         }
         apiBuilder.uriTemplates(uriTemplateList);
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -246,9 +245,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         .getLifeCycleStatus())) {
                     APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                     List<UriTemplate> uriTemplateList = new ArrayList<>();
-                    for (Pair<UriTemplate, Scope> uriPair : apiDefinition.getURITemplates(apiBuilder.getApiDefinition
-                            ())) {
-                        uriTemplateList.add(uriPair.getLeft());
+                    for (APIResource apiResource :
+                            apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())) {
+                        uriTemplateList.add(apiResource.getUriTemplate());
                     }
                     apiBuilder.uriTemplates(uriTemplateList);
 
