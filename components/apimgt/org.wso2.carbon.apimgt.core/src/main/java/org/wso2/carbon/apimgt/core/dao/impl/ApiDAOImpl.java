@@ -826,7 +826,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addTagsMapping(Connection connection, String apiID, List<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
-            List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
+            List<Integer> tagIDs = TagDAOImpl.addTagsIfNotExist(connection, tags);
 
             final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
 
@@ -866,7 +866,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 if (!tagIDs.isEmpty()) {
-                    tags = TagDAO.getTagsByIDs(connection, tagIDs);
+                    tags = TagDAOImpl.getTagsByIDs(connection, tagIDs);
                 }
             }
         }
