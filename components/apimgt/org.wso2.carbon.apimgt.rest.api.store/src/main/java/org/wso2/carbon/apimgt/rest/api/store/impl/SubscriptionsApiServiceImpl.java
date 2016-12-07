@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -15,7 +15,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;

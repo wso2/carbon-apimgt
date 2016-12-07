@@ -136,7 +136,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             throws APIManagementException {
         List<Subscription> subscriptionsList = null;
         try {
-            getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
+            subscriptionsList = getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving subscriptions for application - " + application.getName();
