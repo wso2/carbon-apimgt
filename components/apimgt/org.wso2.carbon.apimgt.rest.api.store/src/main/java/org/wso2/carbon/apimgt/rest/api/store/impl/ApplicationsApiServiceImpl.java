@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -65,7 +67,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             if (application != null) {
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                String errorMessage = "Application not found: " + applicationId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(
+                        errorMessage, ExceptionCodes.APPLICATION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage,e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving application: " + applicationId;
