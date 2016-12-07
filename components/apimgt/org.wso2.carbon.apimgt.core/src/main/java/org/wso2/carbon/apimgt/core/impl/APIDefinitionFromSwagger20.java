@@ -121,8 +121,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return apiResources;
     }
 
-
-    private Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
+    @Override
+    public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         Map<String, Scope> scopeMap = new HashMap<>();
