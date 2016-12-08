@@ -331,12 +331,20 @@ public class APIGatewayManager {
                     api.setContext(ENDPOINT_PRODUCTION + context);
                     String content = createSeqString(api, production_endpoint);
                     element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
                     client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
                 if (sandbox_endpoint != null) {
                     api.setContext(ENDPOINT_SANDBOX + context);
                     String content = createSeqString(api, sandbox_endpoint);
                     element = AXIOMUtil.stringToOM(content);
+                    String fileName = element.getAttributeValue(new QName("name"));
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
                     client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
             } catch (AxisFault e) {
