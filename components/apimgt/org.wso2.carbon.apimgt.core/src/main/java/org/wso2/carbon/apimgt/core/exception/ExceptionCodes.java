@@ -40,11 +40,10 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
             "done"),
-    DOCUMENT_ALREADY_EXISTS(90031, "Document already exists", 400, "Document Already Exists");
+    DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
+    COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
+            + "update the API");
 
-    COULD_NOT_UPDATE_API(900308, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
-            + "update the API"),
-    API_NOT_FOUND(900309, "Could not find the API" , 500, "Could not find the API");
 
 
     private final long errorCode;
