@@ -74,7 +74,7 @@ public class APIManagerFactory {
         // }
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Consumer", e);

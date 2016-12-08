@@ -8,9 +8,9 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.TierMappingUtil;
 
@@ -42,13 +42,22 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(tierListDTO).build();
     }
     @Override
-    public Response tiersTierLevelTierNameGet(String tierName
-, String tierLevel
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response tiersTierLevelTierNameGet(String tierName, String tierLevel, String accept,
+            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
+        TierDTO tierDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Policy tier = apiStore.getPolicy(tierLevel, tierName);
+            tierDTO = TierMappingUtil.fromTierToDTO(tier, tierLevel);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.TIER_LEVEL, tierLevel);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().entity(tierDTO).build();
     }
 }

@@ -38,7 +38,7 @@ public class UserAwareAPIStoreTestCase {
     @Test
     public void testDeleteApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
@@ -49,7 +49,7 @@ public class UserAwareAPIStoreTestCase {
     @Test
     public void testUpdateApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         Application newApplication = new Application("NEW_APP", null);
         applicationFromDAO.setCreatedUser(USER_NAME);

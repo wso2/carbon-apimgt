@@ -65,7 +65,6 @@ public class TierMappingUtil {
         TierDTO dto = new TierDTO();
         dto.setName(tier.getPolicyName());
         dto.setDescription(tier.getDescription());
-        dto.setRequestCount(Long.valueOf(tier.getDefaultQuotaPolicy().getLimit().getUnitTime()));
         dto.setUnitTime(Long.valueOf(tier.getDefaultQuotaPolicy().getLimit().getUnitTime()));
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(tierLevel));
 

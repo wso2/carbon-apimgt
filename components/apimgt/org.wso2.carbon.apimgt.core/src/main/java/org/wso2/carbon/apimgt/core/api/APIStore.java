@@ -176,4 +176,12 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException
      */
     List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
 }
