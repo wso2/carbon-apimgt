@@ -1078,12 +1078,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 }
-                if (api.getUrl() != null && !"".equals(api.getUrl())) {
-                    String path = APIUtil.createEndpoint(api.getUrl(), registry);
-                    if (path != null) {
-                        registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                    }
-                }
             }
             artifactManager.updateGenericArtifact(updateApiArtifact);
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
@@ -2358,12 +2352,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if (api.getUrl() != null && !api.getUrl().isEmpty())    {
-                String path = APIUtil.createEndpoint(api.getUrl(), registry);
-                if (path != null) {
-                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                }
-            }
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
             String apiStatus = api.getStatus().getStatus();
