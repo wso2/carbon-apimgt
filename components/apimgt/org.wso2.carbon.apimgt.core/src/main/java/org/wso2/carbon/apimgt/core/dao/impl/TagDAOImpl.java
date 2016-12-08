@@ -35,6 +35,9 @@ import java.util.List;
  * Provides access to Tags which maybe shared across multiple entities
  */
 public class TagDAOImpl implements TagDAO {
+    TagDAOImpl() {
+    }
+
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     static List<Integer> addTagsIfNotExist(
             Connection connection, List<String> tags) throws SQLException {
