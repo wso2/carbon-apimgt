@@ -67,6 +67,7 @@ public class TierMappingUtil {
         dto.setName(tier.getPolicyName());
         dto.setDescription(tier.getDescription());
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(StringUtils.upperCase(tierLevel)));
+        //// TODO: 08/12/16 More fields to map 
         return dto;
     }
 }
