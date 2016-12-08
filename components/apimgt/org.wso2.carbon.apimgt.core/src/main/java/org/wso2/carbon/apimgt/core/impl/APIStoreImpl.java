@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -170,6 +171,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    @Override
+    public List<Tag> getAllTags() throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public List<Policy> getPolicies(String policyLevel) throws APIManagementException {
+        List<Policy> policyList = null;
+        try {
+            policyList = getPolicyDAO().getPolicies(policyLevel);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving policies for policy level - " + policyLevel;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return policyList;
     }
 
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {

@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
 import java.util.Map;
@@ -158,4 +160,20 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException
      */
     void deleteAPISubscription(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Retrieve all tags
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Tag> getAllTags() throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
 }
