@@ -31,18 +31,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Provides access to Tags which maybe shared across multiple entities
  */
 public class TagDAOImpl implements TagDAO {
+    // Package private to prevent direct instance creation outside the package.
+    // Use the DAOFactory to instantiate a new instance
     TagDAOImpl() {
     }
 
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<Integer> addTagsIfNotExist(
+    static List<String> addTagsIfNotExist(
             Connection connection, List<String> tags) throws SQLException {
-        List<Integer> tagIDs = new ArrayList<>();
+        List<String> tagIDs = new ArrayList<>();
 
         if (!tags.isEmpty()) {
             final String query = "SELECT TAG_ID, NAME FROM AM_TAGS WHERE NAME IN (" +
@@ -57,7 +60,7 @@ public class TagDAOImpl implements TagDAO {
 
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) { // If Tag already exists get respective tag ID
-                        int tagID = rs.getInt("TAG_ID");
+                        String tagID = rs.getString("TAG_ID");
                         tagIDs.add(tagID);
                         incrementTagCount(connection, tagID);
                         existingTags.add(rs.getString("NAME"));
@@ -76,7 +79,7 @@ public class TagDAOImpl implements TagDAO {
     }
 
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<String> getTagsByIDs(Connection connection, List<Integer> tagIDs) throws SQLException {
+    static List<String> getTagsByIDs(Connection connection, List<String> tagIDs) throws SQLException {
         List<String> tags = new ArrayList<>();
 
         if (!tagIDs.isEmpty()) {
@@ -85,7 +88,7 @@ public class TagDAOImpl implements TagDAO {
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (int i = 0; i < tagIDs.size(); ++i) {
-                    statement.setInt(i + 1, tagIDs.get(i));
+                    statement.setString(i + 1, tagIDs.get(i));
                 }
 
                 try (ResultSet rs = statement.executeQuery()) {
@@ -99,54 +102,32 @@ public class TagDAOImpl implements TagDAO {
         return tags;
     }
 
-    private static void incrementTagCount(Connection connection, int tagID) throws SQLException {
+    private static void incrementTagCount(Connection connection, String tagID) throws SQLException {
         final String query = "UPDATE AM_TAGS SET COUNT = COUNT + 1 WHERE TAG_ID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, tagID);
+            statement.setString(1, tagID);
             statement.execute();
         }
     }
 
-    private static void insertNewTags(Connection connection, List<String> tags, List<Integer> tagIDs)
+    private static void insertNewTags(Connection connection, List<String> tags, List<String> tagIDs)
             throws SQLException {
-        final String maxTagIDQuery = "SELECT MAX(TAG_ID) AS TAG_ID FROM AM_TAGS";
-        int maxTagID = -1;
-        try (PreparedStatement statement = connection.prepareStatement(maxTagIDQuery)) {
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    maxTagID = rs.getInt("TAG_ID");
-                }
-            }
-        }
-
-        final String query = "INSERT INTO AM_TAGS (NAME, COUNT) VALUES (?,?)";
+        final String query = "INSERT INTO AM_TAGS (TAG_ID, NAME, COUNT) VALUES (?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query, new String[] { "tag_id" })) {
             for (String tag : tags) {
-                statement.setString(1, tag);
-                statement.setInt(2, 1); // The count should always be 1 initially
+                String tagID = UUID.randomUUID().toString();
+                statement.setString(1, tagID);
+                statement.setString(2, tag);
+                statement.setInt(3, 1); // The count should always be 1 initially
                 statement.addBatch();
+
+                tagIDs.add(tagID);
             }
 
             statement.executeBatch();
         }
-
-        final String newTagIDsQuery = "SELECT TAG_ID FROM AM_TAGS WHERE TAG_ID > ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(newTagIDsQuery)) {
-            statement.setInt(1, maxTagID);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                while (rs.next()) {
-                    tagIDs.add(rs.getInt("TAG_ID"));
-                }
-            }
-        }
-
     }
 
     @Override
