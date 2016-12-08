@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.Tag;
 
 import java.util.List;
 
@@ -30,8 +31,8 @@ import java.util.List;
 public interface TagDAO {
     /**
      * Returns all available tags
-     * @return {@link List<String>} List of tags
+     * @return {@link List<Tag>} List of tags
      * @throws APIMgtDAOException
      */
-    List<String> getTags() throws APIMgtDAOException;
+    List<Tag> getTags() throws APIMgtDAOException;
 }
