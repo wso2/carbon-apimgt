@@ -221,5 +221,6 @@ public class APIMgtConstants {
         public static final String TIER = "TIER";
         public static final String SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
         public static final String DOC_ID = "DOC_ID";
+        public static final String TIER_LEVEL = "TIER_LEVEL";
     }
 }

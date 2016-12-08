@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -40,9 +41,9 @@ public class UserAwareAPIStore extends APIStoreImpl {
 
     private static final Logger log = LoggerFactory.getLogger(UserAwareAPIStore.class);
 
-    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO);
+    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO);
     }
 
     @Override
