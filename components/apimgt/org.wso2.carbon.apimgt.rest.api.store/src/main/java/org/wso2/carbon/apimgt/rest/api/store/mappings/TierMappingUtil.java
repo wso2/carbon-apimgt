@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
@@ -65,9 +66,7 @@ public class TierMappingUtil {
         TierDTO dto = new TierDTO();
         dto.setName(tier.getPolicyName());
         dto.setDescription(tier.getDescription());
-        dto.setUnitTime(Long.valueOf(tier.getDefaultQuotaPolicy().getLimit().getUnitTime()));
-        dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(tierLevel));
-
+        dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(StringUtils.upperCase(tierLevel)));
         return dto;
     }
 }
