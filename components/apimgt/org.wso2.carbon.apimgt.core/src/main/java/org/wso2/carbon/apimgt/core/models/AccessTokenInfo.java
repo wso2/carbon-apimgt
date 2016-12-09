@@ -51,7 +51,11 @@ public class AccessTokenInfo {
     private String endUserName;
 
     public String[] getScopes() {
-        return Arrays.copyOf(scopes, scopes.length);
+        if (scopes != null) {
+            return scopes.clone();
+        } else {
+            return new String[0];
+        }
     }
 
     public int getErrorcode() {
@@ -63,7 +67,7 @@ public class AccessTokenInfo {
     }
 
     public void setScopes(String[] scope) {
-        this.scopes = scope;
+        this.scopes = scope.clone();
     }
 
     public String getTokenState() {

@@ -48,7 +48,8 @@ import javax.net.ssl.X509TrustManager;
  * Class for all utility methods
  */
 public class APIUtils {
-    private static CloseableHttpClient client;
+     private static volatile CloseableHttpClient client;
+
 
     /**
      * Log and throw exceptions. This should be used only at service level.
@@ -218,14 +219,21 @@ public class APIUtils {
 
         if (client != null) {
             return client;
-        }
-        SSLContext sslcontext = SSLContexts.custom().useSSL().build();
-        sslcontext.init(null, new X509TrustManager[]{new HttpsTrustManager()}, new SecureRandom());
-        SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
-                SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-        client = HttpClients.custom().setSSLSocketFactory(factory).build();
+        } else {
+            synchronized (CloseableHttpClient.class) { 
+                if (client == null) {
+                    SSLContext sslcontext = SSLContexts.custom().useSSL().build();
+                    sslcontext.init(null, new X509TrustManager[]{new HttpsTrustManager()}, new SecureRandom());
+                    SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+                            SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+                    client = HttpClients.custom().setSSLSocketFactory(factory).build();
 
-        return client;
+
+                }
+            }
+            return client;
+        }
+
     }
 
     public static void releaseInstance() {

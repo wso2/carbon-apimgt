@@ -361,7 +361,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         try {
             CloseableHttpClient client = APIUtils.getHttpsClient();
-            String introspectEndpoint=System.getProperty("introspectEndpoint", "http://localhost:9763/oauth2/introspect");
+            String introspectEndpoint = System.getProperty("introspectEndpoint",
+                    "http://localhost:9763/oauth2/introspect");
             HttpPost httpPost = new HttpPost(introspectEndpoint);
 
             ArrayList<NameValuePair> postParameters = new ArrayList<>();

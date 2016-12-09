@@ -27,7 +27,7 @@ public class AccessTokenRequest {
     private String clientId;
     private String clientSecret;
     private String grantType;
-    private String[] scopes;
+    private String[] scopes = null;
     private String callbackURI;
     private String resourceOwnerUsername;
     private String resourceOwnerPassword;
@@ -73,11 +73,15 @@ public class AccessTokenRequest {
     }
 
     public String[] getScopes() {
-        return scopes;
+        if (scopes != null) {
+            return scopes.clone();
+        } else {
+            return new String[0];
+        }
     }
 
     public void setScopes(String[] scope) {
-        this.scopes = scope;
+        this.scopes = scope.clone();
     }
 
     public String getCallbackURI() {
