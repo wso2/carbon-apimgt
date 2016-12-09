@@ -653,14 +653,16 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param resourceID         UUID of resource
      * @param content                File content as an InputStream
+     * @param fileName
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addDocumentFileContent(String resourceID, InputStream content) throws APIMgtDAOException {
+    public void addDocumentFileContent(String resourceID, InputStream content, String fileName) throws
+            APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content) == 0) {
+                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, fileName) == 0) {
                     throw new APIMgtDAOException("Cannot add file content for a document that does not exist");
                 }
                 connection.commit();

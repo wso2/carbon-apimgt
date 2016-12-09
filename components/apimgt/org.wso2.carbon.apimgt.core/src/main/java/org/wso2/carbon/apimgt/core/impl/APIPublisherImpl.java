@@ -478,12 +478,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
+     * @param fileName
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
+    public void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws
+            APIManagementException {
         try {
-            getApiDAO().addDocumentFileContent(resourceId, content);
+            getApiDAO().addDocumentFileContent(resourceId, content, fileName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation with file";
             log.error(errorMsg, e);
