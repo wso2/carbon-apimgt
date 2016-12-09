@@ -28,7 +28,7 @@
     <div class="row" id="keys">
         <div class="col-md-12 col-lg-9">
             <div class="add-margin-bottom-4x">
-                <button type="button" class="btn btn-secondary show_keys" onclick="show_Keys()">{{# if show_keys }}Hide Keys{{else}}Show Keys{{/if}}</button>
+                <button id="show_keys" type="button" class="btn btn-secondary show_keys" onclick="show_Keys()">{{# if show_keys }}Hide Keys{{else}}Show Keys{{/if}}</button>
             </div>
             <div class="form-group" id="cons">
                 <label class="" for="ConsumerKey">Consumer Key></label>
@@ -61,15 +61,15 @@
                     <h4>Generating Access Tokens</h4>
                     <p>The following cURL command shows how to generate an access token using the password grant type.</p>
                     <div class="highlight"><pre>
-		 <a data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" {{gatewayurlendpoint }}' class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
+		                <button value='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" {{gatewayurlendpoint }}' class="pull-right btn btn-default copy-button"  title="Copy"><i class="fw fw-copy"></i></button><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
-	     {{gatewayurlendpoint }}</textarea></pre>
+                        {{gatewayurlendpoint }}</textarea></pre>
                     </div>
                     <p>In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.</p>
                     <div class="highlight"><pre>
-			<a data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" {{ gatewayurlendpoint }} ' class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
+			            <button value='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" {{ gatewayurlendpoint }} ' class="pull-right btn btn-default copy-button"  title="Copy"><i class="fw fw-copy"></i></button><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
-	    {{ gatewayurlendpoint }}</textarea></pre>
+                        {{ gatewayurlendpoint }}</textarea></pre>
                     </div>
                 </div>
             </div>
@@ -79,7 +79,7 @@
                 <div class="input-group">
                     <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="Access Token" class="form-control access_token" id="Key" placeholder="Access Token" value="{{Key}}">
                     <div class="input-group-btn">
-                        <button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
+                        <button class="btn btn-default copy-button" value="{{Key}}"  type="button" title="Copy">
                             <i class="fw fw-copy"></i>
                         </button>
                     </div>
@@ -150,7 +150,7 @@
                             <div class="input-group-addon">Seconds.</div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary" data-load-text="Generating" onclick="generatekeys(); return false;">Generate keys</button>
+                    <button type="button" class="btn btn-primary" data-load-text="Generating" onclick="generateKeys(); return false;">Generate keys</button>
                 </form>
             </div>
         </div>

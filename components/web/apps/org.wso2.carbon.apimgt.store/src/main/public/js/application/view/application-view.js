@@ -16,6 +16,8 @@ $(function () {
         size: 4
     });
 
+    var client = new ZeroClipboard( document.getElementById("copy-button") );
+
     client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function () {
@@ -132,6 +134,19 @@ $(function () {
                     $("#sandbox").append(compiledHtml);
                     $('.selectpicker').selectpicker('refresh');
                 }
+                
+                var client = new ZeroClipboard($('.copy-button'));
+
+                client.on('ready', function (event) {
+                    client.on('copy', function (event) {
+                        event.clipboardData.setData('text/plain', event.target.value);
+                    });
+                });
+
+                client.on('error', function (event) {
+                    alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
+                    ZeroClipboard.destroy();
+                });
             },
             error: function (e) {
                 alert("Error occurred viewing application details");
@@ -198,7 +213,7 @@ $(function () {
     };
 });
 
-var generatekeys = function () {
+var generateKeys = function () {
 
     var tabid = $('#tabs li.active').attr("id");
     var keyType;
