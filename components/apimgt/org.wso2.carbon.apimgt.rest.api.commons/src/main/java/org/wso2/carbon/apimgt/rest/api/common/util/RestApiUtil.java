@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
@@ -350,6 +351,16 @@ public class RestApiUtil {
      */
     public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+    }
+
+    /**
+     * Returns an APIMgtAdminService.
+     *
+     * @return API Management Admin Service
+     * @throws APIManagementException
+     */
+    public static APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIMgtAdminService();
     }
 
     /**
