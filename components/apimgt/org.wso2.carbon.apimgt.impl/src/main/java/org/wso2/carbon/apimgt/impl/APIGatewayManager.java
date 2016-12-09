@@ -267,7 +267,12 @@ public class APIGatewayManager {
                         String[] fileNames = new String[2];
                         fileNames[0] = ENDPOINT_PRODUCTION + fileName;
                         fileNames[1] = ENDPOINT_SANDBOX + fileName;
-                        client.undeployWSApi(fileNames);
+                        if (client.isExistingSequence(fileNames[0], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                            client.deleteSequence(fileNames[0], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
+                        if (client.isExistingSequence(fileNames[1], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                            client.deleteSequence(fileNames[1], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -327,30 +332,31 @@ public class APIGatewayManager {
                     String content = createSeqString(api, production_endpoint);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
-                    client.deployWSApi(content, fileName);
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
+                    client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
                 if (sandbox_endpoint != null) {
                     api.setContext(ENDPOINT_SANDBOX + context);
                     String content = createSeqString(api, sandbox_endpoint);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
-                    client.deployWSApi(content, fileName);
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
+                    client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
-
+            } catch (AxisFault e) {
+                String msg = "Error while parsing the policy to get the eligibility query: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            }
             } catch (XMLStreamException e) {
                 String msg = "Error while parsing the policy to get the eligibility query: ";
                 log.error(msg, e);
                 throw new APIManagementException(msg);
-            } catch (IOException e) {
-                String msg = "Error while deploying the policy in gateway manager: ";
-                log.error(msg, e);
-                throw new APIManagementException(msg);
             }
-        } catch (JSONException e) {
-            String msg = "Error in reading JSON object " + e.getMessage();
-            log.error(msg, e);
-            throw new JSONException(msg);
-        }
     }
 
     /**
