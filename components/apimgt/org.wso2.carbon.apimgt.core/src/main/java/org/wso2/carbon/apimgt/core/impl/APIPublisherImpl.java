@@ -714,7 +714,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getApiDAO().getAPISummary(apiId);
             if (api != null) {
-
                 return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
