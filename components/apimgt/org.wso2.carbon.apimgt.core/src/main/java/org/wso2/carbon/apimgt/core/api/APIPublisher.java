@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
-import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
@@ -257,7 +256,17 @@ public interface APIPublisher extends APIManager {
      * @param subStatus Subscription Status
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
+    void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
+            APIManagementException;
+
+    /**
+     * Update the subscription Policy
+     *
+     * @param subId     Subscription ID
+     * @param newPolicy New Subscription Policy
+     * @throws APIManagementException If failed to update subscription policy
+     */
+    void updateSubscriptionPolicy(String subId, String newPolicy) throws
             APIManagementException;
 
 
@@ -319,13 +328,6 @@ public interface APIPublisher extends APIManager {
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
-    /**
-     * Return {@link Subscription} of subscription id
-     * @param subId
-     * @return
-     * @throws APIManagementException
-     */
-    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
     /**
      * This method updates gateway config in the database
      *

@@ -32,7 +32,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            apiPublisher.updateSubscription(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf(blockState));
+            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf(blockState));
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();

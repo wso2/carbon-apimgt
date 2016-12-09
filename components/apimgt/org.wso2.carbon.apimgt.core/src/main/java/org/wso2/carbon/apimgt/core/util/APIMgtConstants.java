@@ -218,5 +218,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_ID = "APPLICATION_ID";
         public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
         public static final String API_ID = "API_ID";
+        public static final String TIER = "TIER";
+        public static final String SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
+        public static final String DOC_ID = "DOC_ID";
+        public static final String TIER_LEVEL = "TIER_LEVEL";
     }
 }

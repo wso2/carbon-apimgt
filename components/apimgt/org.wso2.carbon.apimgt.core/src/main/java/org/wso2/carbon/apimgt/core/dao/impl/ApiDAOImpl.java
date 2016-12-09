@@ -42,9 +42,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -192,12 +191,12 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIs(String searchString) throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE NAME LIKE ?";
+        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1, '%' + searchString + '%');
+            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -213,12 +212,13 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE NAME = ?";
+    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE LOWER(NAME) = ? AND PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, apiName);
+            statement.setString(1, apiName.toLowerCase(Locale.ENGLISH));
+            statement.setString(2, providerName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -346,11 +346,10 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiID      The {@link String} of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
-     * @return true if update is successful else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
+    public void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
         final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
                 "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
@@ -424,8 +423,6 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
-
-        return null;
     }
 
     /**
@@ -829,14 +826,14 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addTagsMapping(Connection connection, String apiID, List<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
-            List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
+            List<String> tagIDs = TagDAOImpl.addTagsIfNotExist(connection, tags);
 
             final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                for (Integer tagID : tagIDs) {
+                for (String tagID : tagIDs) {
                     statement.setString(1, apiID);
-                    statement.setInt(2, tagID);
+                    statement.setString(2, tagID);
                     statement.addBatch();
                 }
 
@@ -862,14 +859,14 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
-                List<Integer> tagIDs = new ArrayList<>();
+                List<String> tagIDs = new ArrayList<>();
 
                 while (rs.next()) {
-                    tagIDs.add(rs.getInt("TAG_ID"));
+                    tagIDs.add(rs.getString("TAG_ID"));
                 }
 
                 if (!tagIDs.isEmpty()) {
-                    tags = TagDAO.getTagsByIDs(connection, tagIDs);
+                    tags = TagDAOImpl.getTagsByIDs(connection, tagIDs);
                 }
             }
         }
@@ -1016,7 +1013,7 @@ public class ApiDAOImpl implements ApiDAO {
         return new ArrayList<>();
     }
 
-    private void addUrlMappings(Connection connection, Set<UriTemplate> uriTemplates, String apiID)
+    private void addUrlMappings(Connection connection, List<UriTemplate> uriTemplates, String apiID)
             throws SQLException {
         final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, "
                 + "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?)";
@@ -1041,10 +1038,10 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private Set<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
+    private List<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
         String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM AM_API_URL_MAPPING WHERE"
                 + " API_ID = ?";
-        Set<UriTemplate> uriTemplateSet = new HashSet<>();
+        List<UriTemplate> uriTemplateSet = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();

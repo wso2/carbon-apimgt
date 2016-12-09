@@ -21,6 +21,9 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.Tag;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,18 +31,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Provides access to Tags which maybe shared across multiple entities
  */
-public class TagDAO {
+public class TagDAOImpl implements TagDAO {
+    // Package private to prevent direct instance creation outside the package.
+    // Use the DAOFactory to instantiate a new instance
+    TagDAOImpl() {
+    }
+
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<Integer> addTagsIfNotExist(
+    static List<String> addTagsIfNotExist(
             Connection connection, List<String> tags) throws SQLException {
-        List<Integer> tagIDs = new ArrayList<>();
+        List<String> tagIDs = new ArrayList<>();
 
         if (!tags.isEmpty()) {
-            final String query = "SELECT TAG_ID, TAG_NAME FROM AM_TAGS WHERE TAG_NAME IN (" +
+            final String query = "SELECT TAG_ID, NAME FROM AM_TAGS WHERE NAME IN (" +
                     DAOUtil.getParameterString(tags.size()) + ")";
 
             List<String> existingTags = new ArrayList<>();
@@ -51,8 +60,10 @@ public class TagDAO {
 
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) { // If Tag already exists get respective tag ID
-                        tagIDs.add(rs.getInt("TAG_ID"));
-                        existingTags.add(rs.getString("TAG_NAME"));
+                        String tagID = rs.getString("TAG_ID");
+                        tagIDs.add(tagID);
+                        incrementTagCount(connection, tagID);
+                        existingTags.add(rs.getString("NAME"));
                     }
                 }
             }
@@ -67,22 +78,22 @@ public class TagDAO {
         return tagIDs;
     }
 
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING") static List<String> getTagsByIDs(
-            Connection connection, List<Integer> tagIDs) throws SQLException {
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    static List<String> getTagsByIDs(Connection connection, List<String> tagIDs) throws SQLException {
         List<String> tags = new ArrayList<>();
 
         if (!tagIDs.isEmpty()) {
-            final String query = "SELECT TAG_NAME FROM AM_TAGS WHERE TAG_ID IN (" +
+            final String query = "SELECT NAME FROM AM_TAGS WHERE TAG_ID IN (" +
                     DAOUtil.getParameterString(tagIDs.size()) + ")";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (int i = 0; i < tagIDs.size(); ++i) {
-                    statement.setInt(i + 1, tagIDs.get(i));
+                    statement.setString(i + 1, tagIDs.get(i));
                 }
 
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
-                        tags.add(rs.getString("TAG_NAME"));
+                        tags.add(rs.getString("NAME"));
                     }
                 }
             }
@@ -91,43 +102,56 @@ public class TagDAO {
         return tags;
     }
 
-    private static void insertNewTags(Connection connection, List<String> tags, List<Integer> tagIDs)
-            throws SQLException {
-        final String maxTagIDQuery = "SELECT MAX(TAG_ID) AS TAG_ID FROM AM_TAGS";
-        int maxTagID = -1;
-        try (PreparedStatement statement = connection.prepareStatement(maxTagIDQuery)) {
+    private static void incrementTagCount(Connection connection, String tagID) throws SQLException {
+        final String query = "UPDATE AM_TAGS SET COUNT = COUNT + 1 WHERE TAG_ID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, tagID);
             statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    maxTagID = rs.getInt("TAG_ID");
-                }
-            }
         }
+    }
 
-        final String query = "INSERT INTO AM_TAGS (TAG_NAME) VALUES (?)";
+    private static void insertNewTags(Connection connection, List<String> tags, List<String> tagIDs)
+            throws SQLException {
+        final String query = "INSERT INTO AM_TAGS (TAG_ID, NAME, COUNT) VALUES (?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query, new String[] { "tag_id" })) {
             for (String tag : tags) {
-                statement.setString(1, tag);
+                String tagID = UUID.randomUUID().toString();
+                statement.setString(1, tagID);
+                statement.setString(2, tag);
+                statement.setInt(3, 1); // The count should always be 1 initially
                 statement.addBatch();
+
+                tagIDs.add(tagID);
             }
 
             statement.executeBatch();
         }
+    }
 
-        final String newTagIDsQuery = "SELECT TAG_ID FROM AM_TAGS WHERE TAG_ID > ?";
+    @Override
+    public List<Tag> getTags() throws APIMgtDAOException {
+        final String query = "SELECT NAME FROM AM_TAGS";
 
-        try (PreparedStatement statement = connection.prepareStatement(newTagIDsQuery)) {
-            statement.setInt(1, maxTagID);
-            statement.execute();
+        List<Tag> tags = new ArrayList<>();
 
-            try (ResultSet rs = statement.getResultSet()) {
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    tagIDs.add(rs.getInt("TAG_ID"));
+                    Tag tag = new Tag.Builder().
+                            name(rs.getString("NAME")).
+                            count(rs.getInt("COUNT")).build();
+
+                    tags.add(tag);
                 }
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
 
+        return tags;
     }
 }

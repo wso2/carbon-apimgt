@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -29,7 +30,6 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -167,7 +167,7 @@ public final class API {
         return lifecycleState;
     }
 
-    public Set<UriTemplate> getUriTemplates() {
+    public List<UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
 
@@ -265,7 +265,7 @@ public final class API {
                 !lifecycleState.equals(api.lifecycleState) : (api.lifecycleState != null)) {
             return false;
         }
-        if (!uriTemplates.equals(api.uriTemplates)) {
+        if (!APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator())) {
             return false;
         }
         if ((copiedFromApiId != null) ?
@@ -339,7 +339,7 @@ public final class API {
     private final String createdBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final Set<UriTemplate> uriTemplates;
+    private final List<UriTemplate> uriTemplates;
     private String copiedFromApiId;
 
     /**
@@ -449,7 +449,7 @@ public final class API {
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<UriTemplate> uriTemplates = Collections.emptySet();
+        private List<UriTemplate> uriTemplates = Collections.emptyList();
         private String copiedFromApiId;
 
         public APIBuilder(String provider, String name, String version) {
@@ -710,7 +710,7 @@ public final class API {
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(Set<UriTemplate> uriTemplates) {
+        public APIBuilder uriTemplates(List<UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
@@ -881,7 +881,7 @@ public final class API {
             return lastUpdatedTime;
         }
 
-        public Set<UriTemplate> getUriTemplates() {
+        public List<UriTemplate> getUriTemplates() {
             return uriTemplates;
         }
 

@@ -27,12 +27,15 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -50,10 +53,12 @@ import java.util.UUID;
 public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
+    private TagDAO tagDAO;
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO) {
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl());
+        this.tagDAO = tagDAO;
     }
 
     @Override public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
@@ -116,6 +121,98 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
+    }
+
+    @Override public Application getApplicationByUuid(String uuid) throws APIManagementException {
+        Application application = null;
+        try {
+            application = getApplicationDAO().getApplication(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving application - " + uuid;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return application;
+    }
+
+    @Override public List<Subscription> getAPISubscriptionsByApplication(Application application)
+            throws APIManagementException {
+        List<Subscription> subscriptionsList = null;
+        try {
+            subscriptionsList = getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId());
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving subscriptions for application - " + application.getName();
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return subscriptionsList;
+    }
+
+    @Override public String addApiSubscription(String apiId, String applicationId, String tier)
+            throws APIManagementException {
+        // Generate UUID for application
+        String subscriptionId = UUID.randomUUID().toString();
+        try {
+            getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
+                    APIMgtConstants.SubscriptionStatus.ACTIVE);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding api subscription for api - " + apiId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return subscriptionId;
+    }
+
+    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
+        try {
+            getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting api subscription - " + subscriptionId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Tag> getAllTags() throws APIManagementException {
+        List<Tag> tagList;
+        try {
+            tagList = getTagDAO().getTags();
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving tags";
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return tagList;
+    }
+
+    @Override
+    public List<Policy> getPolicies(String policyLevel) throws APIManagementException {
+        List<Policy> policyList = null;
+        try {
+            policyList = getPolicyDAO().getPolicies(policyLevel);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving policies for policy level - " + policyLevel;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return policyList;
+    }
+
+    @Override
+    public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
+        Policy policy = null;
+        try {
+            policy = getPolicyDAO().getPolicy(policyLevel, policyName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving policy - " + policyName;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return policy;
     }
 
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
@@ -182,4 +279,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         //// TODO: 16/11/16 Workflow related implementation has to be done 
     }
 
+    private TagDAO getTagDAO() {
+        return tagDAO;
+    }
 }

@@ -25,12 +25,16 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
+import java.util.List;
+
 /**
  * Provides access to Policy data layer
  */
 public interface PolicyDAO {
 
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
+
+    List<Policy> getPolicies(String policyLevel) throws APIMgtDAOException;
 
     void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
