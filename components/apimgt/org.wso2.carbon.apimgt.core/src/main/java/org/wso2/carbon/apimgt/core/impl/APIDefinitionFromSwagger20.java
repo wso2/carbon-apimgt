@@ -131,11 +131,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 String scopes = swagger.getVendorExtensions().get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
                 if (StringUtils.isNotEmpty(scopes)) {
                     JSONObject scopesJson = (JSONObject) new JSONParser().parse(scopes);
-                    Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
+                    Iterator<?> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
                             .get(APIMgtConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES))
                             .iterator();
                     while (scopesIterator.hasNext()) {
-                        Scope scope = new Gson().fromJson(scopesIterator.next().toJSONString(), Scope.class);
+                        Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(), Scope.class);
                         scopeMap.put(scope.getKey(), scope);
                     }
                 }
