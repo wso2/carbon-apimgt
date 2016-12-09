@@ -20,7 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
+import java.util.Objects;
 
 /**
  * Subscriber's view of the API
@@ -69,17 +72,32 @@ public final class Subscription {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         Subscription that = (Subscription) o;
-        return api.equals(that.api) && application.equals(that.application);
+        return Objects.equals(uuid, that.uuid) &&
+                Objects.equals(api, that.api) &&
+                Objects.equals(application, that.application) &&
+                Objects.equals(subscriptionTier, that.subscriptionTier) &&
+                status == that.status;
     }
 
     @Override
     public int hashCode() {
-        int result = api.hashCode();
-        result = 31 * result + application.hashCode();
-        return result;
+        return Objects.hash(uuid, api, application, subscriptionTier, status);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("uuid", uuid)
+                .append("api", api)
+                .append("application", application)
+                .append("subscriptionTier", subscriptionTier)
+                .append("status", status)
+                .toString();
     }
 }

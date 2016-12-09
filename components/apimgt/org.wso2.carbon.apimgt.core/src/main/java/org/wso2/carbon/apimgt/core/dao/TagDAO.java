@@ -18,15 +18,21 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.models;
+package org.wso2.carbon.apimgt.core.dao;
+
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.Tag;
+
+import java.util.List;
 
 /**
- * This class represents Resource Categories supported for {@code ArtifactResourceMetaData}.
+ * Provides read access to the Tag data layer
  */
-
-public enum ResourceCategory {
-    SWAGGER,
-    WSDL_URI,
-    IMAGE,
-    DOC
+public interface TagDAO {
+    /**
+     * Returns all available tags
+     * @return {@link List<Tag>} List of tags
+     * @throws APIMgtDAOException
+     */
+    List<Tag> getTags() throws APIMgtDAOException;
 }

@@ -93,7 +93,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().getAPI(providerName); //todo: call correct doa method
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Unable to fetch APIs of " + providerName, e, log);
+            String errorMsg = "Unable to fetch APIs of " + providerName;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return null;
     }
@@ -263,7 +265,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
-                    throw new APIManagementException(msg, ExceptionCodes.UPDATE_STATE_CHANGE);
+
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
                 } else if (!originalAPI.getName().equals(apiBuilder.getName())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
                             " API have " +
@@ -271,7 +275,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
-                    throw new APIManagementException(msg, ExceptionCodes.UPDATE_STATE_CHANGE);
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
                 } else if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
                             " API have " +
@@ -279,7 +284,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
-                    throw new APIManagementException(msg, ExceptionCodes.UPDATE_STATE_CHANGE);
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
                 } else if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
                             " API have " +
@@ -287,7 +293,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
-                    throw new APIManagementException(msg, ExceptionCodes.UPDATE_STATE_CHANGE);
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
                 } else if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
                             " API have " +
@@ -295,17 +302,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug(msg);
                     }
-                    throw new APIManagementException(msg, ExceptionCodes.UPDATE_STATE_CHANGE);
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
                 }
             } else {
-                String msg = "Couldn't found API with ID " + apiBuilder.getId();
-                log.error(msg);
-                throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+
+                log.error("Couldn't found API with ID " + apiBuilder.getId());
+                throw new APIManagementException("Couldn't found API with ID " + apiBuilder.getId(),
+                        ExceptionCodes.API_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
-            String msg = "Error occurred while updating the API - " + apiBuilder.getName();
-            log.error(msg, e);
-            throw new APIMgtDAOException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -375,12 +384,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
         } catch (APIMgtDAOException e) {
-            String msg = "Couldn't change the status of api ID " + apiId;
-            log.error(msg, e);
-            throw new APIMgtDAOException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Couldn't change the status of api ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            String msg = "Couldn't change the status of api ID " + apiId;
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+            String errorMsg = "Couldn't change the status of api ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
     }
 
@@ -413,11 +423,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
         } catch (APIMgtDAOException e) {
-            String msg = "Couldn't create new API version from " + apiId;
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            if (lifecycleState != null) {
+                try {
+                    getApiLifecycleManager().removeLifecycle(lifecycleState.getLifecycleId());
+                } catch (LifecycleException e1) {
+                    log.error("Couldn't disassociate lifecycle " + lifecycleState.getLifecycleId());
+                }
+            }
+            String errorMsg = "Couldn't create new API version from " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            String msg = "Couldn't Associate  new API Lifecycle from " + apiId;
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+            String errorMsg = "Couldn't Associate  new API Lifecycle from " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return newVersionedId;
     }
@@ -448,8 +467,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
             }
         } catch (APIMgtDAOException e) {
-            String msg = "Unable to add documentation";
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Unable to add documentation";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -458,16 +478,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
+     * @param fileName
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
+    public void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws
+            APIManagementException {
         try {
-            getApiDAO().addDocumentFileContent(resourceId, content);
+            getApiDAO().addDocumentFileContent(resourceId, content, fileName);
         } catch (APIMgtDAOException e) {
-            String msg = " Unable to add documentation with file";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Unable to add documentation with file";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -482,9 +504,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().deleteDocument(docId);
         } catch (APIMgtDAOException e) {
-            String msg = "Unable to add documentation with file";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Unable to add documentation with file";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -504,10 +526,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 status = true;
             }
+
         } catch (APIMgtDAOException e) {
-            String msg = "Couldn't get APISummary for " + apiId;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            String errorMsg = "Couldn't get APISummary for " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return status;
     }
@@ -593,9 +616,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't find APISummary Resource for ID " + apiId, e, log);
+            String errorMsg = "Couldn't find APISummary Resource for ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't find APILifecycle History for ID " + apiId, e, log);
+            String errorMsg = "Couldn't find APILifecycle History for ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
         return lifeCycleEventList;
     }
@@ -621,10 +648,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while deleting the API with id " + identifier, e, log);
+            String errorMsg = "Error occurred while deleting the API with id " + identifier;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Error occurred while Disassociating the API with Lifecycle id " + identifier,
-                    e, log);
+            String errorMsg = "Error occurred while Disassociating the API with Lifecycle id " + identifier;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
     }
 
@@ -647,7 +677,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiResults = getApiDAO().getAPIs();
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while Searching the API with query " + query, e, log);
+            String errorMsg = "Error occurred while Searching the API with query " + query;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiResults;
     }
@@ -698,7 +730,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().updateSwaggerDefinition(apiId, jsonText);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't update the Swagger Definition", e, log);
+            String errorMsg = "Couldn't update the Swagger Definition";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -719,11 +753,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't retrieve API Summary for " + apiId, e, log);
+            String errorMsg = "Couldn't retrieve API Summary for " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
-            APIUtils.logAndThrowException("Couldn't retrieve API Lifecycle for " + apiId, e, log);
+            String errorMsg = "Couldn't retrieve API Lifecycle for " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
-        return null;
     }
 
     /**
@@ -763,7 +800,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't save the thumbnail image", e, log);
+            String errorMsg = "Couldn't save the thumbnail image";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -778,9 +817,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             return getApiDAO().getImage(apiId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't retrieve thumbnail for api " + apiId, e, log);
+            String errorMsg = "Couldn't retrieve thumbnail for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     @Override

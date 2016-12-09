@@ -23,14 +23,17 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This Class contains the model of Uri Templates
  */
 public final class UriTemplate implements Serializable {
 
-    private static final long serialVersionUID = 2829155480731229681L;
+    private static final long serialVersionUID = 1L;
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
@@ -66,49 +69,31 @@ public final class UriTemplate implements Serializable {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         UriTemplate that = (UriTemplate) o;
-
-        if ((uriTemplate != null) ?
-                !uriTemplate.equals(that.uriTemplate) : (that.uriTemplate != null)) {
-            return false;
-        }
-        if ((httpVerb != null) ?
-                !httpVerb.equals(that.httpVerb) : (that.httpVerb != null)) {
-            return false;
-        }
-        if ((authType != null) ?
-                !authType.equals(that.authType) : (that.authType != null)) {
-            return false;
-        }
-        if ((policy != null) ?
-                !policy.equals(that.policy) : (that.policy != null)) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(uriTemplate, that.uriTemplate) &&
+                Objects.equals(httpVerb, that.httpVerb) &&
+                Objects.equals(authType, that.authType) &&
+                Objects.equals(policy, that.policy);
     }
 
     @Override
     public int hashCode() {
-        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
-        result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
-        result = 31 * result + (authType != null ? authType.hashCode() : 0);
-        result = 31 * result + (policy != null ? policy.hashCode() : 0);
-        return result;
+        return Objects.hash(uriTemplate, httpVerb, authType, policy);
     }
 
     @Override
     public String toString() {
-        return "UriTemplate{" +
-                "uriTemplate='" + uriTemplate + '\'' +
-                ", httpVerb='" + httpVerb + '\'' +
-                ", authType='" + authType + '\'' +
-                ", policy='" + policy + '\'' +
-                '}';
+        return new ToStringBuilder(this)
+                .append("uriTemplate", uriTemplate)
+                .append("httpVerb", httpVerb)
+                .append("authType", authType)
+                .append("policy", policy)
+                .toString();
     }
 
     /**

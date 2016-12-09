@@ -65,8 +65,11 @@ class DocMetaDataDAO {
     }
 
     static DocumentInfo getDocumentInfo(Connection connection, String docID) throws SQLException {
-        final String query = "SELECT UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, SOURCE_URL, SOURCE_TYPE, VISIBILITY " +
-                "FROM AM_API_DOC_META_DATA WHERE UUID = ?";
+        final String query = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
+                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
+                ".SOURCE_URL, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA.VISIBILITY,AM_API_RESOURCES" +
+                ".DATA_TYPE FROM AM_API_DOC_META_DATA INNER JOIN AM_API_RESOURCES ON AM_API_DOC_META_DATA.UUID = " +
+                "AM_API_RESOURCES.UUID WHERE  AM_API_DOC_META_DATA.UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docID);
@@ -82,7 +85,8 @@ class DocMetaDataDAO {
                             otherType(rs.getString("OTHER_TYPE_NAME")).
                             sourceURL(rs.getString("SOURCE_URL")).
                             sourceType(DocumentInfo.SourceType.valueOf(rs.getString("SOURCE_TYPE"))).
-                            visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).build();
+                            visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).
+                            fileName(rs.getString("DATA_TYPE")).build();
                 }
             }
         }
