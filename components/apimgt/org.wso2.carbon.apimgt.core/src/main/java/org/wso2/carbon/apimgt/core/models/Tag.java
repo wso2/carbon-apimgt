@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.Objects;
+
 /**
  * Represents an instance of a Tag. Tags can be associated with other entities such as APIs and used for
  * categorizing sets of entities against a given tag.
@@ -39,6 +43,34 @@ public final class Tag {
 
     public int getCount() {
         return count;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Tag tag = (Tag) o;
+        return count == tag.count &&
+                Objects.equals(name, tag.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, count);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("name", name)
+                .append("count", count)
+                .toString();
     }
 
     /**
