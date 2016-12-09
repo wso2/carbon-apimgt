@@ -484,6 +484,18 @@
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
+                <URI>/api/am/store/{version}/tags</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
                 <URI>/api/am/publisher/{version}/apis</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
