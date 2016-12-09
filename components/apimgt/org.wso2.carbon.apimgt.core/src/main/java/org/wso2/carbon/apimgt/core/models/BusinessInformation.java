@@ -23,6 +23,10 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.Objects;
+
 /**
  * This Class represents the Business information of the API
  */
@@ -64,35 +68,36 @@ public final class BusinessInformation {
         this.technicalOwnerEmail = technicalOwnerEmail;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         BusinessInformation that = (BusinessInformation) o;
-
-        if (!businessOwner.equals(that.businessOwner)) {
-            return false;
-        }
-        if (!businessOwnerEmail.equals(that.businessOwnerEmail)) {
-            return false;
-        }
-        if (!technicalOwner.equals(that.technicalOwner)) {
-            return false;
-        }
-        return technicalOwnerEmail.equals(that.technicalOwnerEmail);
-
+        return Objects.equals(businessOwner, that.businessOwner) &&
+                Objects.equals(businessOwnerEmail, that.businessOwnerEmail) &&
+                Objects.equals(technicalOwner, that.technicalOwner) &&
+                Objects.equals(technicalOwnerEmail, that.technicalOwnerEmail);
     }
 
     @Override
     public int hashCode() {
-        int result = businessOwner.hashCode();
-        result = 31 * result + businessOwnerEmail.hashCode();
-        result = 31 * result + technicalOwner.hashCode();
-        result = 31 * result + technicalOwnerEmail.hashCode();
-        return result;
+        return Objects.hash(businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("businessOwner", businessOwner)
+                .append("businessOwnerEmail", businessOwnerEmail)
+                .append("technicalOwner", technicalOwner)
+                .append("technicalOwnerEmail", technicalOwnerEmail)
+                .toString();
     }
 }
