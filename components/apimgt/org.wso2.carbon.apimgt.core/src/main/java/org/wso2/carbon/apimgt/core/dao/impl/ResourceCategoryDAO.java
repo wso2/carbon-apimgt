@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * Provides access to Resource Categories which maybe shared across multiple entities
@@ -70,10 +69,8 @@ class ResourceCategoryDAO {
     static void addResourceCategories(Connection connection) throws SQLException {
         final String query = "INSERT INTO AM_RESOURCE_CATEGORIES (RESOURCE_CATEGORY) VALUES (?)";
 
-        final Map<String, ResourceCategory> standardCategories = ResourceCategory.getStandardCategories();
-
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            for (ResourceCategory category : standardCategories.values()) {
+            for (ResourceCategory category : ResourceCategory.values()) {
                 statement.setString(1, category.toString());
                 statement.addBatch();
             }
