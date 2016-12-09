@@ -65,7 +65,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Search APIs")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         List<API> apimResultsFromDAO = new ArrayList<>();
         when(apiDAO.searchAPIs("")).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("", 1, 2);
@@ -77,7 +77,7 @@ public class APIStoreImplTestCase {
 
     public void searchAPIsWithException() throws Exception {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         PowerMockito.mockStatic(APIUtils.class); // TODO
         when(apiDAO.searchAPIs("select *")).thenThrow(APIMgtDAOException.class);
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
@@ -87,7 +87,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an API by status")
     public void getAPIsByStatus() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         List<API> expectedAPIs = new ArrayList<API>();
         when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenReturn(expectedAPIs);
         List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] { STATUS_CREATED, STATUS_PUBLISHED });
@@ -98,7 +98,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an application by name")
     public void testGetApplicationByName() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null ,null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null ,null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         when(applicationDAO.getApplicationByName(USER_ID, APP_NAME)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
@@ -111,7 +111,7 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
@@ -125,7 +125,7 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIMgtResourceAlreadyExistsException.class)
     public void testAddApplicationWithDuplicateName() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(true);
         apiStore.addApplication(application);
@@ -134,7 +134,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Delete application")
     public void testDeleteApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setId(UUID);
         apiStore.deleteApplication(UUID);
@@ -144,7 +144,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Update an application")
     public void testUpdateApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
         apiStore.updateApplication(UUID, application);
         verify(applicationDAO, times(1)).updateApplication(UUID, application);

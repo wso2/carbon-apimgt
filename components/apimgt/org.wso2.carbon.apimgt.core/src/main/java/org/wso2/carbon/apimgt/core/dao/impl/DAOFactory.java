@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 import java.sql.Connection;
@@ -143,5 +144,31 @@ public class DAOFactory {
         }
 
         return policyDAO;
+    }
+
+    public static TagDAO getTagDAO() throws APIMgtDAOException {
+        TagDAO tagDAO = null;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+                tagDAO = new TagDAOImpl();
+            } else if (driverName.contains("DB2")) {
+
+            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+
+            } else if (driverName.contains("PostgreSQL")) {
+
+            } else if (driverName.contains("Oracle")) {
+
+            } else {
+                throw new APIMgtDAOException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+        return tagDAO;
     }
 }

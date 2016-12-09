@@ -485,6 +485,8 @@
     <properties>
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->
         <!-- downgraded from 2.5.4 to 2.5.3 as per CARBON-15374-->

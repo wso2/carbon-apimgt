@@ -139,7 +139,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
-            return getApiDAO().isAPINameExists(apiName);
+            return getApiDAO().isAPINameExists(apiName, username);
 
         } catch (APIMgtDAOException e) {
             log.error("Couldn't check API Name " + apiName + "Exists", e);
@@ -251,6 +251,21 @@ public abstract class AbstractAPIManager implements APIManager {
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return application;
+    }
+
+    /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscription(subId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
+        }
     }
 
     /**

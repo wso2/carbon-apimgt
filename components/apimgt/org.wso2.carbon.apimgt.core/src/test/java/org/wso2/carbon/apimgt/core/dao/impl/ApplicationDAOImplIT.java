@@ -39,7 +39,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application appFromDB = applicationDAO.getApplication(app.getId());
         Assert.assertNotNull(appFromDB);
         //compare
-        validateApp(appFromDB, app);
+        Assert.assertEquals(appFromDB, app, TestUtil.printDiff(appFromDB, app));
+        validateAppTimestamps(appFromDB, app);
     }
 
     @Test
@@ -56,7 +57,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Application appFromDB = applicationDAO.getApplication(newApp.getId());
         Assert.assertNotNull(appFromDB);
         //compare
-        validateApp(appFromDB, newApp);
+        Assert.assertEquals(appFromDB, newApp, TestUtil.printDiff(appFromDB, newApp));
+        validateAppTimestamps(appFromDB, newApp);
     }
 
     @Test
@@ -97,13 +99,17 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         for (Application application : appsFromDB) {
             Assert.assertNotNull(application);
             if (application.getName().equals(app1.getName())) {
-                validateApp(application, app1);
+                Assert.assertEquals(application, app1, TestUtil.printDiff(application, app1));
+                validateAppTimestamps(application, app1);
             } else if (application.getName().equals(app2.getName())) {
-                validateApp(application, app2);
+                Assert.assertEquals(application, app2, TestUtil.printDiff(application, app2));
+                validateAppTimestamps(application, app2);
             } else if (application.getName().equals(app3.getName())) {
-                validateApp(application, app3);
+                Assert.assertEquals(application, app3, TestUtil.printDiff(application, app3));
+                validateAppTimestamps(application, app3);
             } else if (application.getName().equals(app4.getName())) {
-                validateApp(application, app4);
+                Assert.assertEquals(application, app4, TestUtil.printDiff(application, app4));
+                validateAppTimestamps(application, app4);
             } else {
                 Assert.fail("Invalid Application returned.");
             }
@@ -130,17 +136,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
-    private void validateApp(Application appFromDB, Application expectedApp) {
-        Assert.assertEquals(appFromDB.getName(), expectedApp.getName());
-        Assert.assertEquals(appFromDB.getCallbackUrl(), expectedApp.getCallbackUrl());
-        Assert.assertEquals(appFromDB.getGroupId(), expectedApp.getGroupId());
-        Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus());
-        Assert.assertEquals(appFromDB.getId(), expectedApp.getId());
-        Assert.assertEquals(appFromDB.getTier(), expectedApp.getTier());
-        Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser());
+    private void validateAppTimestamps(Application appFromDB, Application expectedApp) {
         Assert.assertTrue(Duration.between(expectedApp.getCreatedTime(), appFromDB.getCreatedTime()).toMillis() < 1000L,
                 "Application created time is not the same!");
-        Assert.assertEquals(appFromDB.getUpdatedUser(), expectedApp.getUpdatedUser());
         Assert.assertTrue(Duration.between(expectedApp.getUpdatedTime(), appFromDB.getUpdatedTime()).toMillis() < 1000L,
                 "Application updated time is not the same!");
     }

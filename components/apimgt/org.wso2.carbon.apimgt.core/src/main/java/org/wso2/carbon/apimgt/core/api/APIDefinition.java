@@ -18,11 +18,11 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.models.UriTemplate;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * APIDefinition is responsible for providing uri templates, scopes and
@@ -33,11 +33,11 @@ import java.util.Set;
 public interface APIDefinition {
 
     /**
-     * This method extracts the URI templates from the API definition
+     * This method extracts the API resource related data which includes URI templates from the Swagger API definition
      *
-     * @return URI templates
+     * @return SwaggerAPIResourceData
      */
-    Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException;
+    List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
