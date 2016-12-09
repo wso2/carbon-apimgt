@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -59,8 +60,10 @@ public class APIStoreImplTestCase {
     private static final String GROUP_ID = "groupdid";
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
-    public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
-    public static final String TIER = "gold";
+    private static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
+    private static final String TIER = "gold";
+    private static final String APPLICATION_POLICY_LEVEL = "application";
+    private static final String POLICY_NAME = "gold";
 
     @Test(description = "Search APIs")
     public void searchAPIs() throws APIManagementException {
@@ -148,6 +151,30 @@ public class APIStoreImplTestCase {
         Application application = new Application(APP_NAME, USER_NAME);
         apiStore.updateApplication(UUID, application);
         verify(applicationDAO, times(1)).updateApplication(UUID, application);
+    }
+
+    @Test(description = "Retrieve all tags")
+    public void testGetAllTags() throws APIManagementException {
+        TagDAO tagDAO = mock(TagDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null,null,null,null,tagDAO);
+        apiStore.getAllTags();
+        verify(tagDAO, times(1)).getTags();
+    }
+
+    @Test(description = "Get all policies of a specific policy level")
+    public void testGetPolicies() throws APIManagementException{
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME,null,null,null, policyDAO, null);
+        apiStore.getPolicies(APPLICATION_POLICY_LEVEL);
+        verify(policyDAO, times(1)).getPolicies(APPLICATION_POLICY_LEVEL);
+    }
+
+    @Test(description = "Get policy given policy name and policy level")
+    public void testGetPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME,null,null,null, policyDAO, null);
+        apiStore.getPolicy(APPLICATION_POLICY_LEVEL,POLICY_NAME);
+        verify(policyDAO, times(1)).getPolicy(APPLICATION_POLICY_LEVEL,POLICY_NAME);
     }
 
 }
