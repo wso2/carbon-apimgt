@@ -307,7 +307,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
-                preparedStatement.setString(1, subStatus.getStatus());
+                preparedStatement.setString(1, subStatus.toString());
                 preparedStatement.setString(2, subId);
                 preparedStatement.execute();
                 connection.commit();
@@ -507,8 +507,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             ps.setString(2, tier);
             ps.setString(3, apiId);
             ps.setString(4, appId);
-            ps.setString(5, status != null ? status.getStatus() : APIMgtConstants.SubscriptionStatus
-                    .ACTIVE.getStatus());
+            ps.setString(5, status != null ? status.toString() : APIMgtConstants.SubscriptionStatus.ACTIVE.toString());
             ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
             ps.execute();
         }

@@ -75,46 +75,29 @@ public class APIMgtConstants {
      * Application registration statuses.
      */
     public enum AppRegistrationStatus {
-        CREATED("CREATED"), APPROVED("APPROVED"), REJECTED("REJECTED"), COMPLETED("COMPLETED");
-        private String status;
-
-        AppRegistrationStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
+        CREATED,
+        APPROVED,
+        REJECTED,
+        COMPLETED
     }
 
     /**
      * Subscription statuses.
      */
     public enum SubscriptionStatus {
-        BLOCKED("BLOCKED"), PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"), ACTIVE("ACTIVE"), ON_HOLD("ON_HOLD"),
-        REJECTED("REJECTED");
-        private String status;
-
-        SubscriptionStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
+        BLOCKED,
+        PROD_ONLY_BLOCKED,
+        ACTIVE,
+        ON_HOLD,
+        REJECTED
     }
 
     /**
      * Subscription types
      */
-    public static class SubscriptionType {
-        public static final String SUBSCRIBE = "SUBSCRIBE";
-        public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
-
-        private SubscriptionType() {
-        }
+    public enum SubscriptionType {
+        SUBSCRIBE,
+        UN_SUBSCRIBE
     }
 
     /**
