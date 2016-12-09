@@ -20,6 +20,10 @@
 package org.wso2.carbon.apimgt.core.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -27,16 +31,24 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
+
 /**
  * Class for all utility methods
  */
 public class APIUtils {
+    private static CloseableHttpClient client;
 
     /**
      * Log and throw exceptions. This should be used only at service level.
@@ -195,5 +207,28 @@ public class APIUtils {
         Collections.sort(list1, comparator);
         Collections.sort(list2, comparator);
         return list1.equals(list2);
+    }
+
+    /**
+     *  Returns a CloseableHttpClient instance
+     *
+     **/
+
+    public static CloseableHttpClient getHttpsClient() throws KeyManagementException, NoSuchAlgorithmException {
+
+        if (client != null) {
+            return client;
+        }
+        SSLContext sslcontext = SSLContexts.custom().useSSL().build();
+        sslcontext.init(null, new X509TrustManager[]{new HttpsTrustManager()}, new SecureRandom());
+        SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+                SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+        client = HttpClients.custom().setSSLSocketFactory(factory).build();
+
+        return client;
+    }
+
+    public static void releaseInstance() {
+        client = null;
     }
 }

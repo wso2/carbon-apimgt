@@ -323,6 +323,22 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>3.0.0.wso2v1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.3.1.wso2v1</version>
+            </dependency>
+            <dependency>
+            <groupId>commons-httpclient.wso2</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1.0.wso2v2</version>
+        </dependency>
+
         </dependencies>
     </dependencyManagement>
 
