@@ -223,9 +223,20 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return {@link InputStream} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    public InputStream getDocumentationContent(String docId) throws APIManagementException {
+    public InputStream getDocumentationFileContent(String docId) throws APIManagementException {
         try {
             return getApiDAO().getDocumentFileContent(docId);
+        } catch (APIMgtDAOException e) {
+            log.error("Error occurred while retrieving document content", e);
+            throw new APIMgtDAOException("Error occurred while retrieving document content",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String getDocumentationInlineContent(String docId) throws APIManagementException {
+        try {
+            return getApiDAO().getDocumentInlineContent(docId);
         } catch (APIMgtDAOException e) {
             log.error("Error occurred while retrieving document content", e);
             throw new APIMgtDAOException("Error occurred while retrieving document content",
