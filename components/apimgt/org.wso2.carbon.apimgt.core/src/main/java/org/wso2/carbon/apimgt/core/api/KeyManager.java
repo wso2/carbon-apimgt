@@ -137,8 +137,8 @@ public interface KeyManager {
                 Map<String, Object> params = (Map) jsonObject;
 
                 //set client Id
-                if (params.get("client_id") != null) {
-                    authApplicationInfo.setClientId((String) params.get("client_id"));
+                if (params.get(KeyManagerConstants.OAUTH_CLIENT_ID) != null) {
+                    authApplicationInfo.setClientId((String) params.get(KeyManagerConstants.OAUTH_CLIENT_ID));
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
                 authApplicationInfo.putAll(params);
@@ -243,10 +243,11 @@ public interface KeyManager {
         tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
 
 
-        if (oAuthApplication.getParameter("tokenScope") != null) {
-            String[] tokenScopes = (String[]) oAuthApplication.getParameter("tokenScope");
+        if (oAuthApplication.getParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE) != null) {
+            String[] tokenScopes = (String[]) oAuthApplication.getParameter(KeyManagerConstants.
+                    OAUTH_CLIENT_TOKEN_SCOPE);
             tokenRequest.setScopes(tokenScopes);
-            oAuthApplication.addParameter("tokenScope", Arrays.toString(tokenScopes));
+            oAuthApplication.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, Arrays.toString(tokenScopes));
         }
 
         if (oAuthApplication.getParameter(KeyManagerConstants.VALIDITY_PERIOD) != null) {
