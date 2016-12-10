@@ -28,7 +28,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     API_ALREADY_EXISTS(900300, "The API already exists.", 400, " This is error description"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 400, " This is error description"),
-    APIMGT_DAO_EXCEPTION(900302, "Something wrong in DAO layer.", 500, " This is error description"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " This is error description"),
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Life cycle exception occurred", 500, " This is error description"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
@@ -40,6 +40,11 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
             "done"),
+    DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
+    COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
+            + "update the API");
+
+
     API_DOES_NOT_EXIST(900309, "The API does not exist", 400, "Couldn't find the API "),
     DOCUMENT_ALREADY_EXISTS(900310, "Document already exists", 400, "Document Already Exists"),
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),

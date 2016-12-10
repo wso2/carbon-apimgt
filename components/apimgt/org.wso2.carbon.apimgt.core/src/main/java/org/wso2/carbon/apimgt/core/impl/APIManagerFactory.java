@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
@@ -48,6 +49,7 @@ public class APIManagerFactory {
 
     private APIManagerCache<APIPublisher> providers = new APIManagerCache<>(50);
     private APIManagerCache<APIStore> consumers = new APIManagerCache<>(500);
+    private APIMgtAdminService apiMgtAdminService;
 
     private APIManagerFactory() {
 
@@ -68,13 +70,24 @@ public class APIManagerFactory {
 
     }
 
+    private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
+        try {
+            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO());
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't create API Management Admin Service", e);
+            throw new APIMgtDAOException("Couldn't create API Management Admin Service",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
     private APIStore newConsumer(String username) throws APIManagementException {
         // if (username.equals(ANONYMOUS_USER)) {
         // username = null;
         // }
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Consumer", e);
@@ -96,6 +109,15 @@ public class APIManagerFactory {
             }
         }
         return provider;
+    }
+
+    public APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
+        if (apiMgtAdminService == null) {
+            synchronized (this) {
+                apiMgtAdminService = newAPIMgtAdminService();
+            }
+        }
+        return apiMgtAdminService;
     }
 
     public APIStore getAPIConsumer() throws APIManagementException {

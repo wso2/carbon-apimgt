@@ -52,8 +52,10 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
         Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionTier);
-        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
-        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
+        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api),
+                TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api)));
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app),
+                TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
     @Test
@@ -86,8 +88,10 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), APIMgtConstants.SubscriptionStatus.ACTIVE);
         Assert.assertEquals(subscription.getSubscriptionTier(), newSubscriptionPolicy);
-        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
-        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
+        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api),
+                TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api)));
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app),
+                TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
 
         //update subscription status
         APIMgtConstants.SubscriptionStatus newSubscriptionStatus = APIMgtConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
@@ -99,8 +103,10 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), newSubscriptionStatus);
         Assert.assertEquals(subscription.getSubscriptionTier(), newSubscriptionPolicy);
-        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api));
-        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app));
+        Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api),
+                TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api)));
+        Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app),
+                TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
     @Test
@@ -130,9 +136,11 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApplication().getId().equals(app2.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app2)));
             } else if (subscription.getApplication().getId().equals(app4.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -148,11 +156,14 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApplication().getId().equals(app1.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app1));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app1),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app1)));
             } else if (subscription.getApplication().getId().equals(app2.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app2)));
             } else if (subscription.getApplication().getId().equals(app4.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -168,11 +179,14 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApplication().getId().equals(app2.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app2),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app2)));
             } else if (subscription.getApplication().getId().equals(app3.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app3));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app3),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app3)));
             } else if (subscription.getApplication().getId().equals(app4.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -188,7 +202,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApplication().getId().equals(app4.getId())) {
-                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4));
+                Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
+                        TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -219,7 +234,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApi().getId().equals(api2.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api2)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -232,11 +248,14 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApi().getId().equals(api1.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api1));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api1),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api1)));
             } else if (subscription.getApi().getId().equals(api2.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api2)));
             } else if (subscription.getApi().getId().equals(api3.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api3)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -249,7 +268,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApi().getId().equals(api3.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api3)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }
@@ -262,13 +282,17 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         for (Subscription subscription : subscriptions) {
             Assert.assertNotNull(subscription);
             if (subscription.getApi().getId().equals(api1.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api1));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api1),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api1)));
             } else if (subscription.getApi().getId().equals(api2.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api2)));
             } else if (subscription.getApi().getId().equals(api3.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api4)));
             } else if (subscription.getApi().getId().equals(api4.getId())) {
-                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api4));
+                Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api4),
+                        TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api4)));
             } else {
                 Assert.fail("Invalid subscription found!!!");
             }

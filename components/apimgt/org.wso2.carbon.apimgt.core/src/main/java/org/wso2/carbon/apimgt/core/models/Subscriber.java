@@ -20,7 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Subscriber of API. Mapping between a particular Subscriber using a selected API is captured in
@@ -76,5 +79,39 @@ public class Subscriber {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Subscriber that = (Subscriber) o;
+        return id == that.id &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(subscribedDate, that.subscribedDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, email, description, subscribedDate, id);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("name", name)
+                .append("email", email)
+                .append("description", description)
+                .append("subscribedDate", subscribedDate)
+                .append("id", id)
+                .toString();
     }
 }

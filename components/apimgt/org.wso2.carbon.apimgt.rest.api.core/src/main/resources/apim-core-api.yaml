@@ -1,0 +1,251 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "0.9.0"
+  title: "WSO2 API Manager - Core"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager - Core Services**.
+
+    It is written with [swagger 2](http://swagger.io/).
+
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license: 
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes: 
+  - https
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/core/v0.9
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes: 
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request. 
+# The actual media type returned will be specfied in the Content-Type header field 
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces: 
+  - application/json
+
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: ""
+        roles: Internal/subscriber
+        name: apim:subscribe
+        key: apim:subscribe
+
+######################################################
+# The "Validate Subscriptions" Processing Function resource API
+######################################################
+paths:
+  /validate-subscription:
+
+#-----------------------------------------------------
+# Validate a subscription
+#-----------------------------------------------------
+    get:
+      summary: |
+        Validate a subscription
+      description: |
+        Validate a subscription by proving API context, version and consumer key of application.
+      parameters:
+        - $ref : '#/parameters/apiContext'
+        - $ref : '#/parameters/apiVersion'
+        - $ref : '#/parameters/consumerKey'
+        - $ref : '#/parameters/Accept'
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription Validation Information.
+          schema:
+            $ref: '#/definitions/SubscriptionValidationInfo'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+parameters:
+
+# API Context
+  apiContext:
+    name: apiContext
+    in: query
+    description: |
+      Context of the API.
+    required: true
+    type: string
+
+# API Version
+  apiVersion:
+    name: apiVersion
+    in: query
+    description: |
+      Version of the API.
+    required: true
+    type: string
+
+# Consumer Key of the Application
+  consumerKey:
+    name: consumerKey
+    in: query
+    description: |
+      Consumer Key of the Application.
+    required: true
+    type: string
+
+# The HTTP Accept header
+  Accept:
+    name: Accept
+    in: header
+    description: |
+      Media types acceptable for the response. Default is JSON.
+    default: JSON
+    type: string
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+definitions:
+
+#-----------------------------------------------------
+# Subscription Validation Info resource
+#-----------------------------------------------------
+  SubscriptionValidationInfo:
+    title: Subscription Validation Information
+    required:
+      - isValid
+    properties:
+      isValid:
+        type: boolean
+        description: |
+          If a valid subscription is available or not.
+      subscriptionStatus:
+        type: string
+        description: |
+          Subscription Status.
+      applicationId:
+        type: string
+        description: |
+          UUID of application.
+      applicationName:
+        type: string
+        description: |
+          Name of application.
+      applicationOwner:
+        type: string
+        description: |
+          Owner of application.
+      apiId:
+        type: string
+        description: |
+          UUID of API.
+      apiName:
+        type: string
+        description: |
+          Name of API.
+      apiProvider:
+        type: string
+        description: |
+          Name of API provider.
+
+#-----------------------------------------------------
+# The Error resource
+#-----------------------------------------------------
+  Error:
+    title: Error object returned with 4XX HTTP lifeCycleStatus
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+        description: Error message.
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
+      moreInfo:
+        type: string
+        description: |
+          Preferably an url with more details about the error.
+      error:
+        type: array
+        description: |
+          If there are more than one error list them out.
+          For example, list out validation errors by each field.
+        items:
+          $ref: '#/definitions/ErrorListItem'
+
+#-----------------------------------------------------
+# The Error List Item resource
+#-----------------------------------------------------
+  ErrorListItem:
+    title: Description of individual errors that may have occurred during a request.
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+        description: |
+          Description about individual errors occurred
+
+
+#-----------------------------------------------------
+# END-OF-FILE
+#-----------------------------------------------------

@@ -212,12 +212,13 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public boolean isAPINameExists(String apiName) throws APIMgtDAOException {
-        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE NAME = ?";
+    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+        final String apiExistsQuery = "SELECT UUID FROM AM_API WHERE LOWER(NAME) = ? AND PROVIDER = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(apiExistsQuery)) {
-            statement.setString(1, apiName);
+            statement.setString(1, apiName.toLowerCase(Locale.ENGLISH));
+            statement.setString(2, providerName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -652,14 +653,16 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param resourceID         UUID of resource
      * @param content                File content as an InputStream
+     * @param fileName
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addDocumentFileContent(String resourceID, InputStream content) throws APIMgtDAOException {
+    public void addDocumentFileContent(String resourceID, InputStream content, String fileName) throws
+            APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content) == 0) {
+                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, fileName) == 0) {
                     throw new APIMgtDAOException("Cannot add file content for a document that does not exist");
                 }
                 connection.commit();
@@ -825,14 +828,14 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addTagsMapping(Connection connection, String apiID, List<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
-            List<Integer> tagIDs = TagDAO.addTagsIfNotExist(connection, tags);
+            List<String> tagIDs = TagDAOImpl.addTagsIfNotExist(connection, tags);
 
             final String query = "INSERT INTO AM_API_TAG_MAPPING (API_ID, TAG_ID) VALUES (?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                for (Integer tagID : tagIDs) {
+                for (String tagID : tagIDs) {
                     statement.setString(1, apiID);
-                    statement.setInt(2, tagID);
+                    statement.setString(2, tagID);
                     statement.addBatch();
                 }
 
@@ -858,14 +861,14 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
-                List<Integer> tagIDs = new ArrayList<>();
+                List<String> tagIDs = new ArrayList<>();
 
                 while (rs.next()) {
-                    tagIDs.add(rs.getInt("TAG_ID"));
+                    tagIDs.add(rs.getString("TAG_ID"));
                 }
 
                 if (!tagIDs.isEmpty()) {
-                    tags = TagDAO.getTagsByIDs(connection, tagIDs);
+                    tags = TagDAOImpl.getTagsByIDs(connection, tagIDs);
                 }
             }
         }

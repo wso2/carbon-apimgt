@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
@@ -324,6 +325,56 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(spaceDelimitingString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+    }
+
+    @Test
+    public void testIsAPINameExists() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+        apiDAO.addAPI(api);
+
+        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider()));
+
+        final String upperCaseName = "CAPITAL";
+
+        // Add API with upper case name
+        api = SampleTestObjectCreator.createUniqueAPI().name(upperCaseName).build();
+        apiDAO.addAPI(api);
+        // Check with upper case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider()));
+        // Check with lower case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider()));
+        // Check with mixed case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.substring(0, 3) +
+                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider()));
+
+        final String lowerCaseName = "simple";
+
+        // Add API with upper case name
+        api = SampleTestObjectCreator.createUniqueAPI().name(lowerCaseName).build();
+        apiDAO.addAPI(api);
+        // Check with lower case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider()));
+        // Check with upper case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider()));
+        // Check with mixed case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.substring(0, 3) +
+                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider()));
+
+        // Create same API for different providers and check for existence
+        final String sameName = "same";
+
+        API api1 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
+        apiDAO.addAPI(api1);
+
+        API api2 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
+        apiDAO.addAPI(api2);
+
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider"));
     }
 
     @Test

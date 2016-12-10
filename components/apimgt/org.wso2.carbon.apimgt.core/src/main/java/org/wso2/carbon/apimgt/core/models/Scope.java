@@ -22,7 +22,10 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This class contains the model of scope
@@ -76,48 +79,39 @@ public class Scope implements Serializable {
         this.id = id;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         Scope scope = (Scope) o;
-
-        if (id != scope.id) {
-            return false;
-        }
-        if ((key != null) ?
-                !key.equals(scope.key) : (scope.key != null)) {
-            return false;
-        }
-        if ((name != null) ?
-                !name.equals(scope.name) : (scope.name != null)) {
-            return false;
-        }
-        if ((roles != null) ?
-                !roles.equals(scope.roles) : (scope.roles != null)) {
-            return false;
-        }
-        if ((description != null) ?
-                !description.equals(scope.description) : (scope.description != null)) {
-            return false;
-        }
-
-        return true;
+        return id == scope.id &&
+                Objects.equals(key, scope.key) &&
+                Objects.equals(name, scope.name) &&
+                Objects.equals(roles, scope.roles) &&
+                Objects.equals(description, scope.description);
     }
 
     @Override
     public int hashCode() {
-        int result = key != null ? key.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (roles != null ? roles.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + id;
-        return result;
+        return Objects.hash(key, name, roles, description, id);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("key", key)
+                .append("name", name)
+                .append("roles", roles)
+                .append("description", description)
+                .append("id", id)
+                .toString();
     }
 }
 
