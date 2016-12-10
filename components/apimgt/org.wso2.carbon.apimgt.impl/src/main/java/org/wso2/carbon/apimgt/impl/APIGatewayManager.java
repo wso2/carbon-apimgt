@@ -324,12 +324,9 @@ public class APIGatewayManager {
                 sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
             }
             OMElement element;
-            String context;
-            context = api.getContext();
             try {
                 if (production_endpoint != null) {
-                    api.setContext(ENDPOINT_PRODUCTION + context);
-                    String content = createSeqString(api, production_endpoint);
+                    String content = createSeqString(api, production_endpoint, ENDPOINT_PRODUCTION);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
                     if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -338,8 +335,7 @@ public class APIGatewayManager {
                     client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
                 if (sandbox_endpoint != null) {
-                    api.setContext(ENDPOINT_SANDBOX + context);
-                    String content = createSeqString(api, sandbox_endpoint);
+                    String content = createSeqString(api, sandbox_endpoint, ENDPOINT_SANDBOX);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
                     if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -408,9 +404,10 @@ public class APIGatewayManager {
      * @param url
      * @return
      */
-    public String createSeqString(API api, String url) {
+    public String createSeqString(API api, String url, String urltype) {
 
         String context = api.getContext();
+        context = urltype + context;
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
