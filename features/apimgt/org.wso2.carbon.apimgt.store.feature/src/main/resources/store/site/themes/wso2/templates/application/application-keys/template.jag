@@ -169,7 +169,7 @@
 		  <div class="col-md-12 col-lg-9">
 		  	  {{> grants this}}
 		  	  {{> callback_url this}}
-		  	  <form class="add-margin-top-5x well">
+			  <form class="add-margin-top-5x well">
                 <div class="form-group">
                     <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
                       <select id="scopes" class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
@@ -186,7 +186,7 @@
                     </div>
                 </div>
 			    <button  class="btn btn-primary generatekeys" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Generate keys")%></button>
-			  </form>
+              </form>
 		  </div>
 	    </div>
 	  {{/unless}}

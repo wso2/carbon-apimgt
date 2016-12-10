@@ -257,7 +257,7 @@ GrantTypes.prototype.getMap = function(selected){
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
             var scopes = $('#scopes option:selected')
-                .map(function(){ return $( this ).val();}).get().join(" ");
+                            .map(function(){ return $( this ).val();}).get().join(" ");
             
             this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
