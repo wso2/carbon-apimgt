@@ -42,11 +42,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
-            + "update the API");
-
-
-    API_DOES_NOT_EXIST(900309, "The API does not exist", 400, "Couldn't find the API "),
-    DOCUMENT_ALREADY_EXISTS(900310, "Document already exists", 400, "Document Already Exists"),
+            + "update the API"),
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
     ACCESS_TOKEN_INACTIVE(900304, "Invalid Credentials", 401, " Access token is inactive."),
     ACCESS_TOKEN_EXPIRED(900903, "Invalid Credentials", 401, " Access token is expired."),
