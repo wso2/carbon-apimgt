@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
-import org.wso2.carbon.apimgt.rest.api.common.interceptors.RestAPIOAUTH2SecurityInterceptor;
+import org.wso2.carbon.apimgt.rest.api.common.interceptors.RESTAPISecurityInterceptor;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.messaging.Headers;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 * This is the test class for APIMOAuth2SecurityInterceptor
 *
 * */
-public class OAuth2SecurityInterceptorTestCase {
+public class RESTAPISecurityInterceptorTestCase {
 
     private static final String USER = "admin";
 
@@ -78,7 +78,7 @@ public class OAuth2SecurityInterceptorTestCase {
         Response responseObj = Mockito.mock(Response.class);
 
         ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
-        RestAPIOAUTH2SecurityInterceptor interceptor = Mockito.mock(RestAPIOAUTH2SecurityInterceptor.class);
+        RESTAPISecurityInterceptor interceptor = Mockito.mock(RESTAPISecurityInterceptor.class);
         boolean isAuthorized = interceptor.preCall(requestObj, responseObj, serviceMethodInfoObj);
         if (isAuthorized) {
             Assert.assertEquals(isAuthorized, true);

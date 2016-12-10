@@ -70,7 +70,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user)).thenReturn(new
                 LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(true);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI")).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(false);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -85,7 +85,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user)).thenReturn(new
                 LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(false);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI")).thenReturn(true);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(true);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());

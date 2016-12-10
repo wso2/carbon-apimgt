@@ -17,8 +17,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.common.interceptors;
-
+package org.wso2.carbon.apimgt.rest.api.common.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -26,7 +25,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -35,44 +33,33 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.messaging.Headers;
-import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
 import org.wso2.msf4j.security.oauth2.IntrospectionResponse;
 import org.wso2.msf4j.util.SystemVariableUtil;
 
-import javax.ws.rs.HttpMethod;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.ws.rs.HttpMethod;
 
-/*
-*  This is the interceptor that is responsible for OAuth2 authentication and authorization of REST API calls.
-*  @implements Interceptor
-* */
-@Component(
-        name = "org.wso2.carbon.apimgt.rest.api.common.interceptors.RestAPIOAUTH2SecurityInterceptor",
-        service = Interceptor.class,
-        immediate = true
-)
-public class RestAPIOAUTH2SecurityInterceptor implements Interceptor {
-
-    private static final Logger log = LoggerFactory.getLogger(RestAPIOAUTH2SecurityInterceptor.class);
-
+/**
+ * OAuth2 implementation class
+ */
+public class OAuth2Authenticator implements RESTAPIAuthenticator {
+    private static final Logger log = LoggerFactory.getLogger(OAuth2Authenticator.class);
     private static String authServerURL;
 
     static {
@@ -83,40 +70,34 @@ public class RestAPIOAUTH2SecurityInterceptor implements Interceptor {
         }
     }
 
-    public boolean preCall(Request request, Response responder, ServiceMethodInfo serviceMethodInfo) {
-        org.wso2.carbon.apimgt.core.exception.ErrorHandler errorHandler = null;
+    /*
+    * This method performs authentication and authorization
+    * @param Request
+    * @param Response
+    * @param ServiceMethodInfo
+    * throws Exception
+    * */
+    @Override
+    public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
+            throws APIMgtSecurityException {
+        ErrorHandler errorHandler = null;
         boolean isScopeValid = false;
-        try {
-            Headers headers = request.getHeaders();
-            if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
-                String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-                Map<String, String> tokenInfo = validateToken(authHeader);
-                String restAPIResource = getRestAPIResource(request);
+        Headers headers = request.getHeaders();
+        if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
+            String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
+            Map<String, String> tokenInfo = validateToken(authHeader);
+            String restAPIResource = getRestAPIResource(request);
 
-                //scope validation
-                isScopeValid = validateScopes(request, serviceMethodInfo, tokenInfo.get(RestApiConstants.SCOPE),
-                        restAPIResource);
+            //scope validation
+            isScopeValid = validateScopes(request, serviceMethodInfo, tokenInfo.get(RestApiConstants.SCOPE),
+                    restAPIResource);
 
-            } else {
-                throw new APIMgtSecurityException("Missing Authorization header in the request.`",
-                        ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
-            }
-
-
-        } catch (APIMgtSecurityException e) {
-            errorHandler = e.getErrorHandler();
-            log.error(e.getMessage() + " Requested Path: " + request.getUri());
+        } else {
+            throw new APIMgtSecurityException("Missing Authorization header in the request.`",
+                    ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
         }
-        if (!isScopeValid) {
-            handleSecurityError(errorHandler, responder);
 
-        }
         return isScopeValid;
-    }
-
-    //    @Override
-    public void postCall(Request request, int status, ServiceMethodInfo serviceMethodInfo) {
-
     }
 
     /**
@@ -140,6 +121,94 @@ public class RestAPIOAUTH2SecurityInterceptor implements Interceptor {
         }
 
         return responseData;
+    }
+
+    /*
+    * This methos is used to get the rest api resource based on the api context
+    * @param Request
+    * @return String : api resource object
+    * @throws APIMgtSecurityException if resource could not be found.
+    * */
+    private String getRestAPIResource(Request request) throws APIMgtSecurityException {
+        String path = (String) request.getProperty("REQUEST_URL");
+        String restAPIResource = null;
+        //this is publisher API so pick that API
+        try {
+            if (path.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT)) {
+                restAPIResource = RestApiUtil.getPublisherRestAPIResource();
+            } else if (path.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
+                restAPIResource = RestApiUtil.getStoreRestAPIResource();
+            } else {
+                throw new APIMgtSecurityException("No matching Rest Api definition found for path:" + path);
+            }
+        } catch (APIManagementException e) {
+            throw new APIMgtSecurityException(e.getMessage(), ExceptionCodes.AUTH_GENERAL_ERROR);
+        }
+
+        return restAPIResource;
+
+    }
+
+    /*
+    * This method validates the given scope against scopes defined in the api resource
+    * @param Request
+    * @param ServiceMethodInfo
+    * @param scopesToValidate scopes extracted from the access token
+    * @return true if scope validation successful
+    * */
+    @SuppressFBWarnings({"DLS_DEAD_LOCAL_STORE"})
+    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String scopesToValidate,
+                                   String restAPIResource) throws APIMgtSecurityException {
+        final boolean authorized[] = {false};
+
+        String path = (String) request.getProperty("REQUEST_URL");
+        String verb = (String) request.getProperty("HTTP_METHOD");
+        String resource = path.substring(path.length() - 1);
+
+
+        if (!StringUtils.isEmpty(scopesToValidate)) {
+            final List<String> scopes = Arrays.asList(scopesToValidate.split(" "));
+            if (restAPIResource != null) {
+                APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
+                try {
+                    Map<String, Scope> apiDefinitionScopes = apiDefinition.getScopes(restAPIResource);
+                    if (apiDefinitionScopes.isEmpty()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+                                    + verb + " . Hence consider as anonymous permission and let request to continue.");
+                        }
+                        // scope validation gets through if no scopes found in the api definition
+                        authorized[0] = true;
+                    }
+                    apiDefinitionScopes.keySet()      //Only do the scope validation.hence key set is sufficient.
+                            .forEach(scopeKey -> {
+                                Optional<String> key = scopes.stream().filter(scp -> {
+                                    return scp.equalsIgnoreCase(scopeKey);
+                                }).findAny();
+                                if (key.isPresent()) {
+                                    authorized[0] = true;
+                                }
+                            });
+                } catch (APIManagementException e) {
+                    String message = "Error while validating scopes";
+                    log.error(message);
+                    throw new APIMgtSecurityException(message, ExceptionCodes.AUTH_GENERAL_ERROR);
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Rest API resource could not be found for resource '" + resource + "'");
+                }
+            }
+        } else { // scope validation gets through if access token does not contain scopes to validate
+            authorized[0] = true;
+        }
+
+        if (!authorized[0]) {
+            String message = "Scope validation fails for the scope " + scopesToValidate;
+            throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
+
+        }
+        return authorized[0];
     }
 
     /**
@@ -204,108 +273,5 @@ public class RestAPIOAUTH2SecurityInterceptor implements Interceptor {
      */
     private static class ExtendedTypeToken<T> extends TypeToken {
     }
-
-    /**
-     * @param errorHandler Security error code
-     * @param responder    HttpResponder instance which is used send error messages back to the client
-     */
-    private void handleSecurityError(ErrorHandler errorHandler, Response responder) {
-        HashMap<String, String> paramList = new HashMap<String, String>();
-        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
-        responder.setStatus(errorHandler.getHttpStatusCode());
-        responder.setHeader(javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE, RestApiConstants.AUTH_TYPE_OAUTH2);
-        responder.setEntity(errorDTO);
-        responder.send();
-    }
-
-    /*
-    * This method validates the given scope against scopes defined in the api resource
-    * @param Request
-    * @param ServiceMethodInfo
-    * @param scopesToValidate scopes extracted from the access token
-    * @return true if scope validation successful
-    * */
-    @SuppressFBWarnings({"DLS_DEAD_LOCAL_STORE"})
-    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String scopesToValidate,
-                                   String restAPIResource) throws APIMgtSecurityException {
-        final boolean authorized[] = {false};
-
-        String path = (String) request.getProperty("REQUEST_URL");
-        String verb = (String) request.getProperty("HTTP_METHOD");
-        String resource = path.substring(path.length() - 1);
-
-
-        if (!StringUtils.isEmpty(scopesToValidate)) {
-            final List<String> scopes = Arrays.asList(scopesToValidate.split(" "));
-            if (restAPIResource != null) {
-                APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-                try {
-                    Map<String, Scope> apiDefinitionScopes = apiDefinition.getScopes(restAPIResource);
-                    if (apiDefinitionScopes.isEmpty()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
-                                    + verb + " . Hence consider as anonymous permission and let request to continue.");
-                        }
-                        // scope validation gets through if no scopes found in the api definition
-                        authorized[0] = true;
-                    }
-                    apiDefinitionScopes.keySet()      //Only do the scope validation.hence key set is sufficient.
-                            .forEach(scopeKey -> {
-                                Optional<String> key = scopes.stream().filter(scp -> {
-                                    return scp.equalsIgnoreCase(scopeKey);
-                                }).findAny();
-                                if (key.isPresent()) {
-                                    authorized[0] = true;
-                                }
-                            });
-                } catch (APIManagementException e) {
-                    String message = "Error while validating scopes";
-                    log.error(message);
-                    throw new APIMgtSecurityException(message, ExceptionCodes.AUTH_GENERAL_ERROR);
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Rest API resource could not be found for resource '" + resource + "'");
-                }
-            }
-        } else { // scope validation gets through if access token does not contain scopes to validate
-            authorized[0] = true;
-        }
-
-        if (!authorized[0]) {
-            String message = "Scope validation fails for the scope " + scopesToValidate;
-            log.error(message);
-            throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
-
-        }
-        return authorized[0];
-    }
-
-    private String getRestAPIResource(Request request) throws APIMgtSecurityException {
-        String path = (String) request.getProperty("REQUEST_URL");
-        String restAPIResource = null;
-        //this is publisher API so pick that API
-        try {
-            if (path.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT)) {
-                restAPIResource = RestApiUtil.getPublisherRestAPIResource();
-            } else if (path.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
-                restAPIResource = RestApiUtil.getStoreRestAPIResource();
-            } else if (path.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-                restAPIResource = RestApiUtil.getAdminRestAPIResource();
-            } else {
-                APIUtils.logAndThrowException("No matching Rest Api definition found for path:", log);
-            }
-        } catch (APIManagementException e) {
-            throw new APIMgtSecurityException(e.getMessage(), ExceptionCodes.AUTH_GENERAL_ERROR);
-        }
-
-        return restAPIResource;
-
-    }
-
-    public static void setAuthServerUrl(String authServerURL) {
-        RestAPIOAUTH2SecurityInterceptor.authServerURL = authServerURL;
-    }
-
 
 }

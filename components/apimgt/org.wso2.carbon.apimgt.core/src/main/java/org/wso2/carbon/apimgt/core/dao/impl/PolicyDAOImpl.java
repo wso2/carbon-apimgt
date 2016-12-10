@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains Implementation for policy
@@ -38,6 +39,19 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Couldn't find " + policyName + ' ' + policyLevel + "Policy", e);
+        }
+        return null;
+    }
+
+    @Override public List<Policy> getPolicies(String policyLevel) throws APIMgtDAOException {
+        try {
+            if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel)) {
+                return getAPIPolicies();
+            } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel)) {
+                return getApplicationPolicies();
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Couldn't find " + policyLevel + " policies", e);
         }
         return null;
     }
@@ -77,6 +91,58 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
         }
         return policy;
+    }
+
+    /**
+     * Retrieves all API policies.
+     *
+     * @return
+     * @throws SQLException
+     */
+    private List<Policy> getAPIPolicies() throws SQLException {
+        List<Policy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_API_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIPolicy apiPolicy = new APIPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(apiPolicy, resultSet);
+                    apiPolicy.setUserLevel(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                    apiPolicy.setPipelines(getPipelines(apiPolicy.getUuid(), connection));
+
+                    policyList.add(apiPolicy);
+                }
+            }
+        }
+        return policyList;
+    }
+
+    /**
+     * Retrieves all Application policies.
+     *
+     * @return
+     * @throws SQLException
+     */
+    private List<Policy> getApplicationPolicies() throws SQLException {
+        List<Policy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    ApplicationPolicy applicationPolicy = new ApplicationPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(applicationPolicy, resultSet);
+                    policyList.add(applicationPolicy);
+                }
+            }
+        }
+        return policyList;
     }
 
     /**
@@ -160,7 +226,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     private ArrayList<Pipeline> getPipelines(String policyId, Connection connection) throws SQLException {
         ArrayList<Pipeline> pipelines = new ArrayList<>();
         final String sqlQuery = "SELECT CONDITION_GROUP_ID,QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT," +
-                "DESCRIPTION FROM AM_CONDITION_GROUP WHERE POLICY_ID =?";
+                "DESCRIPTION FROM AM_CONDITION_GROUP WHERE UUID =?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             int unitTime;
             int quota;

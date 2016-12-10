@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -38,43 +37,6 @@ import java.util.Set;
  */
 public class APIUtils {
 
-    /**
-     * Log and throw exceptions. This should be used only at service level.
-     *
-     * @param msg Error message
-     * @param log Logger to be used to log the error message
-     * @throws APIManagementException
-     */
-    public static void logAndThrowException(String msg, Logger log) throws APIManagementException {
-        log.error(msg);
-        throw new APIManagementException(msg);
-    }
-
-    /**
-     *
-     * @param msg Error message
-     * @param codes Exception code that need to pass in error DTO.
-     * @param log Logger to be used to log the error message
-     * @throws APIManagementException
-     */
-    public static void logAndThrowException(String msg, ExceptionCodes codes, Logger log) throws
-            APIManagementException {
-        log.error(msg);
-        throw new APIManagementException(msg, codes);
-    }
-
-    /**
-     * Log and throw exceptions. This should be used only at service level.
-     *
-     * @param msg Error message
-     * @param t Exception to be thrown
-     * @param log Logger to be used to log the error message
-     * @throws APIManagementException
-     */
-    public static void logAndThrowException(String msg, Throwable t, Logger log) throws APIManagementException {
-        log.error(msg, t);
-        throw new APIManagementException(msg, t);
-    }
 
     /**
      * Checks if debug log is enabled and logs the message
