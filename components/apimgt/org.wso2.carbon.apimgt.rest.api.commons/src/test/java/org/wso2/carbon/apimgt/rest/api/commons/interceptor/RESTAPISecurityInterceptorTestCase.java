@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 * This is the test class for APIMOAuth2SecurityInterceptor
 *
 * */
-public class OAuth2SecurityInterceptorTestCase {
+public class RESTAPISecurityInterceptorTestCase {
 
     private static final String USER = "admin";
 
