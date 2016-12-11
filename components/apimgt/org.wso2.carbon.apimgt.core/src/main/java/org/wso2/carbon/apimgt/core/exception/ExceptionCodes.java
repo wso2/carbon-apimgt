@@ -42,9 +42,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
-            + "update the API");
-
-
+            + "update the API"),
+    AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
+    ACCESS_TOKEN_INACTIVE(900304, "Invalid Credentials", 401, " Access token is inactive."),
+    ACCESS_TOKEN_EXPIRED(900903, "Invalid Credentials", 401, " Access token is expired."),
+    MISSING_CREDENTIALS(900902, "Missing Credentials", 401, " Please provide an active access token to proceed"),
+    INVALID_SCOPE(900910, "Invalid Scope", 401, " You are not authorized to access the resource."),
+    INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
+            " Please provide the Authorization : Bearer <> token to proceed.");
 
     private final long errorCode;
     private final String errorMessage;

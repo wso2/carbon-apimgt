@@ -12,7 +12,41 @@
     <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
     <name>WSO2 Carbon - API Manager Rest API Commons</name>
     <packaging>bundle</packaging>
-
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <overwrite>true</overwrite>
+                            <resources>
+                                <resource>
+                                    <directory>../org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources</directory>
+                                    <includes>
+                                        <include>publisher-api.yaml</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>../org.wso2.carbon.apimgt.rest.api.store/src/main/resources</directory>
+                                    <includes>
+                                        <include>store-api.yaml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -40,6 +74,26 @@
             <groupId>org.wso2.carbon.security.caas</groupId>
             <artifactId>org.wso2.carbon.security.caas</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.messaging</groupId>
+            <artifactId>org.wso2.carbon.messaging</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -50,7 +104,10 @@
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
-            org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}"
+            org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}",
+            org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
+            org.apache.commons.io.*;
+            com.google.gson.*,
         </import.package>
         <export.package>
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",
