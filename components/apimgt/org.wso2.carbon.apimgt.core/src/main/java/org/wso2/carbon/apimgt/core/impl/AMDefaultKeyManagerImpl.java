@@ -354,11 +354,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagerException {
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         URL url;
+        HttpURLConnection urlConn = null;
         try {
             String introspectEndpoint = System.getProperty("introspectEndpoint",
                     "http://localhost:9763/oauth2/introspect");
             url = new URL(introspectEndpoint);
-            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
             urlConn.getOutputStream()
@@ -404,7 +405,9 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             LOG.error("Error while connecting to token introspect endpoint.", e);
             throw new KeyManagerException(e);
         } finally {
-            //APIUtils.releaseInstance();
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
 
         return tokenInfo;
