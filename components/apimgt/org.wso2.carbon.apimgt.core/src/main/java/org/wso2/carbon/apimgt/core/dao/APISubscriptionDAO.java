@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.List;
@@ -32,7 +33,6 @@ import javax.annotation.CheckForNull;
 /**
  * Provides access to API Subscription data layer
  */
-
 public interface APISubscriptionDAO {
 
     /**
@@ -173,4 +173,16 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException;
+
+    /**
+     * Validates a subscription
+     *
+     * @param apiContext Context of the API
+     * @param apiVersion Version of the API
+     * @param consumerKey Consumer key of the application
+     * @return Subscription Validation Information
+     * @throws APIManagementException
+     */
+    SubscriptionValidationInfo validateSubscription(String apiContext, String apiVersion, String consumerKey)
+            throws APIMgtDAOException;
 }
