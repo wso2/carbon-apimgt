@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +99,7 @@ public final class OAuthApplicationInfo {
     }
 
     public String getJSONString() {
-        return JSONObject.valueToString(parameters);
+        return JSONObject.toJSONString(parameters);
 
     }
 

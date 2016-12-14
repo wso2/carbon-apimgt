@@ -18,24 +18,17 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import org.apache.commons.io.IOUtils;
+
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+
 import org.wso2.carbon.apimgt.core.exception.KeyManagerException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -44,15 +37,13 @@ import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -98,21 +89,24 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         json.put(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientId());
         json.put(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
         json.put(KeyManagerConstants.OAUTH_CLIENT_GRANTS, oAuthApplicationInfo.getGrantTypes());
+        URL url;
+        HttpURLConnection urlConn = null;
         try {
             // Calling DCR endpoint of IS
-            CloseableHttpClient client = APIUtils.getHttpsClient();
-            HttpPost httpPost = new HttpPost("http://localhost:9763/identity/connect/register");
-
-            StringEntity params = new StringEntity(json.toString());
-            httpPost.addHeader("content-type", "application/json");
-            httpPost.setEntity(params);
-            CloseableHttpResponse response = client.execute(httpPost);
-            int responseCode = response.getStatusLine().getStatusCode();
-            HttpEntity respEntity = response.getEntity();
+            String dcrEndpoint = System.getProperty("dcrEndpoint",
+                    "http://localhost:9763/identity/connect/register");
+            url = new URL(dcrEndpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("POST");
+            urlConn.setRequestProperty("content-type", "application/json");
+            urlConn.getOutputStream()
+                    .write((json.toString()).getBytes("UTF-8"));
+            int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
-                String responseStr = EntityUtils.toString(respEntity);
-                JSONObject jObj = new JSONObject(responseStr);
-
+                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
+                JSONParser parser = new JSONParser();
+                JSONObject jObj = (JSONObject) parser.parse(responseStr);
                 String consumerKey = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_ID);
                 String consumerSecret = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_SECRET);
                 String clientName = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_NAME);
@@ -123,19 +117,21 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 oAuthApplicationInfo.setClientSecret(consumerSecret);
                 oAuthApplicationInfo.setGrantTypes(grantTypes);
 
-
             } else { //If DCR call fails
                 throw new KeyManagerException("OAuth app does not contains required data  : " + applicationName);
             }
 
 
-        } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+        } catch (IOException | ParseException e) {
+            LOG.error("Can not create OAuth application  : " + applicationName, e);
             throw new KeyManagerException("Can not create OAuth application  : " + applicationName, e);
         } finally {
-            APIUtils.releaseInstance(); //Release HttpClient
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+
         }
         return oAuthApplicationInfo;
-
 
     }
 
@@ -169,25 +165,33 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         //   LOG.info("Couldn't find OAuth App for Consumer Key : " + consumerKey);
         //  return;
         // }
-        try {
-            //Calling DCR endpoint of WSO2 IS
-            CloseableHttpClient client = APIUtils.getHttpsClient();
+        URL url;
+        HttpURLConnection urlConn = null;
 
-            HttpDelete httpDel = new HttpDelete("http://localhost:9763/identity/register/" + consumerKey);
-            CloseableHttpResponse response = client.execute(httpDel);
-            int responseCode = response.getStatusLine().getStatusCode();
+        try {
+            // Calling DCR endpoint of IS
+            String dcrEndpoint = System.getProperty("dcrEndpoint",
+                    "http://localhost:9763/identity/connect/register/") + consumerKey;
+            url = new URL(dcrEndpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("DELETE");
+
+            int responseCode = urlConn.getResponseCode();
             if (responseCode != 200) { //If DCR call fails
-                LOG.error("Error while deleting the client.");
+                LOG.error("Error while deleting the client-" + consumerKey);
                 throw new KeyManagerException("Error while deleting the client.HTTP error code is:" + responseCode);
             }
-        } catch (IOException | KeyManagementException | NoSuchAlgorithmException e) {
-            LOG.error("Error while connecting to token introspect endpoint.", e);
-            throw new KeyManagerException(e);
+
+
+        } catch (IOException e) {
+            LOG.error("Error while deleting the client- " + consumerKey, e);
+            throw new KeyManagerException("Error while deleting the client- " + consumerKey, e);
         } finally {
-            APIUtils.releaseInstance();
-
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
-
 
     }
 
@@ -245,112 +249,102 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         //TO-DO -ADD A CONFIG FOR TOKEN ENDPOINT
         String tokenEndpoint = System.getProperty("TokenEndpoint", "https://localhost:9443/oauth2/token");
         //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
-        String revokeEndpoint = System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");;
+        String revokeEndpoint = System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
+        ;
 
         // Call the /revoke only if there's a token to be revoked.
-        try {
-            if (tokenRequest.getTokenToRevoke() != null && !"".equals(tokenRequest.getTokenToRevoke())) {
 
-                HttpClient revokeEPClient = APIUtils.getHttpsClient();
+        URL url;
+        HttpURLConnection urlConn = null;
 
-                HttpPost httpRevokePost = new HttpPost(revokeEndpoint);
-
-                // Request parameters.
-                List<NameValuePair> revokeParams = new ArrayList<>(3);
-                revokeParams.add(new BasicNameValuePair(
-                        KeyManagerConstants.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-                revokeParams.add(new BasicNameValuePair(
-                        KeyManagerConstants.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-                revokeParams.add(new BasicNameValuePair(
-                        KeyManagerConstants.OAUTH_TOKEN, tokenRequest.getTokenToRevoke()));
-
-
-                //Revoke the Old Access Token
-                httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-                int statusCode;
-                try {
-                    HttpResponse revokeResponse = revokeEPClient.execute(httpRevokePost);
-                    statusCode = revokeResponse.getStatusLine().getStatusCode();
-                } finally {
-                    APIUtils.releaseInstance();
-                }
-
-                if (statusCode != 200) { //If token revoke failed
-                    throw new RuntimeException("Token revoke failed : HTTP error code : " + statusCode);
+        if (tokenRequest.getTokenToRevoke() != null && !"".equals(tokenRequest.getTokenToRevoke())) {
+            //Revoke the Old Access Token
+            try {
+                url = new URL(revokeEndpoint);
+                urlConn = (HttpURLConnection) url.openConnection();
+                urlConn.setDoOutput(true);
+                urlConn.setRequestMethod("POST");
+                String postParams = KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() +
+                        KeyManagerConstants.OAUTH_CLIENT_SECRET + "=" + tokenRequest.getClientSecret() +
+                        KeyManagerConstants.OAUTH_TOKEN + "=" + tokenRequest.getTokenToRevoke();
+                urlConn.getOutputStream()
+                        .write((postParams).getBytes("UTF-8"));
+                int responseCode = urlConn.getResponseCode();
+                if (responseCode != 200) { //If token revoke failed
+                    throw new RuntimeException("Token revoke failed : HTTP error code : " + responseCode);
                 } else {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
                     }
                 }
+            } catch (IOException e) {
+                String msg = "Error while creating tokens - ";
+                LOG.error(msg, e);
+                throw new KeyManagerException(msg + e.getMessage(), e);
+            } finally {
+                if (urlConn != null) {
+                    urlConn.disconnect();
+                }
             }
-            //get default application access token name from config.
-            //TO-DO -DEFINE APPICATION TOKEN SCOPES
-            String applicationTokenScope = "";
 
-            // When validity time set to a negative value, a token is considered never to expire.
-            if (tokenRequest.getValidityPeriod() == -1L) {
-                // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
-                tokenRequest.setValidityPeriod(-2);
-            }
+        }
+        //get default application access token name from config.
+        //TO-DO -DEFINE APPICATION TOKEN SCOPES
+        String applicationTokenScope = "";
 
-            //Generate New Access Token by client credentials grant type with calling Token API
-            HttpClient tokenEPClient = APIUtils.getHttpsClient();
-            HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-            List<NameValuePair> tokParams = new ArrayList<>(3);
-            tokParams.add(new BasicNameValuePair(KeyManagerConstants.OAUTH_CLIENT_GRANT, GRANT_TYPE_VALUE));
-            tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
-                    Long.toString(tokenRequest.getValidityPeriod())));
-            tokParams.add(new BasicNameValuePair(KeyManagerConstants.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
-            tokParams.add(new BasicNameValuePair(
-                    KeyManagerConstants.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
+        // When validity time set to a negative value, a token is considered never to expire.
+        if (tokenRequest.getValidityPeriod() == -1L) {
+            // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
+            tokenRequest.setValidityPeriod(-2);
+        }
+
+        //Generate New Access Token by client credentials grant type with calling Token API
+        try {
+            url = new URL(tokenEndpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("POST");
             StringBuilder builder = new StringBuilder();
             builder.append(applicationTokenScope);
-
             for (String scope : tokenRequest.getScopes()) {
                 builder.append(' ').append(scope);
             }
+            String postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE + "&" +
+                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
+                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +
+                    KeyManagerConstants.OAUTH_CLIENT_SECRET + "=" + tokenRequest.getClientSecret() + "&" +
+                    KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + builder.toString();
 
-            tokParams.add(new BasicNameValuePair(KeyManagerConstants.OAUTH_CLIENT_SCOPE, builder.toString()));
-
-            httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
-            try {
-                HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
-                HttpEntity tokEntity = tokResponse.getEntity();
-
-                if (tokResponse.getStatusLine().getStatusCode() != 200) { //If token generation failed
-                    throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
-                            tokResponse.getStatusLine().getStatusCode());
-                } else {
-                    tokenInfo = new AccessTokenInfo();
-                    String responseStr = EntityUtils.toString(tokEntity);
-                    JSONObject obj = new JSONObject(responseStr);
-                    newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-                    validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                    if (obj.has("scope")) {
-                        tokenInfo.setScopes(((String) obj.get("scope")).split(" "));
-                    }
-                    tokenInfo.setAccessToken(newAccessToken);
-                    tokenInfo.setValidityPeriod(validityPeriod);
+            urlConn.getOutputStream()
+                    .write((postParams).getBytes("UTF-8"));
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode != 200) { //If token generation failed
+                throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
+                        responseCode);
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Successfully submitted token request for old application token. HTTP status : 200");
                 }
-            } finally {
-                APIUtils.releaseInstance();
+                tokenInfo = new AccessTokenInfo();
+                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
+                JSONParser parser = new JSONParser();
+                JSONObject obj = (JSONObject) parser.parse(responseStr);
+                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                if (obj.containsKey("scope")) {
+                    tokenInfo.setScopes(((String) obj.get("scope")).split(" "));
+                }
+                tokenInfo.setAccessToken(newAccessToken);
+                tokenInfo.setValidityPeriod(validityPeriod);
             }
-        } catch (ClientProtocolException e) {
-            String msg = "Error while creating token - Invalid protocol used";
-            LOG.error(msg, e);
-            throw new KeyManagerException(msg, e);
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Error while preparing request for token/revoke APIs";
-            LOG.error(msg, e);
-            throw new KeyManagerException(msg, e);
-        } catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (IOException | ParseException e) {
             String msg = "Error while creating tokens - ";
             LOG.error(msg, e);
             throw new KeyManagerException(msg + e.getMessage(), e);
-        } catch (JSONException e) {
-            String msg = "Error while parsing response from token api";
-            LOG.error(msg, e);
-            throw new KeyManagerException(msg, e);
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
 
         return tokenInfo;
@@ -359,62 +353,58 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagerException {
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
+        URL url;
         try {
-            CloseableHttpClient client = APIUtils.getHttpsClient();
             String introspectEndpoint = System.getProperty("introspectEndpoint",
                     "http://localhost:9763/oauth2/introspect");
-            HttpPost httpPost = new HttpPost(introspectEndpoint);
-
-            ArrayList<NameValuePair> postParameters = new ArrayList<>();
-            postParameters.add(new BasicNameValuePair(KeyManagerConstants.OAUTH_TOKEN, accessToken));
-
-            httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
-
-            CloseableHttpResponse response = client.execute(httpPost);
-            int responseCode = response.getStatusLine().getStatusCode();
-            HttpEntity respEntity = response.getEntity();
-            if (responseCode == 200) {
-                String responseStr = EntityUtils.toString(respEntity);
-                JSONObject jObj = new JSONObject(responseStr);
-                Object active = jObj.get("active");
-                if ((Boolean) (active)) {
-                    String consumerKey = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_ID);
-                    String endUser = (String) jObj.get(KeyManagerConstants.USERNAME);
-                    long exp = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME);
-                    long issuedTime = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME);
-                    String scopes = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_SCOPE);
-                    if (scopes != null) {
-                        String[] scopesArray = scopes.split("\\s+");
-                        tokenInfo.setScopes(scopesArray);
-                    }
-                    tokenInfo.setTokenValid(true);
-                    tokenInfo.setAccessToken(accessToken);
-                    tokenInfo.setConsumerKey(consumerKey);
-                    tokenInfo.setEndUserName(endUser);
-                    tokenInfo.setIssuedTime(issuedTime);
-
-                    // Convert Expiry Time to milliseconds.
-                    if (exp == Long.MAX_VALUE) {
-                        tokenInfo.setValidityPeriod(Long.MAX_VALUE);
-                    } else {
-                        tokenInfo.setValidityPeriod(exp * 1000);
-                    }
-
-                } else {
-
-                    tokenInfo.setTokenValid(false);
-                    LOG.error("Invalid OAuth Token. ");
-                    tokenInfo.setErrorcode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                    return tokenInfo;
-
-
+            url = new URL(introspectEndpoint);
+            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("POST");
+            urlConn.getOutputStream()
+                    .write(("token=" + accessToken).getBytes("UTF-8"));
+            String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
+            JSONParser parser = new JSONParser();
+            JSONObject jObj = (JSONObject) parser.parse(responseStr);
+            Object active = jObj.get("active");
+            if ((Boolean) (active)) {
+                String consumerKey = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_ID);
+                String endUser = (String) jObj.get(KeyManagerConstants.USERNAME);
+                long exp = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME);
+                long issuedTime = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME);
+                String scopes = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_SCOPE);
+                if (scopes != null) {
+                    String[] scopesArray = scopes.split("\\s+");
+                    tokenInfo.setScopes(scopesArray);
                 }
+                tokenInfo.setTokenValid(true);
+                tokenInfo.setAccessToken(accessToken);
+                tokenInfo.setConsumerKey(consumerKey);
+                tokenInfo.setEndUserName(endUser);
+                tokenInfo.setIssuedTime(issuedTime);
+
+                // Convert Expiry Time to milliseconds.
+                if (exp == Long.MAX_VALUE) {
+                    tokenInfo.setValidityPeriod(Long.MAX_VALUE);
+                } else {
+                    tokenInfo.setValidityPeriod(exp * 1000);
+                }
+
+            } else {
+
+                tokenInfo.setTokenValid(false);
+                LOG.error("Invalid OAuth Token. ");
+                tokenInfo.setErrorcode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                return tokenInfo;
+
+
             }
-        } catch (IOException | KeyManagementException | NoSuchAlgorithmException e) {
+
+        } catch (IOException | ParseException e) {
             LOG.error("Error while connecting to token introspect endpoint.", e);
             throw new KeyManagerException(e);
         } finally {
-            APIUtils.releaseInstance();
+            //APIUtils.releaseInstance();
         }
 
         return tokenInfo;
