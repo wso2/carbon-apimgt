@@ -166,13 +166,12 @@
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.apache.httpcomponents</groupId>
+            <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>commons-httpclient.wso2</groupId>
-            <artifactId>commons-httpclient</artifactId>
-        </dependency>
+
+
+
     </dependencies>
     <build>
         <plugins>

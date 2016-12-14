@@ -23,23 +23,27 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
     @Override
     public Response apisApiIdDelete(String apiId
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
@@ -56,89 +60,105 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId
-, String documentId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
-//        String username = RestApiUtil.getLoggedInUsername();
-//        try {
-//            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-//            DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
-//            if (documentInfo == null) {
-//                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-//                return null;
-//            }
-//            //gets the content depending on the type of the document
-//            if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-//
-//                InputStream fileDataStream =apiPublisher.getDocumentationContent(documentId);
-//                String contentType = documentInfo.
-//                return Response.ok(fileDataStream)
-//                        .header(javax.ws.rs.core.HttpHeaders.CONTENT_TYPE, )
-//                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
-//                        .build();
-//            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
-//                String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
-//                return Response.ok(content)
-//                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
-//                        .build();
-//            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
-//                String sourceUrl = documentation.getSourceUrl();
-//                return Response.seeOther(new URI(sourceUrl)).build();
-//            }
-//        } catch (APIManagementException e) {
-//            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-//            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-//                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-//            } else {
-//                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
-//                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-//            }
-//        } catch (URISyntaxException e) {
-//            String errorMessage = "Error while retrieving source URI location of " + documentId;
-//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-//        }
+            , String documentId
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+    ) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
+            if (documentInfo == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+            //gets the content depending on the type of the document
+            if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
+
+                InputStream fileDataStream = apiPublisher.getDocumentationFileContent(documentId);
+                String filename = documentInfo.getFileName();
+                return Response.ok(fileDataStream)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .build();
+            } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
+                String content = apiPublisher.getDocumentationInlineContent(documentId);
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN).build();
+            } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.URL)) {
+                String sourceUrl = documentInfo.getSourceURL();
+                return Response.seeOther(new URI(sourceUrl)).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
         return null;
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId
-, String documentId
-, String contentType
-, InputStream fileInputStream, FileInfo fileDetail
-, String inlineContent
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String documentId
+            , String contentType
+            , InputStream fileInputStream, FileInfo fileDetail
+            , String inlineContent
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
 
             if (fileInputStream != null && inlineContent != null) {
-                RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
+                String msg = "Only one of 'file' and 'inlineContent' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
             //retrieves the document and send 404 if not found
             DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
             if (documentation == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
+                String msg = "Documntation not found " + documentId;
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
             DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentation);
             //add content depending on the availability of either input stream or inline content
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
+                    String msg = "Source type of document " + documentId + " is not FILE";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
                 docBuilder = docBuilder.fileName(fileDetail.getFileName());
-                apiProvider.uploadDocumentationFile(documentId, fileInputStream);
+                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getFileName());
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                    String msg = "Source type of document " + documentId + " is not INLINE";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 }
                 apiProvider.addDocumentationContent(documentId, inlineContent);
             } else {
-                RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
+                String msg = "Either 'file' or 'inlineContent' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
             }
             apiProvider.updateDocumentation(apiId, docBuilder.build());
             //retrieving the updated doc and the URI
@@ -155,12 +175,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId
-, String documentId
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String documentId
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -176,22 +197,26 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId
-, String documentId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String documentId
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+    ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
             if (documentInfo != null) {
                 return Response.ok().entity(MappingUtil.toDocumentDTO(documentInfo)).build();
-            }else{
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
+            } else {
+                String msg = "Documntation not found " + documentId;
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting document" + documentId;
@@ -203,14 +228,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId
-, String documentId
-, DocumentDTO body
-, String contentType
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String documentId
+            , DocumentDTO body
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -218,18 +244,28 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
+                String msg = "Error while getting document";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
-                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
-                return null;
+                String msg = "otherTypeName cannot be empty if type is OTHER.";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
                     (StringUtils.isBlank(body.getSourceUrl()) || !RestApiUtil.isURL(body.getSourceUrl()))) {
-                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
-                return null;
+                //check otherTypeName for not null if doc type is OTHER
+                String msg = "Invalid document sourceUrl Format";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
             //overriding some properties
@@ -241,28 +277,28 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
             return Response.ok().entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+            log.error(errorMessage, e);
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID,documentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
+
     @Override
     public Response apisApiIdDocumentsGet(String apiId
-, Integer limit
-, Integer offset
-, String accept
-, String ifNoneMatch
- ) throws NotFoundException {
+            , Integer limit
+            , Integer offset
+            , String accept
+            , String ifNoneMatch
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-           List<DocumentInfo> documentInfos =  apiPublisher.getAllDocumentation(apiId,offset,limit);
+            List<DocumentInfo> documentInfos = apiPublisher.getAllDocumentation(apiId, offset, limit);
             DocumentListDTO documentListDTO = MappingUtil.toDocumentListDTO(documentInfos);
             return Response.status(Response.Status.OK).entity(documentListDTO).build();
         } catch (APIManagementException e) {
@@ -274,11 +310,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdDocumentsPost(String apiId
-, DocumentDTO body
-, String contentType
- ) throws NotFoundException {
+            , DocumentDTO body
+            , String contentType
+    ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
@@ -299,12 +336,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create  document for api " + apiId;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            }
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     @Override
@@ -330,7 +367,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
-            String ifUnmodifiedSince) throws NotFoundException {
+                                              String ifUnmodifiedSince) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -352,16 +389,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)){
-                APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+                APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID
+                        (apiId));
                 return Response.ok().entity(apidto).build();
-            }else{
+            } else {
                 RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             }
         } catch (APIManagementException e) {
@@ -375,17 +413,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return null;
     }
+
     @Override
     public Response apisApiIdPut(String apiId
-, APIDTO body
-, String contentType
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , APIDTO body
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            API.APIBuilder api   = MappingUtil.toAPI(body).id(apiId);
+            API.APIBuilder api = MappingUtil.toAPI(body).id(apiId);
             apiPublisher.updateAPI(api);
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
             return Response.ok().entity(apidto).build();
@@ -399,34 +438,36 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         }
     }
+
     @Override
     public Response apisApiIdSwaggerGet(String apiId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String swagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(swagger).build();
         } catch (APIManagementException e) {
-                String errorMessage = "Error while retrieving swagger of API : " + apiId;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            String errorMessage = "Error while retrieving swagger of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
     }
+
     @Override
     public Response apisApiIdSwaggerPut(String apiId
-, String apiDefinition
-, String contentType
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String apiDefinition
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -434,50 +475,52 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
-                String errorMessage = "Error while put swagger for API : " + apiId;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            String errorMessage = "Error while put swagger for API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdThumbnailGet(String apiId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream imageInputStream = apiPublisher.getThumbnailImage(apiId);
             if (imageInputStream != null) {
                 return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header
-                        ("Content-Disposition", "attachment; filename=\"thename.jpg\"").build();
+                        (HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"icon\"").build();
             } else {
                 return Response.noContent().build();
             }
         } catch (APIManagementException e) {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisApiIdThumbnailPost(String apiId
-, InputStream fileInputStream, FileInfo fileDetail
-, String contentType
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , InputStream fileInputStream, FileInfo fileDetail
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
-            apiPublisher.saveThumbnailImage(apiId, fileInputStream, contentType);
+            apiPublisher.saveThumbnailImage(apiId, fileInputStream, fileDetail.getFileName());
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
 //            URI uri = new URI(uriString);
@@ -489,12 +532,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 */
             return Response.status(Response.Status.CREATED).entity(infoDTO).build();
         } catch (APIManagementException e) {
-                String errorMessage = "Error while uploading image" + apiId;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            String errorMessage = "Error while uploading image" + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {
 //            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
@@ -523,19 +566,20 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
             return Response.ok().build();
         } catch (APIManagementException e) {
-                String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     @Override
     public Response apisCopyApiPost(String newVersion
-, String apiId
- ) throws NotFoundException {
-      //  URI newVersionedApiUri;
+            , String apiId
+    ) throws NotFoundException {
+        //  URI newVersionedApiUri;
         APIDTO newVersionedApi;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -548,11 +592,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 //            // return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
             return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while create new API version " + apiId ;
+            String errorMessage = "Error while create new API version " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, newVersion);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList,e);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -564,16 +608,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisGet(Integer limit
-, Integer offset
-, String query
-, String accept
-, String ifNoneMatch
- ) throws NotFoundException {
+            , Integer offset
+            , String query
+            , String accept
+            , String ifNoneMatch
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
             apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs
-                    (limit,offset,query));
+                    (limit, offset, query));
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -622,9 +666,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisPost(APIDTO body
-, String contentType
- ) throws NotFoundException {
-     String username = RestApiUtil.getLoggedInUsername();
+            , String contentType
+    ) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -641,8 +685,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
             paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, body.getVersion());
 
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(),paramList);
-            log.error(errorMessage,e);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 //        catch (URISyntaxException e) {

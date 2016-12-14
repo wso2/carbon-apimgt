@@ -226,7 +226,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     private ArrayList<Pipeline> getPipelines(String policyId, Connection connection) throws SQLException {
         ArrayList<Pipeline> pipelines = new ArrayList<>();
         final String sqlQuery = "SELECT CONDITION_GROUP_ID,QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT," +
-                "DESCRIPTION FROM AM_CONDITION_GROUP WHERE POLICY_ID =?";
+                "DESCRIPTION FROM AM_CONDITION_GROUP WHERE UUID =?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             int unitTime;
             int quota;
