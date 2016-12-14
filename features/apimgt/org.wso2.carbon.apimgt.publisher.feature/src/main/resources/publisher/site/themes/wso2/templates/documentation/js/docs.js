@@ -197,7 +197,7 @@ var editInlineContent = function (provider, apiName, version, docName, mode,tena
 
 var clearDocs = function () {
 	$('#newDoc').hide();
-
+    $('#addDoc').show('fast');
 };
 
 var submitDoc = function() {
