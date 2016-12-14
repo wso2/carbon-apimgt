@@ -135,7 +135,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                             .get(APIMgtConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES))
                             .iterator();
                     while (scopesIterator.hasNext()) {
-                        Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(), Scope.class);
+                        Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
+                                Scope.class);
                         scopeMap.put(scope.getKey(), scope);
                     }
                 }
