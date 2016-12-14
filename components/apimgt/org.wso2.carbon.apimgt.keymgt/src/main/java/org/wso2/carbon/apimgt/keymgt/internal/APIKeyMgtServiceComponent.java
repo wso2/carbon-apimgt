@@ -28,12 +28,9 @@ import org.apache.thrift.transport.TTransportException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
-import org.wso2.carbon.apimgt.impl.internal.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesDelegator;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -43,11 +40,9 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -121,7 +116,7 @@ public class APIKeyMgtServiceComponent {
                 log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
             }
 
-            ScopesIssuer.loadInstance(whitelist);
+            ScopesDelegator.loadInstance(whitelist);
 
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");

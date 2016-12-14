@@ -23,16 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
+import org.wso2.carbon.identity.oauth2.validators.ScopeValidator;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -119,9 +118,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             return true;
         }
 
-        OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
-
-
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if(apiKeyValidationInfoDTO == null){
@@ -165,12 +161,13 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 validationContext.getHttpVerb();
 
         try {
-            if(scopeValidator != null){
-                if(scopeValidator.validateScope(accessTokenDO,
-                                                resource)){
+            ScopeValidator scopeValidator = ScopeValidator.getInstance();
+
+            if (scopeValidator != null) {
+                if (scopeValidator.validateScope(accessTokenDO, resource)) {
                     return true;
 
-                }else {
+                } else {
                     apiKeyValidationInfoDTO.setAuthorized(false);
                     apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                 }
