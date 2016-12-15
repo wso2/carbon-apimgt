@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.constants.APIConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.constants.APIThrottleConstants;
+import org.wso2.carbon.apimgt.gateway.throttling.constants.JMSConfigs;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -74,12 +75,12 @@ public class ThrottleJMSListner {
     public TopicSubscriber subscribe() throws NamingException, JMSException, URLSyntaxException {
         // Lookup connection factory
         TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                getTCPConnectionURL("admin", "admin"));
+                getTCPConnectionURL(JMSConfigs.JMS_USERNAME, JMSConfigs.JMS_PASSWORD));
         topicConnection = connFactory.createTopicConnection();
         topicConnection.start();
         topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = topicSession.createTopic("throttleData");
+        Topic topic = topicSession.createTopic(JMSConfigs.THROTTLING_TOPIC_NAME);
         TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
         return topicSubscriber;
     }
