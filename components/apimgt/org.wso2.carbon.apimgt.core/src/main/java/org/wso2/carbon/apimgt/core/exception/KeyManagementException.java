@@ -19,23 +19,31 @@
 package org.wso2.carbon.apimgt.core.exception;
 
 /**
- *  Exception class for key manager failures.
+ *  Exception class for key management failures.
  */
-public class KeyManagerException extends APIManagementException {
-    public KeyManagerException(String message, Throwable cause) {
+public class KeyManagementException extends APIManagementException {
+    public KeyManagementException(String msg , ExceptionCodes code) {
+        super(msg, code);
+    }
+
+    public KeyManagementException(String msg , Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
+    }
+
+    public KeyManagementException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public KeyManagerException(Throwable cause) {
+    public KeyManagementException(Throwable cause) {
         super(cause);
     }
 
-    protected KeyManagerException(String message, Throwable cause, boolean enableSuppression,
+    protected KeyManagementException(String message, Throwable cause, boolean enableSuppression,
                                         boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public KeyManagerException(String message) {
+    public KeyManagementException(String message) {
         super(message);
     }
 }
