@@ -76,12 +76,14 @@ public class DBScriptRunnerUtil {
     private static void executeSQL(String sql, Connection connection) throws Exception {
         // Check and ignore empty statements
         sql = sql.trim();
-        if ("".equals(sql)) {
-            return;
-        }
+        for (String query : sql.split(";")){
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-             int success = statement.executeUpdate();
+            if ("".equals(query)) {
+                return;
+            }
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                int success = statement.executeUpdate();
+            }
         }
     }
 }

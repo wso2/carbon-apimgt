@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -62,6 +63,10 @@ public class DAOUtil {
     static String getParameterString(int numberOfParameters) {
         List<String> questionMarks = new ArrayList<>(Collections.nCopies(numberOfParameters, "?"));
         return String.join(",", questionMarks);
+    }
+
+    public static void clearDataSource() {
+        dataSource = null;
     }
 }
 

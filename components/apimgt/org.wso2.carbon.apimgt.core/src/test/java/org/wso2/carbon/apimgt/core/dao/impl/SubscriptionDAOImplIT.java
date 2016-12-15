@@ -33,8 +33,9 @@ import java.util.UUID;
 
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
-    @Test
-    public void testAddAndGetSubscription() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testAddAndGetSubscription(String databases ) throws Exception {
+        setUp(databases);
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -58,8 +59,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
-    @Test
-    public void testUpdateSubscription() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testUpdateSubscription(String databases ) throws Exception {
+        setUp(databases);
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -109,8 +111,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
-    @Test
-    public void testGetSubscriptionByAPI() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testGetSubscriptionByAPI(String databases ) throws Exception {
+        setUp(databases);
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -210,8 +213,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    @Test
-    public void testGetSubscriptionByApplication() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testGetSubscriptionByApplication(String databases ) throws Exception {
+        setUp(databases);
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -299,8 +303,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    @Test
-    public void testDeleteSubscription() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testDeleteSubscription(String databases ) throws Exception {
+        setUp(databases);
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
