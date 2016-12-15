@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
@@ -43,7 +42,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MappingUtil {
 
@@ -215,18 +213,7 @@ public class MappingUtil {
         return documentListDTO;
     }
 
-    /**
-     * This method converts the {@link DocumentListDTO} to {@link DocumentInfoResults}
-     * @param documentListDTO
-     * @return
-     */
-    public static DocumentInfoResults toDocumentInfoResults(DocumentListDTO documentListDTO){
-        DocumentInfoResults documentInfoResults = new DocumentInfoResults();
-        for (DocumentDTO documentDTO: documentListDTO.getList()){
-            documentInfoResults.addDocumentInfo(toDocumentInfo(documentDTO));
-        }
-        return documentInfoResults;
-    }
+
 
     /**
      * This method convert {@link org.wso2.carbon.apimgt.core.models.Application} to {@link ApplicationDTO}
@@ -268,7 +255,7 @@ public class MappingUtil {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setApplicationId(subscription.getId());
         subscriptionDTO.setLifeCycleStatus(
-                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().getStatus()));
+                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().toString()));
         subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
         subscriptionDTO.setPolicy(subscription.getSubscriptionTier());

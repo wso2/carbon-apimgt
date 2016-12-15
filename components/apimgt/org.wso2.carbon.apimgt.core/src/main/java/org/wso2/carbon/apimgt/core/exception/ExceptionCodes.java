@@ -42,9 +42,24 @@ public enum ExceptionCodes implements ErrorHandler {
             "done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
-            + "update the API");
-
-
+            + "update the API"),
+    AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
+    ACCESS_TOKEN_INACTIVE(900304, "Invalid Credentials", 401, " Access token is inactive."),
+    ACCESS_TOKEN_EXPIRED(900903, "Invalid Credentials", 401, " Access token is expired."),
+    MISSING_CREDENTIALS(900902, "Missing Credentials", 401, " Please provide an active access token to proceed"),
+    INVALID_SCOPE(900910, "Invalid Scope", 401, " You are not authorized to access the resource."),
+    INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
+            " Please provide the Authorization : Bearer <> token to proceed."),
+    OAUTH2_APP_CREATION_FAILED(900401, "Keymanagement Error", 500, " Error while creating the consumer application."),
+    OAUTH2_APP_ALREADY_EXISTS(900402, "Keymanagement Error", 500, " OAuth2 application already created."),
+    OAUTH2_APP_DELETION_FAILED(900403, "Keymanagement Error", 500, " Error while deleting the consumer application."),
+    OAUTH2_APP_UPDATE_FAILED(900404, "Keymanagement Error", 500, " Error while updating the consumer application."),
+    OAUTH2_APP_RETRIEVAL_FAILED(900405, "Keymanagement Error", 500, " Error while retrieving the consumer application."
+    ),
+    OAUTH2_APP_MAP_FAILED(900406, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900407, "Keymanagement Error", 500, " Error while introspecting the access token."),
+    APPLICATION_TOKEN_GENERATION_FAILED(900408, "Keymanagement Error", 500, " Error while generating the application" +
+            "access token.");
 
     private final long errorCode;
     private final String errorMessage;

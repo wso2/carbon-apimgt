@@ -195,13 +195,13 @@ class ApiResourceDAO {
         }
     }
 
-    static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue)
-                                                                                            throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE UUID = ?";
+    static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue, String
+            fileName) throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ? WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBlob(1, resourceValue);
-            statement.setString(2, resourceID);
-
+            statement.setString(2, fileName);
+            statement.setString(3, resourceID);
             return statement.executeUpdate();
         }
     }

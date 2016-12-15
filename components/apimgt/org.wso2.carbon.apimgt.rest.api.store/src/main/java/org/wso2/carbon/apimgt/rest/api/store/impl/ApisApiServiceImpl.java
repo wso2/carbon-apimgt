@@ -37,7 +37,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         InputStream documentContent = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            documentContent = apiStore.getDocumentationContent(documentId);
+            documentContent = apiStore.getDocumentationFileContent(documentId);
             if (documentContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }

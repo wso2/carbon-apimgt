@@ -128,7 +128,16 @@ public interface APIManager {
      * @return {@link InputStream} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    InputStream getDocumentationContent(String docId) throws APIManagementException;
+    InputStream getDocumentationFileContent(String docId) throws APIManagementException;
+
+    /**
+     * This method used to get the content of a documentation
+     *
+     * @param docId Document ID
+     * @return {@link String} String for document content
+     * @throws APIManagementException if the requested documentation content is not available
+     */
+    String getDocumentationInlineContent(String docId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the uuid
