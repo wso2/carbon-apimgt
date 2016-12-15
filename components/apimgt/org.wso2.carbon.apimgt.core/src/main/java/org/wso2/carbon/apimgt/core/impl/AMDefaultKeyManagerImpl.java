@@ -333,8 +333,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 JSONObject obj = (JSONObject) parser.parse(responseStr);
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.containsKey("scope")) {
-                    tokenInfo.setScopes(((String) obj.get("scope")).split(" "));
+                if (obj.containsKey(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
+                    tokenInfo.setScopes(((String) obj.get(KeyManagerConstants.OAUTH_CLIENT_SCOPE)).split(" "));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
@@ -448,7 +448,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfo.setClientSecret(clientSecret);
         //for the first time we set default time period. TO-DO Add the validity period config value
         oAuthApplicationInfo.addParameter(KeyManagerConstants.VALIDITY_PERIOD,
-                System.getProperty("validityPeriod", "3600"));
+                System.getProperty(KeyManagerConstants.VALIDITY_PERIOD, "3600"));
 
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
@@ -469,7 +469,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             return null;
         } */
 
-        oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
+        oAuthApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopes);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }
