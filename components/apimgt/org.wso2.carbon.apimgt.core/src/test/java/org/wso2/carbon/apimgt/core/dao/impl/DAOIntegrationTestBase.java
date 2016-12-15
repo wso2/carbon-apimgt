@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.testng.annotations.DataProvider;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -25,24 +27,40 @@ import java.sql.SQLException;
 
 public class DAOIntegrationTestBase {
     protected DataSource dataSource;
-    protected static final String sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
-                                              + "features" + File.separator + "apimgt" + File.separator
-                                              + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
-                                              + File.separator + "dbscripts" + File.separator + "h2.sql";
 
-    @org.testng.annotations.BeforeMethod
-    public void setUp() throws Exception {
-        dataSource = new InMemoryDataSource();
-        ((InMemoryDataSource) dataSource).resetDB();
+    public void setUp(String database) throws Exception {
+        String sqlFilePath = null;
+        if ("h2".equals(database)){
+            dataSource = new InMemoryDataSource();
+            ((InMemoryDataSource) dataSource).resetDB();
+            sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
+                    + "features" + File.separator + "apimgt" + File.separator
+                    + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
+                    + File.separator + "dbscripts" + File.separator + "h2.sql";
+        }else if ("mysql".contains(database)){
+            dataSource = new MysqlDataSource();
+            ((MysqlDataSource) dataSource).resetDB();
+            sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
+                    + "features" + File.separator + "apimgt" + File.separator
+                    + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
+                    + File.separator + "dbscripts" + File.separator + "mysql.sql";
+        }
+        DAOUtil.clearDataSource();
         DAOUtil.initialize(dataSource);
         try (Connection connection = DAOUtil.getConnection()) {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
     }
 
-    @org.testng.annotations.AfterClass
-    public void tempDBCleanup() throws SQLException, IOException {
-        ((InMemoryDataSource) dataSource).resetDB();
+    public void tempDBCleanup(String database) throws SQLException, IOException {
+        if ("h2".equals(database)){
+            ((InMemoryDataSource) dataSource).resetDB();
+        }else if ("mysql".contains(database)){
+            ((MysqlDataSource) dataSource).resetDB();
+        }
     }
-
+    @DataProvider(name = "databases",parallel = false)
+    public Object[][] provideData() {
+        return new Object[][] {{"mysql"},{"h2"}};
+    }
 }

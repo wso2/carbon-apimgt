@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,12 +31,15 @@ import java.sql.Statement;
  * Implements DataSource interface which supports in memory h2 DB with a reusable single connection
  */
 public class InMemoryDataSource implements DataSource {
-    private JdbcDataSource dataSource = new JdbcDataSource();
+    HikariDataSource dataSource = new HikariDataSource();
+
 
     InMemoryDataSource() throws SQLException {
-        dataSource.setURL("jdbc:h2:src/test/resources/amdb");
-        dataSource.setUser("sa");
+        dataSource.setJdbcUrl("jdbc:h2:src/test/resources/amdb");
+        dataSource.setUsername("sa");
         dataSource.setPassword("sa");
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setAutoCommit(false);
     }
 
     /**

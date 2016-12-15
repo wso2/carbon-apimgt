@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -20,8 +21,11 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,24 +34,43 @@ public class ApisApiServiceImpl extends ApisApiService {
     
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
-    @Override public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
-
+    @Override
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
+                                                           String ifNoneMatch, String ifModifiedSince) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
-        InputStream documentContent = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            documentContent = apiStore.getDocumentationFileContent(documentId);
-            if (documentContent == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            DocumentContent documentationContent = apiStore.getDocumentationContent(documentId);
+            DocumentInfo documentInfo = documentationContent.getDocumentInfo();
+            if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
+                String filename = documentInfo.getFileName();
+                return Response.ok(documentInfo)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .build();
+            } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
+                String content = documentationContent.getInlineContent();
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN).build();
+            } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
+                String sourceUrl = documentInfo.getSourceURL();
+                return Response.seeOther(new URI(sourceUrl)).build();
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while retrieving content of documentation for given apiId " + apiId + "with docId "
-                            + documentId, e, log);
+            String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
-        return Response.ok().entity(documentContent)
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_OCTET_STREAM).build();
+        return null;
     }
 
 
