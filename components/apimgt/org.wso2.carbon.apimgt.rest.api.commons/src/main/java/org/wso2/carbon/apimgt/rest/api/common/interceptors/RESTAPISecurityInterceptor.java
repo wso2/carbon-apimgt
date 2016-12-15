@@ -36,6 +36,7 @@ import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Security Interceptor that does basic authentication for REST ApI requests.
@@ -69,7 +70,10 @@ public class RESTAPISecurityInterceptor implements Interceptor {
             APIMgtSecurityException {
         ErrorHandler errorHandler = null;
         boolean isAuthenticated = false;
-
+        String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
+        if (requestURI.contains("/publisher") || requestURI.contains("/store")) {
+            return true;
+        }
         try {
             if (authenticatorImplClass == null) {
                 Class<?> implClass = null;
