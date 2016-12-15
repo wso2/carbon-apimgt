@@ -1063,14 +1063,14 @@
         <carbon.apimgt.imp.pkg.version>[6.0.0, 10)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
-        <carbon.analytics.common.version>5.1.3</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.1.4</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.10</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.4</carbon.commons.version>
         <carbon.registry.version>4.6.0</carbon.registry.version>
-        <carbon.mediation.version>4.6.8</carbon.mediation.version>
+        <carbon.mediation.version>4.6.9</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.6.17</carbon.identity.version>
