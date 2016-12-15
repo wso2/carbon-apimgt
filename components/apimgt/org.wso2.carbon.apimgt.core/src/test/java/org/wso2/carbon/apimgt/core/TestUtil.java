@@ -19,6 +19,10 @@
 
 package org.wso2.carbon.apimgt.core;
 
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerCertificateException;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.DockerException;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -138,5 +142,10 @@ public class TestUtil {
         }
 
         return null;
+    }
+    public static String getIpAddressOfContainer(String aliasName) throws DockerCertificateException,
+            DockerException, InterruptedException {
+        DockerClient docker = DefaultDockerClient.fromEnv().build();
+        return docker.inspectContainer("apim-mysql").networkSettings().ipAddress();
     }
 }

@@ -20,7 +20,10 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 
+import com.spotify.docker.client.DockerCertificateException;
+import com.spotify.docker.client.DockerException;
 import com.zaxxer.hikari.HikariDataSource;
+import org.wso2.carbon.apimgt.core.TestUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -32,10 +35,23 @@ import java.util.List;
 public class MysqlDataSource implements DataSource{
    static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
+    static String ipAddress;
 
-    MysqlDataSource() throws SQLException {
+    static {
+        try {
+            ipAddress = TestUtil.getIpAddressOfContainer("apim-mysql");
+        } catch (DockerCertificateException e) {
+            e.printStackTrace();
+        } catch (DockerException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    MysqlDataSource() throws Exception {
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:mysql://"+ipAddress+":3306/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(false);
