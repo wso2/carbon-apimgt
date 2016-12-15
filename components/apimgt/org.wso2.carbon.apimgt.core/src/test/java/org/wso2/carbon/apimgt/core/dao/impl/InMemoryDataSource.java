@@ -31,7 +31,7 @@ import java.sql.Statement;
  * Implements DataSource interface which supports in memory h2 DB with a reusable single connection
  */
 public class InMemoryDataSource implements DataSource {
-    HikariDataSource dataSource = new HikariDataSource();
+    static HikariDataSource dataSource = new HikariDataSource();
 
 
     InMemoryDataSource() throws SQLException {

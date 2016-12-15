@@ -467,6 +467,35 @@
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
+                <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.18.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>start</goal>
+                                <goal>stop</goal>
+                                <goal>remove</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.2.1</version>
+                    <configuration>
+                        <executable>mvn</executable>
+                        <arguments>
+                            <argument>docker:start</argument>
+                            <argument>failsafe:integration-test</argument>
+                            <argument>failsafe:verify</argument>
+                            <argument>docker:stop</argument>
+                            <argument>docker:remove</argument>
+                        </arguments>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

@@ -167,6 +167,12 @@
             <version>5.1.35</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-client</artifactId>
+            <version>3.5.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -201,6 +207,34 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.18.1</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>apim-mysql</alias>
+                            <name>mysql:5.7</name>
+                            <run>
+                                <namingStrategy>alias</namingStrategy>
+                                <env>
+                                    <MYSQL_DATABASE>testamdb</MYSQL_DATABASE>
+                                    <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
+                                </env>
+                                <wait>
+                                    <tcp>
+                                        <ports>
+                                            <port>3306</port>
+                                        </ports>
+                                    </tcp>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
             </plugin>
         </plugins>
     </build>
