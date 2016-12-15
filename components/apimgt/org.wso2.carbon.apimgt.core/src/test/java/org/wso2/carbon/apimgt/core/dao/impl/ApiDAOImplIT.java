@@ -94,17 +94,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (API api : apiList) {
-            if (api.getId().equals(api1.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api1), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api1)));
-            } else if (api.getId().equals(api2.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api2), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api2)));
-            } else {
-                Assert.fail("Invalid API ID found");
-            }
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                                        TestUtil.printDiff(apiList, expectedAPIs));
     }
 
     @Test(dataProvider = "databases")
@@ -147,17 +138,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (API api : apiList) {
-            if (api.getId().equals(api1.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api1), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api1)));
-            } else if (api.getId().equals(api2.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api2), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api2)));
-            } else {
-                Assert.fail("Invalid API ID found");
-            }
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
 
         // Get APIs belonging to provider2
         apiList = apiDAO.getAPIsForProvider(provider2);
