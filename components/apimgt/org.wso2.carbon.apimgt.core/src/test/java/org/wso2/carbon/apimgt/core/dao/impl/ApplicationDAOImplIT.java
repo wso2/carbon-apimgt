@@ -30,8 +30,9 @@ import java.util.List;
 
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
-    @Test
-    public void testAddAndGetApplication() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testAddAndGetApplication(String databases ) throws Exception {
+        setUp(databases);
         //add new app
         Application app = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -43,8 +44,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         validateAppTimestamps(appFromDB, app);
     }
 
-    @Test
-    public void testUpdateApplication() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testUpdateApplication(String databases ) throws Exception {
+        setUp(databases);
         //add new app
         Application currentApp = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -61,8 +63,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         validateAppTimestamps(appFromDB, newApp);
     }
 
-    @Test
-    public void testDeleteApplication() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testDeleteApplication(String databases ) throws Exception {
+        setUp(databases);
         // add app
         Application app = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -72,8 +75,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(appFromDB);
     }
 
-    @Test
-    public void testIsApplicationNameExists() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testIsApplicationNameExists(String databases ) throws Exception {
+        setUp(databases);
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //check for a non-existing application
         Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
@@ -83,8 +87,9 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(applicationDAO.isApplicationNameExists(app.getName()));
     }
 
-    @Test
-    public void testGetAllApplications() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testGetAllApplications(String databases ) throws Exception {
+        setUp(databases);
         //add 4 apps
         String username = "admin";
         Application app1 = TestUtil.addCustomApplication("App1", username);
@@ -116,24 +121,27 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    @Test
-    public void testGetApplicationsForUser() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testGetApplicationsForUser(String databases ) throws Exception {
+        setUp(databases);
 
     }
 
-    @Test
-    public void testGetApplicationsForGroup() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testGetApplicationsForGroup(String databases ) throws Exception {
+        setUp(databases);
 
     }
 
-    @Test
-    public void testSearchApplicationsForUser() throws Exception {
+    @Test(dataProvider = "databases")
+    public void testSearchApplicationsForUser(String databases ) throws Exception {
+        setUp(databases);
 
     }
 
-    @Test
-    public void testSearchApplicationsForGroup() throws Exception {
-
+    @Test(dataProvider = "databases")
+    public void testSearchApplicationsForGroup(String databases ) throws Exception {
+        setUp(databases);
     }
 
     private void validateAppTimestamps(Application appFromDB, Application expectedApp) {

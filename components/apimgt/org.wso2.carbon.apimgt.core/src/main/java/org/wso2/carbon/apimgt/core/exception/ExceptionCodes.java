@@ -59,7 +59,9 @@ public enum ExceptionCodes implements ErrorHandler {
     OAUTH2_APP_MAP_FAILED(900406, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
     TOKEN_INTROSPECTION_FAILED(900407, "Keymanagement Error", 500, " Error while introspecting the access token."),
     APPLICATION_TOKEN_GENERATION_FAILED(900408, "Keymanagement Error", 500, " Error while generating the application" +
-            "access token.");
+            "access token."),
+    DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
+    DOCUMENT_NOT_FOUND(900314, "Document not found", 404, "Document not found");
 
     private final long errorCode;
     private final String errorMessage;
