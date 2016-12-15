@@ -31,10 +31,11 @@ import java.util.List;
 
 public class MysqlDataSource implements DataSource{
    static HikariDataSource basicDataSource = new HikariDataSource();
+    static String databaseName = "testamdb";
 
     MysqlDataSource() throws SQLException {
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/testamdb");
+        basicDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(false);
@@ -56,7 +57,7 @@ public class MysqlDataSource implements DataSource{
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
-                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='amdb'")) {
+                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='"+databaseName+"'")) {
                 while (resultSet.next()) {
                     listOfTables.add(resultSet.getString("TABLE_NAME"));
                 }
