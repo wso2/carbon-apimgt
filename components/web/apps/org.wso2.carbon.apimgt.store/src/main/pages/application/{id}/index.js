@@ -15,10 +15,6 @@
  */
 
 function onRequest(env) {
-    //print(env.config.theme);
-    var apiList = [{id: "1", name: "TwitterFeed", version: "1.0.0", publisher: "White", rating:3},
-        {id: "2", name: "Gmail", version: "2.0.0", publisher: "White", rating:3},
-        {id: "3", name: "Gdrive", version: "3.0.0", publisher: "White", rating:3},
-        {id: "4", name: "FacebookFeed", version: "4.0.0", publisher: "White", rating:3}];
-    return {apis: apiList};
+    var id= env.pathParams["id"];
+    return {id: id};
 }
