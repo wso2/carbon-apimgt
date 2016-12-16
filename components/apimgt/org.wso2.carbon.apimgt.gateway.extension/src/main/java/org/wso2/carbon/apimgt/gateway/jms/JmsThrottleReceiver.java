@@ -1,13 +1,3 @@
-package org.wso2.carbon.apimgt.gateway.jms;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.andes.url.URLSyntaxException;
-
-import javax.jms.JMSException;
-import javax.jms.TopicSubscriber;
-import javax.naming.NamingException;
-
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -25,6 +15,17 @@ import javax.naming.NamingException;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.apimgt.gateway.jms;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.andes.url.URLSyntaxException;
+
+import javax.jms.JMSException;
+import javax.jms.TopicSubscriber;
+import javax.naming.NamingException;
+
 
 /**
  * JMS receiver thread, try to fetch message from JMS topic periodic

@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.constants;
 
 
 /**
- * contains throtlling related constants
+ * contains throttling related constants
  */
 public class APIThrottleConstants {
 
