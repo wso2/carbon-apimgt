@@ -1,4 +1,4 @@
-var AppkeyTemplate;
+var AppkeyTemplate, client;
 var grantTypes = {
     "0": {"key": "refresh_token", "grantType": "Refresh Token"},
     "1": {"key": "urn:ietf:params:oauth:grant-type:saml2-bearer", "grantType": "SAML2"},
@@ -16,7 +16,9 @@ $(function () {
         size: 4
     });
 
-    var client = new ZeroClipboard( document.getElementById("copy-button") );
+    $(".navigation ul li.active").removeClass('active');
+    var prev = $(".navigation ul li:first")
+    $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
     client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
@@ -135,15 +137,15 @@ $(function () {
                     $('.selectpicker').selectpicker('refresh');
                 }
                 
-                var client = new ZeroClipboard($('.copy-button'));
+                var ClipboardClient = new ZeroClipboard($('.copy-button'));
 
-                client.on('ready', function (event) {
-                    client.on('copy', function (event) {
+                ClipboardClient.on('ready', function (event) {
+                    ClipboardClient.on('copy', function (event) {
                         event.clipboardData.setData('text/plain', event.target.value);
                     });
                 });
 
-                client.on('error', function (event) {
+                ClipboardClient.on('error', function (event) {
                     alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
                     ZeroClipboard.destroy();
                 });

@@ -5,6 +5,10 @@ function tierChanged(element) {
 }
 $(function () {
 
+    $(".navigation ul li.active").removeClass('active');
+    var prev = $(".navigation ul li:first")
+    $(".green").insertBefore(prev).css('top','0px').addClass('active');
+
     var bearerToken = "Bearer 9dfe93c5-5e46-3b28-9a65-312cc799cc9b";
 
     var client = new SwaggerClient({
