@@ -38,7 +38,6 @@ public class MysqlDataSource implements DataSource{
 
     MysqlDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
-        basicDataSource.getParentLogger().setLevel(Level.INFO);
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         basicDataSource.setJdbcUrl("jdbc:mysql://"+ipAddress+":3306/" + databaseName);
         basicDataSource.setUsername("root");

@@ -36,7 +36,6 @@ public class InMemoryDataSource implements DataSource {
 
 
     InMemoryDataSource() throws SQLException {
-        dataSource.getParentLogger().setLevel(Level.INFO);
         dataSource.setJdbcUrl("jdbc:h2:src/test/resources/amdb");
         dataSource.setUsername("sa");
         dataSource.setPassword("sa");
