@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator-stubs</artifactId>
-        <version>6.1.3</version>
+        <version>6.1.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
