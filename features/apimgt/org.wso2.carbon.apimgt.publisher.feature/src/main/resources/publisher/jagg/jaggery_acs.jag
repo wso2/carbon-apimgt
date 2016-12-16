@@ -82,7 +82,7 @@
                }
                }
 
-            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session,isAsssertionEncryptionEnabled);
+            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
             ssoRelyingParty.addSession(session);
             session.put("showLogin", "false");
             var api = jagg.module("api");
