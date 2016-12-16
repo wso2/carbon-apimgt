@@ -45,7 +45,6 @@ import javax.jms.TopicSubscriber;
 import javax.naming.NamingException;
 
 
-
 /**
  * This class is used to subscribe to a jms topic and update the throttle maps
  */
@@ -64,6 +63,8 @@ public class ThrottleJMSListner {
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
 
+    private boolean isSubscribed = false;
+
     /**
      * Subscribe to the topic
      *
@@ -74,14 +75,24 @@ public class ThrottleJMSListner {
      */
     public TopicSubscriber subscribe() throws NamingException, JMSException, URLSyntaxException {
         // Lookup connection factory
-        TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                getTCPConnectionURL(JMSConfigs.JMS_USERNAME, JMSConfigs.JMS_PASSWORD));
-        topicConnection = connFactory.createTopicConnection();
-        topicConnection.start();
-        topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-        // Send message
-        Topic topic = topicSession.createTopic(JMSConfigs.THROTTLING_TOPIC_NAME);
-        TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
+        TopicSubscriber topicSubscriber = null;
+        try {
+            TopicConnectionFactory connFactory = new AMQConnectionFactory(
+                    getTCPConnectionURL(JMSConfigs.JMS_USERNAME, JMSConfigs.JMS_PASSWORD));
+            topicConnection = connFactory.createTopicConnection();
+            topicConnection.start();
+            topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
+            // Send message
+            Topic topic = topicSession.createTopic(JMSConfigs.THROTTLING_TOPIC_NAME);
+            topicSubscriber = topicSession.createSubscriber(topic);
+            isSubscribed = true;
+
+        } catch (JMSException e) {
+            //swallowing Exception since this method will be periodically called until a jms conncetion is established
+            isSubscribed = false;
+            log.error("Jms connection failure ");
+        }
+
         return topicSubscriber;
     }
 
@@ -301,5 +312,9 @@ public class ThrottleJMSListner {
         } else {
             ThrottleDataHolder.getInstance().removeKeyTemplate(keyTemplateValue);
         }
+    }
+
+    public boolean isSubscribed() {
+        return isSubscribed;
     }
 }

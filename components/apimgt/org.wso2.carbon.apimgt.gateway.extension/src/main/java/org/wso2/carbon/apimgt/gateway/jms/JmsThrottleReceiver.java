@@ -41,24 +41,30 @@ public class JmsThrottleReceiver extends Thread {
         listner = new ThrottleJMSListner();
         try {
             subscriber = listner.subscribe();
+
+            while (true) {
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Starting to receive throttle messages..... ");
+                    }
+
+                    if (listner.isSubscribed()) {
+                        listner.receive(subscriber);
+                    } else {
+                        subscriber = listner.subscribe();
+                    }
+
+                } catch (NamingException | JMSException e) {
+                    log.error("Unable to subscribe to the topic", e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    log.error("Unable to subscribe to the topic", e);
+                }
+            }
         } catch (NamingException | JMSException | URLSyntaxException e) {
             log.error("Unable to subscribe to the topic", e);
-        }
-
-        while (true) {
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug("Starting to receive throttle messages..... ");
-                }
-                listner.receive(subscriber);
-            } catch (NamingException | JMSException e) {
-                log.error("Unable to subscribe to the topic", e);
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("Unable to subscribe to the topic", e);
-            }
         }
 
     }
