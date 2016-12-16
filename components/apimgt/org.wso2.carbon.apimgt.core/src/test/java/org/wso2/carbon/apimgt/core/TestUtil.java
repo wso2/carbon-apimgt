@@ -122,15 +122,14 @@ public class TestUtil {
 
             if (!Objects.equals(obj1Value, obj2Value)) {
                 return "Diff detected for '" + field.getName() + "' " + System.lineSeparator() +
-                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System
-                        .lineSeparator() +
-                        obj1ValueString + System.lineSeparator() +
-                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System
-                        .lineSeparator() +
-                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System
-                        .lineSeparator() +
-                        obj2ValueString + System.lineSeparator() +
-                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" +
+                        System.lineSeparator() + obj1ValueString + System.lineSeparator() +
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" +
+                        System.lineSeparator() +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" +
+                        System.lineSeparator() + obj2ValueString + System.lineSeparator() +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" +
+                        System.lineSeparator();
             }
         }
 
