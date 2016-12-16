@@ -24,12 +24,12 @@ import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 
-import java.util.Properties;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -37,13 +37,17 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
-import javax.naming.Context;
 
 /**
  * API gateway related functions
  */
 public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
+    private APIMConfigurations config;
+
+    public APIGatewayPublisherImpl() {
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+    }
 
     /**
      * Publishing API configuration artifacts to the gateway
@@ -76,19 +80,14 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
      * @throws URLSyntaxException If connection String is invalid
      */
     private void publishMessage(String content) throws JMSException, URLSyntaxException {
-        Properties properties = new Properties();
-        properties.put(Context.INITIAL_CONTEXT_FACTORY, APIMConfigurations.QPID_ICF);
-        properties.put(APIMConfigurations.CF_NAME_PREFIX + APIMConfigurations.CF_NAME,
-                getTCPConnectionURL(APIMConfigurations.USERNAME, APIMConfigurations.PASSWORD));
-
         // create connection factory
         TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                getTCPConnectionURL(APIMConfigurations.USERNAME, APIMConfigurations.PASSWORD));
+                getTCPConnectionURL(config.getUsername(), config.getPassword()));
         TopicConnection topicConnection = connFactory.createTopicConnection();
         topicConnection.start();
         TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = topicSession.createTopic(APIMConfigurations.TOPIC_NAME);
+        Topic topic = topicSession.createTopic(config.getTopicName());
         // create the message to send
         TextMessage textMessage = topicSession.createTextMessage(content);
         TopicPublisher topicPublisher = topicSession.createPublisher(topic);
@@ -110,10 +109,10 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     private String getTCPConnectionURL(String username, String password) {
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
         return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(APIMConfigurations.CARBON_CLIENT_ID).append("/")
-                .append(APIMConfigurations.CARBON_VIRTUAL_HOST_NAME).append("?brokerlist='tcp://")
-                .append(APIMConfigurations.CARBON_DEFAULT_HOSTNAME).append(":")
-                .append(APIMConfigurations.CARBON_DEFAULT_PORT).append("'").toString();
+                .append(config.getCarbonClientId()).append("/")
+                .append(config.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
+                .append(config.getTopicServerHost()).append(":")
+                .append(config.getTopicServerPort()).append("'").toString();
 
     }
 }

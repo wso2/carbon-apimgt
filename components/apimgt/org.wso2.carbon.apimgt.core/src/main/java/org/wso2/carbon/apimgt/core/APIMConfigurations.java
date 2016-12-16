@@ -16,20 +16,55 @@ package org.wso2.carbon.apimgt.core;
  * specific language governing permissions and limitations
  * under the License.
  */
-//@Configuration(namespace = "wso2.carbon", description = "Carbon Configuration Parameters")
+
+//import org.wso2.carbon.kernel.annotations.Configuration;
+//import org.wso2.carbon.kernel.annotations.Element;
 
 /**
- *
+ * Class to hold APIM configuration parameters and generate yaml file
+ * TODO refactor class when kernal is updated to 5.2.0
  */
+//@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
-    public static final String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
-    public static final String CF_NAME_PREFIX = "connectionfactory.";
-    public static final String CF_NAME = "qpidConnectionfactory";
-    public static final String CARBON_CLIENT_ID = "carbon";
-    public static final String CARBON_VIRTUAL_HOST_NAME = "carbon";
-    public static final String CARBON_DEFAULT_HOSTNAME = "localhost";
-    public static final String CARBON_DEFAULT_PORT = "5672";
-    public static final String TOPIC_NAME = "MYTopic";
-    public static final String USERNAME = "MYTopic";
-    public static final String PASSWORD = "MYTopic";
+    private String carbonClientId = "carbon";
+//    @Element(description = "server version")
+    private String carbonVirtualHostName = "carbon";
+//    @Element(description = "topic server host")
+    private String topicServerHost = "localhost";
+//    @Element(description = "topic server port")
+    private String topicServerPort = "5672";
+//    @Element(description = "topic name")
+    private String topicName = "MYTopic";
+//    @Element(description = "username for topic")
+    private String username = "MYTopic";
+//    @Element(description = "password for topic")
+    private String password = "MYTopic";
+
+    public String getCarbonClientId() {
+        return carbonClientId;
+    }
+
+    public String getCarbonVirtualHostName() {
+        return carbonVirtualHostName;
+    }
+
+    public String getTopicServerHost() {
+        return topicServerHost;
+    }
+
+    public String getTopicServerPort() {
+        return topicServerPort;
+    }
+
+    public String getTopicName() {
+        return topicName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }
