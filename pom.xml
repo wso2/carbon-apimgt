@@ -471,15 +471,6 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.18.1</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>start</goal>
-                                <goal>stop</goal>
-                                <goal>remove</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -487,6 +478,7 @@
                     <version>1.2.1</version>
                     <configuration>
                         <executable>mvn</executable>
+                        <workingDirectory>${project.basedir}/components/apimgt/org.wso2.carbon.apimgt.core</workingDirectory>
                         <arguments>
                             <argument>docker:start</argument>
                             <argument>failsafe:integration-test</argument>

@@ -23,6 +23,7 @@ import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerCertificateException;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerException;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -34,10 +35,15 @@ import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class TestUtil {
+    static Map<String, String> ipAddressMap = new HashedMap();
+    private static TestUtil instance = new TestUtil();
+    private TestUtil(){
 
+    }
     public static Application addTestApplication() throws APIMgtDAOException {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application application = SampleTestObjectCreator.createDefaultApplication();
@@ -116,10 +122,13 @@ public class TestUtil {
 
             if (!Objects.equals(obj1Value, obj2Value)) {
                 return "Diff detected for '" + field.getName() + "' " + System.lineSeparator() +
-                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System.lineSeparator() +
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System
+                        .lineSeparator() +
                         obj1ValueString + System.lineSeparator() +
-                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + System.lineSeparator() +
-                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System.lineSeparator() +
+                        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LHS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System
+                        .lineSeparator() +
+                        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" + System
+                        .lineSeparator() +
                         obj2ValueString + System.lineSeparator() +
                         "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< RHS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
             }
@@ -143,9 +152,19 @@ public class TestUtil {
 
         return null;
     }
-    public static String getIpAddressOfContainer(String aliasName) throws DockerCertificateException,
+    public String getIpAddressOfContainer(String aliasName) throws DockerCertificateException,
             DockerException, InterruptedException {
         DockerClient docker = DefaultDockerClient.fromEnv().build();
-        return docker.inspectContainer("apim-mysql").networkSettings().ipAddress();
+        if (ipAddressMap.containsKey(aliasName)){
+            return ipAddressMap.get(aliasName);
+        }else{
+            String ipAddress = docker.inspectContainer(aliasName).networkSettings().ipAddress();
+            ipAddressMap.put(aliasName,ipAddress);
+            return ipAddress;
+        }
+    }
+
+    public static TestUtil getInstance() {
+        return instance;
     }
 }
