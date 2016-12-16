@@ -22,20 +22,18 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.h2.jdbcx.JdbcDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
 
 /**
  * Implements DataSource interface which supports in memory h2 DB with a reusable single connection
  */
-public class InMemoryDataSource implements DataSource {
+public class H2DataSource implements DataSource {
     static HikariDataSource dataSource = new HikariDataSource();
 
 
-    InMemoryDataSource() throws SQLException {
+    H2DataSource() throws SQLException {
         dataSource.setJdbcUrl("jdbc:h2:src/test/resources/amdb");
         dataSource.setUsername("sa");
         dataSource.setPassword("sa");

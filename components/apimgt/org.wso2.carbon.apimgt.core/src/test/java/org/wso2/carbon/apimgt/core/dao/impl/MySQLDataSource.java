@@ -29,14 +29,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-public class MysqlDataSource implements DataSource{
+public class MySQLDataSource implements DataSource{
    static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
 
 
-    MysqlDataSource() throws Exception {
+    MySQLDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         basicDataSource.setJdbcUrl("jdbc:mysql://"+ipAddress+":3306/" + databaseName);
@@ -57,23 +56,21 @@ public class MysqlDataSource implements DataSource{
     }
 
     public void resetDB() throws SQLException {
-        List<String> listOfTables = new ArrayList<>();
+        List<String> tables = new ArrayList<>();
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
                     "information_schema.tables WHERE table_type = 'base table' AND table_schema='"+databaseName+"'")) {
                 while (resultSet.next()) {
-                    listOfTables.add(resultSet.getString("TABLE_NAME"));
+                    tables.add(resultSet.getString("TABLE_NAME"));
                 }
             }
             statement.execute("SET FOREIGN_KEY_CHECKS = 0");
-            for(int i = 0; i<listOfTables.size();i++){
-                statement.addBatch("DROP TABLE " + listOfTables.get(i));
+            for (String table : tables) {
+                statement.addBatch("DROP TABLE " + table);
             }
             statement.executeBatch();
             statement.execute("SET FOREIGN_KEY_CHECKS = 1");
-
-            connection.commit();
         }
     }
 }
