@@ -403,25 +403,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.19.1</version>
-                    <executions>
-                        <execution>
-                            <id>integration-test</id>
-                            <goals>
-                                <goal>integration-test</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>verify</id>
-                            <goals>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
@@ -467,31 +448,61 @@
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
-                <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.18.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.2.1</version>
-                    <configuration>
-                        <executable>mvn</executable>
-                        <workingDirectory>${project.basedir}/components/apimgt/org.wso2.carbon.apimgt.core</workingDirectory>
-                        <arguments>
-                            <argument>docker:start</argument>
-                            <argument>failsafe:integration-test</argument>
-                            <argument>failsafe:verify</argument>
-                            <argument>docker:stop</argument>
-                            <argument>docker:remove</argument>
-                        </arguments>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
+<profiles>
+    <profile>
+        <id>local-test</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.18.1</version>
+                    <executions>
+                        <execution>
+                            <id>start-docker</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>start</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>stop-docker</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>stop</goal>
+                                <goal>remove</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.19.1</version>
+                    <executions>
+                        <execution>
+                            <phase>integration-test</phase>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <phase>integration-test</phase>
+                            <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
     <properties>
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
