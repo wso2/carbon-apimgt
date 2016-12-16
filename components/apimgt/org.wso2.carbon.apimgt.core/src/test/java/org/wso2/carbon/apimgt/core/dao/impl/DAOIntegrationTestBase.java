@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.testng.annotations.DataProvider;
+import bsh.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +30,16 @@ import java.sql.SQLException;
 
 public class DAOIntegrationTestBase {
     protected DataSource dataSource;
+    String database;
+    public DAOIntegrationTestBase() {
+         database = System.getenv("DATABASE_TYPE");
+        if (StringUtils.isEmpty(database)){
+            database = "h2";
+        }
+    }
 
-    public void setUp(String database) throws Exception {
+    @BeforeMethod
+    public void setUp() throws Exception {
         String sqlFilePath = null;
         if ("h2".equals(database)){
             dataSource = new InMemoryDataSource();
@@ -51,16 +62,12 @@ public class DAOIntegrationTestBase {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
     }
-
-    public void tempDBCleanup(String database) throws SQLException, IOException {
+@AfterClass
+    public void tempDBCleanup() throws SQLException, IOException {
         if ("h2".equals(database)){
             ((InMemoryDataSource) dataSource).resetDB();
         }else if ("mysql".contains(database)){
             ((MysqlDataSource) dataSource).resetDB();
         }
-    }
-    @DataProvider(name = "databases",parallel = false)
-    public Object[][] provideData() {
-        return new Object[][] {{"mysql"},{"h2"}};
     }
 }

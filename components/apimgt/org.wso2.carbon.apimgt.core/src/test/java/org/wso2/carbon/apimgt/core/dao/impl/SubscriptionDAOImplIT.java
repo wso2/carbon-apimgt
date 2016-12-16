@@ -33,9 +33,9 @@ import java.util.UUID;
 
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
-    @Test(dataProvider = "databases")
-    public void testAddAndGetSubscription(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testAddAndGetSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -59,9 +59,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
-    @Test(dataProvider = "databases")
-    public void testUpdateSubscription(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testUpdateSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -111,9 +111,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetSubscriptionByAPI(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetSubscriptionByAPI( ) throws Exception {
+       
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -213,9 +213,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetSubscriptionByApplication(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetSubscriptionByApplication( ) throws Exception {
+       
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -303,9 +303,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    @Test(dataProvider = "databases")
-    public void testDeleteSubscription(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testDeleteSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
