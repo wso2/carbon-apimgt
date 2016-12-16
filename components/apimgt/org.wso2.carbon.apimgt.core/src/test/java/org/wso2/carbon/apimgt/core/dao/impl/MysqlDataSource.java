@@ -57,7 +57,7 @@ public class MysqlDataSource implements DataSource{
     }
 
     public void resetDB() throws SQLException {
-        List<String> listOfTables = new ArrayList();
+        List<String> listOfTables = new ArrayList<>();
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +

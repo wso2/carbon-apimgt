@@ -18,9 +18,10 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -126,15 +128,20 @@ public interface KeyManager {
     default OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo, String jsonInput) throws
             KeyManagementException {
         //initiate json parser.
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject;
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject;
 
         try {
             //parse json String
-            jsonObject = (JSONObject) parser.parse(jsonInput);
+            jsonObject = parser.parse(jsonInput).getAsJsonObject();
             if (jsonObject != null) {
                 //create a map to hold json parsed objects.
-                Map<String, Object> params = (Map) jsonObject;
+                Map<String, Object> params = new HashMap<>();
+                Set<Map.Entry<String, JsonElement>> entries = jsonObject.entrySet();
+
+                for (Map.Entry<String, JsonElement> entry : entries) {
+                    params.put(entry.getKey(), entry.getValue());
+                }
 
                 //set client Id
                 if (params.get(KeyManagerConstants.OAUTH_CLIENT_ID) != null) {
@@ -144,7 +151,7 @@ public interface KeyManager {
                 authApplicationInfo.putAll(params);
                 return authApplicationInfo;
             }
-        } catch (ParseException e) {
+        } catch (JsonSyntaxException e) {
             throw new KeyManagementException("Error occurred while parsing JSON String", e);
         }
         return null;
@@ -170,8 +177,8 @@ public interface KeyManager {
             return tokenRequest;
         }
 
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject;
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject;
 
         if (tokenRequest == null) {
             if (LOG.isDebugEnabled()) {
@@ -181,27 +188,26 @@ public interface KeyManager {
         }
 
         try {
-            jsonObject = (JSONObject) parser.parse(jsonInput);
+            jsonObject = parser.parse(jsonInput).getAsJsonObject();
             // Getting parameters from input string and setting in TokenRequest.
-            if (jsonObject != null && !jsonObject.isEmpty()) {
-                Map<String, Object> params = (Map<String, Object>) jsonObject;
+            if (jsonObject != null && !jsonObject.entrySet().isEmpty()) {
+                //Map<String, Object> params = (Map<String, Object>) jsonObject;
 
-                if (null != params.get(KeyManagerConstants.OAUTH_CLIENT_ID)) {
-                    tokenRequest.setClientId((String) params.get(KeyManagerConstants.OAUTH_CLIENT_ID));
+                if (jsonObject.has(KeyManagerConstants.OAUTH_CLIENT_ID)) {
+                    tokenRequest.setClientId(jsonObject.get(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString());
                 }
 
-                if (null != params.get(KeyManagerConstants.OAUTH_CLIENT_SECRET)) {
-                    tokenRequest.setClientSecret((String) params.get(KeyManagerConstants.OAUTH_CLIENT_SECRET));
+                if (jsonObject.has(KeyManagerConstants.OAUTH_CLIENT_SECRET)) {
+                    tokenRequest.setClientSecret(jsonObject.get(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString());
                 }
 
-                if (null != params.get(KeyManagerConstants.VALIDITY_PERIOD)) {
-                    tokenRequest.setValidityPeriod(Long.parseLong((String) params.get(
-                            KeyManagerConstants.VALIDITY_PERIOD)));
+                if (jsonObject.has(KeyManagerConstants.VALIDITY_PERIOD)) {
+                    tokenRequest.setValidityPeriod(jsonObject.get(KeyManagerConstants.VALIDITY_PERIOD).getAsLong());
                 }
 
                 return tokenRequest;
             }
-        } catch (ParseException e) {
+        } catch (JsonSyntaxException e) {
             throw new KeyManagementException("Error occurred while parsing JSON String", e);
         }
         return null;

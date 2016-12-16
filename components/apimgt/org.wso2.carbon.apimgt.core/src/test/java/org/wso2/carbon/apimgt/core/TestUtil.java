@@ -23,7 +23,6 @@ import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerCertificateException;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerException;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -34,12 +33,13 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class TestUtil {
-    static Map<String, String> ipAddressMap = new HashedMap();
+    private static Map<String, String> ipAddressMap = new HashMap<>();
     private static TestUtil instance = new TestUtil();
     private TestUtil(){
 
