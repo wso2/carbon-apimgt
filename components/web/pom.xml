@@ -40,6 +40,7 @@
         <module>themes/org.wso2.carbon.apimgt.theme.publisher</module>
         <module>apps/org.wso2.carbon.apimgt.store</module>
         <module>apps/org.wso2.carbon.apimgt.publisher</module>
+        <module>apps/org.wso2.carbon.apimgt.editor.app</module>
     </modules>
 
 </project>

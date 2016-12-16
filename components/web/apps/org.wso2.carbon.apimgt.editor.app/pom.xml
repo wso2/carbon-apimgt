@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.wso2.carbon.apimgt.editor.feature</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.web.editor.feature</artifactId>
     <packaging>carbon-feature</packaging>
 
     <name>WSO2 API Manager - Web - Apps - API Editor</name>
@@ -35,7 +35,13 @@
 
     <dependencies>
         <!--UUF Components-->
-
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt.web</groupId>
+            <artifactId>org.wso2.carbon.apimgt.web.store.utils</artifactId>
+            <version>${carbon.apimgt.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
         <!--UUF Themes-->
         <dependency>
             <groupId>org.wso2.carbon.apimgt.web</groupId>
@@ -45,6 +51,11 @@
             <classifier>uuf-theme</classifier>
         </dependency>
         <!--Backend dependencies-->
+        <dependency>
+            <groupId>org.wso2.carbon.uuf.sample</groupId>
+            <artifactId>org.wso2.carbon.uuf.sample.simple-auth.bundle</artifactId>
+            <version>${carbon.uuf.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -61,14 +72,6 @@
                         <goals>
                             <goal>create-app</goal>
                         </goals>
-                        <configuration>
-                            <instructions>
-                                <Import-Package>org.wso2.carbon.uuf.sample.simpleauth.bundle</Import-Package>
-                            </instructions>
-                            <!--All backend dependencies should be specified here-->
-                            <bundles>
-                            </bundles>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
