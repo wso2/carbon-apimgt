@@ -187,28 +187,35 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
                 "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
                 "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
-        try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
+        try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            ps.setString(1, application.getId());
-            ps.setString(2, application.getName());
-            ps.setString(3, application.getTier());
-            ps.setString(4, application.getCallbackUrl());
-            ps.setString(5, application.getDescription());
+            try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
+                ps.setString(1, application.getId());
+                ps.setString(2, application.getName());
+                ps.setString(3, application.getTier());
+                ps.setString(4, application.getCallbackUrl());
+                ps.setString(5, application.getDescription());
 
-            if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
-                ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
-            } else {
-                ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+                if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
+                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
+                } else {
+                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+                }
+
+                ps.setString(7, application.getGroupId());
+                ps.setString(8, application.getCreatedUser());
+                ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setString(10, application.getCreatedUser());
+                ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
+                ps.executeUpdate();
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
-
-            ps.setString(7, application.getGroupId());
-            ps.setString(8, application.getCreatedUser());
-            ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
-            ps.setString(10, application.getCreatedUser());
-            ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
-            ps.executeUpdate();
-            conn.commit();
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
@@ -228,19 +235,26 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
                 "LAST_UPDATED_TIME=?";
-        try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
+        try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            ps.setString(1, updatedApp.getName());
-            ps.setString(2, updatedApp.getTier());
-            ps.setString(3, updatedApp.getCallbackUrl());
-            ps.setString(4, updatedApp.getDescription());
-            ps.setString(5, updatedApp.getStatus());
-            ps.setString(6, updatedApp.getGroupId());
-            ps.setString(7, updatedApp.getUpdatedUser());
-            ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
-            ps.executeUpdate();
-            conn.commit();
+            try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
+                ps.setString(1, updatedApp.getName());
+                ps.setString(2, updatedApp.getTier());
+                ps.setString(3, updatedApp.getCallbackUrl());
+                ps.setString(4, updatedApp.getDescription());
+                ps.setString(5, updatedApp.getStatus());
+                ps.setString(6, updatedApp.getGroupId());
+                ps.setString(7, updatedApp.getUpdatedUser());
+                ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.executeUpdate();
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
+            }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
@@ -254,13 +268,20 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public void deleteApplication(String appID) throws APIMgtDAOException {
-        final String query = "DELETE FROM AM_APPLICATION WHERE UUID = ?";
-        try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement statement = conn.prepareStatement(query)) {
+        final String appDeleteQuery = "DELETE FROM AM_APPLICATION WHERE UUID = ?";
+        try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            statement.setString(1, appID);
-            statement.execute();
-            conn.commit();
+            try (PreparedStatement ps = conn.prepareStatement(appDeleteQuery)) {
+                ps.setString(1, appID);
+                ps.execute();
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
+            }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
@@ -280,7 +301,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, appName);
             statement.execute();
-
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
                     return true;

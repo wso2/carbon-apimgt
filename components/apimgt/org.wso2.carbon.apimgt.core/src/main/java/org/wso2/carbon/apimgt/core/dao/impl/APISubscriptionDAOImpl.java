@@ -210,12 +210,16 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants
             .SubscriptionStatus status) throws APIMgtDAOException {
         try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
+            conn.setAutoCommit(false);
             try {
                 createSubscription(apiId, appId, uuid, tier, status, conn);
                 conn.commit();
-            } catch (SQLException e) {
+            } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -232,14 +236,17 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         final String deleteSubscriptionSql = "DELETE FROM AM_SUBSCRIPTION WHERE UUID = ? ";
         try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
+            conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(deleteSubscriptionSql)) {
-                conn.setAutoCommit(false);
                 ps.setString(1, subscriptionId);
                 ps.execute();
                 conn.commit();
-            } catch (SQLException e) {
+            } catch (SQLException ex) {
                 conn.rollback();
-                throw e;
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -279,15 +286,19 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     @Override
     public void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException {
         try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
+            conn.setAutoCommit(false);
             try {
                 for (Subscription subscription : subscriptionList) {
                     createSubscription(subscription.getApi().getId(), subscription.getApplication().getId(),
                             subscription.getId(), subscription.getSubscriptionTier(), subscription.getStatus(), conn);
                 }
                 conn.commit();
-            } catch (SQLException e) {
+            } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -305,15 +316,19 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus)
             throws APIMgtDAOException {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE UUID = ?";
-        try (Connection connection = DAOUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+        try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, subStatus.toString());
                 preparedStatement.setString(2, subId);
                 preparedStatement.execute();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new APIMgtDAOException(e);
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -331,15 +346,19 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = " +
                 "(SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?) WHERE UUID = ?";
-        try (Connection connection = DAOUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSubscriptionSql)) {
+        try (Connection conn = DAOUtil.getConnection()) {
+            boolean originalAutoCommitState = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, policy);
                 preparedStatement.setString(2, subId);
                 preparedStatement.execute();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new APIMgtDAOException(e);
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);

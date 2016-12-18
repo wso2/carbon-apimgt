@@ -22,11 +22,10 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.h2.jdbcx.JdbcDataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
 
 /**
  * Implements DataSource interface which supports in memory h2 DB with a reusable single connection
@@ -40,7 +39,7 @@ public class InMemoryDataSource implements DataSource {
         dataSource.setUsername("sa");
         dataSource.setPassword("sa");
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setAutoCommit(false);
+        dataSource.setAutoCommit(true);
     }
 
     /**

@@ -29,20 +29,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-public class MysqlDataSource implements DataSource{
-   static HikariDataSource basicDataSource = new HikariDataSource();
-    static String databaseName = "testamdb";
+public class MysqlDataSource implements DataSource {
+    private static HikariDataSource basicDataSource = new HikariDataSource();
+    private static String databaseName = "testamdb";
 
 
     MysqlDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://"+ipAddress+":3306/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:mysql://" + ipAddress + ":3306/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
-        basicDataSource.setAutoCommit(false);
+        basicDataSource.setAutoCommit(true);
         basicDataSource.setMaximumPoolSize(20);
     }
 
@@ -57,23 +56,27 @@ public class MysqlDataSource implements DataSource{
     }
 
     public void resetDB() throws SQLException {
-        List<String> listOfTables = new ArrayList();
-        try (Connection connection = basicDataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
-                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='"+databaseName+"'")) {
-                while (resultSet.next()) {
-                    listOfTables.add(resultSet.getString("TABLE_NAME"));
+        List<String> listOfTables = new ArrayList<>();
+        try (Connection connection = basicDataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                connection.setAutoCommit(false);
+                try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
+                        "information_schema.tables WHERE table_type = 'base table' AND table_schema='" + databaseName
+                        + '\'')) {
+                    while (resultSet.next()) {
+                        listOfTables.add(resultSet.getString("TABLE_NAME"));
+                    }
                 }
+                statement.execute("SET FOREIGN_KEY_CHECKS = 0");
+                for (String listOfTable : listOfTables) {
+                    statement.addBatch("DROP TABLE " + listOfTable);
+                }
+                statement.executeBatch();
+                statement.execute("SET FOREIGN_KEY_CHECKS = 1");
+                connection.commit();
+            } catch (Exception ex) {
+                connection.rollback();
             }
-            statement.execute("SET FOREIGN_KEY_CHECKS = 0");
-            for(int i = 0; i<listOfTables.size();i++){
-                statement.addBatch("DROP TABLE " + listOfTables.get(i));
-            }
-            statement.executeBatch();
-            statement.execute("SET FOREIGN_KEY_CHECKS = 1");
-
-            connection.commit();
         }
     }
 }

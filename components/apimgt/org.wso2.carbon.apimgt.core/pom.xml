@@ -266,15 +266,15 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <phase>integration-test</phase>
                                 <id>integration-test</id>
+                                <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <phase>integration-test</phase>
                                 <id>verify</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
