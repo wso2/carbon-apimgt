@@ -15,22 +15,10 @@ public class APIMaxTpsDTO  {
   
   
   
-  private Long sandbox = null;
-  
-  
   private Long production = null;
-
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("sandbox")
-  public Long getSandbox() {
-    return sandbox;
-  }
-  public void setSandbox(Long sandbox) {
-    this.sandbox = sandbox;
-  }
+  
+  private Long sandbox = null;
 
   
   /**
@@ -45,14 +33,26 @@ public class APIMaxTpsDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("sandbox")
+  public Long getSandbox() {
+    return sandbox;
+  }
+  public void setSandbox(Long sandbox) {
+    this.sandbox = sandbox;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIMaxTpsDTO {\n");
     
-    sb.append("  sandbox: ").append(sandbox).append("\n");
     sb.append("  production: ").append(production).append("\n");
+    sb.append("  sandbox: ").append(sandbox).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
