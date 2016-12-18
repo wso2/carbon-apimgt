@@ -30,12 +30,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MysqlDataSource implements DataSource {
-    private static HikariDataSource basicDataSource = new HikariDataSource();
-    private static String databaseName = "testamdb";
+public class MySQLDataSource implements DataSource {
+    static HikariDataSource basicDataSource = new HikariDataSource();
+    static String databaseName = "testamdb";
 
 
-    MysqlDataSource() throws Exception {
+    MySQLDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         basicDataSource.setJdbcUrl("jdbc:mysql://" + ipAddress + ":3306/" + databaseName);
@@ -56,7 +56,7 @@ public class MysqlDataSource implements DataSource {
     }
 
     public void resetDB() throws SQLException {
-        List<String> listOfTables = new ArrayList<>();
+        List<String> tables = new ArrayList<>();
         try (Connection connection = basicDataSource.getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 connection.setAutoCommit(false);
@@ -64,12 +64,12 @@ public class MysqlDataSource implements DataSource {
                         "information_schema.tables WHERE table_type = 'base table' AND table_schema='" + databaseName
                         + '\'')) {
                     while (resultSet.next()) {
-                        listOfTables.add(resultSet.getString("TABLE_NAME"));
+                        tables.add(resultSet.getString("TABLE_NAME"));
                     }
                 }
                 statement.execute("SET FOREIGN_KEY_CHECKS = 0");
-                for (String listOfTable : listOfTables) {
-                    statement.addBatch("DROP TABLE " + listOfTable);
+                for (String table : tables) {
+                    statement.addBatch("DROP TABLE " + table);
                 }
                 statement.executeBatch();
                 statement.execute("SET FOREIGN_KEY_CHECKS = 1");

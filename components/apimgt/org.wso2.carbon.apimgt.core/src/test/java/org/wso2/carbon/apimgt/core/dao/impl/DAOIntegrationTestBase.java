@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import bsh.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -42,15 +41,15 @@ public class DAOIntegrationTestBase {
     public void setUp() throws Exception {
         String sqlFilePath = null;
         if ("h2".equals(database)){
-            dataSource = new InMemoryDataSource();
-            ((InMemoryDataSource) dataSource).resetDB();
+            dataSource = new H2DataSource();
+            ((H2DataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "h2.sql";
         }else if ("mysql".contains(database)){
-            dataSource = new MysqlDataSource();
-            ((MysqlDataSource) dataSource).resetDB();
+            dataSource = new MySQLDataSource();
+            ((MySQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
@@ -65,9 +64,9 @@ public class DAOIntegrationTestBase {
 @AfterClass
     public void tempDBCleanup() throws SQLException, IOException {
         if ("h2".equals(database)){
-            ((InMemoryDataSource) dataSource).resetDB();
+            ((H2DataSource) dataSource).resetDB();
         }else if ("mysql".contains(database)){
-            ((MysqlDataSource) dataSource).resetDB();
+            ((MySQLDataSource) dataSource).resetDB();
         }
     }
 }
