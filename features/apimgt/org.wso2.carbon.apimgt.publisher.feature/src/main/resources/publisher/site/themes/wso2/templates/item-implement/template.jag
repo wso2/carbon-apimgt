@@ -386,7 +386,7 @@
 							                                <input type="text" class="form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
 														</div>
 														<div class="col-sm-2">
-							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
+							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>" autocomplete="off">
 							                            </div>
 							                        </div>
 
