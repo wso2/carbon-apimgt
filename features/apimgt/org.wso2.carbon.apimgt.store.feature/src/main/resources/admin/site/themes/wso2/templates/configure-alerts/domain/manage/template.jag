@@ -2,7 +2,7 @@
 <%
     var configurations = outputs.configurationInfo;
     var templates = outputs.templates;
-    var domainName = request.getParameter("domainName");
+    var domainName = encode.forUriComponent(request.getParameter("domainName"));
     %>
 
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">

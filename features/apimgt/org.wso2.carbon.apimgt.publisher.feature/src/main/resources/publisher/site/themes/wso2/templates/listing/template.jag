@@ -72,7 +72,7 @@
             } else if (apiCount > 0) {
                 // Check whether the user enabled the tutorial by clicking Documentation sub-menu
                 var isEnjoyHintEnabledWithMenu = false;
-                var interactiveTutorialParamVal = <%=request.getParameter("interactiveTutorial")%>;
+                var interactiveTutorialParamVal = <%=encode.forUriComponent(request.getParameter("interactiveTutorial"))%>;
                 if (null != interactiveTutorialParamVal && interactiveTutorialParamVal == true) {
                     isEnjoyHintEnabledWithMenu = true;
                 }
