@@ -112,4 +112,6 @@ public class PolicyConstants {
 
     public static final String KB = "KB";
 
+    public static final String MEDIATION_NAME_ATTRIBUTE = "name";
+
 }

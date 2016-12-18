@@ -15,7 +15,7 @@ public class APIEndpointSecurityDTO  {
   
   
   
-  private String username = null;
+  private String password = null;
   
   public enum TypeEnum {
      basic,  digest, 
@@ -24,18 +24,18 @@ public class APIEndpointSecurityDTO  {
   private TypeEnum type = null;
   
   
-  private String password = null;
+  private String username = null;
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("username")
-  public String getUsername() {
-    return username;
+  @JsonProperty("password")
+  public String getPassword() {
+    return password;
   }
-  public void setUsername(String username) {
-    this.username = username;
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   
@@ -54,12 +54,12 @@ public class APIEndpointSecurityDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("password")
-  public String getPassword() {
-    return password;
+  @JsonProperty("username")
+  public String getUsername() {
+    return username;
   }
-  public void setPassword(String password) {
-    this.password = password;
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   
@@ -69,9 +69,9 @@ public class APIEndpointSecurityDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEndpointSecurityDTO {\n");
     
-    sb.append("  username: ").append(username).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  password: ").append(password).append("\n");
+    sb.append("  type: ").append(type).append("\n");
+    sb.append("  username: ").append(username).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

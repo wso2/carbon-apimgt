@@ -11,6 +11,7 @@
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.SwaggerJsonApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.PoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.ThrottlingApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -25,7 +26,7 @@
 
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
 
-    <!-- For Basic Authentication scheme please comment the AuthenticationInterceptor which contains "OAuthAuthenticationInterceptor" 
+    <!-- For Basic Authentication scheme please comment the AuthenticationInterceptor which contains "OAuthAuthenticationInterceptor"
             and uncomment the AuthenticationInterceptor which contains "BasicAuthenticationInterceptor"-->
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
     <!--<bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />-->
