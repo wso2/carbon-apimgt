@@ -954,7 +954,7 @@ public class ApiDAOImpl implements ApiDAO {
     private String getAPIThrottlePolicyName(Connection connection, int policyID) throws SQLException {
         final String query = "SELECT NAME FROM AM_API_POLICY WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, policyID);
+            statement.setString(1, "" + policyID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
