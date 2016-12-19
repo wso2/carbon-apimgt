@@ -3,7 +3,7 @@
 
             <hr/>
             <h3 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs 
- <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/apis</small></h3>
+ <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
@@ -21,7 +21,7 @@ Each retrieved API is represented with a minimal amount of attributes. If you wa
                 </h4>
             </div>
 
-                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis
+                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -61,7 +61,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.10/apis</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -286,7 +286,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisPost"></a>Create a new API <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/apis</small></h3>
+            <h3 class="operation-heading"><a name="apisPost"></a>Create a new API <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/apis</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in &#x60;CREATED&#x60; state.
@@ -304,7 +304,7 @@ There is a special capability for a user who has &#x60;APIM Admin&#x60; permissi
                 </h4>
             </div>
 
-                <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis
+                <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
 {
@@ -377,7 +377,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-apisPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/7a2298c4-c905-403f-8fac-38c73301631f
+Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
 Content-Type: application/json
 
 {
@@ -446,7 +446,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/apis</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.11/apis</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

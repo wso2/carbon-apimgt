@@ -2,11 +2,11 @@
     <h1><a name="Throttling Tier (Individual)"></a>Throttling Tier (Individual)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelTierNameDelete"></a>Delete a Tier <br><small>DELETE https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}/{tierName}</small></h3>
+            <h3 class="operation-heading"><a name="tiersTierLevelTierNameDelete"></a>Delete a Tier <br><small>DELETE https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}/{tierName}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete an existing tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low&#x60;
+&#x60;DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
 
 **IMPORTANT:**
 * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
@@ -22,7 +22,7 @@
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNameDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low
+                <div id="request-tiersTierLevelTierNameDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -35,7 +35,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-tiersTierLevelTierNameDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -223,7 +223,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelTierNameGet"></a>Get details of a tier <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}/{tierName}</small></h3>
+            <h3 class="operation-heading"><a name="tiersTierLevelTierNameGet"></a>Get details of a tier <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}/{tierName}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
@@ -239,7 +239,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNameGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Bronze
+                <div id="request-tiersTierLevelTierNameGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Bronze
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -264,7 +264,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Bronze</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Bronze</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -491,11 +491,11 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelTierNamePut"></a>Update a Tier <br><small>PUT https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}/{tierName}</small></h3>
+            <h3 class="operation-heading"><a name="tiersTierLevelTierNamePut"></a>Update a Tier <br><small>PUT https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}/{tierName}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update an existing tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;PUT https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low&#x60;
+&#x60;PUT https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
 
 **IMPORTANT:**
 * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
@@ -511,7 +511,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNamePut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low
+                <div id="request-tiersTierLevelTierNamePut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -556,7 +556,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api/Low&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -810,7 +810,7 @@ Content-Type: application/json
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="tiersUpdatePermissionPost"></a>Update tier permission <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/tiers/update-permission</small></h3>
+            <h3 class="operation-heading"><a name="tiersUpdatePermissionPost"></a>Update tier permission <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/tiers/update-permission</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update tier permissions which controls access for the particular tier based on the subscribers&#39; roles.
@@ -826,7 +826,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-tiersUpdatePermissionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api
+                <div id="request-tiersUpdatePermissionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -844,7 +844,7 @@ Content-Type: application/json
                 <div id="response-tiersUpdatePermissionPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

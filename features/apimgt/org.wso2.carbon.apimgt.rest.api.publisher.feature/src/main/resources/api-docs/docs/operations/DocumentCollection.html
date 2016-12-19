@@ -2,7 +2,7 @@
     <h1><a name="Document (Collection)"></a>Document (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsGet"></a>Get a list of documents of an API <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsGet"></a>Get a list of documents of an API <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
@@ -18,7 +18,7 @@
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
+                <div id="request-apisApiIdDocumentsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -60,7 +60,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -280,7 +280,7 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsPost"></a>Add a new document to an API <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsPost"></a>Add a new document to an API <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
@@ -296,7 +296,7 @@ variant of the resourec.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents
+                <div id="request-apisApiIdDocumentsPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -317,7 +317,7 @@ Content-Type: application/json
                 </h4>
             </div>
                 <div id="response-apisApiIdDocumentsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
+Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
 Content-Type: application/json
 
 {
@@ -332,7 +332,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
