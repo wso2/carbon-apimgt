@@ -196,11 +196,12 @@ public class ThrottleJMSListner {
      */
     private String getTCPConnectionURL(String username, String password) {
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
+        APIMConfigurations apimConfig = new APIMConfigurations();
         return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(APIMConfigurations.CARBON_CLIENT_ID).append("/")
-                .append(APIMConfigurations.CARBON_VIRTUAL_HOST_NAME).append("?brokerlist='tcp://")
-                .append(APIMConfigurations.CARBON_DEFAULT_HOSTNAME).append(":")
-                .append(APIMConfigurations.CARBON_DEFAULT_PORT).append("'").toString();
+                .append(apimConfig.getCarbonClientId()).append("/")
+                .append(apimConfig.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
+                .append(apimConfig.getTopicServerHost()).append(":")
+                .append(apimConfig.getTopicServerPort()).append("'").toString();
     }
 
 
