@@ -37,7 +37,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <warName>client-registration#v0.10</warName>
+                    <warName>client-registration#v0.11</warName>
                 </configuration>
             </plugin>
         </plugins>
