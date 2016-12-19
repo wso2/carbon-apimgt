@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.gateway.jms;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,12 +15,15 @@ package org.wso2.carbon.apimgt.gateway.jms;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.gateway.jms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
+//import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,12 +45,29 @@ import javax.naming.NamingException;
 
 /**
  * This class is used to subscribe to the jms topic and save the read configuration to the file system
+ * TODO refactor class when kernal is updated to 5.2.0
  */
 public class APITopicSubscriber {
     private static final Logger log = LoggerFactory.getLogger(APITopicSubscriber.class);
     private TopicConnection topicConnection;
     private TopicSession topicSession;
+    private APIMConfigurations config = null;
 
+    APITopicSubscriber() {
+        /*try {
+            config = ServiceReferenceHolder.getInstance().getConfigProvider()
+                    .getConfigurationObject(APIMConfigurations.class);
+        } catch (CarbonConfigurationException e) {
+            log.error("error getting config", e);
+        }
+
+        if (config == null) {
+            config = new APIMConfigurations();
+            log.info("Setting default configurations");
+        }*/
+
+        config = new APIMConfigurations();
+    }
     /**
      * Subscribe to the topic
      *
@@ -60,12 +79,12 @@ public class APITopicSubscriber {
     public TopicSubscriber subscribe() throws NamingException, JMSException, URLSyntaxException {
         // Lookup connection factory
         TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                getTCPConnectionURL(APIMConfigurations.USERNAME, APIMConfigurations.PASSWORD));
+                getTCPConnectionURL(config.getUsername(), config.getPassword()));
         topicConnection = connFactory.createTopicConnection();
         topicConnection.start();
         topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = topicSession.createTopic(APIMConfigurations.TOPIC_NAME);
+        Topic topic = topicSession.createTopic(config.getTopicName());
         TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
         return topicSubscriber;
     }
@@ -123,10 +142,10 @@ public class APITopicSubscriber {
     private String getTCPConnectionURL(String username, String password) {
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
         return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(APIMConfigurations.CARBON_CLIENT_ID).append("/")
-                .append(APIMConfigurations.CARBON_VIRTUAL_HOST_NAME).append("?brokerlist='tcp://")
-                .append(APIMConfigurations.CARBON_DEFAULT_HOSTNAME).append(":")
-                .append(APIMConfigurations.CARBON_DEFAULT_PORT).append("'").toString();
+                .append(config.getCarbonClientId()).append("/")
+                .append(config.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
+                .append(config.getTopicServerHost()).append(":")
+                .append(config.getTopicServerPort()).append("'").toString();
     }
 
     /**

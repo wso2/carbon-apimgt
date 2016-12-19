@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.wso2.carbon.apimgt.core.TestUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -29,13 +30,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MysqlDataSource implements DataSource{
+public class PostgreDataSource implements DataSource{
    static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
 
-    MysqlDataSource() throws SQLException {
-        basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://localhost:3306/" + databaseName);
+
+    PostgreDataSource() throws Exception {
+        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-postgre");
+        basicDataSource.setDriverClassName("org.postgresql.Driver");
+        basicDataSource.setJdbcUrl("jdbc:postgresql://"+ipAddress+":5432/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(false);
@@ -54,20 +57,30 @@ public class MysqlDataSource implements DataSource{
 
     public void resetDB() throws SQLException {
         List<String> listOfTables = new ArrayList();
+        List<String> listOfSequences = new ArrayList<>();
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
-                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='"+databaseName+"'")) {
+                    "information_schema.tables WHERE table_type = 'BASE TABLE' AND table_catalog='" + databaseName +
+                    "' AND table_schema='public'")) {
                 while (resultSet.next()) {
                     listOfTables.add(resultSet.getString("TABLE_NAME"));
                 }
             }
-            statement.execute("SET FOREIGN_KEY_CHECKS = 0");
+            try (ResultSet resultSet = statement.executeQuery("SELECT sequence_name as SEQUENCE FROM " +
+                    "information_schema.sequences WHERE sequence_catalog='" + databaseName + "' AND " +
+                    "sequence_schema='public'")) {
+                while (resultSet.next()) {
+                    listOfSequences.add(resultSet.getString("SEQUENCE"));
+                }
+            }
             for(int i = 0; i<listOfTables.size();i++){
-                statement.addBatch("DROP TABLE " + listOfTables.get(i));
+                statement.addBatch("DROP TABLE " + listOfTables.get(i) + " CASCADE");
+            }
+            for(int i = 0; i<listOfSequences.size();i++){
+                statement.addBatch("DROP SEQUENCE " + listOfSequences.get(i) + " CASCADE");
             }
             statement.executeBatch();
-            statement.execute("SET FOREIGN_KEY_CHECKS = 1");
 
             connection.commit();
         }

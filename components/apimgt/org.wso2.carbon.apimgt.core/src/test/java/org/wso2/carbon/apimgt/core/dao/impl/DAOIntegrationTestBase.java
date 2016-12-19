@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.testng.annotations.DataProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,23 +29,38 @@ import java.sql.SQLException;
 
 public class DAOIntegrationTestBase {
     protected DataSource dataSource;
+    String database;
+    public DAOIntegrationTestBase() {
+         database = System.getenv("DATABASE_TYPE");
+        if (StringUtils.isEmpty(database)){
+            database = "h2";
+        }
+    }
 
-    public void setUp(String database) throws Exception {
+    @BeforeMethod
+    public void setUp() throws Exception {
         String sqlFilePath = null;
         if ("h2".equals(database)){
-            dataSource = new InMemoryDataSource();
-            ((InMemoryDataSource) dataSource).resetDB();
+            dataSource = new H2DataSource();
+            ((H2DataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "h2.sql";
         }else if ("mysql".contains(database)){
-            dataSource = new MysqlDataSource();
-            ((MysqlDataSource) dataSource).resetDB();
+            dataSource = new MySQLDataSource();
+            ((MySQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "mysql.sql";
+        }else if ("postgres".contains(database)){
+            dataSource = new PostgreDataSource();
+            ((PostgreDataSource) dataSource).resetDB();
+            sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
+                    + "features" + File.separator + "apimgt" + File.separator
+                    + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
+                    + File.separator + "dbscripts" + File.separator + "postgres.sql";
         }
         DAOUtil.clearDataSource();
         DAOUtil.initialize(dataSource);
@@ -51,16 +68,12 @@ public class DAOIntegrationTestBase {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
     }
-
-    public void tempDBCleanup(String database) throws SQLException, IOException {
+@AfterClass
+    public void tempDBCleanup() throws SQLException, IOException {
         if ("h2".equals(database)){
-            ((InMemoryDataSource) dataSource).resetDB();
+            ((H2DataSource) dataSource).resetDB();
         }else if ("mysql".contains(database)){
-            ((MysqlDataSource) dataSource).resetDB();
+            ((MySQLDataSource) dataSource).resetDB();
         }
-    }
-    @DataProvider(name = "databases",parallel = false)
-    public Object[][] provideData() {
-        return new Object[][] {{"mysql"},{"h2"}};
     }
 }

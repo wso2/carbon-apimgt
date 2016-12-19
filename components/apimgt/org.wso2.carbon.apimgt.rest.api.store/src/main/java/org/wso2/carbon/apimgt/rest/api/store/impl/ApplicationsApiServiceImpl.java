@@ -1,14 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONObject;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
@@ -23,7 +22,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDT
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.util.RestAPIStoreUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -122,8 +120,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-                JSONObject jsonParamObj = new JSONObject();
-                jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+                JsonObject jsonParamObj = new JsonObject();
+                jsonParamObj.addProperty(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
                 String jsonParams = jsonParamObj.toString();
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 

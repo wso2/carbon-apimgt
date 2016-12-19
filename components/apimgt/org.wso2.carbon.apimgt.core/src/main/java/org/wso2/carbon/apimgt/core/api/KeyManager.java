@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +35,9 @@ import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
+
 import java.util.Map;
+
 
 
 /**
@@ -102,7 +109,7 @@ public interface KeyManager {
      */
     KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException;
 
-    /**
+    /** 
      * This method will be used if you want to create a oAuth application in semi-manual mode
      * where you must input minimum consumer key and consumer secret.
      *
@@ -111,6 +118,8 @@ public interface KeyManager {
      * @throws KeyManagementException
      */
     OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException;
+
+    
 
     void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException;
 
@@ -160,6 +169,7 @@ public interface KeyManager {
      */
     void deleteMappedApplication(String consumerKey) throws KeyManagementException;
 
+   
 
 }
 

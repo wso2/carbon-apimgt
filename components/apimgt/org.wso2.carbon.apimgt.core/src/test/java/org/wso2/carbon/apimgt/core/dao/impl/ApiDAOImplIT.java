@@ -36,9 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
-    @Test(dataProvider = "databases")
-    public void testAddGetAPI(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testAddGetAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -51,9 +50,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetAPISummary(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetAPISummary( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -68,9 +66,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiFromDB, expectedAPI);
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetAPIs(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetAPIs( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         List<API> apiList = apiDAO.getAPIs();
@@ -94,22 +91,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (API api : apiList) {
-            if (api.getId().equals(api1.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api1), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api1)));
-            } else if (api.getId().equals(api2.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api2), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api2)));
-            } else {
-                Assert.fail("Invalid API ID found");
-            }
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                                        TestUtil.printDiff(apiList, expectedAPIs));
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetAPIsForProvider(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetAPIsForProvider( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String provider1 = "Watson";
         String provider2 = "Holmes";
@@ -147,17 +134,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (API api : apiList) {
-            if (api.getId().equals(api1.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api1), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api1)));
-            } else if (api.getId().equals(api2.getId())) {
-                Assert.assertEquals(api, SampleTestObjectCreator.copyAPISummary(api2), TestUtil.printDiff(api,
-                        SampleTestObjectCreator.copyAPISummary(api2)));
-            } else {
-                Assert.fail("Invalid API ID found");
-            }
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
 
         // Get APIs belonging to provider2
         apiList = apiDAO.getAPIsForProvider(provider2);
@@ -169,9 +147,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiList.get(0), expectedAPI);
     }
 
-    @Test(dataProvider = "databases")
-    public void testGetAPIsByStatus(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testGetAPIsByStatus( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Define statuses used in test
@@ -264,9 +241,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(apiList.isEmpty());
     }
 
-    @Test(dataProvider = "databases")
-    public void testSearchAPIs(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testSearchAPIs( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Sample API names
@@ -348,9 +324,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
     }
 
-    @Test(dataProvider = "databases")
-    public void testIsAPINameExists(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testIsAPINameExists( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         API api = SampleTestObjectCreator.createUniqueAPI().build();
@@ -399,9 +374,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider"));
     }
 
-    @Test(dataProvider = "databases")
-    public void testDeleteAPI(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testDeleteAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -414,9 +388,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(deletedAPI);
     }
 
-    @Test(dataProvider = "databases")
-    public void testUpdateAPI(String databases ) throws Exception {
-        setUp(databases);
+    @Test
+    public void testUpdateAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();

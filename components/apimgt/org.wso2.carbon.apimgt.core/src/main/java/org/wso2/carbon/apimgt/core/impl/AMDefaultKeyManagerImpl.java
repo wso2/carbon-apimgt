@@ -19,12 +19,12 @@ package org.wso2.carbon.apimgt.core.impl;
 
 
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
 
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
@@ -46,6 +46,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -84,11 +85,11 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             LOG.debug("Trying to create OAuth application :" + applicationName);
         }
         //Create json payload for DCR endpoint
-        JSONObject json = new JSONObject();
-        json.put(KeyManagerConstants.OAUTH_REDIRECT_URIS, oAuthApplicationInfo.getCallbackUrl());
-        json.put(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientId());
-        json.put(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
-        json.put(KeyManagerConstants.OAUTH_CLIENT_GRANTS, oAuthApplicationInfo.getGrantTypes());
+        JsonObject json = new JsonObject();
+        json.addProperty(KeyManagerConstants.OAUTH_REDIRECT_URIS, oAuthApplicationInfo.getCallbackUrl());
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientId());
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_GRANTS, oAuthApplicationInfo.getGrantTypes());
         URL url;
         HttpURLConnection urlConn = null;
         try {
@@ -105,12 +106,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {  //If the DCR call is success
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                JSONParser parser = new JSONParser();
-                JSONObject jObj = (JSONObject) parser.parse(responseStr);
-                String consumerKey = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_ID);
-                String consumerSecret = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_SECRET);
-                String clientName = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_NAME);
-                String grantTypes = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_GRANTS);
+                JsonParser parser = new JsonParser();
+                JsonObject jObj =  parser.parse(responseStr).getAsJsonObject();
+                String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
+                String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
+                String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
+                String grantTypes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
 
                 oAuthApplicationInfo.setClientName(clientName);
                 oAuthApplicationInfo.setClientId(consumerKey);
@@ -126,9 +127,9 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             LOG.error("Can not create OAuth application  : " + applicationName, e);
             throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-        } catch (ParseException e) {
+        } catch (JsonSyntaxException e) {
             LOG.error("Error while processing the response returned from DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName, e);
+                    " OAuth application : " + applicationName, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
@@ -328,12 +329,13 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 }
                 tokenInfo = new AccessTokenInfo();
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                JSONParser parser = new JSONParser();
-                JSONObject obj = (JSONObject) parser.parse(responseStr);
+                JsonParser parser = new JsonParser();
+                JsonObject obj = parser.parse(responseStr).getAsJsonObject();
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.containsKey(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
-                    tokenInfo.setScopes(((String) obj.get(KeyManagerConstants.OAUTH_CLIENT_SCOPE)).split(" "));
+                if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
+                    tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
+                            split(" "));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
@@ -343,7 +345,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             LOG.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
-        } catch (ParseException e) {
+        } catch (JsonSyntaxException e) {
             String msg = "Error while processing the response returned from token generation call.";
             LOG.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
@@ -372,15 +374,15 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             urlConn.getOutputStream()
                     .write(("token=" + accessToken).getBytes("UTF-8"));
             String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-            JSONParser parser = new JSONParser();
-            JSONObject jObj = (JSONObject) parser.parse(responseStr);
-            Object active = jObj.get("active");
-            if ((Boolean) (active)) {
-                String consumerKey = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_ID);
-                String endUser = (String) jObj.get(KeyManagerConstants.USERNAME);
-                long exp = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME);
-                long issuedTime = (Long) jObj.get(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME);
-                String scopes = (String) jObj.get(KeyManagerConstants.OAUTH_CLIENT_SCOPE);
+            JsonParser parser = new JsonParser();
+            JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
+            boolean active = jObj.getAsJsonPrimitive("active").getAsBoolean();
+            if (active) {
+                String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
+                String endUser = jObj.getAsJsonPrimitive(KeyManagerConstants.USERNAME).getAsString();
+                long exp = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME).getAsLong();
+                long issuedTime = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME).getAsLong();
+                String scopes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString();
                 if (scopes != null) {
                     String[] scopesArray = scopes.split("\\s+");
                     tokenInfo.setScopes(scopesArray);
@@ -413,10 +415,10 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             LOG.error(msg, e);
             throw new KeyManagementException(msg, e, ExceptionCodes.
                     TOKEN_INTROSPECTION_FAILED);
-        } catch (ParseException e) {
-            String msg = "Error while processing the response returned from token introspect endpoint.";
-            LOG.error(msg, e);
-            throw new KeyManagementException(msg, e,
+        } catch (JsonSyntaxException e) {
+            String msg="Error while processing the response returned from token introspect endpoint.";
+            LOG.error("Error while processing the response returned from token introspect endpoint.", e);
+            throw new KeyManagementException(msg,e,
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         } finally {
             if (urlConn != null) {
@@ -432,6 +434,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+   
 
     @Override
     public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException {
@@ -503,6 +506,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
     @Override
     public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
 
+    
     }
 
 }
