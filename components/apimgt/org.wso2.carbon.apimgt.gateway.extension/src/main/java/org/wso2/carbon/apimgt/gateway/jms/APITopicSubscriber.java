@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.gateway.jms;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,7 @@ package org.wso2.carbon.apimgt.gateway.jms;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.gateway.jms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
