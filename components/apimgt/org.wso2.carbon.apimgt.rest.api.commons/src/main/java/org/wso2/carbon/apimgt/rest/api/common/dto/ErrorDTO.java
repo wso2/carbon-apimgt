@@ -37,7 +37,7 @@ public class ErrorDTO {
 
     private String description = null;
 
-    private  HashMap<Integer, String>   paramList = null;
+    private  HashMap<String, String>   paramList = null;
 
     private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
@@ -79,11 +79,11 @@ public class ErrorDTO {
      * Preferably an url with more details about the error.
      */
     @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
-    public HashMap getMoreInfo() {
+    public HashMap<String, String> getMoreInfo() {
         return paramList;
     }
 
-    public void setMoreInfo(HashMap moreInfo) {
+    public void setMoreInfo(HashMap<String, String> moreInfo) {
         this.paramList = moreInfo;
     }
 

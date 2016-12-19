@@ -49,7 +49,19 @@ public enum ExceptionCodes implements ErrorHandler {
     MISSING_CREDENTIALS(900902, "Missing Credentials", 401, " Please provide an active access token to proceed"),
     INVALID_SCOPE(900910, "Invalid Scope", 401, " You are not authorized to access the resource."),
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
-            " Please provide the Authorization : Bearer <> token to proceed.");
+            " Please provide the Authorization : Bearer <> token to proceed."),
+    OAUTH2_APP_CREATION_FAILED(900401, "Keymanagement Error", 500, " Error while creating the consumer application."),
+    OAUTH2_APP_ALREADY_EXISTS(900402, "Keymanagement Error", 500, " OAuth2 application already created."),
+    OAUTH2_APP_DELETION_FAILED(900403, "Keymanagement Error", 500, " Error while deleting the consumer application."),
+    OAUTH2_APP_UPDATE_FAILED(900404, "Keymanagement Error", 500, " Error while updating the consumer application."),
+    OAUTH2_APP_RETRIEVAL_FAILED(900405, "Keymanagement Error", 500, " Error while retrieving the consumer application."
+    ),
+    OAUTH2_APP_MAP_FAILED(900406, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900407, "Keymanagement Error", 500, " Error while introspecting the access token."),
+    APPLICATION_TOKEN_GENERATION_FAILED(900408, "Keymanagement Error", 500, " Error while generating the application" +
+            "access token."),
+    DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
+    DOCUMENT_NOT_FOUND(900314, "Document not found", 404, "Document not found");
 
     private final long errorCode;
     private final String errorMessage;

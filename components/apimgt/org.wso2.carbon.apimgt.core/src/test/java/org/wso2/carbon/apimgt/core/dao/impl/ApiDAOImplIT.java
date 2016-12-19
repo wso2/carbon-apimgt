@@ -36,9 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
-
     @Test
-    public void testAddGetAPI() throws Exception {
+    public void testAddGetAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -52,7 +51,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPISummary() throws Exception {
+    public void testGetAPISummary( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -68,7 +67,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIs() throws Exception {
+    public void testGetAPIs( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         List<API> apiList = apiDAO.getAPIs();
@@ -92,13 +91,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (int i = 0; i < apiList.size(); ++i) {
-            Assert.assertEquals(apiList.get(i), expectedAPIs.get(i));
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                                        TestUtil.printDiff(apiList, expectedAPIs));
     }
 
     @Test
-    public void testGetAPIsForProvider() throws Exception {
+    public void testGetAPIsForProvider( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String provider1 = "Watson";
         String provider2 = "Holmes";
@@ -136,9 +134,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(apiList.size() == 2);
 
-        for (int i = 0; i < apiList.size(); ++i) {
-            Assert.assertEquals(apiList.get(i), expectedAPIs.get(i));
-        }
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
 
         // Get APIs belonging to provider2
         apiList = apiDAO.getAPIsForProvider(provider2);
@@ -151,7 +148,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIsByStatus() throws Exception {
+    public void testGetAPIsByStatus( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Define statuses used in test
@@ -245,7 +242,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testSearchAPIs() throws Exception {
+    public void testSearchAPIs( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Sample API names
@@ -328,7 +325,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testIsAPINameExists() throws Exception {
+    public void testIsAPINameExists( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         API api = SampleTestObjectCreator.createUniqueAPI().build();
@@ -378,7 +375,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDeleteAPI() throws Exception {
+    public void testDeleteAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -392,7 +389,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateAPI() throws Exception {
+    public void testUpdateAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -408,7 +405,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB, expectedAPI);
+        Assert.assertEquals(apiFromDB, expectedAPI,TestUtil.printDiff(apiFromDB,expectedAPI));
     }
 
 

@@ -34,7 +34,8 @@ import java.util.UUID;
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
-    public void testAddAndGetSubscription() throws Exception {
+    public void testAddAndGetSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -59,7 +60,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateSubscription() throws Exception {
+    public void testUpdateSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api
@@ -110,7 +112,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetSubscriptionByAPI() throws Exception {
+    public void testGetSubscriptionByAPI( ) throws Exception {
+       
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -211,7 +214,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetSubscriptionByApplication() throws Exception {
+    public void testGetSubscriptionByApplication( ) throws Exception {
+       
         //add test apis, apps and subscriptions
         ApisAndApps apisAndApps = createApisAppsAndSubscriptions();
 
@@ -300,7 +304,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDeleteSubscription() throws Exception {
+    public void testDeleteSubscription( ) throws Exception {
+       
         //add new app
         Application app = TestUtil.addTestApplication();
         //add new api

@@ -31,7 +31,8 @@ import java.util.List;
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
-    public void testAddAndGetApplication() throws Exception {
+    public void testAddAndGetApplication( ) throws Exception {
+
         //add new app
         Application app = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -44,7 +45,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateApplication() throws Exception {
+    public void testUpdateApplication( ) throws Exception {
+
         //add new app
         Application currentApp = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -62,7 +64,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDeleteApplication() throws Exception {
+    public void testDeleteApplication( ) throws Exception {
+
         // add app
         Application app = TestUtil.addTestApplication();
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
@@ -73,7 +76,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testIsApplicationNameExists() throws Exception {
+    public void testIsApplicationNameExists( ) throws Exception {
+
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //check for a non-existing application
         Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
@@ -84,7 +88,8 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAllApplications() throws Exception {
+    public void testGetAllApplications( ) throws Exception {
+
         //add 4 apps
         String username = "admin";
         Application app1 = TestUtil.addCustomApplication("App1", username);
@@ -117,22 +122,25 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetApplicationsForUser() throws Exception {
+    public void testGetApplicationsForUser( ) throws Exception {
+
 
     }
 
     @Test
-    public void testGetApplicationsForGroup() throws Exception {
+    public void testGetApplicationsForGroup( ) throws Exception {
+
 
     }
 
     @Test
-    public void testSearchApplicationsForUser() throws Exception {
+    public void testSearchApplicationsForUser( ) throws Exception {
+
 
     }
 
     @Test
-    public void testSearchApplicationsForGroup() throws Exception {
+    public void testSearchApplicationsForGroup( ) throws Exception {
 
     }
 

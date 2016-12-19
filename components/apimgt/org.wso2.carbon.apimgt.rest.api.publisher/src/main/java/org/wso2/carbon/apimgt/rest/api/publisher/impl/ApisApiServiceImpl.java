@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -68,25 +69,19 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
-            if (documentInfo == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
-                return null;
-            }
-            //gets the content depending on the type of the document
-            if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-
-                InputStream fileDataStream = apiPublisher.getDocumentationFileContent(documentId);
+            DocumentContent documentationContent = apiPublisher.getDocumentationContent(documentId);
+            DocumentInfo documentInfo = documentationContent.getDocumentInfo();
+            if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
                 String filename = documentInfo.getFileName();
-                return Response.ok(fileDataStream)
+                return Response.ok(documentInfo)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                         .build();
-            } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                String content = apiPublisher.getDocumentationInlineContent(documentId);
+            } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
+                String content = documentationContent.getInlineContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN).build();
-            } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.URL)) {
+            } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
                 String sourceUrl = documentInfo.getSourceURL();
                 return Response.seeOther(new URI(sourceUrl)).build();
             }

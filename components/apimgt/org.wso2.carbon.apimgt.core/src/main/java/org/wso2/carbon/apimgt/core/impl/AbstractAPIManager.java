@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 
@@ -223,20 +224,33 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return {@link InputStream} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    public InputStream getDocumentationFileContent(String docId) throws APIManagementException {
+    public DocumentContent getDocumentationContent(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getDocumentFileContent(docId);
-        } catch (APIMgtDAOException e) {
-            log.error("Error occurred while retrieving document content", e);
-            throw new APIMgtDAOException("Error occurred while retrieving document content",
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-    }
-
-    @Override
-    public String getDocumentationInlineContent(String docId) throws APIManagementException {
-        try {
-            return getApiDAO().getDocumentInlineContent(docId);
+            DocumentInfo documentInfo = getDocumentationSummary(docId);
+            DocumentContent.Builder documentContentBuilder = new DocumentContent.Builder();
+            if (documentInfo != null) {
+                documentContentBuilder.documentInfo(documentInfo);
+                if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
+                    InputStream inputStream = getApiDAO().getDocumentFileContent(docId);
+                    if (inputStream != null) {
+                        documentContentBuilder = documentContentBuilder.fileContent(inputStream);
+                    } else {
+                        throw new APIManagementException("Couldn't find file content of  document", ExceptionCodes
+                                .DOCUMENT_CONTENT_NOT_FOUND);
+                    }
+                } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
+                    String inlineContent = getApiDAO().getDocumentInlineContent(docId);
+                    if (inlineContent != null) {
+                        documentContentBuilder = documentContentBuilder.inlineContent(inlineContent);
+                    } else {
+                        throw new APIManagementException("Couldn't find inline content of  document", ExceptionCodes
+                                .DOCUMENT_CONTENT_NOT_FOUND);
+                    }
+                }
+            } else {
+                throw new APIManagementException("Couldn't fnd document", ExceptionCodes.DOCUMENT_NOT_FOUND);
+            }
+            return documentContentBuilder.build();
         } catch (APIMgtDAOException e) {
             log.error("Error occurred while retrieving document content", e);
             throw new APIMgtDAOException("Error occurred while retrieving document content",

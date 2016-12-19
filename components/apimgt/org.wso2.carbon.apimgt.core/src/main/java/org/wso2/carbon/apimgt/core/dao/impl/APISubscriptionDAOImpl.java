@@ -418,7 +418,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 API api = apiBuilder.build();
 
                 Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
-                app.setId(rs.getString("APPLICATION_ID"));
+                app.setId(rs.getString("APP_ID"));
                 app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
                 app.setStatus(rs.getString("APP_STATUS"));
 
@@ -464,7 +464,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 String subscriptionTier = rs.getString("SUBS_POLICY");
 
                 Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
-                app.setId(rs.getString("APPLICATION_ID"));
+                app.setId(rs.getString("APP_ID"));
                 app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
                 app.setStatus(rs.getString("APP_STATUS"));
 

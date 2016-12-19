@@ -51,6 +51,7 @@ public class DAOFactory {
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
 
             } else if (driverName.contains("PostgreSQL")) {
+                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
 
             } else if (driverName.contains("Oracle")) {
 
@@ -81,7 +82,7 @@ public class DAOFactory {
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
 
             } else if (driverName.contains("PostgreSQL")) {
-
+                appDAO = new ApplicationDAOImpl();
             } else if (driverName.contains("Oracle")) {
 
             } else {
@@ -107,6 +108,7 @@ public class DAOFactory {
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
 
             } else if (driverName.contains("PostgreSQL")) {
+                apiSubscriptionDAO = new APISubscriptionDAOImpl();
 
             } else if (driverName.contains("Oracle")) {
 
@@ -133,6 +135,7 @@ public class DAOFactory {
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
 
             } else if (driverName.contains("PostgreSQL")) {
+                policyDAO = new PolicyDAOImpl();
 
             } else if (driverName.contains("Oracle")) {
 
