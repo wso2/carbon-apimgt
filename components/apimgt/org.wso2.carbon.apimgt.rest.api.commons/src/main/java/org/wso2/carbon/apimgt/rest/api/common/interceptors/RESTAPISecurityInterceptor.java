@@ -73,7 +73,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
          * Consider this as a tempory fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
-        if (requestURI.contains("/publisher") || requestURI.contains("/store")) {
+        if (requestURI.contains("/publisher") || requestURI.contains("/store") || requestURI.contains("/editor")) {
             return true;
         }
         try {
