@@ -19,7 +19,6 @@
  */
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-
 import com.zaxxer.hikari.HikariDataSource;
 import org.wso2.carbon.apimgt.core.TestUtil;
 
@@ -33,7 +32,6 @@ import java.util.List;
 public class MySQLDataSource implements DataSource {
     static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
-
 
     MySQLDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
@@ -53,6 +51,16 @@ public class MySQLDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
         return basicDataSource.getConnection();
+    }
+
+    /**
+     * Return javax.sql.DataSource object
+     *
+     * @return {@link javax.sql.DataSource} object
+     */
+    @Override
+    public HikariDataSource getDatasource() throws SQLException {
+        return basicDataSource;
     }
 
     public void resetDB() throws SQLException {

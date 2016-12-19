@@ -114,7 +114,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, POLICY.NAME AS SUBS_POLICY " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_SUBSCRIPTION_POLICY POLICY  " +
                 "WHERE SUBS.APPLICATION_ID = ? AND SUBS.API_ID = API.UUID AND SUBS.TIER_ID = POLICY.UUID";
-        ;
+
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAppSql)) {
             ps.setString(1, applicationId);
@@ -210,7 +210,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants
             .SubscriptionStatus status) throws APIMgtDAOException {
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try {
                 createSubscription(apiId, appId, uuid, tier, status, conn);
@@ -219,7 +218,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -286,7 +285,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     @Override
     public void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException {
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try {
                 for (Subscription subscription : subscriptionList) {
@@ -298,7 +296,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -317,7 +315,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             throws APIMgtDAOException {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, subStatus.toString());
@@ -328,7 +325,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -347,7 +344,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET TIER_ID = " +
                 "(SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?) WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, policy);
@@ -358,7 +354,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);

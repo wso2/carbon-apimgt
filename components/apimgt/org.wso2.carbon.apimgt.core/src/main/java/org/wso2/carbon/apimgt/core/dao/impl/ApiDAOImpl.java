@@ -335,6 +335,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -419,6 +421,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -444,6 +448,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -457,7 +463,8 @@ public class ApiDAOImpl implements ApiDAO {
      * @return Swagger definition String
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
+    @Override
+    public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return getAPIDefinition(connection, apiID);
         } catch (SQLException | IOException e) {
@@ -472,7 +479,8 @@ public class ApiDAOImpl implements ApiDAO {
      * @param swaggerDefinition Swagger definition String
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException {
+    @Override
+    public void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -481,6 +489,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
@@ -494,7 +504,8 @@ public class ApiDAOImpl implements ApiDAO {
      * @return Image stream
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    @Override public InputStream getImage(String apiID) throws APIMgtDAOException {
+    @Override
+    public InputStream getImage(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getBinaryValueForCategory(connection, apiID, ResourceCategory.IMAGE);
         } catch (SQLException e) {
@@ -528,6 +539,8 @@ public class ApiDAOImpl implements ApiDAO {
                 } catch (SQLException e) {
                     connection.rollback();
                     throw new APIMgtDAOException(e);
+                } finally {
+                    connection.setAutoCommit(DAOUtil.isAutoCommit());
                 }
             } catch (SQLException e) {
                 throw new APIMgtDAOException(e);
@@ -556,6 +569,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -642,6 +657,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -669,6 +686,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -694,6 +713,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -716,6 +737,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -1128,6 +1151,8 @@ public class ApiDAOImpl implements ApiDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);

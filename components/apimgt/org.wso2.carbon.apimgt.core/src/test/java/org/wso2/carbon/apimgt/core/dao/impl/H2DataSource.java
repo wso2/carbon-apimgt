@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,7 +30,6 @@ import java.sql.Statement;
  */
 public class H2DataSource implements DataSource {
     static HikariDataSource dataSource = new HikariDataSource();
-
 
     H2DataSource() throws SQLException {
         dataSource.setJdbcUrl("jdbc:h2:src/test/resources/amdb");
@@ -49,6 +47,16 @@ public class H2DataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
+    }
+
+    /**
+     * Return javax.sql.DataSource object
+     *
+     * @return {@link javax.sql.DataSource} object
+     */
+    @Override
+    public HikariDataSource getDatasource() throws SQLException {
+        return dataSource;
     }
 
     public void resetDB() throws SQLException {

@@ -188,7 +188,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
                 "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
                 ps.setString(1, application.getId());
@@ -214,7 +213,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -236,7 +235,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
                 "LAST_UPDATED_TIME=?";
         try (Connection conn = DAOUtil.getConnection()) {
-            boolean originalAutoCommitState = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
                 ps.setString(1, updatedApp.getName());
@@ -253,7 +251,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
-                conn.setAutoCommit(originalAutoCommitState);
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
