@@ -46,7 +46,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -129,7 +128,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (ParseException e) {
             LOG.error("Error while processing the response returned from DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                    " OAuth application : " + applicationName, e);
             throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
@@ -410,13 +409,15 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             }
 
         } catch (IOException e) {
-            LOG.error("Error while connecting to token introspect endpoint.", e, ExceptionCodes.
+            String msg = "Error while connecting to token introspect endpoint.";
+            LOG.error(msg, e);
+            throw new KeyManagementException(msg, e, ExceptionCodes.
                     TOKEN_INTROSPECTION_FAILED);
-            throw new KeyManagementException(e);
         } catch (ParseException e) {
-            LOG.error("Error while processing the response returned from token introspect endpoint.", e,
+            String msg = "Error while processing the response returned from token introspect endpoint.";
+            LOG.error(msg, e);
+            throw new KeyManagementException(msg, e,
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-            throw new KeyManagementException(e);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -431,10 +432,6 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public OAuthApplicationInfo buildFromJSON(String jsonInput) throws KeyManagementException {
-        return null;
-    }
 
     @Override
     public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException {
@@ -506,16 +503,6 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
     @Override
     public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
 
-    }
-
-    @Override
-    public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws KeyManagementException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws KeyManagementException {
-        return null;
     }
 
 }

@@ -18,10 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +30,7 @@ import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -111,104 +103,6 @@ public interface KeyManager {
     KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException;
 
     /**
-     * @param jsonInput this jsonInput will contain set of oAuth application properties.
-     * @return OAuthApplicationInfo object will return after parsed jsonInput
-     * @throws KeyManagementException
-     */
-    OAuthApplicationInfo buildFromJSON(String jsonInput) throws KeyManagementException;
-
-    /**
-     * @param authApplicationInfo
-     * @param jsonInput           this jsonInput will contain set of oAuth application properties.
-     * @return OAuthApplicationInfo object will return after parsed jsonInput
-     * @throws KeyManagementException
-     */
-    default OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo, String jsonInput) throws
-            KeyManagementException {
-        //initiate json parser.
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject;
-
-        try {
-            //parse json String
-            jsonObject = (JSONObject) parser.parse(jsonInput);
-            if (jsonObject != null) {
-                //create a map to hold json parsed objects.
-                Map<String, Object> params = (Map) jsonObject;
-
-                //set client Id
-                if (params.get(KeyManagerConstants.OAUTH_CLIENT_ID) != null) {
-                    authApplicationInfo.setClientId((String) params.get(KeyManagerConstants.OAUTH_CLIENT_ID));
-                }
-                //copy all params map in to OAuthApplicationInfo's Map object.
-                authApplicationInfo.putAll(params);
-                return authApplicationInfo;
-            }
-        } catch (ParseException e) {
-            throw new KeyManagementException("Error occurred while parsing JSON String", e);
-        }
-        return null;
-    }
-
-
-    /**
-     * This method will parse the JSON input and add those additional values to AccessTokenRequest. If its needed to
-     * pass parameters in addition to those specified in AccessTokenRequest, those can be provided in the JSON input.
-     *
-     * @param jsonInput    Input as a JSON. This is the same JSON passed from Store UI.
-     * @param tokenRequest Object encapsulating parameters sent from UI.
-     * @return If input AccessTokenRequest is null, a new object will be returned,
-     * else the additional parameters will be added to the input object passed.
-     * @throws KeyManagementException
-     */
-    default AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
-            throws KeyManagementException {
-        if (jsonInput == null || jsonInput.isEmpty()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("JsonInput is null or Empty.");
-            }
-            return tokenRequest;
-        }
-
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject;
-
-        if (tokenRequest == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Input request is null. Creating a new Request Object.");
-            }
-            tokenRequest = new AccessTokenRequest();
-        }
-
-        try {
-            jsonObject = (JSONObject) parser.parse(jsonInput);
-            // Getting parameters from input string and setting in TokenRequest.
-            if (jsonObject != null && !jsonObject.isEmpty()) {
-                Map<String, Object> params = (Map<String, Object>) jsonObject;
-
-                if (null != params.get(KeyManagerConstants.OAUTH_CLIENT_ID)) {
-                    tokenRequest.setClientId((String) params.get(KeyManagerConstants.OAUTH_CLIENT_ID));
-                }
-
-                if (null != params.get(KeyManagerConstants.OAUTH_CLIENT_SECRET)) {
-                    tokenRequest.setClientSecret((String) params.get(KeyManagerConstants.OAUTH_CLIENT_SECRET));
-                }
-
-                if (null != params.get(KeyManagerConstants.VALIDITY_PERIOD)) {
-                    tokenRequest.setValidityPeriod(Long.parseLong((String) params.get(
-                            KeyManagerConstants.VALIDITY_PERIOD)));
-                }
-
-                return tokenRequest;
-            }
-        } catch (ParseException e) {
-            throw new KeyManagementException("Error occurred while parsing JSON String", e);
-        }
-        return null;
-
-    }
-
-    /**
      * This method will be used if you want to create a oAuth application in semi-manual mode
      * where you must input minimum consumer key and consumer secret.
      *
@@ -217,46 +111,6 @@ public interface KeyManager {
      * @throws KeyManagementException
      */
     OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException;
-
-    /**
-     * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,
-     * this will create a new object, else will modify the provided AccessTokenRequest Object.
-     *
-     * @param oAuthApplication
-     * @param tokenRequest
-     * @return AccessTokenRequest
-     */
-    default AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
-                                                                   AccessTokenRequest tokenRequest)
-            throws KeyManagementException {
-        if (oAuthApplication == null) {
-            return tokenRequest;
-        }
-        if (tokenRequest == null) {
-            tokenRequest = new AccessTokenRequest();
-        }
-
-        if (oAuthApplication.getClientId() == null || oAuthApplication.getClientSecret() == null) {
-            throw new KeyManagementException("Consumer key or Consumer Secret missing.");
-        }
-        tokenRequest.setClientId(oAuthApplication.getClientId());
-        tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
-
-
-        if (oAuthApplication.getParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE) != null) {
-            String[] tokenScopes = (String[]) oAuthApplication.getParameter(KeyManagerConstants.
-                    OAUTH_CLIENT_TOKEN_SCOPE);
-            tokenRequest.setScopes(tokenScopes);
-            oAuthApplication.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, Arrays.toString(tokenScopes));
-        }
-
-        if (oAuthApplication.getParameter(KeyManagerConstants.VALIDITY_PERIOD) != null) {
-            tokenRequest.setValidityPeriod(Long.parseLong((String) oAuthApplication.getParameter(KeyManagerConstants
-                    .VALIDITY_PERIOD)));
-        }
-
-        return tokenRequest;
-    }
 
     void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException;
 
@@ -306,24 +160,6 @@ public interface KeyManager {
      */
     void deleteMappedApplication(String consumerKey) throws KeyManagementException;
 
-    /**
-     * When provided the ConsumerKey, this method will provide all the Active tokens issued against that Key.
-     *
-     * @param consumerKey ConsumerKey of the OAuthClient
-     * @return {@link java.util.Set} having active access tokens.
-     * @throws KeyManagementException
-     */
-    Set<String> getActiveTokensByConsumerKey(String consumerKey) throws KeyManagementException;
-
-
-    /**
-     * Gives details of the Access Token to be displayed on Store.
-     *
-     * @param consumerKey
-     * @return {@link org.wso2.carbon.apimgt.core.models.AccessTokenInfo} populating all the details of the AccessToken.
-     * @throws KeyManagementException
-     */
-    AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws KeyManagementException;
 
 }
 
