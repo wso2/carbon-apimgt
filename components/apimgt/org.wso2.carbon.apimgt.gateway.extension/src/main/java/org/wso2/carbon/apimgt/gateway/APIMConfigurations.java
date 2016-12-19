@@ -26,6 +26,7 @@ package org.wso2.carbon.apimgt.gateway;
  */
 //@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
+
     private String carbonClientId = "carbon";
 //    @Element(description = "server version")
     private String carbonVirtualHostName = "carbon";
