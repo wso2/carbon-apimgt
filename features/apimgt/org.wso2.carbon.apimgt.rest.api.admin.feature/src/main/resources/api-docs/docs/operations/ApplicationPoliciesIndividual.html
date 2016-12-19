@@ -1,362 +1,37 @@
 <div class="main-content">
-    <h1><a name="Custom Rules"></a>Custom Rules</h1>
+    <h1><a name="Application Policies (Individual)"></a>Application Policies (Individual)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="throttlingPoliciesCustomGet"></a>Get all Custom Rules <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom</small></h3>
+            <h3 class="operation-heading"><a name="throttlingPoliciesApplicationPolicyIdDelete"></a>Delete an Application level throttle policy <br><small>DELETE https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/application/{policyId}</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Get all Custom Rules
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
-
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesCustomGet">
-                <h4 class="section-heading">
-                    Request
-                </h4>
-            </div>
-
-                <code class="bash">GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom</code>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesCustomGet">
-                <h4 class="section-heading">
-                    Response
-                </h4>
-            </div>
-                <p>Not Available</p>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <p>Not Available</p>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>Accept</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is JSON.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">JSON</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Modified-Since</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Policies returned </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#CustomRuleList">CustomRuleList</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h3 class="operation-heading"><a name="throttlingPoliciesCustomPost"></a>Add a Custom Rule <br><small>POST https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom</small></h3>
-            <p class="marked"></p>
-
-            <p class="marked">Add a Custom Rule
+            <p class="marked">This operation can be used to delete an Application level throttle policy speciffying its id as a path parameter.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesCustomPost">
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesApplicationPolicyIdDelete">
                 <h4 class="section-heading">
                     Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
 
-                <code class="bash">POST https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom</code>
+                <div id="request-throttlingPoliciesApplicationPolicyIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+</code></div>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesCustomPost">
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesApplicationPolicyIdDelete">
                 <h4 class="section-heading">
                     Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
-                <p>Not Available</p>
+                <div id="response-throttlingPoliciesApplicationPolicyIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <p>Not Available</p>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            
-                            <span class="param-in">Body </span>
-                        </td>
-                        <td class="param-name">
-                            <p>body</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Custom Rule object that should to be added
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                CustomRule
-                                    (<a href="#!/models#CustomRule">CustomRule</a>)
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>Content-Type</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Media type of the entity in the body. Default is JSON.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">JSON</p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">201</p></td>
-                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#CustomRule">CustomRule</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">415</p></td>
-                        <td class="parameter"><p class="marked">Unsupported media type. The entity of the request was in a not supported format. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h3 class="operation-heading"><a name="throttlingPoliciesCustomRuleIdDelete"></a>Delete a Custom Rule <br><small>DELETE https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</small></h3>
-            <p class="marked"></p>
-
-            <p class="marked">Delete a Custom Rule
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
-
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesCustomRuleIdDelete">
-                <h4 class="section-heading">
-                    Request
-                </h4>
-            </div>
-
-                <code class="bash">DELETE https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</code>
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesCustomRuleIdDelete">
-                <h4 class="section-heading">
-                    Response
-                </h4>
-            </div>
-                <p>Not Available</p>
-
-            <h4 class="section-heading">Sample CURL</h4>
-                <p>Not Available</p>
+                <div class="pre"><code class="bash">curl -k -X DELETE -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -385,14 +60,14 @@ formerly retrieved variant of the resource.
                             
                         </td>
                         <td class="param-name">
-                            <p>ruleId</p>
+                            <p>policyId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Custom rule UUID
+                            <p class="param-description marked">Thorttle policy UUID
 </p>
                         </td>
                         <td>
@@ -498,7 +173,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -508,32 +183,52 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="throttlingPoliciesCustomRuleIdGet"></a>Retrieve a Custom Rule <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</small></h3>
+            <h3 class="operation-heading"><a name="throttlingPoliciesApplicationPolicyIdGet"></a>Retrieve an Application Policy <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/application/{policyId}</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Retrieve a Custom Rule providing the policy name.
+            <p class="marked">This operation can be used to retrieve an Application Policy providing the policy id as a path parameter.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesCustomRuleIdGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesApplicationPolicyIdGet">
                 <h4 class="section-heading">
                     Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
 
-                <code class="bash">GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</code>
+                <div id="request-throttlingPoliciesApplicationPolicyIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/6fc88136-dd36-4e81-ac6c-746225c5001b
+Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
+</code></div>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesCustomRuleIdGet">
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesApplicationPolicyIdGet">
                 <h4 class="section-heading">
                     Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
-                <p>Not Available</p>
+                <div id="response-throttlingPoliciesApplicationPolicyIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;policyId&quot;: &quot;6fc88136-dd36-4e81-ac6c-746225c5001b&quot;,
+  &quot;policyName&quot;: &quot;10PerMwin&quot;,
+  &quot;displayName&quot;: &quot;10PerwMin&quot;,
+  &quot;description&quot;: &quot;Allows 10 request per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 10
+  }
+}
+</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <p>Not Available</p>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/6fc88136-dd36-4e81-ac6c-746225c5001b</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -562,14 +257,14 @@ formerly retrieved variant of the resource.
                             
                         </td>
                         <td class="param-name">
-                            <p>ruleId</p>
+                            <p>policyId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Custom rule UUID
+                            <p class="param-description marked">Thorttle policy UUID
 </p>
                         </td>
                         <td>
@@ -662,13 +357,13 @@ formerly retrieved variant of the resource.
                         <td class="parameter"><p class="marked">OK. Policy returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#CustomRule">CustomRule</a>
+                                    <a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -677,7 +372,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested Policy does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Tier does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -696,32 +391,63 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="throttlingPoliciesCustomRuleIdPut"></a>Update a Custom Rule <br><small>PUT https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</small></h3>
+            <h3 class="operation-heading"><a name="throttlingPoliciesApplicationPolicyIdPut"></a>Update an Application level throttle policy <br><small>PUT https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/application/{policyId}</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Update a Custom Rule
+            <p class="marked">This operation can be used to apdate an Application level throttle policy. Upon succesfull, you will receive the updated application policy as the response.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesCustomRuleIdPut">
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesApplicationPolicyIdPut">
                 <h4 class="section-heading">
                     Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
 
-                <code class="bash">PUT https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/custom/{ruleId}</code>
+                <div id="request-throttlingPoliciesApplicationPolicyIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479
+Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
+Content-Type: application/json
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesCustomRuleIdPut">
+{
+  &quot;policyName&quot;: &quot;1PerMin&quot;,
+  &quot;displayName&quot;: &quot;1PerMin&quot;,
+  &quot;description&quot;: &quot;Allows single request per minute&quot;,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 1
+  }
+}</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesApplicationPolicyIdPut">
                 <h4 class="section-heading">
                     Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
-                <p>Not Available</p>
+                <div id="response-throttlingPoliciesApplicationPolicyIdPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;policyId&quot;: &quot;f7becc49-9cc1-463f-bc2b-fc4c82582479&quot;,
+  &quot;policyName&quot;: &quot;1PerMin&quot;,
+  &quot;displayName&quot;: &quot;1PerMin&quot;,
+  &quot;description&quot;: &quot;Allows single request per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 1
+  }
+}</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <p>Not Available</p>
+                <div class="pre"><code class="bash">curl -k -X PUT -H &quot;Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479 -d @data.json</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -750,14 +476,14 @@ formerly retrieved variant of the resource.
                             
                         </td>
                         <td class="param-name">
-                            <p>ruleId</p>
+                            <p>policyId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Custom rule UUID
+                            <p class="param-description marked">Thorttle policy UUID
 </p>
                         </td>
                         <td>
@@ -790,8 +516,8 @@ formerly retrieved variant of the resource.
                         </td>
                         <td>
                             <span class="param-type">
-                                CustomRule
-                                    (<a href="#!/models#CustomRule">CustomRule</a>)
+                                ApplicationThrottlePolicy
+                                    (<a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a>)
                             </span>
                         </td>
                         <td>
@@ -814,7 +540,7 @@ formerly retrieved variant of the resource.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media type of the entity in the body. Default is JSON.
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
 </p>
                         </td>
                         <td>
@@ -823,7 +549,7 @@ formerly retrieved variant of the resource.
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                     <tr>
@@ -905,7 +631,7 @@ formerly retrieved variant of the resource.
                         <td class="parameter"><p class="marked">OK. Policy updated. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#CustomRule">CustomRule</a>
+                                    <a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a>
                             </span>
                         </td>
                     </tr>
@@ -929,7 +655,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
