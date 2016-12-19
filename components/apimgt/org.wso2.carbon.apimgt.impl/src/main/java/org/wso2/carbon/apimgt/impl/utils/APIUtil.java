@@ -3130,9 +3130,13 @@ public final class APIUtil {
     public static boolean isSubscriberRoleCreationEnabled(int tenantId) throws APIManagementException {
         String tenantDomain = getTenantDomainFromTenantId(tenantId);
         JSONObject defaultRoles = getTenantDefaultRoles(tenantDomain);
-        JSONObject subscriberRoleConfig = (JSONObject) defaultRoles
-                .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
-        return isRoleCreationEnabled(subscriberRoleConfig);
+        boolean isSubscriberRoleCreationEnabled = false;
+        if (defaultRoles != null) {
+            JSONObject subscriberRoleConfig = (JSONObject) defaultRoles
+                    .get(APIConstants.API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE);
+            isSubscriberRoleCreationEnabled = isRoleCreationEnabled(subscriberRoleConfig);
+        }
+        return isSubscriberRoleCreationEnabled;
     }
     
     /**
@@ -5521,9 +5525,11 @@ public final class APIUtil {
                     if (value != null) {
                         defaultRolesConfigJSON = (JSONObject) value;
                     } else {
-                        throw new APIManagementException(
-                                APIConstants.API_TENANT_CONF_DEFAULT_ROLES + " config does not exist for tenant "
-                                        + tenantDomain);
+                        //Config might not exist for migrated environments from previous release
+                        if (log.isDebugEnabled()) {
+                            log.debug(APIConstants.API_TENANT_CONF_DEFAULT_ROLES + " config does not exist for tenant "
+                                    + tenantDomain);
+                        }
                     }
                 }
             }
