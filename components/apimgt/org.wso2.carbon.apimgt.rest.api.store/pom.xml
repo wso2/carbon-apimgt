@@ -112,7 +112,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#store#v0.10</warName>
+                    <warName>api#am#store#v0.11</warName>
                 </configuration>
             </plugin>
             <plugin>
