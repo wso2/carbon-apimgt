@@ -1,5 +1,5 @@
 # zone name : fragment name
-footer : footer
+footer : "org.wso2.carbon.apimgt.publisher.commons.ui.footer"
 topbar : globalNavigation
 #primaryMenu : primaryMenu
 secondaryMenu : secondaryMenu
