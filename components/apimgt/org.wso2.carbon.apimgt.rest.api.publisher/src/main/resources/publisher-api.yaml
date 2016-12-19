@@ -236,8 +236,8 @@ paths:
     post:
       x-scope: apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.10/apis"
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       summary: Create a new API
       description: |
         This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.
@@ -2505,13 +2505,27 @@ definitions:
       - name
       - context
       - version
-      - apiDefinition
       - policies
       - isDefaultVersion
       - transport
-      - endpointConfig
       - visibility
     properties:
+      uritemplates:
+        properties:
+          uritemplate:
+            type: string
+            default: "/*"
+          httpVerb:
+            type: string
+            default: "GET"
+          authType:
+            type: string
+            default: "Any"
+          policy:
+            type: string
+            example: "Unlimited"
+          endpoint:
+            $ref: '#/definitions/EndPoint'
       id:
         type: string
         description: |
@@ -2534,11 +2548,6 @@ definitions:
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
-      apiDefinition:
-        description: |
-          Swagger definition of the API which contains details about URI templates and scopes
-        type: string
-        example: {"paths":{"/substract":{"get":{"x-auth-type":"Application & Application User","x-throttling-policy":"Unlimited","parameters":[{"name":"x","required":true,"type":"string","in":"query"},{"name":"y","required":true,"type":"string","in":"query"}],"responses":{"200":{}}}},"/add":{"get":{"x-auth-type":"Application & Application User","x-throttling-policy":"Unlimited","parameters":[{"name":"x","required":true,"type":"string","in":"query"},{"name":"y","required":true,"type":"string","in":"query"}],"responses":{"200":{}}}}},"swagger":"2.0","info":{"title":"CalculatorAPI","version":"1.0.0"}}
       wsdlUri:
         description: |
           WSDL URL if the API is based on a WSDL endpoint
@@ -2576,16 +2585,6 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      maxTps:
-        properties:
-          production:
-            type: integer
-            format: int64
-            example: 1000
-          sandbox:
-            type: integer
-            format: int64
-            example: 1000
       visibility:
         type: string
         enum:
@@ -2604,23 +2603,6 @@ definitions:
         items:
           type: string
         example: []
-      endpointConfig:
-        type: string
-        example: "{\"production_endpoints\":{\"url\":\"https://127.0.0.1:9443/am/sample/calculator/v1/api\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}"
-      endpointSecurity:
-        properties:
-          type:
-            type: string
-            example: basic
-            enum:
-              - basic
-              - digest
-          username:
-            type: string
-            example: admin
-          password:
-            type: string
-            example: password
       gatewayEnvironments:
         description: |
           Comma separated list of gateway environments.
@@ -3086,3 +3068,41 @@ definitions:
         type: string
         description: media-type of the file
         example: "image/jpeg"
+#-----------------------------------------------------
+# The Environment Endpoint resource
+#-----------------------------------------------------
+  EndPoint :
+    title: Endpoints
+    properties:
+      endpointType:
+        type: string
+        description: Type of Endpoint
+        example: "LoadBalance/HTTP"
+      endpointUrl:
+        type: string
+        description: Endpoint Url
+        example: "http://localhost:8280"
+      endpointSecurity:
+        properties:
+          type:
+            type: string
+            example: basic
+            enum:
+              - basic
+              - digest
+          username:
+            type: string
+            example: admin
+          password:
+            type: string
+            example: password
+      maxTps:
+        properties:
+          production:
+            type: integer
+            format: int64
+            example: 1000
+          sandbox:
+            type: integer
+            format: int64
+            example: 1000
