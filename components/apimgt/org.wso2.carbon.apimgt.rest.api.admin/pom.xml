@@ -111,7 +111,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#admin#v0.10</warName>
+                    <warName>api#am#admin#v0.11</warName>
                 </configuration>
             </plugin>
 

@@ -1,87 +1,97 @@
 <div class="main-content">
-    <h1><a name="Throttling Tier (Collection)"></a>Throttling Tier (Collection)</h1>
+    <h1><a name="Application Policies (Collection)"></a>Application Policies (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get all tiers <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}</small></h3>
+            <h3 class="operation-heading"><a name="throttlingPoliciesApplicationGet"></a>Get all Application throttle policies <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/application</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to list the available tiers for a given tier level. Tier level should be specified as a path parameter and should be one of &#x60;api&#x60;, &#x60;application&#x60; and &#x60;resource&#x60;.
+            <p class="marked">This operation can be used to retrieve all application level throttle policies.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesApplicationGet">
                 <h4 class="section-heading">
                     Request
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+                <div id="request-throttlingPoliciesApplicationGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.11/throttling/policies/application
+Authorization: Bearer e59e2657-4c2a-3cd0-8b48-0f4f39940c41
 </code></div>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelGet">
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesApplicationGet">
                 <h4 class="section-heading">
                     Response
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
-                <div id="response-tiersTierLevelGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+                <div id="response-throttlingPoliciesApplicationGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
-
 {
-   &quot;previous&quot;: &quot;&quot;,
-   &quot;list&quot;:    [
-            {
-         &quot;unitTime&quot;: 60000,
-         &quot;tierPlan&quot;: &quot;FREE&quot;,
-         &quot;tierLevel&quot;: &quot;api&quot;,
-         &quot;stopOnQuotaReach&quot;: true,
-         &quot;requestCount&quot;: 1,
-         &quot;description&quot;: &quot;Allows 1 request(s) per minute.&quot;,
-         &quot;name&quot;: &quot;Bronze&quot;,
-         &quot;attributes&quot;: {}
-      },
-            {
-         &quot;unitTime&quot;: 60000,
-         &quot;tierPlan&quot;: &quot;FREE&quot;,
-         &quot;tierLevel&quot;: &quot;api&quot;,
-         &quot;stopOnQuotaReach&quot;: true,
-         &quot;requestCount&quot;: 20,
-         &quot;description&quot;: &quot;Allows 20 request(s) per minute.&quot;,
-         &quot;name&quot;: &quot;Gold&quot;,
-         &quot;attributes&quot;: {}
-      },
-            {
-         &quot;unitTime&quot;: 60000,
-         &quot;tierPlan&quot;: &quot;FREE&quot;,
-         &quot;tierLevel&quot;: &quot;api&quot;,
-         &quot;stopOnQuotaReach&quot;: true,
-         &quot;requestCount&quot;: 5,
-         &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
-         &quot;name&quot;: &quot;Silver&quot;,
-         &quot;attributes&quot;: {}
-      },
-            {
-         &quot;unitTime&quot;: 0,
-         &quot;tierPlan&quot;: null,
-         &quot;tierLevel&quot;: &quot;api&quot;,
-         &quot;stopOnQuotaReach&quot;: true,
-         &quot;requestCount&quot;: 0,
-         &quot;description&quot;: &quot;Allows unlimited requests&quot;,
-         &quot;name&quot;: &quot;Unlimited&quot;,
-         &quot;attributes&quot;: {}
+  &quot;count&quot;: 4,
+  &quot;list&quot;: [
+    {
+      &quot;policyId&quot;: &quot;aef4447a-f996-4b3c-9c47-d0a401ab913c&quot;,
+      &quot;policyName&quot;: &quot;50PerMin&quot;,
+      &quot;displayName&quot;: &quot;50PerMin&quot;,
+      &quot;description&quot;: &quot;Allows 50 request per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 50
       }
-   ],
-   &quot;next&quot;: &quot;&quot;,
-   &quot;count&quot;: 4
-}</code></div>
+    },
+    {
+      &quot;policyId&quot;: &quot;472b573d-b162-4ac9-9984-531ee03d9d7c&quot;,
+      &quot;policyName&quot;: &quot;20PerMin&quot;,
+      &quot;displayName&quot;: &quot;20PerMin&quot;,
+      &quot;description&quot;: &quot;Allows 20 request per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 20
+      }
+    },
+    {
+      &quot;policyId&quot;: &quot;251d4f70-29f8-40f4-8aad-f2d1e7b8cfc2&quot;,
+      &quot;policyName&quot;: &quot;10PerMin&quot;,
+      &quot;displayName&quot;: &quot;10PerMin&quot;,
+      &quot;description&quot;: &quot;Allows 10 request per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 10
+      }
+    },
+    {
+      &quot;policyId&quot;: &quot;aaaef257-5453-42e6-b4a6-c48567864f92&quot;,
+      &quot;policyName&quot;: &quot;Unlimited&quot;,
+      &quot;displayName&quot;: &quot;Unlimited&quot;,
+      &quot;description&quot;: &quot;Allows unlimited requests&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 2147483647
+      }
+    }
+  ]
+}
+</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer e59e2657-4c2a-3cd0-8b48-0f4f39940c41&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/application</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -101,98 +111,6 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>tierLevel</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">List API or Application or Resource type tiers.
-</p>
-                                <p><b>Accepted values: </b></p>
-
-<code>api</code>
-
-<code>application</code>
-
-<code>resource</code>
-
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>limit</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Maximum size of resource array to return.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">25</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>offset</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">0</p>
-                        </td>
-                    </tr>
                     <tr>
                         <td class="parameter">
                             
@@ -250,6 +168,35 @@ variant of the resourec.
                             <p class="marked"></p>
                         </td>
                     </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -270,10 +217,10 @@ variant of the resourec.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. List of tiers returned. </p></td>
+                        <td class="parameter"><p class="marked">OK. Policies returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#TierList">TierList</a>
+                                    <a href="#!/models#ApplicationThrottlePolicyList">ApplicationThrottlePolicyList</a>
                             </span>
                         </td>
                     </tr>
@@ -288,7 +235,7 @@ variant of the resourec.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -298,70 +245,64 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelPost"></a>Create a Tier <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}</small></h3>
+            <h3 class="operation-heading"><a name="throttlingPoliciesApplicationPost"></a>Add an Application level throttle policy <br><small>POST https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/application</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to create a new throttling tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api&#x60;
-
-**IMPORTANT:**
-* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
+            <p class="marked">This operation can be used to add an application level throttle policy
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelPost">
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesApplicationPost">
                 <h4 class="section-heading">
                     Request
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+                <div id="request-throttlingPoliciesApplicationPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.11/throttling/policies/application
+Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
 Content-Type: application/json
 
 {
-    &quot;unitTime&quot;: 60000,
-    &quot;tierPlan&quot;: &quot;FREE&quot;,
-    &quot;tierLevel&quot;: &quot;api&quot;,
-    &quot;stopOnQuotaReach&quot;: true,
-    &quot;requestCount&quot;: 5,
-    &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
-    &quot;name&quot;: &quot;Low&quot;,
-    &quot;attributes&quot;: {
-            &quot;a&quot;:10,
-            &quot;b&quot;:30
-        }
+  &quot;policyName&quot;: &quot;1PerMin&quot;,
+  &quot;displayName&quot;: &quot;1PerMin&quot;,
+  &quot;description&quot;: &quot;Allows 1 request per minute&quot;,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 1
+  }
 }</code></div>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelPost">
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesApplicationPost">
                 <h4 class="section-heading">
                     Response
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                 </h4>
             </div>
-                <div id="response-tiersTierLevelPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/Low
+                <div id="response-throttlingPoliciesApplicationPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://localhost:9443/api/am/admin/v0.11/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479
 Content-Type: application/json
 
 {
-   &quot;unitTime&quot;: 60000,
-   &quot;tierPlan&quot;: &quot;FREE&quot;,
-   &quot;tierLevel&quot;: &quot;api&quot;,
-   &quot;stopOnQuotaReach&quot;: true,
-   &quot;requestCount&quot;: 5,
-   &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
-   &quot;name&quot;: &quot;Low&quot;,
-   &quot;attributes&quot;:    {
-      &quot;b&quot;: &quot;30&quot;,
-      &quot;a&quot;: &quot;10&quot;
-   }
+  &quot;policyId&quot;: &quot;f7becc49-9cc1-463f-bc2b-fc4c82582479&quot;,
+  &quot;policyName&quot;: &quot;1PerMin&quot;,
+  &quot;displayName&quot;: &quot;1PerMin&quot;,
+  &quot;description&quot;: &quot;Allows 1 request per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 1
+  }
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/application -d @data.json</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -397,49 +338,13 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Tier object that should to be added
+                            <p class="param-description marked">Application level policy object that should to be added
 </p>
                         </td>
                         <td>
                             <span class="param-type">
-                                Tier
-                                    (<a href="#!/models#Tier">Tier</a>)
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>tierLevel</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">List API or Application or Resource type tiers.
-</p>
-                                <p><b>Accepted values: </b></p>
-
-<code>api</code>
-
-<code>application</code>
-
-<code>resource</code>
-
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
+                                ApplicationThrottlePolicy
+                                    (<a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a>)
                             </span>
                         </td>
                         <td>
@@ -497,7 +402,7 @@ Content-Type: application/json
                         <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#Tier">Tier</a>
+                                    <a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a>
                             </span>
                         </td>
                     </tr>

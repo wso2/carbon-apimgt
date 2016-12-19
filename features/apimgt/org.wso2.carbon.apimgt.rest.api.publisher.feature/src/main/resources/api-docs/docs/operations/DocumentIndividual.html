@@ -2,7 +2,7 @@
     <h1><a name="Document (Individual)"></a>Document (Individual)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}/content</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents/{documentId}/content</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrive the content of an API&#39;s document.
@@ -27,7 +27,7 @@ The document can be of 3 types. In each cases responses are different.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content
 Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
 </code></div>
 
@@ -54,7 +54,7 @@ startxref
 %%EOF</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot; &gt; sample.pdf</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot; &gt; sample.pdf</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -284,7 +284,7 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentPost"></a>Upload the content of an API document <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}/content</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentPost"></a>Upload the content of an API document <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents/{documentId}/content</small></h3>
             <p class="marked"></p>
 
             <p class="marked">Thid operation can be used to upload a file or add inline content to an API document.
@@ -305,7 +305,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
 Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Length: 8004
 Content-Type: multipart/form-data; boundary&#x3D;------------------------7b9a53f1ffa452b9
@@ -326,7 +326,7 @@ Content-Type: application/octet-stream
                 </h4>
             </div>
                 <div id="response-apisApiIdDocumentsDocumentIdContentPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.10/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
+Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content
 Content-Type: application/json
 
 {
@@ -341,7 +341,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -F file&#x3D;@&quot;sample.pdf&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -F file&#x3D;@&quot;sample.pdf&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -614,7 +614,7 @@ Should be formatted as **provider-name-version**.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdDelete"></a>Delete a document of an API <br><small>DELETE https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdDelete"></a>Delete a document of an API <br><small>DELETE https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents/{documentId}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete a document associated with an API.
@@ -630,7 +630,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
+                <div id="request-apisApiIdDocumentsDocumentIdDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -643,7 +643,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-apisApiIdDocumentsDocumentIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -825,7 +825,7 @@ Should be formatted as **provider-name-version**.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents/{documentId}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a particular document&#39;s metadata associated with an API.
@@ -841,7 +841,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -866,7 +866,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1087,7 +1087,7 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdPut"></a>Update a document of an API <br><small>PUT https://apis.wso2.com/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}</small></h3>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdPut"></a>Update a document of an API <br><small>PUT https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/documents/{documentId}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update metadata of an API&#39;s document.
@@ -1103,7 +1103,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+                <div id="request-apisApiIdDocumentsDocumentIdPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
 Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a
 Content-Type: application/json
 
@@ -1139,7 +1139,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
