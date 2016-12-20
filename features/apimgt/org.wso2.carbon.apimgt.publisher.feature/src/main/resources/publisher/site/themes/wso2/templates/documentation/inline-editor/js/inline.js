@@ -1,24 +1,9 @@
 $(document).ready(function() {
-    //tinyMCE.init({
-    //	selector: 'textarea',
-	 //   plugins: [
-		//		'advlist autolink lists link image charmap print preview anchor',
-		//		'searchreplace visualblocks autosave code fullscreen spellchecker',
-		//		'insertdatetime media table contextmenu paste code'
-		//      ],
-    //    autosave_interval: "1s",
-    //    autosave_retention: "1440m",
-    //    autosave_restore_when_empty: true,
-    //    autosave_ask_before_unload: false,
-    //    autosave_prefix: "doc_auto_save",
-		//toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
-		//toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
-    //});
+
 });
 
 
 function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
-
 
     tinyMCE.init({
         selector: 'textarea',
@@ -30,10 +15,10 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
                         var apiName = json.doc.provider.apiName;
                         var docContent = json.doc.provider.content;
                         $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
-                        if(localStorage.getItem("doc_auto_save"+apiName+"draft") == null) {
+                        if(localStorage.getItem("doc_auto_save"+apiName+provider+version+docName+"draft") == null) {
                             tinyMCE.activeEditor.setContent(docContent);
                         }else{
-                            tinyMCE.activeEditor.setContent(localStorage.getItem("doc_auto_save"+apiName+"draft"));
+                            tinyMCE.activeEditor.setContent(localStorage.getItem("doc_auto_save"+apiName+provider+version+docName+"draft"));
                         }
                     } else {
                         $('#inlineError').show('fast');
@@ -50,18 +35,12 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
         autosave_retention: "1440m",
         autosave_restore_when_empty: true,
         autosave_ask_before_unload: false,
-        autosave_prefix: "doc_auto_save"+ apiName,
+        autosave_prefix: "doc_auto_save"+apiName+provider+version+docName,
         toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
         toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
     });
 
-
-
-
-
 }
-
-
 
 function saveContent(provider, apiName, apiVersion, docName, mode) {
 	var contentDoc = tinyMCE.get('inlineEditor').getContent();
@@ -93,8 +72,8 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
                       } else {
                            $('#docAddMessage').show();
                            setTimeout("hideMsg()", 3000);
-                          localStorage.removeItem("doc_auto_save"+apiName+"draft");
-                          localStorage.removeItem("doc_auto_time"+apiName+"draft");
+                          localStorage.removeItem("doc_auto_save"+apiName+provider+version+docName+"draft");
+                          localStorage.removeItem("doc_auto_time"+apiName+provider+version+docName+"draft");
                       }
                   }
               }, "json");
