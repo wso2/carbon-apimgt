@@ -1,6 +1,6 @@
-appName : API Publisher
+appName : API Editor
 theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
-title : "API Publisher Application"
+title : "API Editor Tool"
 menu :
   main :
     Home : {link: "", icon: "fw-home"}
