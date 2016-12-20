@@ -36,12 +36,12 @@ public class PostgreDataSource implements DataSource{
 
 
     PostgreDataSource() throws Exception {
-        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-postgre");
+        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-postgres");
         basicDataSource.setDriverClassName("org.postgresql.Driver");
         basicDataSource.setJdbcUrl("jdbc:postgresql://"+ipAddress+":5432/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
-        basicDataSource.setAutoCommit(false);
+        basicDataSource.setAutoCommit(true);
         basicDataSource.setMaximumPoolSize(20);
     }
 
@@ -53,6 +53,16 @@ public class PostgreDataSource implements DataSource{
     @Override
     public Connection getConnection() throws SQLException {
         return basicDataSource.getConnection();
+    }
+
+    /**
+     * Return Hikari Datasource
+     *
+     * @return {@link HikariDataSource} object
+     */
+    @Override
+    public HikariDataSource getDatasource() throws SQLException {
+        return basicDataSource;
     }
 
     public void resetDB() throws SQLException {
@@ -81,8 +91,6 @@ public class PostgreDataSource implements DataSource{
                 statement.addBatch("DROP SEQUENCE " + listOfSequences.get(i) + " CASCADE");
             }
             statement.executeBatch();
-
-            connection.commit();
         }
     }
 }

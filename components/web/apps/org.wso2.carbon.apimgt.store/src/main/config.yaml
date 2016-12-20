@@ -18,5 +18,5 @@ menu :
 errorPages:
   "404": /foundation/error/404
   default: /foundation/error/default
-loginPageUri: "simple-auth/login"
+#loginPageUri: "simple-auth/login"  # TODO: This simple-auth login coming from UUF sample app is not currently useful tmkb.
 loginRedirectUri: "/api"

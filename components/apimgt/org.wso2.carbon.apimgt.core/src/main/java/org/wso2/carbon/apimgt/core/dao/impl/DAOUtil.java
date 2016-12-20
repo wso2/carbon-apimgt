@@ -56,8 +56,16 @@ public class DAOUtil {
         if (dataSource != null) {
             return dataSource.getConnection();
         }
+        throw new SQLException("Datasource is not configured properly.");
+    }
 
-        throw new SQLException("Data source is not configured properly.");
+    /**
+     * Get is auto commit enabled
+     *
+     * @return true if auto commit is enabled, false otherwise
+     */
+    public static boolean isAutoCommit() throws SQLException {
+        return dataSource.getDatasource().isAutoCommit();
     }
 
     static String getParameterString(int numberOfParameters) {
