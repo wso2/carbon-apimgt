@@ -46,7 +46,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -416,9 +415,9 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             throw new KeyManagementException(msg, e, ExceptionCodes.
                     TOKEN_INTROSPECTION_FAILED);
         } catch (JsonSyntaxException e) {
-            String msg="Error while processing the response returned from token introspect endpoint.";
+            String msg = "Error while processing the response returned from token introspect endpoint.";
             LOG.error("Error while processing the response returned from token introspect endpoint.", e);
-            throw new KeyManagementException(msg,e,
+            throw new KeyManagementException(msg, e,
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         } finally {
             if (urlConn != null) {

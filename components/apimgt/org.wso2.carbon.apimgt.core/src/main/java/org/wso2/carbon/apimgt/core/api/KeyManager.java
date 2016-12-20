@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
