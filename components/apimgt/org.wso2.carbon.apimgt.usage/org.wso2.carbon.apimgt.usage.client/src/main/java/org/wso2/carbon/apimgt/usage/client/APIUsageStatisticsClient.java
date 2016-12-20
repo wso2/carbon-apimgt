@@ -23,25 +23,53 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.client.bean.*;
+import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
+import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchCountBean;
+import org.wso2.carbon.apimgt.usage.client.bean.RequestSortBean;
+import org.wso2.carbon.apimgt.usage.client.bean.Result;
+import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
-import org.wso2.carbon.apimgt.usage.client.dto.*;
+import org.wso2.carbon.apimgt.usage.client.dto.APIDestinationUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResourcePathUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResponseFaultCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResponseTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIThrottlingOverTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIUsageByUserDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIVersionLastAccessTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIVersionUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.ApiTopUsersListDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.AppCallTypeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.AppRegisteredUsersDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.AppUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.FaultCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.PerAppApiCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.PerUserAPIUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.RegisteredAppUsersDTO;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
-import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
-import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Collections.sort;
 
@@ -621,6 +649,11 @@ public abstract class APIUsageStatisticsClient {
     protected void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
         log.error(msg, e);
         throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
+
+    protected void handleException(String s) throws APIMgtUsageQueryServiceClientException {
+        log.error(s);
+        throw new APIMgtUsageQueryServiceClientException(s);
     }
 
     /**
