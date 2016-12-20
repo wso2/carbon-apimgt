@@ -65,26 +65,21 @@ public class MySQLDataSource implements DataSource {
 
     public void resetDB() throws SQLException {
         List<String> tables = new ArrayList<>();
-        try (Connection connection = basicDataSource.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                connection.setAutoCommit(false);
-                try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
-                        "information_schema.tables WHERE table_type = 'base table' AND table_schema='" + databaseName
-                        + '\'')) {
-                    while (resultSet.next()) {
-                        tables.add(resultSet.getString("TABLE_NAME"));
-                    }
+        try (Connection connection = basicDataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
+                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='" + databaseName
+                    + '\'')) {
+                while (resultSet.next()) {
+                    tables.add(resultSet.getString("TABLE_NAME"));
                 }
-                statement.execute("SET FOREIGN_KEY_CHECKS = 0");
-                for (String table : tables) {
-                    statement.addBatch("DROP TABLE " + table);
-                }
-                statement.executeBatch();
-                statement.execute("SET FOREIGN_KEY_CHECKS = 1");
-                connection.commit();
-            } catch (Exception ex) {
-                connection.rollback();
             }
+            statement.execute("SET FOREIGN_KEY_CHECKS = 0");
+            for (String table : tables) {
+                statement.addBatch("DROP TABLE " + table);
+            }
+            statement.executeBatch();
+            statement.execute("SET FOREIGN_KEY_CHECKS = 1");
         }
     }
 }

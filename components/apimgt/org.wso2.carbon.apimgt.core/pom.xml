@@ -218,6 +218,62 @@
     </build>
     <profiles>
         <profile>
+            <id>local-all</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>run-mysql</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-mysql</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-h2</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-h2</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-postgres</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P local-postgres</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>local-mysql</id>
             <build>
                 <plugins>
@@ -227,14 +283,14 @@
                         <version>0.18.1</version>
                         <executions>
                             <execution>
-                                <id>start-docker</id>
+                                <id>start-docker-for-mysql</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>stop-docker</id>
+                                <id>stop-docker-for-mysql</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>
@@ -272,14 +328,14 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <id>integration-test</id>
+                                <id>integration-test-for-mysql</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>verify</id>
+                                <id>verify-for-mysql</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
@@ -305,15 +361,15 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
+                                <id>integration-test-for-h2</id>
                                 <phase>integration-test</phase>
-                                <id>integration-test</id>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
+                                <id>verify-for-h2</id>
                                 <phase>integration-test</phase>
-                                <id>verify</id>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
@@ -335,14 +391,14 @@
                         <version>0.18.1</version>
                         <executions>
                             <execution>
-                                <id>start-docker</id>
+                                <id>start-docker-for-postgres</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>stop-docker</id>
+                                <id>stop-docker-for-postgres</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>
@@ -353,7 +409,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <alias>apim-postgre</alias>
+                                    <alias>apim-postgres</alias>
                                     <name>postgres:9.6-alpine</name>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -381,15 +437,15 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
+                                <id>integration-test-for-postgres</id>
                                 <phase>integration-test</phase>
-                                <id>integration-test</id>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <phase>integration-test</phase>
-                                <id>verify</id>
+                                <id>verify-for-postgres</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
