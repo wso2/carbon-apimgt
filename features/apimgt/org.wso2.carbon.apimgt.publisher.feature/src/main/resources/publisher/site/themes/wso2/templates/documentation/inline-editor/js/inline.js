@@ -1,44 +1,67 @@
 $(document).ready(function() {
-    tinyMCE.init({
-    	selector: 'textarea',
-	    plugins: [
-				'advlist autolink lists link image charmap print preview anchor',
-				'searchreplace visualblocks autosave code fullscreen spellchecker',
-				'insertdatetime media table contextmenu paste code'
-		      ],
-        autosave_interval: "1s",
-        autosave_retention: "1440m",
-        autosave_restore_when_empty: true,
-        autosave_ask_before_unload: false,
-        autosave_prefix: "doc_auto_save",
-		toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
-		toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
-    });
+    //tinyMCE.init({
+    //	selector: 'textarea',
+	 //   plugins: [
+		//		'advlist autolink lists link image charmap print preview anchor',
+		//		'searchreplace visualblocks autosave code fullscreen spellchecker',
+		//		'insertdatetime media table contextmenu paste code'
+		//      ],
+    //    autosave_interval: "1s",
+    //    autosave_retention: "1440m",
+    //    autosave_restore_when_empty: true,
+    //    autosave_ask_before_unload: false,
+    //    autosave_prefix: "doc_auto_save",
+		//toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
+		//toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
+    //});
 });
 
 
 function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
-    jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"getInlineContent", provider:provider,apiName:apiName,version:version,docName:docName },
-              function (json) {
-                  if (!json.error) {
-                      var docName = json.doc.provider.docName;
-                      var apiName = json.doc.provider.apiName;
-                      var docContent = json.doc.provider.content;
-                      $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
-                      if(localStorage.getItem("doc_auto_savedraft") == null) {
-                          tinyMCE.activeEditor.setContent(docContent);
-                      }else{
-                          tinyMCE.activeEditor.setContent(localStorage.getItem("doc_auto_savedraft"));
-                      }
-                  } else {
-                      $('#inlineError').show('fast');
-                      $('#inlineSpan').html('<strong>'+ i18n.t('Sorry. The content of this document cannot be loaded.')+'</strong><br />'+result.message);
-                  }
-              }, "json");
+
+
+    tinyMCE.init({
+        selector: 'textarea',
+        init_instance_callback : function() {
+            jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"getInlineContent", provider:provider,apiName:apiName,version:version,docName:docName },
+                function (json) {
+                    if (!json.error) {
+                        var docName = json.doc.provider.docName;
+                        var apiName = json.doc.provider.apiName;
+                        var docContent = json.doc.provider.content;
+                        $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
+                        if(localStorage.getItem("doc_auto_save"+apiName+"draft") == null) {
+                            tinyMCE.activeEditor.setContent(docContent);
+                        }else{
+                            tinyMCE.activeEditor.setContent(localStorage.getItem("doc_auto_save"+apiName+"draft"));
+                        }
+                    } else {
+                        $('#inlineError').show('fast');
+                        $('#inlineSpan').html('<strong>'+ i18n.t('Sorry. The content of this document cannot be loaded.')+'</strong><br />'+result.message);
+                    }
+                }, "json");
+        },
+        plugins: [
+            'advlist autolink lists link image charmap print preview anchor',
+            'searchreplace visualblocks autosave code fullscreen spellchecker',
+            'insertdatetime media table contextmenu paste code'
+        ],
+        autosave_interval: "1s",
+        autosave_retention: "1440m",
+        autosave_restore_when_empty: true,
+        autosave_ask_before_unload: false,
+        autosave_prefix: "doc_auto_save"+ apiName,
+        toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
+        toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
+    });
+
+
 
 
 
 }
+
+
 
 function saveContent(provider, apiName, apiVersion, docName, mode) {
 	var contentDoc = tinyMCE.get('inlineEditor').getContent();
@@ -70,8 +93,8 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
                       } else {
                            $('#docAddMessage').show();
                            setTimeout("hideMsg()", 3000);
-                          localStorage.removeItem("doc_auto_savedraft");
-                          localStorage.removeItem("doc_auto_savetime");
+                          localStorage.removeItem("doc_auto_save"+apiName+"draft");
+                          localStorage.removeItem("doc_auto_time"+apiName+"draft");
                       }
                   }
               }, "json");
