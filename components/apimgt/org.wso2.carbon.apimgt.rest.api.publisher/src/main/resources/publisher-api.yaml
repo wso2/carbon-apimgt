@@ -2511,21 +2511,9 @@ definitions:
       - visibility
     properties:
       uritemplates:
-        properties:
-          uritemplate:
-            type: string
-            default: "/*"
-          httpVerb:
-            type: string
-            default: "GET"
-          authType:
-            type: string
-            default: "Any"
-          policy:
-            type: string
-            example: "Unlimited"
-          endpoint:
-            $ref: '#/definitions/EndPoint'
+       type: array
+       items:
+         $ref: '#/definitions/Uritemplate'
       id:
         type: string
         description: |
@@ -3068,6 +3056,26 @@ definitions:
         type: string
         description: media-type of the file
         example: "image/jpeg"
+#-----------------------------------------------------
+# The Uritemplate
+#-----------------------------------------------------
+  Uritemplate:
+    title: Uritemplate
+    properties:
+      uritemplate:
+        type: string
+        default: "/*"
+      httpVerb:
+       type: string
+       default: "GET"
+      authType:
+        type: string
+        default: "Any"
+      policy:
+        type: string
+        example: "Unlimited"
+      endpoint:
+        $ref: '#/definitions/EndPoint'
 #-----------------------------------------------------
 # The Environment Endpoint resource
 #-----------------------------------------------------
