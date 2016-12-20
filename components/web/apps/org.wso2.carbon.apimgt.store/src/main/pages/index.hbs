@@ -1,8 +1,21 @@
 {{layout "main"}}
 {{favicon "images/favicon.png" type="image/png"}}
-{{title "Home | " @config.appName}}
-{{css "css/portal.css"}}
-{{css "css/asset.css"}}
+{{title "Listing | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/api/api.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
 {{#fillZone "content"}}
-    <h1>WelCome to store</h1>
+    <div class="page-header">
+        <h1>{{t "api-store.api.list"}}</h1>
+    </div>
+    <div class="page-content">
+        <div class="row" id="api-content">
+        </div>
+    </div>
 {{/fillZone}}
