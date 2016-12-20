@@ -1,0 +1,4 @@
+# zone name : fragment name
+footer : footer
+topbar : globalNavigation
+#org.wso2.carbon.uuf.sample.foundation.usermenu: org.wso2.carbon.uuf.sample.simple-auth.usermenu
