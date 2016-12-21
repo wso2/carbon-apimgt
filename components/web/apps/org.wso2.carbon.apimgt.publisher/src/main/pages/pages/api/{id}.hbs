@@ -1,0 +1,273 @@
+{{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Listing | " @config.appName}}
+{{js "js/api/{id}.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "actionMenu"}}
+    {{fragment "actionMenuApiDetails"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header" id="apiTitleContainer"></div>
+            <div class="button-bar">
+                <ul class="nav nav-pills">
+                    <li class="active"><a href="#overview-r" data-toggle="tab"><i class="fa fa-eye "></i>&nbsp; Overview</a></li>
+                    <li><a href="#lifecycle-r" data-toggle="tab"><i class="fa fa-circle-o-notch "></i>&nbsp; Life-Cycle</a></li>
+                    <li><a href="#endpoints-r" data-toggle="tab"><i class="fa fa-link "></i>&nbsp; Endpoints</a></li>
+                    <li><a href="#resources-r" data-toggle="tab"><i class="fa fa-align-justify "></i>&nbsp; Resources</a></li>
+                    <li><a href="#documents-r" data-toggle="tab"><i class="fa fa-files-o "></i>&nbsp; Documents</a></li>
+                    <li><a href="#actrl-r" data-toggle="tab"><i class="fa fa-lock "></i>&nbsp; Access Control</a></li>
+                    <li><a href="#sequences-r" data-toggle="tab"><i class="fa fa-code-fork "></i>&nbsp; Mediation</a></li>
+                    <li><a href="#scripting-r" data-toggle="tab"><i class="fa fa-code "></i>&nbsp; Scripting</a></li>
+                </ul>
+            </div>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane active" id="overview-r"></div>
+                    <div class="tab-pane loading" id="lifecycle-r" class="" data-toggle="loading" data-loading-style="overlay" style="height: 300px">
+
+
+                        <div >
+                            <div class="loading-animation">
+                                <div class="logo">
+                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 14 14" enable-background="new 0 0 14 14" xml:space="preserve"><path class="circle" stroke-width="1.4" stroke-miterlimit="10" d="M6.534,0.748C7.546,0.683,8.578,0.836,9.508,1.25 c1.903,0.807,3.339,2.615,3.685,4.654c0.244,1.363,0.028,2.807-0.624,4.031c-0.851,1.635-2.458,2.852-4.266,3.222 c-1.189,0.25-2.45,0.152-3.583-0.289c-1.095-0.423-2.066-1.16-2.765-2.101C1.213,9.78,0.774,8.568,0.718,7.335 C0.634,5.866,1.094,4.372,1.993,3.207C3.064,1.788,4.76,0.867,6.534,0.748z"></path><path class="pulse-line" stroke-width="0.55" stroke-miterlimit="10" d="M12.602,7.006c-0.582-0.001-1.368-0.001-1.95,0 c-0.491,0.883-0.782,1.4-1.278,2.28C8.572,7.347,7.755,5.337,6.951,3.399c-0.586,1.29-1.338,3.017-1.923,4.307 c-1.235,0-2.38-0.002-3.615,0"></path></svg>
+                                    <div class="signal"></div>
+                                </div>
+                                <p>LOADING</p></div>
+                            <div class="loading-bg"></div>
+
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane" id="endpoints-r">
+                        <form class="form-horizontal">
+                            <fieldset>
+
+                                <!-- Select Basic -->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="selectbasic">Endpoint Type</label>
+                                    <div class="col-md-4">
+                                        <select id="selectbasic" name="selectbasic" class="form-control">
+                                            <option value="1">Option one</option>
+                                            <option value="2">Option two</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="textinput">Production Endpoint</label>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" aria-label="...">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn btn-default">Advanced Options</button>
+                                                <button type="button" class="btn btn-default">Test</button>
+                                            </div>
+                                        </div>  <span class="help-block">E.g.: http://appserver/resource</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="textinput">Sandbox Endpoint</label>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" aria-label="...">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn btn-default">Advanced Options</button>
+                                                <button type="button" class="btn btn-default">Test</button>
+                                            </div>
+                                        </div>  <span class="help-block">E.g.: http://appserver/resource</span>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                        </form>
+
+
+                    </div>
+
+                    <div class="tab-pane" id="resources-r">
+                        <button type="button" class="btn btn-default">Import Swagger</button>
+                        <button type="button" class="btn btn-default">Edit Swagger</button>
+                        <br><br>
+                        <form class="form-horizontal">
+                            <fieldset>
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="textinput">Resource</label>
+                                    <div class="col-md-5">
+                                        <input id="textinput" name="textinput" placeholder="" class="form-control input-md" type="text">
+
+                                    </div>
+                                </div>
+
+                                <!-- Multiple Checkboxes (inline) -->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="checkboxes">Operations</label>
+                                    <div class="col-md-4">
+                                        <label class="checkbox-inline" for="checkboxes-0">
+                                            <input name="checkboxes" id="checkboxes-0" value="GET" type="checkbox">
+                                            GET
+                                        </label>
+                                        <label class="checkbox-inline" for="checkboxes-1">
+                                            <input name="checkboxes" id="checkboxes-1" value="POST" type="checkbox">
+                                            POST
+                                        </label>
+                                        <label class="checkbox-inline" for="checkboxes-2">
+                                            <input name="checkboxes" id="checkboxes-2" value="PUT" type="checkbox">
+                                            PUT
+                                        </label>
+                                        <label class="checkbox-inline" for="checkboxes-3">
+                                            <input name="checkboxes" id="checkboxes-3" value="DELETE" type="checkbox">
+                                            DELETE
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Button -->
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="singlebutton"></label>
+                                    <div class="col-md-4">
+                                        <button id="singlebutton" name="singlebutton" class="btn btn-primary">Add Resource</button>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                        </form>
+
+                        <table class="table">
+                            <tbody><tr>
+                                <td class="info">GET</td>
+                                <td> /* </td><td>
+                            </td><td>Application &amp; Application User</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="success">POST</td>
+                                <td> /* </td><td>
+                            </td><td>Application &amp; Application User</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="warning">PUT</td>
+                                <td> /* </td><td>
+                            </td><td>Application &amp; Application User</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="danger">DELETE</td>
+                                <td> /* </td><td>
+                            </td><td>Application &amp; Application User</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            </tbody></table>
+                    </div>
+
+                    <div class="tab-pane" id="documents-r">
+                        <div class="btn-group" role="group" aria-label="...">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-edit "></i> Add Document</button>
+                            <button class="btn btn-default" type="submit"><i class="fa fa-remove"></i> Delete</button>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="actrl-r">
+                        <h4>Visibility</h4>
+                        <!-- Select Basic -->
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <select id="selectbasic" name="selectbasic" class="form-control">
+                                        <option value="1">Public</option>
+                                        <option value="2">Private</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <h4>Tiers</h4>
+                        <table class="table table-bordered col-md-4">
+                            <thead>
+                            <tr>
+                                <td>Name</td>
+                                <td>Rquests per hour</td>
+                            </tr>
+                            </thead>
+                            <tbody><tr>
+                                <td>Unlimited</td>
+                                <td class="text-right">Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Platinum</td>
+                                <td class="text-right">1000</td>
+                            </tr>
+                            <tr>
+                                <td>Gold</td>
+                                <td class="text-right">100</td>
+                            </tr>
+                            </tbody></table>
+                        <h4>OAuth Scopes</h4>
+                        <p>You can assign scope to resources in the resources tab.</p>
+                        <table class="table table-bordered col-md-4">
+                            <thead>
+                            <tr>
+                                <td>Key</td>
+                                <td>Name</td>
+                                <td>Roles</td>
+                                <td>Description</td>
+                            </tr>
+                            </thead>
+                            <tbody><tr>
+                                <td>admin</td>
+                                <td>Admin Scope</td>
+                                <td>admin , something</td>
+                                <td>This is a description</td>
+                            </tr>
+                            <tr>
+                                <td>admin</td>
+                                <td>Admin Scope</td>
+                                <td>admin , something</td>
+                                <td>This is a description</td>
+                            </tr>
+                            </tbody></table>
+                    </div>
+
+                    <div class="tab-pane" id="sequences-r">
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-default active">
+                                <input type="radio" name="options" id="option1" autocomplete="off" checked=""> In Sequence
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="radio" name="options" id="option2" autocomplete="off"> Out Sequence
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="radio" name="options" id="option3" autocomplete="off"> Fault Sequence
+                            </label>
+                        </div>
+                        <div class="row">
+                            <!-- img src="img/flow.svg" class="col-xs-6" -->
+                        </div>
+                        <h3>In Sequence</h3>
+                        <div id="editor2" class="col-md-12 ace_editor ace-tm" style="height:600px"><textarea class="ace_text-input" wrap="off" autocapitalize="off" spellcheck="false" style="opacity: 0;"></textarea><div class="ace_gutter"><div class="ace_layer ace_gutter-layer ace_folding-enabled"></div><div class="ace_gutter-active-line"></div></div><div class="ace_scroller"><div class="ace_content"><div class="ace_layer ace_print-margin-layer"><div class="ace_print-margin" style="left: 4px; visibility: visible;"></div></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_text-layer" style="padding: 0px 4px;"></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_cursor-layer ace_hidden-cursors"><div class="ace_cursor"></div></div></div></div><div class="ace_scrollbar ace_scrollbar-v" style="display: none; width: 20px;"><div class="ace_scrollbar-inner" style="width: 20px;"></div></div><div class="ace_scrollbar ace_scrollbar-h" style="display: none; height: 20px;"><div class="ace_scrollbar-inner" style="height: 20px;"></div></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: hidden;"><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: visible;"></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: visible;">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div></div></div>
+                    </div>
+                    <div class="tab-pane" id="scripting-r">
+                        <table class="table table-bordered">
+                            <tbody><tr>
+                                <th style="width:200px">Resources</th>
+                                <th>Script</th>
+                            </tr>
+                            <tr>
+                                <td>
+
+                                </td>
+                                <td><div id="editor" class="col-md-12 ace_editor ace-tm" style="height:600px"><textarea class="ace_text-input" wrap="off" autocapitalize="off" spellcheck="false" style="opacity: 0;"></textarea><div class="ace_gutter"><div class="ace_layer ace_gutter-layer ace_folding-enabled"></div><div class="ace_gutter-active-line"></div></div><div class="ace_scroller"><div class="ace_content"><div class="ace_layer ace_print-margin-layer"><div class="ace_print-margin" style="left: 4px; visibility: visible;"></div></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_text-layer" style="padding: 0px 4px;"></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_cursor-layer ace_hidden-cursors"><div class="ace_cursor"></div></div></div></div><div class="ace_scrollbar ace_scrollbar-v" style="display: none; width: 20px;"><div class="ace_scrollbar-inner" style="width: 20px;"></div></div><div class="ace_scrollbar ace_scrollbar-h" style="display: none; height: 20px;"><div class="ace_scrollbar-inner" style="height: 20px;"></div></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: hidden;"><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: visible;"></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; white-space: pre; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; overflow: visible;">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div></div></div></td>
+                            </tr><tr>
+                            </tr></tbody></table>
+                    </div>
+
+                </div>
+        </div>
+    </div>
+    <input type="hidden" name="apiId" value="{{@pathParams.id}}" />
+{{/fillZone}}

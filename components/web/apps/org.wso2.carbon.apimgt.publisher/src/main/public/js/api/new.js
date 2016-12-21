@@ -24,7 +24,7 @@ class API {
      */
     constructor(access_key) {
         this.client = new SwaggerClient({
-            url: 'https://apis.wso2.com/api/am/publisher/v0.10/swagger.json',
+            url: '/publisher/public/components/root/base/js/swagger.json',
             usePromise: true
         });
         this.access_key_header = "Bearer " + access_key;
@@ -99,11 +99,11 @@ $(
             function (event) {
                 event.preventDefault();
                 var api_data = {
-                    namea: $("#new-api-name").val(),
+                    name: $("#new-api-name").val(),
                     context: $('#new-api-context').val(),
                     version: $('#new-api-version').val()
                 };
-                var new_api = new API('a58ec0d7-7075-3970-95e7-0532f8763d5a');
+                var new_api = new API($.cookie('token'));
                 new_api.update_template(api_data);
                 new_api.create();
             }

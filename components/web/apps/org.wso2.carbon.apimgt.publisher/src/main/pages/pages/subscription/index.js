@@ -15,5 +15,7 @@
  */
 
 function onRequest(env) {
-    return {env:env};
+    //print(env.config.theme);
+    var apiList = [{id: "1", name: "TwitterFeed", version: "1.0.0", publisher: "White", rating:3}];
+    return {apis: apiList};
 }
