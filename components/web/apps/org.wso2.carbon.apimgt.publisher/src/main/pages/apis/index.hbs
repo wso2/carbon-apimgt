@@ -1,15 +1,12 @@
  {{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Listing | " @config.appName}}
-{{js "js/api/index.js"}}
+{{js "js/apis/index.js"}}
 {{css "css/custom.css"}}
 {{#fillZone "actionMenu"}}
     {{fragment "actionMenuApiListing"}}
 {{/fillZone}}
 {{#fillZone "content"}}
-    <script type="text/javascript">
-        var contextPath = '{{env.contextPath}}';
-    </script>
     <div id="listing">
         <div class="page-header">
             <h2>All APIs</h2>

@@ -15,12 +15,9 @@
  */
 
 function onRequest(env) {
-    var user = {
-        username: "marcus"
-    };
     sendToClient("loginRedirectUri",  env.config.loginRedirectUri);
     sendToClient("loginPageUri",  env.config.loginPageUri);
     sendToClient("contextPath",  env.contextPath);
     sendToClient("uri",  env.request.uri);
-    return {user: user,logo:"../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg",env:env};
+    return {logo:"../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg"};
 }

@@ -17,7 +17,7 @@ $(function () {
                         console.info(context.productionEndpoint);
                     }
                     // Grab the template script
-                    $.get('/publisher/public/components/root/base/templates/api/{id}Title.hbs', function (templateData) {
+                    $.get('/publisher/public/components/root/base/templates/apis/{id}Title.hbs', function (templateData) {
                         var template=Handlebars.compile(templateData);
                         // Pass our data to the template
                         var theCompiledHtml = template(context);
@@ -25,7 +25,7 @@ $(function () {
                         $('#apiTitleContainer').html(theCompiledHtml);
                     }, 'html');
 
-                    $.get('/publisher/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
+                    $.get('/publisher/public/components/root/base/templates/apis/{id}Overview.hbs', function (templateData) {
                         var template=Handlebars.compile(templateData);
                         // Pass our data to the template
                         var theCompiledHtml = template(context);

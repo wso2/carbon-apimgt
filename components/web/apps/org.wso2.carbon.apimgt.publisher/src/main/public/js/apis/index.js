@@ -7,7 +7,7 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function(jsonData) {
                     // Grab the template script
-                    $.get('/publisher/public/components/root/base/templates/api/index.hbs', function (templateData) {
+                    $.get('/publisher/public/components/root/base/templates/apis/index.hbs', function (templateData) {
                         var template=Handlebars.compile(templateData);
                         // Define our data object
                         var context={apis: jsonData.obj.list,contextPath:contextPath};

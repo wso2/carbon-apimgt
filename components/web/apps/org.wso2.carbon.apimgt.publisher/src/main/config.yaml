@@ -5,7 +5,7 @@ errorPages:
   "404": /foundation/error/404
   default: /foundation/error/default
 loginPageUri: "/login"
-loginRedirectUri: "/api"
+loginRedirectUri: "/apis"
 key: ""
 secret: ""
 nonSecureUrl: "/test1,/test2"
