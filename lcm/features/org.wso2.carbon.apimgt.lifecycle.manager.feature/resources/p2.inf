@@ -17,7 +17,7 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../conf); \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/dbscripts/,target:${installFolder}/../../../dbscripts/lifecycle,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/conf/lifecycle.yml/,target:${installFolder}/../../../conf/lifecycle.yml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/conf/lifecycle.yaml/,target:${installFolder}/../../../conf/lifecycle.yaml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/conf/lifecycle-datasources.xml/,target:${installFolder}/../../../conf/datasources/lifecycle-datasources.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/conf/lifecycle-config.xsd/,target:${installFolder}/../../../resources/lifecycle-config.xsd,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.lifecycle.manager_${feature.version}/conf/scxml.xsd/,target:${installFolder}/../../../resources/scxml.xsd,overwrite:true);\
