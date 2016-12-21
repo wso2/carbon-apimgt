@@ -1,8 +1,8 @@
 $(function () {
     var client = new SwaggerClient({
-        url: 'https://apis.wso2.com/api/am/publisher/v0.10/swagger.json',
+        url: '/publisher/public/components/root/base/js/swagger.json',
         success: function(swaggerData) {
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer c5a61c8c-3d05-3f45-a04f-c458c88d20ad", "header"));
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+$.cookie('token'), "header"));
             var apiId = $('input[name="apiId"]').val();
             client["APIs"].get_apis_apiId(
                 {apiId:apiId},
