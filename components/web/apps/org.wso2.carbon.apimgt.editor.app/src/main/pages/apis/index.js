@@ -15,5 +15,6 @@
  */
 
 function onRequest(env) {
+    sendToClient("swaggerURL", env.config.swaggerURL);
     return {};
 }

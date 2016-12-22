@@ -14,3 +14,4 @@ errorPages:
   "404": /foundation/error/404
   default: /foundation/error/default
 loginRedirectUri: "/api"
+swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
