@@ -62,9 +62,7 @@ public class DAOFactory {
             throw new APIMgtDAOException(e);
         }
 
-        if (apiDAO != null) {
-            ((ApiDAOImpl) apiDAO).initResourceCategories();
-        }
+        setup();
 
         return apiDAO;
     }
@@ -91,6 +89,8 @@ public class DAOFactory {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
+
+        setup();
 
         return appDAO;
     }
@@ -119,6 +119,8 @@ public class DAOFactory {
             throw new APIMgtDAOException(e);
         }
 
+        setup();
+
         return apiSubscriptionDAO;
     }
 
@@ -146,6 +148,8 @@ public class DAOFactory {
             throw new APIMgtDAOException(e);
         }
 
+        setup();
+
         return policyDAO;
     }
 
@@ -172,6 +176,14 @@ public class DAOFactory {
             throw new APIMgtDAOException(e);
         }
 
+        setup();
+
         return tagDAO;
     }
+
+    private static void setup() throws APIMgtDAOException {
+        ApiDAOImpl.initResourceCategories();
+        PolicyDAOImpl.initDefaultPolicies();
+    }
+
 }
