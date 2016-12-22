@@ -24,8 +24,7 @@ $(
                     version: $('#new-api-version').val()
                 };
                 var new_api = new API('a58ec0d7-7075-3970-95e7-0532f8763d5a');
-                new_api.update_template(api_data);
-                new_api.create();
+                new_api.create(api_data);
             }
         );
     }
