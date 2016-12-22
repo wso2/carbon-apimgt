@@ -3,7 +3,7 @@ $(window).load(function () {
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function () {
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer f8009e9c-ae7a-3bc4-a39b-56b058f84743", "header"));
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer b0220fb5-40f6-38d6-947b-2507ee5fd8e3", "header"));
             client["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (data) {
 

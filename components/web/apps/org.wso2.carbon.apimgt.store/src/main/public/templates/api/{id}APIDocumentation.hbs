@@ -1,19 +1,9 @@
-<div class="row">
-    <div class="add-margin-3x white-wrapper">
+<div class="api-documentation panel-group accordion" role="tablist">
 
-        <ul class="nav nav-tabs" role="tablist">
-            {{#each tabList}}
+</div>
 
-                <li {{#if this.tabClass}} class="{{this.tabClass}}" {{else}} class="" {{/if}}id="{{@index}}">
-                    <a data-toggle="tab" title="{{this.title}}" href="#{{this.id}}" onclick="setLocalStorageValue()">{{this.title}}</a>
-                </li>
-            {{/each}}
-        </ul>
 
-        <div class="tab-content">
-         {{#each tabList}}
-            <div class="tab-pane fade {{#if this.contentClass}} {{this.contentClass}}{{/if}}" id="{{this.id}}"></div>
-         {{/each}}
-        </div>
-    </div>
+<div class="message message-info remove-margin">
+    <h4><i class="icon fw fw-info"></i>No Documents Found</h4>
+    <p>No documents have been associated with this API so far.</p>
 </div>
