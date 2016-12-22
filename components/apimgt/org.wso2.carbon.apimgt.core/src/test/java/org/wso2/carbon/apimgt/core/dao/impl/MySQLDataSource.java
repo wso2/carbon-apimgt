@@ -19,7 +19,6 @@
  */
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-
 import com.zaxxer.hikari.HikariDataSource;
 import org.wso2.carbon.apimgt.core.TestUtil;
 
@@ -30,18 +29,17 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQLDataSource implements DataSource{
-   static HikariDataSource basicDataSource = new HikariDataSource();
+public class MySQLDataSource implements DataSource {
+    static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
-
 
     MySQLDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mysql");
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://"+ipAddress+":3306/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:mysql://" + ipAddress + ":3306/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
-        basicDataSource.setAutoCommit(false);
+        basicDataSource.setAutoCommit(true);
         basicDataSource.setMaximumPoolSize(20);
     }
 
@@ -55,12 +53,23 @@ public class MySQLDataSource implements DataSource{
         return basicDataSource.getConnection();
     }
 
+    /**
+     * Return javax.sql.DataSource object
+     *
+     * @return {@link javax.sql.DataSource} object
+     */
+    @Override
+    public HikariDataSource getDatasource() throws SQLException {
+        return basicDataSource;
+    }
+
     public void resetDB() throws SQLException {
         List<String> tables = new ArrayList<>();
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT table_name as TABLE_NAME FROM " +
-                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='"+databaseName+"'")) {
+                    "information_schema.tables WHERE table_type = 'base table' AND table_schema='" + databaseName
+                    + '\'')) {
                 while (resultSet.next()) {
                     tables.add(resultSet.getString("TABLE_NAME"));
                 }

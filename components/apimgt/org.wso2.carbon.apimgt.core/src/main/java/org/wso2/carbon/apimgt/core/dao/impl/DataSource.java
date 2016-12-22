@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -34,4 +36,11 @@ public interface DataSource {
      * @return {@link Connection} from given DataSource
      */
     Connection getConnection() throws SQLException;
+
+    /**
+     * Return Hikari Datasource
+     *
+     * @return {@link HikariDataSource} object
+     */
+    HikariDataSource getDatasource() throws SQLException;
 }

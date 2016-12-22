@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 public class LifecycleConfigBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(LifecycleConfigBuilder.class);
-    public static final String LIFECYCLE_YML = "lifecycle.yml";
+    public static final String LIFECYCLE_YAML = "lifecycle.yaml";
 
     public static LifecycleConfig getLifecycleConfig() {
         return lifecycleConfig;
@@ -51,7 +51,7 @@ public class LifecycleConfigBuilder {
     private static LifecycleConfig lifecycleConfig;
 
     public static void build(Supplier<LifecycleConfig> defaultConfig) {
-        Optional<String> lifecycleConfigFileContent = readFile(LIFECYCLE_YML);
+        Optional<String> lifecycleConfigFileContent = readFile(LIFECYCLE_YAML);
         if (lifecycleConfigFileContent.isPresent()) {
             Representer representer = new Representer();
             representer.getPropertyUtils().setSkipMissingProperties(true);
