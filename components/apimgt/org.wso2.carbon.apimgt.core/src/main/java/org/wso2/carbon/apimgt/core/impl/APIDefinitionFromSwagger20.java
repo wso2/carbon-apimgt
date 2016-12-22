@@ -26,6 +26,7 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,17 +36,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Implementation for Swagger 2.0
@@ -55,14 +57,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
 
     /**
-     * This method returns URI templates according to the given swagger file
+     * This method extracts the API resource related data which includes URI templates from the Swagger API definition
      *
-     * @param resourceConfigsJSON swaggerJSON
-     * @return URI Templates
-     * @throws APIManagementException
+     * @return SwaggerAPIResourceData
      */
-    public Set<UriTemplate> getURITemplates(StringBuilder resourceConfigsJSON) throws APIManagementException {
-        Set<UriTemplate> uriTemplateSet = new HashSet<>();
+    @Override
+    public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
+                                                                                throws APIManagementException {
+        List<APIResource> apiResources = new ArrayList<>();
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
@@ -89,54 +91,60 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 } else {
                     uriTemplateBuilder.policy(policy);
                 }
+                APIResource.Builder apiResourceBuilder = new APIResource.Builder();
                 List<String> producesList = operation.getProduces();
                 if (producesList != null) {
                     String produceSeparatedString = "\"";
                     produceSeparatedString += String.join("\",\"", producesList) + "\"";
-                    uriTemplateBuilder.produces(produceSeparatedString);
+                    apiResourceBuilder.produces(produceSeparatedString);
                 }
                 List<String> consumesList = operation.getConsumes();
                 if (consumesList != null) {
                     String consumesSeparatedString = "\"";
                     consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
-                    uriTemplateBuilder.produces(consumesSeparatedString);
+                    apiResourceBuilder.consumes(consumesSeparatedString);
                 }
                 if (operation.getOperationId() != null) {
-                    uriTemplateBuilder.templateId(operation.getOperationId());
+                    apiResourceBuilder.templateId(operation.getOperationId());
                 }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
                 String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
                 if (StringUtils.isNotEmpty(scope)) {
-                    uriTemplateBuilder.scope(scopeMap.get(scope));
+                    apiResourceBuilder.scope(scopeMap.get(scope));
+                    apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
+                    apiResources.add(apiResourceBuilder.build());
                 }
-                uriTemplateSet.add(uriTemplateBuilder.build());
             }
         }
         resourceConfigsJSON.setLength(0);
-        resourceConfigsJSON.append(swagger.getSwagger());
-        return uriTemplateSet;
+        resourceConfigsJSON.append(Json.pretty(swagger));
+        return apiResources;
     }
 
+    @Override
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         Map<String, Scope> scopeMap = new HashMap<>();
         try {
             if (swagger.getVendorExtensions() != null) {
-                String scopes = (String) swagger.getVendorExtensions().get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY);
+                String scopes = swagger.getVendorExtensions().get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
                 if (StringUtils.isNotEmpty(scopes)) {
                     JSONObject scopesJson = (JSONObject) new JSONParser().parse(scopes);
-                    Iterator<JSONObject> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
+                    Iterator<?> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
                             .get(APIMgtConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES))
                             .iterator();
                     while (scopesIterator.hasNext()) {
-                        Scope scope = new Gson().fromJson(scopesIterator.next().toJSONString(), Scope.class);
+                        Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
+                                Scope.class);
                         scopeMap.put(scope.getKey(), scope);
                     }
                 }
             }
         } catch (ParseException e) {
-            APIUtils.logAndThrowException("Couldn't extract scopes from swagger ", e, log);
+            log.error("Couldn't extract scopes from swagger ");
+            throw new APIManagementException("Couldn't extract scopes from swagger ",
+                    ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
         return scopeMap;
     }

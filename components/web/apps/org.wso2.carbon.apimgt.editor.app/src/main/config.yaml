@@ -1,0 +1,16 @@
+appName : API Editor
+theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
+title : "API Editor Tool"
+menu :
+  main :
+    Home : {link: "", icon: "fw-home"}
+  left :
+    APIs : { link: "", icon: "fw-home"}
+    Applications: {link: "applications"}
+    Forum: { link: "forum"}
+    Statistics:
+      {link: "statistics"}
+errorPages:
+  "404": /foundation/error/404
+  default: /foundation/error/default
+loginRedirectUri: "/api"

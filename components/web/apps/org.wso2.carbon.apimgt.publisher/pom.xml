@@ -37,7 +37,7 @@
         <!--UUF Components-->
         <dependency>
             <groupId>org.wso2.carbon.apimgt.web</groupId>
-            <artifactId>org.wso2.carbon.apimgt.web.store.foundation</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
@@ -49,6 +49,12 @@
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>
+        </dependency>
+        <!--Backend dependencies-->
+        <dependency>
+            <groupId>org.wso2.carbon.uuf.sample</groupId>
+            <artifactId>org.wso2.carbon.uuf.sample.simple-auth.bundle</artifactId>
+            <version>${carbon.uuf.version}</version>
         </dependency>
     </dependencies>
 

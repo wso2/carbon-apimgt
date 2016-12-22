@@ -24,8 +24,10 @@ package org.wso2.carbon.apimgt.core.util;
  * This class represents the constants that are used for APIManager implementation
  */
 public class APIMgtConstants {
+
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
+
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
@@ -55,11 +57,12 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
+
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
 
     /**
-     *  Application status related constants.
+     * Application statuses.
      */
     public static class ApplicationStatus {
         public static final String APPLICATION_CREATED = "CREATED";
@@ -69,13 +72,32 @@ public class APIMgtConstants {
     }
 
     /**
-     *  Application registration status related constants.
+     * Application registration statuses.
      */
-    public static class AppRegistrationStatus {
-        public static final String REGISTRATION_CREATED = "CREATED";
-        public static final String REGISTRATION_APPROVED = "APPROVED";
-        public static final String REGISTRATION_REJECTED = "REJECTED";
-        public static final String REGISTRATION_COMPLETED = "COMPLETED";
+    public enum AppRegistrationStatus {
+        CREATED,
+        APPROVED,
+        REJECTED,
+        COMPLETED
+    }
+
+    /**
+     * Subscription statuses.
+     */
+    public enum SubscriptionStatus {
+        BLOCKED,
+        PROD_ONLY_BLOCKED,
+        ACTIVE,
+        ON_HOLD,
+        REJECTED
+    }
+
+    /**
+     * Subscription types
+     */
+    public enum SubscriptionType {
+        SUBSCRIBE,
+        UN_SUBSCRIBE
     }
 
     /**
@@ -172,7 +194,24 @@ public class APIMgtConstants {
         public static final String SUBSCRIPTION_LEVEL = "subscription";
         public static final String RESOURCE_LEVEL = "resource";
 
-
     }
 
+    /**
+     * Exceptions related constance will be put here
+     */
+    public static class ExceptionsConstants {
+
+        public static final String API_NAME = "API_NAME";
+        public static final String API_CONTEXT = "API_CONTEXT";
+        public static final String API_VERSION = "API_VERSION";
+        public static final String APPLICATION_NAME = "APPLICATION_NAME";
+        public static final String CONSUMER_KEY = "CONSUMER_KEY";
+        public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
+        public static final String API_ID = "API_ID";
+        public static final String TIER = "TIER";
+        public static final String SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
+        public static final String DOC_ID = "DOC_ID";
+        public static final String TIER_LEVEL = "TIER_LEVEL";
+    }
 }

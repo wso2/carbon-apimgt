@@ -1,22 +1,11 @@
 appName : API Publisher
 theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
 title : "API Publisher Application"
-menu :
-  main :
-    Home : {link: "", icon: "fw-home"}
-    Pets :
-      See all our amazing pets : {link: "pets"}
-      Add a new pets : {link: "pets/new", icon: "fw fw-add"}
-      Pet of the month : {link: "pets/snowball" }
-      Order new pets: {link: "pets/order"}
-  left :
-    APIs : { link: "", icon: "fw-home"}
-    Applications: {link: "applications"}
-    Forum: { link: "forum"}
-    Statistics:
-      {link: "statistics"}
 errorPages:
   "404": /foundation/error/404
   default: /foundation/error/default
-loginPageUri: "simple-auth/login"
-loginRedirectUri: "/api"
+loginPageUri: "/login"
+loginRedirectUri: "/apis"
+key: ""
+secret: ""
+nonSecureUrl: "/test1,/test2"

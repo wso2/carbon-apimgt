@@ -20,43 +20,13 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * This class represents Resource Categories supported for {@code ArtifactResourceMetaData}.
  */
 
 public enum ResourceCategory {
-    OTHER,
     SWAGGER,
     WSDL_URI,
     IMAGE,
-    DOC;
-
-    private static final Map<String, ResourceCategory> lookup = new HashMap<>();
-
-    static {
-        for (ResourceCategory category : EnumSet.allOf(ResourceCategory.class)) {
-            lookup.put(category.toString(), category);
-        }
-
-        lookup.remove(OTHER.toString());
-    }
-
-    public static ResourceCategory toValue(String dayOfWeek) {
-        ResourceCategory value = lookup.get(dayOfWeek);
-
-        if (value == null) {
-            return ResourceCategory.OTHER;
-        }
-
-        return value;
-    }
-
-    public static Map<String, ResourceCategory> getStandardCategories() {
-        return new HashMap<>(lookup);
-    }
-
+    DOC
 }

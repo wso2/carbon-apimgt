@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
@@ -42,14 +41,14 @@ public class AbstractAPIManagerTestCase {
 
     @Test public void testSearchAPIByUUID() {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null);
-        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).buildApi();
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
+        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         try {
             when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
             API api = apiStore.getAPIbyUUID(API_ID);
             Assert.assertEquals(api.getName(), API_NAME);
             verify(apiDAO, atLeastOnce()).getAPI(API_ID);
-        } catch (APIManagementException | APIMgtDAOException e) {
+        } catch (APIManagementException  e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -57,15 +56,15 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         try {
-            when(applicationDAO.getApplication(UUID, USER_NAME)).thenReturn(applicationFromDAO);
+            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
             Application application = apiStore.getApplication(UUID, USER_NAME, null);
 
             Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplication(UUID, USER_NAME);
-        } catch (APIManagementException | APIMgtDAOException e) {
+            verify(applicationDAO, times(1)).getApplication(UUID);
+        } catch (APIManagementException e) {
             Assert.assertTrue(false);
         }
     }

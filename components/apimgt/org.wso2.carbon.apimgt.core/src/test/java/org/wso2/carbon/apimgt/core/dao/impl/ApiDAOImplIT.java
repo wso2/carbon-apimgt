@@ -22,18 +22,22 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Locale;
+import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
-
     @Test
-    public void testAddGetAPI() throws Exception {
+    public void testAddGetAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -43,11 +47,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
-        validateAPIs(apiFromDB, api);
+        Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
     @Test
-    public void testGetAPISummary() throws Exception {
+    public void testGetAPISummary( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -59,12 +63,319 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API expectedAPI = SampleTestObjectCreator.copyAPISummary(api);
 
         Assert.assertNotNull(apiFromDB);
-        validateAPIs(apiFromDB, expectedAPI);
+        Assert.assertEquals(apiFromDB, expectedAPI);
     }
 
+    @Test
+    public void testGetAPIs( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        List<API> apiList = apiDAO.getAPIs();
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api1 = builder.build();
+
+        apiDAO.addAPI(api1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        API api2 = builder.build();
+
+        apiDAO.addAPI(api2);
+
+        apiList = apiDAO.getAPIs();
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api2));
+
+        Assert.assertTrue(apiList.size() == 2);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                                        TestUtil.printDiff(apiList, expectedAPIs));
+    }
 
     @Test
-    public void testDeleteAPI() throws Exception {
+    public void testGetAPIsForProvider( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        String provider1 = "Watson";
+        String provider2 = "Holmes";
+
+        List<API> apiList = apiDAO.getAPIsForProvider(provider1);
+        Assert.assertTrue(apiList.isEmpty());
+        apiList = apiDAO.getAPIsForProvider(provider2);
+        Assert.assertTrue(apiList.isEmpty());
+
+        // Add APIs belonging to provider1
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.provider(provider1);
+        API api1 = builder.build();
+
+        apiDAO.addAPI(api1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        builder.provider(provider1);
+        API api2 = builder.build();
+
+        apiDAO.addAPI(api2);
+
+        // Add APIs belonging to provider2
+        builder = SampleTestObjectCreator.createUniqueAPI();
+        API api3 = builder.provider(provider2).build();
+
+        apiDAO.addAPI(api3);
+
+        // Get APIs belonging to provider1
+        apiList = apiDAO.getAPIsForProvider(provider1);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api2));
+
+        Assert.assertTrue(apiList.size() == 2);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
+
+        // Get APIs belonging to provider2
+        apiList = apiDAO.getAPIsForProvider(provider2);
+
+        API expectedAPI = SampleTestObjectCreator.copyAPISummary(api3);
+
+        Assert.assertTrue(apiList.size() == 1);
+
+        Assert.assertEquals(apiList.get(0), expectedAPI);
+    }
+
+    @Test
+    public void testGetAPIsByStatus( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        // Define statuses used in test
+        final String publishedStatus = "PUBLISHED";
+        final String createdStatus = "CREATED";
+        final String blockedStatus = "BLOCKED";
+
+        // Define number of APIs to be created for a given status
+        final int numberOfPublished = 4;
+        final int numberOfCreated = 2;
+        final int numberOfBlocked = 1;
+
+        // Add APIs
+        List<API> publishedAPIsSummary = new ArrayList<>();
+        for (int i = 0; i < numberOfPublished; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).build();
+            publishedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        List<API> createdAPIsSummary = new ArrayList<>();
+        for (int i = 0; i < numberOfCreated; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus).build();
+            createdAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        List<API> blockedAPIsSummary = new ArrayList<>();
+        for (int i = 0; i < numberOfBlocked; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).build();
+            blockedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        // Filter APIs by single status
+        List<String> singleStatus = new ArrayList<>();
+        singleStatus.add(publishedStatus);
+
+        List<API> apiList = apiDAO.getAPIsByStatus(singleStatus);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummary, new APIComparator()));
+
+        // Filter APIs by two statuses
+        List<String> twoStatuses = new ArrayList<>();
+        twoStatuses.add(publishedStatus);
+        twoStatuses.add(blockedStatus);
+
+        apiList = apiDAO.getAPIsByStatus(twoStatuses);
+
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
+
+        for (API api : publishedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        for (API api : blockedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        Assert.assertTrue(apiList.isEmpty());
+
+        // Filter APIs by multiple statuses
+        List<String> multipleStatuses = new ArrayList<>();
+        multipleStatuses.add(publishedStatus);
+        multipleStatuses.add(createdStatus);
+        multipleStatuses.add(blockedStatus);
+
+        apiList = apiDAO.getAPIsByStatus(multipleStatuses);
+
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() +
+                                            blockedAPIsSummary.size() + createdAPIsSummary.size());
+
+        for (API api : publishedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        for (API api : blockedAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        for (API api : createdAPIsSummary) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+
+        Assert.assertTrue(apiList.isEmpty());
+    }
+
+    @Test
+    public void testSearchAPIs( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        // Sample API names
+        final String mixedCaseString = "MixedCase";
+        final String lowerCaseString = "lowercase";
+        final String upperCaseString = "UPPERCASE";
+        final String charSymbolNumString = "mi^-@123";
+        final String spaceDelimitingString = " Sp ace ";
+        final String symbolSpaceString = "_under & Score_";
+
+        // Search string cases
+        final String commonMixedCaseSearchString = "CaSe";
+        final String commonLowerCaseSearchString = "case";
+        final String commonUpperCaseSearchString = "CASE";
+        final String symbolSearchString = "^-@";
+        final String numberSearchString = "12";
+        final String spaceIncludedSearchString = "p a";
+
+        // Create test data
+        Map<String, API> apis = new HashMap<>();
+        apis.put(mixedCaseString, SampleTestObjectCreator.createUniqueAPI().name(mixedCaseString).build());
+        apis.put(lowerCaseString, SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).build());
+        apis.put(upperCaseString, SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).build());
+        apis.put(charSymbolNumString, SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).build());
+        apis.put(spaceDelimitingString, SampleTestObjectCreator.createUniqueAPI().name(spaceDelimitingString).build());
+        apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
+
+        // Add APIs
+        for (Map.Entry<String, API> entry : apis.entrySet()) {
+            API api = entry.getValue();
+            apiDAO.addAPI(api);
+            // Replace with summary object for validation
+            apis.put(entry.getKey(), SampleTestObjectCreator.getSummaryFromAPI(api));
+        }
+
+        // Expected common string search result
+        List<API> commonStringResult = new ArrayList<>();
+        commonStringResult.add(apis.get(mixedCaseString));
+        commonStringResult.add(apis.get(lowerCaseString));
+        commonStringResult.add(apis.get(upperCaseString));
+
+        // Search by common mixed case
+        List<API> apiList = apiDAO.searchAPIs(commonMixedCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by common lower case
+        apiList = apiDAO.searchAPIs(commonLowerCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by common upper case
+        apiList = apiDAO.searchAPIs(commonUpperCaseSearchString);
+        Assert.assertEquals(apiList.size(), 3);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
+                TestUtil.printListDiff(apiList, commonStringResult));
+
+        // Search by symbol
+        apiList = apiDAO.searchAPIs(symbolSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        API actualAPI = apiList.get(0);
+        API expectedAPI = apis.get(charSymbolNumString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+
+        // Search by number
+        apiList = apiDAO.searchAPIs(numberSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        actualAPI = apiList.get(0);
+        expectedAPI = apis.get(charSymbolNumString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+
+        // Search with spaces
+        apiList = apiDAO.searchAPIs(spaceIncludedSearchString);
+        Assert.assertEquals(apiList.size(), 1);
+        actualAPI = apiList.get(0);
+        expectedAPI = apis.get(spaceDelimitingString);
+        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
+    }
+
+    @Test
+    public void testIsAPINameExists( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+        apiDAO.addAPI(api);
+
+        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider()));
+
+        final String upperCaseName = "CAPITAL";
+
+        // Add API with upper case name
+        api = SampleTestObjectCreator.createUniqueAPI().name(upperCaseName).build();
+        apiDAO.addAPI(api);
+        // Check with upper case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider()));
+        // Check with lower case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider()));
+        // Check with mixed case format
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.substring(0, 3) +
+                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider()));
+
+        final String lowerCaseName = "simple";
+
+        // Add API with upper case name
+        api = SampleTestObjectCreator.createUniqueAPI().name(lowerCaseName).build();
+        apiDAO.addAPI(api);
+        // Check with lower case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider()));
+        // Check with upper case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider()));
+        // Check with mixed case format
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.substring(0, 3) +
+                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider()));
+
+        // Create same API for different providers and check for existence
+        final String sameName = "same";
+
+        API api1 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
+        apiDAO.addAPI(api1);
+
+        API api2 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
+        apiDAO.addAPI(api2);
+
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider"));
+    }
+
+    @Test
+    public void testDeleteAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -78,7 +389,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateAPI() throws Exception {
+    public void testUpdateAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -91,148 +402,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        API expectedAPI = builder.provider(api.getProvider()).
-                id(api.getId()).
-                name(api.getName()).
-                version(api.getVersion()).
-                context(api.getContext()).
-                createdTime(api.getCreatedTime()).
-                createdBy(api.getCreatedBy()).build();
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
 
         Assert.assertNotNull(apiFromDB);
-        validateAPIs(apiFromDB, expectedAPI);
-    }
-
-    @Test
-    public void testGetAPIsForRoles() throws Exception {
-        /*
-        ApiDAO apiDAO = new ApiDAOImpl(new H2MySQLStatements());
-        API.APIBuilder builder = SampleAPICreator.createDefaultAPI();
-
-        builder.visibility(API.Visibility.RESTRICTED);
-        builder.visibleRoles(Arrays.asList("topsecret", "classified"));
-        API superSecureAPI = builder.build();
-
-        apiDAO.addAPI(superSecureAPI);
-
-        builder = SampleAPICreator.createDefaultAPI();
-        builder.visibility(API.Visibility.RESTRICTED);
-        builder.visibleRoles(Arrays.asList("secret", "classified"));
-
-        API verySecureAPI = builder.build();
-
-        apiDAO.addAPI(verySecureAPI);
-
-        builder = SampleAPICreator.createDefaultAPI();
-        builder.visibility(API.Visibility.RESTRICTED);
-        builder.visibleRoles(Arrays.asList("hidden"));
-
-        API hiddenAPI = builder.build();
-
-        apiDAO.addAPI(hiddenAPI);
-
-        builder = SampleAPICreator.createDefaultAPI();
-        builder.visibility(API.Visibility.PUBLIC);
-        API publicAPI = builder.build();
-
-        apiDAO.addAPI(publicAPI);
-
-        apiDAO.getAPIs(0, 10, Arrays.asList("classified"));
-        */
-    }
-
-    @Test
-    public void testSearchAPIsForRoles() throws Exception {
-
-    }
-
-
-    @Test
-    public void testGetSwaggerDefinition() throws Exception {
-
-    }
-
-    @Test
-    public void testUpdateSwaggerDefinition() throws Exception {
-
-    }
-
-    @Test
-    public void testGetImage() throws Exception {
-
-    }
-
-    @Test
-    public void testUpdateImage() throws Exception {
-
-    }
-
-    @Test
-    public void testChangeLifeCylceStatus() throws Exception {
-
-    }
-
-    @Test
-    public void testCreateNewAPIVersion() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDocumentsInfoList() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDocumentInfo() throws Exception {
-
-    }
-
-    private void validateAPIs(API actualAPI, API expectedAPI) {
-        Assert.assertEquals(actualAPI.getProvider(), expectedAPI.getProvider());
-        Assert.assertEquals(actualAPI.getVersion(), expectedAPI.getVersion());
-        Assert.assertEquals(actualAPI.getName(), expectedAPI.getName());
-        Assert.assertEquals(actualAPI.getDescription(), expectedAPI.getDescription());
-        Assert.assertEquals(actualAPI.getContext(), expectedAPI.getContext());
-        Assert.assertEquals(actualAPI.getId(), expectedAPI.getId());
-        Assert.assertEquals(actualAPI.getLifeCycleStatus(), expectedAPI.getLifeCycleStatus());
-        Assert.assertEquals(actualAPI.getLifecycleInstanceId(), expectedAPI.getLifecycleInstanceId());
-        Assert.assertEquals(actualAPI.getApiDefinition(), expectedAPI.getApiDefinition());
-        Assert.assertEquals(actualAPI.getWsdlUri(), expectedAPI.getWsdlUri());
-        Assert.assertEquals(actualAPI.isResponseCachingEnabled(), expectedAPI.isResponseCachingEnabled());
-        Assert.assertEquals(actualAPI.getCacheTimeout(), expectedAPI.getCacheTimeout());
-        Assert.assertEquals(actualAPI.isDefaultVersion(), expectedAPI.isDefaultVersion());
-        //Assert.assertEquals(actualAPI.getApiPolicy(), expectedAPI.getApiPolicy());
-        Assert.assertTrue(equalLists(actualAPI.getTransport(), expectedAPI.getTransport()));
-        Assert.assertTrue(equalLists(actualAPI.getTags(), expectedAPI.getTags()));
-        //Assert.assertEquals(actualAPI.getPolicies(), expectedAPI.getPolicies());
-        Assert.assertEquals(actualAPI.getVisibility(), expectedAPI.getVisibility());
-        Assert.assertTrue(equalLists(actualAPI.getVisibleRoles(), expectedAPI.getVisibleRoles()));
-        //Assert.assertEquals(actualAPI.getEndpoints(), expectedAPI.getEndpoints());
-        //Assert.assertEquals(actualAPI.getGatewayEnvironments(), expectedAPI.getGatewayEnvironments());
-        Assert.assertEquals(actualAPI.getBusinessInformation(), expectedAPI.getBusinessInformation());
-        Assert.assertEquals(actualAPI.getCorsConfiguration(), expectedAPI.getCorsConfiguration());
-        Assert.assertEquals(actualAPI.getCreatedTime(), expectedAPI.getCreatedTime());
-        Assert.assertEquals(actualAPI.getCreatedBy(), expectedAPI.getCreatedBy());
-        Assert.assertEquals(actualAPI.getLastUpdatedTime(), expectedAPI.getLastUpdatedTime());
-    }
-
-    private boolean equalLists(List<String> one, List<String> two){
-        if (one == null && two == null){
-            return true;
-        }
-
-        if((one == null && two != null)
-                || one != null && two == null
-                || one.size() != two.size()){
-            return false;
-        }
-
-        one = new ArrayList<String>(one);
-        two = new ArrayList<String>(two);
-
-        Collections.sort(one);
-        Collections.sort(two);
-        return one.equals(two);
+        Assert.assertEquals(apiFromDB, expectedAPI,TestUtil.printDiff(apiFromDB,expectedAPI));
     }
 
 

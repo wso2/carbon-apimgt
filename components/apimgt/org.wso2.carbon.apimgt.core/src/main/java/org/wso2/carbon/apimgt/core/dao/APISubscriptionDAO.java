@@ -21,26 +21,47 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.APISubscription;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.util.List;
 import javax.annotation.CheckForNull;
 
 
 /**
  * Provides access to API Subscription data layer
  */
-
 public interface APISubscriptionDAO {
+
     /**
      * Retrieve a given instance of an API Subscription
      *
-     * @param subscriptionID The UUID that uniquely identifies a Subscription
-     * @return valid {@link APISubscription} object or null
+     * @param subscriptionId The UUID that uniquely identifies a Subscription
+     * @return valid {@link Subscription} object or null
      * @throws APIMgtDAOException
      */
     @CheckForNull
-    APISubscription getAPISubscription(String subscriptionID) throws APIMgtDAOException;
+    Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the list of subscriptions of an API
+     *
+     * @param apiId The UUID of API
+     * @return List of {@link Subscription} objects
+     * @throws APIMgtDAOException
+     */
+    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the list of subscriptions of an Application
+     *
+     * @param applicationId The UUID of Application
+     * @return List of {@link Subscription} objects
+     * @throws APIMgtDAOException
+     */
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results
@@ -99,27 +120,69 @@ public interface APISubscriptionDAO {
     /**
      * Create a new Subscription
      *
-     * @param subscription The {@link APISubscription} object to be added
+     * @param uuid   UUID of new subscription
+     * @param apiId  API ID
+     * @param appId  Application ID
+     * @param tier   subscription tier
+     * @param status {@link APIConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException
      */
-    void addAPISubscription(APISubscription subscription) throws APIMgtDAOException;
+    void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants.SubscriptionStatus
+            status) throws APIMgtDAOException;
 
     /**
      * Remove an existing API Subscription
      *
-     * @param subscriptionID The UUID of the API Subscription that needs to be deleted
+     * @param subscriptionId The UUID of the API Subscription that needs to be deleted
      * @throws APIMgtDAOException
      */
-    void deleteAPISubscription(String subscriptionID) throws APIMgtDAOException;
+    void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException;
 
 
-    long getAPISubscriptionCountByAPI(String apiId) throws APIMgtDAOException;
+    /**
+     * Retrieve the number of subscriptions if a given API
+     *
+     * @param apiId UUID of the API
+     * @return  Subscription Count
+     * @throws APIMgtDAOException
+     */
+    long getSubscriptionCountByAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Copy existing subscriptions on one of the API versions into latest version
-     *
-     * @param identifier uuid of newly created version
+     * @param subscriptionList {@link List<Subscription>}
      * @throws APIMgtDAOException
      */
-    void copySubscriptions(String identifier) throws APIMgtDAOException;
+    void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException;
+
+    /**
+     * Update Subscription Status
+     *
+     * @param subId     ID of the Subscription
+     * @param subStatus New Subscription Status
+     * @throws APIMgtDAOException
+     */
+    void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
+            APIMgtDAOException;
+
+    /**
+     * Update Subscription Policy
+     *
+     * @param subId  ID of the Subscription
+     * @param policy New Subscription Policy
+     * @throws APIMgtDAOException
+     */
+    void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException;
+
+    /**
+     * Validates a subscription
+     *
+     * @param apiContext Context of the API
+     * @param apiVersion Version of the API
+     * @param consumerKey Consumer key of the application
+     * @return Subscription Validation Information
+     * @throws APIManagementException
+     */
+    SubscriptionValidationInfo validateSubscription(String apiContext, String apiVersion, String consumerKey)
+            throws APIMgtDAOException;
 }

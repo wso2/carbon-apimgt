@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
@@ -18,8 +21,12 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -27,24 +34,43 @@ public class ApisApiServiceImpl extends ApisApiService {
     
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
-    @Override public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
-
+    @Override
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
+                                                           String ifNoneMatch, String ifModifiedSince) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
-        InputStream documentContent = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            documentContent = apiStore.getDocumentationContent(documentId);
-            if (documentContent == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            DocumentContent documentationContent = apiStore.getDocumentationContent(documentId);
+            DocumentInfo documentInfo = documentationContent.getDocumentInfo();
+            if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
+                String filename = documentInfo.getFileName();
+                return Response.ok(documentInfo)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .build();
+            } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
+                String content = documentationContent.getInlineContent();
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN).build();
+            } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
+                String sourceUrl = documentInfo.getSourceURL();
+                return Response.seeOther(new URI(sourceUrl)).build();
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(
-                    "Error while retrieving content of documentation for given apiId " + apiId + "with docId "
-                            + documentId, e, log);
+            String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
-        return Response.ok().entity(documentContent)
-                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_OCTET_STREAM).build();
+        return null;
     }
 
 
@@ -52,9 +78,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
 
         DocumentDTO documentDTO = null;
-        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
             documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
         } catch (APIManagementException e) {
@@ -71,9 +97,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         DocumentListDTO documentListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String apiConsumer = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             List<DocumentInfo> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
             documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentInfoResults, offset, limit);
@@ -100,18 +126,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         APIDTO apiToReturn = null;
         try {
-            String apiConsumer = RestApiUtil.getLoggedInUsername();
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving API : " + apiId, e, log);
-            }
+            String errorMessage = "Error while retrieving API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(apiToReturn).build();
     }
@@ -140,13 +165,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {
-            String apiConsumer = RestApiUtil.getLoggedInUsername();
-            APIStore apiStore = RestApiUtil.getConsumer(apiConsumer);
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiStore = RestApiUtil.getConsumer(username);
             apisResult = apiStore.searchAPIs(query, offset, limit);
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError(" Error while retrieving APIs ", e, log);
+            String errorMessage = "Error while retrieving APIs ";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, query);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(apiListDTO).build();
     }

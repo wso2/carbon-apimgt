@@ -23,18 +23,17 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * This class represent the Application in api model
  */
 public final class Application {
     private String name;
-    private Set<APISubscription> apiSubscriptions;
     private String groupId;
     private String uuid;
+    private String policyId;
     private String description;
     private String tier;
     private String status;
@@ -49,19 +48,18 @@ public final class Application {
     public Application(String name, String createdUser) {
         this.name = name;
         this.createdUser = createdUser;
-        apiSubscriptions = new LinkedHashSet<APISubscription>();
-        keys = new ArrayList<APIKey>();
+        keys = new ArrayList<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public String getUuid() {
+    public String getId() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setId(String uuid) {
         this.uuid = uuid;
     }
 
@@ -95,14 +93,6 @@ public final class Application {
 
     public void setUpdatedTime(LocalDateTime updatedTime) {
         this.updatedTime = updatedTime;
-    }
-
-    public Set<APISubscription> getAPISubscriptions() {
-        return apiSubscriptions;
-    }
-
-    public void addAPISubscriptions(Set<APISubscription> apiSubscriptions) {
-        this.apiSubscriptions.addAll(apiSubscriptions);
     }
 
     public String getDescription() {
@@ -153,23 +143,36 @@ public final class Application {
         keys.add(key);
     }
 
+    public String getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(String policyId) {
+        this.policyId = policyId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Application)) {
             return false;
         }
-
         Application that = (Application) o;
-        return name.equals(that.name) && createdUser.equals(that.createdUser);
+        return Objects.equals(name, that.name) &&
+                Objects.equals(groupId, that.groupId) &&
+                Objects.equals(uuid, that.uuid) &&
+                Objects.equals(policyId, that.policyId) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(tier, that.tier) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(callbackUrl, that.callbackUrl) &&
+                Objects.equals(createdUser, that.createdUser);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + createdUser.hashCode();
-        return result;
+        return Objects.hash(name, groupId, uuid, policyId, description, tier, status, callbackUrl, createdUser);
     }
 }

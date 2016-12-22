@@ -22,9 +22,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -124,10 +125,10 @@ public interface APIManager {
      * This method used to get the content of a documentation
      *
      * @param docId Document ID
-     * @return {@link InputStream} Input stream for document content
+     * @return {@link DocumentContent} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    InputStream getDocumentationContent(String docId) throws APIManagementException;
+    DocumentContent getDocumentationContent(String docId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the uuid
@@ -140,4 +141,20 @@ public interface APIManager {
      */
     Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
+    /**
+     * Returns the subscriptions for api
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException;
+
+    /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 }

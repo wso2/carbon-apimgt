@@ -21,8 +21,8 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -30,8 +30,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Objects;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -58,14 +57,11 @@ public final class API {
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
         isDefaultVersion = builder.isDefaultVersion;
-        apiPolicy = builder.apiPolicy;
         transport = builder.transport;
         tags = builder.tags;
         policies = builder.policies;
         visibility = builder.visibility;
         visibleRoles = builder.visibleRoles;
-        endpoints = builder.endpoints;
-        gatewayEnvironments = builder.gatewayEnvironments;
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
@@ -73,6 +69,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
+        copiedFromApiId = builder.copiedFromApiId;
     }
 
     public String getId() {
@@ -127,10 +124,6 @@ public final class API {
         return isDefaultVersion;
     }
 
-    public String getApiPolicy() {
-        return apiPolicy;
-    }
-
     public List<String> getTransport() {
         return transport;
     }
@@ -149,14 +142,6 @@ public final class API {
 
     public List<String> getVisibleRoles() {
         return visibleRoles;
-    }
-
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public List<Environment> getGatewayEnvironments() {
-        return gatewayEnvironments;
     }
 
     public BusinessInformation getBusinessInformation() {
@@ -183,9 +168,57 @@ public final class API {
         return lifecycleState;
     }
 
-    public Set<UriTemplate> getUriTemplates() {
+    public List<UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        API api = (API) o;
+        return isResponseCachingEnabled == api.isResponseCachingEnabled &&
+                cacheTimeout == api.cacheTimeout &&
+                isDefaultVersion == api.isDefaultVersion &&
+                Objects.equals(id, api.id) &&
+                Objects.equals(provider, api.provider) &&
+                Objects.equals(name, api.name) &&
+                Objects.equals(version, api.version) &&
+                Objects.equals(context, api.context) &&
+                Objects.equals(description, api.description) &&
+                Objects.equals(lifeCycleStatus, api.lifeCycleStatus) &&
+                Objects.equals(lifecycleInstanceId, api.lifecycleInstanceId) &&
+                Objects.equals(apiDefinition, api.apiDefinition) &&
+                Objects.equals(wsdlUri, api.wsdlUri) &&
+                APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
+                APIUtils.isListsEqualIgnoreOrder(tags, api.tags) &&
+                APIUtils.isListsEqualIgnoreOrder(policies, api.policies) &&
+                visibility == api.visibility &&
+                APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles) &&
+                Objects.equals(businessInformation, api.businessInformation) &&
+                Objects.equals(corsConfiguration, api.corsConfiguration) &&
+                Objects.equals(createdTime, api.createdTime) &&
+                Objects.equals(createdBy, api.createdBy) &&
+                Objects.equals(lastUpdatedTime, api.lastUpdatedTime) &&
+                Objects.equals(lifecycleState, api.lifecycleState) &&
+                APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator()) &&
+                Objects.equals(copiedFromApiId, api.copiedFromApiId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
+                apiDefinition, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion, transport, tags,
+                policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime, createdBy,
+                lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+    }
+
 
     /**
      * Visibility options
@@ -207,42 +240,19 @@ public final class API {
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
     private final boolean isDefaultVersion;
-    private final String apiPolicy;
     private final List<String> transport;
     private final List<String> tags;
     private final List<String> policies;
     private final Visibility visibility;
     private final List<String> visibleRoles;
-    private final List<Endpoint> endpoints;
-    private final List<Environment> gatewayEnvironments;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final Set<UriTemplate> uriTemplates;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        API that = (API) o;
-        return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + provider.hashCode();
-        result = 31 * result + version.hashCode();
-        return result;
-    }
+    private final List<UriTemplate> uriTemplates;
+    private String copiedFromApiId;
 
     /**
      * {@code API} builder static inner class.
@@ -325,14 +335,6 @@ public final class API {
             return visibleRoles;
         }
 
-        public List<Endpoint> getEndpoints() {
-            return endpoints;
-        }
-
-        public List<Environment> getGatewayEnvironments() {
-            return gatewayEnvironments;
-        }
-
         public BusinessInformation getBusinessInformation() {
             return businessInformation;
         }
@@ -353,15 +355,14 @@ public final class API {
         private List<String> policies;
         private Visibility visibility;
         private List<String> visibleRoles = Collections.emptyList();
-        private List<Endpoint> endpoints = Collections.emptyList();
-        private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private LocalDateTime createdTime;
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<UriTemplate> uriTemplates;
+        private List<UriTemplate> uriTemplates = Collections.emptyList();
+        private String copiedFromApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -387,14 +388,11 @@ public final class API {
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
             this.isDefaultVersion = copy.isDefaultVersion;
-            this.apiPolicy = copy.apiPolicy;
             this.transport = copy.transport;
             this.tags = copy.tags;
             this.policies = copy.policies;
             this.visibility = copy.visibility;
             this.visibleRoles = copy.visibleRoles;
-            this.endpoints = copy.endpoints;
-            this.gatewayEnvironments = copy.gatewayEnvironments;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
             this.createdTime = copy.createdTime;
@@ -402,6 +400,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
+            this.copiedFromApiId = copy.copiedFromApiId;
         }
 
         /**
@@ -623,7 +622,7 @@ public final class API {
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(Set<UriTemplate> uriTemplates) {
+        public APIBuilder uriTemplates(List<UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
@@ -649,30 +648,6 @@ public final class API {
          */
         public APIBuilder visibleRoles(List<String> visibleRoles) {
             this.visibleRoles = visibleRoles;
-            return this;
-        }
-
-        /**
-         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained
-         * together.
-         *
-         * @param endpoints the {@code endpoints} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder endpoints(List<Endpoint> endpoints) {
-            this.endpoints = endpoints;
-            return this;
-        }
-
-        /**
-         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param gatewayEnvironments the {@code gatewayEnvironments} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder gatewayEnvironments(List<Environment> gatewayEnvironments) {
-            this.gatewayEnvironments = gatewayEnvironments;
             return this;
         }
 
@@ -737,36 +712,25 @@ public final class API {
         }
 
         /**
+         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param copiedFromApiId the {@code copiedFromApiId} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder copiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
+            return this;
+        }
+
+
+        /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
 
-        public API build() throws APIManagementException {
-            if (StringUtils.isEmpty(this.getId())) {
-                this.id(UUID.randomUUID().toString());
-            }
-            if (StringUtils.isEmpty(this.getApiDefinition())) {
-                throw new APIManagementException("Couldn't find swagger definition of API");
-            }
-            if (StringUtils.isEmpty(this.getName())) {
-                throw new APIManagementException("Couldn't find Name of API ");
-            }
-            if (StringUtils.isEmpty(this.getContext())) {
-                throw new APIManagementException("Couldn't find Context of API ");
-            }
-            if (StringUtils.isEmpty(this.getVersion())) {
-                throw new APIManagementException("Couldn't find Version of API ");
-            }
-            if (this.getTransport().isEmpty()) {
-                throw new APIManagementException("Couldn't find Transport of API ");
-            }
-            if (this.getPolicies().isEmpty()) {
-                throw new APIManagementException("Couldn't find Policies of API ");
-            }
-            if (this.getVisibility() == null) {
-                throw new APIManagementException("Couldn't find Visibility of API ");
-            }
+        public API build()  {
             return new API(this);
         }
 
@@ -829,13 +793,24 @@ public final class API {
             return lastUpdatedTime;
         }
 
-        public Set<UriTemplate> getUriTemplates() {
+        public List<UriTemplate> getUriTemplates() {
             return uriTemplates;
         }
 
-        public API buildApi() {
-            return new API(this);
+        public String getCopiedFromApiId() {
+            return copiedFromApiId;
+        }
+
+        public void setCopiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
         }
     }
 
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public void setCopiedFromApiId(String copiedFromApiId) {
+        this.copiedFromApiId = copiedFromApiId;
+    }
 }

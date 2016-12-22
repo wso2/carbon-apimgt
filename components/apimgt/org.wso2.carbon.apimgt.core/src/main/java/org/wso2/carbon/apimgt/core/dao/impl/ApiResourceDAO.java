@@ -89,7 +89,7 @@ class ApiResourceDAO {
             statement.setString(2, apiID);
             statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
             statement.setString(4, dataType);
-            statement.setBlob(5, binaryValue);
+            statement.setBinaryStream(5, binaryValue);
 
             statement.execute();
         }
@@ -140,7 +140,7 @@ class ApiResourceDAO {
 
             try (ResultSet rs =  statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getBlob("RESOURCE_BINARY_VALUE").getBinaryStream();
+                    return rs.getBinaryStream("RESOURCE_BINARY_VALUE");
                 }
             }
         }
@@ -187,7 +187,7 @@ class ApiResourceDAO {
         final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE " +
                 "API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setBlob(1, resourceValue);
+            statement.setBinaryStream(1, resourceValue);
             statement.setString(2, apiID);
             statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
 
@@ -195,13 +195,13 @@ class ApiResourceDAO {
         }
     }
 
-    static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue)
-                                                                                            throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE UUID = ?";
+    static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue, String
+            fileName) throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ? WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBlob(1, resourceValue);
-            statement.setString(2, resourceID);
-
+            statement.setString(2, fileName);
+            statement.setString(3, resourceID);
             return statement.executeUpdate();
         }
     }

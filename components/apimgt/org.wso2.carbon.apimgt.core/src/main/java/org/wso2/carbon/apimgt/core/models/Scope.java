@@ -22,11 +22,17 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * This class contains the model of scope
  */
-public class Scope {
+public class Scope implements Serializable {
 
+    private static final long serialVersionUID = 5737132983639722942L;
     String key;
     String name;
     String roles;
@@ -71,6 +77,41 @@ public class Scope {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Scope scope = (Scope) o;
+        return id == scope.id &&
+                Objects.equals(key, scope.key) &&
+                Objects.equals(name, scope.name) &&
+                Objects.equals(roles, scope.roles) &&
+                Objects.equals(description, scope.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, name, roles, description, id);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("key", key)
+                .append("name", name)
+                .append("roles", roles)
+                .append("description", description)
+                .append("id", id)
+                .toString();
     }
 }
 

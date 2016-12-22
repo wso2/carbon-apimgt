@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -36,7 +37,7 @@ public class ErrorDTO {
 
     private String description = null;
 
-    private String moreInfo = null;
+    private  HashMap<String, String>   paramList = null;
 
     private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
@@ -78,12 +79,12 @@ public class ErrorDTO {
      * Preferably an url with more details about the error.
      */
     @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
-    public String getMoreInfo() {
-        return moreInfo;
+    public HashMap<String, String> getMoreInfo() {
+        return paramList;
     }
 
-    public void setMoreInfo(String moreInfo) {
-        this.moreInfo = moreInfo;
+    public void setMoreInfo(HashMap<String, String> moreInfo) {
+        this.paramList = moreInfo;
     }
 
     /**
@@ -108,7 +109,7 @@ public class ErrorDTO {
         sb.append("  code: ").append(code).append("\n");
         sb.append("  message: ").append(message).append("\n");
         sb.append("  description: ").append(description).append("\n");
-        sb.append("  moreInfo: ").append(moreInfo).append("\n");
+        sb.append("  moreInfo: ").append(paramList).append("\n");
         sb.append("  error: ").append(error).append("\n");
         sb.append("}\n");
         return sb.toString();

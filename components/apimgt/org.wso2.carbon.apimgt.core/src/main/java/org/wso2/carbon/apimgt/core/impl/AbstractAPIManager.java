@@ -30,10 +30,12 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 
 import java.io.InputStream;
 import java.util.List;
@@ -86,13 +88,14 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from String
      */
-    @Override
-    public API getAPIbyUUID(String uuid) throws APIManagementException {
+    @Override public API getAPIbyUUID(String uuid) throws APIManagementException {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving API with id " + uuid, e, log);
+            log.error("Error occurred while retrieving API with id " + uuid, e);
+            throw new APIMgtDAOException("Error occurred while retrieving API with id " + uuid,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return api;
     }
@@ -117,14 +120,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if the context already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    @Override
-    public boolean isContextExist(String context) throws APIManagementException {
+    @Override public boolean isContextExist(String context) throws APIManagementException {
         try {
             return getApiDAO().isAPIContextExists(context);
+
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't check API Context " + context + "Exists", e, log);
+            log.error("Couldn't check API Context " + context + "Exists");
+            throw new APIMgtDAOException("Couldn't check API Context " + context + "Exists",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return false;
     }
 
     /**
@@ -134,14 +138,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    @Override
-    public boolean isApiNameExist(String apiName) throws APIManagementException {
+    @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
-            return getApiDAO().isAPINameExists(apiName);
+            return getApiDAO().isAPINameExists(apiName, username);
+
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't check API Name " + apiName + "Exists", e, log);
+            log.error("Couldn't check API Name " + apiName + "Exists", e);
+            throw new APIMgtDAOException("Couldn't check API Name " + apiName + "Exists",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return false;
     }
 
     /**
@@ -164,14 +169,16 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return swagger string
      * @throws APIManagementException
      */
-    @Override
-    public String getSwagger20Definition(String api) throws APIManagementException {
+    @Override public String getSwagger20Definition(String api) throws APIManagementException {
         try {
             return getApiDAO().getSwaggerDefinition(api);
+
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Couldn't retrieve swagger definition for apiId " + api, e, log);
+            log.error("Couldn't retrieve swagger definition for apiId " + api, e);
+            throw new APIMgtDAOException("Couldn't retrieve swagger definition for apiId " + api,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
+
     }
 
     /**
@@ -183,14 +190,14 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return {@link List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
-    public List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit)
-                                                                                throws APIManagementException {
+    public List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException {
         try {
             return getApiDAO().getDocumentsInfoList(apiId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving documents", e, log);
+            log.error("Error occurred while retrieving documents", e);
+            throw new APIMgtDAOException("Error occurred while retrieving documents",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     /**
@@ -204,9 +211,10 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             return getApiDAO().getDocumentInfo(docId);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving document", e, log);
+            log.error("Error occurred while retrieving documents", e);
+            throw new APIMgtDAOException("Error occurred while retrieving documents",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     /**
@@ -216,13 +224,38 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return {@link InputStream} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    public InputStream getDocumentationContent(String docId) throws APIManagementException {
+    public DocumentContent getDocumentationContent(String docId) throws APIManagementException {
         try {
-            return getApiDAO().getDocumentFileContent(docId);
+            DocumentInfo documentInfo = getDocumentationSummary(docId);
+            DocumentContent.Builder documentContentBuilder = new DocumentContent.Builder();
+            if (documentInfo != null) {
+                documentContentBuilder.documentInfo(documentInfo);
+                if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
+                    InputStream inputStream = getApiDAO().getDocumentFileContent(docId);
+                    if (inputStream != null) {
+                        documentContentBuilder = documentContentBuilder.fileContent(inputStream);
+                    } else {
+                        throw new APIManagementException("Couldn't find file content of  document", ExceptionCodes
+                                .DOCUMENT_CONTENT_NOT_FOUND);
+                    }
+                } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
+                    String inlineContent = getApiDAO().getDocumentInlineContent(docId);
+                    if (inlineContent != null) {
+                        documentContentBuilder = documentContentBuilder.inlineContent(inlineContent);
+                    } else {
+                        throw new APIManagementException("Couldn't find inline content of  document", ExceptionCodes
+                                .DOCUMENT_CONTENT_NOT_FOUND);
+                    }
+                }
+            } else {
+                throw new APIManagementException("Couldn't fnd document", ExceptionCodes.DOCUMENT_NOT_FOUND);
+            }
+            return documentContentBuilder.build();
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
+            log.error("Error occurred while retrieving document content", e);
+            throw new APIMgtDAOException("Error occurred while retrieving document content",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     /**
@@ -236,11 +269,46 @@ public abstract class AbstractAPIManager implements APIManager {
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
         try {
-           application = getApplicationDAO().getApplication(uuid, userId);
+           application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
-            APIUtils.logAndThrowException("Error occurred while retrieving document content", e, log);
+            log.error("Error occurred while retrieving application - " + uuid, e);
+            throw new APIMgtDAOException("Error occurred while retrieving application - " + uuid,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return application;
+    }
+
+    /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscription(subId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Couldn't retrieve subscription for id " + subId);
+        }
+    }
+
+    /**
+     * Returns the subscriptions for api
+     *
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException {
+        try {
+            return apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't find subscriptions for apiId " + apiId, e);
+            throw new APIMgtDAOException("Couldn't find subscriptions for apiId " + apiId,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     protected ApiDAO getApiDAO() {

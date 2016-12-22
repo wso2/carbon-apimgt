@@ -93,7 +93,7 @@ public interface ApiDAO {
      * @return true if providerName, apiName, version combination already exists else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    boolean isAPINameExists(String apiName) throws APIMgtDAOException;
+    boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException;
 
     /**
      * Checks if a given API Context already exists
@@ -115,11 +115,10 @@ public interface ApiDAO {
      * Update an existing API
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
-     * @return The updated {@link API} object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    API updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException;
+    void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException;
 
     /**
      * Remove an existing API
@@ -226,9 +225,10 @@ public interface ApiDAO {
      *
      * @param resourceID         UUID of resource
      * @param content            File content as an InputStream
+     * @param fileName
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentFileContent(String resourceID, InputStream content) throws APIMgtDAOException;
+    void addDocumentFileContent(String resourceID, InputStream content, String fileName) throws APIMgtDAOException;
 
     /**
      * Add Document File content
@@ -252,4 +252,13 @@ public interface ApiDAO {
      * @param identifier
      */
     void deprecateOlderVersions(String identifier);
-    }
+
+    /**
+     * Check if document Exist
+     * @param apiId
+     * @param documentInfo
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+}

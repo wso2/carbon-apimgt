@@ -545,3 +545,8 @@ a.remove_rating:hover{
     font-size:1.5em;
     padding:12px 2px;
 }
+
+.curl_command{
+    width: 600px;
+    height: 80px;
+}

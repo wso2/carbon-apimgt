@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.InputStream;
@@ -148,16 +149,17 @@ public interface APIPublisher extends APIManager {
      * @param documentInfo      Document Summary
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
+    String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
 
     /**
      * Add a document (of source type FILE) with a file
      *
      * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
+     * @param fileName
      * @throws APIManagementException if failed to add the file
      */
-    void uploadDocumentationFile(String resourceId, InputStream content) throws APIManagementException;
+    void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws APIManagementException;
 
     /**
      * Removes a given documentation
@@ -177,14 +179,31 @@ public interface APIPublisher extends APIManager {
     boolean checkIfAPIExists(String apiId) throws APIManagementException;
 
     /**
+     * Checks if a given API name exists in the registry
+     *
+     * @param name
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    boolean checkIfAPINameExists(String name) throws APIManagementException;
+
+    /**
+     * Checks if a given API context exists in the registry
+     *
+     * @param context
+     * @return boolean result
+     * @throws APIManagementException
+     */
+    boolean checkIfAPIContextExists(String context) throws APIManagementException;
+
+    /**
      * This method used to save the documentation content
      *
-     * @param api               API
-     * @param documentationName name of the inline documentation
+     * @param docId name of the inline documentation
      * @param text              content of the inline documentation
      * @throws APIManagementException if failed to add the document as a resource to registry
      */
-    void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException;
+    void addDocumentationContent(String docId, String text) throws APIManagementException;
 
     /**
      * Updates a given documentation
@@ -234,12 +253,22 @@ public interface APIPublisher extends APIManager {
     /**
      * Update the subscription status
      *
-     * @param apiId     API Identifier
+     * @param subId     Subscription ID
      * @param subStatus Subscription Status
-     * @param appId     Application Id              *
      * @throws APIManagementException If failed to update subscription status
      */
-    void updateSubscription(String apiId, String subStatus, int appId) throws APIManagementException;
+    void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus) throws
+            APIManagementException;
+
+    /**
+     * Update the subscription Policy
+     *
+     * @param subId     Subscription ID
+     * @param newPolicy New Subscription Policy
+     * @throws APIManagementException If failed to update subscription policy
+     */
+    void updateSubscriptionPolicy(String subId, String newPolicy) throws
+            APIManagementException;
 
 
     /**
@@ -263,17 +292,7 @@ public interface APIPublisher extends APIManager {
     LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException;
 
 
-    /**
-     * Update api related information such as database entries, registry updates for state change.
-     *
-     * @param identifier
-     * @param newStatus  accepted if changes are not pushed to a gateway
-     * @param deprecateOlderVersions
-     *@param requireReSubscriptions @return boolean value representing success not not
-     * @throws APIManagementException
-     */
-    void updateAPIForStateChange(String identifier, String newStatus, boolean deprecateOlderVersions, boolean
-            requireReSubscriptions) throws APIManagementException;
+
 
     /**
      * Get the current lifecycle status of the api
@@ -310,4 +329,21 @@ public interface APIPublisher extends APIManager {
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
+    /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
 }

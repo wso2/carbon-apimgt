@@ -23,19 +23,21 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * This Class contains the model of Uri Templates
  */
-public final class UriTemplate {
+public final class UriTemplate implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
     private final String policy;
-    private final Scope scope;
-    private final String templateId;
-    private final String produces;
-    private final String consumes;
 
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
@@ -43,10 +45,6 @@ public final class UriTemplate {
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
-        scope = uriTemplateBuilder.scope;
-        templateId = uriTemplateBuilder.templateId;
-        produces = uriTemplateBuilder.produces;
-        consumes = uriTemplateBuilder.consumes;
     }
 
     public String getUriTemplate() {
@@ -65,8 +63,37 @@ public final class UriTemplate {
         return policy;
     }
 
-    public Scope getScope() {
-        return scope;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        UriTemplate that = (UriTemplate) o;
+        return Objects.equals(uriTemplate, that.uriTemplate) &&
+                Objects.equals(httpVerb, that.httpVerb) &&
+                Objects.equals(authType, that.authType) &&
+                Objects.equals(policy, that.policy);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uriTemplate, httpVerb, authType, policy);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("uriTemplate", uriTemplate)
+                .append("httpVerb", httpVerb)
+                .append("authType", authType)
+                .append("policy", policy)
+                .toString();
     }
 
     /**
@@ -77,10 +104,6 @@ public final class UriTemplate {
         private String httpVerb;
         private String authType;
         private String policy;
-        private String templateId;
-        private String produces;
-        private String consumes;
-        private Scope scope;
 
         public UriTemplateBuilder() {
         }
@@ -109,38 +132,8 @@ public final class UriTemplate {
             return this;
         }
 
-        public UriTemplateBuilder scope(Scope scope) {
-            this.scope = scope;
-            return this;
-        }
-
-        public UriTemplateBuilder produces(String produces) {
-            this.produces = produces;
-            return this;
-        }
-        public UriTemplateBuilder consumes(String consumes) {
-            this.consumes = consumes;
-            return this;
-        }
-        public UriTemplateBuilder templateId(String templateId) {
-            this.templateId = templateId;
-            return this;
-        }
         public UriTemplate build() {
-
             return new UriTemplate(this);
         }
-    }
-
-    public String getTemplateId() {
-        return templateId;
-    }
-
-    public String getProduces() {
-        return produces;
-    }
-
-    public String getConsumes() {
-        return consumes;
     }
 }

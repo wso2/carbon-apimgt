@@ -45,4 +45,14 @@ public class DataSourceImpl implements DataSource {
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
+
+    /**
+     * Return javax.sql.DataSource object
+     *
+     * @return {@link javax.sql.DataSource} object
+     */
+    @Override
+    public HikariDataSource getDatasource() throws SQLException {
+        return dataSource;
+    }
 }

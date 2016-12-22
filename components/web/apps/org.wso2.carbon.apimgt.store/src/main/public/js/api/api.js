@@ -1,4 +1,9 @@
 $(function () {
+    
+    $(".navigation ul li.active").removeClass('active');
+    var prev = $(".navigation ul li:first")
+    $(".purple").insertBefore(prev).css('top','0px').addClass('active');
+    
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function(swaggerData) {

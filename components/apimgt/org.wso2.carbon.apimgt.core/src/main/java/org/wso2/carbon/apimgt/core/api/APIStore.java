@@ -23,6 +23,9 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
 import java.util.Map;
@@ -58,10 +61,10 @@ public interface APIStore extends APIManager {
     /**
      * Function to remove an Application from the API Store
      *
-     * @param application - The Application Object that represents the Application
+     * @param appId - The Application id of the Application
      * @throws APIManagementException
      */
-    void deleteApplication(Application application) throws APIManagementException;
+    void deleteApplication(String appId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -93,7 +96,7 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(String subscriber, String groupId) throws APIManagementException;
+    List<Application> getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -121,4 +124,64 @@ public interface APIStore extends APIManager {
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
+    /**
+     * Retrieve an application given the uuid.
+     *
+     * @param uuid
+     * @return Application object of the given uuid
+     * @throws APIManagementException
+     */
+    Application getApplicationByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Retrieve list of subscriptions given the application.
+     *
+     * @param application
+     * @return List of subscriptions objects of the given application.
+     * @throws APIManagementException
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+    /**
+     * Add an api subscription.
+     *
+     * @param apiId
+     * @param applicationId
+     * @param tier
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiSubscription(String apiId, String applicationId, String tier) throws APIManagementException;
+
+    /**
+     * Delete an API subscription.
+     *
+     * @param subscriptionId
+     * @throws APIManagementException
+     */
+    void deleteAPISubscription(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Retrieve all tags
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Tag> getAllTags() throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
 }
