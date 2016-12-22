@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.gateway.analytics.AnalyticsConfiguration;
 //import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
@@ -27,6 +30,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ConfigurationActivator {
+    private static Logger log = LoggerFactory.getLogger(ConfigurationActivator.class);
+
     /**
      * Get the ConfigProvider service.
      * This is the bind method that gets called for ConfigProvider service registration that satisfy the policy.
@@ -38,6 +43,18 @@ public class ConfigurationActivator {
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
+
+        /*try {
+           AnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().getConfigProvider()
+                    .getConfigurationObject(AnalyticsConfiguration.class);
+        } catch (CarbonConfigurationException e) {
+            log.error("error getting config", e);
+        }*/
+
+        AnalyticsConfiguration analyticsConfiguration = new AnalyticsConfiguration();
+        log.info("Setting default analytics configurations");
+        log.debug("Analytics enabled = " + analyticsConfiguration.isEnabled());
+        ServiceReferenceHolder.getInstance().setAnalyticsConfiguration(analyticsConfiguration);
     }
 
     /**
@@ -47,5 +64,6 @@ public class ConfigurationActivator {
      */
     protected void unregisterConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(null);
+        ServiceReferenceHolder.getInstance().setAnalyticsConfiguration(null);
     }
 }

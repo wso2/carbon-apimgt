@@ -82,6 +82,10 @@
             <groupId>org.wso2.carbon.datasources</groupId>
             <artifactId>org.wso2.carbon.datasource.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -94,7 +98,8 @@
         <export.package>
             <!--!org.wso2.carbon.apimgt.gateway.internal,-->
             org.wso2.carbon.apimgt.gateway.*; version="${carbon.apimgt.exp.pkg.version}"
-            !com.google.common.base.internal,com.google.common.*
+            !com.google.common.base.internal,
+            <!--com.google.common.*-->
         </export.package>
         <import.package>
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
@@ -107,6 +112,7 @@
             org.apache.velocity.*,
             org.wso2.andes.*,
             javax.jms.*,
+            com.google.gson.*,
             org.wso2.securevault.*,
             org.osgi.framework.*,
             javax.annotation;resolution:=optional,
