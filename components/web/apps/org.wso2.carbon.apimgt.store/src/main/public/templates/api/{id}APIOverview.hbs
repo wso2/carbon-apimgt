@@ -1,49 +1,18 @@
 <div class="row">
     <div class="col-md-12 col-lg-9">
-{{#each api.endpointURLs}}
-
-    <h4>{{this.environmentName}} Endpoints</h4>
-
-
-    <h5 class="add-margin-top-2x">{{this.environmentName}} URLs :</h5>
-
-    <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x">
-        <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
-                data-clipboard-text="http://172.17.0.1:8281/e2e2/e2e"
-                class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a>http://172.17.0.1:8281/e2e2/e2e
-
-        </div>
-        <a data-clipboard-text=
-                   <%if (api.type.toUpperCase() != "WS") {%>
-            "<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
-            <%} else {%>
-            "ws://localhost:9099<%=encode.forHtml(api.context)%>"
-            <%}%>
-            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
-        </a>
-        <%if (api.type.toUpperCase() != "WS") {%>
-        <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
-        <%} else {%>
-        ws://localhost:9099<%=encode.forHtml(api.context)%>
-        <%}%>
-        <%if (api.isDefaultVersion){
-        var apiContext = api.context;
-        apiContext = apiContext.replace(api.version + "/", "");
-        apiContext = apiContext.replace(api.version, "");%><br/>
-        <%if (api.type.toUpperCase() != "WS") {%>
-        <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
-        <%} else {%>
-        ws://localhost:9099<%=encode.forHtml(apiContext)%>
-        <%}%>
-        <%}%>
-    </div>
-
-    <%}
-    }
-    }
-    }
-    }
-{{/each}}
-
+        {{#each api.endpointURLs}}
+            <h4>{{this.environmentName}} Endpoints</h4>
+            <h5 class="add-margin-top-2x">{{this.environmentName}} URLs :</h5>
+                {{#each this.environmentURLs}}
+                    <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
+                        <a data-clipboard-text="{{this}}"
+                            class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i>
+                        </a>
+                        {{#each this}}
+                            {{this}} <br/>
+                        {{/each}}
+                    </div>
+                {{/each}}
+        {{/each}}
     </div>
 </div>

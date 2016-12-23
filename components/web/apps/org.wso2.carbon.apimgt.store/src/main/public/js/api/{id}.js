@@ -144,12 +144,39 @@ $(function () {
                             var tab = tabs[i];
                             if(tab.id == "api-overview"){
                                 $.get('/store/public/components/root/base/templates/api/{id}APIOverview.hbs', function (templateData) {
-                                    for (var environment in api.endpointURLs){
-                                        if(environment.type == "production"){
-                                            environment.title = "Production "
+                             /*       if(api.isDefaultVersion){
+                                        var endpointURLs = null;
+                                        for (var endpointURL in  api.endpointURLs){
+                                            //TODO: Handle Web socket
+                                            var defaultEndpoint = null;
+                                            var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
+                                            for(var environmentURL in environmentURLs) {
+                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
+                                                defaultEnvironmentURL =environmentURLs[environmentURL].replace(api.version, "");
+                                                api.endpointURLs[endpointURL].environmentURLs[endpointURL + "Default"] = defaultEnvironmentURL;
+                                            }
+
+                                        }
+                                    }*/
+
+                                    for (var endpointURL in  api.endpointURLs){
+                                        var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
+                                        for(var environmentURL in environmentURLs){
+                                            var currentEnvironmentURL = [];
+                                            currentEnvironmentURL.push(environmentURLs[environmentURL]);
+                                            if(api.isDefaultVersion){
+                                                var defaultEnvironmentURL = null;
+                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
+                                                defaultEnvironmentURL =environmentURLs[environmentURL].replace(api.version, "");
+                                                currentEnvironmentURL.push(defaultEnvironmentURL);
+                                            }
+                                            api.endpointURLs[endpointURL].environmentURLs[environmentURL] = currentEnvironmentURL;
                                         }
                                     }
-                                    var apiOverviewTemplate = Handlebars.compile(templateData);
+
+
+
+                                        var apiOverviewTemplate = Handlebars.compile(templateData);
                                     // Inject template data
                                     var compiledTemplate = apiOverviewTemplate(context);
 
@@ -182,7 +209,7 @@ $(function () {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
 
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer a006a4d8-5273-32ac-b111-0c85895ac054", "header"));
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 200d5b62-7837-3dd9-b4a8-896cbcd755ab", "header"));
             client["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (jsonData) {
                     var context = {};
