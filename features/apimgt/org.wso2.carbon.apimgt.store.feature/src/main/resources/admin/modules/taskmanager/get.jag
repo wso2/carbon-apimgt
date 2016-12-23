@@ -123,11 +123,8 @@ version.open(options,endpoint, false, String(null), String(adminPassword));
 version.send(payload);
 response = version.responseE4X;
 var actualOwner=response.*::taskAbstract.*::actualOwner;
-var store = jagg.module("manager").getAPIStoreObj();
-var isEmailLoginEnabled=store.isEnableEmailUsername();
-if(!isEmailLoginEnabled && (username.indexOf("@") != -1)){
-username=username.split("@")[0];
-}
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+username = MultitenantUtils.getTenantAwareUsername(username);
 if(username==actualOwner){
 
 return true;
