@@ -24,7 +24,6 @@ import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.constants.APIConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.constants.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.throttling.constants.JMSConfigs;
 
@@ -44,7 +43,6 @@ import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 import javax.naming.NamingException;
-
 
 /**
  * This class is used to subscribe to a jms topic and update the throttle maps
@@ -128,7 +126,7 @@ public class ThrottleJMSListner {
                         log.debug("JMS message map :" + map);
                     }
 
-                    if (map.get(APIConstants.THROTTLE_KEY) != null) {
+                    if (map.get(APIThrottleConstants.THROTTLE_KEY) != null) {
                         /**
                          * This message contains throttle data in map which contains Keys
                          * throttleKey - Key of particular throttling level
@@ -136,7 +134,7 @@ public class ThrottleJMSListner {
                          * expiryTimeStamp - When the throttling time window will expires
                          */
                         handleThrottleUpdateMessage(map);
-                    } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
+                    } else if (map.get(APIThrottleConstants.BLOCKING_CONDITION_KEY) != null) {
                         /**
                          * This message contains blocking condition data
                          * blockingCondition - Blocking condition type
@@ -144,7 +142,7 @@ public class ThrottleJMSListner {
                          * state - State whether blocking condition is enabled or not
                          */
                         handleBlockingMessage(map);
-                    } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
+                    } else if (map.get(APIThrottleConstants.POLICY_TEMPLATE_KEY) != null) {
                         /**
                          * This message contains key template data
                          * keyTemplateValue - Value of key template
@@ -246,34 +244,36 @@ public class ThrottleJMSListner {
     // Will not be a performance issue as this will not happen more frequently
     private synchronized void handleBlockingMessage(Map<String, Object> map) {
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString()
-                    + " , " + "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
-                    "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
+            log.debug("Received Key -  blockingCondition : " + map.get(APIThrottleConstants.BLOCKING_CONDITION_KEY)
+                    .toString()
+                    + " , " + "conditionValue :" + map.get(APIThrottleConstants.BLOCKING_CONDITION_VALUE).toString()
+                    + " , " +
+                    "tenantDomain : " + map.get(APIThrottleConstants.BLOCKING_CONDITION_DOMAIN));
         }
 
-        String condition = map.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
-        String conditionValue = map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString();
-        String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
+        String condition = map.get(APIThrottleConstants.BLOCKING_CONDITION_KEY).toString();
+        String conditionValue = map.get(APIThrottleConstants.BLOCKING_CONDITION_VALUE).toString();
+        String conditionState = map.get(APIThrottleConstants.BLOCKING_CONDITION_STATE).toString();
 
-        if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
+        if (APIThrottleConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (APIThrottleConstants.TRUE.equals(conditionState)) {
                 ThrottleDataHolder.getInstance().addApplicationBlockingCondition(conditionValue, conditionValue);
             } else {
                 ThrottleDataHolder.getInstance().removeApplicationBlockingCondition(conditionValue);
             }
-        } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
+        } else if (APIThrottleConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
             if (APIThrottleConstants.TRUE.equals(conditionState)) {
                 ThrottleDataHolder.getInstance().addAPIBlockingCondition(conditionValue, conditionValue);
             } else {
                 ThrottleDataHolder.getInstance().removeAPIBlockingCondition(conditionValue);
             }
-        } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)) {
+        } else if (APIThrottleConstants.BLOCKING_CONDITIONS_USER.equals(condition)) {
             if (APIThrottleConstants.TRUE.equals(conditionState)) {
                 ThrottleDataHolder.getInstance().addUserBlockingCondition(conditionValue, conditionValue);
             } else {
                 ThrottleDataHolder.getInstance().removeUserBlockingCondition(conditionValue);
             }
-        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)) {
+        } else if (APIThrottleConstants.BLOCKING_CONDITIONS_IP.equals(condition)) {
             if (APIThrottleConstants.TRUE.equals(conditionState)) {
                 ThrottleDataHolder.getInstance().addIplockingCondition(conditionValue, conditionValue);
             } else {
@@ -305,10 +305,10 @@ public class ThrottleJMSListner {
 
     private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
         if (!log.isDebugEnabled()) {
-            log.debug("Received Key -  KeyTemplate : " + map.get(APIConstants.POLICY_TEMPLATE_KEY).toString());
+            log.debug("Received Key -  KeyTemplate : " + map.get(APIThrottleConstants.POLICY_TEMPLATE_KEY).toString());
         }
-        String keyTemplateValue = map.get(APIConstants.POLICY_TEMPLATE_KEY).toString();
-        String keyTemplateState = map.get(APIConstants.TEMPLATE_KEY_STATE).toString();
+        String keyTemplateValue = map.get(APIThrottleConstants.POLICY_TEMPLATE_KEY).toString();
+        String keyTemplateState = map.get(APIThrottleConstants.TEMPLATE_KEY_STATE).toString();
         if (APIThrottleConstants.ADD.equals(keyTemplateState)) {
             ThrottleDataHolder.getInstance().addKeyTemplate(keyTemplateValue, keyTemplateValue);
         } else {

@@ -1,24 +1,26 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.apimgt.gateway.throttling.constants;
 
 
 /**
- * contains throttling related constants
+ * Contains throttling related constants
  */
 public class APIThrottleConstants {
 
@@ -67,5 +69,63 @@ public class APIThrottleConstants {
 
     public static final String TRUE = "true";
     public static final String ADD = "add";
+
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
+
+    public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
+    public static final String REMOTE_ADDR = "REMOTE_ADDR";
+
+    public static final String THROTTLING_LATENCY = "throttling_latency";
+
+    public static final String REST_API_CONTEXT = "REST_API_CONTEXT";
+    public static final String SYNAPSE_REST_API_VERSION = "SYNAPSE_REST_API_VERSION";
+
+    // HttpStatus
+    public static final int SC_SERVICE_UNAVAILABLE = 503;
+    public static final int SC_FORBIDDEN = 403;
+
+    public static final String ERROR_CODE = "ERROR_CODE";
+    public static final String ERROR_MESSAGE = "ERROR_MESSAGE";
+
+    // policy constants
+    public static final String IP_RANGE_TYPE = "IPRange";
+    public static final String IP_SPECIFIC_TYPE = "IPSpecific";
+    public static final String QUERY_PARAMETER_TYPE = "QueryParameterType";
+    public static final String JWT_CLAIMS_TYPE = "JWTClaims";
+    public static final String HEADER_TYPE = "Header";
+
+    //governance registry apimgt root location
+    public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
+
+    public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION + "/applicationdata";
+
+    public static final String VERB_INFO_DTO = "VERB_INFO";
+
+    public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
+    public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
+
+    // There is a property added to the message context when such an event happens.
+    public static final String API_USAGE_THROTTLE_OUT_PROPERTY_KEY = "isThrottleOutIgnored";
+    public static final String AUTH_TYPE_NONE = "NONE";
+
+    public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
+    public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
+
+    public static final String THROTTLE_POLICY_DEFAULT = "_default";
+
+    public static final String API_POLICY_USER_LEVEL = "userLevel";
+    public static final String API_POLICY_API_LEVEL = "apiLevel";
+
+
+    public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String BLOCKING_CONDITION_STATE = "state";
+    public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+    public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+    public static final String BLOCKING_CONDITION_DOMAIN = "tenantDomain";
+    public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+    public static final String BLOCKING_CONDITIONS_API = "API";
+    public static final String BLOCKING_CONDITIONS_USER = "USER";
+    public static final String BLOCKING_CONDITIONS_IP = "IP";
 
 }
