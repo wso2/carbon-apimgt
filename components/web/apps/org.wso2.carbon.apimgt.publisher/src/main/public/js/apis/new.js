@@ -24,7 +24,7 @@ class API {
      */
     constructor(access_key) {
         this.client = new SwaggerClient({
-            url: '/publisher/public/components/root/base/js/swagger.json',
+            url: swaggerUrl,
             usePromise: true
         });
         this.access_key_header = "Bearer " + access_key;
