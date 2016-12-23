@@ -19,13 +19,21 @@ $(
             function (event) {
                 event.preventDefault();
                 var api_data = {
-                    namea: $("#new-api-name").val(),
+                    name: $("#new-api-name").val(),
                     context: $('#new-api-context').val(),
                     version: $('#new-api-version').val()
                 };
-                var new_api = new API('a58ec0d7-7075-3970-95e7-0532f8763d5a');
-                new_api.create(api_data);
+                var new_api = new API('');
+                debugger;
+                new_api.create(api_data, createAPICallback);
             }
         );
     }
 );
+
+
+function createAPICallback(response) {
+    // Grab the template script
+    var responseObject = JSON.parse(response.data);
+    window.location.replace("/editor/apis?create_success=true&id=" + responseObject.id + "&name=" + encodeURI(responseObject.name));
+}

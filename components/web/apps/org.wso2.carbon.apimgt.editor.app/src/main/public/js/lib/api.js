@@ -137,15 +137,15 @@ class API {
             "name": null,
             "context": null,
             "version": null,
-            "apiDefinition": "{}",
-            "isDefaultVersion": false,
-            "transport": [
-                "http",
-                "https"
+            "apiDefinition": "{ \"paths\": { \"\/*\": { \"get\": { \"description\": \"Global Get\" } } }, \"swagger\": \"2.0\" }",
+            "cacheTimeout": 10,
+            "transport": ['https'],
+            "policies": [
+                "Unlimited"
             ],
-            "tiers": ["Gold"],
             "visibility": "PUBLIC",
-            "endpointConfig": ""
+            "businessInformation": {},
+            "corsConfiguration": {}
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -167,7 +167,9 @@ class API {
         let payload = this._update_template(api_data);
         var promise_create = this.client.then(
             (client) => {
-                return client.APIs.post_apis(
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                return client.default.apisPost(
                     {body: payload, 'Content-Type': "application/json"}, this._request_meta_data());
             }
         );
@@ -187,7 +189,8 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                client.setBasePath(""); /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
                 return client.default.apisGet();
             }
         );

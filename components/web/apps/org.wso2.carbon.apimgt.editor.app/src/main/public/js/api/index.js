@@ -16,5 +16,4 @@ function getAPIsCallback(response) {
         // Add the compiled html to the page
         $('#apiListingContainer').html(theCompiledHtml);
     }, 'html');
-
 }
