@@ -1,7 +1,7 @@
 $(function () {
     $('#example').DataTable();
     var client = new SwaggerClient({
-        url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
+        url: swaggerURL,
         success: function(swaggerData) {
             client["Tag Collection"].get_tags(
                 {"responseContentType": 'application/json'},

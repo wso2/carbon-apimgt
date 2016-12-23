@@ -6,5 +6,9 @@ function onRequest(env) {
     sendToClient("loginPageUri",  env.config.loginPageUri);
     sendToClient("contextPath",  env.contextPath);
     sendToClient("uri",  env.request.uri);
+    sendToClient("scopes",  env.config.scopes);
+    sendToClient("tokenEndpoint",  env.config.tokenEndpoint);
+    sendToClient("keyAndSecret",  env.config.keyAndSecret);
+    sendToClient("swaggerUrl",  env.config.swaggerUrl);
     return {env:env};
 }

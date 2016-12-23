@@ -98,7 +98,7 @@ class API {
      */
     constructor(access_key) {
         this.client = new SwaggerClient({
-            url: swaggerUrl,
+            url: swaggerURL,
             usePromise: true
         });
         this.client.then(
@@ -137,15 +137,15 @@ class API {
             "name": null,
             "context": null,
             "version": null,
-            "apiDefinition": "{}",
-            "isDefaultVersion": false,
-            "transport": [
-                "http",
-                "https"
+            "apiDefinition": "{ \"paths\": { \"\/*\": { \"get\": { \"description\": \"Global Get\" } } }, \"swagger\": \"2.0\" }",
+            "cacheTimeout": 10,
+            "transport": ['https'],
+            "policies": [
+                "Unlimited"
             ],
-            "tiers": ["Gold"],
             "visibility": "PUBLIC",
-            "endpointConfig": ""
+            "businessInformation": {},
+            "corsConfiguration": {}
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -167,7 +167,9 @@ class API {
         let payload = this._update_template(api_data);
         var promise_create = this.client.then(
             (client) => {
-                return client.APIs.post_apis(
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                return client.default.apisPost(
                     {body: payload, 'Content-Type': "application/json"}, this._request_meta_data());
             }
         );
@@ -178,20 +180,25 @@ class API {
         }
     }
 
-}
-$(
-    function () {
-        $('#api-create-submit').on('click',
-            function (event) {
-                event.preventDefault();
-                var api_data = {
-                    name: $("#new-api-name").val(),
-                    context: $('#new-api-context').val(),
-                    version: $('#new-api-version').val()
-                };
-                var new_api = new API($.cookie('token'));
-                new_api.create(api_data);
+    /**
+     * Get list of all the available APIs, If the call back is given (TODO: need to ask for fallback sequence as well tmkb)
+     * It will be invoked upon receiving the response from REST service.Else will return a promise.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAll(callback) {
+        var promise_get_all = this.client.then(
+            (client) => {
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                return client.default.apisGet();
             }
         );
+        if (callback) {
+            return promise_get_all.then(callback);
+        } else {
+            return promise_get_all;
+        }
     }
-);
+
+}
