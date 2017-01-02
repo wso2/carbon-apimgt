@@ -47,7 +47,7 @@ import java.util.Map;
  */
 
 public class AMDefaultKeyManagerImpl implements KeyManager {
-    static final Logger log = LoggerFactory.getLogger(AMDefaultKeyManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AMDefaultKeyManagerImpl.class);
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
@@ -259,7 +259,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 if (responseCode != 200) { //If token revoke failed
                     throw new RuntimeException("Token revoke failed : HTTP error code : " + responseCode);
                 } else {
-                    APIUtils.logDebug("Successfully submitted revoke request for old application token. HTTP status : 200", log);
+                    APIUtils.logDebug(
+                            "Successfully submitted revoke request for old application token. HTTP status : 200", log);
                 }
             } catch (IOException e) {
                 String msg = "Error while revoking the existing token.";
@@ -307,7 +308,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
                         responseCode);
             } else {
-                APIUtils.logDebug("Successfully submitted token request for old application token. HTTP status : 200", log);
+                APIUtils.logDebug("Successfully submitted token request for old application token. HTTP status : 200",
+                        log);
                 tokenInfo = new AccessTokenInfo();
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
                 JsonParser parser = new JsonParser();
@@ -451,7 +453,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         } */
 
         oAuthApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopes);
-        APIUtils.logDebug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId(), log);
+        APIUtils.logDebug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId(),
+                log);
 
         return oAuthApplicationInfo;
     }
