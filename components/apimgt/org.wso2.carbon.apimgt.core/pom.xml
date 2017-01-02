@@ -222,12 +222,6 @@
                         <goals>
                             <goal>create-doc</goal>
                         </goals>
-                        <configuration>
-                            <!--<configclasses>-->
-                            <!--<configclass>org.wso2.carbon.apimgt.core.APIMConfigurations</configclass>-->
-                            <!--<configclass>org.wso2.carbon.apimgt.core.KeyMgtConfigurations</configclass>-->
-                            <!--</configclasses>-->
-                        </configuration>
                         <phase>compile</phase>
                     </execution>
                 </executions>
