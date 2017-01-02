@@ -214,7 +214,31 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.plugins.configuration</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-doc</goal>
+                        </goals>
+                        <configuration>
+                            <!--<configclasses>-->
+                            <!--<configclass>org.wso2.carbon.apimgt.core.APIMConfigurations</configclass>-->
+                            <!--<configclass>org.wso2.carbon.apimgt.core.KeyMgtConfigurations</configclass>-->
+                            <!--</configclasses>-->
+                        </configuration>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/classes/config-docs</directory>
+                <targetPath>config-docs</targetPath>
+            </resource>
+        </resources>
     </build>
     <profiles>
         <profile>
