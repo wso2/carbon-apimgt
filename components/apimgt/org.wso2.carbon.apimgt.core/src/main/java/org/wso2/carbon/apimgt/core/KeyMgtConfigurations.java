@@ -42,11 +42,15 @@ public class KeyMgtConfigurations {
 
     public KeyMgtConfigurations() {
         //todo improve
-        dcrEndpoint = System.getProperty(KeyManagerConstants.DCR_ENDPOINT, "http://localhost:9763/identity/connect/register");
+        dcrEndpoint = System.getProperty(KeyManagerConstants.DCR_ENDPOINT,
+                "http://localhost:9763/identity/connect/register");
         tokenEndpoint = System.getProperty(KeyManagerConstants.TOKEN_ENDPOINT, "https://localhost:9443/oauth2/token");
-        revokeEndpoint = System.getProperty(KeyManagerConstants.REVOKE_ENDPOINT, "https://localhost:9443/oauth2/revoke");
-        introspectEndpoint = System.getProperty(KeyManagerConstants.INTROSPECT_ENDPOINT, "http://localhost:9763/oauth2/introspect");
-        validityPeriod = System.getProperty(KeyManagerConstants.VALIDITY_PERIOD, KeyManagerConstants.DEFAULT_VALIDITY_PERIOD);
+        revokeEndpoint = System.getProperty(KeyManagerConstants.REVOKE_ENDPOINT,
+                "https://localhost:9443/oauth2/revoke");
+        introspectEndpoint = System.getProperty(KeyManagerConstants.INTROSPECT_ENDPOINT,
+                "http://localhost:9763/oauth2/introspect");
+        validityPeriod = System.getProperty(KeyManagerConstants.VALIDITY_PERIOD, KeyManagerConstants
+                .DEFAULT_VALIDITY_PERIOD);
     }
 
 //    @Element(description = "Key Management Implementation class")
