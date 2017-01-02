@@ -51,7 +51,7 @@ if(jagg.isCSRFTokenValid())
 
             if (result.error === true) {
                 obj = {
-                    error:result.error,
+                    error:true,
                     message:result.message
                 };
                 response.status = 500;
@@ -89,7 +89,7 @@ if(jagg.isCSRFTokenValid())
 
             if (result.error === true) {
                 obj = {
-                    error:result.error,
+                    error:true,
                     message:result.message
                 };
                 response.status = 500;
@@ -111,7 +111,7 @@ if(jagg.isCSRFTokenValid())
             result = mod.addInlineContent(apiDetails, docDetails);
             if (result.error) {
                 obj = {
-                    error:result.error,
+                    error:true,
                     message:result.message
                 };
             } else {
@@ -130,7 +130,7 @@ if(jagg.isCSRFTokenValid())
             result = mod.getInlineContent(api, docName);
             if (result.error) {
                 obj = {
-                    error:result.error,
+                    error:true,
                     message:result.message
                 };
             } else {
