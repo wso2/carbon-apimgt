@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -51,6 +52,84 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testAddDuplicateProviderNameVersionAPI( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+
+        apiDAO.addAPI(api);
+
+        API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
+        duplicateAPIBuilder.provider(api.getProvider());
+        duplicateAPIBuilder.name(api.getName());
+        duplicateAPIBuilder.version(api.getVersion());
+
+        API duplicateAPI = duplicateAPIBuilder.build();
+        try {
+            apiDAO.addAPI(duplicateAPI);
+            Assert.fail("Exception not thrown for adding duplicate API");
+        }
+        catch (APIMgtDAOException e) {
+            // Just catch the exception so that we can continue execution
+        }
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
+        Assert.assertEquals(apiDAO.getAPIs().size(), 1);
+        Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
+    }
+
+    @Test
+    public void testAddSameAPIWithDifferentProviders( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+
+        apiDAO.addAPI(api);
+
+        API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
+        duplicateAPIBuilder.name(api.getName());
+        duplicateAPIBuilder.version(api.getVersion());
+
+        API duplicateAPI = duplicateAPIBuilder.build();
+        apiDAO.addAPI(duplicateAPI);
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+        API duplicateApiFromDB = apiDAO.getAPI(duplicateAPI.getId());
+
+        Assert.assertEquals(duplicateApiFromDB.getName(), api.getName());
+        Assert.assertEquals(duplicateApiFromDB.getVersion(), api.getVersion());
+        Assert.assertEquals(apiDAO.getAPIs().size(), 2);
+        Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
+        Assert.assertEquals(duplicateApiFromDB, duplicateAPI, TestUtil.printDiff(duplicateApiFromDB, duplicateAPI));
+    }
+
+    @Test
+    public void testDuplicateContext( ) throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+
+        apiDAO.addAPI(api);
+
+        API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
+        duplicateAPIBuilder.context(api.getContext());
+
+        API duplicateAPI = duplicateAPIBuilder.build();
+        try {
+            apiDAO.addAPI(duplicateAPI);
+            Assert.fail("Exception not thrown for adding duplicate API context");
+        }
+        catch (APIMgtDAOException e) {
+            // Just catch the exception so that we can continue execution
+        }
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
+        Assert.assertEquals(apiDAO.getAPIs().size(), 1);
+        Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
+    }
+
+        @Test
     public void testGetAPISummary( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();

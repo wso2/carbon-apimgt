@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Contains Implementation for policy
@@ -492,5 +493,112 @@ public class PolicyDAOImpl implements PolicyDAO {
             throw new APIMgtDAOException("Couldn't retrieve subscription tier for id : " + policyId, e);
         }
         return null;
+    }
+
+
+    static void initDefaultPolicies() throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                if (!isDefaultPoliciesExist(connection)) {
+                    connection.setAutoCommit(false);
+
+                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "", 1, 60, "s", "API");
+
+                    addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
+                    addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");
+                    addSubscriptionPolicy(connection, "Silver", "Silver", "Silver");
+                    addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze");
+
+                    addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier", "x", 10, "REQ", 1, "s");
+                    addApplicationPolicy(connection, "20PerMin", "20PerMin", "20PerMin Tier", "x", 50, "REQ", 1, "s");
+
+                    connection.commit();
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    private static boolean isDefaultPoliciesExist(Connection connection) throws SQLException {
+        final String query = "SELECT 1 FROM AM_API_POLICY";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static void addAPIPolicy(Connection connection, String name, String displayName, String description,
+                              String quotaType, int quota, int unitTime, String timeUnit, String applicableLevel)
+                                                                                                throws SQLException {
+        final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, " +
+                "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, APPLICABLE_LEVEL) " +
+                "VALUES (?,?,?,?,?,?,?,?,?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, UUID.randomUUID().toString());
+            statement.setString(2, name);
+            statement.setString(3, displayName);
+            statement.setString(4, description);
+            statement.setString(5, quotaType);
+            statement.setInt(6, quota);
+            statement.setInt(7, unitTime);
+            statement.setString(8, timeUnit);
+            statement.setString(9, applicableLevel);
+
+            statement.execute();
+        }
+    }
+
+    private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
+                                              String description) throws SQLException {
+        final String query = "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION) " +
+                "VALUES (?,?,?,?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, UUID.randomUUID().toString());
+            statement.setString(2, name);
+            statement.setString(3, displayName);
+            statement.setString(4, description);
+
+            statement.execute();
+        }
+    }
+
+    private static void addApplicationPolicy(Connection connection, String name, String displayName, String description,
+                                      String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit)
+                                                                                                throws SQLException {
+        final String query = "INSERT INTO AM_APPLICATION_POLICY (UUID, NAME, DISPLAY_NAME, " +
+                "DESCRIPTION, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) " +
+                "VALUES (?,?,?,?,?,?,?,?,?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, UUID.randomUUID().toString());
+            statement.setString(2, name);
+            statement.setString(3, displayName);
+            statement.setString(4, description);
+            statement.setString(5, quotaType);
+            statement.setInt(6, quota);
+            statement.setString(7, quotaUnit);
+            statement.setInt(8, unitTime);
+            statement.setString(9, timeUnit);
+
+            statement.execute();
+        }
     }
 }

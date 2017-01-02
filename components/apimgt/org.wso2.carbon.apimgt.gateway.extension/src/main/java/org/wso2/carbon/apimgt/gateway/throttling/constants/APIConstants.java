@@ -637,7 +637,7 @@ public final class APIConstants {
     public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
 
-    public static final String API_ANALYTICS = "Analytics.";
+    public static final String API_ANALYTICS = "analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "DASServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "DASAuthServerURL";
