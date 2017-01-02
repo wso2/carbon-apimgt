@@ -17,7 +17,7 @@
         "keyStoreName" :"",
         "signRequests" : "true",
 	    "assertionEncryptionEnabled" : "false",
-        "idpInit" : "true",
+        "idpInit" : "false",
         "idpInitSSOURL" : "https://localhost:9443/samlsso?spEntityID=API_PUBLISHER",
         "externalLogoutPage" : "https://localhost:9443/samlsso?slo=true"
         //"acsURL" : "https://localhost:9443/publisher/jagg/jaggery_acs.jag", //use only if Assertion Consumer Service URL needs to be sent along with SAML request 
