@@ -41,6 +41,7 @@ public class KeyMgtConfigurations {
 
 
     public KeyMgtConfigurations() {
+        //todo improve
         dcrEndpoint = System.getProperty(KeyManagerConstants.DCR_ENDPOINT, "http://localhost:9763/identity/connect/register");
         tokenEndpoint = System.getProperty(KeyManagerConstants.TOKEN_ENDPOINT, "https://localhost:9443/oauth2/token");
         revokeEndpoint = System.getProperty(KeyManagerConstants.REVOKE_ENDPOINT, "https://localhost:9443/oauth2/revoke");
