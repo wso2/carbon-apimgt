@@ -33,7 +33,7 @@ public class DAOIntegrationTestBase {
     public DAOIntegrationTestBase() {
          database = System.getenv("DATABASE_TYPE");
         if (StringUtils.isEmpty(database)){
-            database = "mssql";
+            database = "h2";
         }
     }
 
