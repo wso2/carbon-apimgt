@@ -142,41 +142,23 @@ $(function () {
                         //Load each tab content
                         for (var i = 0; i < tabs.length; i++) {
                             var tab = tabs[i];
-                            if(tab.id == "api-overview"){
+                            if (tab.id == "api-overview") {
                                 $.get('/store/public/components/root/base/templates/api/{id}APIOverview.hbs', function (templateData) {
-                             /*       if(api.isDefaultVersion){
-                                        var endpointURLs = null;
-                                        for (var endpointURL in  api.endpointURLs){
-                                            //TODO: Handle Web socket
-                                            var defaultEndpoint = null;
-                                            var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
-                                            for(var environmentURL in environmentURLs) {
-                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
-                                                defaultEnvironmentURL =environmentURLs[environmentURL].replace(api.version, "");
-                                                api.endpointURLs[endpointURL].environmentURLs[endpointURL + "Default"] = defaultEnvironmentURL;
-                                            }
-
-                                        }
-                                    }*/
-
-                                    for (var endpointURL in  api.endpointURLs){
+                                    for (var endpointURL in  api.endpointURLs) {
                                         var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
-                                        for(var environmentURL in environmentURLs){
+                                        for (var environmentURL in environmentURLs) {
                                             var currentEnvironmentURL = [];
                                             currentEnvironmentURL.push(environmentURLs[environmentURL]);
-                                            if(api.isDefaultVersion){
+                                            if (api.isDefaultVersion) {
                                                 var defaultEnvironmentURL = null;
                                                 defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
-                                                defaultEnvironmentURL =environmentURLs[environmentURL].replace(api.version, "");
+                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version, "");
                                                 currentEnvironmentURL.push(defaultEnvironmentURL);
                                             }
                                             api.endpointURLs[endpointURL].environmentURLs[environmentURL] = currentEnvironmentURL;
                                         }
                                     }
-
-
-
-                                        var apiOverviewTemplate = Handlebars.compile(templateData);
+                                    var apiOverviewTemplate = Handlebars.compile(templateData);
                                     // Inject template data
                                     var compiledTemplate = apiOverviewTemplate(context);
 
@@ -186,17 +168,64 @@ $(function () {
                                 }, 'html');
                             }
 
-                            if(tab.id == "api-documentation"){
-                                $.get('/store/public/components/root/base/templates/api/{id}APIDocumentation.hbs', function (templateData) {
-                                    context.tabList = tabs;
-                                    var apiOverviewTemplate = Handlebars.compile(templateData);
-                                    // Inject template data
-                                    var compiledTemplate = apiOverviewTemplate(context);
+                            if (tab.id == "api-documentation") {
+                                client["API (individual)"].get_apis_apiId_documents({"apiId": apiId}, {"responseContentType": 'application/json'},
+                                    function (jsonData) {
 
-                                    // Append compiled template into page
-                                    $("#api-documentation").append(compiledTemplate);
+                                        var documentationList = jsonData.obj.list, length, documentations = {}, doc, obj;
 
-                                }, 'html');
+                                        if (documentationList != null) {
+                                            length = documentationList.length;
+                                        }
+                                        for (i = 0; i < length; i++) {
+                                            doc = documentationList[i];
+                                            //TODO: Remove this once comparison helper is implemented
+                                            if (doc.sourceType == "INLINE") {
+                                                doc.isInLine = true;
+                                            } else if (doc.sourceType == "FILE") {
+                                                doc.isFile = true;
+                                            } else if (doc.sourceType == "URL") {
+                                                doc.isURL = true;
+                                            }
+                                            obj = documentations[doc.type] || (documentations[doc.type] = []);
+                                            obj.push(doc);
+                                        }
+
+                                        for (var type in documentations) {
+                                            if (documentations.hasOwnProperty(type)) {
+                                                var docs = documentations[type], icon = null, typeName = null;
+                                                if (type.toUpperCase() == "HOWTO") {
+                                                    icon = "fw-info";
+                                                    typeName = "HOW TO";
+                                                } else if (type.toUpperCase() == "PUBLIC_FORUM") {
+                                                    icon = "fw-forum";
+                                                    typeName = "PUBLIC FORUM";
+                                                } else if (type.toUpperCase() == "SUPPORT_FORUM") {
+                                                    icon = "fw-forum";
+                                                    typeName = "SUPPORT FORUM";
+                                                } else if (type.toUpperCase() == "SAMPLES") {
+                                                    icon = "fw-api";
+                                                    typeName = "SAMPLES";
+                                                } else {
+                                                    icon = "fw-text";
+                                                    typeName = "OTHER";
+                                                }
+                                                documentations[type].icon = icon;
+                                                documentations[type].typeName = typeName;
+                                            }
+                                        }
+                                        $.get('/store/public/components/root/base/templates/api/{id}APIDocumentation.hbs', function (templateData) {
+                                            context.documentations = documentations;
+                                            var apiOverviewTemplate = Handlebars.compile(templateData);
+                                            // Inject template data
+                                            var compiledTemplate = apiOverviewTemplate(context);
+
+                                            // Append compiled template into page
+                                            $("#api-documentation").append(compiledTemplate);
+
+                                        }, 'html');
+                                    });
+
                             }
 
                         }
