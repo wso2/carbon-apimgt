@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.lifecycle.manager.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CustomCodeBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -76,11 +75,7 @@ public class LifecycleOperationManager {
             boolean value) throws LifecycleException {
         changeCheckListItem(uuid, currentState, checkListItemName, value);
         LifecycleState currentStateObject = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
-        for (CheckItemBean checkItemBean : currentStateObject.getCheckItemBeanList()) {
-            if (checkListItemName.equals(checkItemBean.getName())) {
-                checkItemBean.setValue(value);
-            }
-        }
+
         if (log.isDebugEnabled()) {
             log.debug("Check list item " + checkListItemName + " is set to " + value);
         }
@@ -165,12 +160,8 @@ public class LifecycleOperationManager {
     }
 
     private static boolean validateCheckListItemSelected(LifecycleState lifecycleState, String nextState) {
-        for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
-            if (checkItemBean.getTargets().contains(nextState) && !checkItemBean.isValue()) {
-                return false;
-            }
-        }
-        return true;
+        return !lifecycleState.getCheckItemBeanList().stream()
+                .anyMatch(checkItemBean -> checkItemBean.getTargets().contains(nextState) && !checkItemBean.isValue());
     }
 }
 
