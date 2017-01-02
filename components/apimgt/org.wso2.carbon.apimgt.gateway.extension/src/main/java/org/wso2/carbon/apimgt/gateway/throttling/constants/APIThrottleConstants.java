@@ -62,10 +62,6 @@ public class APIThrottleConstants {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String MIN = "min";
-    public static final String WS_THROTTLE_POLICY_HEADER = "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
-            ".org/ws/2004/09/policy\" xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
-            "    <throttle:MediatorThrottleAssertion>\n";
-    public static final String WS_THROTTLE_POLICY_BOTTOM = "</throttle:MediatorThrottleAssertion>\n" + "</wsp:Policy>";
 
     public static final String TRUE = "true";
     public static final String ADD = "add";
