@@ -15,13 +15,17 @@
  */
 
 function onRequest(env) {
-    sendToClient("loginRedirectUri",  env.config.loginRedirectUri);
-    sendToClient("loginPageUri",  env.config.loginPageUri);
-    sendToClient("contextPath",  env.contextPath);
-    sendToClient("uri",  env.request.uri);
-    sendToClient("scopes",  env.config.scopes);
-    sendToClient("tokenEndpoint",  env.config.tokenEndpoint);
-    sendToClient("keyAndSecret",  env.config.keyAndSecret);
-    sendToClient("swaggerUrl",  env.config.swaggerUrl);
-    return {logo:"../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg"};
+    sendToClient("loginRedirectUri", env.config.loginRedirectUri);
+    sendToClient("loginPageUri", env.config.loginPageUri);
+    sendToClient("contextPath", env.contextPath);
+    sendToClient("uri", env.request.uri);
+    sendToClient("scopes", env.config.scopes);
+    sendToClient("tokenEndpoint", env.config.tokenEndpoint);
+    sendToClient("keyAndSecret", env.config.keyAndSecret);
+    sendToClient("swaggerUrl", env.config.swaggerUrl);
+    var appName = env.config.appName || "";
+    return {
+        logo: "../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg",
+        appName: appName
+    };
 }
