@@ -6,6 +6,8 @@ errorPages:
   default: /foundation/error/default
 loginPageUri: "/login"
 loginRedirectUri: "/apis"
-key: ""
-secret: ""
+scopes: "apim:api_view"
+tokenEndpoint: "https://apis.wso2.com/apimanager/token"
+keyAndSecret: "dmRNdk05d1R4NkZ5NjNXa2xfb0FEaTdMQXZnYTp3UHNIQkJFS1FPbWU0bGZxYlJRZW1GY3ZqSUlh=="
+swaggerUrl: "/publisher/public/components/root/base/js/swagger.json"
 nonSecureUrl: "/test1,/test2"

@@ -1,10 +1,9 @@
 <header class="header header-default">
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
-            <a href="{{env.contextPath}}/apis" title="apiPublisherHomePage"
-               onclick="jagg.sessionAwareJS({redirect:'/publisher/apis',e:event})" > <img
-                    src="{{public logo}}"
-                    alt="WSO2 API Publisher Home" class="logo"><h1>API Publisher</h1>
+            <a href="{{@contextPath}}/apis" title="apiPublisherHomePage">
+                    <img src="{{public logo}}"
+                    alt="WSO2 {{appName}} Home" class="logo"><h1>{{appName}}</h1>
             </a>
         </div>
 
@@ -27,10 +26,12 @@
                         <span class="caret"></span>
                     </li>
                     <li class="divider visible-xs"></li>
-                    <li><a title="Logout"
-                           href="{{env.contextPath}}/logout">Logout</a></li>
+                    <li><a title="Logout" id="logoutLink">Logout</a></li>
                 </ul>
             </li>
         </ul>
     </div>
 </header>
+{{js "../../../components/root/base/js/route/route.js"}}
+{{js "../../../components/root/base/js/auth/auth-manager.js"}}
+{{js "js/globalNavigation.js"}}

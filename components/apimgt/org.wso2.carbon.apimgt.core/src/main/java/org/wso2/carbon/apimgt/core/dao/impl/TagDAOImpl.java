@@ -68,7 +68,10 @@ public class TagDAOImpl implements TagDAO {
                 }
             }
 
-            tags.removeAll(existingTags); // Remove already existing tags from list so we wont try to add them again
+            if (!existingTags.isEmpty()) {
+                tags = new ArrayList<>(tags); // Create a copy of the tags to prevent modifying original
+                tags.removeAll(existingTags); // Remove already existing tags from list so we wont try to add them again
+            }
 
             if (!tags.isEmpty()) { // Add tags that don't already exist
                 insertNewTags(connection, tags, tagIDs);

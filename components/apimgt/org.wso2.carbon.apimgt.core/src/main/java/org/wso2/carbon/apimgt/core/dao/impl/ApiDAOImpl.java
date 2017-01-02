@@ -958,7 +958,7 @@ public class ApiDAOImpl implements ApiDAO {
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
 
-    private int getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+    private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
         final String query = "SELECT UUID FROM AM_API_POLICY WHERE NAME = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, policyName);
@@ -966,18 +966,18 @@ public class ApiDAOImpl implements ApiDAO {
 
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getInt("UUID");
+                    return rs.getString("UUID");
                 }
             }
         }
 
-        return -1;
+        throw new SQLException("API Policy " + policyName + ", does not exist");
     }
 
-    private String getAPIThrottlePolicyName(Connection connection, int policyID) throws SQLException {
+    private String getAPIThrottlePolicyName(Connection connection, String policyID) throws SQLException {
         final String query = "SELECT NAME FROM AM_API_POLICY WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, "" + policyID);
+            statement.setString(1, policyID);
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
@@ -987,7 +987,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
 
-        return "";
+        throw new SQLException("API Policy ID " + policyID + ", does not exist");
     }
 
     private void addTransports(Connection connection, String apiID, List<String> transports) throws SQLException {
@@ -1048,7 +1048,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(2, uriTemplate.getHttpVerb());
                 statement.setString(3, uriTemplate.getUriTemplate());
                 statement.setString(4, uriTemplate.getAuthType());
-                statement.setInt(5, getAPIThrottlePolicyID(connection, uriTemplate.getPolicy()));
+                statement.setString(5, getAPIThrottlePolicyID(connection, uriTemplate.getPolicy()));
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -1075,7 +1075,7 @@ public class ApiDAOImpl implements ApiDAO {
                     UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder()
                             .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME"))
                             .httpVerb(rs.getString("HTTP_METHOD"))
-                            .policy(getAPIThrottlePolicyName(connection, rs.getInt("API_POLICY_ID"))).build();
+                            .policy(getAPIThrottlePolicyName(connection, rs.getString("API_POLICY_ID"))).build();
                     uriTemplateSet.add(uriTemplate);
                 }
             }
@@ -1090,7 +1090,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy : policies) {
                 statement.setString(1, apiID);
-                statement.setInt(2, getSubscriptionThrottlePolicyID(connection, policy));
+                statement.setString(2, getSubscriptionThrottlePolicyID(connection, policy));
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -1105,7 +1105,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private int getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+    private String getSubscriptionThrottlePolicyID(Connection connection, String policyName) throws SQLException {
         final String query = "SELECT UUID from AM_SUBSCRIPTION_POLICY where NAME=?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, policyName);
@@ -1113,12 +1113,12 @@ public class ApiDAOImpl implements ApiDAO {
 
             try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getInt("UUID");
+                    return rs.getString("UUID");
                 }
             }
         }
 
-        return -1;
+        throw new SQLException("Subscription Policy " + policyName + ", does not exist");
     }
 
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
@@ -1140,7 +1140,7 @@ public class ApiDAOImpl implements ApiDAO {
         return policies;
     }
 
-    void initResourceCategories() throws APIMgtDAOException {
+    static void initResourceCategories() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 if (!ResourceCategoryDAO.isStandardResourceCategoriesExist(connection)) {
