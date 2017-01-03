@@ -41,8 +41,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForTemplate()
-            throws APITemplateException {
+    public String getConfigStringForTemplate() throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
