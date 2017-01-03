@@ -71,7 +71,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses);
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiResults;
@@ -87,7 +87,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String errorMsg =
                     "Error occurred while fetching application for the given applicationName - " + applicationName
                             + " with groupId - " + groupId;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return application;
@@ -102,7 +102,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching applications for the given subscriber - " + subscriber
                     + " with groupId - " + groupId;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return applicationList;
@@ -117,7 +117,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             getApplicationDAO().updateApplication(uuid, application);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating the application - " + uuid;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -136,7 +136,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving application - " + uuid;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
@@ -152,7 +152,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving subscriptions for application - " + application.getName();
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
@@ -169,7 +169,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                     APIMgtConstants.SubscriptionStatus.ACTIVE);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while adding api subscription for api - " + apiId;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return subscriptionId;
@@ -180,7 +180,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting api subscription - " + subscriptionId;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -192,7 +192,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             tagList = getTagDAO().getTags();
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving tags";
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return tagList;
@@ -205,7 +205,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             policyList = getPolicyDAO().getPolicies(policyLevel);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving policies for policy level - " + policyLevel;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policyList;
@@ -218,7 +218,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             policy = getPolicyDAO().getPolicy(policyLevel, policyName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving policy - " + policyName;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policy;
@@ -232,7 +232,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             apiResults = getApiDAO().searchAPIs(query);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating searching APIs - " + query;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
@@ -245,7 +245,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             getApplicationDAO().deleteApplication(appId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting the application - " + appId;
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -284,7 +284,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             applicationUuid = application.getId();
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while creating the application - " + application.getName();
-            log.error(errorMsg);
+            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return applicationUuid;
