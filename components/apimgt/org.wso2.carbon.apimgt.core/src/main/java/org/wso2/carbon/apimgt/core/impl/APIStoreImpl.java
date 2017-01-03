@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
@@ -61,7 +62,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         this.tagDAO = tagDAO;
     }
 
-    @Override public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
+    @Override
+    public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses)
             throws APIManagementException {
         List<API> apiResults = null;
         try {
@@ -75,7 +77,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public Application getApplicationByName(String applicationName, String ownerId, String groupId)
+    @Override
+    public Application getApplicationByName(String applicationName, String ownerId, String groupId)
             throws APIManagementException {
         Application application = null;
         try {
@@ -90,7 +93,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public List<Application> getApplications(String subscriber, String groupId)
+    @Override
+    public List<Application> getApplications(String subscriber, String groupId)
             throws APIManagementException {
         List<Application> applicationList = null;
         try {
@@ -104,7 +108,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return applicationList;
     }
 
-    @Override public void updateApplication(String uuid, Application application) throws APIManagementException {
+    @Override
+    public void updateApplication(String uuid, Application application) throws APIManagementException {
         try {
             application.setId(uuid);
             application.setUpdatedUser(getUsername());
@@ -117,13 +122,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
     }
 
-    @Override public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
+    @Override
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
             String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException {
         return null;
     }
 
-    @Override public Application getApplicationByUuid(String uuid) throws APIManagementException {
+    @Override
+    public Application getApplicationByUuid(String uuid) throws APIManagementException {
         Application application = null;
         try {
             application = getApplicationDAO().getApplication(uuid);
@@ -136,7 +143,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return application;
     }
 
-    @Override public List<Subscription> getAPISubscriptionsByApplication(Application application)
+    @Override
+    public List<Subscription> getAPISubscriptionsByApplication(Application application)
             throws APIManagementException {
         List<Subscription> subscriptionsList = null;
         try {
@@ -151,7 +159,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return subscriptionsList;
     }
 
-    @Override public String addApiSubscription(String apiId, String applicationId, String tier)
+    @Override
+    public String addApiSubscription(String apiId, String applicationId, String tier)
             throws APIManagementException {
         // Generate UUID for application
         String subscriptionId = UUID.randomUUID().toString();
@@ -215,6 +224,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return policy;
     }
 
+    @Override
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;
@@ -229,7 +239,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return apiResults;
     }
 
-    @Override public void deleteApplication(String appId) throws APIManagementException {
+    @Override
+    public void deleteApplication(String appId) throws APIManagementException {
         try {
             getApplicationDAO().deleteApplication(appId);
         } catch (APIMgtDAOException e) {
@@ -239,7 +250,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
     }
 
-    @Override public String addApplication(Application application) throws APIManagementException {
+    @Override
+    public String addApplication(Application application) throws APIManagementException {
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
@@ -277,6 +289,22 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
+    }
+
+    /**
+     * Creates an OAuth2 app for a given APIM Application and generate keys.
+     *
+     * @param application Application for which keys should be generated
+     * @return Generated keys
+     */
+    @Override
+    public APIKey generateKeysForApplication(Application application) {
+        //todo:generate keys
+        APIKey apiKey = new APIKey();
+        apiKey.setConsumerKey("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        apiKey.setConsumerSecret("yyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+
+        return apiKey;
     }
 
     private TagDAO getTagDAO() {

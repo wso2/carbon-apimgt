@@ -65,7 +65,32 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
              PreparedStatement ps = conn.prepareStatement(getSubscriptionSql)) {
             ps.setString(1, subscriptionId);
             try (ResultSet rs = ps.executeQuery()) {
-                return createSubscriptionWithApiAndAppInformation(rs);
+                return createSubscriptionWithApiAndAppInformation(rs, true);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Retrieve all API Subscriptions
+     *
+     * @return A list of {@link Subscription} objects
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public List<Subscription> getAPISubscriptions() throws APIMgtDAOException {
+        final String getSubscriptionsSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.API_ID AS API_ID, " +
+                "SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, " +
+                "API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
+                "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
+                "APP.CREATED_BY AS APP_OWNER " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_API API " +
+                "WHERE SUBS.APPLICATION_ID = APP.UUID AND SUBS.API_ID = API.UUID";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsSql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionsFromResultSet(rs, false);
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -140,7 +165,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     public APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName)
             throws APIMgtDAOException {
         //todo: implement
-        createSubscriptionsFromResultSet(null);
+        createSubscriptionsFromResultSet(null, false);
         return null;
     }
 
@@ -407,24 +432,29 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         return validationInfo;
     }
 
-    private List<Subscription> createSubscriptionsFromResultSet(ResultSet rs) throws APIMgtDAOException {
+    private List<Subscription> createSubscriptionsFromResultSet(ResultSet rs, boolean withSubscriptionPolicyInfo)
+            throws APIMgtDAOException {
         List<Subscription> subscriptionList = new ArrayList<>();
         Subscription subscription;
         if (rs == null) {
             return new ArrayList<>();
         }
-        while ((subscription = createSubscriptionWithApiAndAppInformation(rs)) != null) {
+        while ((subscription = createSubscriptionWithApiAndAppInformation(rs, withSubscriptionPolicyInfo)) != null) {
             subscriptionList.add(subscription);
         }
         return subscriptionList;
     }
 
-    private Subscription createSubscriptionWithApiAndAppInformation(ResultSet rs) throws APIMgtDAOException {
+    private Subscription createSubscriptionWithApiAndAppInformation(ResultSet rs, boolean withSubscriptionPolicyInfo)
+            throws APIMgtDAOException {
         Subscription subscription = null;
         try {
             if (rs.next()) {
                 String subscriptionId = rs.getString("SUBS_UUID");
-                String subscriptionTier = rs.getString("SUBS_POLICY");
+                String subscriptionTier = "";
+                if (withSubscriptionPolicyInfo) {
+                    subscriptionTier = rs.getString("SUBS_POLICY");
+                }
 
                 API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
                         rs.getString("API_NAME"), rs.getString("API_VERSION"));
