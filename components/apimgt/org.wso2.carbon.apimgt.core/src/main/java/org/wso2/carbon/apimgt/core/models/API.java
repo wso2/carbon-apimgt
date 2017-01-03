@@ -53,6 +53,11 @@ public final class API {
         } else {
             apiDefinition = "";
         }
+        if (builder.gatewayConfig != null) {
+            gatewayConfig = builder.gatewayConfig.toString();
+        } else {
+            gatewayConfig = "";
+        }
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
@@ -106,6 +111,10 @@ public final class API {
 
     public String getApiDefinition() {
         return apiDefinition;
+    }
+
+    public String getGatewayConfig() {
+        return gatewayConfig;
     }
 
     public String getWsdlUri() {
@@ -195,6 +204,7 @@ public final class API {
                 Objects.equals(lifeCycleStatus, api.lifeCycleStatus) &&
                 Objects.equals(lifecycleInstanceId, api.lifecycleInstanceId) &&
                 Objects.equals(apiDefinition, api.apiDefinition) &&
+                Objects.equals(gatewayConfig, api.gatewayConfig) &&
                 Objects.equals(wsdlUri, api.wsdlUri) &&
                 APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
                 APIUtils.isListsEqualIgnoreOrder(tags, api.tags) &&
@@ -214,9 +224,9 @@ public final class API {
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
-                apiDefinition, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion, transport, tags,
-                policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime, createdBy,
-                lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                apiDefinition, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
+                transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
+                createdTime, createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
 
 
@@ -236,6 +246,7 @@ public final class API {
     private final String lifeCycleStatus;
     private final String lifecycleInstanceId;
     private final String apiDefinition;
+    private final String gatewayConfig;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
@@ -295,6 +306,10 @@ public final class API {
             return apiDefinition;
         }
 
+        public StringBuilder getGatewayConfig() {
+            return gatewayConfig;
+        }
+
         public String getWsdlUri() {
             return wsdlUri;
         }
@@ -345,6 +360,7 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private StringBuilder apiDefinition;
+        private StringBuilder gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
@@ -517,6 +533,18 @@ public final class API {
          */
         public APIBuilder apiDefinition(StringBuilder apiDefinition) {
             this.apiDefinition = apiDefinition;
+            return this;
+        }
+
+        /**
+         * Sets the {@code gatewayConfig} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param gatewayConfig the {@code gatewayConfig} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder gatewayConfig(StringBuilder gatewayConfig) {
+            this.gatewayConfig = gatewayConfig;
             return this;
         }
 

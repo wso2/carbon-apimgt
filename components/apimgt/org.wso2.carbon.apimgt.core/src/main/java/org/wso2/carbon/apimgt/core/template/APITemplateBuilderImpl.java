@@ -22,29 +22,33 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.util.List;
 
 /**
  * Generate API config template
  */
 public class APITemplateBuilderImpl implements APITemplateBuilder {
     private API api;
+    private List<APIResource> apiResources;
 
-    public APITemplateBuilderImpl(API api) {
-        this.api = api;
+    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<APIResource> apiResources) {
+        this.api = apiBuilder.build();
+        this.apiResources = apiResources;
     }
 
     @Override
-    public String getConfigStringForTemplate(API api) throws APITemplateException {
-
+    public String getConfigStringForTemplate()
+            throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new ResourceConfigContext(configcontext, api);
+            configcontext = new ResourceConfigContext(configcontext, this.api, this.apiResources);
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.init();
@@ -59,12 +63,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForPrototypeScriptAPI(API api) throws APITemplateException {
+    public String getConfigStringForPrototypeScriptAPI() throws APITemplateException {
         return null;
     }
 
     @Override
-    public String getConfigStringForDefaultAPITemplate(API api) throws APITemplateException {
+    public String getConfigStringForDefaultAPITemplate() throws APITemplateException {
         return null;
     }
 }

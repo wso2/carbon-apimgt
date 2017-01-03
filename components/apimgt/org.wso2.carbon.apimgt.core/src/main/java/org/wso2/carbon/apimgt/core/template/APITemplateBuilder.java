@@ -18,15 +18,13 @@
 */
 package org.wso2.carbon.apimgt.core.template;
 
-import org.wso2.carbon.apimgt.core.models.API;
-
 /**
  * Used to provide abstract layer to generate API type template
  */
 public interface APITemplateBuilder {
-    String getConfigStringForTemplate(API api) throws APITemplateException;
+    String getConfigStringForTemplate() throws APITemplateException;
 
-    String getConfigStringForPrototypeScriptAPI(API api) throws APITemplateException;
+    String getConfigStringForPrototypeScriptAPI() throws APITemplateException;
 
-    String getConfigStringForDefaultAPITemplate(API api) throws APITemplateException;
+    String getConfigStringForDefaultAPITemplate() throws APITemplateException;
 }
