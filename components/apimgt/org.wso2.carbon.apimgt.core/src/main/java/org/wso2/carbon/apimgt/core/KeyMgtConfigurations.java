@@ -39,7 +39,6 @@ public class KeyMgtConfigurations {
 //    @Element(description = "OAuth app validity period")
     private String validityPeriod;
 
-
     public KeyMgtConfigurations() {
         //todo improve
         dcrEndpoint = System.getProperty(KeyManagerConstants.DCR_ENDPOINT,
