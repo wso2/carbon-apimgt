@@ -344,7 +344,7 @@ var faultSequencesLoaded = false;
                     <label class="control-label" for="credentials"><%=i18n.localize("Credentials")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
-                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
+                        <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>" autocomplete="off">
                     </div>
                 </div>
 

@@ -54,129 +54,17 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * @param tenantDomain - The Tenant Domain
      * @throws APIManagementException
      */
-    public void addSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
-
-        UserRegistry registry;
+    public void setSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
         try {
-            String encryptedPassword = doEncryption(api.getEndpointUTPassword());
             String secureVaultAlias = api.getId().getProviderName() +
                                       "--" + api.getId().getApiName() + api.getId().getVersion();
-            registry = getRegistry(tenantDomain);
-            Resource resource = registry.get(APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION);
-            //add the property to the resource then put the resource
-            resource.addProperty(secureVaultAlias, encryptedPassword);
-            registry.put(resource.getPath(), resource);
-            resource.discard();
-
+            apiGatewayAdminStub.doEncryption(tenantDomain, secureVaultAlias, api.getEndpointUTPassword());
         } catch (Exception e) {
-            String msg = "Failed to get registry secure vault property for the tenant : " + tenantDomain + e.getMessage();
+            String msg = "Failed to set secure vault property for the tenant : " + tenantDomain + e.getMessage();
             throw new APIManagementException(msg, e);
         }
     }
 
-
-    /**
-     * Store the encrypted password into the registry with the unique property name.
-     * Property name is constructed as "Provider+ ApiName +Version"
-     *
-     * @param api - The api
-     * @param tenantDomain - The tenant domain
-     * @throws APIManagementException
-     */
-    public void deleteSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
-
-        UserRegistry registry;
-        try {
-
-            String secureVaultAlias = api.getId().getProviderName() +
-                                      "--" + api.getId().getApiName() + api.getId().getVersion();
-            registry = getRegistry(tenantDomain);
-            Resource resource = registry.get(APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION);
-            resource.removeProperty(secureVaultAlias);
-            registry.put(resource.getPath(), resource);
-            resource.discard();
-
-        } catch (Exception e) {
-            String msg = "Failed to delete the property. " + e.getMessage();
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Update the encrypted password into the registry with the unique property
-     * name. Property name is constructed as "Provider+ ApiName +Version"
-     *
-     * @param api - The api
-     * @param tenantDomain - The Tenant Domain
-     * @throws APIManagementException
-     */
-    public void updateSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
-        UserRegistry registry;
-
-        try {
-            String encryptedPassword = doEncryption(api.getEndpointUTPassword());
-
-            String secureVaultAlias = api.getId().getProviderName() +
-                                      "--" + api.getId().getApiName() + api.getId().getVersion();
-            registry = getRegistry(tenantDomain);
-            Resource resource = registry.get(APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION);
-            resource.setProperty(secureVaultAlias, encryptedPassword);
-            registry.put(resource.getPath(), resource);
-            resource.discard();
-        } catch (Exception e) {
-            String msg = "Failed to update the property. " + e.getMessage();
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Get the config system registry for tenants
-     *
-     * @param tenantDomain - The tenant domain
-     * @return - A UserRegistry instance for the tenant
-     * @throws APIManagementException
-     */
-    private UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
-                                                                                  true);
-        } else {
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                     true);
-        }
-
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        UserRegistry registry;
-        try {
-            registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getConfigSystemRegistry(tenantId);
-        } catch (RegistryException e) {
-            String msg = "Failed to get registry instance for the tenant : " + tenantDomain + e.getMessage();
-            throw new APIManagementException(msg, e);
-        }
-        return registry;
-    }
-
-    /**
-     * encrypt the plain text password
-     *
-     * @param plainTextPass plain text password
-     * @return encrypted password
-     * @throws APIManagementException
-     */
-    private String doEncryption(String plainTextPass) throws APIManagementException {
-        String encodedValue;
-        try {
-            encodedValue = apiGatewayAdminStub.doEncryption(plainTextPass);
-
-        } catch (Exception e) {
-            String msg = "Failed to encrypt the secured endpoint password, " + e.getMessage();
-            throw new APIManagementException(msg, e);
-        }
-        return encodedValue;
-    }
 
     /**
      * Add the API to the gateway
@@ -485,58 +373,4 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
-	/**
-     * deploy websocket api to the gateway
-     *
-     * @param content body of the sequence
-     * @param fileName file name of the sequence
-     * @throws AxisFault
-     */
-    public void deployWSApi(String content, String fileName) throws AxisFault {
-        File file = new File(APIConstants.SEQUENCE_FILE_FOLDER);
-        //if directory doesn't exist, make one
-        if (!file.exists()) {
-            file.mkdir();
-        }
-        File writeFile = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileName + APIConstants.XML_EXTENSION);  //file folder+/
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(writeFile);
-            //if file doesn't exit make one
-            if (!writeFile.exists()) {
-                writeFile.createNewFile();
-            }
-            byte[] contentInBytes = content.getBytes();
-            fos.write(contentInBytes);
-            fos.flush();
-        } catch (IOException e) {
-            log.error("Error in writing the file" + e.getMessage(), e);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                log.error("Error in writing the file" + e.getMessage(), e);
-            }
-        }
-    }
-
-	/**
-	 * remove websocket api from the gateway
-     *
-     * @param fileNames
-     */
-    public void undeployWSApi(String[] fileNames) {
-        File file;
-        for (int i = 0; i < fileNames.length; i++) {
-            file = new File(APIConstants.SEQUENCE_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
-            boolean deleted = file.delete();
-            if (deleted) {
-                log.debug("File : " + fileNames[i] + " is deleted");
-            } else {
-                log.error("Error occurred in deleting file: " + fileNames[i]);
-            }
-        }
-    }
 }

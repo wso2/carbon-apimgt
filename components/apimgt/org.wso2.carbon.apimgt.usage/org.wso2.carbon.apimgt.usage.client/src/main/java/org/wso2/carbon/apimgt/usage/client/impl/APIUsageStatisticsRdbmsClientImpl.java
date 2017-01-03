@@ -44,12 +44,35 @@ import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
-import org.wso2.carbon.apimgt.usage.client.dto.*;
+import org.wso2.carbon.apimgt.usage.client.dto.APIDestinationUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResourcePathUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResponseFaultCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIResponseTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIThrottlingOverTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIUsageByUserDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIVersionLastAccessTimeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIVersionUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.ApiTopUsersDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.ApiTopUsersListDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.AppCallTypeDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.AppUsageDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.FaultCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.PerAppApiCountDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.PerUserAPIUsageDTO;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
-import org.wso2.carbon.apimgt.usage.client.pojo.*;
-import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIAccessTime;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIResponseFaultCount;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIResponseTime;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIUsage;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByDestination;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByResourcePath;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUser;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUserName;
 import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
+import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -67,12 +90,23 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.*;
-import java.text.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-
-import static java.util.Collections.sort;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
@@ -120,13 +154,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             String targetEndpoint = apiManagerAnalyticsConfiguration.getDasReceiverUrlGroups();
             if (targetEndpoint == null || targetEndpoint.equals("")) {
-                throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
+                handleException("Required BAM server URL parameter unspecified");
             }
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Exception while instantiating API manager core objects",
-                    e);
+            handleException("Exception while instantiating API manager core objects", e);
         }
     }
 
@@ -144,8 +177,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (NamingException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
-                    "source: " + DATA_SOURCE_NAME, e);
+            handleException("Error while looking up the data source: " + DATA_SOURCE_NAME, e);
         }
     }
 
@@ -161,6 +193,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser to build the OMElement.";
+            log.error(msg, e);
             throw new Exception(msg, e);
         }
         StAXOMBuilder builder = new StAXOMBuilder(parser);
@@ -391,8 +424,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying top app usage data from JDBC database", e);
+            handleException("Error occurred while querying top app usage data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -510,8 +542,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying top api users data from JDBC database", e);
+            handleException("Error occurred while querying top api users data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -580,8 +611,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying API faulty invocation data from JDBC database", e);
+            handleException("Error occurred while querying API faulty invocation data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -712,8 +742,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying API call type data from JDBC database", e);
+            handleException("Error occurred while querying API call type data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -844,8 +873,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying per App usage data from JDBC database", e);
+            handleException("Error occurred while querying per App usage data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -953,8 +981,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying API usage data from JDBC database", e);
+            handleException("Error occurred while querying API usage data from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -1135,7 +1162,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     try {
                         responseTimeDTO.setServiceTime(numberFormat.parse(format.format(avgTime)).doubleValue());
                     } catch (ParseException e) {
-                        throw new APIMgtUsageQueryServiceClientException("Parse exception while formatting time");
+                        handleException("Parse exception while formatting time");
                     }
                     apiResponseTimeUsage.add(responseTimeDTO);
                 }
@@ -1205,8 +1232,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 responseTimeData.add(new APIResponseTime(apiName, version, context, responseTime, responseCount));
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying API response times from JDBC database", e);
+            handleException("Error occurred while querying API response times from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -1302,8 +1328,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 lastAccessTimeData.add(new APIAccessTime(apiName, version, context, accessTime, username));
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Error occurred while querying last access data for APIs from JDBC database", e);
+            handleException("Error occurred while querying last access data for APIs from JDBC database", e);
         } finally {
             closeDatabaseLinks(resultSet, statement, connection);
         }
@@ -1387,7 +1412,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             try {
                                 faultPercentage = 100 - numberFormat.parse(twoDForm.format(faultPercentage)).doubleValue();
                             } catch (ParseException e) {
-                                throw new APIMgtUsageQueryServiceClientException("Parse exception while formatting time");
+                                handleException("Parse exception while formatting time");
                             }
                             faultyDTO.setFaultPercentage(faultPercentage);
                             faultyDTO.setTotalRequestCount(requestCount);
@@ -1556,8 +1581,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source" +
+                    " is properly configured in the APIUsageTracker configuration.");
         }
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1592,6 +1617,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return faultUsage;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, statement, connection);
@@ -1647,6 +1673,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return usage;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, statement, connection);
@@ -1664,8 +1691,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1704,6 +1731,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return usageByResourcePath;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, statement, connection);
@@ -1753,8 +1781,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private List<APIUsage> getUsageByAPIVersionsData(String tableName, String fromDate, String toDate, String apiName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1808,6 +1836,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return usageDataList;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, statement, connection);
@@ -1826,8 +1855,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private List<APIUsageByUserName> getAPIUsageByUserData(String providerName, String fromDate, String toDate,
             Integer limit) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1980,6 +2009,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return usageByName;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
@@ -2044,6 +2074,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 return apiProviderImpl.getAPIsByProvider(providerId);
             }
         } catch (APIManagementException e) {
+            log.error("Error while retrieving APIs by " + providerId, e);
             throw new APIMgtUsageQueryServiceClientException("Error while retrieving APIs by " + providerId, e);
         }
     }
@@ -2133,8 +2164,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIFirstAccess queryFirstAccess(String columnFamily) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2182,6 +2213,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
             return firstAccess;
         } catch (Exception e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying from JDBC database" + e.getMessage(), e);
         } finally {
@@ -2200,8 +2232,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                                                             + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         Connection connection = null;
         PreparedStatement prepareStatement = null;
@@ -2234,6 +2266,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             return usageData;
         } catch (SQLException e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs,prepareStatement,connection);
@@ -2258,8 +2291,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the datasource is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -2326,12 +2359,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
 
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
+                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                        " does not exist.");
             }
             return throttlingData;
         } catch (SQLException e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
@@ -2354,8 +2387,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String toDate) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the datasource is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -2405,12 +2438,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
 
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
+                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                        " does not exist.");
             }
             return throttlingData;
         } catch (SQLException e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
@@ -2428,8 +2461,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public List<String> getAPIsForThrottleStats(String provider) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -2463,12 +2496,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     throttlingAPIData.add(api);
                 }
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
+                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                        " does not exist.");
             }
             return throttlingAPIData;
         } catch (SQLException e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
@@ -2489,8 +2522,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2528,12 +2561,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     throttlingAppData.add(applicationName);
                 }
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
+                handleException("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                        " does not exist.");
             }
             return throttlingAppData;
         } catch (SQLException e) {
+            log.error("Error occurred while querying from JDBC database " + e.getMessage(), e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
@@ -2563,8 +2596,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
             APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         List<Result<ExecutionTimeOfAPIValues>> result = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
         Connection connection = null;
@@ -2648,16 +2681,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     result.add(result1);
                 }
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + tableName +
-                                " does not exist.");
+                handleException("Statistics Table:" + tableName + " does not exist.");
             }
             if (!result.isEmpty()) {
                 insertZeroElementsAndSort(result, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
             }
         } catch (SQLException e) {
-            log.error("SQLException occurred when accessing the database", e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            handleException("Error occurred while querying from JDBC database", e);
         } catch (ParseException e) {
             handleException("Couldn't parse the date", e);
         } finally {
@@ -2671,8 +2701,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("DAS data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("BAM data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
         Connection connection = null;
@@ -2732,13 +2762,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     result.add(result1);
                 }
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + tableName +
-                                " does not exist.");
+                handleException("Statistics Table:" + tableName + " does not exist.");
             }
         } catch (SQLException e) {
-            log.error("SQLException occurred when accessing the database", e);
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            handleException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
         }
@@ -2750,8 +2777,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String
             tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("DAS data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+            handleException("DAS data source hasn't been initialized. Ensure that the data source " +
+                    "is properly configured in the APIUsageTracker configuration.");
         }
         List<Result<UserAgentUsageCount>> result = new ArrayList<Result<UserAgentUsageCount>>();
         Connection connection = null;
@@ -2804,12 +2831,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     result.add(result1);
                 }
             } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + tableName +
-                                " does not exist.");
+                handleException("Statistics Table:" + tableName + " does not exist.");
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+            handleException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
         }

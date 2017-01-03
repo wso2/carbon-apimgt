@@ -6,13 +6,16 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.rest.api.stub.types.carbon.APIData;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -174,11 +177,30 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public boolean deleteApiForTenant(String apiProviderName, String apiName, String version, String tenantDomain)
             throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
+        // Delete secure vault alias properties if exists
+        try {
+            GatewayUtils.deleteRegistryProperty(GatewayUtils.getAPIEndpointSecretAlias(apiProviderName, apiName,
+                                                                                       version),
+                                                APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION, tenantDomain);
+        } catch (APIManagementException e) {
+            String msg = "Failed to delete secure endpoint password alias " + e.getMessage();
+            throw new AxisFault(msg, e);
+        }
         return restClient.deleteApi(tenantDomain);
     }
 
     public boolean deleteApi(String apiProviderName, String apiName, String version) throws AxisFault {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
+        // Delete secure vault alias properties if exists
+        try {
+            GatewayUtils.deleteRegistryProperty(GatewayUtils.getAPIEndpointSecretAlias(apiProviderName, apiName,
+                                                                                       version),
+                                                APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION,
+                                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        } catch (APIManagementException e) {
+            String msg = "Failed to delete secure endpoint password alias " + e.getMessage();
+            throw new AxisFault(msg, e);
+        }
         return restClient.deleteApi();
     }
 
@@ -331,17 +353,20 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * encrypt the plain text password
      *
-     * @param plainTextPass plain text password
+     * @param plainTextPass
+     *            plain text password
      * @return encrypted password
      * @throws APIManagementException
      */
-    public String doEncryption(String plainTextPass) throws AxisFault {
+    public String doEncryption(String tenantDomain, String secureVaultAlias, String plainTextPass) throws AxisFault {
         MediationSecurityAdminServiceClient client = new MediationSecurityAdminServiceClient();
         String encodedValue = null;
         try {
             encodedValue = client.doEncryption(plainTextPass);
-        } catch (Exception e) {
-            String msg = "Failed to encrypt the secured endpoint password, " + e.getMessage();
+            GatewayUtils.setRegistryProperty(secureVaultAlias, encodedValue,
+                                             APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION, tenantDomain);
+        } catch (APIManagementException e) {
+            String msg = "Failed to encrypt and store the secured endpoint password, " + e.getMessage();
             throw new AxisFault(msg, e);
         }
         return encodedValue;

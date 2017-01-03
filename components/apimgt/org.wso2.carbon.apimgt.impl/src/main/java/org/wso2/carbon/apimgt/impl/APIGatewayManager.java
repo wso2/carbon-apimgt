@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -113,16 +112,13 @@ public class APIGatewayManager {
 						          " from Environment " + environment.getName() +
 						          " since its relevant URL has been removed.");
 					}
-					// We need to remove the api from the environment since its
-					// relevant url has been removed.
-					operation ="delete";
 					client.deleteApi(tenantDomain, api.getId());
                     if(api.isPublishedDefaultVersion()){
                         if(client.getDefaultApi(tenantDomain, api.getId())!=null){
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-					setSecureVaultProperty(api, tenantDomain, environment, operation);
+					setSecureVaultProperty(api, tenantDomain, environment);
 					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
 					if (debugEnabled) {
@@ -148,7 +144,7 @@ public class APIGatewayManager {
                             client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }
                     }
-					setSecureVaultProperty(api, tenantDomain, environment, operation);
+					setSecureVaultProperty(api, tenantDomain, environment);
 
                     //Update the custom sequences of the API
 					updateCustomSequences(api, tenantDomain, environment);
@@ -173,7 +169,6 @@ public class APIGatewayManager {
                     //Deploy the fault sequence first since it has to be available by the time the API is deployed.
                     deployAPIFaultSequence(api, tenantDomain, environment);
 
-                    operation ="add";
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         //Add the API
                         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -190,7 +185,7 @@ public class APIGatewayManager {
                                 client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
                             }
                         }
-                        setSecureVaultProperty(api, tenantDomain, environment, operation);
+                        setSecureVaultProperty(api, tenantDomain, environment);
 
                         //Deploy the custom sequences of the API.
                         deployCustomSequences(api, tenantDomain, environment);
@@ -255,19 +250,20 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            String operation = "delete";
-
                             client.deleteApi(tenantDomain, api.getId());
                             undeployCustomSequences(api, tenantDomain, environment);
-
-                            setSecureVaultProperty(api, tenantDomain, environment, operation);
                         }
                     } else {
                         String fileName = api.getContext().replace('/', '-');
                         String[] fileNames = new String[2];
                         fileNames[0] = ENDPOINT_PRODUCTION + fileName;
                         fileNames[1] = ENDPOINT_SANDBOX + fileName;
-                        client.undeployWSApi(fileNames);
+                        if (client.isExistingSequence(fileNames[0], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                            client.deleteSequence(fileNames[0], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
+                        if (client.isExistingSequence(fileNames[1], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                            client.deleteSequence(fileNames[1], MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
                     }
 
                     if (api.isPublishedDefaultVersion()) {
@@ -284,15 +280,7 @@ public class APIGatewayManager {
                     log.error("Error occurred when removing from gateway " + environmentName,
                               axisFault);
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                } catch (APIManagementException ex) {
-                    /*
-                    didn't throw this exception to handle multiple gateway publishing
-                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                    */
-                    log.error("Error occurred undeploy sequences on " + environmentName, ex);
-                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
-                }
+                } 
             }
 
         }
@@ -319,38 +307,35 @@ public class APIGatewayManager {
                 sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
             }
             OMElement element;
-            String context;
-            context = api.getContext();
             try {
                 if (production_endpoint != null) {
-                    api.setContext(ENDPOINT_PRODUCTION + context);
-                    String content = createSeqString(api, production_endpoint);
+                    String content = createSeqString(api, production_endpoint, ENDPOINT_PRODUCTION);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
-                    client.deployWSApi(content, fileName);
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
+                    client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
                 if (sandbox_endpoint != null) {
-                    api.setContext(ENDPOINT_SANDBOX + context);
-                    String content = createSeqString(api, sandbox_endpoint);
+                    String content = createSeqString(api, sandbox_endpoint, ENDPOINT_SANDBOX);
                     element = AXIOMUtil.stringToOM(content);
                     String fileName = element.getAttributeValue(new QName("name"));
-                    client.deployWSApi(content, fileName);
+                    if (client.isExistingSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        client.deleteSequence(fileName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    }
+                    client.addSequence(element, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 }
-
+            } catch (AxisFault e) {
+                String msg = "Error while parsing the policy to get the eligibility query: ";
+                log.error(msg, e);
+                throw new APIManagementException(msg);
+            }
             } catch (XMLStreamException e) {
                 String msg = "Error while parsing the policy to get the eligibility query: ";
                 log.error(msg, e);
                 throw new APIManagementException(msg);
-            } catch (IOException e) {
-                String msg = "Error while deploying the policy in gateway manager: ";
-                log.error(msg, e);
-                throw new APIManagementException(msg);
             }
-        } catch (JSONException e) {
-            String msg = "Error in reading JSON object " + e.getMessage();
-            log.error(msg, e);
-            throw new JSONException(msg);
-        }
     }
 
     /**
@@ -402,9 +387,10 @@ public class APIGatewayManager {
      * @param url
      * @return
      */
-    public String createSeqString(API api, String url) {
+    public String createSeqString(API api, String url, String urltype) {
 
         String context = api.getContext();
+        context = urltype + context;
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
@@ -766,21 +752,14 @@ public class APIGatewayManager {
      * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
-	private void setSecureVaultProperty(API api, String tenantDomain, Environment environment, String operation)
+	private void setSecureVaultProperty(API api, String tenantDomain, Environment environment)
             throws APIManagementException {
 		boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
 		                                                    getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 		if (api.isEndpointSecured() && isSecureVaultEnabled) {
 			try {							
 				APIGatewayAdminClient securityAdminClient = new APIGatewayAdminClient(api.getId(), environment);
-				if("add".equals(operation)){
-				securityAdminClient.addSecureVaultProperty(api, tenantDomain);
-				} else if("update".equals(operation)){
-					securityAdminClient.updateSecureVaultProperty(api, tenantDomain);
-				} else if("delete".equals(operation)){
-					securityAdminClient.deleteSecureVaultProperty(api, tenantDomain);
-				}
-
+				securityAdminClient.setSecureVaultProperty(api, tenantDomain);
 			} catch (Exception e) {
 				String msg = "Error in setting secured password.";
                 log.error(msg + ' ' + e.getLocalizedMessage(), e);

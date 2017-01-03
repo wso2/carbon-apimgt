@@ -19,6 +19,12 @@ public class SequenceDTO  {
   
   
   private String type = null;
+  
+  
+  private String id = null;
+  
+  
+  private Boolean shared = null;
 
   
   /**
@@ -45,6 +51,30 @@ public class SequenceDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("shared")
+  public Boolean getShared() {
+    return shared;
+  }
+  public void setShared(Boolean shared) {
+    this.shared = shared;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -53,6 +83,8 @@ public class SequenceDTO  {
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");
+    sb.append("  id: ").append(id).append("\n");
+    sb.append("  shared: ").append(shared).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

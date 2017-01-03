@@ -43,6 +43,14 @@
       {
         "Name": "apim:subscription_block",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:mediation_policy_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:mediation_policy_create",
+        "Roles": "admin"
       }, 
       {
         "Name": "apim:api_workflow",

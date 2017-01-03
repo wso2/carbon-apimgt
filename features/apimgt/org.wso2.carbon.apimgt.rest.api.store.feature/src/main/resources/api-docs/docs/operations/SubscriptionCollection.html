@@ -3,16 +3,16 @@
 
             <hr/>
             <h3 class="operation-heading"><a name="subscriptionsGet"></a>Get all subscriptions
- <br><small>GET https://apis.wso2.com/api/am/store/v0.10/subscriptions</small></h3>
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.11/subscriptions</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
 1. Retrieving applications which are subscibed to a specific API.
-&#x60;GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
+&#x60;GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
 
 2. Retrieving APIs which are subscribed by a specific application.
-&#x60;GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?applicationId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
+&#x60;GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?applicationId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&#x60;
 
 **IMPORTANT:**
 * It is mandatory to provide either **apiId** or **applicationId**.
@@ -28,7 +28,7 @@
                 </h4>
             </div>
 
-                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed
+                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -64,7 +64,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?apiId&#x3D;c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

@@ -725,7 +725,7 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
         if (apiData.get("seqFile", apiData) != null)  {
             FileHostObject seqFile = (FileHostObject) apiData.get("seqFile", apiData);
-            String inSeqPath = APIUtil.getSequencePath(apiId, sequenceType) + RegistryConstants.PATH_SEPARATOR;
+            String inSeqPath = APIUtil.getSequencePath(apiId, sequenceType);
             inSeqFileName = uploadSequenceFile(apiProvider, seqFile, inSeqPath);
         }
         return inSeqFileName;

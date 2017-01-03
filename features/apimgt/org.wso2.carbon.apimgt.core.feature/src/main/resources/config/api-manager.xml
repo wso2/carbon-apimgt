@@ -460,123 +460,111 @@
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>
-                <URI>/api/am/store/apis/generate-sdk</URI>
+                <URI>/api/am/store/{version}/apis</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/store/{version}/apis/generate-sdk</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/tiers/{tierLevel}</URI>
+                <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/store/{version}/applications</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/v0.10/apis</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/applications</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/applications/generate-keys</URI>
+                <URI>/api/am/store/{version}/applications/generate-keys</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/v0.10/{apiId}/documents</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/subscriptions</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/tags</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/tiers/api</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/{tierLevel}</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/store/v0.10/{tierLevel}/{tierName}</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis</URI>
+                <URI>/api/am/store/{version}/subscriptions</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}</URI>
+                <URI>/api/am/store/{version}/tags</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/publisher/{version}/apis</URI>
+                <HTTPMethods>GET,POST</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}</URI>
                 <HTTPMethods>GET,DELETE,PUT</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/swagger</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,PUT</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/thumbnail</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/change-lifecycle</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/change-lifecycle</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/copy-api</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/copy-api</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/applications/{applicationId}</URI>
+                <URI>/api/am/publisher/{version}/applications/{applicationId}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/documents</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}/content</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/apis/{apiId}/documents/{documentId}</URI>
+                <URI>/api/am/publisher/{version}/apis/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,PUT,DELETE</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/environments</URI>
+                <URI>/api/am/publisher/{version}/environments</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/subscriptions</URI>
+                <URI>/api/am/publisher/{version}/subscriptions</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/subscriptions/block-subscription</URI>
+                <URI>/api/am/publisher/{version}/subscriptions/block-subscription</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/subscriptions/{subscriptionId}</URI>
+                <URI>/api/am/publisher/{version}/subscriptions/{subscriptionId}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/subscriptions/unblock-subscription</URI>
+                <URI>/api/am/publisher/{version}/subscriptions/unblock-subscription</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/tiers/{tierLevel}</URI>
+                <URI>/api/am/publisher/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/publisher/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,PUT,DELETE</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/publisher/v0.10/tiers/update-permission</URI>
+                <URI>/api/am/publisher/{version}/tiers/update-permission</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>
@@ -667,9 +655,9 @@
     	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>   		
     	<ServerUser>${admin.username}</ServerUser>
     	<ServerPassword>${admin.password}</ServerPassword>
-    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.10/workflows/update-workflow-status</WorkflowCallbackAPI>
+    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.11/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
-        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.10/register</DCREndPoint>
+        <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.11/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>
         <DCREndPointPassword>${admin.password}</DCREndPointPassword>
     </WorkflowConfigurations>

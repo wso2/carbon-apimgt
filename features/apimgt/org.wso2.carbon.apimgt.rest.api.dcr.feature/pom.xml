@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.1.2-SNAPSHOT</version>
+        <version>6.1.20-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -64,7 +64,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>client-registration#v0.10.war</destFileName>
+                                    <destFileName>client-registration#v0.11.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -87,7 +87,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>client-registration#v0.10.war</include>
+                                        <include>client-registration#v0.11.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>

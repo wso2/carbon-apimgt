@@ -2,7 +2,7 @@
     <h1><a name="Subscription (Individual)"></a>Subscription (Individual)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="subscriptionsBlockSubscriptionPost"></a>Block a subscription <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/subscriptions/block-subscription</small></h3>
+            <h3 class="operation-heading"><a name="subscriptionsBlockSubscriptionPost"></a>Block a subscription <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/subscriptions/block-subscription</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to block a subscription. Along with the request, &#x60;blockState&#x60; must be specified as a query parameter.
@@ -21,7 +21,7 @@
                 </h4>
             </div>
 
-                <div id="request-subscriptionsBlockSubscriptionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/block-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&amp;blockState&#x3D;PROD_ONLY_BLOCKED
+                <div id="request-subscriptionsBlockSubscriptionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/block-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&amp;blockState&#x3D;PROD_ONLY_BLOCKED
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -43,7 +43,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/block-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&amp;blockState&#x3D;PROD_ONLY_BLOCKED&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/block-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&amp;blockState&#x3D;PROD_ONLY_BLOCKED&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -238,7 +238,7 @@ Content-Type: application/json
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="subscriptionsSubscriptionIdGet"></a>Get details of a subscription <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/subscriptions/{subscriptionId}</small></h3>
+            <h3 class="operation-heading"><a name="subscriptionsSubscriptionIdGet"></a>Get details of a subscription <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/subscriptions/{subscriptionId}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to get details of a single subscription.
@@ -254,7 +254,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-subscriptionsSubscriptionIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809
+                <div id="request-subscriptionsSubscriptionIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -276,7 +276,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -458,7 +458,7 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="subscriptionsUnblockSubscriptionPost"></a>Unblock a Subscription <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/subscriptions/unblock-subscription</small></h3>
+            <h3 class="operation-heading"><a name="subscriptionsUnblockSubscriptionPost"></a>Unblock a Subscription <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/subscriptions/unblock-subscription</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.
@@ -474,7 +474,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-subscriptionsUnblockSubscriptionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/unblock-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809
+                <div id="request-subscriptionsUnblockSubscriptionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/unblock-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#x60;
 </code></div>
 
@@ -496,7 +496,7 @@ Content-Type: application/json
 } </code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions/unblock-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions/unblock-subscription?subscriptionId&#x3D;64eca60b-2e55-4c38-8603-e9e6bad7d809&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

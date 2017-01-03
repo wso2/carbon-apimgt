@@ -551,3 +551,7 @@ a.remove_rating:hover{
 }
 
 
+.apiNameWrap{
+    width: 211px;
+    word-wrap: break-word;
+}

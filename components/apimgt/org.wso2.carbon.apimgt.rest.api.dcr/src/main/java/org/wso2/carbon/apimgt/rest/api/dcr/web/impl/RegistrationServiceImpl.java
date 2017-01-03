@@ -146,14 +146,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                             applicationName, e);
                 }
                 //Retrieving the existing application
-                boolean isNewlyCreated;
                 if (appServiceProvider != null) {
                     returnedAPP = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
-                    isNewlyCreated = false;
                 } else {
                     //create a new application if the application doesn't exists.
                     returnedAPP = this.createApplication(applicationName, appRequest, grantTypes);
-                    isNewlyCreated = true;
                 }
                 //ReturnedAPP is null
                 if (returnedAPP == null) {
@@ -169,11 +166,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     if (log.isDebugEnabled()) {
                         log.debug("OAuth app " + profile.getClientName() + " creation successful.");
                     }
-                    if(isNewlyCreated){
-                        response = Response.status(Response.Status.CREATED).entity(returnedAPP).build();
-                    } else {
-                        response = Response.status(Response.Status.OK).entity(returnedAPP).build();
-                    }
+                    response = Response.status(Response.Status.OK).entity(returnedAPP).build();
                 }
             } else {
                 String errorMsg = "Logged in user '" + authUserName + "' and application owner '" +
@@ -196,8 +189,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     @DELETE
     @Override
     public Response unRegister(@QueryParam("applicationName") String applicationName,
-                               @QueryParam("userId") String userId,
-                               @QueryParam("consumerKey") String consumerKey) {
+            @QueryParam("userId") String userId,
+            @QueryParam("consumerKey") String consumerKey) {
         Response response;
         try {
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
@@ -292,7 +285,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @throws APIKeyMgtException if failed to create the a new application
      */
     private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
-                                                   String grantType) throws APIManagementException {
+            String grantType) throws APIManagementException {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
@@ -394,7 +387,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @return created Oauth App
      */
     private OAuthConsumerAppDTO createOAuthApp(String appName, OAuthApplicationInfo applicationInfo,
-                                               String grantTypes, String userName) {
+            String grantTypes, String userName) {
         OAuthConsumerAppDTO createdApp = null;
         OAuthAdminService oauthAdminService = new OAuthAdminService();
         OAuthConsumerAppDTO oauthConsumerAppDTO = new OAuthConsumerAppDTO();
@@ -434,9 +427,9 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @return OAuthApplicationInfo object containing parsed values.
      */
     private OAuthApplicationInfo fromAppDTOToApplicationInfo(String clientId, String clientName,
-                                                             String callbackUrl, String clientSecret,
-                                                             boolean saasApp, String appOwner,
-                                                             Map<String, String> sampleMap) {
+            String callbackUrl, String clientSecret,
+            boolean saasApp, String appOwner,
+            Map<String, String> sampleMap) {
 
         OAuthApplicationInfo updatingApp = new OAuthApplicationInfo();
         updatingApp.setClientId(clientId);

@@ -2,7 +2,7 @@
     <h1><a name="Throttling Tier (Collection)"></a>Throttling Tier (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get all tiers <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}</small></h3>
+            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get all tiers <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to list the available tiers for a given tier level. Tier level should be specified as a path parameter and should be one of &#x60;api&#x60;, &#x60;application&#x60; and &#x60;resource&#x60;.
@@ -18,7 +18,7 @@
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api
+                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -81,7 +81,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -298,11 +298,11 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="tiersTierLevelPost"></a>Create a Tier <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}</small></h3>
+            <h3 class="operation-heading"><a name="tiersTierLevelPost"></a>Create a Tier <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/tiers/{tierLevel}</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to create a new throttling tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;POST https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api&#x60;
+&#x60;POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api&#x60;
 
 **IMPORTANT:**
 * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
@@ -318,7 +318,7 @@ variant of the resourec.
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api
+                <div id="request-tiersTierLevelPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -343,7 +343,7 @@ Content-Type: application/json
                 </h4>
             </div>
                 <div id="response-tiersTierLevelPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/Low
+Location: https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/Low
 Content-Type: application/json
 
 {
@@ -361,7 +361,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

@@ -150,7 +150,10 @@ public final class APIConstants {
 
     // registry location for wsdl files
     public static final String API_WSDL_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
-
+    public static final String API_WSDL_RESOURCE = API_APPLICATION_DATA_LOCATION+"/wsdls";
+    public static final String WSDL_FILE_EXTENSION = ".wsdl";
+    public static final String WSDL_PROVIDER_SEPERATOR = "--";
+    
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
@@ -915,9 +918,12 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String MEDIATION_SEQUENCE_ELEM="sequence";
+    public static final String MEDIATION_CONFIG_EXT=".xml";
     public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
     public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
     public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
+    public static final String API_CUSTOM_SEQ_JSON_FAULT = "json_fault.xml";
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
