@@ -10,7 +10,6 @@ $(function () {
     $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
     var bearerToken = "Bearer 9dfe93c5-5e46-3b28-9a65-312cc799cc9b";
-
     var client = new SwaggerClient({
         url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
         success: function () {

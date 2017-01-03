@@ -1,0 +1,9 @@
+<label for="tiers-list" class="hidden-xs">Tiers</label>
+<select id="tiers-list" name="tiers-list" class="form-control">
+    {{#each api.tiers}}
+        <option title="<%= tierDisplayName%>"
+                data-content="<span><strong>{{this}}</strong><br /><%=tiersList[j].tierDescription%></span>"
+                value="<%=tier%>">{{this}}
+        </option>
+    {{/each}}
+</select>
