@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+import java.time.Duration;
+import java.time.temporal.Temporal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -160,4 +162,11 @@ public class APIUtils {
         return list1.equals(list2);
     }
 
+    public static boolean isTimeStampsEquals(Temporal date1, Temporal date2) {
+        if (date1 == null && date2 == null) {
+            return true;
+        } else {
+            return Duration.between(date1, date2).toMillis() < 1000L;
+        }
+    }
 }
