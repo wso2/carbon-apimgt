@@ -25,8 +25,8 @@
 						<span class="helper"></span>
                     </label>
                     <div>
-                   		<div class="heading"><%=i18n.localize("I have an Existing API")%></div>
-                        <div class="description truncate" title="<%=i18n.localize("Use an existing API's endpoint or the API definition to create an API.")%>"><%=i18n.localize("Use an existing API's endpoint or the API definition to create an API.")%></div>
+                   		<div class="heading"><%=i18n.localize("I Have an Existing API")%></div>
+                        <div class="description truncate" title="<%=i18n.localize("Use an existing API's endpoint or the API Swagger definition to create an API.")%>"><%=i18n.localize("Use an existing API's endpoint or the API Swagger definition to create an API.")%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
                         </div>
@@ -81,8 +81,8 @@
                                     <span class="helper"></span>
                     </label>
                     <div>
-                   		<div class="heading"><%=i18n.localize("I have a SOAP Endpoint")%></div>
-                        <div class="description truncate" title="<%=i18n.localize("Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.")%>"><%=i18n.localize("Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.")%></div>
+                   		<div class="heading"><%=i18n.localize("I Have a SOAP Endpoint")%></div>
+                        <div class="description truncate" title="<%=i18n.localize("Use an existing SOAP endpoint to create a managed API. Import the WSDL of the SOAP service.")%>"><%=i18n.localize("Use an existing SOAP endpoint to create a managed API. Import the WSDL of the SOAP service.")%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
                         </div>
@@ -96,7 +96,7 @@
 						<div class="form-group">
 	                               <div class="col-sm-12">
 	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
-	                                   <label for="wsdl-url" class="error wsdlError" style="display:none"><%=i18n.localize("Please use a valid wsdl endpoint")%></label>
+	                                   <label for="wsdl-url" class="error wsdlError" style="display:none"><%=i18n.localize("Please use a valid WSDL endpoint")%></label>
 	                               </div>
 	                        </div>
 	                        <input name="action" value="start" type="hidden"/>
@@ -115,7 +115,7 @@
                                     <span class="helper"></span>
                     </label>
                     <div>
-                   		<div class="heading"><%=i18n.localize("Design New REST API")%></div>
+                   		<div class="heading"><%=i18n.localize("Design a New REST API")%></div>
                         <div class="description truncate" title="<%=i18n.localize("Design and prototype a new REST API.")%>"><%=i18n.localize("Design and prototype a new REST API.")%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
@@ -142,7 +142,7 @@
                                     <span class="helper"></span>
                     </label>
                     <div>
-                   		<div class="heading"><%=i18n.localize("Design New Websocket API")%></div>
+                   		<div class="heading"><%=i18n.localize("Design a New Websocket API")%></div>
                         <div class="description truncate" title="<%=i18n.localize("Design and prototype a new Websocket API.")%>"><%=i18n.localize("Design and prototype a new Websocket API.")%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>

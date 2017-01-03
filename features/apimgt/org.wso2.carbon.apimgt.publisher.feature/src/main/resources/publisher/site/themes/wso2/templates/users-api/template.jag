@@ -113,7 +113,7 @@
                   <thead>
                   <tr>
                     <th><%=i18n.localize("Subscriber")%></th>
-                    <th><%=i18n.localize("Number of API Calls")%></th>
+                    <th><%=i18n.localize("Number of API calls")%></th>
                   </tr>
                   </thead>
             </table>
@@ -136,7 +136,7 @@
               <thead>
               <tr>
                 <th><%=i18n.localize("Subscriber")%></th>
-                <th><%=i18n.localize("Number of API Calls")%></th>
+                <th><%=i18n.localize("Number of API calls")%></th>
               </tr>
               </thead>
             </table>

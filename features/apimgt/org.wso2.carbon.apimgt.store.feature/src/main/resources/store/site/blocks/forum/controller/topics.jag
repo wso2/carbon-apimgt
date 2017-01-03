@@ -266,7 +266,7 @@ if(validation_errors != true){
 			allowedRoles.add(everyOnePermission);
             allowedRoles.add(subscriberDeletePermission);
         	allowedRoles.add(anonGetPermission);
-		}else if(visibilityLevel == "private"){ // When the API is in 'Visible to my domain' visibility level.
+		}else if(visibilityLevel == "private"){ // When the API is in 'Visible to my Domain' visibility level.
 			allowedRoles.add(everyOnePermission);
             allowedRoles.add(subscriberDeletePermission);
             deniedRoles.add(anonGetPermission);

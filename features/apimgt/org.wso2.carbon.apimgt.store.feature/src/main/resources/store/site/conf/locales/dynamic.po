@@ -13,7 +13,7 @@ msgid "public"
 msgstr "Public"
 
 msgid "private"
-msgstr "Visible to my domain"
+msgstr "Visible to my Domain"
 
 msgid "restricted"
 msgstr "Restricted by roles"

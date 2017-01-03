@@ -60,7 +60,7 @@ msgid "Thumbnail image when stats not configured"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:249
-msgid "Please Note that the graph will be showing only 15 entries"
+msgid "Note that the graph shows only 15 entries"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
@@ -97,7 +97,7 @@ msgid "Show more details"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:493
-msgid "Please Note that the graph will be showing only 20 entries"
+msgid "Note that the graph shows only 20 entries"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
@@ -143,7 +143,7 @@ msgid "Data Publishing Enabled"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/js/stats.js:80
-msgid "Generate Some traffic to see statistics"
+msgid "Generate some traffic to see statistics"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:123
@@ -172,11 +172,11 @@ msgid "No-Stats"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:136
-msgid "WSO2 wiki documentation on APIM statistics"
+msgid "WSO2 wiki documentation on APIM Statistics"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:137
-msgid "Refer our wiki to configure DAS correctly"
+msgid "Refer our documentation to configure WSO2 DAS correctly"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/applications-time/js/stats.js:66
@@ -233,7 +233,7 @@ msgid "Resource not specified"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/js/api-design.js:989
-msgid "Error occurred while updating API"
+msgid "Error occurred while updating the API"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/js/api-design.js:1015
@@ -319,7 +319,7 @@ msgid "Service Port must be provided for WSDL endpoint."
 msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:130
-msgid "File must be in image file format."
+msgid "File must be in an image file format."
 msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:135
@@ -449,7 +449,7 @@ msgid "File already exists..!"
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/js/docs.js:401
-msgid "Invalid Document URL Format."
+msgid "Invalid document URL format."
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/inline-editor/js/inline.js:26
@@ -537,11 +537,11 @@ msgid "Sample PizzaShackAPI is Created Successfully"
 msgstr ""
 
 #: site/themes/wso2/templates/listing/js/samples.js:217
-msgid "Error occurred while adding sample API"
+msgid "Error occurred while adding the sample API"
 msgstr ""
 
 #: site/themes/wso2/templates/listing/js/samples.js:240
-msgid "Error occurred while adding sample API documentation"
+msgid "Error occurred while adding the sample API documentation"
 msgstr ""
 
 #: site/themes/wso2/templates/listing/js/listing.js:5
@@ -556,7 +556,7 @@ msgid "public"
 msgstr "Public"
 
 msgid "private"
-msgstr "Visible to my domain"
+msgstr "Visible to my Domain"
 
 msgid "restricted"
 msgstr "Restricted by roles"

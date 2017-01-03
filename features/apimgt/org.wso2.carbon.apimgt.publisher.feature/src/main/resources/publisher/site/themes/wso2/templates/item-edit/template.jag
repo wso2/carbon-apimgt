@@ -95,7 +95,7 @@ var faultSequencesLoaded = false;
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
                         <a class="icon-question-sign help_popup" help_data="default_api_help" title="default_api_help"></a>
-                        <p id="default_api_help" class="hide"><%=i18n.localize("Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.")%></p>
+                        <p id="default_api_help" class="hide"><%=i18n.localize("Making an API version the default will allow the subscribers to invoke it without the version attribute in the URI.")%></p>
 
                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
                             <!--@todo: param_string-->
@@ -172,7 +172,7 @@ var faultSequencesLoaded = false;
                        <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n
                        .localize("Public")%></option>
                        <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n
-                       .localize("Visible to my domain")%></option>
+                       .localize("Visible to my Domain")%></option>
                        <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected"
                        <%}%>><%=i18n.localize("Restricted by roles")%></option>
                    </select>
@@ -288,7 +288,7 @@ var faultSequencesLoaded = false;
                                <option value="address"><%=i18n.localize("Address Endpoint")%></option>
                                <option value="wsdl"><%=i18n.localize("WSDL Endpoint")%></option>
                                <option value="failover"><%=i18n.localize("Failover Endpoint")%></option>
-                               <option value="load_balance"><%=i18n.localize("Load balanced Endpoint")%></option>
+                               <option value="load_balance"><%=i18n.localize("Load Balanced Endpoint")%></option>
                            </select>
                            <a class="icon-question-sign help_popup" help_data="endpoint_help" title="endpoint_help"></a>
                        </div>
@@ -298,13 +298,13 @@ var faultSequencesLoaded = false;
 
                <div id="endpoint_help" class="hide">
                <strong><%=i18n.localize("HTTP Endpoint")%> </strong><p>
-               <%=i18n.localize("Defines a URI Template based REST Service endpoint")%></p>
+               <%=i18n.localize("Defines a URI template based REST service endpoint")%></p>
                <strong><%=i18n.localize("Address Endpoint")%></strong><p><%=i18n.localize("Defines the direct URL of the service")%></p>
                <strong><%=i18n.localize("WSDL Endpoint")%></strong><p><%=i18n.localize("Defines the WSDL, Service and Port")%></p>
                 <strong><%=i18n.localize("Failover Group")%> </strong>
                 <p><%=i18n.localize("Defines the endpoints that the service will try to connect to in case of a failure. This will take place in a round robin manner")%></p>
                 <strong><%=i18n.localize("Load Balance Endpoint")%></strong><p>
-                <%=i18n.localize("Defines groups of endpoints for replicated services.The incoming requests will be directed to these endpoints in a round robin manner. These endpoints automatically handle the fail-over cases as well")%> </p>
+                <%=i18n.localize("Defines groups of endpoints for replicated services.The incoming requests are directed to these endpoints in a round robin manner. These endpoints automatically handle the fail-over cases as well")%> </p>
                </div>
 
                <div id="endpoint_form" class="endpoint_dives" >
@@ -426,7 +426,7 @@ var faultSequencesLoaded = false;
 						<div class="controls">
 		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTenants()">
 			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all tenants")%></option>
 			                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
 		                	</select>
                             <a class="icon-question-sign help_popup" help_data="subscriptions_help" title="subscriptions_help"></a>

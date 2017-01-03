@@ -140,7 +140,7 @@ $(document).ready(function() {
             return ($.inArray(ext, validFileExtensions)) > -1;
         }
         return true;
-    }, i18n.t('File must be in image file format.'));
+    }, i18n.t('File must be in an image file format.'));
 
     $.validator.addMethod('validateForwardSlashAtEnd', function(value, element) {
         var regexForwardSlashAtEnd = /.+\/$/;

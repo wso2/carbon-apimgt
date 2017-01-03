@@ -108,7 +108,7 @@
 
        <div class="alert alert-info" id="apiInfo" style="display:none;">
            <div style="padding-bottom:10px">
-           <b><%=i18n.localize("The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ")%></b>
+           <b><%=i18n.localize("The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed to through the API Store. ")%></b>
            </div>
        </div>
 

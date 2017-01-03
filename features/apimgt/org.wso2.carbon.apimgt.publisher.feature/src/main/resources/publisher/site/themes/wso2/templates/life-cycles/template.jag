@@ -281,7 +281,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                        </label>
                      </div>
                     <%}else{%>
-                        <%if((itemName == i18n.localize("Require Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
+                        <%if((itemName == i18n.localize("Requires Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
                                 continue;
                         }else{%>
                             <div class="form-group">

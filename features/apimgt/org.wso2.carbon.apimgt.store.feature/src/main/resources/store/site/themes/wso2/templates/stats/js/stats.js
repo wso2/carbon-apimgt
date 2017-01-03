@@ -13,7 +13,7 @@ function showNoDataAnalyticsMsg() {
     $('.stat-page').html("");
     var msg=  "<div class='message message-info'>"+
             "<h4><i class='icon fw fw-warning'></i>" + i18n.t('Data Publishing Enabled') + "</h4>" +
-            "<p> " + i18n.t('Generate Some traffic to see statistics') + "</p>" +
+            "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +
             "</div>";
     $('.stat-page').append($(msg));
 }

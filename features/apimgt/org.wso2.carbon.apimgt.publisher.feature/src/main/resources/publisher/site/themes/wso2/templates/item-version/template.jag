@@ -62,7 +62,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-4 control-label"><%=i18n.localize("Make this the Default Version")%>
+								<label class="col-sm-4 control-label"><%=i18n.localize("Make this the Default version")%>
 									<a class="help_popup" help_data=default_api_help data-trigger="hover" data-placement="bottom" title="default_api_help">
 										<span class="icon fw-stack fw-lg" style="font-size:6px">
 											<i class="fw fw-circle fw-stack-2x"></i>

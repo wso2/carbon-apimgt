@@ -7,7 +7,7 @@ var result = mod.getTiers();
 <script>
 var res = <%=result%>;
 </script>
-<div class="page-header"> <h2><%=i18n.localize("API Request Count With Throttling Tiers")%></h2></div>
+<div class="page-header"> <h2><%=i18n.localize("API Request Count with Throttling Tiers")%></h2></div>
 
 <div class="content-section shadow-up">
 <div class="content-data">
