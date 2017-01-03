@@ -38,15 +38,15 @@
                                 <td>{{this.summary}}</td>
                                 <td>
                                     {{#if this.isURL}}
-                                        <a href="{{this.sourceUrl}}" title="Inline Documentation" class="doc-content"
+                                        <a href="{{this.sourceUrl}}" title="URL Documentation" class="doc-content"
                                            target="_blank">{{this.sourceUrl}}</a>
                                     {{/if}}
                                     {{#if this.isFile}}
-                                        <a href="{{this.sourceUrl}}" title="Inline Documentation" class="doc-content"
+                                        <a href="{{this.sourceUrl}}" title="File Documentation" class="doc-content"
                                            target="_blank">Download</a>
                                     {{/if}}
                                     {{#if this.isInLine}}
-                                        <a href="{{this.sourceUrl}}" title="Inline Documentation" class="doc-content"
+                                        <a href="/store/apis/{{../../api.id}}/documents/{{this.documentId}}" title="Inline Documentation" class="doc-content"
                                            target="_blank">View Content</a>
                                     {{/if}}
                             </tr>
