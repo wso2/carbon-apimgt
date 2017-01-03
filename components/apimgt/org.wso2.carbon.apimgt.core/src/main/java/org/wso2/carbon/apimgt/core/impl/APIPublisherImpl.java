@@ -42,6 +42,9 @@ import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -180,7 +183,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         List<UriTemplate> uriTemplateList = new ArrayList<>();
-        for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())) {
+        List<APIResource> apiResources = apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition());
+        for (APIResource apiResource : apiResources) {
             uriTemplateList.add(apiResource.getUriTemplate());
         }
         apiBuilder.uriTemplates(uriTemplateList);
@@ -192,6 +196,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
+                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, apiResources);
+                try {
+                    String gatewayConfig = apiTemplateBuilder.getConfigStringForTemplate();
+                    if (log.isDebugEnabled()) {
+                        log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
+                    }
+                    apiBuilder.gatewayConfig(new StringBuilder(gatewayConfig));
+                } catch (APITemplateException e) {
+                    log.error("Error generating API configuration for API " + apiBuilder.getName(), e);
+                }
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);
@@ -830,7 +844,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public String getApiGatewayConfig(String apiId) throws APIManagementException {
-        //TODO implement logic here
-        return "Not yet implement";
+        try {
+            return getApiDAO().getGatewayConfig(apiId);
+
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't retrieve swagger definition for apiId " + apiId, e);
+            throw new APIMgtDAOException("Couldn't retrieve gateway configuration for apiId " + apiId,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }

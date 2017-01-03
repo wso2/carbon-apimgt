@@ -24,11 +24,11 @@ import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.core.template.APITemplateException;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
@@ -57,17 +57,17 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
      */
     @Override
     public boolean publishToGateway(API api) {
-        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         try {
-            String content = apiTemplateBuilder.getConfigStringForTemplate(api);
-            publishMessage(content);
+            ApiDAO apiDAO = DAOFactory.getApiDAO();
+            String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
+            publishMessage(gatewayConfig);
             return true;
-        } catch (APITemplateException e) {
-            log.error("Error generating API configuration for API " + api.getName(), e);
         } catch (JMSException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
         } catch (URLSyntaxException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
+        } catch (APIMgtDAOException e) {
+            log.error("Error getting API configuration for API " + api.getName(), e);
         }
         return false;
     }
