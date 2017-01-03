@@ -663,7 +663,7 @@
 
     </profiles>
     <properties>
-        <private.package>org.wso2.carbon.apimgt.core.dao.internal</private.package>
+        <private.package>org.wso2.carbon.apimgt.core.internal</private.package>
         <import.package>
             org.eclipse.osgi.util,
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
@@ -689,7 +689,7 @@
             org.wso2.securevault.*;
         </import.package>
         <export.package>
-            !org.wso2.carbon.apimgt.core.dao.internal,
+            !org.wso2.carbon.apimgt.core.internal,
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
     </properties>
