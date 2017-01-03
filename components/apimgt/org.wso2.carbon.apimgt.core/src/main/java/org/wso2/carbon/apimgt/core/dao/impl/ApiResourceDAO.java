@@ -20,8 +20,11 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -130,7 +133,7 @@ class ApiResourceDAO {
     }
 
     static InputStream getBinaryValueForCategory(Connection connection, String apiID,
-                                                 ResourceCategory category) throws SQLException {
+                                                 ResourceCategory category) throws SQLException, IOException {
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
                 "RESOURCE_CATEGORY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -140,7 +143,9 @@ class ApiResourceDAO {
 
             try (ResultSet rs =  statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getBinaryStream("RESOURCE_BINARY_VALUE");
+                    InputStream inputStream = new ByteArrayInputStream(IOUtils.toByteArray(rs.getBinaryStream
+                            ("RESOURCE_BINARY_VALUE")));
+                    return inputStream;
                 }
             }
         }

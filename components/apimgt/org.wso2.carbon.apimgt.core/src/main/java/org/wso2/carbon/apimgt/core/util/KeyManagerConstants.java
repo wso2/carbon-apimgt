@@ -60,6 +60,11 @@ public class KeyManagerConstants {
     public static final String USERNAME = "username";
     public static final String OAUTH2_TOKEN_EXP_TIME = "exp";
     public static final String OAUTH2_TOKEN_ISSUED_TIME = "iat";
+    public static final String DCR_ENDPOINT = "dcrEndpoint";
+    public static final String TOKEN_ENDPOINT = "TokenEndpoint";
+    public static final String REVOKE_ENDPOINT = "RevokeEndpoint";
+    public static final String INTROSPECT_ENDPOINT = "introspectEndpoint";
+    public static final String DEFAULT_VALIDITY_PERIOD = "3600";
 
     /**
      * Status codes used in key-validation process

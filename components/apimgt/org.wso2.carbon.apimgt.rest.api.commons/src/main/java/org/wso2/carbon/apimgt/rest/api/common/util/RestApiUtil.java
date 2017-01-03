@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.common.util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -526,4 +528,16 @@ public class RestApiUtil {
         return storeRestAPIDefinition;
     }
 
+    /**
+     * used to convert yaml to json
+     * @param yamlString yaml String
+     * @return
+     */
+    public static String convertYmlToJson(String yamlString) {
+        Yaml yaml = new Yaml();
+        Map map = (Map) yaml.load(yamlString);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putAll(map);
+        return jsonObject.toJSONString();
+    }
 }

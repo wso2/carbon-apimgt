@@ -46,6 +46,15 @@ public interface APISubscriptionDAO {
     Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException;
 
     /**
+     * Retrieve all API Subscriptions
+     *
+     * @return A list of {@link Subscription} objects
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    List<Subscription> getAPISubscriptions() throws APIMgtDAOException;
+
+    /**
      * Retrieve the list of subscriptions of an API
      *
      * @param apiId The UUID of API
