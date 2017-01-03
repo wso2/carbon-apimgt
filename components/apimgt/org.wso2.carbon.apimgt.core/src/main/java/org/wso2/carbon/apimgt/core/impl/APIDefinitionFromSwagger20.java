@@ -109,7 +109,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 }
                 uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
                 String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
-                if (true || StringUtils.isNotEmpty(scope)) {
+                if (StringUtils.isNotEmpty(scope)) {
                     apiResourceBuilder.scope(scopeMap.get(scope));
                     apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
                     apiResources.add(apiResourceBuilder.build());
