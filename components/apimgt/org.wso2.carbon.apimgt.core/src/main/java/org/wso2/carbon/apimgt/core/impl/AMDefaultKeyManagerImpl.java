@@ -17,18 +17,13 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
-
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -37,14 +32,12 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.io.IOException;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import java.util.Map;
 
 
@@ -54,7 +47,7 @@ import java.util.Map;
  */
 
 public class AMDefaultKeyManagerImpl implements KeyManager {
-    static final Logger LOG = LoggerFactory.getLogger(AMDefaultKeyManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AMDefaultKeyManagerImpl.class);
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
@@ -80,9 +73,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             applicationName = applicationName + "_" + keyType;
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to create OAuth application :" + applicationName);
-        }
+        APIUtils.logDebug("Trying to create OAuth application :", log);
+
         //Create json payload for DCR endpoint
         JsonObject json = new JsonObject();
         json.addProperty(KeyManagerConstants.OAUTH_REDIRECT_URIS, oAuthApplicationInfo.getCallbackUrl());
@@ -123,11 +115,11 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
 
         } catch (IOException e) {
-            LOG.error("Can not create OAuth application  : " + applicationName, e);
+            log.error("Can not create OAuth application  : " + applicationName, e);
             throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (JsonSyntaxException e) {
-            LOG.error("Error while processing the response returned from DCR endpoint.Can not create" +
+            log.error("Error while processing the response returned from DCR endpoint.Can not create" +
                     " OAuth application : " + applicationName, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -155,20 +147,17 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public void deleteApplication(String consumerKey) throws KeyManagementException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to delete OAuth application for consumer key :" + consumerKey);
-        }
+        APIUtils.logDebug("Trying to delete OAuth application for consumer key :" + consumerKey, log);
         if (consumerKey == null || consumerKey.isEmpty()) { //If the consumer key empty or null,returns
             return;
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Getting OAuth App for " + consumerKey);
-        }
+        APIUtils.logDebug("Getting OAuth App for " + consumerKey + consumerKey, log);
+
             /*code to check the client app exists/not
             * */
 
         // if (spAppName == null) {
-        //   LOG.info("Couldn't find OAuth App for Consumer Key : " + consumerKey);
+        //   log.info("Couldn't find OAuth App for Consumer Key : " + consumerKey);
         //  return;
         // }
         URL url;
@@ -185,14 +174,14 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
             int responseCode = urlConn.getResponseCode();
             if (responseCode != 200) { //If DCR call fails
-                LOG.error("Error while deleting the client-" + consumerKey);
+                log.error("Error while deleting the client-" + consumerKey);
                 throw new KeyManagementException("Error while deleting the client.HTTP error code is:" + responseCode,
                         ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
             }
 
 
         } catch (IOException e) {
-            LOG.error("Error while deleting the client- " + consumerKey, e);
+            log.error("Error while deleting the client- " + consumerKey, e);
             throw new KeyManagementException("Error while deleting the client- " + consumerKey, e,
                     ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
         } finally {
@@ -207,10 +196,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
         //TO-DO- USE CORRECT DCRM ENDPOINT
 
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
-        }
+        APIUtils.logDebug("Trying to retrieve OAuth application for consumer key :" + consumerKey, log);
 
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
        /* try {
@@ -242,7 +228,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         AccessTokenInfo tokenInfo = null;
 
         if (tokenRequest == null) {
-            LOG.warn("No information available to generate Token.");
+            log.warn("No information available to generate Token.");
             return null;
         }
 
@@ -273,13 +259,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 if (responseCode != 200) { //If token revoke failed
                     throw new RuntimeException("Token revoke failed : HTTP error code : " + responseCode);
                 } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
-                    }
+                    APIUtils.logDebug(
+                            "Successfully submitted revoke request for old application token. HTTP status : 200", log);
                 }
             } catch (IOException e) {
                 String msg = "Error while revoking the existing token.";
-                LOG.error(msg, e);
+                log.error(msg, e);
                 throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                         APPLICATION_TOKEN_GENERATION_FAILED);
             } finally {
@@ -323,9 +308,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
                         responseCode);
             } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Successfully submitted token request for old application token. HTTP status : 200");
-                }
+                APIUtils.logDebug("Successfully submitted token request for old application token. HTTP status : 200",
+                        log);
                 tokenInfo = new AccessTokenInfo();
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
                 JsonParser parser = new JsonParser();
@@ -341,12 +325,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             }
         } catch (IOException e) {
             String msg = "Error while creating the new token for token regeneration.";
-            LOG.error(msg, e);
+            log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
         } catch (JsonSyntaxException e) {
             String msg = "Error while processing the response returned from token generation call.";
-            LOG.error(msg, e);
+            log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
         } finally {
@@ -402,7 +386,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             } else {
 
                 tokenInfo.setTokenValid(false);
-                LOG.error("Invalid OAuth Token. ");
+                log.error("Invalid OAuth Token. ");
                 tokenInfo.setErrorcode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return tokenInfo;
 
@@ -411,12 +395,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         } catch (IOException e) {
             String msg = "Error while connecting to token introspect endpoint.";
-            LOG.error(msg, e);
+            log.error(msg, e);
             throw new KeyManagementException(msg, e, ExceptionCodes.
                     TOKEN_INTROSPECTION_FAILED);
         } catch (JsonSyntaxException e) {
             String msg = "Error while processing the response returned from token introspect endpoint.";
-            LOG.error("Error while processing the response returned from token introspect endpoint.", e);
+            log.error("Error while processing the response returned from token introspect endpoint.", e);
             throw new KeyManagementException(msg, e,
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         } finally {
@@ -452,13 +436,13 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         try {
-            /*  TO-DO -ADD LOGIC TO RETIRVE OAUTH2 APP
+            /*  TO-DO -ADD logIC TO RETIRVE OAUTH2 APP
 
                */
         } catch (Exception e) {
             String msg = "Some thing went wrong while getting OAuth application for given consumer key " +
                     oAuthApplicationInfo.getClientId();
-            LOG.error(msg, e);
+            log.error(msg, e);
             throw new KeyManagementException(msg, e, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         } finally {
 
@@ -469,10 +453,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         } */
 
         oAuthApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopes);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
-        }
-
+        APIUtils.logDebug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId(),
+                log);
 
         return oAuthApplicationInfo;
     }

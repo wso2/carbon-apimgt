@@ -1667,7 +1667,7 @@ definitions:
         enum:
           - BLOCKED
           - PROD_ONLY_BLOCKED
-          - UNBLOCKED
+          - ACTIVE
           - ON_HOLD
           - REJECTED
 

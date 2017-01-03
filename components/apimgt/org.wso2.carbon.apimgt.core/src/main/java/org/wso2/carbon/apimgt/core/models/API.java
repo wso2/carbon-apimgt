@@ -203,9 +203,9 @@ public final class API {
                 APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
-                Objects.equals(createdTime, api.createdTime) &&
+                APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
                 Objects.equals(createdBy, api.createdBy) &&
-                Objects.equals(lastUpdatedTime, api.lastUpdatedTime) &&
+                APIUtils.isTimeStampsEquals(lastUpdatedTime, api.lastUpdatedTime) &&
                 Objects.equals(lifecycleState, api.lifecycleState) &&
                 APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator()) &&
                 Objects.equals(copiedFromApiId, api.copiedFromApiId);
