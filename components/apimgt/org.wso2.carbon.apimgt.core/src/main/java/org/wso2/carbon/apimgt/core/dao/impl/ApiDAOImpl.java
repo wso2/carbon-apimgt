@@ -327,7 +327,9 @@ public class ApiDAOImpl implements ApiDAO {
                             ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri);
                 }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
+/*
                 addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
+*/
                 addTransports(connection, apiPrimaryKey, api.getTransport());
                 addUrlMappings(connection, api.getUriTemplates(), apiPrimaryKey);
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
@@ -973,14 +975,14 @@ public class ApiDAOImpl implements ApiDAO {
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
 
-    private void addGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
+    /*private void addGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
         if (!gatewayConfig.isEmpty()) {
             ApiResourceDAO
                     .addBinaryResource(connection, apiID, UUID.randomUUID().toString(), ResourceCategory.GATEWAY_CONFIG,
                             MediaType.APPLICATION_JSON,
                             new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)));
         }
-    }
+    }*/
 
     private String getGatewayConfig(Connection connection, String apiID) throws SQLException, IOException {
         InputStream gatewayConfig = ApiResourceDAO

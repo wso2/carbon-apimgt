@@ -41,9 +41,6 @@ import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -190,7 +187,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
-                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, apiResources);
+/*                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, apiResources);
                 try {
                     String gatewayConfig = apiTemplateBuilder.getConfigStringForTemplate();
                     if (log.isDebugEnabled()) {
@@ -199,7 +196,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiBuilder.gatewayConfig(new StringBuilder(gatewayConfig));
                 } catch (APITemplateException e) {
                     log.error("Error generating API configuration for API " + apiBuilder.getName(), e);
-                }
+                }*/
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);

@@ -66,6 +66,7 @@ public final class API {
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
         copiedFromApiId = builder.copiedFromApiId;
+        gatewayConfig = builder.gatewayConfig;
     }
 
     public String getId() {
@@ -215,9 +216,9 @@ public final class API {
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
-                endpointID, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion, transport, tags,
-                policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime, createdBy,
-                lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                endpointID, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
+                transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime
+                , createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
 
 
@@ -297,7 +298,7 @@ public final class API {
             return endpointId;
         }
 
-        public StringBuilder getGatewayConfig() {
+        public String getGatewayConfig() {
             return gatewayConfig;
         }
 
@@ -351,7 +352,7 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private String endpointId;
-        private StringBuilder gatewayConfig;
+        private String gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
@@ -530,7 +531,7 @@ public final class API {
          * @param gatewayConfig the {@code gatewayConfig} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder gatewayConfig(StringBuilder gatewayConfig) {
+        public APIBuilder gatewayConfig(String gatewayConfig) {
             this.gatewayConfig = gatewayConfig;
             return this;
         }
