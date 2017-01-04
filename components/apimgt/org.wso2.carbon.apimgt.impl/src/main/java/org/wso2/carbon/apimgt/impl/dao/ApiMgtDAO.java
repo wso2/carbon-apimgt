@@ -8992,18 +8992,19 @@ public class ApiMgtDAO {
             // Returns only single row
             if (resultSet.next()) {
 
-                /*Not sure about below comment :-) (Dhanuka)
+                /*
                  *  H2 doesn't return generated keys when key is provided (not generated).
                    Therefore policyId should be policy parameter's policyId when it is provided.
                  */
                 if (policyId == -1) {
                     policyId = resultSet.getInt(1);
                 }
-                List<Pipeline> pipelines = policy.getPipelines();
-                if (pipelines != null) {
-                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                        addPipeline(pipeline, policyId, conn);
-                    }
+            }
+
+            List<Pipeline> pipelines = policy.getPipelines();
+            if (pipelines != null) {
+                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                    addPipeline(pipeline, policyId, conn);
                 }
             }
         } finally {
