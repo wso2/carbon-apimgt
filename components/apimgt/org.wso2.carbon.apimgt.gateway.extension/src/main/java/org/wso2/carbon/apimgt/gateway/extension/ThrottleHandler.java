@@ -198,7 +198,7 @@ public class ThrottleHandler implements MessagingHandler {
         apiVersion = apiVersion != null ? apiVersion : "";
 
         String subscriberTenantDomain = "";
-        // TODO: get teanant from carbon message
+        // TODO: get tenant from carbon message
         String apiTenantDomain = "carbon.super";
         ConditionGroupDTO[] conditionGroupDTOs;
         String applicationId = authContext.getApplicationId();
@@ -467,7 +467,7 @@ public class ThrottleHandler implements MessagingHandler {
     private boolean doThrottle(CarbonMessage carbonMessage) {
 
         // TODO: get authcontext from carbonmessage
-        AuthenticationContextDTO authenticationContext = new AuthenticationContextDTO();
+        AuthenticationContextDTO authenticationContext = AuthenticationContextDTO.getInstance();
 
         boolean isThrottled = false;
 
