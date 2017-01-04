@@ -47,8 +47,9 @@ public class ThrottleUtils {
 
             OMNode result = null;
             try {
-                XMLStreamReader parser = XMLInputFactory.newInstance().
-                        createXMLStreamReader(inputStream);
+                XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+                xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+                XMLStreamReader parser = xmlInputFactory.createXMLStreamReader(inputStream);
                 StAXOMBuilder builder = new StAXOMBuilder(parser);
                 result = builder.getDocumentElement();
 

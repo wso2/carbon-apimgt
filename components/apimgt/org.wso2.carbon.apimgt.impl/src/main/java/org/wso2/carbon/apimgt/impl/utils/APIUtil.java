@@ -3975,7 +3975,9 @@ public final class APIUtil {
         XMLStreamReader parser;
         StAXOMBuilder builder;
         try {
-            parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            parser = factory.createXMLStreamReader(inputStream);
             builder = new StAXOMBuilder(parser);
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";

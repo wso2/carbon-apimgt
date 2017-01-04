@@ -322,6 +322,8 @@ public class UsageClient {
             String where = "where sub.subscriber_id=app.subscriber_id and sub.tenant_id=" + tenantId;
             String groupAndOrder = " group by app.created_time order by app.created_time asc";
             String time = " and app.created_time between ? and ? ";
+            boolean isAPINameSet = false;
+            boolean isDeveloperSet = false;
 
             if ("All".equals(apiName) && "All".equals(developer)) {
                 from = "from AM_APPLICATION app,AM_SUBSCRIBER sub ";
@@ -345,11 +347,13 @@ public class UsageClient {
                 }
 
                 if (!"All".equals(apiName)) {
-                    where += " and api.api_name = '" + apiName + "' ";
+                    where += " and api.api_name = ? ";
+                    isAPINameSet = true;
                 }
 
                 if (!"All".equals(developer)) {
-                    where += " and sub.user_id = '" + developer + "' ";
+                    where += " and sub.user_id = ? ";
+                    isDeveloperSet = true;
                 }
 
             }
@@ -361,6 +365,16 @@ public class UsageClient {
 
             statement.setTimestamp(1, fromTime);
             statement.setTimestamp(2, toTime);
+            if (isAPINameSet) {
+                statement.setString(3, apiName);
+                if (isDeveloperSet) {
+                    statement.setString(4, developer);
+                }
+            }
+            if (isDeveloperSet) {
+                statement.setString(3, developer);
+            }
+
             //execute
             rs = statement.executeQuery();
 
@@ -442,8 +456,10 @@ public class UsageClient {
                 where += providers.toString();
             }
 
+            boolean isAPINameSet = false;
             if (apiName != null && !StringUtils.isBlank(apiName) && !"All".equalsIgnoreCase(apiName)) {
-                where += "and api.api_name='" + apiName + "' ";
+                where += "and api.api_name= ? ";
+                isAPINameSet = true;
             }
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
@@ -453,6 +469,10 @@ public class UsageClient {
 
             statement.setTimestamp(1, fromTime);
             statement.setTimestamp(2, toTime);
+            if (isAPINameSet) {
+                statement.setString(3, apiName);
+            }
+
             //execute
             rs = statement.executeQuery();
             List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
