@@ -271,7 +271,7 @@
     "scope" : "Scope",
 
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
-    "provideAccessToken" : "If you already have an access token please provide it below.",
+    "provideAccessToken" : "If you already have an access token, please provide it below.",
     "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
 
     "goBack" : "Regresa",

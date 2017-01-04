@@ -336,7 +336,7 @@ var deleteResource = function (deleteButton) {
     //Check whether only one defined resource remains before delete operation
     if(count==3){
         $('#resourceTableError').show('fast');
-        $('#resourceTableError').html( i18n.t("Sorry. This row cannot be deleted. At least one resource entry has to be available.")+'<br />');
+        $('#resourceTableError').html( i18n.t("This row cannot be deleted. At least one resource entry has to be available.")+'<br />');
         return;
     }
     $('#resourceTableError').hide('fast');

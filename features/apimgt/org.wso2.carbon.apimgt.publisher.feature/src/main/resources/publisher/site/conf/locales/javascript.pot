@@ -47,7 +47,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:84
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:129
-msgid "Thumbnail image when stats enabled"
+msgid "Thumbnail image when stats are enabled"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
@@ -56,7 +56,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:138
-msgid "Thumbnail image when stats not configured"
+msgid "Thumbnail image when stats are not configured"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:249
@@ -409,7 +409,7 @@ msgid "Error"
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/js/jagg.js:148
-msgid "Username, Password fields are empty."
+msgid "Username and Password fields are empty."
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/js/jagg.js:242
@@ -453,7 +453,7 @@ msgid "Invalid document URL format."
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/inline-editor/js/inline.js:26
-msgid "Sorry. The content of this document cannot be loaded."
+msgid "The content of this document cannot be loaded."
 msgstr ""
 
 #: site/themes/wso2/templates/item-edit/js/edit.js:339

@@ -234,7 +234,7 @@ $(document).ready(function () {
         // Validate inputs.
         if ($('#subject').val().trim() == "") {
             jagg.message({
-                content: i18n.t('Topic subject cannot be empty.'),
+                content: i18n.t('The topic subject cannot be empty.'),
                 type: "error"
             });
             return;
@@ -242,7 +242,7 @@ $(document).ready(function () {
 
         if ($('<div>').append($('#topicDescriptioEditor').code()).text().trim() == "") {
             jagg.message({
-                content: i18n.t('Topic description cannot be empty.'),
+                content: i18n.t('The topic description cannot be empty.'),
                 type: "error"
             });
             return;
@@ -364,7 +364,7 @@ $(document).ready(function () {
         var newSubject = $('#forum_topic_subject_edit_input').val().trim();
         if (newSubject == "") {
             jagg.message({
-                content: i18n.t('Topic subject cannot be empty.'),
+                content: i18n.t('The topic subject cannot be empty.'),
                 type: "error"
             });
             return;
@@ -373,7 +373,7 @@ $(document).ready(function () {
         var newDescription = $('#forum_topic_description_edit_editor').code();
         if ($('<div>').append(newDescription).text().trim() == "") {
             jagg.message({
-                content: i18n.t('Topic description cannot be empty.'),
+                content: i18n.t('The topic description cannot be empty.'),
                 type: "error"
             });
             return;
