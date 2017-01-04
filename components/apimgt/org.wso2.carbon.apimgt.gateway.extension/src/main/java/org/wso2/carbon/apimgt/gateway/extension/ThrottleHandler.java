@@ -306,7 +306,6 @@ public class ThrottleHandler implements MessagingHandler {
                     }
                 }
 
-
                 if (!isApiLevelThrottled) {
 
                     //Here check resource level throttled. If throttled then call handler throttled and pass.
@@ -322,8 +321,7 @@ public class ThrottleHandler implements MessagingHandler {
                             isSubscriptionLevelSpikeThrottled = isSubscriptionLevelSpike(carbonMsg,
                                     subscriptionLevelThrottleKey);
                         }
-                        //if subscription level not throttled then move to application level
-                        //Stop on quata reach
+                        //If subscription level not throttled then move to application level
                         if (!isSubscriptionLevelThrottled && !isSubscriptionLevelSpikeThrottled) {
                             //Application Level Throttling
                             isApplicationLevelThrottled = ThrottleDataHolder.getInstance().
