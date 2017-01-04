@@ -496,7 +496,7 @@ var drawChart = function (from, to) {
                           count++;
                             //limiting to show 20 entries at a time
                             if(count>20){
-                                $('#displayMsg').html('<h5 style="color:#555" >'+ i18n.t('Please Note that the graph will be showing only 20 entries') + '</h5>');
+                                $('#displayMsg').html('<h5 style="color:#555" >'+ i18n.t('Note that the graph shows only 20 entries') + '</h5>');
                                 state_array[id] = false;
                                 $(this).prop("checked", "");
                                 count--;

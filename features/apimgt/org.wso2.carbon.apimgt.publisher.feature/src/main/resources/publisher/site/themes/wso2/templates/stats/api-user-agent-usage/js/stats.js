@@ -1,4 +1,4 @@
-var currentLocation = "allAPIs";$('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+var currentLocation = "allAPIs";$('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats are enabled"></div>'));
 var statsEnabled = isDataPublishingEnabled();
 var apiNameVersionMap = {};
 var apiName;

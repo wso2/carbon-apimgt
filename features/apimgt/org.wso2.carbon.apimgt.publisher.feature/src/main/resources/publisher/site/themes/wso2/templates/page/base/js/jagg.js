@@ -145,7 +145,7 @@ var jagg = jagg || {};
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
             $('#loginErrorBox').show();
-            $('#loginErrorMsg').html(i18n.t('Username, Password fields are empty.'));
+            $('#loginErrorMsg').html(i18n.t('Username and Password fields are empty.'));
             $('#username').focus();
             return;
         }

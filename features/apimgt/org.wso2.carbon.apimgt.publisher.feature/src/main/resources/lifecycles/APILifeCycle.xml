@@ -28,7 +28,7 @@
                         <data name="checkItems">
                             <item name="Deprecate old versions after publish the API" forEvent="">
                             </item>
-                            <item name="Require re-subscription when publish the API" forEvent="">
+                            <item name="Requires re-subscription when publish the API" forEvent="">
                             </item>
                         </data>
 
@@ -51,7 +51,7 @@
                         <data name="checkItems">
                             <item name="Deprecate old versions after publish the API" forEvent="">
                             </item>
-                            <item name="Require re-subscription when publish the API" forEvent="">
+                            <item name="Requires re-subscription when publish the API" forEvent="">
                             </item>
                         </data>
 

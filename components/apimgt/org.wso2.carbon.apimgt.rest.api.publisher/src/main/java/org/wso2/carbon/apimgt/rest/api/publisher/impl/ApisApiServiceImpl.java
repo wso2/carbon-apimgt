@@ -30,6 +30,7 @@ import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -41,10 +42,13 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -1424,13 +1428,21 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
                                         String ifUnmodifiedSince) {
         try {
+            APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            apiProvider.saveSwagger20Definition(apiIdentifier, apiDefinition);
+            API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(existingAPI, apiDefinition);
+            Set<Scope> scopes = definitionFromSwagger20.getScopes(apiDefinition);
+            existingAPI.setUriTemplates(uriTemplates);
+            existingAPI.setScopes(scopes);
+
+            //Update API is called to update URITemplates and scopes of the API
+            apiProvider.updateAPI(existingAPI);
+            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
             //retrieves the updated swagger definition
-            String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
+            String apiSwagger = apiProvider.getSwagger20Definition(existingAPI.getId());
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -1441,6 +1453,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

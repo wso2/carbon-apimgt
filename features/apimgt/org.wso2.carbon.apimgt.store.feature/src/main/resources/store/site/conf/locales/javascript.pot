@@ -171,7 +171,7 @@ msgid ""
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/js/jagg.js:167
-msgid "Username, Password fields are empty."
+msgid "Username and Password fields are empty."
 msgstr ""
 
 #: site/themes/wso2/templates/comment/comment-add/js/comment-add.js:48
@@ -233,12 +233,12 @@ msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:237
 #: site/themes/wso2/templates/forum/js/forum-list.js:367
-msgid "Topic subject cannot be empty."
+msgid "The topic subject cannot be empty."
 msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:245
 #: site/themes/wso2/templates/forum/js/forum-list.js:376
-msgid "Topic description cannot be empty."
+msgid "The topic description cannot be empty."
 msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:277
@@ -289,7 +289,7 @@ msgid "The passwords you entered do not match."
 msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/js/sign-up.js:8
-msgid "The Name contains white spaces."
+msgid "The name contains white spaces."
 msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/js/sign-up.js:40
@@ -350,14 +350,14 @@ msgid "Are you sure you want to remove the application "
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-add/js/application-add.js:46
-msgid "Return back to API detail page?"
+msgid "Return to API detail page?"
 msgstr ""
 
 msgid "public"
 msgstr "Public"
 
 msgid "private"
-msgstr "Visible to my domain"
+msgstr "Visible to my Domain"
 
 msgid "restricted"
 msgstr "Restricted by roles"

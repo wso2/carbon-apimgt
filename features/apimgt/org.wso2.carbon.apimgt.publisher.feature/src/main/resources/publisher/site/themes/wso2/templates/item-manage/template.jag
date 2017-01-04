@@ -147,7 +147,7 @@
                         <div class="panel-collapse">
                             <div class="panel-body">
                                         <div class="form-group">
-                                            <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default Version:")%>
+                                            <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default version:")%>
                                                 <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
                                                     <span class="icon fw-stack fw-lg" style="font-size:6px">
                                                         <i class="fw fw-circle fw-stack-2x"></i>
@@ -189,7 +189,7 @@
                                                         <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
                                                         <span class="helper"><%=i18n.localize("HTTP")%></span>
                                                 </label>
-                                                <label id="transport_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Transport.")%></label>
+                                                <label id="transport_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one transport.")%></label>
                                             </div>
                                         </div>
 
@@ -241,7 +241,7 @@
                                                             <%} else {%>
                                                                 <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all tenants")%></option>
                                                                     <% if(!(enableSelectedTenantSubscription == 'false')) {%>
                                                                     <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
                                                                     <% } %>
@@ -279,7 +279,7 @@
                         <div class="panel-collapse">
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default Version:")%>
+                                    <label class = "col-sm-3 control-label"><%=i18n.localize("Make this the Default version:")%>
                                         <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
                                             <span class="icon fw-stack fw-lg" style="font-size:6px">
                                                 <i class="fw fw-circle fw-stack-2x"></i>
@@ -329,7 +329,7 @@
                             <%} else {%>
                             <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all tenants")%></option>
                                 <% if(!(enableSelectedTenantSubscription == 'false')) {%>
                                 <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
                                 <% } %>
@@ -429,7 +429,7 @@
                                                         <%
                                                         }
                                                     %>
-                                                   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one Subscription Tier.")%></label>
+                                                   <label id="tier_error" class="error hide" style="display: block;"><%=i18n.localize("Please select at least one subscription tier.")%></label>
                                                 </div>
                                         	</div>
 
@@ -445,7 +445,7 @@
                                             				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
                                             			</span>
                                                     </a>
-                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Enabling an API Level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API Level Policy is available")%></p>
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Enabling an API-level policy will apply the selected policy across all resources of the API. The resources level tier selection will be disabled and will not be taken into consideration within a handler if the API-level policy is available")%></p>
                                                 </label>
                                                 <div class="controls col-sm-8">
                                                     <label class="radio">
@@ -464,7 +464,7 @@
                                             			</span>
                                                     </a>
 
-                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Since there aren't resources for Websocket API's , Advanced throttling policies apply to API Level")%></p>
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("Since there aren't resources for Websocket API's, advanced throttling policies apply to the API-level")%></p>
                                                 </label>
                                                         <div class="controls col-sm-8">
                                                     <label class="radio hide">
@@ -621,7 +621,7 @@
                                                                           <p class="help-block">
                                         									  <i class="fw fw-info"></i>
                                                                               <%=i18n.localize("Refer ")%>
-                                                                              <a target="_blank" href="https://docs.wso2.com/display/AM200/Working+with+Throttling"><%=i18n.localize("documentation")%></a>
+                                                                              <a target="_blank" href="https://docs.wso2.com/display/AM210/Working+with+Throttling"><%=i18n.localize("documentation")%></a>
                                                                               <%=i18n.localize("for more information about each throttling setting.")%>
                                                                           </p>
                                                                     </div>
@@ -857,7 +857,7 @@
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
                 <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" title="<%=i18n.localize("Keep Editing API")%>"><%=i18n.localize("Keep Editing API")%></button>
-                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("Go to APIStore")%>"><%=i18n.localize("Go to APIStore")%></a>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("Go to API Store")%>"><%=i18n.localize("Go to API Store")%></a>
                 <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary" title="<%=i18n.localize("Go to Overview")%>"><%=i18n.localize("Go to Overview")%></a>
                 </div>
               </div>
@@ -1193,7 +1193,7 @@
                 },
                 error: function(){
                     $('#'+thisID).buttonLoader('stop');
-                    jagg.message({content:"<%=i18n.localize("Error occurred while updating API")%>",type:"error"});
+                    jagg.message({content:"<%=i18n.localize("Error occurred while updating the API")%>",type:"error"});
                 },
                 dataType: 'json'
             });
@@ -1340,13 +1340,13 @@
         jQuery.validator.addMethod("characterValidation", function(value, element) {
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
-        }, '<%=i18n.localize("Field Contains special characters")%>');
+        }, '<%=i18n.localize("Field contains special characters")%>');
 
         //character validation excluding space
         jQuery.validator.addMethod("characterValidationExceptSpace", function(value, element) {
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\t\n]*$/.test( value );
-        }, '<%=i18n.localize("Field Contains special characters")%>');
+        }, '<%=i18n.localize("Field contains special characters")%>');
        </script>
 
 <% }); %>

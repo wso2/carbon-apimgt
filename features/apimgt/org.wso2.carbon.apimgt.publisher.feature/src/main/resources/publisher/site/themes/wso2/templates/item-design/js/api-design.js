@@ -991,7 +991,7 @@ $(document).ready(function(){
             },
             error: function() {
                 $('#'+thisID).buttonLoader('stop');
-                jagg.message({content: i18n.t("Error occurred while updating API"), type: "error"});
+                jagg.message({content: i18n.t("Error occurred while updating the API"), type: "error"});
             },
             dataType: 'json'
         });

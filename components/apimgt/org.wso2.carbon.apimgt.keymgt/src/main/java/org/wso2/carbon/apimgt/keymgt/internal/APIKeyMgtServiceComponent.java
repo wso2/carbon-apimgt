@@ -229,7 +229,7 @@ public class APIKeyMgtServiceComponent {
         APIKeyMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
     }
 
-    protected void removeScopeIssuers() {
+    protected void removeScopeIssuers(ScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.setScopesIssuers(null);
     }
 

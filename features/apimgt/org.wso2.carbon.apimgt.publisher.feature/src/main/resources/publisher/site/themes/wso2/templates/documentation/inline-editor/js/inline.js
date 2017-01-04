@@ -22,7 +22,7 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
                         }
                     } else {
                         $('#inlineError').show('fast');
-                        $('#inlineSpan').html('<strong>'+ i18n.t('Sorry. The content of this document cannot be loaded.')+'</strong><br />'+result.message);
+                        $('#inlineSpan').html('<strong>'+ i18n.t('The content of this document cannot be loaded.')+'</strong><br />'+result.message);
                     }
                 }, "json");
         },

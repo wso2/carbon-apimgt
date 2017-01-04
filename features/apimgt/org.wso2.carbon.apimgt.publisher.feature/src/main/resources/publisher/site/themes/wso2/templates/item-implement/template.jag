@@ -154,7 +154,7 @@
 																{{/if}}																
 																{{/if}}
 																{{#if template_not_supported }}
-																<label class="error" for="name"><%=i18n.localize("Address endpoint does not support URI Templates.")%></label>
+																<label class="error" for="name"><%=i18n.localize("Address endpoint does not support URI templates.")%></label>
 																{{/if}}
 															</div>
 							                            </div>
@@ -648,7 +648,7 @@
 							                </div>
 							                <div class="modal-footer">
 							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true " title="<%=i18n.localize("Keep Editing API")%>"><%=i18n.localize("Keep Editing API")%></button>
-							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("Go to APIStore")%>" ><%=i18n.localize("Go to APIStore")%></a>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("Go to API Store")%>" ><%=i18n.localize("Go to API Store")%></a>
 							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary" title="<%=i18n.localize("Go to Overview")%>" ><%=i18n.localize("Go to Overview")%></a>
 							                </div>
 							                </div>
@@ -1005,7 +1005,7 @@
                 <label class="control-label col-sm-3" for="actionDuration"><%=i18n.localize("Duration (ms)")%></label>
                 <div class="col-sm-2">
                     <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="{{#if actionDuration}}{{actionDuration}}{{else}}30000{{/if}}">
-                    <p class="help-block hide"><%=i18n.localize("The duration in milliseconds before considering a request as a timeout.")%></p>
+                    <p class="help-block hide"><%=i18n.localize("The duration, in milliseconds, before a request is considered as a timeout.")%></p>
                 </div>
             </div>
         </fieldset>

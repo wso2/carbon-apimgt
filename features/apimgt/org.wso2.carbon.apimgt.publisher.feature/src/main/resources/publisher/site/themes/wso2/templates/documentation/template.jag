@@ -69,7 +69,7 @@
 						 <select id="docVisibility" style="width:100%">
 							 <option value="API_LEVEL" selected="true">Same as API visibility</option>
 							 <option value="OWNER_ONLY">Private</option>
-							 <option value="PRIVATE">Visible to my domain</option>
+							 <option value="PRIVATE">Visible to my Domain</option>
 						 </select>
 		             </div>
 		        </div>
@@ -136,7 +136,7 @@
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("URL")%>
 		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
            				        <p id="urlDoc_help" class="hide">
-           				            <%=i18n.localize("Link to documentation managed by an external configuration management system")%>
+           				            <%=i18n.localize("Link to documentation is managed by an external configuration management system")%>
                                 </p>
 		                      </label>
 		                  
@@ -216,7 +216,7 @@
                     <td><%= encode.forHtml(doc.docType)%></td>
                       <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
                     <td> <%if(doc.visibility=="OWNER_ONLY"){%>Private<%}%>
-                         <%if(doc.visibility=="PRIVATE"){%>Visible to my domain <%}%>
+                         <%if(doc.visibility=="PRIVATE"){%>Visible to my Domain <%}%>
                          <%if(doc.visibility=="API_LEVEL"){%>Same as API visibility <%}%>
 
                    </td><%}%>

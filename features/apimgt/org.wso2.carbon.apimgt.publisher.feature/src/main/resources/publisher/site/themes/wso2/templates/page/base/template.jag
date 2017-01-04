@@ -97,14 +97,14 @@ var user = jagg.getUser();
 				<li class="visible-inline-block">
 					
 	                     <!--Links to Access APIStore-->
-	                     	<a href="<%=storeUrl%>"  target="_blank" title="<%=i18n.localize("Go to APIStore")%>">
+	                     	<a href="<%=storeUrl%>"  target="_blank" title="<%=i18n.localize("Go to API Store")%>">
 	                     		<span class="icon fw-stack fw-lg">
 	                   <i class="fw fw-circle fw-stack-2x" title="user"></i>
 	                   <i class="fw fw-deploy fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
 	                     		
 								<span class="hidden-xs">
-									<%=i18n.localize("Go to APIStore")%>
+									<%=i18n.localize("Go to API Store")%>
 								</span>
 	                     	</a>
 	                

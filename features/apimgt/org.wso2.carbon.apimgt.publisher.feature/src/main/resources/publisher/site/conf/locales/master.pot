@@ -213,7 +213,7 @@ msgid "Overall API Usage (Across All Versions)"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-usage-user/template.jag:44
-msgid "Note : Date Range only applies to hit count."
+msgid "Note : Date Range only applies to the hit count."
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faulty-invocations/template.jag:2
@@ -252,14 +252,14 @@ msgstr ""
 #: site/themes/wso2/templates/stats/api-user-agent-usage/template.jag:11
 #: site/themes/wso2/templates/stats/api-latencytime/template.jag:11
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:136
-msgid "WSO2 wiki documentation on APIM statistics"
+msgid "WSO2 wiki documentation on APIM Statistics"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-geolocation-usage/template.jag:12
 #: site/themes/wso2/templates/stats/api-user-agent-usage/template.jag:12
 #: site/themes/wso2/templates/stats/api-latencytime/template.jag:12
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:137
-msgid "Refer our wiki to configure DAS correctly"
+msgid "Refer our documentation to configure WSO2 DAS correctly"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-geolocation-usage/template.jag:27
@@ -371,7 +371,7 @@ msgid "API Last Access Times (Across All Versions)"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-throttledtime/template.jag:10
-msgid "API Request Count With Throttling Tiers"
+msgid "API Request Count with Throttling Tiers"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-latencytime/template.jag:2
@@ -567,7 +567,7 @@ msgstr ""
 #: site/themes/wso2/templates/item-design/template.jag:177
 #: site/themes/wso2/templates/item-design/template.jag:186
 #: site/themes/wso2/templates/item-edit/template.jag:175
-msgid "Visible to my domain"
+msgid "Visible to my Domain"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:180
@@ -593,7 +593,7 @@ msgid "API Publisher - Error"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:226
-msgid "Image file exceeds the maximum limit of 1MB."
+msgid "The image file exceeds the maximum limit of 1MB."
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:240
@@ -728,7 +728,7 @@ msgid "Import API Definition"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:430
-msgid "Existing API Definition will be overwritten by the imported definition."
+msgid "Existing API definition will be overwritten by the imported definition."
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:438
@@ -823,8 +823,8 @@ msgstr ""
 #: site/themes/wso2/templates/item-design/template.jag:578
 msgid ""
 "Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS "
-"method is not selected, OPTIONS calls will be returned from the gateway with "
-"Allowed methods."
+"method is not selected, OPTIONS calls will be returned from the Gateway with "
+"allowed methods."
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:582
@@ -974,7 +974,7 @@ msgstr ""
 #: site/themes/wso2/templates/page/base/template.jag:92
 #: site/themes/wso2/templates/item-manage/template.jag:732
 #: site/themes/wso2/templates/item-implement/template.jag:642
-msgid "Go to APIStore"
+msgid "Go to API Store"
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/template.jag:115
@@ -1129,7 +1129,7 @@ msgid "Configurations"
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:146
-msgid "Make this the Default Version:"
+msgid "Make this the Default version:"
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:153
@@ -1173,7 +1173,7 @@ msgid "HTTP"
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:188
-msgid "Please select at least one Transport."
+msgid "Please select at least one transport."
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:193
@@ -1296,7 +1296,7 @@ msgid ""
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:344
-msgid "Please select at least one Subscription Tier."
+msgid "Please select at least one subscription tier."
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:352
@@ -1450,7 +1450,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:1009
 #: site/themes/wso2/templates/item-design/js/api-design.js:989
-msgid "Error occurred while updating API"
+msgid "Error occurred while updating the API"
 msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:1058
@@ -1506,7 +1506,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-manage/template.jag:1141
 #: site/themes/wso2/templates/item-manage/template.jag:1147
-msgid "Field Contains special characters"
+msgid "Field contains special characters"
 msgstr ""
 
 #: site/themes/wso2/templates/tiers/template.jag:8
@@ -1540,7 +1540,7 @@ msgid "Update Permissions"
 msgstr ""
 
 #: site/themes/wso2/templates/tiers/template.jag:91
-msgid "Successfully updated Tier Permissions."
+msgid "Successfully updated tier permissions."
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/inline-editor/template.jag:60
@@ -1573,7 +1573,7 @@ msgstr ""
 #: site/themes/wso2/templates/documentation/template.jag:64
 msgid ""
 "<strong>Same as API visibility: </strong> Visible to the same user roles who "
-"can see the API.<br/><strong> Visible to my domain :</strong>  Visible to "
+"can see the API.<br/><strong> Visible to my Domain :</strong>  Visible to "
 "all registered users in the API's tenant domain.<br/><strong>Private:</"
 "strong> Visible only to the API creator's role."
 msgstr ""
@@ -1618,7 +1618,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/documentation/template.jag:137
 msgid ""
-"Link to documentation managed by an external configuration management system"
+"Link to documentation is managed by an external configuration management system"
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/template.jag:147
@@ -1758,7 +1758,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-edit/template.jag:98
 msgid ""
-"Making an API version default will allow the subscribers to invoke it "
+"Making an API version the default will allow the subscribers to invoke it "
 "without the version attribute in the URI."
 msgstr ""
 
@@ -1835,11 +1835,11 @@ msgid "Failover Endpoint"
 msgstr ""
 
 #: site/themes/wso2/templates/item-edit/template.jag:291
-msgid "Load balanced Endpoint"
+msgid "Load Balanced Endpoint"
 msgstr ""
 
 #: site/themes/wso2/templates/item-edit/template.jag:301
-msgid "Defines a URI Template based REST Service endpoint"
+msgid "Defines a URI template based REST service endpoint"
 msgstr ""
 
 #: site/themes/wso2/templates/item-edit/template.jag:302
@@ -1867,7 +1867,7 @@ msgstr ""
 #: site/themes/wso2/templates/item-edit/template.jag:307
 msgid ""
 "Defines groups of endpoints for replicated services.The incoming requests "
-"will be directed to these endpoints in a round robin manner. These endpoints "
+"are directed to these endpoints in a round robin manner. These endpoints "
 "automatically handle the fail-over cases as well"
 msgstr ""
 
@@ -2025,7 +2025,7 @@ msgstr ""
 #: site/themes/wso2/templates/users-api/template.jag:140
 #: site/themes/wso2/templates/usage/template.jag:20
 #: site/themes/wso2/templates/usage/template.jag:47
-msgid "Number of API Calls"
+msgid "Number of API calls"
 msgstr ""
 
 #: site/themes/wso2/templates/users-api/template.jag:135
@@ -2061,7 +2061,7 @@ msgid ""
 msgstr ""
 
 #: site/themes/wso2/templates/item-version/template.jag:65
-msgid "Make this the Default Version"
+msgid "Make this the Default version"
 msgstr ""
 
 #: site/themes/wso2/templates/item-version/template.jag:72
@@ -2098,11 +2098,11 @@ msgid "Login"
 msgstr ""
 
 #: site/themes/wso2/templates/item-external/template.jag:32
-msgid "Successfully Updated External Stores"
+msgid "Successfully updated external stores"
 msgstr ""
 
 #: site/themes/wso2/templates/item-external/template.jag:43
-msgid "Display In External Stores"
+msgid "Display in External Stores"
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:95
@@ -2126,7 +2126,7 @@ msgid "Please specify a production or sandbox endpoint."
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:155
-msgid "Address endpoint does not support URI Templates."
+msgid "Address endpoint does not support URI templates."
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:183
@@ -2424,7 +2424,7 @@ msgid "Duration (ms)"
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:1005
-msgid "The duration in milliseconds before considering a request as a timeout."
+msgid "The duration, in milliseconds, before a request is considered as a timeout."
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:1015
@@ -2466,11 +2466,11 @@ msgid "Let's get started!"
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:17
-msgid "I have an Existing API"
+msgid "I Have an Existing API"
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:18
-msgid "Use an existing API's endpoint or the API definition to create an API."
+msgid "Use an existing API's endpoint or the API Swagger definition to create an API."
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:60
@@ -2480,17 +2480,17 @@ msgid "Start Creating"
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:73
-msgid "I have a SOAP Endpoint"
+msgid "I Have a SOAP Endpoint"
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:74
 msgid ""
-"Use an existing SOAP endpoint to create a managed API. Import WSDL of the "
+"Use an existing SOAP endpoint to create a managed API. Import the WSDL of the "
 "SOAP service."
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:88
-msgid "Please use a valid wsdl endpoint"
+msgid "Please use a valid WSDL endpoint"
 msgstr ""
 
 #: site/themes/wso2/templates/item-add/template.jag:107
@@ -2615,7 +2615,7 @@ msgid "Current State"
 msgstr ""
 
 #: site/themes/wso2/templates/life-cycles/template.jag:160
-msgid "Require Re-Subscription"
+msgid "Requires Re-Subscription"
 msgstr ""
 
 #: site/themes/wso2/templates/life-cycles/template.jag:160
@@ -2698,7 +2698,7 @@ msgstr ""
 #: site/themes/wso2/templates/listing/template.jag:51
 msgid ""
 "The following APIs have been created. APIs that are marked as PUBLISHED can "
-"be subscribed through the API Store. "
+"be subscribed to through the API Store. "
 msgstr ""
 
 #: site/themes/wso2/templates/listing/template.jag:114
@@ -2752,7 +2752,7 @@ msgid "public"
 msgstr "Public"
 
 msgid "private"
-msgstr "Visible to my domain"
+msgstr "Visible to my Domain"
 
 msgid "restricted"
 msgstr "Restricted by roles"
@@ -2914,7 +2914,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:84
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:129
-msgid "Thumbnail image when stats enabled"
+msgid "Thumbnail image when stats are enabled"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
@@ -2923,11 +2923,11 @@ msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
 #: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:138
-msgid "Thumbnail image when stats not configured"
+msgid "Thumbnail image when stats are not configured"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:249
-msgid "Please Note that the graph will be showing only 15 entries"
+msgid "Note that the graph shows only 15 entries"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
@@ -2956,7 +2956,7 @@ msgid "Show more details"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:493
-msgid "Please Note that the graph will be showing only 20 entries"
+msgid "Note that the graph shows only 20 entries"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
@@ -2977,7 +2977,7 @@ msgid "Data Publishing Enabled"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/js/stats.js:80
-msgid "Generate Some traffic to see statistics"
+msgid "Generate some traffic to see statistics"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:123
@@ -3131,7 +3131,7 @@ msgid "Service Port must be provided for WSDL endpoint."
 msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:130
-msgid "File must be in image file format."
+msgid "File must be in an image file format."
 msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:135
@@ -3193,7 +3193,7 @@ msgid "Error"
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/js/jagg.js:148
-msgid "Username, Password fields are empty."
+msgid "Username and Password fields are empty."
 msgstr ""
 
 #: site/themes/wso2/templates/page/base/js/jagg.js:245
@@ -3225,11 +3225,11 @@ msgid "File already exists..!"
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/js/docs.js:401
-msgid "Invalid Document URL Format."
+msgid "Invalid document URL format."
 msgstr ""
 
 #: site/themes/wso2/templates/documentation/inline-editor/js/inline.js:26
-msgid "Sorry. The content of this document cannot be loaded."
+msgid "The content of this document cannot be loaded."
 msgstr ""
 
 #: site/themes/wso2/templates/item-edit/js/edit.js:339

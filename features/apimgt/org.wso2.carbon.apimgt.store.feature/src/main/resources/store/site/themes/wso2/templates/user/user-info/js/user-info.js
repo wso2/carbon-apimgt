@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('noSpace', function(value, element) {
             return !/\s/g.test(value);
-    }, 'The Name contains white spaces.');
+    }, 'The name contains white spaces.');
 
 
     $("#change-password").validate({

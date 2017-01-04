@@ -214,7 +214,7 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                 }else {
                     $(".modal-body").removeClass("loadingButton");
                     jagg.message({
-                        content: i18n.t("Error occurred while adding sample API"),
+                        content: i18n.t("Error occurred while adding the sample API"),
                         type: "error",
                         title: i18n.t("Error")
                     });
@@ -237,7 +237,7 @@ APISamples.prototype.addSampleAPIDoc = function () {
             if (apiDocResult.error) {
                 $(".modal-body").removeClass("loadingButton");
                 jagg.message({
-                    content: i18n.t("Error occurred while adding sample API documentation"),
+                    content: i18n.t("Error occurred while adding the sample API documentation"),
                     type: "error",
                     title: i18n.t("Error")
                 });

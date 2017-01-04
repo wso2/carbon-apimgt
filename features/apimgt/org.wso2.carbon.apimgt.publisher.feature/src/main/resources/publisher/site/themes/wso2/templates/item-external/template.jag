@@ -29,7 +29,7 @@ var faultSequencesLoaded = false;
             
             <div id="externalPublishStatus" class="alert alert-success" role="alert" style="display:none">
                     <i class="icon fw fw-success fade out"></i>
-                    <%=i18n.localize("Successfully Updated External Stores")%>
+                    <%=i18n.localize("Successfully updated external stores")%>
                     <button type="button" class="close" aria-label="close" data-dismiss="alert">
                         <span aria-hidden="true">
                             <i class="fw fw-cancel"></i>

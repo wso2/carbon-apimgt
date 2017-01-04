@@ -28,7 +28,7 @@
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
             <h4><%=i18n.localize("Grant Types")%></h4>
-			<p><%=i18n.localize("Application can use the following grant types to generate Access Tokens. Based on the application requirement, you can enable or disable grant types for this application.")%></p>
+			<p><%=i18n.localize("The application can use the following grant types to generate Access Tokens. Based on the application requirement, you can enable or disable grant types for this application.")%></p>
 			<div class="row add-padding-left-2x add-padding-bottom-2x">			
 			{{#each grants}}	
 			  <div class="col-xs-6 col-sm-3 add-padding-1x">			
@@ -80,13 +80,13 @@
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
 		  	<h4><%=i18n.localize("Generating Access Tokens")%></h4>
-		  	<p><%=i18n.localize("The following cURL command shows how to generate an access token using the password grant type.")%></p>
+		  	<p><%=i18n.localize("The following cURL command shows how to generate an access token using the Password Grant type.")%></p>
 			<div class="highlight"><pre>
 		 <a data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
 	     <%= gatewayurlendpoint %>/token</textarea></pre>
 	        </div>
-	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.")%></p>
+	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the Client Credential grant type with the following cURL command.")%></p>
 			<div class="highlight"><pre>
 			<a data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
@@ -125,7 +125,7 @@
                 <label for="" class="control-label"><%=i18n.localize("Validity period")%></label>
                     <div class="input-group col-sm-6">
                       <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time">
-                      <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+                      <div class="input-group-addon"><%=i18n.localize("Seconds")%></div>
                     </div>
             </div>
             <button class=" btn btn-primary regenerate" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
@@ -182,7 +182,7 @@
                     <label><%=i18n.localize("Access token validity period")%> </label>
                     <div class="input-group col-sm-6">
                       <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control form-control-md validity_time">
-                      <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+                      <div class="input-group-addon"><%=i18n.localize("Seconds")%></div>
                     </div>
                 </div>
 			    <button  class="btn btn-primary generatekeys" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Generate keys")%></button>

@@ -43,7 +43,7 @@ $(document).ready(function () {
                 $.cookie('lastAppName',application,{ expires: date});
                 $.cookie('lastAppStatus',status,{ expires: date});
                 if(goBack == "yes"){
-                    jagg.message({content:i18n.t('Return back to API detail page?'),type:'confirm',okCallback:function(){
+                    jagg.message({content:i18n.t('Return to API detail page?'),type:'confirm',okCallback:function(){
                     window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
                         window.location = jagg.url("/site/pages/application.jag?name=" + application );
