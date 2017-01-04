@@ -2,14 +2,13 @@
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
             <a href="{{@contextPath}}/apis" title="apiPublisherHomePage">
-                {{fragment "wso2-logo"}}
+                {{fragment "wso2-logo" invert=true}}
                 <!-- TODO: take this `wso2-logo` from common.foundation component fragment if possible ~tmkb-->
-                <h1>{{appName}}</h1>
+                <h4 style="display: inline">{{appName}}</h4>
             </a>
         </div>
 
         <ul class="nav navbar-right float-remove-xs text-center-xs">
-
             <li class="visible-inline-block">
                 <a href="#" class="dropdown" data-toggle="dropdown" title="user">
 					<span class="icon fw-stack fw-lg">
@@ -32,6 +31,6 @@
                 </ul>
             </li>
         </ul>
+
     </div>
 </header>
-{{fragment "authManager"}}
