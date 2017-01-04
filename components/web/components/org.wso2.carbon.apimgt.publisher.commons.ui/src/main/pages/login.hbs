@@ -2,8 +2,7 @@
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Login | " @config.appName}}
 {{css "css/login.css"}}
-{{js "js/route/route.js"}}
-{{js "js/auth/auth-manager.js"}}
+{{fragment "authJsLibraries"}}
 {{js "js/login.js"}}
 {{#fillZone "content"}}
     {{#if errorMessage}}
