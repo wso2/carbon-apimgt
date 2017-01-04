@@ -7879,20 +7879,24 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         Set<Scope> scopes = new LinkedHashSet<Scope>();
         List<String> inputScopeList = Arrays.asList(scopeKeys.split(" "));
-        StringBuilder scopeStrBuilder = new StringBuilder();
-        for (String inputScope : inputScopeList) {
-            scopeStrBuilder.append('\'').append(inputScope).append("',");
+        StringBuilder placeHolderBuilder = new StringBuilder();
+        for (int i = 0; i < inputScopeList.size(); i++) {
+            placeHolderBuilder.append("?, ");
         }
-        String scopesString = scopeStrBuilder.toString();
-        scopesString = scopesString.substring(0, scopesString.length() - 1);
+
+        String placeHolderStr = placeHolderBuilder.deleteCharAt(placeHolderBuilder.length() - 2).toString();
         try {
             conn = APIMgtDBUtil.getConnection();
-
-            String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX + scopesString + SQLConstants
+            String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX + placeHolderStr + SQLConstants
                     .GET_SCOPES_BY_SCOPE_KEYS_SUFFIX;
-
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantId);
+
+            for (int i = 0; i < inputScopeList.size(); i++) {
+                ps.setString(i + 1, inputScopeList.get(i));
+            }
+
+            ps.setInt(inputScopeList.size() + 1, tenantId);
+
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 Scope scope = new Scope();
@@ -8992,18 +8996,19 @@ public class ApiMgtDAO {
             // Returns only single row
             if (resultSet.next()) {
 
-                /*Not sure about below comment :-) (Dhanuka)
+                /*
                  *  H2 doesn't return generated keys when key is provided (not generated).
                    Therefore policyId should be policy parameter's policyId when it is provided.
                  */
                 if (policyId == -1) {
                     policyId = resultSet.getInt(1);
                 }
-                List<Pipeline> pipelines = policy.getPipelines();
-                if (pipelines != null) {
-                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                        addPipeline(pipeline, policyId, conn);
-                    }
+            }
+
+            List<Pipeline> pipelines = policy.getPipelines();
+            if (pipelines != null) {
+                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                    addPipeline(pipeline, policyId, conn);
                 }
             }
         } finally {

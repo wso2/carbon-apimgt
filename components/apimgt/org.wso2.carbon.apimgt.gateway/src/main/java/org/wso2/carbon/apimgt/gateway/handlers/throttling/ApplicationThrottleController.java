@@ -132,8 +132,10 @@ public class ApplicationThrottleController {
 
             OMNode result = null;
             try {
-                XMLStreamReader parser = XMLInputFactory.newInstance().
-                        createXMLStreamReader(inputStream);
+                XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+                XMLStreamReader parser = factory.createXMLStreamReader(inputStream);
+
                 StAXOMBuilder builder = new StAXOMBuilder(parser);
                 result = builder.getDocumentElement();
 

@@ -4,7 +4,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.1.26-SNAPSHOT</version>
+    <version>6.1.30-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -1059,7 +1059,7 @@
 
         <!-- APIM Component Version -->
 
-        <carbon.apimgt.version>6.1.26-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.1.30-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
@@ -1074,12 +1074,12 @@
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.7.5</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.3.2</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-inbound-auth-oauth.version>5.3.3</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.4</carbon.identity-user-ws.version>
         <carbon.identity-inbound-auth-saml2.version>5.2.0</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.2.1</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>5.3.0</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.1.4</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.5</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.7.0</carbon.governance.version>
         <carbon.deployment.version>4.7.0</carbon.deployment.version>
