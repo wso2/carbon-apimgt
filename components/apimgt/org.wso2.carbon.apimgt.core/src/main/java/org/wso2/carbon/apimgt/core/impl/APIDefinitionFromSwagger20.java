@@ -37,11 +37,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +76,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
                 Operation operation = operationEntry.getValue();
                 Map<String, Object> vendorExtensions = operation.getVendorExtensions();
-                String authType = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_AUTH_TYPE);
+/*                String authType = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_AUTH_TYPE);
                 if (authType == null) {
                     uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
                     vendorExtensions.put(APIMgtConstants.SWAGGER_X_AUTH_TYPE, APIMgtConstants
@@ -90,7 +90,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                     vendorExtensions.put(APIMgtConstants.SWAGGER_X_THROTTLING_TIER, APIUtils.getDefaultAPIPolicy());
                 } else {
                     uriTemplateBuilder.policy(policy);
-                }
+                }*/
                 APIResource.Builder apiResourceBuilder = new APIResource.Builder();
                 List<String> producesList = operation.getProduces();
                 if (producesList != null) {
@@ -149,4 +149,38 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return scopeMap;
     }
 
+    /**
+     * generate the swagger from uri templates.
+     *
+     * @param api
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public String generateSwaggerFromResources(API api) throws APIManagementException {
+/*        Swagger swagger = new Swagger();
+        Info info = new Info();
+        info.setTitle(api.getName());
+        info.setDescription(api.getDescription());
+        Contact contact = new Contact();
+        if (api.getBusinessInformation() != null){
+            BusinessInformation businessInformation = api.getBusinessInformation();
+            contact.setName(businessInformation.getBusinessOwner());
+            contact.setEmail(businessInformation.getBusinessOwnerEmail());
+        }
+        info.setContact(contact);
+        info.setVersion(api.getVersion());
+        Map<String,Path> stringPathMap = new HashMap<>();
+        for (UriTemplate uriTemplate : api.getUriTemplates()){
+            if (stringPathMap.containsKey(uriTemplate.getUriTemplate())){
+                Path path = stringPathMap.get(uriTemplate.getUriTemplate());
+                Map<HttpMethod,Operation> operationMap = path.getOperationMap();
+                if (!operationMap.containsKey(HttpMethod.valueOf(uriTemplate.getHttpVerb()))){
+                    Operation operation = new Operation();
+                    operation.set
+                }
+            }
+        }*/
+        return null;
+    }
 }

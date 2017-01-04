@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.io.InputStream;
 import java.util.List;
@@ -261,4 +262,51 @@ public interface ApiDAO {
      * @throws APIMgtDAOException
      */
     boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+
+
+    /**
+     * Add an Endpoint
+     *
+     * @param endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    void addEndpoint(Endpoint endpoint) throws APIMgtDAOException;
+
+
+
+    /**
+     * Delete an Endpoint
+     *
+     * @param endpointId
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean deleteEndpoint(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Update an Endpoint
+     *
+     * @param endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException;
+
+    /**
+     * Get an Endpoint
+     *
+     * @param endpointId uuid of endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    Endpoint getEndpoint(String endpointId) throws APIMgtDAOException;
+
+
+    /**
+     * get all Endpoints
+     * @return
+     * @throws APIMgtDAOException
+     */
+    List<Endpoint> getEndpoints() throws APIMgtDAOException;
 }

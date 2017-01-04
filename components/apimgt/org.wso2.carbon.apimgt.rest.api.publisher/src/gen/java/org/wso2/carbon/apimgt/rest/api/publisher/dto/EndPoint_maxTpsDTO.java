@@ -7,17 +7,17 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * API_maxTpsDTO
+ * EndPoint_maxTpsDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
-public class API_maxTpsDTO   {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+public class EndPoint_maxTpsDTO   {
   @JsonProperty("production")
   private Long production = null;
 
   @JsonProperty("sandbox")
   private Long sandbox = null;
 
-  public API_maxTpsDTO production(Long production) {
+  public EndPoint_maxTpsDTO production(Long production) {
     this.production = production;
     return this;
   }
@@ -35,7 +35,7 @@ public class API_maxTpsDTO   {
     this.production = production;
   }
 
-  public API_maxTpsDTO sandbox(Long sandbox) {
+  public EndPoint_maxTpsDTO sandbox(Long sandbox) {
     this.sandbox = sandbox;
     return this;
   }
@@ -62,9 +62,9 @@ public class API_maxTpsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_maxTpsDTO apIMaxTps = (API_maxTpsDTO) o;
-    return Objects.equals(this.production, apIMaxTps.production) &&
-        Objects.equals(this.sandbox, apIMaxTps.sandbox);
+    EndPoint_maxTpsDTO endPointMaxTps = (EndPoint_maxTpsDTO) o;
+    return Objects.equals(this.production, endPointMaxTps.production) &&
+        Objects.equals(this.sandbox, endPointMaxTps.sandbox);
   }
 
   @Override
@@ -75,7 +75,7 @@ public class API_maxTpsDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class API_maxTpsDTO {\n");
+    sb.append("class EndPoint_maxTpsDTO {\n");
     
     sb.append("    production: ").append(toIndentedString(production)).append("\n");
     sb.append("    sandbox: ").append(toIndentedString(sandbox)).append("\n");

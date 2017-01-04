@@ -27,8 +27,10 @@ import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +44,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPI(api.getId());
@@ -55,7 +57,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddDuplicateProviderNameVersionAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -486,7 +488,44 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI,TestUtil.printDiff(apiFromDB,expectedAPI));
     }
+    @Test
+    public void testAddGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertEquals(endpoint,retrieved);
+    }
+    @Test
+    public void testAddUpdateGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
+        Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
+        apiDAO.updateEndpoint(updatedEndpoint);
+        Endpoint retrieved = apiDAO.getEndpoint(updatedEndpoint.getId());
+        Assert.assertEquals(updatedEndpoint,retrieved);
+    }
+    @Test
+    public void testAddDeleteGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        apiDAO.deleteEndpoint(endpoint.getId());
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertNull(retrieved);
+    }
 
-
-
+    @Test
+    public void testAddGetAllEndPoints() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
+        Endpoint endpoint2 = SampleTestObjectCreator.createAlternativeEndpoint();
+        apiDAO.addEndpoint(endpoint1);
+        apiDAO.addEndpoint(endpoint2);
+        List<Endpoint> endpointListAdd = new ArrayList<>();
+        endpointListAdd.add(endpoint1);
+        endpointListAdd.add(endpoint2);
+        List<Endpoint> endpointList = apiDAO.getEndpoints();
+        APIUtils.isListsEqualIgnoreOrder(endpointListAdd, endpointList, new EndPointComparator());
+    }
 }
