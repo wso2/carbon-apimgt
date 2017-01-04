@@ -91,14 +91,14 @@ public class ThrottleHandler implements MessagingHandler {
     @Override
     public void invokeAtSourceRequestReceiving(CarbonMessage carbonMessage) {
 
+        //Handle incoming requests and call throttling method to perform throttling.
         long executionStartTime = System.currentTimeMillis();
         try {
             doThrottle(carbonMessage);
         } finally {
-            carbonMessage.setProperty(APIThrottleConstants.THROTTLING_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
+            carbonMessage.setProperty(APIThrottleConstants.THROTTLING_LATENCY, System.currentTimeMillis() -
+                    executionStartTime);
         }
-
     }
 
     @Override
@@ -243,21 +243,18 @@ public class ThrottleHandler implements MessagingHandler {
                 apiLevelTier = authContext.getApiTier();
                 resourceLevelTier = verbInfoDTO.getThrottling();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply
-                // for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase
                         (apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
                 }
 
-
                 //If verbInfo is present then only we will do resource level throttling
                 if (APIThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling()) &&
                         !apiLevelThrottledTriggered) {
                     //If unlimited tier throttling will not apply at resource level and pass it
                     if (log.isDebugEnabled()) {
-                        log.debug("Resource level throttling set as unlimited and request will pass " +
-                                "resource level");
+                        log.debug("Resource level throttling set as unlimited and request will pass resource level");
                     }
                 } else {
                     if (APIThrottleConstants.API_POLICY_USER_LEVEL.equalsIgnoreCase(verbInfoDTO.getApplicableLevel())) {
@@ -337,11 +334,9 @@ public class ThrottleHandler implements MessagingHandler {
                                 boolean keyTemplatesAvailable = ThrottleDataHolder.getInstance()
                                         .isKeyTemplatesPresent();
                                 if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
-                                        applicationLevelThrottleKey,
-                                        subscriptionLevelThrottleKey, apiLevelThrottleKey,
-                                        subscriptionLevelThrottleKey, apiContext,
-                                        apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
-                                        ThrottleDataHolder.getInstance().getKeyTemplateMap(), carbonMsg)) {
+                                        resourceLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
+                                        apiTenantDomain, applicationId, ThrottleDataHolder.getInstance()
+                                                .getKeyTemplateMap(), carbonMsg)) {
                                     //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
@@ -448,25 +443,6 @@ public class ThrottleHandler implements MessagingHandler {
         return false;
     }
 
-
-    /**
-     * HAndle incoming requests and call throttling method to perform throttling.
-     *
-     * @param messageContext message context object which contains message details.
-     * @return return true if message flow need to continue and pass requests to next handler in chain. Else return
-     * false to notify error with handler
-     */
-    public boolean handleRequest(CarbonMessage messageContext) {
-
-        long executionStartTime = System.currentTimeMillis();
-        try {
-            return doThrottle(messageContext);
-        } finally {
-            messageContext.setProperty(APIThrottleConstants.THROTTLING_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
-        }
-    }
-
     /**
      * This method will handle responses. Usually we do not perform throttling for responses going back to clients.
      * However if we consider bandwidth scenarios we may need to consider handle response and response patch as well
@@ -490,7 +466,7 @@ public class ThrottleHandler implements MessagingHandler {
      */
     private boolean doThrottle(CarbonMessage carbonMessage) {
 
-        // TODO: get authcontext from message
+        // TODO: get authcontext from carbonmessage
         AuthenticationContextDTO authenticationContext = new AuthenticationContextDTO();
 
         boolean isThrottled = false;
@@ -582,7 +558,7 @@ public class ThrottleHandler implements MessagingHandler {
 
         String message = httpErrorCode + errorDescription + nextAccessTimeString;
         messageContext.setProperty("THROTTLE_OUT_MESSAGE", message);
-        // TODO: Implement throttleout message
+        // TODO: Implement throttleout message based on new balerina
     }
 
     public void setId(String id) {
@@ -631,7 +607,7 @@ public class ThrottleHandler implements MessagingHandler {
      * @return true if message is throttled else false
      */
     public boolean isSubscriptionLevelSpike(CarbonMessage carbonMessage, String throttleKey) {
-        // // TODO: Implement spike arraest
+        // TODO: Implement spike arrest or use the synapse spike arrest
         return false;
     }
 
@@ -642,9 +618,9 @@ public class ThrottleHandler implements MessagingHandler {
      *
      * @return
      */
-    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey,
-                                        String subscriptionKey, String apiContext, String apiVersion, String appTenant,
-                                        String apiTenant, String appId, Map<String, String> keyTemplateMap,
+    public boolean validateCustomPolicy(String userID, String resourceKey, String apiContext, String apiVersion,
+                                        String appTenant,String apiTenant, String appId,
+                                        Map<String, String> keyTemplateMap,
                                         CarbonMessage messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
