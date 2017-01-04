@@ -537,7 +537,7 @@ public class ThrottleHandler implements MessagingHandler {
      * @return
      */
     public boolean validateCustomPolicy(String userID, String resourceKey, String apiContext, String apiVersion,
-                                        String appTenant,String apiTenant, String appId,
+                                        String appTenant, String apiTenant, String appId,
                                         Map<String, String> keyTemplateMap,
                                         CarbonMessage messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
@@ -571,6 +571,7 @@ public class ThrottleHandler implements MessagingHandler {
 
     /**
      * Need to complete the implementation using ballerina
+     *
      * @param messageContext
      */
     private void handleThrottleOut(CarbonMessage messageContext) {
@@ -647,6 +648,7 @@ public class ThrottleHandler implements MessagingHandler {
 
     /**
      * USed to Create a meaningful error message
+     *
      * @param throttleErrorCode
      * @param message
      * @param description
