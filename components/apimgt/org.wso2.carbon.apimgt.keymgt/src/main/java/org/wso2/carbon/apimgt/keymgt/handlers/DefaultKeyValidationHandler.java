@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -119,9 +119,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             return true;
         }
 
-        OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
-
-
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if(apiKeyValidationInfoDTO == null){
@@ -165,12 +162,13 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 validationContext.getHttpVerb();
 
         try {
-            if(scopeValidator != null){
-                if(scopeValidator.validateScope(accessTokenDO,
-                                                resource)){
+            OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
+
+            if (scopeValidator != null) {
+                if (scopeValidator.validateScope(accessTokenDO, resource)) {
                     return true;
 
-                }else {
+                } else {
                     apiKeyValidationInfoDTO.setAuthorized(false);
                     apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                 }
