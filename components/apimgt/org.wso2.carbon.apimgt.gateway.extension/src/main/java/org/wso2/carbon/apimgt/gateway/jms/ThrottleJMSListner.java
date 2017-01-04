@@ -20,12 +20,8 @@ package org.wso2.carbon.apimgt.gateway.jms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.andes.client.AMQConnectionFactory;
-import org.wso2.andes.url.URLSyntaxException;
-import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.constants.APIThrottleConstants;
-import org.wso2.carbon.apimgt.gateway.throttling.constants.JMSConfigs;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -37,21 +33,14 @@ import java.util.regex.Pattern;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-import javax.naming.NamingException;
+import javax.jms.MessageListener;
 
 /**
  * This class is used to subscribe to a jms topic and update the throttle maps
  */
-public class ThrottleJMSListner {
+public class ThrottleJMSListner implements MessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(ThrottleJMSListner.class);
-    private TopicConnection topicConnection;
-    private TopicSession topicSession;
 
     // These patterns will be used to determine for which type of keys the throttling condition has occurred.
     private Pattern apiPattern = Pattern.compile("/.*/(.*):\\1_(condition_(\\d*)|default)");
@@ -64,47 +53,8 @@ public class ThrottleJMSListner {
 
     private boolean isSubscribed = false;
 
-    /**
-     * Subscribe to the topic
-     *
-     * @return subscriber
-     * @throws NamingException    throws if any name resolution issue occur
-     * @throws JMSException       throws if JMS exception occurred
-     * @throws URLSyntaxException throws if connection string exception found
-     */
-    public TopicSubscriber subscribe() throws NamingException, JMSException, URLSyntaxException {
-        // Lookup connection factory
-        TopicSubscriber topicSubscriber = null;
-        try {
-            TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                    getTCPConnectionURL(JMSConfigs.JMS_USERNAME, JMSConfigs.JMS_PASSWORD));
-            topicConnection = connFactory.createTopicConnection();
-            topicConnection.start();
-            topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-            // Send message
-            Topic topic = topicSession.createTopic(JMSConfigs.THROTTLING_TOPIC_NAME);
-            topicSubscriber = topicSession.createSubscriber(topic);
-            isSubscribed = true;
-
-        } catch (JMSException e) {
-            //swallowing Exception since this method will be periodically called until a jms conncetion is established
-            isSubscribed = false;
-            log.error("Jms connection failure ");
-        }
-
-        return topicSubscriber;
-    }
-
-    /**
-     * Try to read msg from topic
-     *
-     * @param topicSubscriber current subscriber
-     * @throws NamingException throws if any name resolution issue occur
-     * @throws JMSException    throws if JMS exception occurred
-     */
-    public void receive(TopicSubscriber topicSubscriber) throws NamingException, JMSException {
-
-        Message message = topicSubscriber.receive();
+    @Override
+    public void onMessage(Message message) {
 
         if (log.isDebugEnabled()) {
             log.debug(" Event received in JMS Event Receiver - " + message);
@@ -161,47 +111,6 @@ public class ThrottleJMSListner {
             log.error("JMSException occurred when processing the received message ", e);
         }
     }
-
-    /**
-     * Stops the jms listener
-     */
-    public void stop() {
-        if (topicSession != null) {
-            try {
-                topicSession.close();
-            } catch (JMSException e) {
-                // TODO Auto-generated catch block
-                log.error("Error closing connections", e);
-            }
-        }
-        if (topicConnection != null) {
-            try {
-                topicConnection.stop();
-                topicConnection.close();
-            } catch (JMSException e) {
-                // TODO Auto-generated catch block
-                log.error("Error closing connections", e);
-            }
-        }
-    }
-
-    /**
-     * Construct and get JMS connection String
-     *
-     * @param username user name
-     * @param password password
-     * @return connection String as String
-     */
-    private String getTCPConnectionURL(String username, String password) {
-        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-        APIMConfigurations apimConfig = new APIMConfigurations();
-        return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(apimConfig.getCarbonClientId()).append("/")
-                .append(apimConfig.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
-                .append(apimConfig.getTopicServerHost()).append(":")
-                .append(apimConfig.getTopicServerPort()).append("'").toString();
-    }
-
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) {
 
@@ -314,9 +223,5 @@ public class ThrottleJMSListner {
         } else {
             ThrottleDataHolder.getInstance().removeKeyTemplate(keyTemplateValue);
         }
-    }
-
-    public boolean isSubscribed() {
-        return isSubscribed;
     }
 }
