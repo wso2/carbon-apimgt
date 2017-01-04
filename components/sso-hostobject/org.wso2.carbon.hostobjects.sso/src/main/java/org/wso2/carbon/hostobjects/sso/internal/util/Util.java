@@ -67,6 +67,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.crypto.SecretKey;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,6 +76,7 @@ import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -86,7 +88,7 @@ public class Util {
 
     private static boolean bootStrapped = false;
 
-    private static Random random = new Random();
+    private static SecureRandom random = new SecureRandom();
 
     private static RealmService realmService = null;
 
@@ -167,6 +169,7 @@ public class Util {
         try {
             doBootstrap();
             DocumentBuilderFactory documentBuilderFactory = getSecuredDocumentBuilder();
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             documentBuilderFactory.setNamespaceAware(true);
             DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(new ByteArrayInputStream(authReqStr.trim().getBytes()));

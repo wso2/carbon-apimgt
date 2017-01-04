@@ -37,6 +37,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -60,6 +61,7 @@ public class SAMLGroupIDExtractorImpl implements LoginPostExecutor {
             String claim = "http://wso2.org/claims/organization";
             samlResponseStream = new ByteArrayInputStream(loginResponse.getBytes());
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             builderFactory.setNamespaceAware(true);
             docBuilder = builderFactory.newDocumentBuilder();
             Document document = docBuilder.parse(samlResponseStream);

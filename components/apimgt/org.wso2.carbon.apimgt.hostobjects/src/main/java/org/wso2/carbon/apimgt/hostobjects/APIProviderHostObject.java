@@ -4192,13 +4192,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}
-	};
-
-
     private boolean resourceMethodMatches(String[] resourceMethod1,
                                           String[] resourceMethod2) {
         for (String m1 : resourceMethod1) {

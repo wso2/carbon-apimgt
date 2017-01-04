@@ -40,6 +40,7 @@ import javax.wsdl.extensions.ExtensibilityElement;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
@@ -180,6 +181,7 @@ public class APIMWSDLReader {
 		try {
 			// Generate wsdl document from registry data
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			factory.setNamespaceAware(true);
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			org.apache.woden.WSDLFactory wsdlFactory = org.apache.woden.WSDLFactory.newInstance();

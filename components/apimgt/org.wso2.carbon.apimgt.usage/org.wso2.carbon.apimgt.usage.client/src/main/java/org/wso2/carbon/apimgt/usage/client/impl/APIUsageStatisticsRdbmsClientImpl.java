@@ -190,7 +190,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public static OMElement buildOMElement(InputStream inputStream) throws Exception {
         XMLStreamReader parser;
         try {
-            parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            parser = xmlInputFactory.createXMLStreamReader(inputStream);
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser to build the OMElement.";
             log.error(msg, e);
@@ -2604,18 +2606,20 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
+            boolean isVersionSet = false;
+            boolean isTenantSet = false;
+            boolean isMediationTypeSet = false;
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT * FROM ");
             String tableName = getExecutionTimeTableByView(drillDown);
-            query.append(tableName).append(" WHERE ");
-            query.append("api='" + apiName).append("'");
+            query.append(tableName).append(" WHERE api = ?");
             if (version != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
-                        .append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("= ?");
+                isVersionSet = true;
             }
             if (tenantDomain != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
-                        (tenantDomain).append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("= ?");
+                isTenantSet = true;
             }
             if (fromDate != null && toDate != null) {
                 try {
@@ -2628,11 +2632,26 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
             if (mediationType != null && mediationType != "ALL") {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(" = '").append
-                        (mediationType).append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(" = ?");
+                isMediationTypeSet = true;
             }
             if (isTableExist(tableName, connection)) { //Tables exist
+
+                // dynamically set parameters to prepared statement according to what is appended before
+                int counter = 2;
                 preparedStatement = connection.prepareStatement(query.toString());
+                preparedStatement.setString(1, apiName);
+                if (isVersionSet) {
+                    preparedStatement.setString(counter, version);
+                    counter++;
+                }
+                if (isTenantSet) {
+                    preparedStatement.setString(counter, tenantDomain);
+                    counter++;
+                }
+                if (isMediationTypeSet) {
+                    preparedStatement.setString(counter, mediationType);
+                }
                 rs = preparedStatement.executeQuery();
                 int hour = 0;
                 int minute = 0;
@@ -2709,6 +2728,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
+            boolean isVersionSet = false;
+            boolean isTenantSet = false;
+            boolean isDrilldownSet = false;
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country ");
             if (!"ALL".equals(drillDown)) {
@@ -2716,15 +2738,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
             query.append("FROM ");
             String tableName = APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY;
-            query.append(tableName).append(" WHERE ");
-            query.append("api='" + apiName).append("'");
+            query.append(tableName).append(" WHERE api= ?");
             if (version != null && !"ALL".equals(version)) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
-                        .append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("= ?");
+                isVersionSet = true;
             }
             if (tenantDomain != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
-                        (tenantDomain).append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("= ?");
+                isTenantSet = true;
             }
             if (fromDate != null && toDate != null) {
                 try {
@@ -2735,14 +2756,31 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
             if (!"ALL".equals(drillDown)) {
-                query.append(" AND country ='").append(drillDown).append("'");
+                query.append(" AND country = ?");
+                isDrilldownSet = true;
             }
             query.append(" GROUP BY country ");
             if (!"ALL".equals(drillDown)) {
                 query.append(",city");
             }
             if (isTableExist(tableName, connection)) { //Tables exist
+
+                // dynamically set parameters to prepared statement according to what is appended before
+                int counter = 2;
                 preparedStatement = connection.prepareStatement(query.toString());
+                preparedStatement.setString(1, apiName);
+                if (isVersionSet) {
+                    preparedStatement.setString(counter, version);
+                    counter++;
+                }
+                if (isTenantSet) {
+                    preparedStatement.setString(counter, tenantDomain);
+                    counter++;
+                }
+                if (isDrilldownSet) {
+                    preparedStatement.setString(counter, drillDown);
+                }
+
                 rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
@@ -2785,19 +2823,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
+            boolean isVersionSet = false;
+            boolean isTenantSet = false;
+            boolean isDrilldownSet = false;
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,os,browser " +
                     "FROM ");
             String tableName = APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY;
-            query.append(tableName).append(" WHERE ");
-            query.append("api='" + apiName).append("'");
+            query.append(tableName).append(" WHERE api= ?");
             if (version != null && !"ALL".equals(version)) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
-                        .append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("= ?");
+                isVersionSet = true;
             }
             if (tenantDomain != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
-                        (tenantDomain).append("'");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("= ?");
+                isTenantSet = true;
             }
             if (fromDate != null && toDate != null) {
                 try {
@@ -2808,12 +2848,29 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
             if (!"ALL".equals(drillDown)) {
-                query.append(" AND os ='").append(drillDown).append("'");
+                query.append(" AND os = ?");
+                isDrilldownSet = true;
             }
             query.append(" GROUP BY os, browser ");
 
             if (isTableExist(tableName, connection)) { //Tables exist
+
+                // dynamically set parameters to prepared statement according to what is appended before
+                int counter = 2;
                 preparedStatement = connection.prepareStatement(query.toString());
+                preparedStatement.setString(1, apiName);
+                if (isVersionSet) {
+                    preparedStatement.setString(counter, version);
+                    counter++;
+                }
+                if (isTenantSet) {
+                    preparedStatement.setString(counter, tenantDomain);
+                    counter++;
+                }
+                if (isDrilldownSet) {
+                    preparedStatement.setString(counter, drillDown);
+                }
+
                 rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     Result<UserAgentUsageCount> result1 = new Result<UserAgentUsageCount>();

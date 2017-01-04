@@ -7879,20 +7879,24 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         Set<Scope> scopes = new LinkedHashSet<Scope>();
         List<String> inputScopeList = Arrays.asList(scopeKeys.split(" "));
-        StringBuilder scopeStrBuilder = new StringBuilder();
-        for (String inputScope : inputScopeList) {
-            scopeStrBuilder.append('\'').append(inputScope).append("',");
+        StringBuilder placeHolderBuilder = new StringBuilder();
+        for (int i = 0; i < inputScopeList.size(); i++) {
+            placeHolderBuilder.append("?, ");
         }
-        String scopesString = scopeStrBuilder.toString();
-        scopesString = scopesString.substring(0, scopesString.length() - 1);
+
+        String placeHolderStr = placeHolderBuilder.deleteCharAt(placeHolderBuilder.length() - 2).toString();
         try {
             conn = APIMgtDBUtil.getConnection();
-
-            String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX + scopesString + SQLConstants
+            String sqlQuery = SQLConstants.GET_SCOPES_BY_SCOPE_KEYS_PREFIX + placeHolderStr + SQLConstants
                     .GET_SCOPES_BY_SCOPE_KEYS_SUFFIX;
-
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantId);
+
+            for (int i = 0; i < inputScopeList.size(); i++) {
+                ps.setString(i + 1, inputScopeList.get(i));
+            }
+
+            ps.setInt(inputScopeList.size() + 1, tenantId);
+
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 Scope scope = new Scope();
