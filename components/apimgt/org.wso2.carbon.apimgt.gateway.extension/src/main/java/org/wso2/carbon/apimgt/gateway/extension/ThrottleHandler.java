@@ -481,86 +481,6 @@ public class ThrottleHandler implements MessagingHandler {
         return true;
     }
 
-
-    public String getFaultPayload(int throttleErrorCode, String message, String description,
-                                  String nextAccessTimeValue) {
-
-        String errorMessage = message + " " + description + "Error Code" + throttleErrorCode + nextAccessTimeValue;
-        return errorMessage;
-    }
-
-    private void handleThrottleOut(CarbonMessage messageContext) {
-
-        String errorMessage = null;
-        String errorDescription = null;
-        int errorCode = -1;
-        int httpErrorCode = -1;
-        String nextAccessTimeString = "";
-        if (APIThrottleConstants.HARD_LIMIT_EXCEEDED.equals(
-                messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE;
-            errorMessage = "API Limit Reached";
-            errorDescription = "API not accepting requests";
-            // It it's a hard limit exceeding, we tell it as service not being available.
-            httpErrorCode = APIThrottleConstants.SC_SERVICE_UNAVAILABLE;
-        } else if (APIThrottleConstants.REQUEST_BLOCKED.equals(
-                messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.BLOCKED_ERROR_CODE;
-            errorMessage = "Message blocked";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_FORBIDDEN;
-            errorDescription = "You have been blocked from accessing the resource";
-        } else if (APIThrottleConstants.API_LIMIT_EXCEEDED
-                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
-                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        } else if (APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED
-                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        } else if (APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED
-                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        } else if (APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED
-                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = APIThrottleConstants.SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        } else {
-            errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
-            errorMessage = "Message throttled out";
-            // By default we send a 429 response back
-            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-            errorDescription = "You have exceeded your quota";
-        }
-
-        messageContext.setProperty(APIThrottleConstants.ERROR_CODE, errorCode);
-        messageContext.setProperty(APIThrottleConstants.ERROR_MESSAGE, errorMessage);
-
-        String message = httpErrorCode + errorDescription + nextAccessTimeString;
-        messageContext.setProperty("THROTTLE_OUT_MESSAGE", message);
-        // TODO: Implement throttleout message based on new balerina
-    }
-
     public void setId(String id) {
         this.id = id;
     }
@@ -649,5 +569,96 @@ public class ThrottleHandler implements MessagingHandler {
         if (throttleDataPublisher == null) {
             throttleDataPublisher = new ThrottleDataPublisher();
         }
+    }
+
+    /**
+     * Need to complete the implementation using ballerina
+     * @param messageContext
+     */
+    private void handleThrottleOut(CarbonMessage messageContext) {
+
+        String errorMessage = null;
+        String errorDescription = null;
+        int errorCode = -1;
+        int httpErrorCode = -1;
+        String nextAccessTimeString = "";
+        if (APIThrottleConstants.HARD_LIMIT_EXCEEDED.equals(
+                messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE;
+            errorMessage = "API Limit Reached";
+            errorDescription = "API not accepting requests";
+            // It it's a hard limit exceeding, we tell it as service not being available.
+            httpErrorCode = APIThrottleConstants.SC_SERVICE_UNAVAILABLE;
+        } else if (APIThrottleConstants.REQUEST_BLOCKED.equals(
+                messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.BLOCKED_ERROR_CODE;
+            errorMessage = "Message blocked";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_FORBIDDEN;
+            errorDescription = "You have been blocked from accessing the resource";
+        } else if (APIThrottleConstants.API_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else {
+            errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        }
+
+        messageContext.setProperty(APIThrottleConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(APIThrottleConstants.ERROR_MESSAGE, errorMessage);
+
+        String message = httpErrorCode + errorDescription + nextAccessTimeString;
+        messageContext.setProperty("THROTTLE_OUT_MESSAGE", message);
+        // TODO: Implement throttleout message based on new balerina
+    }
+
+    /**
+     * USed to Create a meaningful error message
+     * @param throttleErrorCode
+     * @param message
+     * @param description
+     * @param nextAccessTimeValue
+     * @return
+     */
+    public String getFaultPayload(int throttleErrorCode, String message, String description,
+                                  String nextAccessTimeValue) {
+
+        String errorMessage = message + " " + description + "Error Code" + throttleErrorCode + nextAccessTimeValue;
+        return errorMessage;
     }
 }
