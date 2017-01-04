@@ -32,6 +32,8 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     private String applicationName;
 
+    private int applicationId;
+
     private String tierName;
 
     public String getApiName() {
@@ -88,5 +90,13 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     public void setApiProvider(String apiProvider) {
         this.apiProvider = apiProvider;
+    }
+
+    public int getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(int applicationId) {
+        this.applicationId = applicationId;
     }
 }
