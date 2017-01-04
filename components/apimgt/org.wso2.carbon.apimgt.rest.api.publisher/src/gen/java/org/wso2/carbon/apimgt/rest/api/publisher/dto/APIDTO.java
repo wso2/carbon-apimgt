@@ -16,11 +16,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-04T14:58:24.387+05:30")
 public class APIDTO   {
-  @JsonProperty("operations")
-  private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
-
   @JsonProperty("id")
   private String id = null;
 
@@ -125,28 +122,8 @@ public class APIDTO   {
   @JsonProperty("endpointId")
   private String endpointId = null;
 
-  public APIDTO operations(List<API_operationsDTO> operations) {
-    this.operations = operations;
-    return this;
-  }
-
-  public APIDTO addOperationsItem(API_operationsDTO operationsItem) {
-    this.operations.add(operationsItem);
-    return this;
-  }
-
-   /**
-   * Get operations
-   * @return operations
-  **/
-  @ApiModelProperty(value = "")
-  public List<API_operationsDTO> getOperations() {
-    return operations;
-  }
-
-  public void setOperations(List<API_operationsDTO> operations) {
-    this.operations = operations;
-  }
+  @JsonProperty("operations")
+  private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
 
   public APIDTO id(String id) {
     this.id = id;
@@ -592,6 +569,29 @@ public class APIDTO   {
     this.endpointId = endpointId;
   }
 
+  public APIDTO operations(List<API_operationsDTO> operations) {
+    this.operations = operations;
+    return this;
+  }
+
+  public APIDTO addOperationsItem(API_operationsDTO operationsItem) {
+    this.operations.add(operationsItem);
+    return this;
+  }
+
+   /**
+   * Get operations
+   * @return operations
+  **/
+  @ApiModelProperty(value = "")
+  public List<API_operationsDTO> getOperations() {
+    return operations;
+  }
+
+  public void setOperations(List<API_operationsDTO> operations) {
+    this.operations = operations;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -602,8 +602,7 @@ public class APIDTO   {
       return false;
     }
     APIDTO API = (APIDTO) o;
-    return Objects.equals(this.operations, API.operations) &&
-        Objects.equals(this.id, API.id) &&
+    return Objects.equals(this.id, API.id) &&
         Objects.equals(this.name, API.name) &&
         Objects.equals(this.description, API.description) &&
         Objects.equals(this.context, API.context) &&
@@ -625,12 +624,13 @@ public class APIDTO   {
         Objects.equals(this.sequences, API.sequences) &&
         Objects.equals(this.businessInformation, API.businessInformation) &&
         Objects.equals(this.corsConfiguration, API.corsConfiguration) &&
-        Objects.equals(this.endpointId, API.endpointId);
+        Objects.equals(this.endpointId, API.endpointId) &&
+        Objects.equals(this.operations, API.operations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(operations, id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpointId);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpointId, operations);
   }
 
   @Override
@@ -638,7 +638,6 @@ public class APIDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
-    sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -662,6 +661,7 @@ public class APIDTO   {
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    endpointId: ").append(toIndentedString(endpointId)).append("\n");
+    sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("}");
     return sb.toString();
   }

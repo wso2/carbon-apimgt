@@ -93,9 +93,6 @@ public class APIUtils {
         if (StringUtils.isEmpty(api.getId())) {
             throw new APIManagementException("Couldn't find UUID of API");
         }
-        if (StringUtils.isEmpty(api.getEndpointId())) {
-            throw new APIManagementException("Couldn't find swagger definition of API");
-        }
         if (StringUtils.isEmpty(api.getName())) {
             throw new APIManagementException("Couldn't find Name of API ");
         }

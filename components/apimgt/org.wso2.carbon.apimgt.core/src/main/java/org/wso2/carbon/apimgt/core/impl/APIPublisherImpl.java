@@ -176,9 +176,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
-
-        List<UriTemplate> uriTemplateList = new ArrayList<>();
-        apiBuilder.uriTemplates(uriTemplateList);
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);

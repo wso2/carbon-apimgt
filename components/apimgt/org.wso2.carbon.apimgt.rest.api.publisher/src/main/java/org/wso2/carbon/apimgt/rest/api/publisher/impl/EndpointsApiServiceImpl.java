@@ -17,7 +17,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -88,7 +87,8 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             Endpoint endpoint = MappingUtil.toEndpoint(body);
             Endpoint retrievedEndpoint = apiPublisher.getEndpoint(endpointId);
             if (retrievedEndpoint != null) {
-                apiPublisher.updateEndpoint(endpoint);
+                Endpoint updatedEndpint = new Endpoint.Builder(endpoint).id(endpointId).build();
+                apiPublisher.updateEndpoint(updatedEndpint);
                 Endpoint updatedEndpoint = apiPublisher.getEndpoint(endpointId);
                 return Response.ok().entity(MappingUtil.toEndPointDTO(updatedEndpoint)).build();
             } else {

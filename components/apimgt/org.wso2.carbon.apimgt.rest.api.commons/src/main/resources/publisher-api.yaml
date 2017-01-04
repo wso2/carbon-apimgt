@@ -2782,28 +2782,6 @@ definitions:
       - transport
       - visibility
     properties:
-      operations:
-       type: array
-       items:
-        properties:
-          id:
-           type: string
-           example: "postapiresource"
-          uritemplate:
-            type: string
-            default: "/*"
-          httpVerb:
-            type: string
-            default: "GET"
-          authType:
-            type: string
-            default: "Any"
-          policy:
-            type: string
-            example: "Unlimited"
-          endpoint:
-            type: string
-            example: 01234567-0123-0123-0123-012345678901
       id:
         type: string
         description: |
@@ -2932,6 +2910,28 @@ definitions:
         description: |
           UUID of the Endpoint
         example: 01234567-0123-0123-0123-012345678901
+      operations:
+       type: array
+       items:
+        properties:
+          id:
+           type: string
+           example: "postapiresource"
+          uritemplate:
+            type: string
+            default: "/*"
+          httpVerb:
+            type: string
+            default: "GET"
+          authType:
+            type: string
+            default: "Any"
+          policy:
+            type: string
+            example: "Unlimited"
+          endpoint:
+            type: string
+            example: 01234567-0123-0123-0123-012345678901
 
 #-----------------------------------------------------
 # The Application resource

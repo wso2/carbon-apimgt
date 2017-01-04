@@ -1338,7 +1338,7 @@ public class ApiDAOImpl implements ApiDAO {
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 Endpoint.Builder endpointBuilder = new Endpoint.Builder();
-                endpointBuilder.id("");
+                endpointBuilder.id(resultSet.getString("UUID"));
                 endpointBuilder.endpointConfig(IOUtils.toString(resultSet.getBinaryStream
                         ("ENDPOINT_CONFIGURATION")));
                 endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"), resultSet.getLong
