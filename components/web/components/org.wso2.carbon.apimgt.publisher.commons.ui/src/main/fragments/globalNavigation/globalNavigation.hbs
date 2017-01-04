@@ -2,8 +2,9 @@
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
             <a href="{{@contextPath}}/apis" title="apiPublisherHomePage">
-                    <img src="{{public logo}}"
-                    alt="WSO2 {{appName}} Home" class="logo"><h1>{{appName}}</h1>
+                {{fragment "wso2-logo"}}
+                <!-- TODO: take this `wso2-logo` from common.foundation component fragment if possible ~tmkb-->
+                <h1>{{appName}}</h1>
             </a>
         </div>
 
@@ -15,12 +16,13 @@
 	                   <i class="fw fw-circle fw-stack-2x" title="user"></i>
 	                   <i class="fw fw-user fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
-					<span class="hidden-xs">
+                    <span class="hidden-xs">
 							<span class="userNameContainer">admin</span>
 							 <span class="caret"></span>
 					</span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+                <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown"
+                    role="menu">
                     <li class="dropdown-header visible-xs">
                         <span class="userNameContainer">admin</span>
                         <span class="caret"></span>
@@ -32,4 +34,4 @@
         </ul>
     </div>
 </header>
-{{fragment "authJsLibraries"}}
+{{fragment "authManager"}}
