@@ -48,16 +48,7 @@ public final class API {
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
         lifecycleInstanceId = builder.lifecycleInstanceId;
-        if (builder.apiDefinition != null) {
-            apiDefinition = builder.apiDefinition.toString();
-        } else {
-            apiDefinition = "";
-        }
-        if (builder.gatewayConfig != null) {
-            gatewayConfig = builder.gatewayConfig.toString();
-        } else {
-            gatewayConfig = "";
-        }
+            endpointID = builder.endpointId;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
@@ -109,8 +100,8 @@ public final class API {
         return lifecycleInstanceId;
     }
 
-    public String getApiDefinition() {
-        return apiDefinition;
+    public String getEndpointId() {
+        return endpointID;
     }
 
     public String getGatewayConfig() {
@@ -203,7 +194,7 @@ public final class API {
                 Objects.equals(description, api.description) &&
                 Objects.equals(lifeCycleStatus, api.lifeCycleStatus) &&
                 Objects.equals(lifecycleInstanceId, api.lifecycleInstanceId) &&
-                Objects.equals(apiDefinition, api.apiDefinition) &&
+                Objects.equals(endpointID, api.endpointID) &&
                 Objects.equals(gatewayConfig, api.gatewayConfig) &&
                 Objects.equals(wsdlUri, api.wsdlUri) &&
                 APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
@@ -224,9 +215,9 @@ public final class API {
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
-                apiDefinition, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
-                transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
-                createdTime, createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                endpointID, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion, transport, tags,
+                policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime, createdBy,
+                lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
 
 
@@ -245,7 +236,7 @@ public final class API {
     private final String description;
     private final String lifeCycleStatus;
     private final String lifecycleInstanceId;
-    private final String apiDefinition;
+    private final String endpointID;
     private final String gatewayConfig;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -302,8 +293,8 @@ public final class API {
             return lifecycleInstanceId;
         }
 
-        public StringBuilder getApiDefinition() {
-            return apiDefinition;
+        public String getEndpointId() {
+            return endpointId;
         }
 
         public StringBuilder getGatewayConfig() {
@@ -359,7 +350,7 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
-        private StringBuilder apiDefinition;
+        private String endpointId;
         private StringBuilder gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
@@ -395,11 +386,7 @@ public final class API {
             this.description = copy.description;
             this.lifeCycleStatus = copy.lifeCycleStatus;
             this.lifecycleInstanceId = copy.lifecycleInstanceId;
-            if (copy.apiDefinition != null) {
-                this.apiDefinition = new StringBuilder(copy.apiDefinition);
-            } else {
-                this.apiDefinition = new StringBuilder();
-            }
+            this.endpointId = copy.endpointID;
             this.wsdlUri = copy.wsdlUri;
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
@@ -525,14 +512,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained
+         * Sets the {@code endpointID} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
-         * @param apiDefinition the {@code apiDefinition} to set
+         * @param endpointId the {@code endpointID} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiDefinition(StringBuilder apiDefinition) {
-            this.apiDefinition = apiDefinition;
+        public APIBuilder endpointId(String endpointId) {
+            this.endpointId = endpointId;
             return this;
         }
 

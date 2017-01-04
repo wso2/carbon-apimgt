@@ -7,29 +7,29 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 
 /**
- * EnvironmentListDTO
+ * EndPointListDTO
  */
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
-public class EnvironmentListDTO   {
+public class EndPointListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
   @JsonProperty("list")
-  private List<EnvironmentDTO> list = new ArrayList<EnvironmentDTO>();
+  private List<EndPointDTO> list = new ArrayList<EndPointDTO>();
 
-  public EnvironmentListDTO count(Integer count) {
+  public EndPointListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of Environments returned. 
+   * Number of EndPoints returned. 
    * @return count
   **/
-  @ApiModelProperty(example = "1", value = "Number of Environments returned. ")
+  @ApiModelProperty(example = "1", value = "Number of EndPoints returned. ")
   public Integer getCount() {
     return count;
   }
@@ -38,12 +38,12 @@ public class EnvironmentListDTO   {
     this.count = count;
   }
 
-  public EnvironmentListDTO list(List<EnvironmentDTO> list) {
+  public EndPointListDTO list(List<EndPointDTO> list) {
     this.list = list;
     return this;
   }
 
-  public EnvironmentListDTO addListItem(EnvironmentDTO listItem) {
+  public EndPointListDTO addListItem(EndPointDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -53,11 +53,11 @@ public class EnvironmentListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<EnvironmentDTO> getList() {
+  public List<EndPointDTO> getList() {
     return list;
   }
 
-  public void setList(List<EnvironmentDTO> list) {
+  public void setList(List<EndPointDTO> list) {
     this.list = list;
   }
 
@@ -70,9 +70,9 @@ public class EnvironmentListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    EnvironmentListDTO environmentList = (EnvironmentListDTO) o;
-    return Objects.equals(this.count, environmentList.count) &&
-        Objects.equals(this.list, environmentList.list);
+    EndPointListDTO endPointList = (EndPointListDTO) o;
+    return Objects.equals(this.count, endPointList.count) &&
+        Objects.equals(this.list, endPointList.list);
   }
 
   @Override
@@ -83,7 +83,7 @@ public class EnvironmentListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EnvironmentListDTO {\n");
+    sb.append("class EndPointListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

@@ -14,10 +14,10 @@ import org.wso2.msf4j.formparam.FileInfo;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
-public class TiersApiServiceImpl extends TiersApiService {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
-    public Response tiersTierLevelGet(String tierLevel
+    public Response policiesTierLevelGet(String tierLevel
 , Integer limit
 , Integer offset
 , String accept
@@ -27,7 +27,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response tiersTierLevelPost(TierDTO body
+    public Response policiesTierLevelPost(TierDTO body
 , String tierLevel
 , String contentType
  ) throws NotFoundException {
@@ -35,7 +35,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response tiersTierLevelTierNameDelete(String tierName
+    public Response policiesTierLevelTierNameDelete(String tierName
 , String tierLevel
 , String ifMatch
 , String ifUnmodifiedSince
@@ -44,7 +44,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response tiersTierLevelTierNameGet(String tierName
+    public Response policiesTierLevelTierNameGet(String tierName
 , String tierLevel
 , String accept
 , String ifNoneMatch
@@ -54,7 +54,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response tiersTierLevelTierNamePut(String tierName
+    public Response policiesTierLevelTierNamePut(String tierName
 , TierDTO body
 , String tierLevel
 , String contentType
@@ -65,7 +65,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response tiersUpdatePermissionPost(String tierName
+    public Response policiesUpdatePermissionPost(String tierName
 , String tierLevel
 , String ifMatch
 , String ifUnmodifiedSince

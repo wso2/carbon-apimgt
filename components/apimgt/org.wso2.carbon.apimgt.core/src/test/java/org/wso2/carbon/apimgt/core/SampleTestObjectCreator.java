@@ -21,10 +21,11 @@
 package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.io.IOUtils;
-import org.wso2.carbon.apimgt.core.api.APIDefinition;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -36,6 +37,7 @@ import java.util.UUID;
 
 public class SampleTestObjectCreator {
     static String apiDefinition;
+    static String endpointId = UUID.randomUUID().toString();
     static {
         byte[] bytes = new byte[0];
         try {
@@ -69,7 +71,7 @@ public class SampleTestObjectCreator {
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
                 lifecycleInstanceId(UUID.randomUUID().toString()).
-                apiDefinition(new StringBuilder(apiDefinition)).
+                endpointId(endpointId).
                 wsdlUri("").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
@@ -85,17 +87,6 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy("admin").
                 lastUpdatedTime(LocalDateTime.now());
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
         return apiBuilder;
     }
 
@@ -166,7 +157,7 @@ public class SampleTestObjectCreator {
                 context("yummy").
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder(apiDefinition)).
+                endpointId(endpointId).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -182,17 +173,6 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
                 lastUpdatedTime(LocalDateTime.now());
-
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
 
         return apiBuilder;
     }
@@ -227,7 +207,7 @@ public class SampleTestObjectCreator {
                 context(UUID.randomUUID().toString()).
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder(apiDefinition)).
+                endpointId(endpointId).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -243,17 +223,6 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
                 lastUpdatedTime(LocalDateTime.now());
-
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
 
         return apiBuilder;
     }
@@ -317,5 +286,20 @@ public class SampleTestObjectCreator {
         application.setUpdatedUser("admin");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
+    }
+
+    public static Endpoint createMockEndpoint() {
+        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").build();
+    }
+    public static Endpoint createUpdatedEndpoint() {
+        return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").build();
+    }
+    public static Endpoint createAlternativeEndpoint() {
+        String uuid = UUID.randomUUID().toString();
+        return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").build();
+
     }
 }

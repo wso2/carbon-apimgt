@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -35,9 +34,9 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -181,12 +180,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.id(UUID.randomUUID().toString());
         }
 
-        APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
         List<UriTemplate> uriTemplateList = new ArrayList<>();
-        List<APIResource> apiResources = apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition());
-        for (APIResource apiResource : apiResources) {
-            uriTemplateList.add(apiResource.getUriTemplate());
-        }
         apiBuilder.uriTemplates(uriTemplateList);
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
@@ -254,19 +248,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
                 apiBuilder.createdTime(originalAPI.getCreatedTime());
-                if (StringUtils.isNotEmpty(apiBuilder.getApiDefinition()) && (originalAPI.getName().equals(apiBuilder
+                if (StringUtils.isNotEmpty(apiBuilder.getEndpointId()) && (originalAPI.getName().equals(apiBuilder
                         .getName())) && (originalAPI.getContext().equals(apiBuilder.getContext())) && (originalAPI
                         .getVersion().equals(apiBuilder.getVersion())) && (originalAPI.getProvider().equals
                         (apiBuilder.getProvider())) && originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder
                         .getLifeCycleStatus())) {
-                    APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-                    List<UriTemplate> uriTemplateList = new ArrayList<>();
-                    for (APIResource apiResource :
-                            apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())) {
-                        uriTemplateList.add(apiResource.getUriTemplate());
-                    }
-                    apiBuilder.uriTemplates(uriTemplateList);
-
                     API api = apiBuilder.build();
                     getApiDAO().updateAPI(api.getId(), api);
                     if (log.isDebugEnabled()) {
@@ -852,5 +838,65 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIMgtDAOException("Couldn't retrieve gateway configuration for apiId " + apiId,
                     ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    /**
+     * Return list of endpoints
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Endpoint> getAllEndpoints() throws APIManagementException {
+        return getApiDAO().getEndpoints();
+    }
+
+    /**
+     * Get endpoint details according to the endpointId
+     *
+     * @param endpointId uuid of endpoint
+     * @return details of endpoint
+     * @throws APIManagementException
+     */
+    @Override
+    public Endpoint getEndpoint(String endpointId) throws APIManagementException {
+        return getApiDAO().getEndpoint(endpointId);
+    }
+
+    /**
+     * Add an endpoint
+     *
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    @Override
+    public String addEndpoint(Endpoint endpoint) throws APIManagementException {
+        Endpoint.Builder builder = new Endpoint.Builder(endpoint);
+        builder.id(UUID.randomUUID().toString());
+        Endpoint endpoint1 = builder.build();
+        getApiDAO().addEndpoint(endpoint1);
+        return endpoint1.getId();
+    }
+
+    /**
+     * Update and endpoint
+     *
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    @Override
+    public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
+        getApiDAO().updateEndpoint(endpoint);
+    }
+
+    /**
+     * Delete an endpoint
+     *
+     * @param endpointId
+     * @throws APIManagementException
+     */
+    @Override
+    public void deleteEndpoint(String endpointId) throws APIManagementException {
+        getApiDAO().deleteEndpoint(endpointId);
     }
 }

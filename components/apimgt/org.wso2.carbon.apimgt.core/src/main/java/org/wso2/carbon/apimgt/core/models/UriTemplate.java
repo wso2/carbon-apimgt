@@ -38,13 +38,14 @@ public final class UriTemplate implements Serializable {
     private final String httpVerb;
     private final String authType;
     private final String policy;
-
+    private final String endpointId;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
+        endpointId = uriTemplateBuilder.endpointId;
     }
 
     public String getUriTemplate() {
@@ -63,6 +64,9 @@ public final class UriTemplate implements Serializable {
         return policy;
     }
 
+    public String getEndpointId() {
+        return endpointId;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -78,12 +82,13 @@ public final class UriTemplate implements Serializable {
         return Objects.equals(uriTemplate, that.uriTemplate) &&
                 Objects.equals(httpVerb, that.httpVerb) &&
                 Objects.equals(authType, that.authType) &&
-                Objects.equals(policy, that.policy);
+                Objects.equals(policy, that.policy) &&
+                Objects.equals(endpointId, that.endpointId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uriTemplate, httpVerb, authType, policy);
+        return Objects.hash(uriTemplate, httpVerb, authType, policy, endpointId);
     }
 
     @Override
@@ -92,18 +97,19 @@ public final class UriTemplate implements Serializable {
                 .append("uriTemplate", uriTemplate)
                 .append("httpVerb", httpVerb)
                 .append("authType", authType)
-                .append("policy", policy)
+                .append("policy", policy).append("endpointId", endpointId)
                 .toString();
     }
 
     /**
-     *  Builder class for getInstance
+     * Builder class for getInstance
      */
     public static final class UriTemplateBuilder {
         private String uriTemplate;
         private String httpVerb;
         private String authType;
         private String policy;
+        private String endpointId;
 
         public UriTemplateBuilder() {
         }
@@ -129,6 +135,11 @@ public final class UriTemplate implements Serializable {
 
         public UriTemplateBuilder policy(String policy) {
             this.policy = policy;
+            return this;
+        }
+
+        public UriTemplateBuilder endpointId(String endpointId) {
+            this.endpointId = endpointId;
             return this;
         }
 

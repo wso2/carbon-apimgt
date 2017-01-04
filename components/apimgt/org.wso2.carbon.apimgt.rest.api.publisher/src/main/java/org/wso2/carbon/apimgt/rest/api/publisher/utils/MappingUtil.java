@@ -23,20 +23,26 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_maxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
@@ -58,7 +64,6 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
-        apidto.setApiDefinition(api.getApiDefinition());
         apidto.setIsDefaultVersion(api.isDefaultVersion());
         apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
@@ -83,7 +88,17 @@ public class MappingUtil {
         apiCorsConfigurationDTO.setAccessControlAllowOrigins(corsConfiguration.getAllowOrigins());
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isEnabled());
         apidto.setCorsConfiguration(apiCorsConfigurationDTO);
-
+        apidto.setEndpointId(api.getEndpointId());
+        List<UriTemplate> uriTemplateList = api.getUriTemplates();
+        for (UriTemplate uriTemplate : uriTemplateList) {
+            API_operationsDTO apiOperationsDTO = new API_operationsDTO();
+            apiOperationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+            apiOperationsDTO.setAuthType(uriTemplate.getAuthType());
+            apiOperationsDTO.setEndpoint(uriTemplate.getEndpointId());
+            apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
+            apiOperationsDTO.setPolicy(uriTemplate.getPolicy());
+            apidto.addOperationsItem(apiOperationsDTO);
+        }
         return apidto;
     }
 
@@ -108,13 +123,27 @@ public class MappingUtil {
         corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
-
+        List<API_operationsDTO> operationList = apidto.getOperations();
+        List<UriTemplate> uriTemplateList = new ArrayList<>();
+        for (API_operationsDTO operationsDTO : operationList){
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+            uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
+            uriTemplateBuilder.authType(operationsDTO.getAuthType());
+            uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
+            uriTemplateBuilder.policy(operationsDTO.getPolicy());
+            if (StringUtils.isNotEmpty(operationsDTO.getEndpoint())){
+                uriTemplateBuilder.endpointId(operationsDTO.getEndpoint());
+            }else{
+                uriTemplateBuilder.endpointId(apidto.getEndpointId());
+            }
+            uriTemplateList.add(uriTemplateBuilder.build());
+        }
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                apiDefinition(new StringBuilder(apidto.getApiDefinition())).
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
+                endpointId(apidto.getEndpointId()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getPolicies()).
@@ -124,6 +153,7 @@ public class MappingUtil {
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
+                uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);
         return apiBuilder;
     }
@@ -260,5 +290,41 @@ public class MappingUtil {
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
         subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
         return subscriptionDTO;
+    }
+
+    /**
+     * Convert {@link Endpoint} to {@link EndPointDTO}
+     * @param endpoint
+     * @return
+     */
+    public static EndPointDTO toEndPointDTO(Endpoint endpoint) {
+        EndPointDTO endPointDTO = new EndPointDTO();
+        endPointDTO.setId(endpoint.getId());
+        endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
+        endPointDTO.setEndpointSecurity(endpoint.getSecurity());
+        EndPoint_maxTpsDTO endPointMaxTpsDTO = new EndPoint_maxTpsDTO();
+        Endpoint.MaxTps maxTps = endpoint.getMaxTps();
+        if (maxTps != null) {
+            endPointMaxTpsDTO.setProduction(maxTps.getProduction());
+            endPointMaxTpsDTO.setSandbox(maxTps.getSandbox());
+        }
+        endPointDTO.setMaxTps(endPointMaxTpsDTO);
+        return endPointDTO;
+    }
+
+    /**
+     * Convert {@link EndPointDTO} to {@link Endpoint}
+     * @param endPointDTO
+     * @return
+     */
+    public static Endpoint toEndpoint(EndPointDTO endPointDTO) {
+        Endpoint.Builder endPointBuilder = new Endpoint.Builder();
+        endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
+        EndPoint_maxTpsDTO maxTpsDTO = endPointDTO.getMaxTps();
+        if (maxTpsDTO != null) {
+            endPointBuilder.maxTps(new Endpoint.MaxTps(maxTpsDTO.getProduction(), maxTpsDTO.getSandbox()));
+        }
+        endPointBuilder.security(endPointDTO.getEndpointSecurity());
+        return endPointBuilder.build();
     }
 }

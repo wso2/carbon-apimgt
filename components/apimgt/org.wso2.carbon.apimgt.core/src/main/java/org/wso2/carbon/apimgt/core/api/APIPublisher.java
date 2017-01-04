@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -346,4 +347,41 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     * Return list of endpoints
+     * @return
+     * @throws APIManagementException
+     */
+    List<Endpoint> getAllEndpoints() throws APIManagementException;
+
+
+    /**
+     * Get endpoint details according to the endpointId
+     * @param endpointId uuid of endpoint
+     * @return details of endpoint
+     * @throws APIManagementException
+     */
+    Endpoint getEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Add an endpoint
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    String addEndpoint(Endpoint endpoint) throws APIManagementException;
+
+    /**
+     * Update and endpoint
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    void updateEndpoint(Endpoint endpoint) throws APIManagementException;
+
+    /**
+     * Delete an endpoint
+     * @param endpointId
+     * @throws APIManagementException
+     */
+    void deleteEndpoint(String endpointId) throws APIManagementException;
 }
