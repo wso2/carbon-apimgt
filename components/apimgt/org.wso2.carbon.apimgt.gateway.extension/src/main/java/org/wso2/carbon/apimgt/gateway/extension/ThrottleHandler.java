@@ -668,12 +668,10 @@ public class ThrottleHandler implements MessagingHandler {
     /**
      * This method will initialize data publisher and this data publisher will be used to push events to traffic manager
      */
-    private static void initDataPublisher() {
+    private static synchronized void initDataPublisher() {
 
         if (throttleDataPublisher == null) {
-            synchronized (throttleDataPublisher) {
-                throttleDataPublisher = new ThrottleDataPublisher();
-            }
+            throttleDataPublisher = new ThrottleDataPublisher();
         }
     }
 }
