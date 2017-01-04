@@ -20,36 +20,35 @@ package org.wso2.carbon.apimgt.keymgt.issuers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.issuers.ScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 import java.util.*;
 
-public class ScopesDelegator {
+public class ScopesIssuingHandler {
 
-    private static Log log = LogFactory.getLog(ScopesDelegator.class);
+    private static Log log = LogFactory.getLog(ScopesIssuingHandler.class);
     private List<String> scopeSkipList = new ArrayList<String>();
     private static Map<String, ScopesIssuer> scopesIssuers;
     private static final String DEFAULT_SCOPE_NAME = "default";
     /**
      * Singleton of ScopeIssuer.*
      */
-    private static ScopesDelegator scopesDelegator;
+    private static ScopesIssuingHandler scopesIssuingHandler;
     
-    private ScopesDelegator() {
+    private ScopesIssuingHandler() {
     }
 
     public static void loadInstance(List<String> whitelist) {
-        scopesDelegator = new ScopesDelegator();
+        scopesIssuingHandler = new ScopesIssuingHandler();
         if (whitelist != null && !whitelist.isEmpty()) {
-            scopesDelegator.scopeSkipList.addAll(whitelist);
+            scopesIssuingHandler.scopeSkipList.addAll(whitelist);
         }
-        scopesIssuers = OAuthServerConfiguration.getInstance().getOAuth2ScopesIssuers();
+        scopesIssuers = APIKeyMgtDataHolder.getScopesIssuers();
     }  
 
-    public static ScopesDelegator getInstance() {
-        return scopesDelegator;
+    public static ScopesIssuingHandler getInstance() {
+        return scopesIssuingHandler;
     }
 
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx) {
@@ -61,7 +60,7 @@ public class ScopesDelegator {
         if (scopesIssuers == null || scopesIssuers.isEmpty()) {
 
             if (log.isDebugEnabled()) {
-                log.debug("Scope Issuers are not defined in 'identity.xml'");
+                log.debug("Scope Issuers are not loaded");
             }
             tokReqMsgCtx.setScope(defaultScope);
             return true;
@@ -72,7 +71,6 @@ public class ScopesDelegator {
             tokReqMsgCtx.setScope(defaultScope);
             return true;
         }
-        //List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         Map<String, List<String>> scopeSets = new HashMap<String, List<String>>();
 
@@ -95,7 +93,7 @@ public class ScopesDelegator {
         List<String> authorizedScopes;
         boolean isAllAuthorized = false;
         for (String prefix : scopesIssuers.keySet()) {
-            authorizedScopes = scopesIssuers.get(prefix).getScopes(tokReqMsgCtx, scopeSets.get(prefix));
+            authorizedScopes = scopesIssuers.get(prefix).getScopes(tokReqMsgCtx, scopeSkipList);
             if (authorizedAllScopes != null) {
                 authorizedAllScopes.addAll(authorizedScopes);
                 isAllAuthorized = true;

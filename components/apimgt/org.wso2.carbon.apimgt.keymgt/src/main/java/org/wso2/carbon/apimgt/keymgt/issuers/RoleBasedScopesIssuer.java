@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
-import org.wso2.carbon.identity.oauth2.issuers.ScopesIssuer;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -39,10 +38,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class RoleBasedScopesIssuer implements ScopesIssuer {
+public class RoleBasedScopesIssuer extends ScopesIssuer {
 
     private static Log log = LogFactory.getLog(RoleBasedScopesIssuer.class);
     private static final String DEFAULT_SCOPE_NAME = "default";
+
+    // set role based scopes issuer as the default
+    private static final String ISSUER_PREFIX = "default";
+
+    @Override
+    public String getPrefix(){
+        return ISSUER_PREFIX;
+    }
 
     @Override
     public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes) {
@@ -50,12 +57,6 @@ public class RoleBasedScopesIssuer implements ScopesIssuer {
         List<String> defaultScope = new ArrayList<String>();
         defaultScope.add(DEFAULT_SCOPE_NAME);
 
-//        //If no scopes were requested.
-//        if (requestedScopes == null || requestedScopes.length == 0) {
-//            tokReqMsgCtx.setScope(defaultScope);
-//            return true;
-//        }
-//
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
         String endUsernameWithDomain = UserCoreUtil.addDomainToName(username,
@@ -158,46 +159,6 @@ public class RoleBasedScopesIssuer implements ScopesIssuer {
             log.error("Error while getting scopes of application " + e.getMessage(), e);
             return null;
         }
-    }
-
-    /**
-     * Get the set of default scopes. If a requested scope is matches with the patterns specified in the whitelist,
-     * then such scopes will be issued without further validation. If the scope list is empty,
-     * token will be issued for default scop1e.
-     *
-     * @param requestedScopes - The set of requested scopes
-     * @return - The subset of scopes that are allowed
-     */
-    private List<String> getAllowedScopes(List<String> scopeSkipList, List<String> requestedScopes) {
-        List<String> authorizedScopes = new ArrayList<String>();
-
-        //Iterate the requested scopes list.
-        for (String scope : requestedScopes) {
-            if (isWhiteListedScope(scopeSkipList, scope)) {
-                authorizedScopes.add(scope);
-            }
-        }
-
-        if (authorizedScopes.isEmpty()) {
-            authorizedScopes.add(DEFAULT_SCOPE_NAME);
-        }
-
-        return authorizedScopes;
-    }
-
-    /**
-     * Determines if the scope is specified in the whitelist.
-     *
-     * @param scope - The scope key to check
-     * @return - 'true' if the scope is white listed. 'false' if not.
-     */
-    private boolean isWhiteListedScope(List<String> scopeSkipList, String scope) {
-        for (String scopeTobeSkipped : scopeSkipList) {
-            if (scope.matches(scopeTobeSkipped)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

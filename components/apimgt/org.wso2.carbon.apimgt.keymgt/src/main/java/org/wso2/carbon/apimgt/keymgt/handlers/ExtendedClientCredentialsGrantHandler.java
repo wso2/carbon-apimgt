@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesDelegator;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
@@ -73,7 +73,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
         // Execute ScopeIssuer
-        boolean state = ScopesDelegator.getInstance().setScopes(tokReqMsgCtx);
+        boolean state = ScopesIssuingHandler.getInstance().setScopes(tokReqMsgCtx);
 
         // If ScopeIssuer returns true, then see if application scope is set.
         if (state) {

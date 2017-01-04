@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesDelegator;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -165,7 +165,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
-        return ScopesDelegator.getInstance().setScopes(tokReqMsgCtx);
+        return ScopesIssuingHandler.getInstance().setScopes(tokReqMsgCtx);
     }
 
     private String getLoginUserName(String userID) {

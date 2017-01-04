@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.keymgt.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.user.core.service.RealmService;
 
 public class ServiceReferenceHolder {
 
@@ -40,5 +39,4 @@ public class ServiceReferenceHolder {
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
     }
-
 }

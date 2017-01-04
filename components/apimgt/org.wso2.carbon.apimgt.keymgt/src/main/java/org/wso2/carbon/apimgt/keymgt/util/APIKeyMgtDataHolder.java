@@ -23,11 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class APIKeyMgtDataHolder {
 
@@ -38,6 +42,7 @@ public class APIKeyMgtDataHolder {
     private static Boolean isThriftServerEnabled = true;
     private static TokenGenerator tokenGenerator;
     private static boolean jwtGenerationEnabled = false;
+    private static Map<String, ScopesIssuer> scopesIssuers = new HashMap<String, ScopesIssuer>();
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
 
     // Scope used for marking Application Tokens
@@ -146,5 +151,17 @@ public class APIKeyMgtDataHolder {
 
     public static String getApplicationTokenScope() {
         return applicationTokenScope;
+    }
+
+    public static void addScopesIssuer(String prefix, ScopesIssuer scopesIssuer) {
+        scopesIssuers.put(prefix, scopesIssuer);
+    }
+
+    public static void setScopesIssuers(Map<String, ScopesIssuer> scpIssuers) {
+        scopesIssuers = scpIssuers;
+    }
+
+    public static Map<String, ScopesIssuer> getScopesIssuers() {
+        return scopesIssuers;
     }
 }

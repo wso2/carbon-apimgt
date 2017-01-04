@@ -20,7 +20,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesDelegator;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.saml.SAML2BearerGrantHandler;
 
@@ -29,6 +29,6 @@ public class ExtendedSAML2BearerGrantHandler extends SAML2BearerGrantHandler {
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
-        return ScopesDelegator.getInstance().setScopes(tokReqMsgCtx);
+        return ScopesIssuingHandler.getInstance().setScopes(tokReqMsgCtx);
     }
 }

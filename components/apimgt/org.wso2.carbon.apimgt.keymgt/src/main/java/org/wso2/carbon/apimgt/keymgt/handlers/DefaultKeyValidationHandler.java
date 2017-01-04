@@ -29,9 +29,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
-import org.wso2.carbon.identity.oauth2.validators.ScopeValidator;
+import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -161,7 +162,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 validationContext.getHttpVerb();
 
         try {
-            ScopeValidator scopeValidator = ScopeValidator.getInstance();
+            OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
 
             if (scopeValidator != null) {
                 if (scopeValidator.validateScope(accessTokenDO, resource)) {

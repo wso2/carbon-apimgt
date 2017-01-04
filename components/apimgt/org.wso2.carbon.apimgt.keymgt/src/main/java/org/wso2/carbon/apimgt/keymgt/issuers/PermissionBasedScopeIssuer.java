@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
-import org.wso2.carbon.identity.oauth2.issuers.ScopesIssuer;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -37,12 +36,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class PermissionBasedScopeIssuer implements ScopesIssuer {
+public class PermissionBasedScopeIssuer extends ScopesIssuer {
 
     private static Log log = LogFactory.getLog(PermissionBasedScopeIssuer.class);
     private static final String DEFAULT_SCOPE_NAME = "default";
+    private static final String ISSUER_PREFIX = "permission";
     private static final String UI_EXECUTE = "ui.execute";
     private static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
+
+    @Override
+    public String getPrefix(){
+        return ISSUER_PREFIX;
+    }
 
     @Override
     public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes) {
@@ -183,46 +188,6 @@ public class PermissionBasedScopeIssuer implements ScopesIssuer {
             log.error("Error occurred while initializing user store.", e);
         }
         return authorizedScopes;
-    }
-
-    /**
-     * Get the set of default scopes. If a requested scope is matches with the patterns specified in the whitelist,
-     * then such scopes will be issued without further validation. If the scope list is empty,
-     * token will be issued for default scop1e.
-     *
-     * @param requestedScopes - The set of requested scopes
-     * @return - The subset of scopes that are allowed
-     */
-    private List<String> getAllowedScopes(List<String> scopeSkipList, List<String> requestedScopes) {
-        List<String> authorizedScopes = new ArrayList<String>();
-
-        //Iterate the requested scopes list.
-        for (String scope : requestedScopes) {
-            if (isWhiteListedScope(scopeSkipList, scope)) {
-                authorizedScopes.add(scope);
-            }
-        }
-
-        if (authorizedScopes.isEmpty()) {
-            authorizedScopes.add(DEFAULT_SCOPE_NAME);
-        }
-
-        return authorizedScopes;
-    }
-
-    /**
-     * Determines if the scope is specified in the whitelist.
-     *
-     * @param scope - The scope key to check
-     * @return - 'true' if the scope is white listed. 'false' if not.
-     */
-    private boolean isWhiteListedScope(List<String> scopeSkipList, String scope) {
-        for (String scopeTobeSkipped : scopeSkipList) {
-            if (scope.matches(scopeTobeSkipped)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

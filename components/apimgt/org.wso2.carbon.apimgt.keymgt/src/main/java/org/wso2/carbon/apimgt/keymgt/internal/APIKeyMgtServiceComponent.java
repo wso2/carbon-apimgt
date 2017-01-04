@@ -27,10 +27,14 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.useradmin.Role;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesDelegator;
+import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
+import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -65,6 +69,12 @@ import java.util.concurrent.Executors;
  * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
+ * @scr.reference name="scope.issuer.service"
+ * interface="org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer"
+ * cardinality="1..n"
+ * policy="dynamic"
+ * bind="addScopeIssuer"
+ * unbind="removeScopeIssuers"
  */
 public class APIKeyMgtServiceComponent {
 
@@ -116,11 +126,21 @@ public class APIKeyMgtServiceComponent {
                 log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
             }
 
-            ScopesDelegator.loadInstance(whitelist);
+            PermissionBasedScopeIssuer permissionBasedScopeIssuer = new PermissionBasedScopeIssuer();
+            RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuer();
+            APIKeyMgtDataHolder.addScopesIssuer(permissionBasedScopeIssuer.getPrefix(), permissionBasedScopeIssuer);
+            APIKeyMgtDataHolder.addScopesIssuer(roleBasedScopesIssuer.getPrefix(), roleBasedScopesIssuer);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
+            }
+
+            ScopesIssuingHandler.loadInstance(whitelist);
 
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
+
         } catch (Exception e) {
             log.error("Failed to initialize key management service.", e);
         }
@@ -203,6 +223,14 @@ public class APIKeyMgtServiceComponent {
             log.debug("ThriftAuthenticatorService unset in Entitlement bundle");
         }
         this.thriftAuthenticationService = null;
+    }
+
+    protected void addScopeIssuer(ScopesIssuer scopesIssuer) {
+        APIKeyMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
+    }
+
+    protected void removeScopeIssuers() {
+        APIKeyMgtDataHolder.setScopesIssuers(null);
     }
 
     private void startThriftService() throws Exception {
