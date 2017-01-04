@@ -18,20 +18,31 @@
 
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This abstract class represents the basic requirements of a scope issuer.
+ */
 public abstract class ScopesIssuer {
 
     private static final String DEFAULT_SCOPE_NAME = "default";
 
+    /**
+     * This method is used to retrieve the authorized scopes with respect to a token.
+     *
+     * @param tokReqMsgCtx token message context
+     * @param whiteListedScopes scopes to be white listed
+     * @return returns authorized scopes list
+     */
     public abstract List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes);
 
+    /**
+     * This method is used to get the prefix of the scope issuer.
+     * @return returns the prefix with respect to an issuer.
+     */
     public abstract String getPrefix();
 
     /**

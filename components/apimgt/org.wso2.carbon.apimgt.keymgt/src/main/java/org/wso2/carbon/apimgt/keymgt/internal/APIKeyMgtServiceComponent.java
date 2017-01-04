@@ -225,10 +225,18 @@ public class APIKeyMgtServiceComponent {
         this.thriftAuthenticationService = null;
     }
 
+    /**
+     * Add scope issuer to the map.
+     * @param scopesIssuer scope issuer.
+     */
     protected void addScopeIssuer(ScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
     }
 
+    /**
+     * unset scope issuer.
+     * @param scopesIssuer
+     */
     protected void removeScopeIssuers(ScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.setScopesIssuers(null);
     }

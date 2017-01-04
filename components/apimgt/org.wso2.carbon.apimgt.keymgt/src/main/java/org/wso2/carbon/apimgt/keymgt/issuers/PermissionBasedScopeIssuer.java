@@ -36,6 +36,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class represents the functions related to an scope issuer which
+ * issues scopes based on user permissions.
+ */
 public class PermissionBasedScopeIssuer extends ScopesIssuer {
 
     private static Log log = LogFactory.getLog(PermissionBasedScopeIssuer.class);

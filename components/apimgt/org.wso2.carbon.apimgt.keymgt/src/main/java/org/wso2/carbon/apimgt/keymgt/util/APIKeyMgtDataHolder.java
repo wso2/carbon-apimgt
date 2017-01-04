@@ -153,6 +153,11 @@ public class APIKeyMgtDataHolder {
         return applicationTokenScope;
     }
 
+    /**
+     * Add scope issuers to the map.
+     * @param prefix prefix of the scope issuer.
+     * @param scopesIssuer scope issuer instance.
+     */
     public static void addScopesIssuer(String prefix, ScopesIssuer scopesIssuer) {
         scopesIssuers.put(prefix, scopesIssuer);
     }
