@@ -448,14 +448,14 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <id>integration-test-for-mysql</id>
+                                <id>integration-test-for-db2</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>verify-for-mysql</id>
+                                <id>verify-for-db2</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
@@ -481,14 +481,14 @@
                         <version>0.18.1</version>
                         <executions>
                             <execution>
-                                <id>start-docker-for-db2</id>
+                                <id>start-docker-for-mssql</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>stop-docker-for-db2</id>
+                                <id>stop-docker-for-mssql</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>
@@ -545,14 +545,14 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <id>integration-test-for-mysql</id>
+                                <id>integration-test-for-mssql</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>verify-for-mysql</id>
+                                <id>verify-for-mssql</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
@@ -680,7 +680,7 @@
 
     </profiles>
     <properties>
-        <private.package>org.wso2.carbon.apimgt.core.dao.internal</private.package>
+        <private.package>org.wso2.carbon.apimgt.core.internal</private.package>
         <import.package>
             org.eclipse.osgi.util,
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
@@ -706,7 +706,7 @@
             org.wso2.securevault.*;
         </import.package>
         <export.package>
-            !org.wso2.carbon.apimgt.core.dao.internal,
+            !org.wso2.carbon.apimgt.core.internal,
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
     </properties>

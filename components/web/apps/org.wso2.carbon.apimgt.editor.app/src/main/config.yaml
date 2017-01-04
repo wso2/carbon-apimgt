@@ -1,5 +1,5 @@
 appName : API Editor
-theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
+theme : "org.wso2.carbon.uuf.common.theme.default"
 title : "API Editor Tool"
 menu :
   main :

@@ -6,7 +6,7 @@ $(function () {
 
 function getAPIsCallback(response) {
     // Grab the template script
-    $.get('/publisher/public/components/root/base/templates/api/index.hbs', function (templateData) {
+    $.get('public/components/root/base/templates/api/index.hbs', function (templateData) {
         var template = Handlebars.compile(templateData);
         // Define our data object
         var context = {apis: response.obj.list};

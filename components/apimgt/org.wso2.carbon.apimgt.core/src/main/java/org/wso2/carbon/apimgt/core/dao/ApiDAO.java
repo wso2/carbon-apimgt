@@ -88,6 +88,17 @@ public interface ApiDAO {
     List<API> searchAPIs(String searchString) throws APIMgtDAOException;
 
     /**
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     * and matches the given search criteria.
+     * @param searchString The search string provided
+     * @param statuses A list of matching life cycle statuses
+     * @return {@link List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> searchAPIsByStatus(String searchString, List<String> statuses) throws APIMgtDAOException;
+
+    /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
      * exists
      * @param apiName Name of API
