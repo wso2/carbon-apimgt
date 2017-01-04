@@ -48,10 +48,6 @@ public class JmsThrottleReceiver {
     private TopicSubscriber topicSubscriber;
     private TopicSession topicSession;
 
-    public static final String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
-    private static final String CF_NAME_PREFIX = "connectionfactory.";
-    private static final String CF_NAME = "qpidConnectionfactory";
-
     /**
      * Creates a JMS Topic subscription and registers a meesageListner
      *
@@ -64,7 +60,7 @@ public class JmsThrottleReceiver {
             topicConnection = topicConnectionFactory.createTopicConnection();
 
             // if there is no Exception Listner a default exception listner will be set
-            if (config.getDefaultExceptionListener() == null) {
+            if (config.getDefaultExceptionListener() != null) {
                 topicConnection.setExceptionListener(config.getDefaultExceptionListener());
             } else {
 
