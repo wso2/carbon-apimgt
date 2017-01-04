@@ -25,10 +25,7 @@ public class ThrottleDataPublisher {
             String authorizedUser, String apiContext, String apiVersion, String appTenant, String apiTenant,
             String appId, CarbonMessage messageContext,
             AuthenticationContextDTO authenticationContext) {
-        try {
+
             log.info("Throttling event publisher yet to be implemented");
-        } catch (Exception e) {
-            log.error("Error while publishing throttling events to global policy server", e);
-        }
     }
 }
