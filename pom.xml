@@ -1063,9 +1063,9 @@
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
-        <carbon.analytics.common.version>5.1.4</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.1.7</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.10</carbon.kernel.version>
+        <carbon.kernel.version>4.4.11</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.4</carbon.commons.version>
@@ -1073,12 +1073,12 @@
         <carbon.mediation.version>4.6.9</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.6.59</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.2.28</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity.version>5.7.5</carbon.identity.version>
+        <carbon.identity-inbound-auth-oauth.version>5.3.2</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.4</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.1.6</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-saml2.version>5.2.0</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.2.1</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>5.2.3</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-local-auth-basicauth.version>5.3.0</carbon.identity-local-auth-basicauth.version>
         <carbon.identity-outbound-auth-samlsso.version>5.1.4</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.7.0</carbon.governance.version>
@@ -1188,7 +1188,7 @@
         <!-- apache pdfbox version -->
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
-        <event.processor.stub.version>2.1.0</event.processor.stub.version>
+        <event.processor.stub.version>2.1.6</event.processor.stub.version>
         <swagger.codegen.version>2.2.0.wso2v2</swagger.codegen.version>
         <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.10</swagger.core.version>
