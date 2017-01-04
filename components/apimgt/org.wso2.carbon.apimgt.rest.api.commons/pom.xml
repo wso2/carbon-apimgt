@@ -106,6 +106,8 @@
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
+            org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
+            org.json.simple.*,
             org.apache.commons.io.*;
             com.google.gson.*,
         </import.package>
