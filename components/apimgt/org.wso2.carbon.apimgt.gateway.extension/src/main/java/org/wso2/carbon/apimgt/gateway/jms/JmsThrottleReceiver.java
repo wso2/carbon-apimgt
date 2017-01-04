@@ -48,10 +48,6 @@ public class JmsThrottleReceiver {
     private TopicSubscriber topicSubscriber;
     private TopicSession topicSession;
 
-    public static final String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
-    private static final String CF_NAME_PREFIX = "connectionfactory.";
-    private static final String CF_NAME = "qpidConnectionfactory";
-
     /**
      * Creates a JMS Topic subscription and registers a meesageListner
      *
@@ -60,17 +56,18 @@ public class JmsThrottleReceiver {
     public void registerSubscriber(JMSConfigDTO config) {
         try {
 
+            // getting a Connection factory from andes Client
             TopicConnectionFactory topicConnectionFactory = new AMQConnectionFactory(getTCPConnectionURL(config));
             topicConnection = topicConnectionFactory.createTopicConnection();
 
-            // if there is no Exception Listner a default exception listner will be set
-            if (config.getDefaultExceptionListener() == null) {
+            // if there is no Exception Listener a default exception listener will be set
+            if (config.getDefaultExceptionListener() != null) {
                 topicConnection.setExceptionListener(config.getDefaultExceptionListener());
             } else {
-
                 topicConnection.setExceptionListener(new ExceptionListener() {
                     @Override
                     public void onException(JMSException exception) {
+                        // This will trigger if there is a connection sudden JMS failure
                         log.info("TopicConnection ExceptionListener triggered for: " + config.getTopicName(),
                                 exception);
                         reSubscribeToJMSTopic(config);
@@ -135,6 +132,10 @@ public class JmsThrottleReceiver {
                 .append("'").toString();
     }
 
+    /**
+     * Closes TopicConnection and TopicSession
+     * This method is called before resubscribing
+     */
     private void closeConnection() {
 
         if (topicConnection != null) {
@@ -157,6 +158,11 @@ public class JmsThrottleReceiver {
 
     }
 
+    /**
+     * If its a connection failure reSubscribeToJMSTopic will be called
+     * @param exception
+     * @param config
+     */
     private void handleException(Exception exception, JMSConfigDTO config) {
         // If its a connection failure restarting the connection
         if (exception.getCause().getClass().equals(AMQConnectionFailureException.class)) {
