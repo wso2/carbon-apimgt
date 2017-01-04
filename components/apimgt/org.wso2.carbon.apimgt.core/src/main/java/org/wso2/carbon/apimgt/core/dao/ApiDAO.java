@@ -272,4 +272,13 @@ public interface ApiDAO {
      * @throws APIMgtDAOException
      */
     boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+
+    /**
+     * Get gateway configuration of a given API
+     * @param apiID The UUID of the respective API
+     * @return gateway configuration String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    String getGatewayConfig(String apiID) throws APIMgtDAOException;
 }

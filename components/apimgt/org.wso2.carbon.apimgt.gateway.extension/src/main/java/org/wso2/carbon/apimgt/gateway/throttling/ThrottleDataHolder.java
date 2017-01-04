@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * When throttle data holder initialize it should read complete throttle decision table from global policy engine
  * via web service calls. In addition to that it should subscribe to topic and listen throttle updates.
  */
-
 public class ThrottleDataHolder {
 
     private static final Logger log = LoggerFactory.getLogger(ThrottleDataHolder.class);

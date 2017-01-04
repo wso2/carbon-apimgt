@@ -20,7 +20,12 @@ package org.wso2.carbon.apimgt.core.template;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
+
+import java.util.List;
 
 /**
  * Resource level config generate template
@@ -29,10 +34,13 @@ public class ResourceConfigContext extends ConfigContext {
 
     private API api;
     private ConfigContext configContext;
+    private static final Logger log = LoggerFactory.getLogger(ResourceConfigContext.class);
+    private List<APIResource> apiResources;
 
-    public ResourceConfigContext(ConfigContext context, API api) {
+    public ResourceConfigContext(ConfigContext context, API api, List<APIResource> apiResources) {
         this.configContext = context;
         this.api = api;
+        this.apiResources = apiResources;
     }
 
     @Override
@@ -44,6 +52,7 @@ public class ResourceConfigContext extends ConfigContext {
         VelocityContext context = configContext.getContext();
         context.put("StringUtils", StringUtils.class);
         context.put("uriTemplate", api.getUriTemplates());
+        context.put("apiResources", this.apiResources);
         return context;
     }
 }

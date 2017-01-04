@@ -357,6 +357,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
                 addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+                addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
                 addTransports(connection, apiPrimaryKey, api.getTransport());
                 addUrlMappings(connection, api.getUriTemplates(), apiPrimaryKey);
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
@@ -524,6 +525,21 @@ public class ApiDAOImpl implements ApiDAO {
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
+        }
+    }
+
+    /**
+     * Get gateway configuration of a given API
+     *
+     * @param apiID The UUID of the respective API
+     * @return gateway configuration String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    public String getGatewayConfig(String apiID) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return getGatewayConfig(connection, apiID);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -986,6 +1002,22 @@ public class ApiDAOImpl implements ApiDAO {
                                                                 ResourceCategory.SWAGGER);
 
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
+    }
+
+    private void addGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
+        if (!gatewayConfig.isEmpty()) {
+            ApiResourceDAO
+                    .addBinaryResource(connection, apiID, UUID.randomUUID().toString(), ResourceCategory.GATEWAY_CONFIG,
+                            MediaType.APPLICATION_JSON,
+                            new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    private String getGatewayConfig(Connection connection, String apiID) throws SQLException, IOException {
+        InputStream gatewayConfig = ApiResourceDAO
+                .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
+
+        return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
     }
 
     private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
