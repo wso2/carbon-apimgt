@@ -126,7 +126,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="'+ i18n.t('Thumbnail image when stats enabled') + '"></div>'));
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="'+ i18n.t('Thumbnail image when stats are enabled') + '"></div>'));
                 }
 
                 else {
@@ -135,7 +135,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         '<a href=\'https://docs.wso2.com/display/AM210/Configuring+APIM+Runtime+Statistics\' target=\'_blank\'' +
 		       	        'title=' + i18n.t('Refer our documentation to configure API Manager Analytics correctly') + ' class=\'warningLink\'>' +
 	                    i18n.t('Refer our documentation to configure API Manager Analytics correctly') + '</a></span><br/>' +
-			            '<img src="../themes/wso2/images/statsThumb.png" alt="'+ i18n.t('Thumbnail image when stats not configured') + '"></div>'));
+			            '<img src="../themes/wso2/images/statsThumb.png" alt="'+ i18n.t('Thumbnail image when stats are not configured') + '"></div>'));
                 }
             }
             else {

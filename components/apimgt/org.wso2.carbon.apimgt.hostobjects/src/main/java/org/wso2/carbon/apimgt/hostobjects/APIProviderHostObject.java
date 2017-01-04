@@ -23,7 +23,6 @@ import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.parser.SwaggerParser;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -53,7 +52,10 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -81,7 +83,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -95,7 +96,6 @@ import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -3276,7 +3276,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 sourceURL = args[7].toString();
                 //validate urls
                 if (sourceURL == null || !isURL(sourceURL.trim())) {
-                    throw new APIManagementException("Invalid Document Url Format.");
+                    throw new APIManagementException("Invalid document URL format.");
                 }
                 sourceURL = sourceURL.trim();
                 doc.setSourceUrl(sourceURL);

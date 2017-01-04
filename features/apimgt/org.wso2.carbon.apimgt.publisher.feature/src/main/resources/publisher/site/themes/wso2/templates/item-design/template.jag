@@ -187,7 +187,7 @@
 													<% if (api) {%>
 														<option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("Public")%></option>
 												<% if(isMultipleTenantsAvailable == true) {%>
-														<option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("Visible to my domain")%></option>
+														<option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("Visible to my Domain")%></option>
 												<% } %>
 														<% if(!(enableRestrictByRoles == 'false')) {%>
 																 <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("Restricted by roles")%></option>
@@ -196,7 +196,7 @@
 													<%} else {%>
 														<option value="public"><%=i18n.localize("Public")%></option>
 												<% if(isMultipleTenantsAvailable == true) {%>
-														<option value="private"><%=i18n.localize("Visible to my domain")%></option>
+														<option value="private"><%=i18n.localize("Visible to my Domain")%></option>
 												<% } %>
 														<% if(!(enableRestrictByRoles == 'false')) {%>
 																 <option value="restricted"><%=i18n.localize("Restricted by roles")%></option>
@@ -236,7 +236,7 @@
 												 <div class="modal-body">
 												 <p>
 												 	<i class="fw fw-error"></i>
-												 	<span class="messageText"><%=i18n.localize("Image file exceeds the maximum limit of 1MB.")%></span>
+												 	<span class="messageText"><%=i18n.localize("The image file exceeds the maximum limit of 1MB.")%></span>
 												 </p>
 
 												 </div>
@@ -463,7 +463,7 @@
 								<i class="icon fw fw-warning"></i><%=i18n.localize("Warning")%>
 							</h4>
 							<p>
-								<%=i18n.localize("Existing API Definition will be overwritten by the imported definition.")%>
+								<%=i18n.localize("Existing API definition will be overwritten by the imported definition.")%>
 							</p>
 						</div>
 						<div class="alert alert-danger hide" id="swagger_help" role="alert">
@@ -611,7 +611,7 @@
 										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 										                </span>	
 							</a>
-                        <p id="options_help" class="hide"><%=i18n.localize("Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS method is not selected, OPTIONS calls will be returned from the gateway with Allowed methods.")%></p>
+                        <p id="options_help" class="hide"><%=i18n.localize("Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS method is not selected, OPTIONS calls will be returned from the Gateway with allowed methods.")%></p>
                     </label>  
 
                         <label id="less">

@@ -687,7 +687,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/api/swagger/template.jag:231
 #: site/themes/wso2/templates/api/swagger/template.jag:236
-msgid "If you already have an access token please provide it below."
+msgid "If you already have an access token, please provide it below."
 msgstr ""
 
 #: site/themes/wso2/templates/api/swagger/template.jag:236
@@ -702,7 +702,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/api/swagger/template.jag:242
 msgid ""
-"Selected application does not have an access token for the selected "
+"The selected application does not have an access token for the selected "
 "environment. Please go to the subscription page and generate an access token "
 "first."
 msgstr ""
@@ -856,7 +856,7 @@ msgid "Visit Store"
 msgstr ""
 
 #: site/themes/wso2/templates/menu/header/template.jag:31
-msgid "APIStore Home"
+msgid "API Store Home"
 msgstr ""
 
 #: site/themes/wso2/templates/menu/header/template.jag:32
@@ -1348,7 +1348,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:31
 msgid ""
-"Application can use the following grant types to generate Access Tokens. "
+"The application can use the following grant types to generate Access Tokens. "
 "Based on the application requirement, you can enable or disable grant types "
 "for this application."
 msgstr ""
@@ -1386,13 +1386,13 @@ msgstr ""
 #: site/themes/wso2/templates/application/application-keys/template.jag:83
 msgid ""
 "The following cURL command shows how to generate an access token using the "
-"password grant type."
+"Password Grant type."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:89
 msgid ""
-"In a similar manner, you can generate an access token using the client "
-"credential grant type with the following cURL command."
+"In a similar manner, you can generate an access token using the Client "
+"Credential grant type with the following cURL command."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:98
@@ -1430,7 +1430,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:128
 #: site/themes/wso2/templates/application/application-keys/template.jag:170
-msgid "Seconds."
+msgid "Seconds"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:131
@@ -1584,7 +1584,7 @@ msgid "public"
 msgstr "Public"
 
 msgid "private"
-msgstr "Visible to my domain"
+msgstr "Visible to my Domain"
 
 msgid "restricted"
 msgstr "Restricted by roles"

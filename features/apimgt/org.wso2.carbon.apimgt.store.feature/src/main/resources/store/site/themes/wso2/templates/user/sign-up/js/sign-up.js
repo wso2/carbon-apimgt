@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('noSpace', function(value, element) {
             return !/\s/g.test(value);
-    }, i18n.t('The Name contains white spaces.'));
+    }, i18n.t('The name contains white spaces.'));
 
 
     $("#sign-up").validate({

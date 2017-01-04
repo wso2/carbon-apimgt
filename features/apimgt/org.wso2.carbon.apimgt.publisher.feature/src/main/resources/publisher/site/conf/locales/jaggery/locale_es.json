@@ -180,7 +180,7 @@
     "tierHelpMsg" : "Los niveles que seleccione aquí son los que están disponibles para los suscriptores para suscribirse a esta API." ,
     "roleHelpMsg" : "Esta opción controla la visibilidad API se basa en la función de usuario en ambas aplicaciones. Si la API se puede acceder por todos, incluyendo a los usuarios anónimos, a continuación, seleccione la visibilidad como 'Pública'. Si desea restringir el visiblity de API para los usuarios registrados en su dominio, a continuación, seleccione 'Visible a mi dominio'. Else seleccionarlo como 'restringido' y entrar en las funciones de los usuarios a los que el API se puede acceder desde las dos aplicaciones. ",
     "tenantRoleHelpMsg" : "Esta opción controla la visibilidad de la API en función del usuario." ,
-    "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ",
+    "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed to through the API Store. ",
     "tagsHelpMsg":"Lista separada por comas (Ex: tag1, tag2, tag3)",
     "descriptionHelpLable":"el máximo apoyo 20000 caracteres",
     "optionsHelpMsg": "Elija un método para Opciones para enviar OPCIONES llama a respaldados. Si la puerta de enlace de la API no seleccionado volverá llamada de opciones con los métodos permitidos en pasarela.",
