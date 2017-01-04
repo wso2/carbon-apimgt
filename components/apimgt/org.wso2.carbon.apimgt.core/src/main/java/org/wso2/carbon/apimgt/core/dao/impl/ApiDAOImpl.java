@@ -204,6 +204,36 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     * and matches the given search criteria.
+     *
+     * @param searchString The search string provided
+     * @param statuses     A list of matching life cycle statuses
+     * @return {@link List < API >} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> searchAPIsByStatus(String searchString, List<String> statuses) throws APIMgtDAOException {
+        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ? AND CURRENT_LC_STATUS IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+
+            for (int i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 2, statuses.get(i));
+            }
+
+            return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Checks if a given API which is uniquely identified by the API Name  already
      * exists
      *
