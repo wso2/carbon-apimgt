@@ -219,7 +219,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
         List<API> apiResults = null;
         try {
-            apiResults = getApiDAO().searchAPIs(query);
+            //TODO: Need to validate users roles against results returned
+            if (query != null && !query.isEmpty()) {
+                apiResults = getApiDAO().searchAPIs(query);
+            } else {
+                List<String> statuses = new ArrayList<>();
+                statuses.add("PUBLISHED");
+                statuses.add("PROTOTYPED");
+                apiResults = getApiDAO().getAPIsByStatus(statuses);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating searching APIs - " + query;
             log.error(errorMsg);
