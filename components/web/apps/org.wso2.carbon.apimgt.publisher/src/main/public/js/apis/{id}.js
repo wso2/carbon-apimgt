@@ -17,6 +17,7 @@ $(function () {
     var client = new SwaggerClient({
         url: swaggerUrl,
         success: function(swaggerData) {
+            client.setBasePath(":9443/api/am/publisher/v0.10"); //TODO Remove this line when move to C5 rest api
             client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+$.cookie('token'), "header"));
             var apiId = $('input[name="apiId"]').val();
             client["APIs"].get_apis_apiId(
