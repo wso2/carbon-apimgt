@@ -23,13 +23,17 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Component;
+import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
 import org.wso2.carbon.apimgt.core.util.APIConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -44,7 +48,9 @@ import java.util.Map;
  * Implementation of API Store operations.
  *
  */
-public class APIStoreImpl extends AbstractAPIManager implements APIStore {
+public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
+
+    private List<EventObserver> observerList = new ArrayList<EventObserver>();
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
@@ -153,4 +159,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         //// TODO: 16/11/16 Workflow related implementation has to be done 
     }
 
-  }
+    @Override
+    public void registerObserver(EventObserver observer) {
+        if (observer != null && !observerList.contains(observer))
+            observerList.add(observer);
+    }
+
+    @Override
+    public void notifyObservers(Component component, Event event) {
+        observerList.forEach(x -> x.captureEvent(component, event));
+    }
+
+    @Override
+    public void removeObserver(EventObserver observer) {
+        if (observer != null)
+            observerList.remove(observer);
+    }
+
+    public List<EventObserver> getObserverList() {
+        return observerList;
+    }
+}

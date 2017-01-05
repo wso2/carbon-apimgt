@@ -23,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -31,7 +33,9 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscriber;
@@ -52,9 +56,11 @@ import java.util.UUID;
 /**
  * Implementation of API Publisher operations
  */
-public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
+public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher, APIMObservable {
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
+
+    private List<EventObserver> observerList = new ArrayList<EventObserver>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
@@ -127,7 +133,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return null;
     }
 
-
     /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
      *
@@ -179,6 +184,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 getApiDAO().addAPI(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
+                ObserverNotifierThread observerNotifierThread =
+                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION);
+                observerNotifierThread.start();
             } else {
                 APIUtils.logAndThrowException("Duplicate API already Exist with name/Context " + apiBuilder.getName(),
                         log);
@@ -228,6 +236,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().updateAPI(api.getId(), api);
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                        ObserverNotifierThread observerNotifierThread =
+                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE);
+                        observerNotifierThread.start();
                     }
                 } else {
                     String msg = "API " + api.getName() + "-" + api.getVersion() + " Couldn't update as API have " +
@@ -473,6 +484,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                    ObserverNotifierThread observerNotifierThread =
+                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION);
+                    observerNotifierThread.start();
                 }
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
@@ -611,5 +625,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException {
         return null;
+    }
+
+    @Override
+    public void registerObserver(EventObserver observer) {
+        if (observer != null && !observerList.contains(observer))
+            observerList.add(observer);
+    }
+
+    @Override
+    public void notifyObservers(Component component, Event event) {
+        observerList.forEach(x -> x.captureEvent(component, event));
+    }
+
+    @Override
+    public void removeObserver(EventObserver observer) {
+        if (observer != null)
+            observerList.remove(observer);
+    }
+
+    public List<EventObserver> getObserverList() {
+        return observerList;
     }
 }

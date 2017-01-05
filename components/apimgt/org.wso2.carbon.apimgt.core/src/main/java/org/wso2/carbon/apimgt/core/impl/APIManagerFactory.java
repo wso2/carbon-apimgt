@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -45,6 +46,9 @@ public class APIManagerFactory {
 
     private static final APIManagerFactory instance = new APIManagerFactory();
 
+    private UserAwareAPIPublisher userAwareAPIPublisher;
+    private UserAwareAPIStore userAwareAPIStore;
+
     private APIManagerCache<APIPublisher> providers = new APIManagerCache<>(50);
     private APIManagerCache<APIStore> consumers = new APIManagerCache<>(500);
 
@@ -58,8 +62,13 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            userAwareAPIPublisher = new UserAwareAPIPublisher(username,
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
+
+            userAwareAPIPublisher.registerObserver(EventLogger.getEventLoggerObject());
+
+            return  userAwareAPIPublisher;
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't Create API Provider", e, log);
         }
@@ -71,13 +80,16 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            userAwareAPIStore = new UserAwareAPIStore(username,
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO());
+
+            userAwareAPIStore.registerObserver(EventLogger.getEventLoggerObject());
+
         } catch (SQLException e) {
             APIUtils.logAndThrowException("Couldn't Create API Consumer", e, log);
         }
         return null;
-
     }
 
     public APIPublisher getAPIProvider(String username) throws APIManagementException {
@@ -114,6 +126,14 @@ public class APIManagerFactory {
             }
         }
         return consumer;
+    }
+
+    public @Nullable APIPublisherImpl getAPIPublisherImpl() {
+        return userAwareAPIPublisher;
+    }
+
+    public @Nullable APIStoreImpl getAPIStoreImpl() {
+        return userAwareAPIStore;
     }
 
     public void clearAll() {
