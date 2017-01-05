@@ -44,10 +44,11 @@ input.ep-field{
     font-size: 16px;
  }
 .navbar-menu-toggle,.navbar-menu-toggle:hover, .navbar-menu-toggle:focus, .navbar-menu-toggle:active{
-    background:#222;
+    /* TODO: Prevent overriding original colors from theme*/
+    /*background:#222;*/
 }
 .navbar-menu-toggle[aria-expanded=true]{
-    background:#242932;
+    /*background:#242932;*/
 }
 .form-group label>.requiredAstrix {
     color: #E74C3C;
