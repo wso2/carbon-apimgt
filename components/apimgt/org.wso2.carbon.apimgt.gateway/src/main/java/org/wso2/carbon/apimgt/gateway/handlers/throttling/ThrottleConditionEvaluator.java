@@ -193,7 +193,7 @@ public class ThrottleConditionEvaluator {
         if (value == null) {
             return false;
         }
-        return value.equals(condition.getConditionValue());
+        return value.matches(condition.getConditionValue());
     }
 
     private boolean isMatchingIP(MessageContext messageContext, ConditionDTO condition) {

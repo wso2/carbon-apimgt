@@ -48,8 +48,10 @@ public class QueryParameterCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL + PolicyConstants.QUOTE +
-                getValue()+ PolicyConstants.QUOTE +PolicyConstants.CLOSE_BRACKET;   //"("+queryAttribute+"=="+value+")"
+        //"regex:find('+value+', cast(map:get(propertiesMap,'+name+'),'string')))"
+        String condition = PolicyConstants.OPEN_BRACKET + PolicyConstants.REGEX_PREFIX_QUERY
+                + PolicyConstants.QUOTE + getValue() + PolicyConstants.QUOTE + PolicyConstants.COMMA +
+                getQueryAttributeName() + PolicyConstants.CLOSE_BRACKET + PolicyConstants.CLOSE_BRACKET;
         if(isInvertCondition()){
             condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
