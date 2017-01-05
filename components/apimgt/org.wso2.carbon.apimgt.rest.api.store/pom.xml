@@ -150,7 +150,8 @@
             org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
-            javax.ws.rs.*; version="${javax.ws.rs.import.version.range}"
+            javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
+            com.google.gson.*; version="${google.code.gson.import.version.range}"
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.store.internal,

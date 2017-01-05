@@ -108,7 +108,7 @@ public interface APIStore extends APIManager {
     void updateApplication(String uuid, Application application) throws APIManagementException;
 
     /**
-     * Creates a request for getting Approval for Application Registration.
+     * Generates oAuth keys for an application.
      *
      * @param userId          Subsriber name.
      * @param applicationName of the Application.
@@ -121,7 +121,7 @@ public interface APIStore extends APIManager {
      * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+    Map<String, Object> generateApplicationKeys(String userId, String applicationName,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 

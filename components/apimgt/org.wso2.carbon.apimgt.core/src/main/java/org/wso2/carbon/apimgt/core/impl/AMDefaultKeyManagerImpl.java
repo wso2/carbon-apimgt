@@ -112,25 +112,21 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             } else { //If DCR call fails
                 throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName);
             }
-
-
         } catch (IOException e) {
-            log.error("Can not create OAuth application  : " + applicationName, e);
-            throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            String errorMsg = "Can not create OAuth application  : " + applicationName;
+            log.error(errorMsg, e);
+            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (JsonSyntaxException e) {
-            log.error("Error while processing the response returned from DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            String errorMsg = "Error while processing the response returned from DCR endpoint.Can not create" +
+                    " OAuth application : " + applicationName;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
             }
-
         }
         return oAuthApplicationInfo;
-
     }
 
     @Override

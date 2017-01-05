@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -32,18 +33,28 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
+import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -123,10 +134,52 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId,
-            String applicationName, String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId, String jsonString) throws APIManagementException {
-        return null;
+    public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String tokenType,
+            String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope, String groupingId,
+            String jsonString) throws APIManagementException {
+
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        String authScopeString;
+
+        if (!authorizedScopes.isEmpty()) {
+            StringBuilder scopeBuilder = new StringBuilder();
+            for (Scope scope : authorizedScopes) {
+                scopeBuilder.append(scope.getKey()).append(' ');
+            }
+            authScopeString = scopeBuilder.toString();
+        } else {
+            authScopeString = KeyManagerConstants.OAUTH2_DEFAULT_SCOPE;
+        }
+        OAuthAppRequest oauthAppRequest = ApplicationUtils
+                .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonString);
+        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
+        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+        try {
+            OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
+            Map<String, Object> keyDetails = new HashMap<>();
+            AccessTokenRequest accessTokenRequest = null;
+
+            if (oauthAppInfo != null) {
+                keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
+                keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
+                keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
+                accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo, null);
+            }
+            AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
+
+            // adding access token information with key details
+            if (accessTokenInfo != null) {
+                keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
+                keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
+            }
+            return keyDetails;
+        } catch (KeyManagementException e) {
+            String errorMsg = "Error occurred while generating oauth keys for application - ";
+            log.error(errorMsg, e);
+            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+        }
     }
 
     @Override

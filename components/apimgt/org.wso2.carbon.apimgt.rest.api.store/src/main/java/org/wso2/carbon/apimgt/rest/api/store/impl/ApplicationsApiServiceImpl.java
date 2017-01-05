@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -126,23 +126,28 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
                 Map<String, Object> keyDetails = apiConsumer
-                        .requestApprovalForApplicationRegistration(username, application.getName(),
-                                body.getKeyType().toString(), body.getCallbackUrl(), accessAllowDomainsArray,
-                                body.getValidityTime(), tokenScopes, application.getGroupId(), jsonParams);
+                        .generateApplicationKeys(username, application.getName(), body.getKeyType().toString(),
+                                body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
+                                application.getGroupId(), jsonParams);
                 applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                String errorMessage = "Application not found for key geneation: " + applicationId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(
+                        errorMessage, ExceptionCodes.APPLICATION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage,e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
-            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
-                RestApiUtil
-                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
-                                e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
-                        log);
-            }
+            String errorMessage = "Error while generating keys for application";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(applicationKeyDTO).build();
     }

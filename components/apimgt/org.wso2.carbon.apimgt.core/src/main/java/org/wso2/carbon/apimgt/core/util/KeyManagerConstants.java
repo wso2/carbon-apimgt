@@ -65,6 +65,8 @@ public class KeyManagerConstants {
     public static final String REVOKE_ENDPOINT = "RevokeEndpoint";
     public static final String INTROSPECT_ENDPOINT = "introspectEndpoint";
     public static final String DEFAULT_VALIDITY_PERIOD = "3600";
+    public static final String OAUTH2_DEFAULT_SCOPE = "default";
+
 
     /**
      * Status codes used in key-validation process
@@ -85,6 +87,17 @@ public class KeyManagerConstants {
 
         private KeyValidationStatus() {
         }
+    }
+
+    /**
+     * Key details related constants
+     */
+    public static class KeyDetails {
+        public static final String VALIDITY_TIME = "validityTime";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String CONSUMER_SECRET = "consumerSecret";
+        public static final String APP_DETAILS = "appDetails";
     }
 
 }
