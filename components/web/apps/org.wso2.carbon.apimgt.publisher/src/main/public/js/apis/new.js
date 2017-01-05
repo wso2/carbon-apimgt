@@ -101,6 +101,7 @@ class API {
             url: swaggerUrl,
             usePromise: true
         });
+        client.setBasePath(":9443/api/am/publisher/v0.10"); //TODO Remove this line when move to C5 rest api
         this.client.then(
             (swagger) => {
                 this.keyMan = new KeyManager(access_key);
