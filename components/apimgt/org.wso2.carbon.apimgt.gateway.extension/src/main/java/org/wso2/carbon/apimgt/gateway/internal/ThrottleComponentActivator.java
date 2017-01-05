@@ -24,6 +24,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.gateway.jms.JmsThrottleReceiver;
+import org.wso2.carbon.apimgt.gateway.jms.ThrottleJMSListner;
+import org.wso2.carbon.apimgt.gateway.throttling.dto.JMSConfigDTO;
 
 
 /**
@@ -44,10 +46,17 @@ public class ThrottleComponentActivator {
             log.debug("Activating throttling component ...");
         }
 
-        //starting JMS Receiver
+        //Creating JMS Config DTO
+        JMSConfigDTO jmsDto = new JMSConfigDTO("admin", "admin", "throttleData");
+        jmsDto.setClientId("carbon");
+        jmsDto.setVirtualHostName("carbon");
+        jmsDto.setDefaultHostname("localhost");
+        jmsDto.setDefaultPort("5672");
+        jmsDto.setMessageListenerl(new ThrottleJMSListner());
+
+        // registering jms subscriber
         JmsThrottleReceiver jmsThrottleReceiver = new JmsThrottleReceiver();
-        jmsThrottleReceiver.start();
-        log.info("JmsThrottleReceiver started.......");
+        jmsThrottleReceiver.registerSubscriber(jmsDto);
 
         return;
     }

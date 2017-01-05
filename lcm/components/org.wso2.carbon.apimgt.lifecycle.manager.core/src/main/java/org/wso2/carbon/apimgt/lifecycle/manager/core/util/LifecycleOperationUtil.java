@@ -461,10 +461,9 @@ public class LifecycleOperationUtil {
     }
 
     public static void setCheckListItemData(LifecycleState lifecycleState, Map<String, Boolean> checkListItemData) {
-        for (CheckItemBean checkItemBean : lifecycleState.getCheckItemBeanList()) {
-            if (checkListItemData.containsKey(checkItemBean.getName())) {
-                checkItemBean.setValue(checkListItemData.get(checkItemBean.getName()));
-            }
-        }
+        lifecycleState.getCheckItemBeanList().stream()
+                .filter(checkItemBean -> checkListItemData.containsKey(checkItemBean.getName()))
+                .forEach(checkItemBean -> checkItemBean.setValue(checkListItemData.get(checkItemBean.getName())));
+
     }
 }

@@ -100,11 +100,7 @@ public class TestUtil {
         return summaryApp;
     }
 
-    public static String printDiff(Object obj1, Object obj2) throws IllegalAccessException {
-        if (obj1.getClass() != obj2.getClass()) {
-            throw new IllegalArgumentException("The types of the objects supplied do not match");
-        }
-
+    public static <T> String printDiff(T obj1, T obj2) throws IllegalAccessException {
         Field[] fields = FieldUtils.getAllFields(obj1.getClass());
 
         for (Field field : fields) {

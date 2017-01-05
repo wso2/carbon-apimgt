@@ -1,5 +1,5 @@
 appName : API Editor
-theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
+theme : "org.wso2.carbon.uuf.common.theme.default"
 title : "API Editor Tool"
 menu :
   main :
@@ -11,7 +11,7 @@ menu :
     Statistics:
       {link: "statistics"}
 errorPages:
-  "404": /foundation/error/404
-  default: /foundation/error/default
+  "404": /ui/error/404
+  default: /ui/error/default
 loginRedirectUri: "/api"
 swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"

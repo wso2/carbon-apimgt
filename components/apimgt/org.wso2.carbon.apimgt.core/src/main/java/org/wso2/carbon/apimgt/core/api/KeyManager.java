@@ -18,18 +18,13 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-
 
 import java.util.Map;
 
@@ -44,8 +39,6 @@ import java.util.Map;
  * needs to be implemented.
  */
 public interface KeyManager {
-
-    static final Logger LOG = LoggerFactory.getLogger(KeyManager.class);
 
     /**
      * Create a new OAuth application in the Authorization Server.

@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.core.impl.AMDefaultKeyManagerImpl;
  * for example key manager class will be initiate from here.
  */
 public class KeyManagerHolder {
-    private static final Logger LOG = LoggerFactory.getLogger(KeyManagerHolder.class);
+    private static final Logger log = LoggerFactory.getLogger(KeyManagerHolder.class);
     private static KeyManager keyManager = null;
 
 
@@ -64,7 +64,7 @@ public class KeyManagerHolder {
                 initializeKeyManager();
 
             } catch (KeyManagementException e) {
-                LOG.error("Error while initialzing the keymanager implementation.", e);
+                log.error("Error while initialzing the keymanager implementation.", e);
             }
 
         }

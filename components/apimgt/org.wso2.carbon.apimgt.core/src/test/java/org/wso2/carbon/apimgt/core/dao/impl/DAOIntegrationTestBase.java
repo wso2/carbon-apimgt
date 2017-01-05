@@ -61,6 +61,13 @@ public class DAOIntegrationTestBase {
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "postgres.sql";
+        }else if ("mssql".contains(database)){
+            dataSource = new MSSQLDataSource();
+            ((MSSQLDataSource) dataSource).resetDB();
+            sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
+                    + "features" + File.separator + "apimgt" + File.separator
+                    + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
+                    + File.separator + "dbscripts" + File.separator + "mssql.sql";
         }
         DAOUtil.clearDataSource();
         DAOUtil.initialize(dataSource);
@@ -74,6 +81,10 @@ public class DAOIntegrationTestBase {
             ((H2DataSource) dataSource).resetDB();
         }else if ("mysql".contains(database)){
             ((MySQLDataSource) dataSource).resetDB();
+        }else if ("mssql".contains(database)){
+            ((MSSQLDataSource) dataSource).resetDB();
+        }else if ("postgres".contains(database)){
+            ((PostgreDataSource) dataSource).resetDB();
         }
     }
 }
