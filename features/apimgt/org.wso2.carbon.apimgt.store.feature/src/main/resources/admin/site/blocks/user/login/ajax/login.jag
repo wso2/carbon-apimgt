@@ -9,7 +9,19 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if (action === "login" && request.getMethod() == 'POST') {
+    if (action === "logout" && request.getMethod() == 'POST') {
+            jagg.setUser(null);
+            jagg.setWorkflowCookie(null);
+            print({
+                error:false
+            });
+
+    } else if (request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
 
@@ -34,13 +46,6 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else if (action === "logout" && request.getMethod() == 'POST') {
-        jagg.setUser(null);
-        jagg.setWorkflowCookie(null);
-        print({
-            error:false
-        });
-
     } else if (action === "loginWithSAMLToken" && request.getMethod() == 'POST') {
         var log = new Log();
 
