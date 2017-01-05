@@ -84,30 +84,35 @@ public class ScopesIssuingHandler {
         }
 
         for (String scope : requestedScopes) {
+            boolean scopeAssigned = false;
             for (String prefix : scopesIssuers.keySet()) {
                 if (scope.startsWith(prefix)) {
                     scopeSets.get(prefix).add(scope);
+                    scopeAssigned = true;
                     break;
                 }
+            }
+            if (!scopeAssigned) {
                 scopeSets.get(DEFAULT_SCOPE_NAME).add(scope);
             }
         }
 
-        List<String> authorizedAllScopes = new ArrayList<String>();
+        Set<String> authorizedAllScopes = new HashSet<String>();
         List<String> authorizedScopes;
+        List<String> sortedScopes;
         boolean isAllAuthorized = false;
-        for (String prefix : scopesIssuers.keySet()) {
-            authorizedScopes = scopesIssuers.get(prefix).getScopes(tokReqMsgCtx, scopeSkipList);
-            if (authorizedAllScopes != null) {
+        for (String prefix : scopeSets.keySet()) {
+            sortedScopes = scopeSets.get(prefix);
+            if (sortedScopes.size() > 0) {
+                tokReqMsgCtx.setScope(sortedScopes.toArray(new String[sortedScopes.size()]));
+                authorizedScopes = scopesIssuers.get(prefix).getScopes(tokReqMsgCtx, scopeSkipList);
                 authorizedAllScopes.addAll(authorizedScopes);
                 isAllAuthorized = true;
-            } else {
-                isAllAuthorized = false;
             }
         }
 
         if (isAllAuthorized) {
-            tokReqMsgCtx.setScope((String[]) authorizedAllScopes.toArray());
+            tokReqMsgCtx.setScope(authorizedAllScopes.toArray(new String[authorizedAllScopes.size()]));
             return true;
         }
         return false;

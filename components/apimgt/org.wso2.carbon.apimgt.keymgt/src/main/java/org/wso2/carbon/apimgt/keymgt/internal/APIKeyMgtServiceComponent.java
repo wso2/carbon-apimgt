@@ -71,7 +71,7 @@ import java.util.concurrent.Executors;
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
  * @scr.reference name="scope.issuer.service"
  * interface="org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer"
- * cardinality="1..n"
+ * cardinality="0..n"
  * policy="dynamic"
  * bind="addScopeIssuer"
  * unbind="removeScopeIssuers"
