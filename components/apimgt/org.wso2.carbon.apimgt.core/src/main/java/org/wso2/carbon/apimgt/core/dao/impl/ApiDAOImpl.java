@@ -204,6 +204,36 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     * and matches the given search criteria.
+     *
+     * @param searchString The search string provided
+     * @param statuses     A list of matching life cycle statuses
+     * @return {@link List < API >} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> searchAPIsByStatus(String searchString, List<String> statuses) throws APIMgtDAOException {
+        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ? AND CURRENT_LC_STATUS IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+
+            for (int i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 2, statuses.get(i));
+            }
+
+            return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Checks if a given API which is uniquely identified by the API Name  already
      * exists
      *
@@ -327,6 +357,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
                 addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+                addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
                 addTransports(connection, apiPrimaryKey, api.getTransport());
                 addUrlMappings(connection, api.getUriTemplates(), apiPrimaryKey);
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
@@ -494,6 +525,21 @@ public class ApiDAOImpl implements ApiDAO {
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
+        }
+    }
+
+    /**
+     * Get gateway configuration of a given API
+     *
+     * @param apiID The UUID of the respective API
+     * @return gateway configuration String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    public String getGatewayConfig(String apiID) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return getGatewayConfig(connection, apiID);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -956,6 +1002,22 @@ public class ApiDAOImpl implements ApiDAO {
                                                                 ResourceCategory.SWAGGER);
 
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
+    }
+
+    private void addGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
+        if (!gatewayConfig.isEmpty()) {
+            ApiResourceDAO
+                    .addBinaryResource(connection, apiID, UUID.randomUUID().toString(), ResourceCategory.GATEWAY_CONFIG,
+                            MediaType.APPLICATION_JSON,
+                            new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    private String getGatewayConfig(Connection connection, String apiID) throws SQLException, IOException {
+        InputStream gatewayConfig = ApiResourceDAO
+                .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
+
+        return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
     }
 
     private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {

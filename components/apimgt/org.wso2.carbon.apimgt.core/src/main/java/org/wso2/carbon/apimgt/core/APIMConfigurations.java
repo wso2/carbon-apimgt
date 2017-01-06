@@ -36,9 +36,9 @@ public class APIMConfigurations {
 //    @Element(description = "topic name")
     private String topicName = "MYTopic";
 //    @Element(description = "username for topic")
-    private String username = "MYTopic";
+    private String username = "admin";
 //    @Element(description = "password for topic")
-    private String password = "MYTopic";
+    private String password = "admin";
 
     public String getCarbonClientId() {
         return carbonClientId;
