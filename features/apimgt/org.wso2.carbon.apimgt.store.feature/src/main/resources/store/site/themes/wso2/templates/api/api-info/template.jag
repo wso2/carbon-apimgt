@@ -165,7 +165,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                             <% if(api.rates!=0) {%>
                                                 <div class="col-xs-3 col-sm-3">
                                                     <div class="average-rating">
-                                                        <%=api.rates%>
+                                                        <%=api.rates.toFixed(1)%>
                                                     </div>
                                                 </div>
                                             <%} %>

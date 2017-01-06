@@ -59,7 +59,7 @@
   <div id="forum_topic_rating_block" class="row add-margin-top-5x">
     <div class="col-xs-4 col-sm-4 col-md-1 col-lg-1">
         <div class="average-rating">
-            <%=inputs.averageRating%>
+            <%=parseFloat(inputs.averageRating).toFixed(1)%>
         </div>
     </div>
     <div class="user_rating col-xs-8 col-sm-8 col-md-11 col-lg-11">
