@@ -185,7 +185,7 @@ $('input.rate_save').on('change', function () {
     }, function (result) {
         if (result.error == false) {
             if($('.average-rating').length > 0){
-            $('.average-rating').text(result.rating);
+            $('.average-rating').text(parseFloat(result.rating).toFixed(1));
             $('.average-rating').show();
             }else{
                 $('.rate_td').before("<td><div class='average-rating'>"+result.rating+"</div></td>");
