@@ -98,7 +98,7 @@ class API {
      */
     constructor(access_key) {
         this.client = new SwaggerClient({
-            url: swaggerUrl,
+            url: swaggerURL,
             usePromise: true
         });
         client.setBasePath(":9443/api/am/publisher/v0.10"); //TODO Remove this line when move to C5 rest api
