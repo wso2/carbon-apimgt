@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "0.10.0"
+  version: "0.11.0"
   title: "WSO2 API Manager - Publisher API"
   description: |
     This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
