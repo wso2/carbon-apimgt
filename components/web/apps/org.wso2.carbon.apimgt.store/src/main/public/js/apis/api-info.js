@@ -11,7 +11,7 @@ $(function () {
                     var api = jsonData.obj;
                     var context = {api: api};
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APIHeader.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-header.hbs', function (templateData) {
                         var apiHeaderTemplate = Handlebars.compile(templateData);
 
                         // Pass our data to the template
@@ -21,7 +21,7 @@ $(function () {
                         $('.page-header').html(apiHeaderCompilesTemplate);
                     }, 'html');
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APIThumbnail.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-thumbnail.hbs', function (templateData) {
 
                         var apiThumbnailTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -31,7 +31,7 @@ $(function () {
                         $('#api-thumbnail').append(apiThumbnailCompiledTemplate);
                     }, 'html');
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APIInfo.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-info.hbs', function (templateData) {
 
                         var apiOverviewTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -41,7 +41,7 @@ $(function () {
                         $('#api-info').append(compiledTemplate);
                     }, 'html');
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APITierList.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-tier-list.hbs', function (templateData) {
 
                         var apiOverviewTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -51,7 +51,7 @@ $(function () {
                         $('#tier-list').append(compiledTemplate);
                     }, 'html');
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APISubscriptions.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-subscriptions.hbs', function (templateData) {
 
                         var apiOverviewTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -130,7 +130,7 @@ $(function () {
                         }
                     }
 
-                    $.get('/store/public/components/root/base/templates/api/{id}APIDetailTabList.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-detail-tab-list.hbs', function (templateData) {
                         context.tabList = tabs;
                         var apiOverviewTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -143,7 +143,7 @@ $(function () {
                         for (var i = 0; i < tabs.length; i++) {
                             var tab = tabs[i];
                             if (tab.id == "api-overview") {
-                                $.get('/store/public/components/root/base/templates/api/{id}APIOverview.hbs', function (templateData) {
+                                $.get('/store/public/components/root/base/templates/apis/{apiId}/api-overview.hbs', function (templateData) {
                                     for (var endpointURL in  api.endpointURLs) {
                                         var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
                                         for (var environmentURL in environmentURLs) {
@@ -214,7 +214,7 @@ $(function () {
                                                 documentations[type].typeName = typeName;
                                             }
                                         }
-                                        $.get('/store/public/components/root/base/templates/api/{id}APIDocumentation.hbs', function (templateData) {
+                                        $.get('/store/public/components/root/base/templates/apis/{apiId}/api-documentations.hbs', function (templateData) {
                                             context.documentations = documentations;
                                             var apiOverviewTemplate = Handlebars.compile(templateData);
                                             // Inject template data
@@ -238,7 +238,7 @@ $(function () {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
 
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 200d5b62-7837-3dd9-b4a8-896cbcd755ab", "header"));
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 12770569-28a9-3864-9f7b-c3fcdc16b890", "header"));
             client["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (jsonData) {
                     var context = {};
@@ -271,7 +271,7 @@ $(function () {
                                         availableApplications.push(application);
                                     }
 
-                                $.get('/store/public/components/root/base/templates/api/{id}APIApplicationsList.hbs', function (templateData) {
+                                $.get('/store/public/components/root/base/templates/apis/{apiId}/api-applications-list.hbs', function (templateData) {
                                     var applicationsTemplate = Handlebars.compile(templateData);
                                     // Define our data object
                                     var context = {};
@@ -298,6 +298,7 @@ $(function () {
     });
 
 });
+
 
 
 

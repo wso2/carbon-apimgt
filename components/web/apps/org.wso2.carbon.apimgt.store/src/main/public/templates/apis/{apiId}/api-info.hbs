@@ -32,19 +32,21 @@
                                     class="label label-primary">{{api.status}}</span></p>
                         </div>
                     </div>
-                    <div class="form-group">
+                    {{#if api.rating}}
+                        <div class="form-group">
 
-                        <label class="col-xs-4 col-sm-4 control-label"><strong>Rating:</strong></label>
+                            <label class="col-xs-4 col-sm-4 control-label"><strong>Rating:</strong></label>
 
-                        <div class="col-xs-5 col-sm-5">
-                            <p class="form-control-static">
-                                <input type="hidden" class="rating-tooltip-manual rate_save"
-                                       value=""/>
-                                <a class="remove_rating" title="remove rates"><i class="fw fw-error"
-                                                                                 style="font-size:11px;"></i></a>
-                            </p>
+                            <div class="col-xs-5 col-sm-5">
+                                <p class="form-control-static">
+                                    <input type="hidden" class="rating-tooltip-manual rate_save"
+                                           value=""/>
+                                    <a class="remove_rating" title="remove rates"><i class="fw fw-error"
+                                                                                     style="font-size:11px;"></i></a>
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    {{/if}}
                 </div>
             </div>
 
