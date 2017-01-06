@@ -40,12 +40,10 @@
                                     {{#if this.isURL}}
                                         <a href="{{this.sourceUrl}}" title="URL Documentation" class="doc-content"
                                            target="_blank">{{this.sourceUrl}}</a>
-                                    {{/if}}
-                                    {{#if this.isFile}}
+                                    {{else if this.isFile}}
                                         <a href="{{this.sourceUrl}}" title="File Documentation" class="doc-content"
                                            target="_blank">Download</a>
-                                    {{/if}}
-                                    {{#if this.isInLine}}
+                                    {{else if this.isInLine}}
                                         <a href="/store/apis/{{../../api.id}}/documents/{{this.documentId}}" title="Inline Documentation" class="doc-content"
                                            target="_blank">View Content</a>
                                     {{/if}}
@@ -56,6 +54,10 @@
                 </div>
             </div>
         </div>
-
+                                    {{else}}
+                                            <div class="message message-info remove-margin">
+                                                <h4><i class="icon fw fw-info"></i>No Documents Found</h4>
+                                                <p>No documents have been associated with this API so <far class=""></far></p>
+                                            </div>
     {{/each}}
 </div>

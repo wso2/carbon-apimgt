@@ -238,7 +238,7 @@ $(function () {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
 
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 200d5b62-7837-3dd9-b4a8-896cbcd755ab", "header"));
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 12770569-28a9-3864-9f7b-c3fcdc16b890", "header"));
             client["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (jsonData) {
                     var context = {};
