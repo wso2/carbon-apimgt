@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -138,20 +137,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope, String groupingId,
             String jsonString) throws APIManagementException {
 
-        List<Scope> authorizedScopes = new ArrayList<Scope>();
-        String authScopeString;
 
-        if (!authorizedScopes.isEmpty()) {
-            StringBuilder scopeBuilder = new StringBuilder();
-            for (Scope scope : authorizedScopes) {
-                scopeBuilder.append(scope.getKey()).append(' ');
-            }
-            authScopeString = scopeBuilder.toString();
-        } else {
-            authScopeString = KeyManagerConstants.OAUTH2_DEFAULT_SCOPE;
-        }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
-                .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonString);
+                .createOauthAppRequest(applicationName, userId, callbackUrl, null, jsonString);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -165,7 +153,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
                 keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
-                accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo, null);
+                accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
             }
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
 

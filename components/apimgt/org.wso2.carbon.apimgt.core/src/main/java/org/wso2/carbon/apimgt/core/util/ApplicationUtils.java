@@ -46,27 +46,25 @@ public class ApplicationUtils {
             String tokenScope, String clientDetails)
             throws APIManagementException {
 
+        String[] tokenScopeList = new String[]{tokenScope};
         //initiate OauthAppRequest object.
         OAuthAppRequest appRequest = new OAuthAppRequest();
         OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
         authApplicationInfo.setClientName(clientName);
         authApplicationInfo.setCallbackUrl(callbackURL);
-        authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScope);
+        authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
         authApplicationInfo.setClientId(clientId);
+        authApplicationInfo.setAppOwner(clientId);
 
         //set applicationInfo object
         appRequest.setOAuthApplicationInfo(authApplicationInfo);
         return appRequest;
     }
 
-    public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication,
-            AccessTokenRequest tokenRequest)
+    public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication)
             throws APIManagementException {
-        if (tokenRequest == null) {
-            tokenRequest = new AccessTokenRequest();
-        }
 
-
+        AccessTokenRequest tokenRequest = new AccessTokenRequest();
         if (oAuthApplication.getClientId() == null || oAuthApplication.getClientSecret() == null) {
             throw new APIManagementException("Consumer key or Consumer Secret missing.");
         }

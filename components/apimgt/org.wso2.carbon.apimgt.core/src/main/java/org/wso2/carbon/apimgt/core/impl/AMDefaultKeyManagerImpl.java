@@ -77,10 +77,10 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         //Create json payload for DCR endpoint
         JsonObject json = new JsonObject();
-        json.addProperty(KeyManagerConstants.OAUTH_REDIRECT_URIS, oAuthApplicationInfo.getCallbackUrl());
-        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientId());
+        json.addProperty(KeyManagerConstants.OAUTH_REDIRECT_URIS, "");
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientName());
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
-        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_GRANTS, oAuthApplicationInfo.getGrantTypes());
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_GRANTS, "refresh_token");
         URL url;
         HttpURLConnection urlConn = null;
         try {
@@ -92,17 +92,18 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
             urlConn.setRequestProperty("content-type", "application/json");
+            urlConn.setRequestProperty("Authorization", "Basic YWRtaW46YWRtaW4=");
             urlConn.getOutputStream()
                     .write((json.toString()).getBytes("UTF-8"));
             int responseCode = urlConn.getResponseCode();
-            if (responseCode == 200) {  //If the DCR call is success
+            if (responseCode == 201) {  //If the DCR call is success
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
                 JsonParser parser = new JsonParser();
                 JsonObject jObj =  parser.parse(responseStr).getAsJsonObject();
                 String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
                 String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
                 String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
-                String grantTypes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                String grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
 
                 oAuthApplicationInfo.setClientName(clientName);
                 oAuthApplicationInfo.setClientId(consumerKey);
@@ -286,6 +287,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
+            urlConn.setRequestProperty("Authorization", "Basic YWRtaW46YWRtaW4=");
             StringBuilder builder = new StringBuilder();
             builder.append(applicationTokenScope);
             for (String scope : tokenRequest.getScopes()) {
