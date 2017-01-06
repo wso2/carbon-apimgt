@@ -20,9 +20,18 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.Application;
 
 /**
  * 
@@ -30,9 +39,46 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
  */
 public class UserAwareAPIStore extends APIStoreImpl {
 
+    private static final Logger log = LoggerFactory.getLogger(UserAwareAPIStore.class);
 
-    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO);
+    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO);
+    }
+
+    @Override
+    public void deleteApplication(String appId) throws APIManagementException {
+        try {
+            Application application = getApplicationDAO().getApplication(appId);
+            if (application != null && application.getCreatedUser().equals(getUsername())) {
+                super.deleteApplication(appId);
+            } else {
+                String errorMsg = "Could not find application - " + appId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.APPLICATION_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting application - " + appId;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APPLICATION_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void updateApplication(String uuid, Application application) throws APIManagementException {
+        try {
+            Application oldApplication = getApplicationDAO().getApplication(uuid);
+            if (oldApplication != null && oldApplication.getCreatedUser().equals(getUsername())) {
+                super.updateApplication(uuid, application);
+            } else {
+                String errorMsg = "Could not find application - " + uuid;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.APPLICATION_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating application - " + uuid;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APPLICATION_NOT_FOUND);
+        }
     }
 }

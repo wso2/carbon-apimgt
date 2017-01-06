@@ -252,7 +252,17 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${apache.commons.lang3.version}</version>
             </dependency>
-                <dependency>
+            <dependency>
+                <groupId>commons-lang.wso2</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${version.commons-collections}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>annotations</artifactId>
                 <version>${findbug.exclude.version}</version>
@@ -282,6 +292,41 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${google.code.gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.apache.velocity</groupId>
+                <artifactId>velocity</artifactId>
+                <version>${velocity.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.andes.wso2</groupId>
+                <artifactId>andes-client</artifactId>
+                <version>${andes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs.wso2</groupId>
+                <artifactId>geronimo-jms_1.1_spec</artifactId>
+                <version>1.1.0.wso2v1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.securevault</groupId>
+                <artifactId>org.wso2.securevault</artifactId>
+                <version>${securevault.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.messaging</groupId>
+                <artifactId>org.wso2.carbon.messaging</artifactId>
+                <version>${carbon.messaging.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -358,25 +403,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.19.1</version>
-                    <executions>
-                        <execution>
-                            <id>integration-test</id>
-                            <goals>
-                                <goal>integration-test</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>verify</id>
-                            <goals>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-		<plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
@@ -422,16 +448,28 @@
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
+                <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.18.1</version>
+                </plugin>
+                <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
     <properties>
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->
-        <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
+        <!-- downgraded from 2.5.4 to 2.5.3 as per CARBON-15374-->
+        <maven.bundle.plugin.version>2.5.3</maven.bundle.plugin.version>
 
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
@@ -460,7 +498,7 @@
         <carbon.transport.version>2.1.9-SNAPSHOT</carbon.transport.version>
         <carbon.transport.package.import.version.range>[2.0.0, 2.2.0)</carbon.transport.package.import.version.range>
 
-        <carbon.messaging.version>1.0.8-SNAPSHOT</carbon.messaging.version>
+        <carbon.messaging.version>1.0.10</carbon.messaging.version>
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
 
@@ -500,6 +538,7 @@
 
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
+        <version.commons-collections>3.2.2.wso2v1</version.commons-collections>
         <rx.java.version>1.2.0.wso2v1</rx.java.version>
         <testng.version>6.9.10</testng.version>
         <org.wso2.orbit.org.apache.solr.version>5.2.1.wso2v1</org.wso2.orbit.org.apache.solr.version>
@@ -524,23 +563,27 @@
 
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
-        <carbon.uuf.version>1.0.0-m7</carbon.uuf.version>
+        <carbon.uuf.version>1.0.0-SNAPSHOT</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m6</carbon-uuf-maven-plugin.version>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
-        <carbon.messaging.version>1.0.2</carbon.messaging.version>
+        <carbon.messaging.version>1.0.10</carbon.messaging.version>
         <carbon.messaging.package.import.version.range>[0.0.0, 2.0.0)</carbon.messaging.package.import.version.range>
         <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
         <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <!--<slf4j.version>1.7.5</slf4j.version>-->
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
         <!--End of Dependency for integration gateway extension-->
-        <swagger.parser.version>1.0.21.wso2v1</swagger.parser.version>
+        <swagger.parser.version>1.0.21.wso2v2</swagger.parser.version>
         <google.code.gson.version>2.7</google.code.gson.version>
-	<!-- Jacoco for code coverage -->
-	<jacoco.version>0.7.5.201505241946</jacoco.version>
-	<maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
-
+        <velocity.version>1.7.0.wso2v1</velocity.version>
+        <!-- Jacoco for code coverage -->
+        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
+        <google.guava.version>18.0</google.guava.version>
+        <andes.version>3.0.5</andes.version>
+        <securevault.version>1.0.0-wso2v2</securevault.version>
+        <slf4j.version>1.7.22</slf4j.version>
     </properties>
 
 </project>

@@ -19,43 +19,27 @@
 
 package org.wso2.carbon.apimgt.core.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Policy;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Class for all utility methods
  */
 public class APIUtils {
 
-    /**
-     * Log and throw exceptions. This should be used only at service level.
-     *
-     * @param msg Error message
-     * @param log Logger to be used to log the error message
-     * @throws APIManagementException
-     */
-    public static void logAndThrowException(String msg, Logger log) throws APIManagementException {
-        log.error(msg);
-        throw new APIManagementException(msg);
-    }
-
-    /**
-     * Log and throw exceptions. This should be used only at service level.
-     *
-     * @param msg Error message
-     * @param t Exception to be thrown
-     * @param log Logger to be used to log the error message
-     * @throws APIManagementException
-     */
-    public static void logAndThrowException(String msg, Throwable t, Logger log) throws APIManagementException {
-        log.error(msg, t);
-        throw new APIManagementException(msg, t);
-    }
 
     /**
      * Checks if debug log is enabled and logs the message
@@ -94,5 +78,95 @@ public class APIUtils {
      */
     public static Map<String, Policy> getPolicies(int policyType) throws APIManagementException {
         return null;
+    }
+
+    public static String getDefaultAPIPolicy() {
+        // TODO: 11/25/16 need to implement logic
+        return "Unlimited";
+    }
+
+    /**
+     * Validate the API object
+     * @throws APIManagementException
+     */
+    public static void validate(API api) throws APIManagementException {
+        if (StringUtils.isEmpty(api.getId())) {
+            throw new APIManagementException("Couldn't find UUID of API");
+        }
+        if (StringUtils.isEmpty(api.getApiDefinition())) {
+            throw new APIManagementException("Couldn't find swagger definition of API");
+        }
+        if (StringUtils.isEmpty(api.getName())) {
+            throw new APIManagementException("Couldn't find Name of API ");
+        }
+        if (StringUtils.isEmpty(api.getContext())) {
+            throw new APIManagementException("Couldn't find Context of API ");
+        }
+        if (StringUtils.isEmpty(api.getVersion())) {
+            throw new APIManagementException("Couldn't find Version of API ");
+        }
+        if (api.getTransport().isEmpty()) {
+            throw new APIManagementException("Couldn't find Transport of API ");
+        }
+        if (api.getPolicies().isEmpty()) {
+            throw new APIManagementException("Couldn't find Policies of API ");
+        }
+        if (api.getVisibility() == null) {
+            throw new APIManagementException("Couldn't find Visibility of API ");
+        }
+    }
+
+    /**
+     * Checks String lists for equality independent of the order of elements in the lists.
+     *
+     * Note that order of the elements in the lists will be changed as a result of sorting,
+     * but this is not a concern usually since the order does not matter.
+     */
+    public static boolean isListsEqualIgnoreOrder(List<String> list1, List<String> list2) {
+        if (list1 == null && list2 == null) {
+            return true;
+        }
+
+        if (list1 == null || list2 == null || list1.size() != list2.size()) {
+            return false;
+        }
+
+        // Sort lists so that the order of elements don't affect the equal check.
+        // Note that order of the elements in the lists will be changed as a result but this is not a concern since
+        // the order does not matter
+        Collections.sort(list1);
+        Collections.sort(list2);
+        return list1.equals(list2);
+    }
+
+    /**
+     * Checks generic lists for equality independent of the order of elements in the lists.
+     *
+     * Note that order of the elements in the lists will be changed as a result of sorting,
+     * but this is not a concern usually since the order does not matter.
+     */
+    public static <T> boolean isListsEqualIgnoreOrder(List<T> list1, List<T> list2, Comparator<T> comparator) {
+        if (list1 == null && list2 == null) {
+            return true;
+        }
+
+        if (list1 == null || list2 == null || list1.size() != list2.size()) {
+            return false;
+        }
+
+        // Sort lists so that the order of elements don't affect the equal check.
+        // Note that order of the elements in the lists will be changed as a result but this is not a concern since
+        // the order does not matter
+        Collections.sort(list1, comparator);
+        Collections.sort(list2, comparator);
+        return list1.equals(list2);
+    }
+
+    public static boolean isTimeStampsEquals(Temporal date1, Temporal date2) {
+        if (date1 == null && date2 == null) {
+            return true;
+        } else {
+            return Duration.between(date1, date2).toMillis() < 1000L;
+        }
     }
 }

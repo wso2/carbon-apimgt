@@ -22,10 +22,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -106,16 +106,17 @@ public interface APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link DocumentInfoResults} Document list
+     * @return {@link List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
-    DocumentInfoResults getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException;
+    List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit)
+                                                                        throws APIManagementException;
 
     /**
      * Get a summary of documentation by doc Id
      *
      * @param docId Document ID
-     * @return {@link DocumentInfo} Documentation summary
+     * @return {@link DocumentInfo} Documentation meta data
      * @throws APIManagementException if it failed to fetch Documentation
      */
     DocumentInfo getDocumentationSummary(String docId) throws APIManagementException;
@@ -124,17 +125,36 @@ public interface APIManager {
      * This method used to get the content of a documentation
      *
      * @param docId Document ID
-     * @return {@link InputStream} Input stream for document content
+     * @return {@link DocumentContent} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
-    InputStream getDocumentationContent(String docId) throws APIManagementException;
+    DocumentContent getDocumentationContent(String docId) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the uuid
+     *
      * @param uuid uuid of the Application
+     * @param userId  Name of the User.
+     * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
      */
-    Application getApplicationByUUID(String uuid) throws APIManagementException;
+    Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
+    /**
+     * Returns the subscriptions for api
+     * @param apiId
+     * @return
+     * @throws APIManagementException
+     */
+    List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException;
+
+    /**
+     * Return {@link Subscription} of subscription id
+     *
+     * @param subId
+     * @return
+     * @throws APIManagementException
+     */
+    Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 }

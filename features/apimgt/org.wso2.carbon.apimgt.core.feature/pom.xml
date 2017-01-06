@@ -57,6 +57,10 @@
             <artifactId>jackson-jaxrs-base</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
             <exclusions>
@@ -89,6 +93,38 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
         </dependency>
     </dependencies>
 
@@ -145,6 +181,32 @@
                                 </sql>
                                 <echo message="##################### END ########################" />
                             </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                                    <version>7.0.0-SNAPSHOT</version>
+                                    <type>bundle</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                                    <includes>config-docs/**</includes>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
@@ -227,8 +289,8 @@
                                     <version>${json-simple.wso2.version}</version>
                                 </bundle>
                                 <bundle>
-                                        <symbolicName>commons-io</symbolicName>
-                                        <version>${commons-io.version}</version>
+                                    <symbolicName>commons-io</symbolicName>
+                                    <version>${commons-io.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>io.swagger.core</symbolicName>
@@ -241,6 +303,34 @@
                                 <bundle>
                                     <symbolicName>com.google.gson</symbolicName>
                                     <version>${google.code.gson.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.commons.lang3</symbolicName>
+                                    <version>${apache.commons.lang3.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>velocity</symbolicName>
+                                    <version>${velocity.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-lang</symbolicName>
+                                    <version>${commons-lang.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-collections</symbolicName>
+                                    <version>${version.commons-collections}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>geronimo-jms_1.1_spec</symbolicName>
+                                    <version>1.1.0.wso2v1</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>andes-client</symbolicName>
+                                    <version>${andes.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.wso2.securevault</symbolicName>
+                                    <version>${securevault.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

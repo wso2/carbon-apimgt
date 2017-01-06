@@ -20,139 +20,125 @@
 
 package org.wso2.carbon.apimgt.core.dao;
 
-import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationSummaryResults;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
 
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.Application;
+
+import java.util.List;
 import javax.annotation.CheckForNull;
-import java.sql.SQLException;
 
 /**
  * Provides access to Application data layer
  */
 public interface ApplicationDAO {
+
     /**
      * Retrieve a given instance of an Application
-     * @param appID The UUID that uniquely identifies an Application
-     * @return valid {@link Application} object or null
-     * @throws SQLException
      *
+     * @param appId   The UUID that uniquely identifies an Application
+     * @return valid {@link Application} object or null
+     * @throws APIMgtDAOException
      */
     @CheckForNull
-    Application getApplication(String appID) throws SQLException;
+    Application getApplication(String appId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve a given instance of an Application
+     *
+     * @param appName Name of the Application
+     * @param ownerId ID of the application owner.
+     * @return valid {@link Application} object or null
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all available Applications that belong to a user.
+     *
+     * @param ownerId Username of user
+     * @return A list of {@link Application}
+     * @throws APIMgtDAOException
+     */
+    List<Application> getApplications(String ownerId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified username
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     *
+     * @param offset   The number of results from the beginning that is to be ignored
+     * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
-     *
+     * @throws APIMgtDAOException
      */
-    ApplicationSummaryResults getApplicationsForUser(int offset, int limit, String userName)
-                                                                                throws SQLException;
+    Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications. This method supports result pagination and
      * ensures results returned are those that belong to the specified Group ID
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
+     *
+     * @param offset  The number of results from the beginning that is to be ignored
+     * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
-     *
+     * @throws APIMgtDAOException
      */
-    ApplicationSummaryResults getApplicationsForGroup(int offset, int limit, String groupID)
-            throws SQLException;
+    Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param userName The username to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
      *
+     * @param searchString The search string provided
+     * @return An array of matching {@link Application} objects
+     * @throws APIMgtDAOException
      */
-    ApplicationSummaryResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                        int limit, String userName) throws SQLException;
+    Application[] searchApplicationsForUser(String searchString, String userId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
-     * @param searchAttribute The attribute of an Application against which the search will be performed
-     * @param searchString The search string provided
-     * @param offset The number of results from the beginning that is to be ignored
-     * @param limit The maximum number of results to be returned after the offset
-     * @param groupID The Group ID to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws SQLException
      *
+     * @param searchString The search string provided
+     * @param groupID      The Group ID to filter results by
+     * @return An array of matching {@link Application} objects
+     * @throws APIMgtDAOException
      */
-    ApplicationSummaryResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
-                                                        int limit, String groupID) throws SQLException;
+    Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException;
 
     /**
      * Add a new instance of an Application
-     * @param application The {@link Application} object to be added
-     * @return UUID of created {@link Application}
-     * @throws SQLException
      *
+     * @param application The {@link Application} object to be added
+     * @throws APIMgtDAOException
      */
-    String addApplication(Application application) throws SQLException;
+    void addApplication(Application application) throws APIMgtDAOException;
 
     /**
      * Update an existing Application
-     * @param appID The UUID of the Application that needs to be updated
-     * @param updatedApp Substitute {@link Application} object that will replace the existing Application
-     * @throws SQLException
      *
+     * @param appID      The UUID of the Application that needs to be updated
+     * @param updatedApp Substitute {@link Application} object that will replace the existing Application
+     * @throws APIMgtDAOException
      */
-    void updateApplication(String appID, Application updatedApp) throws SQLException;
+    void updateApplication(String appID, Application updatedApp) throws APIMgtDAOException;
 
     /**
      * Remove an existing Application
+     *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws SQLException
-     *
+     * @throws APIMgtDAOException
      */
-    void deleteApplication(String appID) throws SQLException;
+    void deleteApplication(String appID) throws APIMgtDAOException;
 
     /**
-     * Fetches an Application by name.
+     * Check whether given application name is already available in the system
      *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @throws SQLException
+     * @param appName application name
+     * @return true if application name is already available
+     * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
-    Application getApplicationByName(String userId, String applicationName,  String groupId) throws SQLException;
-
-    /**
-     * Retrieves the Application which is corresponding to the given UUID String
-     *
-     * @param uuid UUID of Application
-     * @return
-     * @throws SQLException
-     */
-    Application getApplicationByUUID(String uuid) throws SQLException;
-
-    /**
-     * Check whether given application name is available under current subscriber or group
-     *
-     * @param appName  application name
-     * @param username subscriber username
-     * @param groupId  group of the subscriber
-     * @return true if application is available for the subscriber
-     * @throws SQLException if failed to get applications for given subscriber
-     */
-    boolean isApplicationExists(String appName, String username, String groupId) throws SQLException;
-
-
-    Application[] getApplications(Subscriber subscriber, String groupingId) throws SQLException;
+    boolean isApplicationNameExists(String appName) throws APIMgtDAOException;
 
 }

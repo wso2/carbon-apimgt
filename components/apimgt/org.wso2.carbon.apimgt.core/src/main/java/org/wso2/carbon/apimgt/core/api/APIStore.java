@@ -22,10 +22,12 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.Subscriber;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,38 +37,35 @@ import java.util.Map;
  */
 public interface APIStore extends APIManager {
 
-
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
-     * 
+     *
      * @param offset offset
-     * @param limit limit
+     * @param limit  limit
      * @param status One or more Statuses
      * @return List<API>
      * @throws APIManagementException if failed to API set
      */
-    List<API> getAllAPIsByStatus(int offset, int limit, String[] status)
-            throws APIManagementException;
-    
-   
+    List<API> getAllAPIsByStatus(int offset, int limit, String[] status) throws APIManagementException;
+
     /**
      * Returns a paginated list of all APIs which match the given search criteria.
-     *   
+     *
      * @param query searchType
      * @param limit limit
      * @return List<API>
      * @throws APIManagementException
      */
-    List<API> searchAPIs(String query, int offset, int limit)
-            throws APIManagementException;
+    List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
-     * @param application - The Application Object that represents the Application
+     *
+     * @param appId - The Application id of the Application
      * @throws APIManagementException
      */
-    void removeApplication(Application application) throws APIManagementException;
+    void deleteApplication(String appId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -75,67 +74,124 @@ public interface APIStore extends APIManager {
      * @return uuid of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-     String addApplication(Application application) throws APIManagementException;
-
+    String addApplication(Application application) throws APIManagementException;
 
     /**
      * This will return APIM application by giving name and subscriber
-     * @param userId APIM subscriber ID.
-     * @param applicationName APIM application name.
-     * @param groupId Group id.
+     *
+     * @param applicationName APIM application name
+     * @param ownerId          Application owner ID.
+     * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException
      */
-    Application getApplicationsByName(String userId, String applicationName, String groupId)
+    Application getApplicationByName(String applicationName, String ownerId, String groupId)
             throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupId the groupId to which the applications must belong.
+     * @param groupId    the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    Application[] getApplications(Subscriber subscriber, String groupId) throws APIManagementException;
+    List<Application> getApplications(String subscriber, String groupId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
-     *
+     * @param uuid Uuid of the existing application
      * @param application Application object containing updated data
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void updateApplication(Application application) throws APIManagementException;
+    void updateApplication(String uuid, Application application) throws APIManagementException;
 
     /**
      * Creates a request for getting Approval for Application Registration.
      *
-     * @param userId Subsriber name.
+     * @param userId          Subsriber name.
      * @param applicationName of the Application.
-     * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl callback URL
-     * @param allowedDomains allowedDomains for token.
-     * @param validityTime validity time period.
-     * @param groupingId APIM application id.
-     * @param jsonString Callback URL for the Application.
-     * @param tokenScope Scopes for the requested tokens.
-     *
+     * @param tokenType       Token type (PRODUCTION | SANDBOX)
+     * @param callbackUrl     callback URL
+     * @param allowedDomains  allowedDomains for token.
+     * @param validityTime    validity time period.
+     * @param groupingId      APIM application id.
+     * @param jsonString      Callback URL for the Application.
+     * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId, String jsonString) throws APIManagementException;
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
+            String tokenScope, String groupingId, String jsonString) throws APIManagementException;
 
     /**
-     * Check whether given application name is available under current subscriber or group
+     * Retrieve an application given the uuid.
      *
-     * @param appName  application name
-     * @param username subscriber username
-     * @param groupId  group of the subscriber
-     * @return true if application is available for the subscriber
-     * @throws SQLException if failed to get applications for given subscriber
+     * @param uuid
+     * @return Application object of the given uuid
+     * @throws APIManagementException
      */
-    boolean isApplicationExists(String appName, String username, String groupId) throws APIManagementException;
+    Application getApplicationByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Retrieve list of subscriptions given the application.
+     *
+     * @param application
+     * @return List of subscriptions objects of the given application.
+     * @throws APIManagementException
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+    /**
+     * Add an api subscription.
+     *
+     * @param apiId
+     * @param applicationId
+     * @param tier
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiSubscription(String apiId, String applicationId, String tier) throws APIManagementException;
+
+    /**
+     * Delete an API subscription.
+     *
+     * @param subscriptionId
+     * @throws APIManagementException
+     */
+    void deleteAPISubscription(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Retrieve all tags
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Tag> getAllTags() throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+
+    /**
+     * Retrieve all policies of given tier level.
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
+
+    /**
+     * Creates an OAuth2 app for a given APIM Application and generate keys.
+     *
+     * @param application    Application for which keys should be generated
+     * @return Generated keys
+     */
+    APIKey generateKeysForApplication(Application application);
 
 }

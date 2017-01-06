@@ -63,5 +63,31 @@ public class RestApiConstants {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String APIID_PARAM = "{apiId}";
+    public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+    public static final String REST_API_PROVIDER = "admin";
+    public static final String REST_API_STORE_CONTEXT = "/api/am/store/";
+    public static final String REST_API_STORE_VERSION = "v0.10";
+    public static final String REST_API_PUBLISHER_VERSION = "v0.10";
+    public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
+    public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
+    public static final String REST_API_ADMIN_VERSION = "v0.10";
+
+    public static final String AUTHORIZATION_HTTP_HEADER = "Authorization";
+    public static final String AUTH_TYPE_OAUTH2 = "OAuth2";
+    public static final String BEARER_PREFIX = "bearer";
+    public static final String AUTH_SERVER_URL_KEY = "AUTH_SERVER_URL";
+    public static final String AUTH_SERVER_URL = "https://localhost:9443/oauth2/introspect";
+    public static final String SCOPE = "scope";
+    public static final String PUBLISHER_API = "/publisher-api.yaml";
+    public static final String STORE_API = "/store-api.yaml";
+    public static final String AUTH_TYPE_BASIC = "Basic";
+    public static final String CHARSET_UTF_8 = "UTF-8";
+
+    public static final int AUTH_TYPE_BASIC_LENGTH = AUTH_TYPE_BASIC.length();
 
 }
+
+

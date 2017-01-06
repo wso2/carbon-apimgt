@@ -22,13 +22,17 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.util.Map;
@@ -46,11 +50,34 @@ public class APIManagerFactory {
 
     private static final APIManagerFactory instance = new APIManagerFactory();
 
+    private APIMgtAdminService apiMgtAdminService;
     private UserAwareAPIPublisher userAwareAPIPublisher;
     private UserAwareAPIStore userAwareAPIStore;
 
-    private APIManagerCache<APIPublisher> providers = new APIManagerCache<>(50);
-    private APIManagerCache<APIStore> consumers = new APIManagerCache<>(500);
+    private static final int MAX_PROVIDERS = 50;
+    private static final int MAX_CONSUMERS = 500;
+
+    // Thread safe Cache for API Providers
+    private static Map<String, APIPublisher> providers =
+            Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
+                                        (MAX_PROVIDERS + 1, 1, false) {
+        // This method is called just after a new entry has been added
+        @Override
+        public boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_PROVIDERS;
+        }
+    });
+
+    // Thread safe Cache for API Consumers
+    private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
+            (MAX_CONSUMERS + 1, 1, false) {
+        // This method is called just after a new entry has been added
+        @Override
+        public boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_CONSUMERS;
+        }
+    });
+
 
     private APIManagerFactory() {
 
@@ -62,17 +89,27 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            userAwareAPIPublisher = new UserAwareAPIPublisher(username,
-                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO());
+            userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
             userAwareAPIPublisher.registerObserver(EventLogger.getEventLoggerObject());
-
             return  userAwareAPIPublisher;
-        } catch (SQLException e) {
-            APIUtils.logAndThrowException("Couldn't Create API Provider", e, log);
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't Create API Provider", e);
+            throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
+
+    }
+
+    private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
+        try {
+            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO());
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't create API Management Admin Service", e);
+            throw new APIMgtDAOException("Couldn't create API Management Admin Service",
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
     }
 
     private APIStore newConsumer(String username) throws APIManagementException {
@@ -80,16 +117,15 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            userAwareAPIStore = new UserAwareAPIStore(username,
-                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO());
+            userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
             userAwareAPIStore.registerObserver(EventLogger.getEventLoggerObject());
-
-        } catch (SQLException e) {
-            APIUtils.logAndThrowException("Couldn't Create API Consumer", e, log);
+            return userAwareAPIStore;
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't Create API Consumer", e);
+            throw new APIMgtDAOException("Couldn't Create API Consumer", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     public APIPublisher getAPIProvider(String username) throws APIManagementException {
@@ -106,6 +142,15 @@ public class APIManagerFactory {
             }
         }
         return provider;
+    }
+
+    public APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
+        if (apiMgtAdminService == null) {
+            synchronized (this) {
+                apiMgtAdminService = newAPIMgtAdminService();
+            }
+        }
+        return apiMgtAdminService;
     }
 
     public APIStore getAPIConsumer() throws APIManagementException {
@@ -128,61 +173,15 @@ public class APIManagerFactory {
         return consumer;
     }
 
+    public APIGatewayPublisher getGateway() {
+        return new APIGatewayPublisherImpl();
+    }
+
     public @Nullable APIPublisherImpl getAPIPublisherImpl() {
         return userAwareAPIPublisher;
     }
 
     public @Nullable APIStoreImpl getAPIStoreImpl() {
         return userAwareAPIStore;
-    }
-
-    public void clearAll() {
-        consumers.exclusiveLock();
-        try {
-            for (APIStore consumer : consumers.values()) {
-                cleanupSilently(consumer);
-            }
-            consumers.clear();
-        } finally {
-            consumers.release();
-        }
-
-        providers.exclusiveLock();
-        try {
-            for (APIPublisher provider : providers.values()) {
-                cleanupSilently(provider);
-            }
-            providers.clear();
-        } finally {
-            providers.release();
-        }
-    }
-
-    private void cleanupSilently(APIManager manager) {
-        // if (manager != null) {
-        // try {
-        // manager.cleanup();
-        // } catch (APIManagementException ignore) {
-        //
-        // }
-        // }
-    }
-
-    private static class APIManagerCache<T> extends LRUCache<String, T> {
-
-        private static final long serialVersionUID = -232359641908536526L;
-
-        public APIManagerCache(int maxEntries) {
-            super(maxEntries);
-        }
-
-        protected void handleRemovableEntry(Map.Entry<String, T> entry) {
-            log.warn(" To be implemented ");
-            // try {
-            // ((APIManager) entry.getValue()).cleanup();
-            // } catch (APIManagementException e) {
-            // log.warn("Error while cleaning up APIManager instance", e);
-            // }
-        }
     }
 }

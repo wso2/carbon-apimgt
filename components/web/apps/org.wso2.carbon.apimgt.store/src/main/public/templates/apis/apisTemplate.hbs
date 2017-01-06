@@ -1,0 +1,31 @@
+{{#each apis}}
+    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="white-wrapper add-margin-bottom-4x">
+            <div class="thumbnail icon">
+                <div class="square-element">
+                    <img class="" src="/registry/resource/_system/governance/apimgt/applicationdata/icons/admin/foo/1.0.0/icon" alt="API Thumbnail">
+
+                </div>
+                <a href="{{id}}" title="Browse APIs">
+                    <div class="after">
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>
+                    </div>
+                </a>
+            </div>
+            <div class="add-padding-2x app-data ">
+                <h4 class="truncate"><a href="" title="API Name: {{name}}">{{name}}</a></h4>
+                <h5><a href="" title="Version">{{version}}</a></h5>
+
+                <p class="truncate">{{publisher}}</p>
+
+
+                <input type="hidden" class="rating" disabled="disabled" value="{{rating}}" />
+
+            </div>
+        </div>
+    </div>
+
+{{/each}}

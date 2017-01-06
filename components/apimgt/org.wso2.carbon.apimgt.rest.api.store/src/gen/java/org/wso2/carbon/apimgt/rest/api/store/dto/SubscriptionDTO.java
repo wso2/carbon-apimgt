@@ -31,8 +31,8 @@ public class SubscriptionDTO   {
     BLOCKED("BLOCKED"),
     
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
-    
-    UNBLOCKED("UNBLOCKED"),
+
+    ACTIVE("ACTIVE"),
     
     ON_HOLD("ON_HOLD"),
     

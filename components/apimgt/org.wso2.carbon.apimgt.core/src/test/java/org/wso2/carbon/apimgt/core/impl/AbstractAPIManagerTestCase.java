@@ -17,50 +17,56 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-
-import java.io.InputStream;
-import java.sql.SQLException;
+import org.wso2.carbon.apimgt.core.models.Application;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class AbstractAPIManagerTestCase {
-    private ApiDAO apiDAO = mock(ApiDAO.class);
-    private ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-    private APISubscriptionDAO subscriptionDAO = mock(APISubscriptionDAO.class);
 
-    private APIStore apiStore = new APIStoreImpl("username", apiDAO, applicationDAO, subscriptionDAO);
+    private static final String USER_NAME = "username";
+    private static final String API_VERSION = "1.0.0";
+    private static final String PROVIDER_NAME = "provider";
+    private static final String API_NAME = "provider";
+    private static final String API_ID = "provider";
+    private static final String APP_NAME = "appname";
+    public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
-    @Test
-    public void testSearchAPIByUUID() {
-
+    @Test public void testSearchAPIByUUID() {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
+        API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         try {
-            API apiFromDAO = new API.APIBuilder("provider1", "TestAPIByUUID", "1.0.0").build();
-            when(apiDAO.getAPI("1234")).thenReturn(apiFromDAO);
-
-            API api = apiStore.getAPIbyUUID("1234");
-            Assert.assertEquals(api.getName(), "TestAPIByUUID");
-            verify(apiDAO, atLeastOnce()).getAPI("1234");
-        } catch (APIManagementException | SQLException e) {
+            when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
+            API api = apiStore.getAPIbyUUID(API_ID);
+            Assert.assertEquals(api.getName(), API_NAME);
+            verify(apiDAO, atLeastOnce()).getAPI(API_ID);
+        } catch (APIManagementException  e) {
             Assert.fail(e.getMessage());
         }
     }
 
-//    @Test
-//    public void testGetDocument() {
-//        try {
-//            InputStream docContent = apiStore.getDocumentationContent("");
-//        } catch (APIManagementException e) {
-//            Assert.fail(e.getMessage());
-//        }
-//    }
+    @Test(description = "Retrieve an application by uuid")
+    public void testGetApplicationByUuid() {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
+        Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
+        try {
+            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
+            Application application = apiStore.getApplication(UUID, USER_NAME, null);
+
+            Assert.assertNotNull(application);
+            verify(applicationDAO, times(1)).getApplication(UUID);
+        } catch (APIManagementException e) {
+            Assert.assertTrue(false);
+        }
+    }
 
 }

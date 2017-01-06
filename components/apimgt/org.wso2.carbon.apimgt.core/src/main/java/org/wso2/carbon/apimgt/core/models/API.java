@@ -21,14 +21,16 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -46,19 +48,25 @@ public final class API {
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
         lifecycleInstanceId = builder.lifecycleInstanceId;
-        apiDefinition = builder.apiDefinition;
+        if (builder.apiDefinition != null) {
+            apiDefinition = builder.apiDefinition.toString();
+        } else {
+            apiDefinition = "";
+        }
+        if (builder.gatewayConfig != null) {
+            gatewayConfig = builder.gatewayConfig.toString();
+        } else {
+            gatewayConfig = "";
+        }
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
         isDefaultVersion = builder.isDefaultVersion;
-        apiPolicy = builder.apiPolicy;
         transport = builder.transport;
         tags = builder.tags;
         policies = builder.policies;
         visibility = builder.visibility;
         visibleRoles = builder.visibleRoles;
-        endpoints = builder.endpoints;
-        gatewayEnvironments = builder.gatewayEnvironments;
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
@@ -66,6 +74,7 @@ public final class API {
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
+        copiedFromApiId = builder.copiedFromApiId;
     }
 
     public String getId() {
@@ -104,6 +113,10 @@ public final class API {
         return apiDefinition;
     }
 
+    public String getGatewayConfig() {
+        return gatewayConfig;
+    }
+
     public String getWsdlUri() {
         return wsdlUri;
     }
@@ -118,10 +131,6 @@ public final class API {
 
     public boolean isDefaultVersion() {
         return isDefaultVersion;
-    }
-
-    public String getApiPolicy() {
-        return apiPolicy;
     }
 
     public List<String> getTransport() {
@@ -144,14 +153,6 @@ public final class API {
         return visibleRoles;
     }
 
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public List<Environment> getGatewayEnvironments() {
-        return gatewayEnvironments;
-    }
-
     public BusinessInformation getBusinessInformation() {
         return businessInformation;
     }
@@ -160,31 +161,80 @@ public final class API {
         return corsConfiguration;
     }
 
-    public Date getCreatedTime() {
-        return new Date(createdTime.getTime());
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
     }
 
     public String getCreatedBy() {
         return createdBy;
     }
 
-    public Date getLastUpdatedTime() {
-        return new Date(lastUpdatedTime.getTime());
+    public LocalDateTime getLastUpdatedTime() {
+        return lastUpdatedTime;
     }
 
     public LifecycleState getLifecycleState() {
         return lifecycleState;
     }
 
-    public Set<URITemplate> getUriTemplates() {
+    public List<UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        API api = (API) o;
+        return isResponseCachingEnabled == api.isResponseCachingEnabled &&
+                cacheTimeout == api.cacheTimeout &&
+                isDefaultVersion == api.isDefaultVersion &&
+                Objects.equals(id, api.id) &&
+                Objects.equals(provider, api.provider) &&
+                Objects.equals(name, api.name) &&
+                Objects.equals(version, api.version) &&
+                Objects.equals(context, api.context) &&
+                Objects.equals(description, api.description) &&
+                Objects.equals(lifeCycleStatus, api.lifeCycleStatus) &&
+                Objects.equals(lifecycleInstanceId, api.lifecycleInstanceId) &&
+                Objects.equals(apiDefinition, api.apiDefinition) &&
+                Objects.equals(gatewayConfig, api.gatewayConfig) &&
+                Objects.equals(wsdlUri, api.wsdlUri) &&
+                APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
+                APIUtils.isListsEqualIgnoreOrder(tags, api.tags) &&
+                APIUtils.isListsEqualIgnoreOrder(policies, api.policies) &&
+                visibility == api.visibility &&
+                APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles) &&
+                Objects.equals(businessInformation, api.businessInformation) &&
+                Objects.equals(corsConfiguration, api.corsConfiguration) &&
+                APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
+                Objects.equals(createdBy, api.createdBy) &&
+                APIUtils.isTimeStampsEquals(lastUpdatedTime, api.lastUpdatedTime) &&
+                Objects.equals(lifecycleState, api.lifecycleState) &&
+                APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator()) &&
+                Objects.equals(copiedFromApiId, api.copiedFromApiId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
+                apiDefinition, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
+                transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
+                createdTime, createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+    }
+
 
     /**
      * Visibility options
      */
     public enum Visibility {
-        PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
+        PUBLIC, PRIVATE, RESTRICTED, CONTROLLED,
     }
 
     private final String id;
@@ -196,52 +246,30 @@ public final class API {
     private final String lifeCycleStatus;
     private final String lifecycleInstanceId;
     private final String apiDefinition;
+    private final String gatewayConfig;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
     private final boolean isDefaultVersion;
-    private final String apiPolicy;
     private final List<String> transport;
     private final List<String> tags;
     private final List<String> policies;
     private final Visibility visibility;
     private final List<String> visibleRoles;
-    private final List<Endpoint> endpoints;
-    private final List<Environment> gatewayEnvironments;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
-    private final Date createdTime;
+    private final LocalDateTime createdTime;
     private final String createdBy;
-    private final Date lastUpdatedTime;
+    private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final Set<URITemplate> uriTemplates ;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        API that = (API) o;
-        return (name.equals(that.name) && provider.equals(that.provider) && version.equals(that.version));
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + provider.hashCode();
-        result = 31 * result + version.hashCode();
-        return result;
-    }
+    private final List<UriTemplate> uriTemplates;
+    private String copiedFromApiId;
 
     /**
      * {@code API} builder static inner class.
      */
     @SuppressFBWarnings("CD_CIRCULAR_DEPENDENCY")
-    public static final class APIBuilder implements ManagedLifecycle{
+    public static final class APIBuilder implements ManagedLifecycle {
         private String id;
         private String provider;
         private String name;
@@ -274,8 +302,12 @@ public final class API {
             return lifecycleInstanceId;
         }
 
-        public String getApiDefinition() {
+        public StringBuilder getApiDefinition() {
             return apiDefinition;
+        }
+
+        public StringBuilder getGatewayConfig() {
+            return gatewayConfig;
         }
 
         public String getWsdlUri() {
@@ -318,14 +350,6 @@ public final class API {
             return visibleRoles;
         }
 
-        public List<Endpoint> getEndpoints() {
-            return endpoints;
-        }
-
-        public List<Environment> getGatewayEnvironments() {
-            return gatewayEnvironments;
-        }
-
         public BusinessInformation getBusinessInformation() {
             return businessInformation;
         }
@@ -335,7 +359,8 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
-        private String apiDefinition;
+        private StringBuilder apiDefinition;
+        private StringBuilder gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
@@ -346,21 +371,21 @@ public final class API {
         private List<String> policies;
         private Visibility visibility;
         private List<String> visibleRoles = Collections.emptyList();
-        private List<Endpoint> endpoints = Collections.emptyList();
-        private List<Environment> gatewayEnvironments = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
-        private Date createdTime;
+        private LocalDateTime createdTime;
         private String createdBy;
-        private Date lastUpdatedTime;
+        private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private Set<URITemplate> uriTemplates;
+        private List<UriTemplate> uriTemplates = Collections.emptyList();
+        private String copiedFromApiId;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
             this.version = version;
         }
+
         public APIBuilder(API copy) {
             this.id = copy.id;
             this.provider = copy.provider;
@@ -370,19 +395,20 @@ public final class API {
             this.description = copy.description;
             this.lifeCycleStatus = copy.lifeCycleStatus;
             this.lifecycleInstanceId = copy.lifecycleInstanceId;
-            this.apiDefinition = copy.apiDefinition;
+            if (copy.apiDefinition != null) {
+                this.apiDefinition = new StringBuilder(copy.apiDefinition);
+            } else {
+                this.apiDefinition = new StringBuilder();
+            }
             this.wsdlUri = copy.wsdlUri;
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
             this.isDefaultVersion = copy.isDefaultVersion;
-            this.apiPolicy = copy.apiPolicy;
             this.transport = copy.transport;
             this.tags = copy.tags;
             this.policies = copy.policies;
             this.visibility = copy.visibility;
             this.visibleRoles = copy.visibleRoles;
-            this.endpoints = copy.endpoints;
-            this.gatewayEnvironments = copy.gatewayEnvironments;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
             this.createdTime = copy.createdTime;
@@ -390,6 +416,7 @@ public final class API {
             this.lastUpdatedTime = copy.lastUpdatedTime;
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
+            this.copiedFromApiId = copy.copiedFromApiId;
         }
 
         /**
@@ -404,7 +431,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param provider the {@code provider} to set
          * @return a reference to this APIBuilder
@@ -426,7 +454,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param version the {@code version} to set
          * @return a reference to this APIBuilder
@@ -437,7 +466,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param context the {@code context} to set
          * @return a reference to this APIBuilder
@@ -448,7 +478,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param description the {@code description} to set
          * @return a reference to this APIBuilder
@@ -459,7 +490,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lifeCycleStatus the {@code lifeCycleStatus} to set
          * @return a reference to this APIBuilder
@@ -470,7 +502,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lifeCycleInstanceID} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lifecycleInstanceId the {@code lifeCycleInstanceID} to set
          * @return a reference to this APIBuilder
@@ -486,24 +519,38 @@ public final class API {
          * @param lifecycleState
          * @return a reference to APIBuilder
          */
-        public APIBuilder lifecycleState(LifecycleState lifecycleState){
+        public APIBuilder lifecycleState(LifecycleState lifecycleState) {
             this.lifecycleState = lifecycleState;
             return this;
         }
 
         /**
-         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param apiDefinition the {@code apiDefinition} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiDefinition(String apiDefinition) {
+        public APIBuilder apiDefinition(StringBuilder apiDefinition) {
             this.apiDefinition = apiDefinition;
             return this;
         }
 
         /**
-         * Sets the {@code wsdlUri} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code gatewayConfig} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param gatewayConfig the {@code gatewayConfig} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder gatewayConfig(StringBuilder gatewayConfig) {
+            this.gatewayConfig = gatewayConfig;
+            return this;
+        }
+
+        /**
+         * Sets the {@code wsdlUri} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param wsdlUri the {@code wsdlUri} to set
          * @return a reference to this APIBuilder
@@ -514,7 +561,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods can
+         * be chained together.
          *
          * @param isResponseCachingEnabled the {@code isResponseCachingEnabled} to set
          * @return a reference to this APIBuilder
@@ -525,7 +573,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param cacheTimeout the {@code cacheTimeout} to set
          * @return a reference to this APIBuilder
@@ -536,7 +585,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param isDefaultVersion the {@code isDefaultVersion} to set
          * @return a reference to this APIBuilder
@@ -547,7 +597,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code apiPolicy} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code apiPolicy} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param apiPolicy the {@code apiPolicy} to set
          * @return a reference to this APIBuilder
@@ -558,7 +609,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param transport the {@code transport} to set
          * @return a reference to this APIBuilder
@@ -580,7 +632,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param policies the {@code policies} to set
          * @return a reference to this APIBuilder
@@ -591,18 +644,20 @@ public final class API {
         }
 
         /**
-         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(Set<URITemplate> uriTemplates) {
+        public APIBuilder uriTemplates(List<UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
 
         /**
-         * Sets the {@code visibility} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code visibility} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param visibility the {@code visibility} to set
          * @return a reference to this APIBuilder
@@ -613,7 +668,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code visibleRoles} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code visibleRoles} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param visibleRoles the {@code visibleRoles} to set
          * @return a reference to this APIBuilder
@@ -624,29 +680,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code endpoints} and returns a reference to this APIBuilder so that the methods can be chained together.
-         *
-         * @param endpoints the {@code endpoints} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder endpoints(List<Endpoint> endpoints) {
-            this.endpoints = endpoints;
-            return this;
-        }
-
-        /**
-         * Sets the {@code gatewayEnvironments} and returns a reference to this APIBuilder so that the methods can be chained together.
-         *
-         * @param gatewayEnvironments the {@code gatewayEnvironments} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder gatewayEnvironments(List<Environment> gatewayEnvironments) {
-            this.gatewayEnvironments = gatewayEnvironments;
-            return this;
-        }
-
-        /**
-         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param businessInformation the {@code businessInformation} to set
          * @return a reference to this APIBuilder
@@ -657,7 +692,8 @@ public final class API {
         }
 
         /**
-         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param corsConfiguration the {@code corsConfiguration} to set
          * @return a reference to this APIBuilder
@@ -668,18 +704,20 @@ public final class API {
         }
 
         /**
-         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param createdTime the {@code createdTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder createdTime(Date createdTime) {
-            this.createdTime = new Date(createdTime.getTime());
+        public APIBuilder createdTime(LocalDateTime createdTime) {
+            this.createdTime = createdTime;
             return this;
         }
 
         /**
-         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
          *
          * @param createdBy the {@code createdBy} to set
          * @return a reference to this APIBuilder
@@ -690,22 +728,37 @@ public final class API {
         }
 
         /**
-         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
          *
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder lastUpdatedTime(Date lastUpdatedTime) {
-            this.lastUpdatedTime = new Date(lastUpdatedTime.getTime());
+        public APIBuilder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+            this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }
+
+        /**
+         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param copiedFromApiId the {@code copiedFromApiId} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder copiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
+            return this;
+        }
+
 
         /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
-        public API build() {
+
+        public API build()  {
             return new API(this);
         }
 
@@ -756,17 +809,36 @@ public final class API {
             return lifecycleState;
         }
 
-        public Date getCreatedTime() {
-            return new Date(createdTime.getTime());
+        public LocalDateTime getCreatedTime() {
+            return createdTime;
         }
 
         public String getCreatedBy() {
             return createdBy;
         }
 
-        public Date getLastUpdatedTime() {
-            return new Date(lastUpdatedTime.getTime());
+        public LocalDateTime getLastUpdatedTime() {
+            return lastUpdatedTime;
+        }
+
+        public List<UriTemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
+        public String getCopiedFromApiId() {
+            return copiedFromApiId;
+        }
+
+        public void setCopiedFromApiId(String copiedFromApiId) {
+            this.copiedFromApiId = copiedFromApiId;
         }
     }
 
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public void setCopiedFromApiId(String copiedFromApiId) {
+        this.copiedFromApiId = copiedFromApiId;
+    }
 }

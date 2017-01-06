@@ -20,14 +20,15 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 
 /**
  * This class used to check the permissions for users
  */
  class UserAwareAPIPublisher extends APIPublisherImpl {
 
-    public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO,new APILifeCycleManagerImpl());
+    public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+             APISubscriptionDAO apiSubscriptionDAO , PolicyDAO policyDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl());
     }
 }

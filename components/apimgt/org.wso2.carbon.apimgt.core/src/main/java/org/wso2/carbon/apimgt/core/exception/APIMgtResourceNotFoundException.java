@@ -27,6 +27,10 @@ public class APIMgtResourceNotFoundException extends APIManagementException {
         super(msg);
     }
 
+    public APIMgtResourceNotFoundException(String msg, ExceptionCodes code) {
+        super(msg, code);
+    }
+
     public APIMgtResourceNotFoundException(String msg, Throwable e) {
         super(msg, e);
     }

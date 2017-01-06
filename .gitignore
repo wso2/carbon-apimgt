@@ -23,4 +23,4 @@ features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/package.json
 features/org.wso2.carbon.apimgt.lifecycle.manager.feature/resources/database/
 features/apimgt/org.wso2.carbon.apimgt.core.feature/resources/database/
-lcm/features/org.wso2.carbon.apimgt.lifecycle.manager.feature/resources/database/
+lcm/features/org.wso2.carbon.apimgt.lifecycle.manager.feature/resources/database/WSO2LIFECYCLE_DB.h2.db

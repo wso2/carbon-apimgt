@@ -1,0 +1,54 @@
+<form class="form-horizontal api-custom-forms api-overview view" id="apiOverviewForm">
+    <div class="form-group">
+        <label for="inputEmail3" class="col-sm-2 control-label">Throttling Tier</label>
+        <div class="col-sm-10 view">
+            {{#each tiers}}{{this}}, {{/each}}
+        </div>
+        <div class="col-sm-10 edit">
+            <select>
+                {{#each tiers}}
+                    <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">Visibility</label>
+        <div class="col-sm-10 view">
+            {{visibility}}
+        </div>
+        <div class="col-sm-10 edit">
+            <select class="select form-control">
+                <option value="public" selected="selected">Public</option>
+                <option value="restricted">Restricted by roles</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">Endpoint</label>
+        <div class="col-sm-10 view">
+            <a href="{{productionEndpoint}}">{{productionEndpoint}}</a>
+        </div>
+        <div class="col-sm-10 edit">
+            <input type="text" value="{{productionEndpoint}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-10 view">
+            {{description}}
+        </div>
+        <div class="col-sm-10 edit">
+            <textarea>{{description}}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10 view">
+            <button type="button" class="btn btn-default" data-name="editApiButton">Edit</button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10 edit">
+            <button type="button" class="btn btn-default" data-name="saveApiButton">Save</button>
+            <button type="button" class="btn btn-default" data-name="cancelApiButton">Cancel</button>
+        </div>
+    </div>
+</form>

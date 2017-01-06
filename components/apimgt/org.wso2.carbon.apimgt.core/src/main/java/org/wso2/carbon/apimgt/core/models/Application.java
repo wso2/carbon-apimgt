@@ -21,74 +21,78 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * This class represent the Application in api model
  */
 public final class Application {
     private String name;
-    private Subscriber subscriber;
-    private Set<APISubscription> apiSubscriptions = new LinkedHashSet<APISubscription>();
     private String groupId;
     private String uuid;
+    private String policyId;
     private String description;
     private String tier;
     private String status;
     private String callbackUrl;
-    private List<APIKey> keys = new ArrayList<APIKey>();
+    private String createdUser;
+    private LocalDateTime createdTime;
+    private String updatedUser;
+    private LocalDateTime updatedTime;
+    private List<APIKey> keys;
 
 
-    public Application(String name, Subscriber subscriber) {
+    public Application(String name, String createdUser) {
         this.name = name;
-        this.subscriber = subscriber;
+        this.createdUser = createdUser;
+        keys = new ArrayList<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public Subscriber getSubscriber() {
-        return subscriber;
-    }
-
-    public Set<APISubscription> getAPISubscriptions() {
-        return apiSubscriptions;
-    }
-
-    public void addAPISubscriptions(Set<APISubscription> apiSubscriptions) {
-        this.apiSubscriptions.addAll(apiSubscriptions);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Application that = (Application) o;
-        return name.equals(that.name) && subscriber.equals(that.subscriber);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + subscriber.hashCode();
-        return result;
-    }
-
-    public String getUUID() {
+    public String getId() {
         return uuid;
     }
 
-    public void setUUID(String uuid) {
+    public void setId(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getCreatedUser() {
+        return createdUser;
+    }
+
+    public void setCreatedUser(String createdUser) {
+        this.createdUser = createdUser;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdatedUser() {
+        return updatedUser;
+    }
+
+    public void setUpdatedUser(String updatedUser) {
+        this.updatedUser = updatedUser;
+    }
+
+    public LocalDateTime getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(LocalDateTime updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
     public String getDescription() {
@@ -137,5 +141,38 @@ public final class Application {
 
     public void addKey(APIKey key) {
         keys.add(key);
+    }
+
+    public String getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(String policyId) {
+        this.policyId = policyId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Application)) {
+            return false;
+        }
+        Application that = (Application) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(groupId, that.groupId) &&
+                Objects.equals(uuid, that.uuid) &&
+                Objects.equals(policyId, that.policyId) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(tier, that.tier) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(callbackUrl, that.callbackUrl) &&
+                Objects.equals(createdUser, that.createdUser);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, groupId, uuid, policyId, description, tier, status, callbackUrl, createdUser);
     }
 }

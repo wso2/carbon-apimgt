@@ -24,21 +24,24 @@ package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.DocumentInfoResults;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MappingUtil {
 
@@ -61,10 +64,10 @@ public class MappingUtil {
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
-        apidto.setStatus(api.getLifeCycleStatus());
+        apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
         apidto.setTransport(api.getTransport());
-        api.getPolicies().forEach(apidto::addTiersItem);
+        api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -106,19 +109,20 @@ public class MappingUtil {
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
 
-		API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
+        API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                apiDefinition(apidto.getApiDefinition()).
-                lifeCycleStatus(apidto.getStatus()).
+                apiDefinition(new StringBuilder(apidto.getApiDefinition())).
+                lifeCycleStatus(apidto.getLifeCycleStatus()).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
-                policies(apidto.getTiers()).
+                policies(apidto.getPolicies()).
                 tags(apidto.getTags()).
+                transport(apidto.getTransport()).
                 cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
-                policies(apidto.getTiers()).
+                policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration);
         return apiBuilder;
@@ -139,7 +143,7 @@ public class MappingUtil {
             apiInfo.setDescription(apiSummary.getDescription());
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setStatus(apiSummary.getLifeCycleStatus());
+            apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfoList.add(apiInfo);
         }
@@ -175,7 +179,7 @@ public class MappingUtil {
         documentDTO.setSourceUrl(documentDTO.getSourceUrl());
         documentDTO.setSummary(documentDTO.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
-        documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType()));
+        documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType().toString()));
         return documentDTO;
     }
 
@@ -185,16 +189,15 @@ public class MappingUtil {
      * @return
      */
     public  static DocumentInfo toDocumentInfo(DocumentDTO documentDTO){
-        DocumentInfo documentInfo = new DocumentInfo();
-        documentInfo.setId(documentDTO.getDocumentId());
-        documentInfo.setSummary(documentDTO.getSummary());
-        documentInfo.setName(documentDTO.getName());
-        documentInfo.setOtherType(documentDTO.getOtherTypeName());
-        documentInfo.setSourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString()));
-        documentInfo.setSourceURL(documentInfo.getSourceURL());
-        documentInfo.setType(documentDTO.getType().toString());
-        documentInfo.setVisibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString()));
-        return documentInfo;
+        return new DocumentInfo.Builder().
+                id(documentDTO.getDocumentId()).
+                summary(documentDTO.getSummary()).
+                name(documentDTO.getName()).
+                otherType(documentDTO.getOtherTypeName()).
+                sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
+                sourceURL(documentDTO.getSourceUrl()).
+                type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
+                visibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString())).build();
     }
 
     /**
@@ -202,24 +205,60 @@ public class MappingUtil {
      * @param documentInfoResults
      * @return
      */
-    public static DocumentListDTO toDocumentListDTO(DocumentInfoResults documentInfoResults){
+    public static DocumentListDTO toDocumentListDTO(List<DocumentInfo> documentInfoResults){
         DocumentListDTO documentListDTO = new DocumentListDTO();
-        List<DocumentDTO> documentDTOList = documentInfoResults.getDocumentInfoList().stream().map
-                (MappingUtil::toDocumentDTO).collect(Collectors.toList());
-        documentListDTO.setList(documentDTOList);
+        for (DocumentInfo documentInfo : documentInfoResults){
+            documentListDTO.addListItem(toDocumentDTO(documentInfo));
+        }
         return documentListDTO;
     }
 
+
+
     /**
-     * This method converts the {@link DocumentListDTO} to {@link DocumentInfoResults}
-     * @param documentListDTO
+     * This method convert {@link org.wso2.carbon.apimgt.core.models.Application} to {@link ApplicationDTO}
+     * return
+     */
+    public static ApplicationDTO toApplicationDto(Application application){
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(application.getId());
+        applicationDTO.setDescription(application.getDescription());
+        applicationDTO.setGroupId(application.getGroupId());
+        applicationDTO.setName(application.getName());
+        applicationDTO.setSubscriber(application.getCreatedUser());
+        applicationDTO.setThrottlingTier(application.getTier());
+        return applicationDTO;
+    }
+
+    /**
+     * Converts List<{@link Subscription}> into {@link SubscriptionListDTO}</>
+     * @param subscriptionList list of {@link Subscription}
+     * @param limit no of items to return
+     * @param offset
      * @return
      */
-    public static DocumentInfoResults toDocumentInfoResults(DocumentListDTO documentListDTO){
-        DocumentInfoResults documentInfoResults = new DocumentInfoResults();
-        for (DocumentDTO documentDTO: documentListDTO.getList()){
-            documentInfoResults.addDocumentInfo(toDocumentInfo(documentDTO));
+    public static SubscriptionListDTO fromSubscriptionListToDTO(List<Subscription> subscriptionList, Integer limit,
+                                                                Integer offset) {
+        SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
+        for (Subscription subscription : subscriptionList) {
+            subscriptionListDTO.addListItem(fromSubscription(subscription));
         }
-        return documentInfoResults;
+        return subscriptionListDTO;
+    }
+
+    /**
+     * Converts {@link Subscription} to {@link SubscriptionDTO}
+     * @param subscription
+     * @return
+     */
+    public static SubscriptionDTO fromSubscription(Subscription subscription) {
+        SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+        subscriptionDTO.setApplicationId(subscription.getId());
+        subscriptionDTO.setLifeCycleStatus(
+                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().toString()));
+        subscriptionDTO.setApplicationId(subscription.getApplication().getId());
+        subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
+        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
+        return subscriptionDTO;
     }
 }

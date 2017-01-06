@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -55,13 +56,25 @@ public class DAOUtil {
         if (dataSource != null) {
             return dataSource.getConnection();
         }
+        throw new SQLException("Datasource is not configured properly.");
+    }
 
-        throw new SQLException("Data source is not configured properly.");
+    /**
+     * Get is auto commit enabled
+     *
+     * @return true if auto commit is enabled, false otherwise
+     */
+    public static boolean isAutoCommit() throws SQLException {
+        return dataSource.getDatasource().isAutoCommit();
     }
 
     static String getParameterString(int numberOfParameters) {
         List<String> questionMarks = new ArrayList<>(Collections.nCopies(numberOfParameters, "?"));
         return String.join(",", questionMarks);
+    }
+
+    public static void clearDataSource() {
+        dataSource = null;
     }
 }
 
