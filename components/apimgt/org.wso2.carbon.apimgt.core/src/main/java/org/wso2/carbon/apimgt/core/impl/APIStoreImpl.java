@@ -133,13 +133,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String tokenType,
-            String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope, String groupingId,
-            String jsonString) throws APIManagementException {
+    public Map<String, Object> generateApplicationKeys(String userId, String applicationName,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String groupingId) throws APIManagementException {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils
-                .createOauthAppRequest(applicationName, userId, callbackUrl, null,
-                        jsonString); //for now tokenSope = null
+                .createOauthAppRequest(applicationName, userId, callbackUrl, null); //for now tokenSope = null
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();

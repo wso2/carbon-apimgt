@@ -36,14 +36,12 @@ public class ApplicationUtils {
      * @param clientName client Name.
      * @param callbackURL This is the call back URL of the application
      * @param tokenScope The token scope
-     * @param clientDetails The client details
      * @param clientId The ID of the client
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope, String clientDetails)
-            throws APIManagementException {
+            String tokenScope) throws APIManagementException {
 
         //String[] tokenScopeList = new String[]{tokenScope};
         //initiate OauthAppRequest object.

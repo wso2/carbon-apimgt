@@ -115,15 +115,13 @@ import javax.ws.rs.core.Response;
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-                JsonObject jsonParamObj = new JsonObject();
-                jsonParamObj.addProperty(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-                String jsonParams = jsonParamObj.toString();
+                JsonObject clientDetails = new JsonObject();
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
                 Map<String, Object> keyDetails = apiConsumer
                         .generateApplicationKeys(username, application.getName(), body.getKeyType().toString(),
                                 body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
-                                application.getGroupId(), jsonParams);
+                                application.getGroupId());
                 applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             } else {

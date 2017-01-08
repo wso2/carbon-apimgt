@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -286,8 +287,9 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
             urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            String clientEncoded = Base64.getEncoder()
-                    .encodeToString((tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret()).getBytes());
+            String clientEncoded = Base64.getEncoder().encodeToString(
+                    (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
+                            .getBytes(StandardCharsets.UTF_8));
             urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
             StringBuilder builder = new StringBuilder();
             builder.append(applicationTokenScope);

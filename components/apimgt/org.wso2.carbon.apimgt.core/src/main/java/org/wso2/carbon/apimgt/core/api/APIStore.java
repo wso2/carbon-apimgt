@@ -117,13 +117,12 @@ public interface APIStore extends APIManager {
      * @param allowedDomains  allowedDomains for token.
      * @param validityTime    validity time period.
      * @param groupingId      APIM application id.
-     * @param jsonString      Callback URL for the Application.
      * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String, Object> generateApplicationKeys(String userId, String applicationName,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId, String jsonString) throws APIManagementException;
+            String tokenScope, String groupingId) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.
