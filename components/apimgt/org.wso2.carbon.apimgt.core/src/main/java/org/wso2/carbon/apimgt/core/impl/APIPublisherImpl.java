@@ -217,7 +217,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
                 ObserverNotifierThread observerNotifierThread =
-                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION);
+                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION, this);
                 observerNotifierThread.start();
             } else {
                 String message = "Duplicate API already Exist with name/Context " + apiBuilder.getName();
@@ -280,7 +280,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
                         ObserverNotifierThread observerNotifierThread =
-                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE);
+                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE, this);
                         observerNotifierThread.start();
                     }
                 } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
@@ -669,7 +669,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                     ObserverNotifierThread observerNotifierThread =
-                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION);
+                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION, this);
                     observerNotifierThread.start();
                 }
             } else {

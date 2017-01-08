@@ -51,8 +51,6 @@ public class APIManagerFactory {
     private static final APIManagerFactory instance = new APIManagerFactory();
 
     private APIMgtAdminService apiMgtAdminService;
-    private UserAwareAPIPublisher userAwareAPIPublisher;
-    private UserAwareAPIStore userAwareAPIStore;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -89,7 +87,7 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
             userAwareAPIPublisher.registerObserver(EventLogger.getEventLoggerObject());
@@ -117,7 +115,7 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
+            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
             userAwareAPIStore.registerObserver(EventLogger.getEventLoggerObject());
@@ -175,13 +173,5 @@ public class APIManagerFactory {
 
     public APIGatewayPublisher getGateway() {
         return new APIGatewayPublisherImpl();
-    }
-
-    public @Nullable APIPublisherImpl getAPIPublisherImpl() {
-        return userAwareAPIPublisher;
-    }
-
-    public @Nullable APIStoreImpl getAPIStoreImpl() {
-        return userAwareAPIStore;
     }
 }

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
 
@@ -28,23 +29,18 @@ public class ObserverNotifierThread implements Runnable {
     private Component component;
     private Event event;
     private Thread threadObj;
+    private APIMObservable observable;
 
-    public ObserverNotifierThread(Component component, Event event) {
+    public ObserverNotifierThread(Component component, Event event, APIMObservable observable) {
         this.component = component;
         this.event = event;
+        this.observable = observable;
     }
 
     @Override
     public void run() {
-        if (component == Component.API_PUBLISHER) {
-            APIPublisherImpl apiPublisherImpl = APIManagerFactory.getInstance().getAPIPublisherImpl();
-            if (apiPublisherImpl != null)
-                apiPublisherImpl.notifyObservers(component, event);
-        } else if (component == Component.API_STORE) {
-            APIStoreImpl apiStoreImpl = APIManagerFactory.getInstance().getAPIStoreImpl();
-            if (apiStoreImpl != null)
-                apiStoreImpl.notifyObservers(component, event);
-        }
+            if (observable != null)
+                observable.notifyObservers(component, event);
     }
 
     public void start() {
