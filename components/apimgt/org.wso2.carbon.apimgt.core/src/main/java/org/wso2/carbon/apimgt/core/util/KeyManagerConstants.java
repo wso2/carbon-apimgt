@@ -98,6 +98,8 @@ public class KeyManagerConstants {
         public static final String CONSUMER_KEY = "consumerKey";
         public static final String CONSUMER_SECRET = "consumerSecret";
         public static final String APP_DETAILS = "appDetails";
+        public static final String SUPPORTED_GRANT_TYPES = "supportedGrantTypes";
+        public static final String TOKEN_SCOPES = "tokenScopes";
     }
 
 }

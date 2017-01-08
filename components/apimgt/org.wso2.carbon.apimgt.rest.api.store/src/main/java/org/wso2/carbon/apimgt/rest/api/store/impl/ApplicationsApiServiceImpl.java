@@ -30,15 +30,13 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
-public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30") public class ApplicationsApiServiceImpl
+        extends ApplicationsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
-    @Override
-    public
-    Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince)
-            throws NotFoundException {
+    @Override public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
+            String ifUnmodifiedSince) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -54,8 +52,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().build();
     }
 
-    @Override
-    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
+    @Override public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
             String ifModifiedSince) throws NotFoundException {
         ApplicationDTO applicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -66,12 +63,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             } else {
                 String errorMessage = "Application not found: " + applicationId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(
-                        errorMessage, ExceptionCodes.APPLICATION_NOT_FOUND);
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
                 HashMap<String, String> paramList = new HashMap<String, String>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage,e);
+                log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
@@ -85,9 +82,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(applicationDTO).build();
     }
 
-    @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType,
-            String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
+    @Override public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
         ApplicationDTO updatedApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -110,8 +106,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(updatedApplicationDTO).build();
     }
 
-    @Override
-    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
+    @Override public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
         ApplicationKeyDTO applicationKeyDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -133,12 +128,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             } else {
                 String errorMessage = "Application not found for key geneation: " + applicationId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(
-                        errorMessage, ExceptionCodes.APPLICATION_NOT_FOUND);
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
                 HashMap<String, String> paramList = new HashMap<String, String>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage,e);
+                log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
@@ -176,8 +171,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
-            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
-                    allMatchedApps.size());
+            ApplicationMappingUtil
+                    .setPaginationParams(applicationListDTO, groupId, limit, offset, allMatchedApps.size());
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving applications";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -203,8 +198,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
             //MSf4j support needed
-//            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
-//                    createdApplicationDTO.getApplicationId());
+            //            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
+            //                    createdApplicationDTO.getApplicationId());
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new application : " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -214,7 +209,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
-//        return Response.created(location).entity(createdApplicationDTO).build();
-          return Response.status(Response.Status.CREATED).entity(createdApplicationDTO).build();
+        //        return Response.created(location).entity(createdApplicationDTO).build();
+        return Response.status(Response.Status.CREATED).entity(createdApplicationDTO).build();
     }
 }

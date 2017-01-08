@@ -18,11 +18,10 @@ package org.wso2.carbon.apimgt.core.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-
-import java.util.Arrays;
 
 /**
  * Utility class for performing Operations related to Applications, OAuth clients.
@@ -46,13 +45,13 @@ public class ApplicationUtils {
             String tokenScope, String clientDetails)
             throws APIManagementException {
 
-        String[] tokenScopeList = new String[]{tokenScope};
+        //String[] tokenScopeList = new String[]{tokenScope};
         //initiate OauthAppRequest object.
         OAuthAppRequest appRequest = new OAuthAppRequest();
         OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
         authApplicationInfo.setClientName(clientName);
         authApplicationInfo.setCallbackUrl(callbackURL);
-        authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
+        //authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
         authApplicationInfo.setClientId(clientId);
         authApplicationInfo.setAppOwner(clientId);
 
@@ -65,24 +64,25 @@ public class ApplicationUtils {
             throws APIManagementException {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
-        if (oAuthApplication.getClientId() == null || oAuthApplication.getClientSecret() == null) {
-            throw new APIManagementException("Consumer key or Consumer Secret missing.");
+        if (oAuthApplication.getClientId() != null || oAuthApplication.getClientSecret() != null) {
+            tokenRequest.setClientId(oAuthApplication.getClientId());
+            tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
+        } else {
+            throw new KeyManagementException("Consumer key or Consumer Secret missing.");
         }
-        tokenRequest.setClientId(oAuthApplication.getClientId());
-        tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
-        if (oAuthApplication.getParameter("tokenScope") != null) {
-            String[] tokenScopes = (String[]) oAuthApplication.getParameter("tokenScope");
-            tokenRequest.setScopes(tokenScopes);
-            oAuthApplication.addParameter("tokenScope", Arrays.toString(tokenScopes));
-        }
+
+//        if (oAuthApplication.getParameter("tokenScope") != null) {
+//            String[] tokenScopes = (String[]) oAuthApplication.getParameter("tokenScope");
+//            tokenRequest.setScopes(tokenScopes);
+//            oAuthApplication.addParameter("tokenScope", Arrays.toString(tokenScopes));
+//        }
 
         if (oAuthApplication.getParameter(KeyManagerConstants.VALIDITY_PERIOD) != null) {
             tokenRequest.setValidityPeriod(Long.parseLong((String) oAuthApplication.getParameter(KeyManagerConstants
                     .VALIDITY_PERIOD)));
+        } else {
+            throw new KeyManagementException("Validity period missing for generated oAuth keys");
         }
-
         return tokenRequest;
-
     }
-
 }

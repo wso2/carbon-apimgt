@@ -137,30 +137,35 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope, String groupingId,
             String jsonString) throws APIManagementException {
 
-
         OAuthAppRequest oauthAppRequest = ApplicationUtils
-                .createOauthAppRequest(applicationName, userId, callbackUrl, null, jsonString);
+                .createOauthAppRequest(applicationName, userId, callbackUrl, null,
+                        jsonString); //for now tokenSope = null
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-
         try {
             OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
             Map<String, Object> keyDetails = new HashMap<>();
             AccessTokenRequest accessTokenRequest = null;
 
             if (oauthAppInfo != null) {
+                APIUtils.logDebug("Successfully created oAuth application", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
+                keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
                 keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
-                accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
+            } else {
+                throw new KeyManagementException("Error occurred while creating oAuth application");
             }
+            accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
-
             // adding access token information with key details
             if (accessTokenInfo != null) {
+                APIUtils.logDebug("Successfully created Oauth access token", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
                 keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
+            } else {
+                throw new KeyManagementException("Error occurred while generating access token for OAuth application");
             }
             return keyDetails;
         } catch (KeyManagementException e) {
