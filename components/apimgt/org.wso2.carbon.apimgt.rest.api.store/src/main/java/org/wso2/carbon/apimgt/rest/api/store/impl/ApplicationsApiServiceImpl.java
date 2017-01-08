@@ -115,7 +115,6 @@ import javax.ws.rs.core.Response;
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-                JsonObject clientDetails = new JsonObject();
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
                 Map<String, Object> keyDetails = apiConsumer
