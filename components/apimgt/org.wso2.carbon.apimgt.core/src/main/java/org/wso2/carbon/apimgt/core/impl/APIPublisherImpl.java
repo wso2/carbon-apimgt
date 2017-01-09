@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -154,9 +154,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
-       long subscriptionCount = 0;
+        long subscriptionCount = 0;
         try {
-            subscriptionCount =  getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
+            subscriptionCount = getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
             log.error("Couldn't retrieve Subscriptions for API " + id, e, log);
             throw new APIManagementException("Couldn't retrieve Subscriptions for API " + id, e, ExceptionCodes
@@ -423,7 +423,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param apiId        The API to be copied
+     * @param apiId      The API to be copied
      * @param newVersion The version of the new API
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
@@ -501,8 +501,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param resourceId         UUID of API
-     * @param content       content of the file as an Input Stream
+     * @param resourceId UUID of API
+     * @param content    content of the file as an Input Stream
      * @param fileName
      * @throws APIManagementException if failed to add the file
      */
@@ -818,13 +818,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * Save the thumbnail icon for api
-     * @param apiId apiId of api
+     *
+     * @param apiId       apiId of api
      * @param inputStream inputStream of image
      * @throws APIManagementException
      */
     @Override
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
-                                                                            throws APIManagementException {
+            throws APIManagementException {
         try {
             getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
@@ -870,8 +871,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public void registerObserver(EventObserver observer) {
-        if (observer != null && !observerList.contains(observer))
+        if (observer != null && !observerList.contains(observer)) {
             observerList.add(observer);
+        }
     }
 
     @Override
@@ -881,8 +883,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public void removeObserver(EventObserver observer) {
-        if (observer != null)
+        if (observer != null) {
             observerList.remove(observer);
+        }
     }
 
     public List<EventObserver> getObserverList() {

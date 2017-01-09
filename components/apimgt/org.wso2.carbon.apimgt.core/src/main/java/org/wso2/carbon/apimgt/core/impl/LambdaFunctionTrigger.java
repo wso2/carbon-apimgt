@@ -24,10 +24,14 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
 
+/**
+ * Implementation which observes to the API Manager events and trigger corresponding lambda function that belongs to
+ * the user and particular event occurred.
+ */
 public class LambdaFunctionTrigger implements EventObserver {
 
     @Override
-    public void captureEvent(Component component, Event Event) {
+    public void captureEvent(Component component, Event event) {
 
     }
 

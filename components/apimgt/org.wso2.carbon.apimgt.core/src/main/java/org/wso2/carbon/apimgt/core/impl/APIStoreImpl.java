@@ -23,8 +23,8 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
-import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -42,10 +42,10 @@ import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -73,7 +73,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private TagDAO tagDAO;
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
+                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl());
         this.tagDAO = tagDAO;
     }
@@ -140,8 +140,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public Map<String, Object> generateApplicationKeys(String userId, String applicationName,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId) throws APIManagementException {
+                                                       String tokenType, String callbackUrl, String[] allowedDomains,
+                                                       String validityTime, String tokenScope,
+                                                       String groupingId) throws APIManagementException {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, userId, callbackUrl, null); //for now tokenSope = null
@@ -226,7 +227,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return subscriptionId;
     }
 
-    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
+    @Override
+    public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         try {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
@@ -306,14 +308,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
-                String message =  "An application already exists with a duplicate name - " + application.getName();
+                String message = "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             //Tier validation
             String tierName = application.getTier();
             if (tierName == null) {
-                String message =  "Tier name cannot be null - " + application.getName();
+                String message = "Tier name cannot be null - " + application.getName();
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
@@ -364,8 +366,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public void registerObserver(EventObserver observer) {
-        if (observer != null && !observerList.contains(observer))
+        if (observer != null && !observerList.contains(observer)) {
             observerList.add(observer);
+        }
     }
 
     @Override
@@ -375,8 +378,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public void removeObserver(EventObserver observer) {
-        if (observer != null)
+        if (observer != null) {
             observerList.remove(observer);
+        }
     }
 
     public List<EventObserver> getObserverList() {

@@ -33,14 +33,10 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import javax.annotation.Nullable;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
- * 
  * Creates API Producers and API Consumers.
- *
  */
 public class APIManagerFactory {
 
@@ -58,13 +54,13 @@ public class APIManagerFactory {
     // Thread safe Cache for API Providers
     private static Map<String, APIPublisher> providers =
             Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
-                                        (MAX_PROVIDERS + 1, 1, false) {
-        // This method is called just after a new entry has been added
-        @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_PROVIDERS;
-        }
-    });
+                    (MAX_PROVIDERS + 1, 1, false) {
+                // This method is called just after a new entry has been added
+                @Override
+                public boolean removeEldestEntry(Map.Entry eldest) {
+                    return size() > MAX_PROVIDERS;
+                }
+            });
 
     // Thread safe Cache for API Consumers
     private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
@@ -87,11 +83,11 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
+            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
+                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
             userAwareAPIPublisher.registerObserver(EventLogger.getEventLoggerObject());
-            return  userAwareAPIPublisher;
+            return userAwareAPIPublisher;
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Provider", e);
             throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -115,8 +111,9 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
+            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(),
+                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
+                    DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
             userAwareAPIStore.registerObserver(EventLogger.getEventLoggerObject());
             return userAwareAPIStore;

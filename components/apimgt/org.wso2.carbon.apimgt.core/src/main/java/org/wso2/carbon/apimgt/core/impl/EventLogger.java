@@ -19,17 +19,25 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.text.DecimalFormat;
-import java.util.logging.*;
 
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
+/**
+ * An Observer which is used to observe possible APIMObservables and logs any event occurs there.
+ */
 public class EventLogger implements EventObserver {
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(EventObserver.class);
 
     private static final EventLogger eventLoggerObj = new EventLogger();
     private File relativeDirectory;
@@ -48,13 +56,12 @@ public class EventLogger implements EventObserver {
             if (isDirCreated || Files.exists(relativeDirectory.toPath())) {
                 logFile = new File(relativeDirectory, "logFile.txt");
                 boolean isFileCreated = logFile.createNewFile();
-                if (isFileCreated || Files.exists(logFile.toPath()))
+                if (isFileCreated || Files.exists(logFile.toPath())) {
                     logger = Logger.getLogger("MyLog");
+                }
             }
-        } catch (SecurityException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Cannot create new log file.");
         }
     }
 
@@ -66,7 +73,7 @@ public class EventLogger implements EventObserver {
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Cannot add file handler.");
         }
     }
 

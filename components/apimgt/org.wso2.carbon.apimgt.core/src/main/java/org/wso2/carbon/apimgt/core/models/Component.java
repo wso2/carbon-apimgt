@@ -19,6 +19,9 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Enum for selecting Component options
+ */
 public enum Component {
     API_PUBLISHER("API_PUBLISHER"), API_STORE("API_STORE"), ADMIN_PORTAL("ADMIN_PORTAL");
 

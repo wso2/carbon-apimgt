@@ -19,6 +19,9 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
+/**
+ * Enum for selecting Event options
+ */
 public enum Event {
     API_CREATION("API_CREATION"), API_DELETION("API_DELETION"), API_UPDATE("API_UPDATE"),
     LIFE_CYCLE_CHANGE("LIFE_CYCLE_CHANGE"), DOC_CREATION("DOC_CREATION"),

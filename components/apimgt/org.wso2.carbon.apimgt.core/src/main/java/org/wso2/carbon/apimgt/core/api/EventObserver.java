@@ -22,7 +22,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
 
+/**
+ * Observer interface which is used to observe the events occur in API manager.
+ */
 @FunctionalInterface
 public interface EventObserver {
-    public void captureEvent(Component component, Event Event);
+    public void captureEvent(Component component, Event event);
 }

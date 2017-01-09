@@ -24,6 +24,9 @@ import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
 
+/**
+ * Thread used to notify the observers whenever an event occurs in an Observable
+ */
 public class ObserverNotifierThread implements Runnable {
 
     private Component component;
@@ -39,8 +42,9 @@ public class ObserverNotifierThread implements Runnable {
 
     @Override
     public void run() {
-            if (observable != null)
-                observable.notifyObservers(component, event);
+        if (observable != null) {
+            observable.notifyObservers(component, event);
+        }
     }
 
     public void start() {
