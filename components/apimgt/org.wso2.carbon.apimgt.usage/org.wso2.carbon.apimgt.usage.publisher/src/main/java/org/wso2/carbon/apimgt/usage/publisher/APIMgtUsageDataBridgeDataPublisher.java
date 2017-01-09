@@ -148,10 +148,14 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
             try {
                 //Create new DataPublisher for the tenant.
-                dataPublisher = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
-
-                //Add created DataPublisher.
-                UsageComponent.addDataPublisher(tenantDomain, dataPublisher);
+                synchronized (APIMgtUsageDataBridgeDataPublisher.class) {
+                    dataPublisher = UsageComponent.getDataPublisher(tenantDomain);
+                    if (dataPublisher == null) {
+                        dataPublisher = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
+                        //Add created DataPublisher.
+                        UsageComponent.addDataPublisher(tenantDomain, dataPublisher);
+                    }
+                }
             } catch (DataPublisherAlreadyExistsException e) {
                 log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
                          " when one already exists. Returning existing data publisher");
