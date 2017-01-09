@@ -60,6 +60,7 @@ public class APIMgtConstants {
 
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
+    public static final String EMPTY_STRING_VALUE = " ";
 
     /**
      * Application statuses.
