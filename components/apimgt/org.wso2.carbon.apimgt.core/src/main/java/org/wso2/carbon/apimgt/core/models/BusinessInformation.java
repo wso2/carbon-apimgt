@@ -24,6 +24,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.Objects;
 
@@ -31,17 +32,21 @@ import java.util.Objects;
  * This Class represents the Business information of the API
  */
 public final class BusinessInformation {
-    private String businessOwner = "";
-    private String businessOwnerEmail = "";
-    private String technicalOwner = "";
-    private String technicalOwnerEmail = "";
+    private String businessOwner;
+    private String businessOwnerEmail;
+    private String technicalOwner;
+    private String technicalOwnerEmail;
 
     public String getBusinessOwner() {
         return businessOwner;
     }
 
     public void setBusinessOwner(String businessOwner) {
-        this.businessOwner = businessOwner;
+        if ("".equals(businessOwner)) {
+            this.businessOwner = APIMgtConstants.EMPTY_STRING_VALUE;
+        } else {
+            this.businessOwner = businessOwner;
+        }
     }
 
     public String getBusinessOwnerEmail() {
@@ -49,7 +54,11 @@ public final class BusinessInformation {
     }
 
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
-        this.businessOwnerEmail = businessOwnerEmail;
+        if ("".equals(businessOwnerEmail)) {
+            this.businessOwnerEmail = APIMgtConstants.EMPTY_STRING_VALUE;
+        } else {
+            this.businessOwnerEmail = businessOwnerEmail;
+        }
     }
 
     public String getTechnicalOwner() {
@@ -57,7 +66,11 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwner(String technicalOwner) {
-        this.technicalOwner = technicalOwner;
+        if ("".equals(technicalOwner)) {
+            this.technicalOwner = APIMgtConstants.EMPTY_STRING_VALUE;
+        } else {
+            this.technicalOwner = technicalOwner;
+        }
     }
 
     public String getTechnicalOwnerEmail() {
@@ -65,7 +78,11 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-        this.technicalOwnerEmail = technicalOwnerEmail;
+        if ("".equals(technicalOwnerEmail)) {
+            this.technicalOwnerEmail = APIMgtConstants.EMPTY_STRING_VALUE;
+        } else {
+            this.technicalOwnerEmail = technicalOwnerEmail;
+        }
     }
 
 
