@@ -82,6 +82,11 @@ include("/jagg/jagg.jag");
             sortColumn = "NAME";
         }
 
+        if (sortOrder.equals("desc")) {
+            sortOrder = "desc";
+        } else {
+            sortOrder = "asc";
+        }
 
         username = user.username;
         mod = jagg.module("application");
