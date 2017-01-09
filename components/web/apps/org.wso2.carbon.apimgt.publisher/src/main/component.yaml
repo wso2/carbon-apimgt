@@ -7,8 +7,8 @@ bindings:
       - secondaryMenu
 
 config:
-  title : "API Editor Tool"
-  appName : API Editor
+  title : "API Publisher Application"
+  appName : API Publisher
   loginRedirectUri: "/api"
   swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
 

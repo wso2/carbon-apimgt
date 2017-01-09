@@ -1,0 +1,20 @@
+apis: []
+
+bindings:
+  - zoneName: footer
+    mode: prepend
+    fragments:
+      - footer
+  - zoneName: topbar
+    mode: prepend
+    fragments:
+      - globalNavigation
+  - zoneName: sidebar
+    mode: prepend
+    fragments:
+      - sidebar
+
+config:
+  appName : API Store
+  title : "API Store Listing"
+  loginRedirectUri: "/apis"
