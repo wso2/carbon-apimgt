@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -18,6 +19,8 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -485,11 +488,16 @@ public class PolicyDAOImpl implements PolicyDAO {
                     applicationPolicy.setDisplayName(rs.getString("DISPLAY_NAME"));
                     applicationPolicy.setDescription(rs.getString("DESCRIPTION"));
                     applicationPolicy.setDeployed(rs.getBoolean("IS_DEPLOYED"));
-                    applicationPolicy.setCustomAttributes(rs.getString("CUSTOM_ATTRIBUTES"));
+                    InputStream inputStream = rs.getBinaryStream("CUSTOM_ATTRIBUTES");
+                    if (inputStream != null) {
+                        applicationPolicy.setCustomAttributes(IOUtils.toString(inputStream));
+                    } else {
+                        applicationPolicy.setCustomAttributes("");
+                    }
                     return applicationPolicy;
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new APIMgtDAOException("Couldn't retrieve subscription tier for id : " + policyId, e);
         }
         return null;
@@ -502,10 +510,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "Count", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "Count", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "Count", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "Count", 1, 60, "s", "API");
 
                     addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
                     addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");
