@@ -134,7 +134,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @Override
-    public List<SubscriptionValidationData> getAPISubscriptionsForValidation() throws APIMgtDAOException {
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation() throws APIMgtDAOException {
         final String getSubscriptionsSql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
                 "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
@@ -142,7 +142,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
                 "AM_APP_KEY_MAPPING KEY_MAP " +
-                "WHERE SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID";
+                "WHERE SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID AND " +
+                "KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsSql)) {
             try (ResultSet rs = ps.executeQuery()) {
@@ -162,7 +163,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @Override
-    public List<SubscriptionValidationData> getAPISubscriptionsForValidation(String apiContext, String apiVersion)
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String apiVersion)
             throws APIMgtDAOException {
         final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
@@ -172,7 +173,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
                 "AM_APP_KEY_MAPPING KEY_MAP " +
                 "WHERE SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID AND " +
-                "API.CONTEXT = ? AND API.VERSION = ?";
+                "KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND API.CONTEXT = ? AND API.VERSION = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
             ps.setString(1, apiContext);

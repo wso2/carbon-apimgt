@@ -78,7 +78,6 @@ paths:
       parameters:
         - $ref : '#/parameters/apiContext'
         - $ref : '#/parameters/apiVersion'
-        - $ref : '#/parameters/Accept'
       tags:
         - Subscriptions of API
       responses:
@@ -132,15 +131,6 @@ parameters:
     description: |
       Version of the API.
     required: false
-    type: string
-
-# The HTTP Accept header
-  Accept:
-    name: Accept
-    in: header
-    description: |
-      Media types acceptable for the response. Default is JSON.
-    default: JSON
     type: string
 
 ######################################################

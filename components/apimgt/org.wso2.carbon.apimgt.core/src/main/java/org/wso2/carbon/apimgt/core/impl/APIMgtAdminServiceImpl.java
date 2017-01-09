@@ -30,7 +30,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions() throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptionsForValidation();
+        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation();
     }
 
     /**
@@ -44,6 +44,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptionsForValidation(apiContext, apiVersion);
+        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
     }
 }

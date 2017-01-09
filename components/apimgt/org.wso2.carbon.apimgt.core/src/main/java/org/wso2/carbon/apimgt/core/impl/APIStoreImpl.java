@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -133,7 +132,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     }
 
     @Override
-    public Map<String, Object> generateApplicationKeys(String userId, String applicationName,
+    public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
             String groupingId) throws APIManagementException {
 
@@ -148,27 +147,36 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             AccessTokenRequest accessTokenRequest = null;
 
             if (oauthAppInfo != null) {
-                APIUtils.logDebug("Successfully created oAuth application", log);
+                APIUtils.logDebug("Successfully created OAuth application", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
                 keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
                 keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
             } else {
-                throw new KeyManagementException("Error occurred while creating oAuth application");
+                throw new KeyManagementException("Error occurred while creating OAuth application");
             }
             accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
             // adding access token information with key details
             if (accessTokenInfo != null) {
-                APIUtils.logDebug("Successfully created Oauth access token", log);
+                APIUtils.logDebug("Successfully created OAuth access token", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
                 keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
             } else {
                 throw new KeyManagementException("Error occurred while generating access token for OAuth application");
             }
+
+            //todo: temporarily saving to db. later this has to be done via workflow
+            try {
+                getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
+            } catch (APIMgtDAOException e) {
+                String errorMsg = "Error occurred while saving key data - " + applicationId;
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
             return keyDetails;
         } catch (KeyManagementException e) {
-            String errorMsg = "Error occurred while generating oauth keys for application - ";
+            String errorMsg = "Error occurred while generating OAuth keys for application - ";
             log.error(errorMsg, e);
             throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
@@ -334,22 +342,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
-    }
-
-    /**
-     * Creates an OAuth2 app for a given APIM Application and generate keys.
-     *
-     * @param application Application for which keys should be generated
-     * @return Generated keys
-     */
-    @Override
-    public APIKey generateKeysForApplication(Application application) {
-        //todo:generate keys
-        APIKey apiKey = new APIKey();
-        apiKey.setConsumerKey("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        apiKey.setConsumerSecret("yyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-
-        return apiKey;
     }
 
     private TagDAO getTagDAO() {

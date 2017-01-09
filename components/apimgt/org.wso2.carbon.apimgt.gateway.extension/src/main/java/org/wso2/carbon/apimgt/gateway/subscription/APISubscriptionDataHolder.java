@@ -37,8 +37,8 @@ public class APISubscriptionDataHolder {
     private static final char DELIMITER = '@';
     private static APISubscriptionDataHolder instance = new APISubscriptionDataHolder();
 
-    //key: API_CONTEXT$API_VERSION   value : HashMap<CONSUMER_KEY, SUBSCRIPTION_POLICY>
-    private Map<String, HashMap<String, String>> apiSubscriptionMap = Collections.synchronizedMap(
+    //key: API_CONTEXT$API_VERSION   value : Map<CONSUMER_KEY, SUBSCRIPTION_DATA_MAP>
+    private Map<String, Map<String, Map<String, String>>> apiSubscriptionMap = Collections.synchronizedMap(
             new ExtendedLinkedHashMap());
 
     public static APISubscriptionDataHolder getInstance() {
@@ -49,11 +49,12 @@ public class APISubscriptionDataHolder {
      * @param apiContext  API Context
      * @param apiVersion  API Version
      * @param consumerKey Consumer Key of Application
-     * @return Policy name if a subscription is available, otherwise null
+     * @return Subscription data map if a subscription is available, otherwise null
      * @throws APIManagementException
      */
-    public String getApiSubscriptionPolicyIfAvailable(String apiContext, String apiVersion, String consumerKey) {
-        HashMap<String, String> subscriptionMap = apiSubscriptionMap.get(apiContext + DELIMITER + apiVersion);
+    public Map<String, String> getApiSubscriptionPolicyIfAvailable(String apiContext, String apiVersion,
+                                                                   String consumerKey) {
+        Map<String, Map<String, String>> subscriptionMap = apiSubscriptionMap.get(apiContext + DELIMITER + apiVersion);
         if (subscriptionMap != null) {
             return subscriptionMap.get(consumerKey);
         }
@@ -63,29 +64,30 @@ public class APISubscriptionDataHolder {
     /**
      * Add new subscription to Subscription Map
      *
-     * @param apiContext  API Context
-     * @param apiVersion  API Version
-     * @param consumerKey Consumer Key of Application
-     * @param policy      Subscription Policy
+     * @param apiContext       API Context
+     * @param apiVersion       API Version
+     * @param consumerKey      Consumer Key of Application
+     * @param subscriptionData Subscription Data Map
      * @throws APIManagementException
      */
-    public void addApiSubscriptionToMap(String apiContext, String apiVersion, String consumerKey, String policy) {
+    public void addApiSubscriptionToMap(String apiContext, String apiVersion, String consumerKey,
+                                        Map<String, String> subscriptionData) {
         String apiKey = apiContext + DELIMITER + apiVersion;
         synchronized (apiKey.intern()) {
             if (apiSubscriptionMap.get(apiKey) == null) {
-                HashMap<String, String> subscriptionsOfApi = new HashMap<>();
-                subscriptionsOfApi.put(consumerKey, policy);
+                Map<String, Map<String, String>> subscriptionsOfApi = new HashMap<>();
+                subscriptionsOfApi.put(consumerKey, subscriptionData);
                 apiSubscriptionMap.put(apiKey, subscriptionsOfApi);
             } else {
-                apiSubscriptionMap.get(apiKey).put(consumerKey, policy);
+                apiSubscriptionMap.get(apiKey).put(consumerKey, subscriptionData);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Subscription entry added to Subscription Map. API: " + apiContext + ':' + apiVersion +
-                        " Consumer Key: " + consumerKey + " Subscription Policy: " + policy);
+                        " Consumer Key: " + consumerKey + " Subscription Policy: " + subscriptionData);
             }
             //todo: remove this line
             log.info("Subscription entry added to Subscription Map. API: " + apiContext + ':' + apiVersion +
-                    " Consumer Key: " + consumerKey + " Subscription Policy: " + policy);
+                    " Consumer Key: " + consumerKey + " Subscription Policy: " + subscriptionData);
         }
     }
 
@@ -100,7 +102,7 @@ public class APISubscriptionDataHolder {
     public void removeApiSubscriptionFromMap(String apiContext, String apiVersion, String consumerKey) {
         String apiKey = apiContext + DELIMITER + apiVersion;
         synchronized (apiKey.intern()) {
-            HashMap<String, String> subscriptionsOfApi = apiSubscriptionMap.get(apiKey);
+            Map<String, Map<String, String>> subscriptionsOfApi = apiSubscriptionMap.get(apiKey);
             if (subscriptionsOfApi != null) {
                 subscriptionsOfApi.remove(consumerKey);
             }
@@ -114,7 +116,7 @@ public class APISubscriptionDataHolder {
         }
     }
 
-    private static class ExtendedLinkedHashMap extends LinkedHashMap<String, HashMap<String, String>> {
+    private static class ExtendedLinkedHashMap extends LinkedHashMap<String, Map<String, Map<String, String>>> {
 
         private static final long serialVersionUID = 6103479545023548050L;
 

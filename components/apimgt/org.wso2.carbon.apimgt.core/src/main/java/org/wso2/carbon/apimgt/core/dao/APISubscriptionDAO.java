@@ -62,7 +62,7 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @CheckForNull
-    List<SubscriptionValidationData> getAPISubscriptionsForValidation(String apiContext, String apiVersion)
+    List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String apiVersion)
             throws APIMgtDAOException;
 
     /**
@@ -81,7 +81,7 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     @CheckForNull
-    List<SubscriptionValidationData> getAPISubscriptionsForValidation() throws APIMgtDAOException;
+    List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation() throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results

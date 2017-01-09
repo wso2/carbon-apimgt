@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.gateway.GatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.APISubscriptionValidationException;
 import org.wso2.carbon.apimgt.gateway.subscription.APISubscriptionDataHolder;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -101,9 +103,22 @@ class APISubscriptionMessageJMSListener {
                 String apiVersion = jsonMsg.get(GatewayConstants.API_VERSION).getAsString();
                 String consumerKey = jsonMsg.get(GatewayConstants.CONSUMER_KEY).getAsString();
                 if (GatewayConstants.ACTION_NEW.equalsIgnoreCase(action)) {
+                    String apiProvider = jsonMsg.get(GatewayConstants.API_PROVIDER).getAsString();
+                    String appName = jsonMsg.get(GatewayConstants.APPLICATION_NAME).getAsString();
+                    String appOwner = jsonMsg.get(GatewayConstants.APPLICATION_OWNER).getAsString();
                     String subscriptionPolicy = jsonMsg.get(GatewayConstants.SUBSCRIPTION_POLICY).getAsString();
+                    String keyEnvType = jsonMsg.get(GatewayConstants.KEY_ENV_TYPE).getAsString();
+                    Map<String, String> subscriptionData = new HashMap<>();
+                    subscriptionData.put(GatewayConstants.SUBSCRIPTION_POLICY, subscriptionPolicy);
+                    subscriptionData.put(GatewayConstants.API_CONTEXT, apiContext);
+                    subscriptionData.put(GatewayConstants.API_VERSION, apiVersion);
+                    subscriptionData.put(GatewayConstants.API_PROVIDER, apiProvider);
+                    subscriptionData.put(GatewayConstants.APPLICATION_NAME, appName);
+                    subscriptionData.put(GatewayConstants.APPLICATION_OWNER, appOwner);
+                    subscriptionData.put(GatewayConstants.CONSUMER_KEY, consumerKey);
+                    subscriptionData.put(GatewayConstants.KEY_ENV_TYPE, keyEnvType);
                     APISubscriptionDataHolder.getInstance().addApiSubscriptionToMap(apiContext, apiVersion, consumerKey,
-                            subscriptionPolicy);
+                            subscriptionData);
                 } else if (GatewayConstants.ACTION_REMOVED.equalsIgnoreCase(action)) {
                     APISubscriptionDataHolder.getInstance().removeApiSubscriptionFromMap(apiContext, apiVersion,
                             consumerKey);
@@ -153,5 +168,4 @@ class APISubscriptionMessageJMSListener {
                 config.getTopicServerHost() + ':' +
                 config.getTopicServerPort() + '\'';
     }
-
 }
