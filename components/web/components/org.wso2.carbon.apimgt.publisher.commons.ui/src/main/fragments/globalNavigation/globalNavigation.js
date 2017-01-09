@@ -15,7 +15,7 @@
  */
 
 function onRequest(env) {
-    sendToClient("swaggerUrl", env.config.swaggerUrl);
+    sendToClient("swaggerURL", env.config.swaggerURL);
     var appName = env.config.appName || "";
     return {
         appName: appName

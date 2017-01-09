@@ -9,6 +9,6 @@ function onRequest(env) {
     sendToClient("scopes",  env.config.scopes);
     sendToClient("tokenEndpoint",  env.config.tokenEndpoint);
     sendToClient("keyAndSecret",  env.config.keyAndSecret);
-    sendToClient("swaggerUrl",  env.config.swaggerUrl);
+    sendToClient("swaggerURL",  env.config.swaggerURL);
     return {env:env};
 }
