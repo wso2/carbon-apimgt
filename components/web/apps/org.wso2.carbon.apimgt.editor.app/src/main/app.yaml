@@ -1,0 +1,23 @@
+theme : "org.wso2.carbon.uuf.common.theme.default"
+
+menus:
+  - name: "main"
+    items:
+      - text: "Home"
+        link: ""
+        icon: "fw-home"
+  - name: "left"
+    items:
+      - text: "APIs"
+        link: ""
+        icon: "fw-home"
+      - text: "Applications"
+        link: "/applications"
+      - text: "Forum"
+        link: "/forum"
+      - text: "Statistics"
+        link: "/statistics"
+
+errorPages:
+  404: /ui/error/404
+  default: /ui/error/default
