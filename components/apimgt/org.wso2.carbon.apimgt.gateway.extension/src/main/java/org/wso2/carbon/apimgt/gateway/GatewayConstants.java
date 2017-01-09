@@ -22,4 +22,14 @@ package org.wso2.carbon.apimgt.gateway;
  */
 public class GatewayConstants {
     public static final String EVENT_DTO_PROPERTY_NAME = "statDto";
+
+    //Subscription data related constants
+    public static final String ACTION = "ACTION";
+    public static final String ACTION_NEW = "NEW";
+    public static final String ACTION_REMOVED = "REMOVED";
+    public static final String API_CONTEXT = "API_CONTEXT";
+    public static final String API_VERSION = "API_VERSION";
+    public static final String CONSUMER_KEY = "CONSUMER_KEY";
+    public static final String SUBSCRIPTION_POLICY = "SUBSCRIPTION_POLICY";
+    public static final String SUBSCRIPTION_TOPIC_NAME = "APISubscriptionTopic";
 }

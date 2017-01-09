@@ -23,7 +23,8 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.SubscriptionValidationInfo;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationResult;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.List;
@@ -46,15 +47,6 @@ public interface APISubscriptionDAO {
     Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException;
 
     /**
-     * Retrieve all API Subscriptions
-     *
-     * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException
-     */
-    @CheckForNull
-    List<Subscription> getAPISubscriptions() throws APIMgtDAOException;
-
-    /**
      * Retrieve the list of subscriptions of an API
      *
      * @param apiId The UUID of API
@@ -64,6 +56,16 @@ public interface APISubscriptionDAO {
     public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
 
     /**
+     * Retrieve the list of subscriptions of an API for validation
+     *
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    List<SubscriptionValidationData> getAPISubscriptionsForValidation(String apiContext, String apiVersion)
+            throws APIMgtDAOException;
+
+    /**
      * Retrieve the list of subscriptions of an Application
      *
      * @param applicationId The UUID of Application
@@ -71,6 +73,15 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException
      */
     public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve all API Subscriptions for validation
+     *
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    List<SubscriptionValidationData> getAPISubscriptionsForValidation() throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results
@@ -192,6 +203,6 @@ public interface APISubscriptionDAO {
      * @return Subscription Validation Information
      * @throws APIManagementException
      */
-    SubscriptionValidationInfo validateSubscription(String apiContext, String apiVersion, String consumerKey)
+    SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String consumerKey)
             throws APIMgtDAOException;
 }

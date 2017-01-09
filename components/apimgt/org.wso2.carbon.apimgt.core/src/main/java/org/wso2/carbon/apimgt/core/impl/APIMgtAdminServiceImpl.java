@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
 import java.util.List;
 
@@ -29,7 +29,21 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @throws APIManagementException
      */
     @Override
-    public List<Subscription> getAPISubscriptions() throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptions();
+    public List<SubscriptionValidationData> getAPISubscriptions() throws APIManagementException {
+        return apiSubscriptionDAO.getAPISubscriptionsForValidation();
+    }
+
+    /**
+     * Return all API subscriptions of a given API
+     *
+     * @param apiContext
+     * @param apiVersion
+     * @return all subscriptions
+     * @throws APIManagementException
+     */
+    @Override
+    public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
+            throws APIManagementException {
+        return apiSubscriptionDAO.getAPISubscriptionsForValidation(apiContext, apiVersion);
     }
 }

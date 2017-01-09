@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "0.9.0"
+  version: "0.11.0"
   title: "WSO2 API Manager - Core"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager - Core Services**.
@@ -33,7 +33,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/core/v0.9
+basePath: /api/am/core/v0.11
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -55,39 +55,39 @@ produces:
 x-wso2-security:
   apim:
     x-wso2-scopes:
-      - description: ""
-        roles: Internal/subscriber
-        name: apim:subscribe
-        key: apim:subscribe
+      - description: "admin"
+        roles: admin
+        name: apim:admin
+        key: apim:admin
 
 ######################################################
-# The "Validate Subscriptions" Processing Function resource API
+# The "Subscription Collection" resource APIs
 ######################################################
 paths:
-  /validate-subscription:
+  /subscriptions:
 
 #-----------------------------------------------------
-# Validate a subscription
+# Retrieve all subscriptions of a certain API
 #-----------------------------------------------------
     get:
       summary: |
-        Validate a subscription
+        Return the list of subscriptions of an API
       description: |
-        Validate a subscription by proving API context, version and consumer key of application.
+        Return the list of subscriptions of an API, by proving API context and version. Response consist of API Context,
+        API version, Consumer Key and Subscription Policy
       parameters:
         - $ref : '#/parameters/apiContext'
         - $ref : '#/parameters/apiVersion'
-        - $ref : '#/parameters/consumerKey'
         - $ref : '#/parameters/Accept'
       tags:
-        - Subscription Validation
+        - Subscriptions of API
       responses:
         200:
           description: |
             OK.
-            Subscription Validation Information.
+            The list of Subscriptions.
           schema:
-            $ref: '#/definitions/SubscriptionValidationInfo'
+            $ref: '#/definitions/SubscriptionList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -122,7 +122,7 @@ parameters:
     in: query
     description: |
       Context of the API.
-    required: true
+    required: false
     type: string
 
 # API Version
@@ -131,16 +131,7 @@ parameters:
     in: query
     description: |
       Version of the API.
-    required: true
-    type: string
-
-# Consumer Key of the Application
-  consumerKey:
-    name: consumerKey
-    in: query
-    description: |
-      Consumer Key of the Application.
-    required: true
+    required: false
     type: string
 
 # The HTTP Accept header
@@ -158,45 +149,43 @@ parameters:
 definitions:
 
 #-----------------------------------------------------
-# Subscription Validation Info resource
+# The Subscription List resource
 #-----------------------------------------------------
-  SubscriptionValidationInfo:
-    title: Subscription Validation Information
-    required:
-      - isValid
+  SubscriptionList:
+    title: Subscription List
     properties:
-      isValid:
-        type: boolean
-        description: |
-          If a valid subscription is available or not.
-      subscriptionStatus:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Subscription'
+
+#-----------------------------------------------------
+# The Subscription resource
+#-----------------------------------------------------
+  Subscription:
+    title: Subscription
+    required:
+      - apiContext
+      - apiVersion
+      - consumerKey
+      - subscriptionPolicy
+    properties:
+      apiContext:
         type: string
         description: |
-          Subscription Status.
-      applicationId:
+          Context of API.
+      apiVersion:
         type: string
         description: |
-          UUID of application.
-      applicationName:
+          Version of API.
+      consumerKey:
         type: string
         description: |
-          Name of application.
-      applicationOwner:
+          Consumer Key of Application.
+      subscriptionPolicy:
         type: string
         description: |
-          Owner of application.
-      apiId:
-        type: string
-        description: |
-          UUID of API.
-      apiName:
-        type: string
-        description: |
-          Name of API.
-      apiProvider:
-        type: string
-        description: |
-          Name of API provider.
+          Subscription Policy.
 
 #-----------------------------------------------------
 # The Error resource
