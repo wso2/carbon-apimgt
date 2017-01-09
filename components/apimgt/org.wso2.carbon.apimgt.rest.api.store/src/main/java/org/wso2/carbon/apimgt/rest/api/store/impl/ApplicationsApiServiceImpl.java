@@ -118,7 +118,7 @@ import javax.ws.rs.core.Response;
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
                 Map<String, Object> keyDetails = apiConsumer
-                        .generateApplicationKeys(username, application.getName(), body.getKeyType().toString(),
+                        .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType().toString(),
                                 body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                                 application.getGroupId());
                 applicationKeyDTO = ApplicationKeyMappingUtil

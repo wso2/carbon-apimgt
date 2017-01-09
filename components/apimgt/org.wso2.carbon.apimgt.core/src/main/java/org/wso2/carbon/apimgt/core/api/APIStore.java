@@ -111,7 +111,8 @@ public interface APIStore extends APIManager {
      * Generates oAuth keys for an application.
      *
      * @param userId          Subsriber name.
-     * @param applicationName of the Application.
+     * @param applicationName name of the Application.
+     * @param applicationId   id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
@@ -120,7 +121,7 @@ public interface APIStore extends APIManager {
      * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName,
+    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId) throws APIManagementException;
 
