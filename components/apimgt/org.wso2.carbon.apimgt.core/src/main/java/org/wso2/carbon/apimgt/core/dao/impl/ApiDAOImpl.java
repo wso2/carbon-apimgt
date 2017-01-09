@@ -204,6 +204,36 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     * and matches the given search criteria.
+     *
+     * @param searchString The search string provided
+     * @param statuses     A list of matching life cycle statuses
+     * @return {@link List < API >} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> searchAPIsByStatus(String searchString, List<String> statuses) throws APIMgtDAOException {
+        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ? AND CURRENT_LC_STATUS IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+
+            for (int i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 2, statuses.get(i));
+            }
+
+            return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Checks if a given API which is uniquely identified by the API Name  already
      * exists
      *
@@ -1118,7 +1148,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addSubscriptionPolicies(Connection connection, List<String> policies, String apiID)
             throws SQLException {
         final String query =
-                "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
+                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy : policies) {
                 statement.setString(1, apiID);
@@ -1130,7 +1160,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void deleteSubscriptionPolicies(Connection connection, String apiID) throws SQLException {
-        final String query = "DELETE FROM AM_API_SUBSCRIPTION_POLICY_MAPPING WHERE API_ID = ?";
+        final String query = "DELETE FROM AM_API_SUBS_POLICY_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.execute();
@@ -1154,7 +1184,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
-        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING apimsubmapping," +
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBS_POLICY_MAPPING apimsubmapping," +
                 "AM_SUBSCRIPTION_POLICY amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
                 "AND apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();

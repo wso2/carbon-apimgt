@@ -1,0 +1,21 @@
+apis: []
+
+bindings:
+  - zoneName: footer
+    mode: prepend
+    fragments:
+      - footer
+  - zoneName: topbar
+    mode: prepend
+    fragments:
+      - globalNavigation
+
+config:
+  appName : Publisher Commons
+  loginPageUri: "/ui/login"
+  loginRedirectUri: "/apis"
+  scopes: "apim:api_view"
+  tokenEndpoint: "https://localhost:8243/token"
+  keyAndSecret: "dmRNdk05d1R4NkZ5NjNXa2xfb0FEaTdMQXZnYTp3UHNIQkJFS1FPbWU0bGZxYlJRZW1GY3ZqSUlh=="
+  swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
+  nonSecureUrl: "/test1,/test2"

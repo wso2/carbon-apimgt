@@ -1,6 +1,0 @@
-appName : API Publisher
-theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
-title : "API Publisher Application"
-errorPages:
-  "404": /ui/error/404
-  default: /ui/error/default

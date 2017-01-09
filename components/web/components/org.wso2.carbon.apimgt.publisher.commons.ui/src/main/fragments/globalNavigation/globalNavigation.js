@@ -15,10 +15,9 @@
  */
 
 function onRequest(env) {
-    sendToClient("swaggerUrl", env.config.swaggerUrl);
+    sendToClient("swaggerURL", env.config.swaggerURL);
     var appName = env.config.appName || "";
     return {
-        logo: "../../../themes/" + env.config.theme + "/lib/theme-wso2_1.0/images/logo-inverse.svg",
         appName: appName
     };
 }

@@ -42,11 +42,26 @@
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
-        <!--UUF Themes-->
         <dependency>
+            <groupId>org.wso2.carbon.uuf.common</groupId>
+            <artifactId>org.wso2.carbon.uuf.common.foundation</artifactId>
+            <version>${carbon.uuf.common.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
+        <!--UUF Themes-->
+        <!-- TODO: Removed the local theme temporally and switch to default theme from UUF commons-->
+        <!--<dependency>
             <groupId>org.wso2.carbon.apimgt.web</groupId>
             <artifactId>org.wso2.carbon.apimgt.web.publisher.theme.default</artifactId>
             <version>${carbon.apimgt.version}</version>
+            <type>zip</type>
+            <classifier>uuf-theme</classifier>
+        </dependency>-->
+        <dependency>
+            <groupId>org.wso2.carbon.uuf.common</groupId>
+            <artifactId>org.wso2.carbon.uuf.common.theme.default</artifactId>
+            <version>${carbon.uuf.common.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>
         </dependency>

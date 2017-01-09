@@ -197,6 +197,12 @@
             <version>4.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>12.1.0.1-atlassian-hosted</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -443,14 +449,14 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <id>integration-test-for-mysql</id>
+                                <id>integration-test-for-db2</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>verify-for-mysql</id>
+                                <id>verify-for-db2</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
@@ -476,14 +482,14 @@
                         <version>0.18.1</version>
                         <executions>
                             <execution>
-                                <id>start-docker-for-db2</id>
+                                <id>start-docker-for-mssql</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>stop-docker-for-db2</id>
+                                <id>stop-docker-for-mssql</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>
@@ -540,14 +546,14 @@
                         <version>2.19.1</version>
                         <executions>
                             <execution>
-                                <id>integration-test-for-mysql</id>
+                                <id>integration-test-for-mssql</id>
                                 <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>verify-for-mysql</id>
+                                <id>verify-for-mssql</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
@@ -672,10 +678,87 @@
                 </plugins>
             </build>
         </profile>
-
+        <profile>
+            <id>local-oracle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.18.1</version>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-postgres</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-postgres</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>apim-oracle</alias>
+                                    <name>dockerhub.private.wso2.com/tharindua-wso2-oracle-database:11.2.0.2-xe</name>
+                                    <run>
+                                        <namingStrategy>alias</namingStrategy>
+                                        <env>
+                                            <DB_NAME>testamdb</DB_NAME>
+                                        </env>
+                                        <wait>
+                                            <!--<tcp>
+                                                <ports>
+                                                    <port>1521</port>
+                                                </ports>
+                                            </tcp>-->
+                                            <time>400000</time>
+                                        </wait>
+                                        <shmSize>2718281829</shmSize>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-postgres</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-postgres</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <environmentVariables>
+                                <DATABASE_TYPE>oracle</DATABASE_TYPE>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <properties>
-        <private.package>org.wso2.carbon.apimgt.core.dao.internal</private.package>
+        <private.package>org.wso2.carbon.apimgt.core.internal</private.package>
         <import.package>
             org.eclipse.osgi.util,
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
@@ -701,7 +784,7 @@
             org.wso2.securevault.*;
         </import.package>
         <export.package>
-            !org.wso2.carbon.apimgt.core.dao.internal,
+            !org.wso2.carbon.apimgt.core.internal,
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
     </properties>
