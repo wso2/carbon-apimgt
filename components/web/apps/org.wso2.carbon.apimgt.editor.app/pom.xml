@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
             <artifactId>org.wso2.carbon.uuf.common.foundation</artifactId>
-            <version>1.0.0-m9</version>
+            <version>1.0.0-m1</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
