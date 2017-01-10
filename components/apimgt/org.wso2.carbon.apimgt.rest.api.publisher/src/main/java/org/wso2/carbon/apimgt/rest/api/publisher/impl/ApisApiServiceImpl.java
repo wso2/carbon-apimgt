@@ -187,19 +187,17 @@ public class ApisApiServiceImpl extends ApisApiService {
                                     "adding the API. A duplicate API already exists for "
                                     + body.getName() + "-" + body.getVersion(), log);
                         } else {
-                            return Response.status(Response.Status.BAD_REQUEST).
-                                    entity("Error occurred while adding API. API with name " +
-                                            body.getName() + (" already exists with different " +
-                                            "context").toString()).build();
+                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
+                                    body.getName() + " already exists with different " +
+                                    "context", log);
                         }
                     }
                 }
             } else {
                 //If no any previous version exists
                 if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                    return Response.status(Response.Status.BAD_REQUEST).
-                            entity(("Error occurred while adding the API. A duplicate API context " +
-                                    "already exists for " + body.getContext()).toString()).build();
+                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
+                                    "already exists for " + body.getContext(), log);
                 }
             }
 
@@ -418,7 +416,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        APIIdentifier apiIdentifier = null;
+        APIIdentifier apiIdentifier;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -438,7 +436,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving all api specific mediation policies" +
-                        " of API : " + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion();
+                        " of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -459,7 +457,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                                                       String mediationPolicyId,
                                                                       String ifMatch,
                                                                       String ifUnmodifiedSince) {
-        APIIdentifier apiIdentifier = null;
+        APIIdentifier apiIdentifier;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
@@ -473,8 +471,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (deletionStatus) {
                 return Response.ok().build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource not " +
-                        "found , deletion unsuccessful").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -483,7 +480,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while deleting API specific mediation policy : " +
-                        mediationPolicyId + "of API" + apiIdentifier.getApiName();
+                        mediationPolicyId + "of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -505,7 +502,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                                                    String mediationPolicyId,
                                                                    String accept, String ifNoneMatch,
                                                                    String ifModifiedSince) {
-        APIIdentifier apiIdentifier = null;
+        APIIdentifier apiIdentifier;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
@@ -522,8 +519,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         MediationMappingUtil.fromMediationToDTO(mediation);
                 return Response.ok().entity(mediationDTO).build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
-                        " not found or does not exists.").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -532,7 +528,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while getting mediation policy with uuid "
-                        + mediationPolicyId + " of API " + apiIdentifier.getApiName();
+                        + mediationPolicyId + " of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -558,7 +554,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                                                    String ifMatch,
                                                                    String ifUnmodifiedSince) {
         InputStream contentStream = null;
-        APIIdentifier apiIdentifier = null;
+        APIIdentifier apiIdentifier;
         Mediation updatedMediation;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -606,8 +602,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             } else {
                 //If registry resource not exists
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
-                        " not fount or does not exists, updating unsuccessful").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -616,7 +611,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error occurred while updating the mediation policy with uuid " +
-                        mediationPolicyId + " of API " + apiIdentifier.getApiName();
+                        mediationPolicyId + " of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -653,7 +648,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPoliciesMediationPost(MediationDTO body, String apiId, String contentType,
                                                    String ifMatch, String ifUnmodifiedSince) {
-        APIIdentifier apiIdentifier = null;
+        APIIdentifier apiIdentifier;
         InputStream contentStream = null;
         Mediation createdMediation;
         try {
@@ -675,8 +670,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
                     body.getType() + RegistryConstants.PATH_SEPARATOR + fileName;
             if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                return Response.status(Response.Status.CONFLICT).entity("Mediation policy already " +
-                        "exists in the given resource path, cannot create new").build();
+                RestApiUtil.handleConflict("Mediation policy already " +
+                        "exists in the given resource path, cannot create new", log);
             }
             //Adding api specific mediation policy
             String mediationPolicyUrl = apiProvider.addResourceFile(mediationResourcePath, contentFile);
@@ -698,7 +693,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while adding the mediation policy : " + body.getName() +
-                        "of API " + apiIdentifier.getApiName();
+                        "of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
