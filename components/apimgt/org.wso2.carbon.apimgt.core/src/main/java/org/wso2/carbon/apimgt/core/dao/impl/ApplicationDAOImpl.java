@@ -23,7 +23,9 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -308,6 +310,32 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throw new APIMgtDAOException(ex);
         }
         return false;
+    }
+
+    @Override
+    public void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails)
+            throws APIMgtDAOException {
+        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE,"
+                + "STATE, CREATE_MODE) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DAOUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(addApplicationKeysQuery)) {
+                ps.setString(1, appId);
+                ps.setString(2, oAuthAppDetails.getClientId());
+                ps.setString(3, oAuthAppDetails.getClientSecret());
+                ps.setString(4, oAuthAppDetails.getParameter(KeyManagerConstants.APP_KEY_TYPE).toString());
+                ps.setString(5, "CREATED"); //temporary fix
+                ps.executeUpdate();
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
     }
 
     private List<Application> createApplicationsFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {

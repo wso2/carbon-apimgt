@@ -98,7 +98,7 @@ class API {
      */
     constructor(access_key) {
         this.client = new SwaggerClient({
-            url: swaggerURL,
+            url: this._getSwaggerURL(),
             usePromise: true
         });
         this.client.then(
@@ -116,7 +116,11 @@ class API {
         );
     }
 
-    _request_meta_data(key_scope = 'default') {
+    _getSwaggerURL() {
+        return swaggerURL;
+    }
+
+    _requestMetaData(key_scope = 'default') {
         let access_key_header = "Bearer " + this.keyMan.getKey(key_scope); //TODO: tmkb Depend on result from promise
         let request_meta = {
             clientAuthorizations: {
@@ -131,7 +135,7 @@ class API {
      * Intend to be a private static method in API class,Update the API template with given parameter values.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
      */
-    _update_template(api_data) {
+    _updateTemplate(api_data) {
         let payload;
         let template = {
             "name": null,
@@ -164,13 +168,13 @@ class API {
      * @returns {Promise} Promise after creating and optionally calling the callback method.
      */
     create(api_data, callback = null) {
-        let payload = this._update_template(api_data);
+        let payload = this._updateTemplate(api_data);
         var promise_create = this.client.then(
             (client) => {
                 client.setBasePath("");
                 /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
                 return client.default.apisPost(
-                    {body: payload, 'Content-Type': "application/json"}, this._request_meta_data());
+                    {body: payload, 'Content-Type': "application/json"}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -198,6 +202,25 @@ class API {
             return promise_get_all.then(callback);
         } else {
             return promise_get_all;
+        }
+    }
+
+    get(id, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: id,
+                };
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                return client.default.apisApiIdGet(
+                    {apiId: id, 'Content-Type': "application/json"}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
         }
     }
 

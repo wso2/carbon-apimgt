@@ -32,7 +32,6 @@ public class AccessTokenRequest {
     private String resourceOwnerUsername;
     private String resourceOwnerPassword;
     private String refreshToken;
-    private String tenantDomain;
     private long validityPeriod;
     private String tokenToRevoke;
 
@@ -122,15 +121,6 @@ public class AccessTokenRequest {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
-    }
-
-
-    public String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
     }
 
     public void addRequestParam(String paramName, Object paramValue) {

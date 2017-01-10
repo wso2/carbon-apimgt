@@ -12,7 +12,7 @@ $(function () {
                 function(jsonData) {
                     // Grab the template script
 
-                    $.get('/store/public/components/root/base/templates/api/tagsTemplate.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/tagsTemplate.hbs', function (templateData) {
                         var template=Handlebars.compile(templateData);
                         // Define our data object
                         var context=jsonData.obj;
@@ -32,7 +32,7 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function(jsonData) {
                     // Grab the template script
-                    $.get('/store/public/components/root/base/templates/api/apisTemplate.hbs', function (templateData) {
+                    $.get('/store/public/components/root/base/templates/apis/apisTemplate.hbs', function (templateData) {
                         var template=Handlebars.compile(templateData);
                         // Define our data object
                         var context={apis: jsonData.obj.list};

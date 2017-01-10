@@ -4,13 +4,15 @@
         <option value="-">Select Application...</option>
     {{/unless}}
     <option value="createNewApp">New Application...</option>
+    {{#if applications}}
     <optgroup label="My Applications">
         {{#each applications}}
             {{#if isDefault}}
-                <option selected value="{{id}}">{{name}}</option>
+                <option selected value="{{applicationId}}" data-applicationId >{{name}}</option>
             {{else}}
-                <option value="{{id}}">{{name}}</option>
+                <option value="{{applicationId}}">{{name}}</option>
             {{/if}}
         {{/each}}
     </optgroup>
+    {{/if}}
 </select>

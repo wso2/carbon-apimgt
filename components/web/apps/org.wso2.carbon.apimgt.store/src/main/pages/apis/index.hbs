@@ -1,0 +1,25 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Listing | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/apis/api.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header">
+        <h1>{{t "api-store.api.list"}}</h1>
+    </div>
+    <div class="page-content">
+        <div class="row" id="api-list-content">
+
+
+        </div>
+    </div>
+
+
+{{/fillZone}}

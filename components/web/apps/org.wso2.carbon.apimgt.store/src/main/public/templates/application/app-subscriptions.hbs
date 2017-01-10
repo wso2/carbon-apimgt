@@ -1,0 +1,18 @@
+<div  id="subscription-table-nodata" class="message message-info hide">
+    <h4><i class="icon fw fw-info"></i>No Subscriptions</h4>
+    <p>This application has not yet been subscribed to an API. To subscribe, select an API from
+        <a title="API listing page" href="<%=jagg.urlTenanted("/")%>" ><%= i18n.localize("API listing page")%></a><%= i18n.localize(" and subscribe to it with an app.")%></p>
+</div>
+
+<div id="subscription-table-wrap" class="hide">
+    <table id="subscription-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0" data-app="<%= encode.forHtml(outputs.application.name) %>" data-appid="<%= encode.forHtml(outputs.application.id) %>">
+        <thead>
+        <tr>
+            <th>API Name</th>
+            <th>Subscription Tier</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+    </table>
+</div>
