@@ -6,23 +6,23 @@
     "Scope": [
       {
         "Name": "apim:api_publish",
-        "Roles": "admin"
+        "Roles": "admin,Internal/publisher"
       },
       {
         "Name": "apim:api_create",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:api_view",
-        "Roles": "admin"
+        "Roles": "admin,Internal/publisher,Internal/creator"
       },
       {
         "Name": "apim:subscribe",
-        "Roles": "Internal/subscriber"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:tier_view",
-        "Roles": "admin"
+        "Roles": "admin,Internal/publisher,Internal/creator"
       },
       {
         "Name": "apim:tier_manage",
@@ -38,11 +38,11 @@
       },
       {
         "Name": "apim:subscription_view",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:subscription_block",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:mediation_policy_view",
@@ -51,10 +51,10 @@
       {
         "Name": "apim:mediation_policy_create",
         "Roles": "admin"
-      }, 
+      },
       {
         "Name": "apim:api_workflow",
-        "Roles": "admin"
+        "Roles": "admin,Internal/publisher,Internal/creator"
       }
     ]
   },
