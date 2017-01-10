@@ -1,7 +1,7 @@
-package org.wso2.carbon.apimgt.rest.api.store.factories;
+package org.wso2.carbon.apimgt.rest.api.core.factories;
 
-import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.impl.SubscriptionsApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.core.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.core.impl.SubscriptionsApiServiceImpl;
 
 public class SubscriptionsApiServiceFactory {
     private final static SubscriptionsApiService service = new SubscriptionsApiServiceImpl();
