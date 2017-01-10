@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
@@ -486,11 +485,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder description(String description) {
-            if ("".equals(description)) {
-                this.description = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.description = description;
-            }
+           this.description = description;
             return this;
         }
 
@@ -561,11 +556,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder wsdlUri(String wsdlUri) {
-            if ("".equals(wsdlUri)) {
-                this.wsdlUri = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.wsdlUri = wsdlUri;
-            }
+            this.wsdlUri = wsdlUri;
             return this;
         }
 
@@ -613,11 +604,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder apiPolicy(String apiPolicy) {
-            if ("".equals(apiPolicy)) {
-                this.apiPolicy = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.apiPolicy = apiPolicy;
-            }
+            this.apiPolicy = apiPolicy;
             return this;
         }
 
@@ -736,11 +723,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder createdBy(String createdBy) {
-            if ("".equals(createdBy)) {
-                this.createdBy = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.createdBy = createdBy;
-            }
+            this.createdBy = createdBy;
             return this;
         }
 
@@ -764,12 +747,8 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder copiedFromApiId(String copiedFromApiId) {
-            if ("".equals(copiedFromApiId)) {
-                this.copiedFromApiId = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.copiedFromApiId = copiedFromApiId;
-            }
-            return this;
+                   this.copiedFromApiId = copiedFromApiId;
+                   return this;
         }
 
 
@@ -849,14 +828,6 @@ public final class API {
         public String getCopiedFromApiId() {
             return copiedFromApiId;
         }
-
-        public void setCopiedFromApiId(String copiedFromApiId) {
-            if ("".equals(copiedFromApiId)) {
-                this.copiedFromApiId = APIMgtConstants.EMPTY_STRING_VALUE;
-            } else {
-                this.copiedFromApiId = copiedFromApiId;
-            }
-        }
     }
 
     public String getCopiedFromApiId() {
@@ -864,10 +835,6 @@ public final class API {
     }
 
     public void setCopiedFromApiId(String copiedFromApiId) {
-        if ("".equals(copiedFromApiId)) {
-            this.copiedFromApiId = APIMgtConstants.EMPTY_STRING_VALUE;
-        } else {
-            this.copiedFromApiId = copiedFromApiId;
-        }
+             this.copiedFromApiId = copiedFromApiId;
     }
 }
