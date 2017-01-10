@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.core.models;
 
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.Objects;
 
@@ -42,11 +41,7 @@ public final class BusinessInformation {
     }
 
     public void setBusinessOwner(String businessOwner) {
-        if ("".equals(businessOwner)) {
-            this.businessOwner = APIMgtConstants.EMPTY_STRING_VALUE;
-        } else {
-            this.businessOwner = businessOwner;
-        }
+             this.businessOwner = businessOwner;
     }
 
     public String getBusinessOwnerEmail() {
@@ -54,11 +49,7 @@ public final class BusinessInformation {
     }
 
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
-        if ("".equals(businessOwnerEmail)) {
-            this.businessOwnerEmail = APIMgtConstants.EMPTY_STRING_VALUE;
-        } else {
-            this.businessOwnerEmail = businessOwnerEmail;
-        }
+             this.businessOwnerEmail = businessOwnerEmail;
     }
 
     public String getTechnicalOwner() {
@@ -66,11 +57,7 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwner(String technicalOwner) {
-        if ("".equals(technicalOwner)) {
-            this.technicalOwner = APIMgtConstants.EMPTY_STRING_VALUE;
-        } else {
             this.technicalOwner = technicalOwner;
-        }
     }
 
     public String getTechnicalOwnerEmail() {
@@ -78,11 +65,7 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-        if ("".equals(technicalOwnerEmail)) {
-            this.technicalOwnerEmail = APIMgtConstants.EMPTY_STRING_VALUE;
-        } else {
             this.technicalOwnerEmail = technicalOwnerEmail;
-        }
     }
 
 
