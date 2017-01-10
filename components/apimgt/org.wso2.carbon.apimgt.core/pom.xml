@@ -719,11 +719,7 @@
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
                                         <wait>
-                                            <!--<tcp>
-                                                <ports>
-                                                    <port>1521</port>
-                                                </ports>
-                                            </tcp>-->
+                                            <log>DATABASE IS READY TO USE!</log>
                                             <time>400000</time>
                                         </wait>
                                         <shmSize>2718281829</shmSize>
