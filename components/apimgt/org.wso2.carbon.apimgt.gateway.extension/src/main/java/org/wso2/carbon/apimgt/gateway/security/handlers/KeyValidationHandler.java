@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers;
+package org.wso2.carbon.apimgt.gateway.security.handlers;
 
 import org.wso2.carbon.apimgt.gateway.exception.APIKeyMgtException;
 import org.wso2.carbon.apimgt.gateway.models.TokenValidationContext;

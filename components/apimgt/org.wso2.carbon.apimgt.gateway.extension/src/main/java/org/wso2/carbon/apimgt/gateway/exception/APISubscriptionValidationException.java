@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,24 +22,19 @@ package org.wso2.carbon.apimgt.gateway.exception;
 /**
  * Exception class for key validation failures.
  */
-public class APIKeyMgtException extends Exception {
-    private static final long serialVersionUID = 595805804854058405L;
+public class APISubscriptionValidationException extends Exception {
 
-    private int errorCode;
+    private static final long serialVersionUID = 5813925030638754789L;
 
-    public APIKeyMgtException(int errorCode, String message) {
+    public APISubscriptionValidationException(String message) {
         super(message);
-        this.errorCode = errorCode;
     }
 
-    public APIKeyMgtException(String message, Throwable cause) {
-        super(message, cause);
-
+    public APISubscriptionValidationException(String message, Throwable e) {
+        super(message, e);
     }
 
-    public APIKeyMgtException(int errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
+    public APISubscriptionValidationException(Exception e) {
+        super(e);
     }
-
 }

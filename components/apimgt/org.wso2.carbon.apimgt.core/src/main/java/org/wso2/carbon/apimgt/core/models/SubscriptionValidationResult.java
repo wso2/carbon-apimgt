@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 /**
  * Status of an API can be anyone from following list.
  */
-public class SubscriptionValidationInfo {
+public class SubscriptionValidationResult {
 
     private boolean isValid;
     private APIMgtConstants.SubscriptionStatus subscriptionStatus;
@@ -35,7 +35,7 @@ public class SubscriptionValidationInfo {
     private String apiName;
     private String apiProvider;
 
-    public SubscriptionValidationInfo(boolean isValid) {
+    public SubscriptionValidationResult(boolean isValid) {
         this.isValid = isValid;
     }
 

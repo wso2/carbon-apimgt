@@ -198,11 +198,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc6</artifactId>
             <version>12.1.0.1-atlassian-hosted</version>
@@ -719,11 +714,7 @@
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
                                         <wait>
-                                            <!--<tcp>
-                                                <ports>
-                                                    <port>1521</port>
-                                                </ports>
-                                            </tcp>-->
+                                            <log>DATABASE IS READY TO USE!</log>
                                             <time>400000</time>
                                         </wait>
                                         <shmSize>2718281829</shmSize>
