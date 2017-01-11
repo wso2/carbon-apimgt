@@ -1,13 +1,24 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+
+import java.util.List;
+
+import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
 
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince);
@@ -30,8 +41,8 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdThumbnailGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdThumbnailPost(String apiId,InputStream fileInputStream,Attachment fileDetail,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdWsdlGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisApiIdWsdlPost(String apiId,String wsdlDefinision,String contentType,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response apisApiIdWsdlPut(String apiId,String wsdlDefinision,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisApiIdWsdlPost(String apiId,String wsdlDefinition,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisApiIdWsdlPut(String apiId,String wsdlDefinition,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisChangeLifecyclePost(String action,String apiId,String lifecycleChecklist,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisCopyApiPost(String newVersion,String apiId);
     public abstract Response apisGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch);

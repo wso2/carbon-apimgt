@@ -32,9 +32,11 @@ public class WorkflowsApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. .\n", response = WorkflowDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nEnvironment list is returned.\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nWorkflow request information is returned.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n") })
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nWorkflow for the given reference in not found.\n") })
 
     public Response workflowsUpdateWorkflowStatusPost(@ApiParam(value = "Workflow reference id\n",required=true) @QueryParam("workflowReferenceId") String workflowReferenceId,
     @ApiParam(value = "Workflow event that need to be updated\n" ,required=true ) WorkflowDTO body)
