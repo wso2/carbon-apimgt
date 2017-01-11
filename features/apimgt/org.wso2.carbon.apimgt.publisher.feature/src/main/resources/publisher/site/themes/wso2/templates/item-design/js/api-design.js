@@ -448,15 +448,37 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     this.container.delegate(".delete_scope","click", function(){
-    	$("#messageModal div.modal-footer").html("");
-        var i = $(this).attr("data-index");
-        jagg.message({content: i18n.t('confirm.deleteScope'),
-            type: 'confirm', title: i18n.t("Delete Scope"),
-            okCallback: function () {
-                API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
-                API_DESIGNER.render_scopes();
-            }});
-    });
+       	$("#messageModal div.modal-footer").html("");
+           var i = $(this).attr("data-index");
+            jagg.post("/site/blocks/item-design/ajax/add.jag",
+            {
+               action:"validateScope",
+               scope:$("#scopeKey").val(),
+               roleName:$("#scopeRoles").val()
+            },
+            function (result) {
+                 if (!result.error) {
+                    if (result.isScopeExist == "true") {
+    					jagg.message({
+   						content : "Scope " + $("#scopeKey").val() + " already assigned by an API.",
+   						type : "error"
+   					});
+   					return;
+   	     			}else{
+                        jagg.message({content: i18n.t('Are you sure you want to delete the scope'),
+                        type: 'confirm', title: i18n.t("Delete Scope"),
+                        okCallback: function () {
+                            API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
+                            API_DESIGNER.render_scopes();
+
+                        }});
+                    }
+                  API_DESIGNER.render_scopes();
+                  API_DESIGNER.render_resources();
+                 }
+   			}, "json");
+        });
+
 
     this.container.delegate("#define_scopes" ,'click', function(){
         $("#scopeName").val('');

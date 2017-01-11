@@ -123,7 +123,7 @@
     "abnormalResponseTime_Desc": "This alert type gets triggered if there is a sudden increase in the response time of a particular API resource. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend. ",
     "block": "Block",
     "blocked": "BLOCKED",
-    "confirm.deleteScope": "confirm.deleteScope",
+    "Are you sure you want to delete the scope": "Are you sure you want to delete the scope?",
     "controlled": "Restricted by tenants",
     "created": "CREATED",
     "demote to created": "Demote to Created",
