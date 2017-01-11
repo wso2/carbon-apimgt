@@ -22,4 +22,9 @@ package org.wso2.carbon.apimgt.gateway;
  */
 public class GatewayConstants {
     public static final String EVENT_DTO_PROPERTY_NAME = "statDto";
+    public static final String APPLICATION_NAME = "api.ut.application.name";
+    public static final String APPLICATION_ID = "api.ut.application.id";
+    public static final String END_USER_NAME = "api.ut.userName";
+    public static final String REQUEST_RECEIVED_TIME = "wso2statistics.request.received.time";
+    public static final String REST_FULL_REQUEST_PATH = "REST_FULL_REQUEST_PATH";
 }

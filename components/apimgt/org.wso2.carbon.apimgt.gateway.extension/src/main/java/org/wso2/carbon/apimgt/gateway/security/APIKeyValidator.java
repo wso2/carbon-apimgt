@@ -16,30 +16,16 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.exception;
-
-
+package org.wso2.carbon.apimgt.gateway.security;
 /**
- * Exception class for key validation failures.
+ * This class is used to validate a given API key against a given API context and a version.
+ * Actual validation operations are carried out by invoking back-end authentication and
+ * key validation services. In order to minimize the network overhead, this implementation
+ * caches some API key authentication information in memory. This implementation and the
+ * underlying caching implementation are thread-safe. An instance of this class must not be
+ * shared among multiple APIs, API handlers or authenticators.
  */
-public class APIKeyMgtException extends Exception {
-    private static final long serialVersionUID = 595805804854058405L;
 
-    private int errorCode;
-
-    public APIKeyMgtException(int errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
-    }
-
-    public APIKeyMgtException(String message, Throwable cause) {
-        super(message, cause);
-
-    }
-
-    public APIKeyMgtException(int errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
-    }
+public class APIKeyValidator {
 
 }
