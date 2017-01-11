@@ -21,11 +21,12 @@ $(function () {
     $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
     client = new SwaggerClient({
-        url: 'https://apis.wso2.com/api/am/store/v0.10/swagger.json',
+        url: swaggerURL + "applications",
         success: function () {
+            client.setBasePath("");
             var id = document.getElementById("appid").value;
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 0f0904a3-c4b0-3b6c-9ca2-879277c66721", "header"));
-            client["Application (individual)"].get_applications_applicationId({"applicationId": id},
+            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Basic YWRtaW46YWRtaW4=", "header"));
+            client.default.applicationsApplicationIdGet({"applicationId": id},
                 function (data) {
                     renderAppDetails(data);
                     renderApplicationKeys(data);
@@ -39,7 +40,7 @@ $(function () {
     var renderAppDetails = function (data) {
 
         $.ajax({
-            url: '/store/public/components/root/base/templates/application/appDetails.hbs',
+            url: '/store/public/components/root/base/templates/applications/appDetails.hbs',
             type: 'GET',
             success: function (result) {
                 var templateScript = result;
@@ -63,7 +64,7 @@ $(function () {
     var renderApplicationKeys = function (data) {
 
         $.ajax({
-            url: '/store/public/components/root/base/templates/application/applicationKeys.hbs',
+            url: '/store/public/components/root/base/templates/applications/applicationKeys.hbs',
             type: 'GET',
             success: function (result) {
                 var keyTemplateScript = result;
@@ -114,7 +115,6 @@ $(function () {
                                 context = setDefaultContext(data);
                                 compiledHtml = AppkeyTemplate(context);
                                 $("#sandbox").append(compiledHtml);
-
                             }
                         }
                         else {
@@ -124,7 +124,6 @@ $(function () {
                                 context = setDefaultContext(data);
                                 compiledHtml = AppkeyTemplate(context);
                                 $("#production").append(compiledHtml);
-
                             }
                         }
                         $('.selectpicker').selectpicker('refresh');
@@ -228,7 +227,7 @@ var generateKeys = function () {
 
     var id = document.getElementById("appid").value;
 
-    client["Application (individual)"].post_applications_generate_keys(
+    client.default.applicationsGenerateKeysPost(
         {
             "applicationId": id,
             "Content-Type": "application/json",

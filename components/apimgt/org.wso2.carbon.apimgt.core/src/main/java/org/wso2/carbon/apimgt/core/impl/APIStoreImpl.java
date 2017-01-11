@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -282,7 +283,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
         List<API> apiResults = null;
         try {
-            apiResults = getApiDAO().searchAPIs(query);
+            //TODO: Need to validate users roles against results returned
+            if (query != null && !query.isEmpty()) {
+                apiResults = getApiDAO().searchAPIs(query);
+            } else {
+                List<String> statuses = new ArrayList<>();
+                statuses.add(APIStatus.);
+                statuses.add(APIMgtConstants.API_PROTOTYPED);
+                apiResults = getApiDAO().getAPIsByStatus(statuses);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating searching APIs - " + query;
             log.error(errorMsg, e);
