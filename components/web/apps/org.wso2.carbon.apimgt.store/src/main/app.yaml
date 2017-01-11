@@ -9,6 +9,8 @@ menus:
   - name: "left"
     items:
       - text: "APIs"
+        link: ""
+        icon: "fw-home"
 errorPages:
   "404": /foundation/error/404
   default: /foundation/error/default
