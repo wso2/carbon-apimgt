@@ -1362,8 +1362,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     APIConstants.WSDL_FILE_EXTENSION;
             resourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + resourcePath;
             if (apiProvider.checkIfResourceExists(resourcePath)) {
-                return Response.status(Response.Status.CONFLICT).entity("wsdl resource already " +
-                        "exists, cannot create a new").build();
+                RestApiUtil.handleConflict("wsdl resource already exists for the API " + apiId, log);
             }
             apiProvider.uploadWsdl(resourcePath, wsdlDefinition);
             String created = apiProvider.getWsdl(apiIdentifier);
@@ -1382,7 +1381,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlPut(String apiId, String wsdlDefinision, String contentType,
+    public Response apisApiIdWsdlPut(String apiId, String wsdlDefinition, String contentType,
                                      String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1394,7 +1393,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     APIConstants.WSDL_FILE_EXTENSION;
             resourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + resourcePath;
             if (apiProvider.checkIfResourceExists(resourcePath)) {
-                apiProvider.updateWsdl(resourcePath,wsdlDefinision);
+                apiProvider.updateWsdl(resourcePath,wsdlDefinition);
             }
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

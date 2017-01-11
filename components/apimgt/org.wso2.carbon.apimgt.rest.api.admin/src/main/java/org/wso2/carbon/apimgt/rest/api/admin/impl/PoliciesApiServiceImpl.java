@@ -110,8 +110,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                 return Response.ok().build();
             } else {
                 //If registry resource not found
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource not " +
-                        "found , deletion unsuccessful").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting the global mediation policy with uuid "
@@ -143,8 +142,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                 return Response.ok().entity(mediationDTO).build();
             } else {
                 //If global mediation policy not exists
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
-                        " not found or does not exists.").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving the global mediation policy with id "
@@ -208,8 +206,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                 }
             } else {
                 //If resource not exists
-                return Response.status(Response.Status.NOT_FOUND).entity("Requested resource" +
-                        " not fount or does not exists, updating unsuccessful").build();
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating the global mediation policy " +
@@ -261,8 +258,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                     RegistryConstants.PATH_SEPARATOR + body.getType() +
                     RegistryConstants.PATH_SEPARATOR + fileName;
             if (apiProvider.checkIfResourceExists(mediationPolicyPath)) {
-                return Response.status(Response.Status.CONFLICT).entity("Mediation policy already " +
-                        "exists in the given resource path, cannot create new").build();
+                RestApiUtil.handleConflict("Mediation policy already exists", log);
             }
             //Adding new global mediation sequence
             String mediationPolicyUrl =

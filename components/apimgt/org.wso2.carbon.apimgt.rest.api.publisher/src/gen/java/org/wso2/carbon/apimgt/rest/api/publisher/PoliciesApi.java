@@ -6,8 +6,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.PoliciesApiServiceFac
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 
 import java.util.List;
 

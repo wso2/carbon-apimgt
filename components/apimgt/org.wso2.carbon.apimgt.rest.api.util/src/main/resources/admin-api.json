@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.10.0",
+    "version": "0.11.0",
     "title": "WSO2 API Manager - Admin",
     "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
     "contact": {
@@ -540,6 +540,51 @@
           }
         }
       },
+      "delete": {
+        "x-scope": "apim:mediation_policy_create",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060",
+        "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Delete an API",
+        "description": "This operation can be used to delete an existing API proving the Id of the API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/mediationPolicyId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "Mediation (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nResource successfully deleted.\n"
+          },
+          "403": {
+            "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "put": {
         "x-scope": "apim:mediation_policy_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f",
@@ -612,51 +657,6 @@
           },
           "404": {
             "description": "Not Found.\nThe resource to be updated does not exist.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "412": {
-            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "delete": {
-        "x-scope": "apim:mediation_policy_create",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060",
-        "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK",
-        "summary": "Delete an API",
-        "description": "This operation can be used to delete an existing API proving the Id of the API.\n",
-        "parameters": [
-          {
-            "$ref": "#/parameters/mediationPolicyId"
-          },
-          {
-            "$ref": "#/parameters/If-Match"
-          },
-          {
-            "$ref": "#/parameters/If-Unmodified-Since"
-          }
-        ],
-        "tags": [
-          "Mediation (Individual)"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK.\nResource successfully deleted.\n"
-          },
-          "403": {
-            "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found.\nResource to be deleted does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1753,6 +1753,20 @@
       "description": "Validator for conditional requests; based on Last Modified header.\n",
       "type": "string"
     },
+    "limit": {
+      "name": "limit",
+      "in": "query",
+      "description": "Maximum size of resource array to return.\n",
+      "default": 25,
+      "type": "integer"
+    },
+    "offset": {
+      "name": "offset",
+      "in": "query",
+      "description": "Starting point within the complete list of items qualified.\n",
+      "default": 0,
+      "type": "integer"
+    },
     "mediationPolicyId": {
       "name": "mediationPolicyId",
       "in": "path",
@@ -2290,6 +2304,32 @@
         }
       }
     },
+    "mediationList": {
+      "title": "Mediation List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of mediation sequences returned.\n",
+          "example": 1
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of sequences qualified.\nEmpty if no more sequences are to be returned.\n",
+          "example": ""
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of sequences qualified.\nEmpty if current subset is the first subset returned.\n",
+          "example": ""
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MediationInfo"
+          }
+        }
+      }
+    },
     "MediationInfo": {
       "title": "MediationInfo",
       "required": [
@@ -2314,32 +2354,6 @@
             "fault"
           ],
           "example": "in"
-        }
-      }
-    },
-    "mediationList": {
-      "title": "Mediation List",
-      "properties": {
-        "count": {
-          "type": "integer",
-          "description": "Number of mediation sequences returned.\n",
-          "example": 1
-        },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of sequences qualified.\nEmpty if no more sequences are to be returned.\n",
-          "example": ""
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of sequences qualified.\nEmpty if current subset is the first subset returned.\n",
-          "example": ""
-        },
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MediationInfo"
-          }
         }
       }
     },

@@ -1735,11 +1735,11 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Add wsdl
       description: |
-        This operation can be used to add a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinision`.
+        This operation can be used to add a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinition`.
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
-          name: wsdlDefinision
+          name: wsdlDefinition
           description: wsdl of the API
           type: string
           required: true
@@ -1818,11 +1818,11 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: update wsdl
       description: |
-        This operation can be used to update a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinision`.
+        This operation can be used to update a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinition`.
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
-          name: wsdlDefinision
+          name: wsdlDefinition
           description: wsdl of the API
           type: string
           required: true
