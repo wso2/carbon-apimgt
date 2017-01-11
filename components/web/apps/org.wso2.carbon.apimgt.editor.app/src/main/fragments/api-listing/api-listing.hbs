@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-4 api-search">
+        <form class="form-horizontal" action="{{@contextPath}}/apis">
+            <div class="form-group">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="input-group input-wrap has-form-control-btn">
+                        <input type="text" name="query" title="Search text" class="form-control"
+                               placeholder="Search" />
+
+                        <input type="hidden" name="tenant" value="null" />
+
+                        <div class="input-group-btn">
+                            <button class="form-control-btn" type="submit" title="Search"><i class="fw fw-search" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="input-group-btn">
+                            <a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="Dismissible popover">
+                                <span class="icon fw-lg add-margin-left-1x" style="font-size:14px">
+                                    <i class="fw fw-info" title="Search options"></i>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="searchAPIHelp" class="hide">
+                <div><strong>Search Options</strong></div>
+                <ol>
+                    <li>By API Name [Default]  or</li>
+                    <li>By API Provider [Syntax - provider:xxxx ]  or</li>
+                    <li>By API Version  [Syntax - version:xxxx ]  or</li>
+                    <li>By Context [Syntax - context:xxxx ] or </li>
+                    <li>By Status [Syntax - status:xxxx ] or </li>
+                    <li>By Description [Syntax - description:xxxx ] or</li>
+                    <li>By Subcontext [Syntax - subcontext:xxxx ] </li>
+                    <li>By Documentation Content [Syntax - doc:xxxx ] </li>
+                </ol>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="page-content">
+    <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>API</th>
+            <th>Activity</th>
+            <th>Usage</th>
+            <th>Status</th>
+            <th class="t-right">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each @params.apis}}
+            <tr>
+                <td>
+                    <a href="apis/{{id}}"><i class="fw-2x fw fw-api"></i> {{name}}</a></td>
+                <td>{{version}}</td>
+                <td>{{provider}}</td>
+                <td><h4><span class="label label-success status_w">{{status}}</span></h4></td>
+                <td class="t-right">
+                    <a href="" class="cu-reg-btn btn-edit" data-toggle="tooltip" data-original-title="Edit"><span>Edit</span></a>
+                    <a href="" class="cu-reg-btn btn-delete" data-toggle="tooltip" data-original-title="Delete"><span>Delete</span></a>
+                </td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
