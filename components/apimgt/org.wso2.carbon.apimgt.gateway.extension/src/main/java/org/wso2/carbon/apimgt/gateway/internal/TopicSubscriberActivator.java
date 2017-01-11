@@ -22,6 +22,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.gateway.jms.APISubscriptionReceiver;
 import org.wso2.carbon.apimgt.gateway.jms.JmsReceiver;
 
 /**
@@ -39,5 +40,8 @@ public class TopicSubscriberActivator {
         log.info("TopicSubscriber listener Activated");
         JmsReceiver jms = new JmsReceiver();
         jms.start();
+
+        APISubscriptionReceiver apiSubscriptionReceiver = new APISubscriptionReceiver();
+        apiSubscriptionReceiver.start();
     }
 }

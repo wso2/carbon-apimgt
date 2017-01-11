@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -167,7 +166,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 throw new KeyManagementException("Error occurred while generating access token for OAuth application");
             }
 
-            // temporarily saving to db. later this has to be done via workflow
+            //todo: temporarily saving to db. later this has to be done via workflow
             try {
                 getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
             } catch (APIMgtDAOException e) {
@@ -343,22 +342,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
-    }
-
-    /**
-     * Creates an OAuth2 app for a given APIM Application and generate keys.
-     *
-     * @param application Application for which keys should be generated
-     * @return Generated keys
-     */
-    @Override
-    public APIKey generateKeysForApplication(Application application) {
-        //todo:generate keys
-        APIKey apiKey = new APIKey();
-        apiKey.setConsumerKey("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        apiKey.setConsumerSecret("yyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-
-        return apiKey;
     }
 
     private TagDAO getTagDAO() {

@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
@@ -185,13 +184,4 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException
      */
     Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
-
-    /**
-     * Creates an OAuth2 app for a given APIM Application and generate keys.
-     *
-     * @param application    Application for which keys should be generated
-     * @return Generated keys
-     */
-    APIKey generateKeysForApplication(Application application);
-
 }

@@ -70,7 +70,7 @@ public class SampleTestObjectCreator {
                 lifeCycleStatus("CREATED").
                 lifecycleInstanceId(UUID.randomUUID().toString()).
                 apiDefinition(new StringBuilder(apiDefinition)).
-                wsdlUri("").
+                wsdlUri(" ").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
