@@ -37,4 +37,8 @@ public class GatewayConstants {
     public static final String KEY_ENV_TYPE = "KEY_ENV_TYPE";
 
     public static final String SUBSCRIPTION_TOPIC_NAME = "APISubscriptionTopic";
+    public static final String APPLICATION_ID = "api.ut.application.id";
+    public static final String END_USER_NAME = "api.ut.userName";
+    public static final String REQUEST_RECEIVED_TIME = "wso2statistics.request.received.time";
+    public static final String REST_FULL_REQUEST_PATH = "REST_FULL_REQUEST_PATH";
 }
