@@ -35,14 +35,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
-import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -287,8 +280,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 apiResults = getApiDAO().searchAPIs(query);
             } else {
                 List<String> statuses = new ArrayList<>();
-                statuses.add(APIMgtConstants.API_PUBLISHED);
-                statuses.add(APIMgtConstants.API_PROTOTYPED);
+                statuses.add(APIStatus.PUBLISHED.getStatus());
+                statuses.add(APIStatus.PROTOTYPED.getStatus());
                 apiResults = getApiDAO().getAPIsByStatus(statuses);
             }
         } catch (APIMgtDAOException e) {
