@@ -82,8 +82,8 @@ public class APIStoreImplTestCase {
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         List<API> apimResultsFromDAO = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        statuses.add("PUBLISHED");
-        statuses.add("PROTOTYPED");
+        statuses.add(APIMgtConstants.API_PUBLISHED);
+        statuses.add(APIMgtConstants.API_PROTOTYPED);
         when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("", 1, 2);
         Assert.assertNotNull(apis);
