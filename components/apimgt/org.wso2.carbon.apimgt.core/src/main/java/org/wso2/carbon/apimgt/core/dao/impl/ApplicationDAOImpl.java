@@ -322,8 +322,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             try (PreparedStatement ps = conn.prepareStatement(addApplicationKeysQuery)) {
                 ps.setString(1, appId);
                 ps.setString(2, oAuthAppDetails.getClientId());
-                ps.setString(3, oAuthAppDetails.getClientSecret());
-                ps.setString(4, oAuthAppDetails.getParameter(KeyManagerConstants.APP_KEY_TYPE).toString());
+                ps.setString(3, oAuthAppDetails.getParameter(KeyManagerConstants.APP_KEY_TYPE).toString());
+                ps.setString(4, "COMPLETED"); //temporary fix
                 ps.setString(5, "CREATED"); //temporary fix
                 ps.executeUpdate();
                 conn.commit();
