@@ -267,6 +267,7 @@ public class UsageClient {
             return list;
 
         } catch (Exception e) {
+            log.error("Error occurred while querying from database for Developer Signups stat", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
@@ -363,18 +364,19 @@ public class UsageClient {
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
-            statement.setTimestamp(1, fromTime);
-            statement.setTimestamp(2, toTime);
+            int i = 1;
             if (isAPINameSet) {
-                statement.setString(3, apiName);
+                statement.setString(i++, apiName);
                 if (isDeveloperSet) {
-                    statement.setString(4, developer);
+                    statement.setString(i++, developer);
+                }
+            } else {
+                if (isDeveloperSet) {
+                    statement.setString(i++, developer);
                 }
             }
-            if (isDeveloperSet) {
-                statement.setString(3, developer);
-            }
-
+            statement.setTimestamp(i++, fromTime);
+            statement.setTimestamp(i, toTime);
             //execute
             rs = statement.executeQuery();
 
@@ -388,6 +390,7 @@ public class UsageClient {
             }
             return list;
         } catch (Exception e) {
+            log.error("Error occurred while querying from database for App Registrations stat", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
@@ -467,11 +470,12 @@ public class UsageClient {
             Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
             Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
-            statement.setTimestamp(1, fromTime);
-            statement.setTimestamp(2, toTime);
+            int i = 1;
             if (isAPINameSet) {
-                statement.setString(3, apiName);
+                statement.setString(i++, apiName);
             }
+            statement.setTimestamp(i++, fromTime);
+            statement.setTimestamp(i, toTime);
 
             //execute
             rs = statement.executeQuery();
@@ -485,6 +489,7 @@ public class UsageClient {
             }
             return list;
         } catch (Exception e) {
+            log.error("Error occurred while querying from database for API Subscription Over Time stat", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
@@ -515,7 +520,6 @@ public class UsageClient {
      * get published api accumulated count over time
      *
      * @param provider  logged publisher
-     * @param developer application developer
      * @param apiFilter api filter state
      * @param fromDate  starting date of the results
      * @param toDate    ending date of the results
@@ -566,6 +570,7 @@ public class UsageClient {
             }
             return list;
         } catch (Exception e) {
+            log.error("Error occurred while querying from database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
@@ -636,6 +641,7 @@ public class UsageClient {
             return list;
 
         } catch (Exception e) {
+            log.error("Error occurred while querying from database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
@@ -694,6 +700,7 @@ public class UsageClient {
             }
             return new ArrayList<APIListDTO>(list);
         } catch (APIManagementException e) {
+            log.error("Error occurred while querying from database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         }
     }
@@ -737,6 +744,7 @@ public class UsageClient {
             }
             return list;
         } catch (Exception e) {
+            log.error("Error occurred while querying from database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             if (rs != null) {
