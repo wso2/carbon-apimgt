@@ -54,7 +54,7 @@
       },
       {
         "Name": "apim:api_workflow",
-        "Roles": "admin,Internal/publisher,Internal/creator"
+        "Roles": "admin"
       }
     ]
   },
