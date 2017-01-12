@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -24,7 +25,6 @@ public class APIBusinessInformationDTO  {
   
   
   private String businessOwner = null;
-
 
   private String lastUpdatedTime = null;
 
@@ -53,6 +53,7 @@ public class APIBusinessInformationDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -64,7 +65,8 @@ public class APIBusinessInformationDTO  {
     this.businessOwnerEmail = businessOwnerEmail;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("technicalOwnerEmail")
@@ -75,7 +77,8 @@ public class APIBusinessInformationDTO  {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("technicalOwner")
@@ -86,7 +89,8 @@ public class APIBusinessInformationDTO  {
     this.technicalOwner = technicalOwner;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("businessOwner")

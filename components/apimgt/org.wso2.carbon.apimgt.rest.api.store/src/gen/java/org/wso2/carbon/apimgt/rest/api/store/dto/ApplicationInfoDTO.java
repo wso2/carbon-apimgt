@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -34,7 +35,6 @@ public class ApplicationInfoDTO  {
   
   private String groupId = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -62,6 +62,7 @@ public class ApplicationInfoDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -73,7 +74,8 @@ public class ApplicationInfoDTO  {
     this.applicationId = applicationId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("name")
@@ -84,7 +86,8 @@ public class ApplicationInfoDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("subscriber")
@@ -95,7 +98,8 @@ public class ApplicationInfoDTO  {
     this.subscriber = subscriber;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("throttlingTier")
@@ -106,7 +110,8 @@ public class ApplicationInfoDTO  {
     this.throttlingTier = throttlingTier;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("description")
@@ -117,7 +122,8 @@ public class ApplicationInfoDTO  {
     this.description = description;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")
@@ -128,7 +134,8 @@ public class ApplicationInfoDTO  {
     this.status = status;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("groupId")

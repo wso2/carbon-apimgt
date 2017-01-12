@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.TokenDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -37,7 +38,6 @@ public class ApplicationKeyDTO  {
   
   private TokenDTO token = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -65,6 +65,7 @@ public class ApplicationKeyDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    * Consumer key of the application
    **/
@@ -77,7 +78,8 @@ public class ApplicationKeyDTO  {
     this.consumerKey = consumerKey;
   }
 
-    /**
+  
+  /**
    * Consumer secret of the application
    **/
   @ApiModelProperty(value = "Consumer secret of the application")
@@ -89,7 +91,8 @@ public class ApplicationKeyDTO  {
     this.consumerSecret = consumerSecret;
   }
 
-    /**
+  
+  /**
    * Supported grant types for the application
    **/
   @ApiModelProperty(value = "Supported grant types for the application")
@@ -101,7 +104,8 @@ public class ApplicationKeyDTO  {
     this.supportedGrantTypes = supportedGrantTypes;
   }
 
-    /**
+  
+  /**
    * State of the key generation of the application
    **/
   @ApiModelProperty(value = "State of the key generation of the application")
@@ -113,7 +117,8 @@ public class ApplicationKeyDTO  {
     this.keyState = keyState;
   }
 
-    /**
+  
+  /**
    * Key type
    **/
   @ApiModelProperty(value = "Key type")
@@ -125,7 +130,8 @@ public class ApplicationKeyDTO  {
     this.keyType = keyType;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("token")

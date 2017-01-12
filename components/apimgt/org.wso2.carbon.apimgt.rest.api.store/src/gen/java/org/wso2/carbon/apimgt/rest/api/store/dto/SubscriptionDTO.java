@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -31,7 +32,6 @@ public class SubscriptionDTO  {
   
   private StatusEnum status = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -59,6 +59,7 @@ public class SubscriptionDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -70,7 +71,8 @@ public class SubscriptionDTO  {
     this.subscriptionId = subscriptionId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationId")
@@ -81,7 +83,8 @@ public class SubscriptionDTO  {
     this.applicationId = applicationId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("apiIdentifier")
@@ -92,7 +95,8 @@ public class SubscriptionDTO  {
     this.apiIdentifier = apiIdentifier;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("tier")
@@ -103,7 +107,8 @@ public class SubscriptionDTO  {
     this.tier = tier;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")

@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -27,7 +28,6 @@ public class DocumentListDTO  {
   
   
   private List<DocumentDTO> list = new ArrayList<DocumentDTO>();
-
 
   private String lastUpdatedTime = null;
 
@@ -56,6 +56,7 @@ public class DocumentListDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    * Number of Documents returned.\n
    **/
@@ -68,7 +69,8 @@ public class DocumentListDTO  {
     this.count = count;
   }
 
-    /**
+  
+  /**
    * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
    **/
   @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
@@ -80,7 +82,8 @@ public class DocumentListDTO  {
     this.next = next;
   }
 
-    /**
+  
+  /**
    * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
    **/
   @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
@@ -92,7 +95,8 @@ public class DocumentListDTO  {
     this.previous = previous;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")

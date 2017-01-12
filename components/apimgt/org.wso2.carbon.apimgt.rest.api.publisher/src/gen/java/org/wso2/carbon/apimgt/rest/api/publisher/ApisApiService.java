@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import java.util.List;
@@ -41,8 +42,7 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdThumbnailGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdThumbnailPost(String apiId,InputStream fileInputStream,Attachment fileDetail,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdWsdlGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisApiIdWsdlPost(String apiId,String wsdlDefinition,String contentType,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response apisApiIdWsdlPut(String apiId,String wsdlDefinition,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisApiIdWsdlPost(String apiId,WsdlDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisChangeLifecyclePost(String action,String apiId,String lifecycleChecklist,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisCopyApiPost(String newVersion,String apiId);
     public abstract Response apisGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch);

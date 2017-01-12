@@ -1,14 +1,25 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import io.swagger.annotations.ApiParam;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
 
-import javax.ws.rs.*;
+import io.swagger.annotations.ApiParam;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+
+import java.util.List;
+
+import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
 import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
 
 @Path("/apis")
 @Consumes({ "application/json" })
@@ -173,16 +184,17 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response apisApiIdThumbnailGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.apisApiIdThumbnailGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apisApiIdThumbnailGet(apiId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
     }
 
-    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince)
+    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince)
     {
-        return delegate.apisApiIdThumbnailGetGetLastUpdatedTime(apiId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdThumbnailGetGetLastUpdatedTime(apiId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
     @Path("/generate-sdk/")

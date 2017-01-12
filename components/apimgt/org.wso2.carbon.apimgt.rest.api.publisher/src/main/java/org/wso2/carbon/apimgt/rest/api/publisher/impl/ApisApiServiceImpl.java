@@ -52,13 +52,7 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
@@ -1325,7 +1319,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
             String wsdlContent = apiProvider.getWsdl(apiIdentifier);
-            return Response.ok().entity(wsdlContent).build();
+            WsdlDTO dto = new WsdlDTO();
+            dto.setWsdlDefinition(wsdlContent);
+            dto.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
+                    apiIdentifier.getVersion() + ".wsdl");
+            return Response.ok().entity(dto).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -1340,18 +1338,17 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Add a new wsdl in to the registry
-     *
-     * @param apiId             API uuid
-     * @param wsdlDefinition    wsdl content
+     * 
+     * @param apiId API Id
+     * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl to the registry
+     * @return added wsdl 
      */
     @Override
-    public Response apisApiIdWsdlPost(String apiId, String wsdlDefinition, String contentType,
-                                      String ifMatch, String ifUnmodifiedSince) {
+    public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,
+            String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1364,37 +1361,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (apiProvider.checkIfResourceExists(resourcePath)) {
                 RestApiUtil.handleConflict("wsdl resource already exists for the API " + apiId, log);
             }
-            apiProvider.uploadWsdl(resourcePath, wsdlDefinition);
-            String created = apiProvider.getWsdl(apiIdentifier);
-            return Response.ok().entity(created).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while uploading wsdl of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
-    }
+            apiProvider.uploadWsdl(resourcePath, body.getWsdlDefinition());
 
-    @Override
-    public Response apisApiIdWsdlPut(String apiId, String wsdlDefinition, String contentType,
-                                     String ifMatch, String ifUnmodifiedSince) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
-                    tenantDomain);
-            String resourcePath = apiIdentifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
-                    APIConstants.WSDL_FILE_EXTENSION;
-            resourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + resourcePath;
-            if (apiProvider.checkIfResourceExists(resourcePath)) {
-                apiProvider.updateWsdl(resourcePath,wsdlDefinition);
-            }
+            WsdlDTO wsdlDTO = new WsdlDTO();
+            wsdlDTO.setWsdlDefinition(apiProvider.getWsdl(apiIdentifier));
+            wsdlDTO.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
+                    apiIdentifier.getVersion() + ".wsdl");
+            return Response.ok().entity(wsdlDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource

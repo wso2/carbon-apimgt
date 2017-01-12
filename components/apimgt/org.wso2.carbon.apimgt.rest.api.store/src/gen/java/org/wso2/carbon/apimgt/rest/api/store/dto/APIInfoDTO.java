@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -34,7 +35,6 @@ public class APIInfoDTO  {
   
   private String status = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -62,6 +62,7 @@ public class APIInfoDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -73,7 +74,8 @@ public class APIInfoDTO  {
     this.id = id;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("name")
@@ -84,7 +86,8 @@ public class APIInfoDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("description")
@@ -95,7 +98,8 @@ public class APIInfoDTO  {
     this.description = description;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("context")
@@ -106,7 +110,8 @@ public class APIInfoDTO  {
     this.context = context;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("version")
@@ -117,7 +122,8 @@ public class APIInfoDTO  {
     this.version = version;
   }
 
-    /**
+  
+  /**
    * If the provider value is not given, the user invoking the API will be used as the provider.\n
    **/
   @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.\n")
@@ -129,7 +135,8 @@ public class APIInfoDTO  {
     this.provider = provider;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")

@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorListItemDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -30,7 +31,6 @@ public class ErrorDTO  {
   
   
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
-
 
   private String lastUpdatedTime = null;
 
@@ -59,6 +59,7 @@ public class ErrorDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -70,7 +71,8 @@ public class ErrorDTO  {
     this.code = code;
   }
 
-    /**
+  
+  /**
    * Error message.
    **/
   @ApiModelProperty(required = true, value = "Error message.")
@@ -82,7 +84,8 @@ public class ErrorDTO  {
     this.message = message;
   }
 
-    /**
+  
+  /**
    * A detail description about the error message.\n
    **/
   @ApiModelProperty(value = "A detail description about the error message.\n")
@@ -94,7 +97,8 @@ public class ErrorDTO  {
     this.description = description;
   }
 
-    /**
+  
+  /**
    * Preferably an url with more details about the error.\n
    **/
   @ApiModelProperty(value = "Preferably an url with more details about the error.\n")
@@ -106,7 +110,8 @@ public class ErrorDTO  {
     this.moreInfo = moreInfo;
   }
 
-    /**
+  
+  /**
    * If there are more than one error list them out.\nFor example, list out validation errors by each field.\n
    **/
   @ApiModelProperty(value = "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n")

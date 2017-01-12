@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -18,7 +19,6 @@ public class TagDTO  {
   
   @NotNull
   private Integer weight = null;
-
 
   private String lastUpdatedTime = null;
 
@@ -47,6 +47,7 @@ public class TagDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -58,7 +59,8 @@ public class TagDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("weight")

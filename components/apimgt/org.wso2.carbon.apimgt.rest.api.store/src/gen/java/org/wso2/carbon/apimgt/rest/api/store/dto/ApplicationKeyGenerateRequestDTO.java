@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -33,7 +34,6 @@ public class ApplicationKeyGenerateRequestDTO  {
   
   private List<String> scopes = new ArrayList<String>();
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -61,6 +61,7 @@ public class ApplicationKeyGenerateRequestDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -72,7 +73,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     this.keyType = keyType;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("validityTime")
@@ -83,7 +85,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     this.validityTime = validityTime;
   }
 
-    /**
+  
+  /**
    * Callback URL
    **/
   @ApiModelProperty(value = "Callback URL")
@@ -95,7 +98,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     this.callbackUrl = callbackUrl;
   }
 
-    /**
+  
+  /**
    * Allowed domains for the access token
    **/
   @ApiModelProperty(required = true, value = "Allowed domains for the access token")
@@ -107,7 +111,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     this.accessAllowDomains = accessAllowDomains;
   }
 
-    /**
+  
+  /**
    * Allowed scopes for the access token
    **/
   @ApiModelProperty(value = "Allowed scopes for the access token")

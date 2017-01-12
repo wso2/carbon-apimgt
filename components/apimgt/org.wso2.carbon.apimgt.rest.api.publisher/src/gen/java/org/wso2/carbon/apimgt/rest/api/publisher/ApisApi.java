@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import java.util.List;
@@ -455,9 +456,9 @@ public class ApisApi  {
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get a wsdl correspond to a API", notes = "This operation can be used to retrieve a particular global mediation policy.\n", response = void.class)
+    @io.swagger.annotations.ApiOperation(value = "Get a wsdl correspond to a API", notes = "This operation can be used to retrieve a particular global mediation policy.\n", response = WsdlDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested swagger document of the API is returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested WSDL DTO object belongs to the API\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
         
@@ -474,7 +475,7 @@ public class ApisApi  {
     }
     @POST
     @Path("/{apiId}/wsdl")
-    @Consumes({ "multipart/form-data" })
+    @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add wsdl", notes = "This operation can be used to add a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinition`.\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
@@ -489,36 +490,12 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response apisApiIdWsdlPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "wsdl of the API", required=true )@Multipart(value = "wsdlDefinition")  String wsdlDefinition,
+    @ApiParam(value = "DTO including WSDL definition that needs to be added\n" ,required=true ) WsdlDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.apisApiIdWsdlPost(apiId,wsdlDefinition,contentType,ifMatch,ifUnmodifiedSince);
-    }
-    @PUT
-    @Path("/{apiId}/wsdl")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "update wsdl", notes = "This operation can be used to update a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinition`.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with updated wsdl definition\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden.\nThe request must be conditional but no condition has been specified.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
-
-    public Response apisApiIdWsdlPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "wsdl of the API", required=true )@Multipart(value = "wsdlDefinition")  String wsdlDefinition,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.apisApiIdWsdlPut(apiId,wsdlDefinition,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apisApiIdWsdlPost(apiId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @POST
     @Path("/change-lifecycle")

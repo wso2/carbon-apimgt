@@ -6,6 +6,7 @@ import java.util.Map;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -46,7 +47,6 @@ public class TierDTO  {
   @NotNull
   private Boolean stopOnQuotaReach = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -74,6 +74,7 @@ public class TierDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -85,7 +86,8 @@ public class TierDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("description")
@@ -96,7 +98,8 @@ public class TierDTO  {
     this.description = description;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("tierLevel")
@@ -107,7 +110,8 @@ public class TierDTO  {
     this.tierLevel = tierLevel;
   }
 
-    /**
+  
+  /**
    * Custom attributes added to the tier policy\n
    **/
   @ApiModelProperty(value = "Custom attributes added to the tier policy\n")
@@ -119,7 +123,8 @@ public class TierDTO  {
     this.attributes = attributes;
   }
 
-    /**
+  
+  /**
    * Maximum number of requests which can be sent within a provided unit time\n
    **/
   @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time\n")
@@ -131,7 +136,8 @@ public class TierDTO  {
     this.requestCount = requestCount;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("unitTime")
@@ -142,7 +148,8 @@ public class TierDTO  {
     this.unitTime = unitTime;
   }
 
-    /**
+  
+  /**
    * This attribute declares whether this tier is available under commercial or free\n
    **/
   @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free\n")
@@ -154,7 +161,8 @@ public class TierDTO  {
     this.tierPlan = tierPlan;
   }
 
-    /**
+  
+  /**
    * If this attribute is set to false, you are capabale of sending requests\neven if the request count exceeded within a unit time\n
    **/
   @ApiModelProperty(required = true, value = "If this attribute is set to false, you are capabale of sending requests\neven if the request count exceeded within a unit time\n")

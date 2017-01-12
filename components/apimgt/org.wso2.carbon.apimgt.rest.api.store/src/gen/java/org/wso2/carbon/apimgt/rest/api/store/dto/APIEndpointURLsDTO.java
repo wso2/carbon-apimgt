@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIEnvironmentURLsDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -22,7 +23,6 @@ public class APIEndpointURLsDTO  {
   
   
   private String environmentType = null;
-
 
   private String lastUpdatedTime = null;
 
@@ -51,6 +51,7 @@ public class APIEndpointURLsDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -62,7 +63,8 @@ public class APIEndpointURLsDTO  {
     this.environmentURLs = environmentURLs;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("environmentName")
@@ -73,7 +75,8 @@ public class APIEndpointURLsDTO  {
     this.environmentName = environmentName;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("environmentType")
