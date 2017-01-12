@@ -417,19 +417,23 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the thumbnail image of an API specified by API identifier
      *
      * @param apiId           API Id
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Thumbnail image of the API
      */
     @Override
-    public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch,
-                                          String ifModifiedSince) {
+    public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiIdentifier);
 
             if (thumbnailResource != null) {
@@ -448,6 +452,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -599,7 +606,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Thumbnail image of the API
      */
     @Override
-    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
+    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String xWSO2Tenant, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
     }
 

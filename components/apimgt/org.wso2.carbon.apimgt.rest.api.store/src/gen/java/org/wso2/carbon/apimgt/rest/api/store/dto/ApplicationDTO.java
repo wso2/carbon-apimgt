@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -43,7 +44,6 @@ public class ApplicationDTO  {
   
   private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -71,6 +71,7 @@ public class ApplicationDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -82,7 +83,8 @@ public class ApplicationDTO  {
     this.applicationId = applicationId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
@@ -93,7 +95,8 @@ public class ApplicationDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    * If subscriber is not given user invoking the API will be taken as the subscriber.\n
    **/
   @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.\n")
@@ -105,7 +108,8 @@ public class ApplicationDTO  {
     this.subscriber = subscriber;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("throttlingTier")
@@ -116,7 +120,8 @@ public class ApplicationDTO  {
     this.throttlingTier = throttlingTier;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("callbackUrl")
@@ -127,7 +132,8 @@ public class ApplicationDTO  {
     this.callbackUrl = callbackUrl;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("description")
@@ -138,7 +144,8 @@ public class ApplicationDTO  {
     this.description = description;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")
@@ -149,7 +156,8 @@ public class ApplicationDTO  {
     this.status = status;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("groupId")
@@ -160,7 +168,8 @@ public class ApplicationDTO  {
     this.groupId = groupId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("keys")

@@ -1211,7 +1211,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     + documentationName + " of API: " + identifier.getApiName();
             handleException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get ddocument content found for documentation: "
+            handleException("Failed to get document content found for documentation: "
                     + documentationName + " of API: " + identifier.getApiName(), e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1310,15 +1310,47 @@ public abstract class AbstractAPIManager implements APIManager {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-
-        String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+        String tenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        Registry registry;
+        boolean isTenantFlowStarted = false;
         try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+	        /* If the API provider is a tenant, load tenant registry*/
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                registry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    registry = ServiceReferenceHolder.getInstance().
+                            getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    registry = this.registry;
+                }
+            }
+            String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
                 return new ResourceFile(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
-            handleException("Error while loading API icon from the registry", e);
+            handleException("Error while loading API icon of API " +  identifier.getApiName()
+                    + ":" + identifier.getVersion() + " from the registry", e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Error while loading API icon of API " + identifier.getApiName()
+                    + ":" + identifier.getVersion(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return null;
     }

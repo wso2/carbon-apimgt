@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -27,7 +28,6 @@ public class TierListDTO  {
   
   
   private List<TierDTO> list = new ArrayList<TierDTO>();
-
 
   private String lastUpdatedTime = null;
 
@@ -56,6 +56,7 @@ public class TierListDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    * Number of Tiers returned.\n
    **/
@@ -68,7 +69,8 @@ public class TierListDTO  {
     this.count = count;
   }
 
-    /**
+  
+  /**
    * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
    **/
   @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
@@ -80,7 +82,8 @@ public class TierListDTO  {
     this.next = next;
   }
 
-    /**
+  
+  /**
    * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
    **/
   @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
@@ -92,7 +95,8 @@ public class TierListDTO  {
     this.previous = previous;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")

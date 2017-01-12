@@ -1,11 +1,22 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import io.swagger.annotations.ApiParam;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 
-import javax.ws.rs.*;
+import io.swagger.annotations.ApiParam;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
+
+import java.util.List;
+
+import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
 import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
 
 @Path("/tags")
 @Consumes({ "application/json" })

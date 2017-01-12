@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -23,7 +24,6 @@ public class TokenDTO  {
   
   
   private Long validityTime = null;
-
 
   private String lastUpdatedTime = null;
 
@@ -52,6 +52,7 @@ public class TokenDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    * Access token
    **/
@@ -64,7 +65,8 @@ public class TokenDTO  {
     this.accessToken = accessToken;
   }
 
-    /**
+  
+  /**
    * Valid scopes for the access token
    **/
   @ApiModelProperty(value = "Valid scopes for the access token")
@@ -76,7 +78,8 @@ public class TokenDTO  {
     this.tokenScopes = tokenScopes;
   }
 
-    /**
+  
+  /**
    * Maximum validity time for the access token
    **/
   @ApiModelProperty(value = "Maximum validity time for the access token")

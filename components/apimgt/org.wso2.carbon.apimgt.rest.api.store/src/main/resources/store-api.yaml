@@ -565,6 +565,7 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.        
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'

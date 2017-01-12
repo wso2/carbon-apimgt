@@ -503,6 +503,9 @@
                         "$ref": "#/parameters/apiId"
                     },
                     {
+                        "$ref": "#/parameters/requestedTenant"
+                    },
+                    {
                         "$ref": "#/parameters/Accept"
                     },
                     {

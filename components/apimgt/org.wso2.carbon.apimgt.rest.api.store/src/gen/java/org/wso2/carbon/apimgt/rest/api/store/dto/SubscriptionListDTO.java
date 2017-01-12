@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -27,7 +28,6 @@ public class SubscriptionListDTO  {
   
   
   private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
-
 
   private String lastUpdatedTime = null;
 
@@ -56,6 +56,7 @@ public class SubscriptionListDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    * Number of Subscriptions returned.\n
    **/
@@ -68,7 +69,8 @@ public class SubscriptionListDTO  {
     this.count = count;
   }
 
-    /**
+  
+  /**
    * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
    **/
   @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
@@ -80,7 +82,8 @@ public class SubscriptionListDTO  {
     this.next = next;
   }
 
-    /**
+  
+  /**
    * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
    **/
   @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
@@ -92,7 +95,8 @@ public class SubscriptionListDTO  {
     this.previous = previous;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")

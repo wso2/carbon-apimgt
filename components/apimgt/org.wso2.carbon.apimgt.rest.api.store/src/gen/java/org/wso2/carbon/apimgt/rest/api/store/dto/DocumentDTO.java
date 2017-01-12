@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -40,7 +41,6 @@ public class DocumentDTO  {
   
   private String otherTypeName = null;
 
-
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
@@ -68,6 +68,7 @@ public class DocumentDTO  {
     this.createdTime=createdTime;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -79,7 +80,8 @@ public class DocumentDTO  {
     this.documentId = documentId;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
@@ -90,7 +92,8 @@ public class DocumentDTO  {
     this.name = name;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("type")
@@ -101,7 +104,8 @@ public class DocumentDTO  {
     this.type = type;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("summary")
@@ -112,7 +116,8 @@ public class DocumentDTO  {
     this.summary = summary;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("sourceType")
@@ -123,7 +128,8 @@ public class DocumentDTO  {
     this.sourceType = sourceType;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("sourceUrl")
@@ -134,7 +140,8 @@ public class DocumentDTO  {
     this.sourceUrl = sourceUrl;
   }
 
-    /**
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("otherTypeName")
