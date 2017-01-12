@@ -1653,7 +1653,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK.\nRequested swagger document of the API is returned\n",
+                        "description": "OK.\nRequested WSDL DTO object belongs to the API\n",
+                        "schema": {
+                            "$ref": "#/definitions/Wsdl"
+                        },
                         "headers": {
                             "Content-Type": {
                                 "description": "The content type of the body.\n",
@@ -1687,9 +1690,6 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "multipart/form-data"
-                ],
                 "x-scope": "apim:api_create",
                 "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
                 "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-tier\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
@@ -1701,93 +1701,13 @@
                         "$ref": "#/parameters/apiId"
                     },
                     {
-                        "in": "formData",
-                        "name": "wsdlDefinition",
-                        "description": "wsdl of the API",
-                        "type": "string",
-                        "required": true
-                    },
-                    {
-                        "$ref": "#/parameters/Content-Type"
-                    },
-                    {
-                        "$ref": "#/parameters/If-Match"
-                    },
-                    {
-                        "$ref": "#/parameters/If-Unmodified-Since"
-                    }
-                ],
-                "tags": [
-                    "Wsdl (Individual)"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK.\nSuccessful response with updated wsdl definition\n",
-                        "headers": {
-                            "Location": {
-                                "description": "The URL of the newly created resource.\n",
-                                "type": "string"
-                            },
-                            "Content-Type": {
-                                "description": "The content type of the body.\n",
-                                "type": "string"
-                            },
-                            "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
-                                "type": "string"
-                            },
-                            "Last-Modified": {
-                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request.\nInvalid request or validation error\n",
+                        "in": "body",
+                        "name": "body",
+                        "description": "DTO including WSDL definition that needs to be added\n",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Error"
+                            "$ref": "#/definitions/Wsdl"
                         }
-                    },
-                    "403": {
-                        "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found.\nThe resource to be updated does not exist.\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "412": {
-                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "x-scope": "apim:api_create",
-                "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
-                "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-tier\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
-                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
-                "summary": "update wsdl",
-                "description": "This operation can be used to update a wsdl to an existing API. wsdl definition to be updated is passed as a form data parameter `wsdlDefinition`.\n",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/apiId"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "wsdlDefinition",
-                        "description": "wsdl of the API",
-                        "type": "string",
-                        "required": true
                     },
                     {
                         "$ref": "#/parameters/Content-Type"
@@ -2745,13 +2665,6 @@
             "required": true,
             "type": "string"
         },
-        "wsdlId": {
-            "name": "wsdlId",
-            "in": "path",
-            "description": "Wsdl Id\n",
-            "required": true,
-            "type": "string"
-        },
         "subscriptionId-Q": {
             "name": "subscriptionId",
             "in": "query",
@@ -3380,64 +3293,17 @@
                 }
             }
         },
-        "WsdlList": {
-            "title": "Wsdl List",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "description": "Number of mediation sequences returned.\nexample: 1\n"
-                },
-                "next": {
-                    "type": "string",
-                    "description": "Link to the next subset of sequences qualified.\nEmpty if no more sequences are to be returned.\n",
-                    "example": ""
-                },
-                "previous": {
-                    "type": "string",
-                    "description": "Link to the previous subset of sequences qualified.\nEmpty if current subset is the first subset returned.\n",
-                    "example": ""
-                },
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/WsdlInfo"
-                    }
-                }
-            }
-        },
-        "WsdlInfo": {
-            "title": "WsdlInfo",
-            "required": [
-                "name",
-                "id"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "example": "json_fault.xml"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "01234567-0123-0123-0123-012345678901"
-                }
-            }
-        },
         "Wsdl": {
             "title": "Wsdl",
             "required": [
-                "name",
-                "config"
+                "name"
             ],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "example": "01234567-0123-0123-0123-012345678901"
-                },
                 "name": {
                     "type": "string",
                     "example": "admin--calculatorAPI2.0.wsdl"
                 },
-                "config": {
+                "wsdlDefinition": {
                     "type": "string",
                     "example": "<definitions name=\"HelloService\" targetNamespace=\"http://www.examples.com/wsdl/HelloService.wsdl\" xmlns=\"http://schemas.xmlsoap.org/wsdl/\" xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:tns=\"http://www.examples.com/wsdl/HelloService.wsdl\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n<message name=\"SayHelloRequest\"> <part name=\"firstName\" type=\"xsd:string\"/> </message>\n<message name=\"SayHelloResponse\"> <part name=\"greeting\" type=\"xsd:string\"/> </message>\n<portType name=\"Hello_PortType\"> <operation name=\"sayHello\"> <input message=\"tns:SayHelloRequest\"/> <output message=\"tns:SayHelloResponse\"/> </operation> </portType>\n<binding name=\"Hello_Binding\" type=\"tns:Hello_PortType\"> <soap:binding style=\"rpc\" transport=\"http://schemas.xmlsoap.org/soap/http\"/> <operation name=\"sayHello\"> <soap:operation soapAction=\"sayHello\"/> <input> <soap:body encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" namespace=\"urn:examples:helloservice\" use=\"encoded\"/> </input>\n<output> <soap:body encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" namespace=\"urn:examples:helloservice\" use=\"encoded\"/> </output> </operation> </binding>\n<service name=\"Hello_Service\"> <documentation>WSDL File for HelloService</documentation> <port binding=\"tns:Hello_Binding\" name=\"Hello_Port\"> <soap:address location=\"http://www.examples.com/SayHello/\" /> </port> </service> </definitions>"
                 }
