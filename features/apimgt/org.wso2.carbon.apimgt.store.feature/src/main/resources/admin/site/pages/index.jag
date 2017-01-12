@@ -30,7 +30,7 @@ if(pageName == "subscription") {
 
 (function () {
     var user = jagg.getUser();
-    if (!user && site.ssoConfiguration.idpInit == "true") {
+    if (!user && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.idpInit == "true") {
         //There is already a redirection applied to idpInitSSOURL (in site.conf) from sso/fiter.
         //So we should not do another redirection; just return from this.  
         return;

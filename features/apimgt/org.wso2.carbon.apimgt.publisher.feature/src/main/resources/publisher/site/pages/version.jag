@@ -13,7 +13,11 @@ i18n.init(request,localeResourcesBasePath);
     if (jagg.getPublishPermitted() != null && jagg.getCreatePermitted() != null) {
 	isPermitted = jagg.getPublishPermitted().permitted || jagg.getCreatePermitted().permitted;
     }
-
+    if (!user && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.idpInit == "true") {
+        //There is already a redirection applied to idpInitSSOURL (in site.conf) from sso/fiter.
+        //So we should not do another redirection; just return from this.  
+        return;
+    }
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
