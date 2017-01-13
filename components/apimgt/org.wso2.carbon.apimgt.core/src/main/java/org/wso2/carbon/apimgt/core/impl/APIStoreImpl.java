@@ -288,8 +288,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 apiResults = getApiDAO().searchAPIs(query);
             } else {
                 List<String> statuses = new ArrayList<>();
-                statuses.add(APIStatus.);
-                statuses.add(APIMgtConstants.API_PROTOTYPED);
+                statuses.add(APIStatus.PUBLISHED.getStatus());
+                statuses.add(APIStatus.PROTOTYPED.getStatus());
                 apiResults = getApiDAO().getAPIsByStatus(statuses);
             }
         } catch (APIMgtDAOException e) {
