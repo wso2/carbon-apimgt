@@ -4782,6 +4782,8 @@ public final class APIUtil {
                             Thread.currentThread().setName("APIMHostObjectUtils-loadTenantConfig-thread");
                             try {
                                 PrivilegedCarbonContext.startTenantFlow();
+                                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                        .setTenantDomain(finalTenantDomain, true);
                                 ConfigurationContext ctx = ServiceReferenceHolder.getContextService()
                                         .getServerConfigContext();
                                 TenantAxisUtils.getTenantAxisConfiguration(finalTenantDomain, ctx);
