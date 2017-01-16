@@ -96,7 +96,7 @@ public class APIManagerFactory {
 
     private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
         try {
-            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO());
+            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getApiDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
@@ -108,7 +108,7 @@ public class APIManagerFactory {
     private APIStore newConsumer(String username) throws APIManagementException {
         // if (username.equals(ANONYMOUS_USER)) {
         // username = null;
-        // }
+        // }        git status
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
