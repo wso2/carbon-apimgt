@@ -241,7 +241,7 @@
                                                             <%} else {%>
                                                                 <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all tenants")%></option>
+                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
                                                                     <% if(!(enableSelectedTenantSubscription == 'false')) {%>
                                                                     <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
                                                                     <% } %>
@@ -329,7 +329,7 @@
                             <%} else {%>
                             <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all tenants")%></option>
+                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
                                 <% if(!(enableSelectedTenantSubscription == 'false')) {%>
                                 <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
                                 <% } %>
