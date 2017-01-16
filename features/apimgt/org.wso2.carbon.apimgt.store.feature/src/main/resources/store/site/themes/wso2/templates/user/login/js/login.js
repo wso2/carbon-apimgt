@@ -94,8 +94,14 @@ $(document).ready(function () {
 
 
 	        if ($(this).attr("href")) {
+                var gotoUrl = siteContext;
+                //when there is a custom URL configured for a tenant in store (i.e https://store.apim.com -> tenant.com)
+                //the store will be on root context. In that cases, the redirection should happen to "/"
+                if (!gotoUrl) {
+                    gotoUrl = "/";
+                }
                 if($(this).attr("id") == "btn-login"){
-                    $.cookie("goto_url", window.location.href, {path: "/store"});
+                    $.cookie("goto_url", window.location.href, {path: gotoUrl});
                 } else {
                     $.cookie("goto_url", $(this).attr("href"));
                 }
