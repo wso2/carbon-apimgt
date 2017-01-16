@@ -271,14 +271,16 @@ GrantTypes.prototype.getMap = function(selected){
             }, $.proxy(function (result) {
                 this.element.find('.generatekeys').buttonLoader('stop');
                 if (!result.error) {
-                	var appDetails = JSON.parse(result.data.key.appDetails);
+                    if ((typeof(result.data.key.appDetails) != 'undefined') ||  (result.data.key.appDetails != null)){
+                        var appDetails = JSON.parse(result.data.key.appDetails);
+                        this.app.grants = this.grants.getMap(appDetails.grant_types);
+                    }
                     this.app.ConsumerKey = result.data.key.consumerKey,
                     this.app.ConsumerSecret = result.data.key.consumerSecret,
                     this.app.Key = result.data.key.accessToken,
                     this.app.KeyScope = result.data.key.tokenScope,
                     this.app.ValidityTime = result.data.key.validityTime,
                     this.app.keyState = result.data.key.keyState,
-                    this.app.grants = this.grants.getMap(appDetails.grant_types),
                     this.render();
                 } else {
                     jagg.message({content: result.message, type: "error"});
