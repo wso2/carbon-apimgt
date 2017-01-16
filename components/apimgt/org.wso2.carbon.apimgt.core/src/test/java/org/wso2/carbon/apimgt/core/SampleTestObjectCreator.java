@@ -318,4 +318,26 @@ public class SampleTestObjectCreator {
         application.setUpdatedTime(LocalDateTime.now());
         return application;
     }
+
+
+    public static DocumentInfo getMockDocumentInfoObject(String docId) {
+
+        DocumentInfo.Builder builder = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide")
+                .id(docId);
+        return builder.build();
+    }
+
+    public static List<DocumentInfo> getMockDocumentInfoObjectsList() {
+        List<DocumentInfo> docList = new ArrayList<>();
+
+        DocumentInfo doc1 = new DocumentInfo.Builder().fileName("sample1").id("123").build();
+        DocumentInfo doc2 = new DocumentInfo.Builder().fileName("sample1").id("124").build();
+        DocumentInfo doc3 = new DocumentInfo.Builder().fileName("sample1").id("125").build();
+
+        docList.add(doc1);
+        docList.add(doc2);
+        docList.add(doc3);
+
+        return docList;
+    }
 }

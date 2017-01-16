@@ -17,11 +17,17 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -38,34 +44,46 @@ public class AbstractAPIManagerTestCase {
     private static final String APP_NAME = "app_name";
     public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
-    @Test public void testSearchAPIByUUID() {
+    @Test public void testSearchAPIByUUID() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
-        try {
-            when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
-            API api = apiStore.getAPIbyUUID(UUID);
-            Assert.assertEquals(api.getName(), API_NAME);
-            verify(apiDAO, atLeastOnce()).getAPI(UUID);
-        } catch (APIManagementException  e) {
-            Assert.fail(e.getMessage());
-        }
+        when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
+        API api = apiStore.getAPIbyUUID(UUID);
+        Assert.assertEquals(api.getName(), API_NAME);
+        verify(apiDAO, atLeastOnce()).getAPI(UUID);
     }
 
     @Test(description = "Retrieve an application by uuid")
-    public void testGetApplicationByUuid() {
+    public void testGetApplicationByUuid() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
-        try {
-            when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-            Application application = apiStore.getApplication(UUID, USER_NAME, null);
-
-            Assert.assertNotNull(application);
-            verify(applicationDAO, times(1)).getApplication(UUID);
-        } catch (APIManagementException e) {
-            Assert.assertTrue(false);
-        }
+        when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
+        Application application = apiStore.getApplication(UUID, USER_NAME, null);
+        Assert.assertNotNull(application);
+        verify(applicationDAO, times(1)).getApplication(UUID);
     }
 
+    @Test(description = "Retrieve documentation summary given the id")
+    public void testGetDocumentationSummary() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
+        DocumentInfo documentInfoMock = SampleTestObjectCreator.getMockDocumentInfoObject(UUID);
+        when(apiDAO.getDocumentInfo(UUID)).thenReturn(documentInfoMock);
+        DocumentInfo documentInfo = apiStore.getDocumentationSummary(UUID);
+        Assert.assertNotNull(documentInfo);
+        verify(apiDAO, times(1)).getDocumentInfo(UUID);
+    }
+
+    @Test(description = "Retrieve list of documentations")
+    public void testAllDocumentation() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
+        List<DocumentInfo> documentInfoMockList = SampleTestObjectCreator.getMockDocumentInfoObjectsList();
+        when(apiDAO.getDocumentsInfoList(UUID)).thenReturn(documentInfoMockList);
+        List<DocumentInfo> documentInfoList = apiStore.getAllDocumentation(UUID, 1, 10);
+        Assert.assertNotNull(documentInfoList);
+        verify(apiDAO, times(1)).getDocumentsInfoList(UUID);
+    }
 }
