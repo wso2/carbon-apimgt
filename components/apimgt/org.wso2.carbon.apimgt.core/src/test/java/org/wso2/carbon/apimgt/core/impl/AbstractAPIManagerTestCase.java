@@ -34,9 +34,8 @@ public class AbstractAPIManagerTestCase {
     private static final String USER_NAME = "username";
     private static final String API_VERSION = "1.0.0";
     private static final String PROVIDER_NAME = "provider";
-    private static final String API_NAME = "provider";
-    private static final String API_ID = "provider";
-    private static final String APP_NAME = "appname";
+    private static final String API_NAME = "api_name";
+    private static final String APP_NAME = "app_name";
     public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
     @Test public void testSearchAPIByUUID() {
@@ -44,10 +43,10 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         try {
-            when(apiDAO.getAPI(API_ID)).thenReturn(apiFromDAO);
-            API api = apiStore.getAPIbyUUID(API_ID);
+            when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
+            API api = apiStore.getAPIbyUUID(UUID);
             Assert.assertEquals(api.getName(), API_NAME);
-            verify(apiDAO, atLeastOnce()).getAPI(API_ID);
+            verify(apiDAO, atLeastOnce()).getAPI(UUID);
         } catch (APIManagementException  e) {
             Assert.fail(e.getMessage());
         }
