@@ -4,15 +4,15 @@ bindings:
   - zoneName: footer
     mode: prepend
     fragments:
-      - footer
+      - org.wso2.carbon.apimgt.publisher.commons.ui.footer
   - zoneName: topbar
     mode: prepend
     fragments:
-      - globalNavigation
+      - org.wso2.carbon.apimgt.publisher.commons.ui.globalNavigation
 
 config:
   appName : Publisher Commons
-  loginPageUri: "/ui/login"
+  loginPageUri: "/commons/login"
   loginRedirectUri: "/apis"
   scopes: "apim:api_view"
   tokenEndpoint: "https://localhost:8243/token"
