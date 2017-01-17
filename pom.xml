@@ -564,9 +564,9 @@
 
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
-        <carbon.uuf.version>1.0.0-m9</carbon.uuf.version>
+        <carbon.uuf.version>1.0.0-SNAPSHOT</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m10</carbon-uuf-maven-plugin.version>
-        <carbon.uuf.common.version>1.0.0-m1</carbon.uuf.common.version>
+        <carbon.uuf.common.version>1.0.0-SNAPSHOT</carbon.uuf.common.version>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
         <carbon.messaging.version>1.0.10</carbon.messaging.version>
