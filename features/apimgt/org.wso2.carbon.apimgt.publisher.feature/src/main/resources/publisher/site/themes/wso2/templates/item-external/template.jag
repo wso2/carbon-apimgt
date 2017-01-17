@@ -40,7 +40,7 @@ var faultSequencesLoaded = false;
             <%if(api.apiStores!=null){%>
             <input type="hidden" id="externalAPIStores" name="externalAPIStores" value="<%for(var j=0;j<api.apiStores.length;j++){ if(api.apiStores[j].published){%><%=api.apiStores[j].name%>::<%}}%>" />
             <div class="form-group">
-                <label class="col-sm-4 control-label"><%=i18n.localize("Display In External Stores")%>:</label>
+                <label class="col-sm-4 control-label"><%=i18n.localize("Display in External Stores")%>:</label>
 				<div class="col-sm-4">
 					<ul class="nav">
 						<%for(var i=0;i<api.apiStores.length;i++){%>
