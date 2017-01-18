@@ -70,6 +70,18 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
     <build>
 
@@ -160,7 +172,9 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
-            org.json.simple.*
+            org.json.simple.*,
+            org.apache.commons.io.*,
+            com.google.gson.*
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.publisher.internal,

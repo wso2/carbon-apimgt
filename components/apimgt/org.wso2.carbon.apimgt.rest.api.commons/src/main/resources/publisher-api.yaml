@@ -1514,7 +1514,7 @@ paths:
 ######################################################
 # Export **Individual API** Configuration Resource API
 ######################################################
-  /apis/export/{name}/{version}:
+  /apis/export/api/{name}/{version}:
 
     get:
       produces:
@@ -1543,98 +1543,6 @@ paths:
           description: |
             Not Found.
             Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-############################################################################
-# Export **Individual API/ Collection of APIs** Configuration Resource API
-############################################################################
-  /apis/import:
-    post:
-      consumes:
-        - application/zip
-      summary: Imports API(s).
-      description: |
-        This operation can be used to import one or more APIs.
-      tags:
-        - Import Configuration
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/APIList'
-          headers:
-            Location:
-              description: |
-                Location of the newly created API(s).
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-    put:
-      consumes:
-        - application/zip
-      summary: Imports API(s).
-      description: |
-        This operation can be used to import one or more existing APIs.
-      tags:
-        - Import Configuration
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the updated object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/APIList'
-          headers:
-            Location:
-              description: |
-                Location of the newly created API(s).
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         406:

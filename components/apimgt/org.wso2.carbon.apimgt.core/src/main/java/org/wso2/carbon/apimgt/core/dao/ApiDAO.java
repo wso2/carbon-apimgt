@@ -42,6 +42,15 @@ public interface ApiDAO {
     @CheckForNull API getAPI(String apiID) throws APIMgtDAOException;
 
     /**
+     * Retrieves an instance of an API for the given name and version
+     * @param apiName name of the API
+     * @param version version of the API
+     * @return valid {@link API} object or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @CheckForNull API getAPI(String apiName, String version) throws APIMgtDAOException;
+
+    /**
      * Retrieve a given instance of an APISummary object
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null

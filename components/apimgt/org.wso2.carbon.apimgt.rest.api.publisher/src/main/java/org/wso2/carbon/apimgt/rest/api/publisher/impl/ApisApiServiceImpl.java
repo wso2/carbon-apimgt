@@ -20,6 +20,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
@@ -28,12 +30,10 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
@@ -337,6 +337,74 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+
+    @Override
+    public Response apisExportApiApiNameApiVersionGet(String apiName, String apiVersion) throws NotFoundException {
+
+        APIPublisher publisher = null;
+        String exportedFilePath = null;
+        List<API> apis = new ArrayList<>();
+        API anApi;
+        try {
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+            anApi = publisher.getAPIbyNameAndVersion(apiName, apiVersion);
+            apis.add(anApi);
+            // TODO: add search support
+            exportedFilePath = new ImportExportManager(publisher, System.getProperty("java.io.tmpdir")).exportAPIs(apis);
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while export API: " + apiName + ", version: " + apiVersion;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, apiName);
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, apiVersion);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+
+        File exportedApiArciveFile = new File(exportedFilePath);
+        Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK).entity(exportedApiArciveFile);
+        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedApiArciveFile.getName() + "\"");
+        Response response = responseBuilder.build();
+
+        // remove the local directory to which api info. was imported
+//        try {
+//            ImportExportUtils.deleteDirectory(apiUniqueDirectory);
+//        } catch (APIManagementException e) {
+//            // no need to throw, log and continue
+//            log.error("Error while deleteing directory " + apiUniqueDirectory, e);
+//        }
+
+        return response;
+    }
+
+    @Override
+    public Response apisImportPost(InputStream fileInputStream, FileInfo fileDetail) throws NotFoundException {
+
+        APIPublisher publisher = null;
+        try {
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+        } catch (APIManagementException e) {
+            return ImportExportUtils.handleError(log, "Error while retrieving Publisher instance", e);
+        }
+
+        ImportExportManager importManager = new ImportExportManager(publisher, System.getProperty("java.io.tmpdir"));
+        try {
+            importManager.importAPIs(fileInputStream);
+        } catch (APIManagementException e) {
+            // TODO: remove handleError from ImportExportUtils class
+            // TODO: handle error properly (send to client)
+            return ImportExportUtils.handleError(log, "Error while importing APIs", e);
+        }
+
+        // TODO: support location header for created APIs
+        return Response.status(Response.Status.CREATED).entity("").build();
+    }
+
+    @Override
+    public Response apisImportPut(InputStream fileInputStream, FileInfo fileDetail) throws NotFoundException {
+        return null;
     }
 
     @Override

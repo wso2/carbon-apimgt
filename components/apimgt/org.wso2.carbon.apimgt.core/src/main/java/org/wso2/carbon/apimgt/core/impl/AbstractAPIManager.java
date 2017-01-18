@@ -101,6 +101,27 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Returns an {@link API} object for the given api name and version
+     * @param apiName name of the API
+     * @param version version of the API
+     * @return an instance of {@link API} corresponding to the given name & version or null
+     * @throws APIManagementException
+     */
+    @Override
+    public API getAPIbyNameAndVersion(String apiName, String version) throws APIManagementException {
+
+        API api;
+        try {
+            api = apiDAO.getAPI(apiName, version);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving API with name: " + apiName + ", version: " + version;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return api;
+    }
+
+    /**
      * Checks the Availability of given String
      *
      * @param api

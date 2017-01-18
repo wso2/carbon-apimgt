@@ -4,13 +4,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
@@ -32,7 +32,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-06T13:57:53.911+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -209,6 +209,65 @@ public class ApisApi implements Microservice  {
 )
     throws NotFoundException {
         return delegate.apisApiIdDocumentsPost(apiId,body,contentType);
+    }
+    @GET
+    @Path("/export/{name}/{version}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, tags={ "Export Configuration", })
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Export Configuration returned. ", response = File.class),
+
+            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = File.class),
+
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = File.class),
+
+            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
+    public Response apisExportApiNameVersionGet(@ApiParam(value = "Name of the API ",required=true) @PathParam("name") String name
+            ,@ApiParam(value = "Version of the API ",required=true) @PathParam("version") String version
+    )
+            throws NotFoundException {
+        return delegate.apisExportApiApiNameApiVersionGet(name,version);
+    }
+    @POST
+    @Path("/import")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more APIs. ", response = APIListDTO.class, tags={ "Import Configuration", })
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
+    public Response apisImportPost(
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FileInfo fileDetail
+    )
+            throws NotFoundException {
+        return delegate.apisImportPost(fileInputStream, fileDetail);
+    }
+    @PUT
+    @Path("/import")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more existing APIs. ", response = APIListDTO.class, tags={ "Import Configuration", })
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the updated object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
+    public Response apisImportPut(
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FileInfo fileDetail
+    )
+            throws NotFoundException {
+        return delegate.apisImportPut(fileInputStream, fileDetail);
     }
     @GET
     @Path("/{apiId}/gateway-config")
@@ -456,6 +515,8 @@ public class ApisApi implements Microservice  {
     @io.swagger.annotations.ApiOperation(value = "Check given API attibute name is already exist ", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = void.class, tags={ "API (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested API attibute status is returned ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Requested API attribute does not meet requiremnts. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API attribute does not exist. ", response = void.class),
         
