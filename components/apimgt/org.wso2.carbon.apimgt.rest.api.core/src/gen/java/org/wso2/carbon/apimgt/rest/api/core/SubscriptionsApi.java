@@ -27,7 +27,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-06T17:54:33.855+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-18T15:27:32.639+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
@@ -46,9 +46,9 @@ public class SubscriptionsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionListDTO.class) })
     public Response subscriptionsGet(@ApiParam(value = "Context of the API. ") @QueryParam("apiContext") String apiContext
 ,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Number of entities that should be retrieved. ") @QueryParam("limit") Integer limit
 )
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiContext,apiVersion,accept);
+        return delegate.subscriptionsGet(apiContext,apiVersion,limit);
     }
 }

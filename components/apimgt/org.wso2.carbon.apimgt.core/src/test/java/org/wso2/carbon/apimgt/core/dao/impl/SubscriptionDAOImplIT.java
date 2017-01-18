@@ -141,7 +141,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         registerOAuthAppForApplication(applicationDAO, "client-key-for-app-4", "client-secret-for-app-4", app4.getId());
 
         //get all subscriptions
-        List<SubscriptionValidationData> subscriptions = subscriptionDAO.getAPISubscriptionsOfAPIForValidation();
+        List<SubscriptionValidationData> subscriptions = subscriptionDAO.getAPISubscriptionsOfAPIForValidation(-1);
         //validate subscription count
         Assert.assertEquals(subscriptions.size(), 9, "There should be 9 subscriptions (only).");
 

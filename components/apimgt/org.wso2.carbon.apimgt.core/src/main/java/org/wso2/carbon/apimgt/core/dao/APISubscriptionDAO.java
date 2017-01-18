@@ -77,11 +77,12 @@ public interface APISubscriptionDAO {
     /**
      * Retrieve all API Subscriptions for validation
      *
+     * @param limit Subscription Limit
      * @return A list of {@link SubscriptionValidationData} objects
      * @throws APIMgtDAOException
      */
     @CheckForNull
-    List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation() throws APIMgtDAOException;
+    List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(int limit) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results

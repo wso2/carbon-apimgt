@@ -9,19 +9,52 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-06T17:54:33.855+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-18T15:27:32.639+05:30")
 public class SubscriptionDTO   {
+  @JsonProperty("apiName")
+  private String apiName = null;
+
   @JsonProperty("apiContext")
   private String apiContext = null;
 
   @JsonProperty("apiVersion")
   private String apiVersion = null;
 
+  @JsonProperty("apiProvider")
+  private String apiProvider = null;
+
   @JsonProperty("consumerKey")
   private String consumerKey = null;
 
   @JsonProperty("subscriptionPolicy")
   private String subscriptionPolicy = null;
+
+  @JsonProperty("applicationName")
+  private String applicationName = null;
+
+  @JsonProperty("applicationOwner")
+  private String applicationOwner = null;
+
+  @JsonProperty("keyEnvType")
+  private String keyEnvType = null;
+
+  public SubscriptionDTO apiName(String apiName) {
+    this.apiName = apiName;
+    return this;
+  }
+
+   /**
+   * Name of API. 
+   * @return apiName
+  **/
+  @ApiModelProperty(required = true, value = "Name of API. ")
+  public String getApiName() {
+    return apiName;
+  }
+
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
+  }
 
   public SubscriptionDTO apiContext(String apiContext) {
     this.apiContext = apiContext;
@@ -59,6 +92,24 @@ public class SubscriptionDTO   {
     this.apiVersion = apiVersion;
   }
 
+  public SubscriptionDTO apiProvider(String apiProvider) {
+    this.apiProvider = apiProvider;
+    return this;
+  }
+
+   /**
+   * Provider of API. 
+   * @return apiProvider
+  **/
+  @ApiModelProperty(required = true, value = "Provider of API. ")
+  public String getApiProvider() {
+    return apiProvider;
+  }
+
+  public void setApiProvider(String apiProvider) {
+    this.apiProvider = apiProvider;
+  }
+
   public SubscriptionDTO consumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
     return this;
@@ -83,16 +134,70 @@ public class SubscriptionDTO   {
   }
 
    /**
-   * Subscription Policy. 
+   * Name of Subscription Policy. 
    * @return subscriptionPolicy
   **/
-  @ApiModelProperty(required = true, value = "Subscription Policy. ")
+  @ApiModelProperty(required = true, value = "Name of Subscription Policy. ")
   public String getSubscriptionPolicy() {
     return subscriptionPolicy;
   }
 
   public void setSubscriptionPolicy(String subscriptionPolicy) {
     this.subscriptionPolicy = subscriptionPolicy;
+  }
+
+  public SubscriptionDTO applicationName(String applicationName) {
+    this.applicationName = applicationName;
+    return this;
+  }
+
+   /**
+   * Application Name. 
+   * @return applicationName
+  **/
+  @ApiModelProperty(required = true, value = "Application Name. ")
+  public String getApplicationName() {
+    return applicationName;
+  }
+
+  public void setApplicationName(String applicationName) {
+    this.applicationName = applicationName;
+  }
+
+  public SubscriptionDTO applicationOwner(String applicationOwner) {
+    this.applicationOwner = applicationOwner;
+    return this;
+  }
+
+   /**
+   * Application Owner. 
+   * @return applicationOwner
+  **/
+  @ApiModelProperty(required = true, value = "Application Owner. ")
+  public String getApplicationOwner() {
+    return applicationOwner;
+  }
+
+  public void setApplicationOwner(String applicationOwner) {
+    this.applicationOwner = applicationOwner;
+  }
+
+  public SubscriptionDTO keyEnvType(String keyEnvType) {
+    this.keyEnvType = keyEnvType;
+    return this;
+  }
+
+   /**
+   * Key type (Production or Sandbox). 
+   * @return keyEnvType
+  **/
+  @ApiModelProperty(required = true, value = "Key type (Production or Sandbox). ")
+  public String getKeyEnvType() {
+    return keyEnvType;
+  }
+
+  public void setKeyEnvType(String keyEnvType) {
+    this.keyEnvType = keyEnvType;
   }
 
 
@@ -105,15 +210,20 @@ public class SubscriptionDTO   {
       return false;
     }
     SubscriptionDTO subscription = (SubscriptionDTO) o;
-    return Objects.equals(this.apiContext, subscription.apiContext) &&
+    return Objects.equals(this.apiName, subscription.apiName) &&
+        Objects.equals(this.apiContext, subscription.apiContext) &&
         Objects.equals(this.apiVersion, subscription.apiVersion) &&
+        Objects.equals(this.apiProvider, subscription.apiProvider) &&
         Objects.equals(this.consumerKey, subscription.consumerKey) &&
-        Objects.equals(this.subscriptionPolicy, subscription.subscriptionPolicy);
+        Objects.equals(this.subscriptionPolicy, subscription.subscriptionPolicy) &&
+        Objects.equals(this.applicationName, subscription.applicationName) &&
+        Objects.equals(this.applicationOwner, subscription.applicationOwner) &&
+        Objects.equals(this.keyEnvType, subscription.keyEnvType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiContext, apiVersion, consumerKey, subscriptionPolicy);
+    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, applicationName, applicationOwner, keyEnvType);
   }
 
   @Override
@@ -121,10 +231,15 @@ public class SubscriptionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
     
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
+    sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    subscriptionPolicy: ").append(toIndentedString(subscriptionPolicy)).append("\n");
+    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
+    sb.append("    applicationOwner: ").append(toIndentedString(applicationOwner)).append("\n");
+    sb.append("    keyEnvType: ").append(toIndentedString(keyEnvType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

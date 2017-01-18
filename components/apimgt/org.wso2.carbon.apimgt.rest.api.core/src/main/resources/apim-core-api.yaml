@@ -78,6 +78,7 @@ paths:
       parameters:
         - $ref : '#/parameters/apiContext'
         - $ref : '#/parameters/apiVersion'
+        - $ref : '#/parameters/limit'
       tags:
         - Subscriptions of API
       responses:
@@ -133,6 +134,16 @@ parameters:
     required: false
     type: string
 
+# Subscription Limit
+  limit:
+    name: limit
+    in: query
+    description: |
+      Number of entities that should be retrieved.
+    required: false
+    type: integer
+    format: int32
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -155,11 +166,20 @@ definitions:
   Subscription:
     title: Subscription
     required:
+      - apiName
       - apiContext
       - apiVersion
+      - apiProvider
       - consumerKey
       - subscriptionPolicy
+      - applicationName
+      - applicationOwner
+      - keyEnvType
     properties:
+      apiName:
+        type: string
+        description: |
+          Name of API.
       apiContext:
         type: string
         description: |
@@ -168,6 +188,10 @@ definitions:
         type: string
         description: |
           Version of API.
+      apiProvider:
+        type: string
+        description: |
+          Provider of API.
       consumerKey:
         type: string
         description: |
@@ -175,7 +199,19 @@ definitions:
       subscriptionPolicy:
         type: string
         description: |
-          Subscription Policy.
+          Name of Subscription Policy.
+      applicationName:
+        type: string
+        description: |
+          Application Name.
+      applicationOwner:
+        type: string
+        description: |
+          Application Owner.
+      keyEnvType:
+        type: string
+        description: |
+          Key type (Production or Sandbox).
 
 #-----------------------------------------------------
 # The Error resource

@@ -18,26 +18,27 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     private APISubscriptionDAO apiSubscriptionDAO;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO)  {
+    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
     }
 
     /**
      * Return all API subscriptions
      *
+     * @param limit Subscription Limit
      * @return all subscriptions
      * @throws APIManagementException
      */
     @Override
-    public List<SubscriptionValidationData> getAPISubscriptions() throws APIManagementException {
-        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation();
+    public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
+        return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(limit);
     }
 
     /**
      * Return all API subscriptions of a given API
      *
-     * @param apiContext
-     * @param apiVersion
+     * @param apiContext Context of API
+     * @param apiVersion Version of API
      * @return all subscriptions
      * @throws APIManagementException
      */
