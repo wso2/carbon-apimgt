@@ -135,7 +135,7 @@ public class TagDAOImpl implements TagDAO {
 
     @Override
     public List<Tag> getTags() throws APIMgtDAOException {
-        final String query = "SELECT NAME FROM AM_TAGS";
+        final String query = "SELECT NAME, COUNT FROM AM_TAGS";
 
         List<Tag> tags = new ArrayList<>();
 

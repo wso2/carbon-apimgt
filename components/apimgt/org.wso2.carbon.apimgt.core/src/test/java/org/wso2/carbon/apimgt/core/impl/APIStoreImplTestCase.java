@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -65,15 +66,29 @@ public class APIStoreImplTestCase {
     private static final String APPLICATION_POLICY_LEVEL = "application";
     private static final String POLICY_NAME = "gold";
 
-    @Test(description = "Search APIs")
+    @Test(description = "Search APIs with a search query")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        when(apiDAO.searchAPIs("")).thenReturn(apimResultsFromDAO);
+        when(apiDAO.searchAPIs("pizza")).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
+        Assert.assertNotNull(apis);
+        verify(apiDAO, atLeastOnce()).searchAPIs("pizza");
+    }
+
+    @Test(description = "Search APIs with an empty query")
+    public void searchAPIsEmpty() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
+        List<API> apimResultsFromDAO = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        statuses.add(APIStatus.PUBLISHED.getStatus());
+        statuses.add(APIStatus.PROTOTYPED.getStatus());
+        when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("", 1, 2);
         Assert.assertNotNull(apis);
-        verify(apiDAO, atLeastOnce()).searchAPIs("");
+        verify(apiDAO, atLeastOnce()).getAPIsByStatus(statuses);
     }
 
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)

@@ -1,0 +1,18 @@
+<label for="application-list">Applications</label>
+<select id="application-list" class="form-control">
+    {{#unless isSubscribedToDefault}}
+        <option value="-">Select Application...</option>
+    {{/unless}}
+    <option value="createNewApp">New Application...</option>
+    {{#if applications}}
+    <optgroup label="My Applications">
+        {{#each applications}}
+            {{#if isDefault}}
+                <option selected value="{{applicationId}}" data-applicationId >{{name}}</option>
+            {{else}}
+                <option value="{{applicationId}}">{{name}}</option>
+            {{/if}}
+        {{/each}}
+    </optgroup>
+    {{/if}}
+</select>

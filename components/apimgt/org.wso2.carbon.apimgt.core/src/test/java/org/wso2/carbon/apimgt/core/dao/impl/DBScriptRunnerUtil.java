@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.StringTokenizer;
 
 public class DBScriptRunnerUtil {
@@ -75,15 +76,19 @@ public class DBScriptRunnerUtil {
 
     private static void executeSQL(String sql, Connection connection) throws Exception {
         // Check and ignore empty statements
+        String delimiter = ";";
+        if (connection.getMetaData().getDriverName().contains("Oracle")) {
+            delimiter = "/";
+        }
         sql = sql.trim();
-        for (String query : sql.split(";")){
-
-            if ("".equals(query)) {
-                return;
+        try (Statement statement = connection.createStatement()) {
+            for (String query : sql.split(delimiter)) {
+                if ("".equals(query)) {
+                    return;
+                }
+                statement.addBatch(query);
             }
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                int success = statement.executeUpdate();
-            }
+            statement.executeBatch();
         }
     }
 }

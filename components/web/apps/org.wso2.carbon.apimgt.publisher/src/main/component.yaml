@@ -1,0 +1,14 @@
+apis: []
+
+bindings:
+  - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondaryMenu"
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.publisher.feature.secondaryMenu
+
+config:
+  title : "API Publisher Application"
+  appName : API Publisher
+  loginRedirectUri: "/api"
+  swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
+

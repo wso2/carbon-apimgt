@@ -34,6 +34,17 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
+
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.uuf.common</groupId>
+            <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
+            <version>${carbon.uuf.common.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

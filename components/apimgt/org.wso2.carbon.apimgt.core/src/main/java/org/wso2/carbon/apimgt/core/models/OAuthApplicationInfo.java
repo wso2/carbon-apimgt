@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.models;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +32,7 @@ public final class OAuthApplicationInfo {
     private String clientId;
     private String clientName;
     private String callBackURL;
-    private String grantTypes;
+    private List<String> grantTypes;
     private String clientSecret;
     private Map<String, Object> parameters = new HashMap<String, Object>();
     private boolean isSaasApplication;
@@ -86,7 +87,7 @@ public final class OAuthApplicationInfo {
      *
      * @param grantTypes grant types
      */
-    public void setGrantTypes(String grantTypes) {
+    public void setGrantTypes(List<String> grantTypes) {
         this.grantTypes = grantTypes;
     }
 
@@ -111,7 +112,7 @@ public final class OAuthApplicationInfo {
         return callBackURL;
     }
 
-    public String getGrantTypes() {
+    public List<String> getGrantTypes() {
         return grantTypes;
     }
 

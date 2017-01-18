@@ -44,8 +44,8 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
-            <artifactId>org.wso2.carbon.uuf.common.foundation</artifactId>
-            <version>${carbon.uuf.version}</version>
+            <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
+            <version>${carbon.uuf.common.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
@@ -60,8 +60,8 @@
         </dependency>-->
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
-            <artifactId>org.wso2.carbon.uuf.common.theme.default</artifactId>
-            <version>${carbon.uuf.version}</version>
+            <artifactId>org.wso2.carbon.uuf.common.theme.default.theme</artifactId>
+            <version>${carbon.uuf.common.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>
         </dependency>
