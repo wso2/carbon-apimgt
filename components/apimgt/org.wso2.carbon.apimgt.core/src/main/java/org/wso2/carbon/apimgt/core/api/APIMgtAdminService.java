@@ -32,16 +32,17 @@ public interface APIMgtAdminService {
     /**
      * Return all API subscriptions
      *
+     * @param limit Subscription Limit
      * @return all subscriptions
      * @throws APIManagementException
      */
-    List<SubscriptionValidationData> getAPISubscriptions() throws APIManagementException;
+    List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException;
 
     /**
      * Return all API subscriptions of a given API
      *
-     * @param apiContext
-     * @param apiVersion
+     * @param apiContext Context of API
+     * @param apiVersion Version of API
      * @return all subscriptions
      * @throws APIManagementException
      */

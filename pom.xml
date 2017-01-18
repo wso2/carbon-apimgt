@@ -195,6 +195,7 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
+                <scope>test</scope>
                 <version>${testng.version}</version>
             </dependency>
             <dependency>
@@ -327,6 +328,22 @@
                 <groupId>org.wso2.carbon.messaging</groupId>
                 <artifactId>org.wso2.carbon.messaging</artifactId>
                 <version>${carbon.messaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-gson</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <scope>test</scope>
+                <version>${wiremock.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -586,6 +603,7 @@
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
+        <feign.version>9.3.1</feign.version>
+        <wiremock.version>2.5.0</wiremock.version>
     </properties>
-
 </project>
