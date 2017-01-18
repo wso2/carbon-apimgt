@@ -4,7 +4,7 @@ bindings:
   - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondaryMenu"
     mode: prepend
     fragments:
-      - secondaryMenu
+      - org.wso2.carbon.apimgt.web.publisher.feature.secondaryMenu
 
 config:
   title : "API Publisher Application"

@@ -19,5 +19,5 @@ menus:
         link: "/statistics"
 
 errorPages:
-  "404": /ui/error/404
-  default: /ui/error/default
+  "404": /commons/error/404
+  default: /commons/error/default
