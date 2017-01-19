@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
@@ -34,7 +33,6 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -64,10 +62,10 @@ public class ThrottleDataPublisher {
     public ThrottleDataPublisher() {
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
         if (throttleProperties != null) {
-            dataPublisherPool = ThrottleDataPublisherPool.getInstance();
             ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
                     .getThrottleProperties().getDataPublisher();
-            if (dataPublisherConfiguration.isEnabled()){
+            if (dataPublisherConfiguration != null && dataPublisherConfiguration.isEnabled()) {
+                dataPublisherPool = ThrottleDataPublisherPool.getInstance();
                 ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
                         .getInstance().getThrottleProperties().getDataPublisherThreadPool();
 
