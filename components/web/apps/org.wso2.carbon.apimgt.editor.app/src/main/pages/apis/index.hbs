@@ -1,6 +1,7 @@
 {{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Listing | " @config.appName}}
+{{log @config}}
 {{js "js/api/index.js"}}
 {{js "js/lib/api.js"}}
 {{css "css/custom.css"}}
@@ -36,6 +37,22 @@
         <div class="content-section shadow-up">
             <div class="content-data" id="apiListingContainer">
                 {{defineZone "apiListingContainer"}}
+                <div class="page-content">
+                    <table id="apim-publisher-listing" class="table table-striped table-bordered" cellspacing="0"
+                           width="100%">
+                        <thead>
+                        <tr>
+                            <th class="api-listing-name">API</th>
+                            <th>Version</th>
+                            <th>Provider</th>
+                            <th class="api-listing-status">Status</th>
+                            <th class="api-listing-action">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

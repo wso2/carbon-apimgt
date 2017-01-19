@@ -1,4 +1,3 @@
-{{log this}}
 <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-4 api-search">
         <form class="form-horizontal" action="{{@contextPath}}/apis">
@@ -43,28 +42,36 @@
     </div>
 </div>
 <div class="page-content">
-    <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
+    <table id="apim-publisher-listing" class="table table-striped table-bordered" cellspacing="0" width="100%">
         <thead>
-        <tr>
-            <th>API</th>
-            <th>Activity</th>
-            <th>Usage</th>
-            <th>Status</th>
-            <th class="t-right">Actions</th>
-        </tr>
+            <tr>
+                <th>API</th>
+                <th>Version</th>
+                <th>Provider</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
         {{#each @params.apis}}
             <tr>
                 <td>
-                    <a href="apis/{{id}}"><i class="fw-2x fw fw-api"></i> {{name}}</a></td>
+                    <a href="{{id}}"><i class="fw-2x fw fw-api"></i> {{name}}</a></td>
                 <td>{{version}}</td>
                 <td>{{provider}}</td>
-                <td><h4><span class="label label-success status_w"></span></h4></td>
-                <td class="t-right">
-                    <a href="" class="cu-reg-btn btn-edit" data-toggle="tooltip"
-                       data-original-title="Edit"><span>Edit</span></a>
-                    <a href="" class="cu-reg-btn btn-delete" data-toggle="tooltip" data-original-title="Delete"><span>Delete</span></a>
+                <td><h4><span class="label label-success">N/A</span></h4></td>
+                <td>
+                    <a href="{{id}}" class="cu-reg-btn btn-edit text-warning" data-toggle="tooltip"
+                       data-original-title="Edit">
+                        <span>Edit </span>
+                        <i class="fw fw-edit"></i>
+                    </a>
+                    <a data-api-id="{{id}}" class="cu-reg-btn btn-delete text-danger api-listing-delete"
+                       data-toggle="tooltip"
+                       data-original-title="Delete">
+                        <span>Delete </span>
+                        <i class="fw fw-delete"></i>
+                    </a>
                 </td>
             </tr>
         {{/each}}
