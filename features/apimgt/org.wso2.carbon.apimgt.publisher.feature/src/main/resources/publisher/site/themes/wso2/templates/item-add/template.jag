@@ -49,7 +49,7 @@
 						<div class="form-group toggleContainers">
 							<div class="controls col-sm-12">
 								<div class="input-group input-wrap file-upload-control">
-									<input type="text" class="form-control" placeholder="Click browse to add a file" readonly>
+									<input type="text" class="form-control" placeholder="Click Browse to add a file" readonly>
 									<input id="swagger-file" name="swagger-file" type="file" title="swagger-file" class="form-control" multiple>
 									<div class="input-group-btn">
 										<button class="btn btn-primary browse" type="button" title="Browse File">

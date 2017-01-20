@@ -1,5 +1,6 @@
 {
     " Statistics ": " Statistics ",
+    "Analytics": "Analytics",
     " and subscribe to it with an app.": " and subscribe to it with an app.",
     " has been submitted and is now awaiting approval.": " has been submitted and is now awaiting approval.",
     "'s API Store": "'s API Store",
@@ -136,7 +137,7 @@
     "July": "July",
     "June": "June",
     "List APIs": "List APIs",
-    "Manage Alert Types": "Manage Alert Types",
+    "Manage Alert Types": "Manage Alerts",
     "Map Existing OAuth Keys": "Map Existing OAuth Keys",
     "March": "March",
     "May": "May",

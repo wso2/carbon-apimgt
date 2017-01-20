@@ -920,7 +920,7 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)
+					<label class="control-label col-sm-3" for="suspendDuration"><%=i18n.localize("Intial Duration (Millis)")%>
 						<a class="help_popup" help_data="suspendDuration_help" data-trigger="hover" data-placement="bottom" title="suspendDuration_help">
 							<span class="icon fw-stack fw-lg" style="font-size:6px">
 							   <i class="fw fw-circle fw-stack-2x"></i>

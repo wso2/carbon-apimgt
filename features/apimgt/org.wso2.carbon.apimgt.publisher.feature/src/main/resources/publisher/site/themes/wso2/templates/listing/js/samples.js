@@ -71,8 +71,8 @@ function APISamples () {
     "description about the error message.\",\"type\":\"string\"},\"code\":{\"format\":\"int64\"," +
     "\"type\":\"integer\"},\"moreInfo\":{\"description\":\"Preferably an url with more details" +
     " about the error.\",\"type\":\"string\"}},\"required\":[\"code\",\"message\"]}},\"consumes\"" +
-    ":[\"application/json\"],\"info\":{\"title\":\"PizzaShackAPI\",\"description\":\"This document" +
-    " describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\",\"license\":{\"name\"" +
+    ":[\"application/json\"],\"info\":{\"title\":\"PizzaShackAPI\",\"description\":\"This" +
+    " is a RESTFul API for Pizza Shack online pizza delivery store.\\n\",\"license\":{\"name\"" +
     ":\"Apache 2.0\",\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"},\"contact\":" +
     "{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\",\"url\":" +
     "\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}";

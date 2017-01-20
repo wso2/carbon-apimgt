@@ -44,7 +44,7 @@
 
 
 
-<div class="page-header"> <h2><%=i18n.localize("Statistics")%></h2> </div>
+<div class="page-header"> <h2><%=i18n.localize("Analytics")%></h2> </div>
     <%
 	var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 	var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();

@@ -42,7 +42,7 @@
                 }
                 %>
                     <div class="form-group">
-                            <label class="col-sm-1 control-label"><strong><%=i18n.localize("Email")%></strong></label>
+                            <label class="col-sm-1 control-label"><strong><%=i18n.localize("Email")%>: </strong></label>
                             <%
                                 var savedEmailList ="";
                                 if(outputs.emailList.allSavedEmailListJson[0] != null){

@@ -22,7 +22,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Admin Portal - Manager Alert Types",
+            "title":"API Admin Portal - Manage Alerts",
             "header":{
                 "name":"menu/primary"
             },
