@@ -934,7 +934,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                         info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                    APIThrottleConstants.PRODUCTION_HARD_LIMIT);
-                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getKeyType())) {
                         hardThrottleContext.setThrottleId(id + APIThrottleConstants.SANDBOX_HARD_LIMIT);
                         info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                    APIThrottleConstants.SANDBOX_HARD_LIMIT);
