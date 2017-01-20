@@ -4,15 +4,20 @@ $(function () {
     $(document).on('click', ".api-listing-delete", {api_instance: api}, deleteAPIHandler); // Event-type, Selector, data, method
 });
 
+/**
+ * Callback method to handle apis data after receiving them via the REST API
+ * @param response {object} Raw response object returned from swagger client
+ */
 function getAPIsCallback(response) {
-    // var context = {apis: response.obj.list};
-    // var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
-    // UUFClient.renderFragment("org.wso2.carbon.apimgt.web.editor.feature.api-listing", context, "apiListingContainer", mode);
     var dt_data = _apiResponseToData(response);
     _initDataTable(dt_data);
-
 }
 
+/**
+ * Handler method to handle the `onclick` event of the delete button
+ * Send delete API call and remove the row from data tables
+ * @param event {object} Click event
+ */
 function deleteAPIHandler(event) {
     let data_table = $('#apim-publisher-listing').DataTable();
     let current_row = data_table.row($(this).closest('tr'));
@@ -71,6 +76,14 @@ function _initDataTable(raw_data) {
         }
     }
 
+    /**
+     * Retrun the data which need to render, filter or other action related to Name column in the table
+     * @param data {object} Data need to be sent to the server
+     * @param type {string} Type of the action currently performing i:e desplay, filter ect
+     * @param row {object} Data for the currently processing row
+     * @returns {*} {string} HTML for name column if display action name data if filtering action
+     * @private
+     */
     function _renderNameLink(data, type, row) {
         if (type === "display") {
             var icon = $("<i>").addClass("fw");
