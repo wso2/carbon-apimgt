@@ -130,11 +130,11 @@
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
-								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            	{{#if type}}<a class="help_popup" help_data="{{type}}_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
 													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-													                </span>
+													                </span>{{/if}}
 								                            	</a>{{/if}}{{/if}}
 								                            </label>
 								                            <div class=" col-xs-12 col-sm-8 col-md-8 col-lg-8">
@@ -334,7 +334,13 @@
 								                         <!-- strong>Failover Group </strong><p><%= i18n.localize("The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.")%></p>
 								                         <strong>Load Balance</strong><p><%= i18n.localize("The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.")%></p-->
 								                         <Strong>Dynamic Endpoint</strong><p><%= i18n.localize("The dynamic endpoint will send the message to the address specified in the 'To' header.")%></p>
-							                        </div>							
+							                        </div>
+													<div id="production_endpoints_help" class="hide">
+														 <p><%= i18n.localize("The Production Endpoint is the actual backend endpoint URL of the API.")%></p>
+													</div>
+													<div id="sandbox_endpoints_help" class="hide">
+														 <p><%= i18n.localize("The Sandbox Endpoint is the testing/pre-production endpoint URL of the API.")%></p>
+													</div>
 							<%if(api.type.toUpperCase() != "WS"){%>
 							                         <div class="form-group">
 							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
