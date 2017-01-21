@@ -18,7 +18,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Store- Manager Alert Types",
+            "title":"API Store- Manage Alerts",
             "header":{
                 "name":"menu/primary"
             },

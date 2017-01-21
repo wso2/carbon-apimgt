@@ -154,7 +154,7 @@
 		                    	<button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">Change File</button>
 								<div id="sourceFile" style="display:none;">
 									<div  class="input-group input-wrap file-upload-control">
-										<input type="text" id="fileName" class="form-control" placeholder="Click browse to add a file" readonly>
+										<input type="text" id="fileName" class="form-control" placeholder="Click Browse to add a file" readonly>
 										<input type="file" name="docLocation" id="docLocation" title="doclocation" class="form-control">
 										<div class="input-group-btn">
 											<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">

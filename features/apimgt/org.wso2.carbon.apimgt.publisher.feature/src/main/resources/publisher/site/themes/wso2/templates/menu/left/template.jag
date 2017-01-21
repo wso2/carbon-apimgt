@@ -51,8 +51,8 @@
 
 
 					<li <%if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ %>class="active"<%} %>><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("Statistics")%>"
-                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Statistics")%>" style="font-size:22px;"></i> <%=i18n.localize("Statistics")%>
-                               <i class="fw  fw-2x" title="<%=i18n.localize("Statistics")%>"></i>
+                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Analytics")%>" style="font-size:22px;"></i> <%=i18n.localize("Analytics")%>
+                               <i class="fw  fw-2x" title="<%=i18n.localize("Analytics")%>"></i>
                                </a>
 
 

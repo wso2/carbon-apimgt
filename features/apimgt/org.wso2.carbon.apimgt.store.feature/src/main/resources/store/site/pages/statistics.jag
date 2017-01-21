@@ -24,7 +24,7 @@ if(!stat){
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Store- Statistics",
+            "title":"API Store- Analytics",
              "header":{
                 "name":"menu/primary"
             },

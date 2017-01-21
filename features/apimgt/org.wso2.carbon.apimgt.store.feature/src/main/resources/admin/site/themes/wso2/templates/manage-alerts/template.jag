@@ -41,7 +41,7 @@
                     }
                     %>
                         <div class="form-group">
-                                <label class="col-sm-1 email"><p class=""><strong>Email</strong></p></label>
+                                <label class="col-sm-1 email"><p class=""><strong>Email: </strong></p></label>
                                 <%
                                     var savedEmailList ="";
                                     if(outputs.emailList.allSavedEmailListJson[0] != null){

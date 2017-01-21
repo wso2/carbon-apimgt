@@ -851,7 +851,7 @@
               </div>
               <div class="modal-body">
                 <p>
-                    <%=i18n.localize("You have successfully published your API")%> : <strong><%=api.name%>-<%=api.version%></strong>
+                    <%=i18n.localize("You have successfully published your API")%>: <strong><%=api.name%>-<%=api.version%></strong>
                 </p>
               </div>
               <div class="modal-footer successMsgFooter">

@@ -185,7 +185,7 @@
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
 	                <li>
-	                    <a href="#" title="<%=i18n.localize("Statistics")%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("Statistics")%></a>
+	                    <a href="#" title="<%=i18n.localize("Analytics")%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("Analytics")%></a>
 	                </li>
 	                <% if(page == "api-subscriptions") { %>
 		                <li class="active">
