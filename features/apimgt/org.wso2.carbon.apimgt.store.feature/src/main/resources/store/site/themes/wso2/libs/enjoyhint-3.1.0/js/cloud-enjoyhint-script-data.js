@@ -80,7 +80,7 @@ var re_generate_production_keys_data = [
         'showSkip' : false
     },
     {
-        'click .regenerate': 'Click "Re-generate keys" to generate the new OAuth token.',
+        'click .regenerate': 'Click "Regenerate keys" to generate the new OAuth token.',
         'showSkip' : false
     },
     {
@@ -97,7 +97,7 @@ var re_generate_production_keys_data = [
 
 var subscription_token_regenerate_script_data = [
     {
-        'click #btn-regeneratekeys-prod': 'Click "Re-generate keys" to get your OAuth token.'
+        'click #btn-regeneratekeys-prod': 'Click "Regenerate keys" to get your OAuth token.'
     },
     {
         selector: '#' + getApiName(),

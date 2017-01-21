@@ -455,7 +455,7 @@ var faultSequencesLoaded = false;
                         <span style="color:#999"><%=i18n.localize("URL Pattern&nbsp;")%></span>
                         <div class="input-prepend">
                             <span class="add-on">/{context}/{version}/</span>
-                            <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern E.g.: path/to/resource" class="resource_url_pattern"/>
+                            <input style="width:500px" id="resource_url_pattern" type="text" placeholder="E.g., path/to/resource" class="resource_url_pattern"/>
                         </div>
                         <div  style="margin-top:5px;">
                             <ul class="inline" style="margin-left:80px">
@@ -558,7 +558,7 @@ var faultSequencesLoaded = false;
                     <div class="control-group">
                         <label class="control-label" for="scopeKey"><%=i18n.localize("Scope Key")%></label>
                         <div class="controls">
-                        <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
+                        <input type="text" id="scopeKey" placeholder="<%=i18n.localize("Eg: api_name_read")%>">
                         </div>
                     </div>
                     <div class="control-group">
@@ -570,7 +570,7 @@ var faultSequencesLoaded = false;
                     <div class="control-group">
                         <label class="control-label" for="scopeRoles"><%=i18n.localize("Roles")%></label>
                         <div class="controls">
-                        <input type="text" id="scopeRoles" placeholder="E.g.: role1,role2,role3">
+                        <input type="text" id="scopeRoles" placeholder="<%=i18n.localize("E.g.: role1,role2,role3")%>">
                         </div>
                     </div>
                     <div class="control-group">

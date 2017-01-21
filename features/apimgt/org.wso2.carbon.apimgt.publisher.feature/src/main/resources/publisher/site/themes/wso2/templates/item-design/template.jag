@@ -159,7 +159,7 @@
 											<div class="form-group">
 												<label class="col-sm-3 control-label" for="version"><%=i18n.localize("Version")%>:<span class="requiredAstrix">*</span></label>
 												<div class="col-sm-4">
-													<input type="text" class="form-control required validateAPIVersion validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
+													<input type="text" class="form-control required validateAPIVersion validInput noSpace" placeholder="E.g., v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
 												</div>
 											</div>
 											<% }else{ %>
@@ -588,7 +588,7 @@
                     <% }else{ %>
                         <span class="input-group-addon" id="resource_url_pattern_refix">/{context}/{version}/</span>
                     <% } %>
-                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern E.g.: path/to/resource" class="resource_url_pattern form-control"/>
+                    <input id="resource_url_pattern" type="text" placeholder="E.g., path/to/resource" class="resource_url_pattern form-control"/>
                 </div>
             </div>
         </div>
