@@ -24,15 +24,18 @@ import org.slf4j.Logger;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 
 /**
@@ -96,20 +99,8 @@ public class APIUtils {
         if (StringUtils.isEmpty(api.getName())) {
             throw new APIManagementException("Couldn't find Name of API ");
         }
-        if (StringUtils.isEmpty(api.getContext())) {
-            throw new APIManagementException("Couldn't find Context of API ");
-        }
         if (StringUtils.isEmpty(api.getVersion())) {
             throw new APIManagementException("Couldn't find Version of API ");
-        }
-        if (api.getTransport().isEmpty()) {
-            throw new APIManagementException("Couldn't find Transport of API ");
-        }
-        if (api.getPolicies().isEmpty()) {
-            throw new APIManagementException("Couldn't find Policies of API ");
-        }
-        if (api.getVisibility() == null) {
-            throw new APIManagementException("Couldn't find Visibility of API ");
         }
     }
 
@@ -165,5 +156,44 @@ public class APIUtils {
         } else {
             return Duration.between(date1, date2).toMillis() < 1000L;
         }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_CONVERT_CASE", justification = "Didn't need to do " +
+            "as String already did internally")
+
+
+/**
+ * used to generate operationId according to the uri template and http verb
+ */
+    public static String generateOperationIdFromPath(String path, String httpVerb) {
+        //TODO need to write proper way of creating operationId
+        StringTokenizer stringTokenizer = new StringTokenizer(path, "/");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(httpVerb.toLowerCase());
+        while (stringTokenizer.hasMoreElements()) {
+            String part1 = stringTokenizer.nextToken();
+            if (part1.contains("{")) {
+                String pathParam = part1.replace("{", "").replace("}", "");
+/*
+                stringBuilder.append("By" + pathParam);
+*/
+            }  else {
+                stringBuilder.append(part1);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public static Map<String, UriTemplate> getMergedUriTemplates(Map<String, UriTemplate> oldUriTemplateMap,
+                                                                 Map<String, UriTemplate> updatedUriTemplateMap) {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
+        for (UriTemplate uriTemplate : updatedUriTemplateMap.values()) {
+            if (oldUriTemplateMap.containsKey(uriTemplate.getTemplateId())) {
+                uriTemplateMap.put(uriTemplate.getTemplateId(), oldUriTemplateMap.get(uriTemplate.getTemplateId()));
+            } else {
+                uriTemplateMap.put(uriTemplate.getTemplateId(), uriTemplate);
+            }
+        }
+        return uriTemplateMap;
     }
 }

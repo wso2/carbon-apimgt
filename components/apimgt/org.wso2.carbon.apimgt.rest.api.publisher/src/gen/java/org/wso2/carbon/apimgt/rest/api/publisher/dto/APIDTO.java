@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 
@@ -119,8 +120,8 @@ public class APIDTO   {
   @JsonProperty("corsConfiguration")
   private API_corsConfigurationDTO corsConfiguration = null;
 
-  @JsonProperty("endpointId")
-  private String endpointId = null;
+  @JsonProperty("endpoint")
+  private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
   @JsonProperty("operations")
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
@@ -551,22 +552,27 @@ public class APIDTO   {
     this.corsConfiguration = corsConfiguration;
   }
 
-  public APIDTO endpointId(String endpointId) {
-    this.endpointId = endpointId;
+  public APIDTO endpoint(List<API_endpointDTO> endpoint) {
+    this.endpoint = endpoint;
+    return this;
+  }
+
+  public APIDTO addEndpointItem(API_endpointDTO endpointItem) {
+    this.endpoint.add(endpointItem);
     return this;
   }
 
    /**
-   * UUID of the Endpoint 
-   * @return endpointId
+   * Get endpoint
+   * @return endpoint
   **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Endpoint ")
-  public String getEndpointId() {
-    return endpointId;
+  @ApiModelProperty(value = "")
+  public List<API_endpointDTO> getEndpoint() {
+    return endpoint;
   }
 
-  public void setEndpointId(String endpointId) {
-    this.endpointId = endpointId;
+  public void setEndpoint(List<API_endpointDTO> endpoint) {
+    this.endpoint = endpoint;
   }
 
   public APIDTO operations(List<API_operationsDTO> operations) {
@@ -624,13 +630,13 @@ public class APIDTO   {
         Objects.equals(this.sequences, API.sequences) &&
         Objects.equals(this.businessInformation, API.businessInformation) &&
         Objects.equals(this.corsConfiguration, API.corsConfiguration) &&
-        Objects.equals(this.endpointId, API.endpointId) &&
+        Objects.equals(this.endpoint, API.endpoint) &&
         Objects.equals(this.operations, API.operations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpointId, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
   }
 
   @Override
@@ -660,7 +666,7 @@ public class APIDTO   {
     sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
-    sb.append("    endpointId: ").append(toIndentedString(endpointId)).append("\n");
+    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("}");
     return sb.toString();

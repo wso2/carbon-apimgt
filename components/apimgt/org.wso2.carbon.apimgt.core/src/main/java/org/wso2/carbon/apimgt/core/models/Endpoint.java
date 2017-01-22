@@ -30,6 +30,7 @@ public class Endpoint {
     private final String endpointConfig;
     private final MaxTps maxTps;
     private final String security;
+    private final String name;
 
     public String getId() {
         return id;
@@ -47,11 +48,16 @@ public class Endpoint {
         return security;
     }
 
+    public String getName() {
+        return name;
+    }
+
     private Endpoint(Builder builder) {
         id = builder.id;
         endpointConfig = builder.endpointConfig;
         maxTps = builder.maxTps;
         security = builder.security;
+        name = builder.name;
     }
 
 
@@ -150,6 +156,7 @@ public class Endpoint {
         private String endpointConfig;
         private MaxTps maxTps;
         private String security;
+        public String name;
 
         public Builder() {
         }
@@ -181,6 +188,18 @@ public class Endpoint {
          */
         public Builder endpointConfig(String endpointConfig) {
             this.endpointConfig = endpointConfig;
+            return this;
+        }
+
+        /**
+         * Sets the {@code name} and returns a reference to this Builder so that the methods can be chained
+         * together.
+         *
+         * @param name the {@code name} to set
+         * @return a reference to this Builder
+         */
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 
@@ -276,7 +295,8 @@ public class Endpoint {
         return Objects.equals(endpoint.id, id) &&
                 Objects.equals(endpoint.endpointConfig, endpointConfig) &&
                 Objects.equals(endpoint.security, security) &&
-                Objects.equals(endpoint.maxTps, maxTps);
+                Objects.equals(endpoint.maxTps, maxTps) &&
+                Objects.equals(endpoint.name, name);
     }
 
     @Override

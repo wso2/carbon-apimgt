@@ -384,4 +384,12 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     void deleteEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Create api from Definition
+     * @param apiDefinition
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 }

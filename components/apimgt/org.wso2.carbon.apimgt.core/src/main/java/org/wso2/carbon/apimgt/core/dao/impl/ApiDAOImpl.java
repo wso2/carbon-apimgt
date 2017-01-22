@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -43,8 +44,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.MediaType;
@@ -77,7 +81,7 @@ public class ApiDAOImpl implements ApiDAO {
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API,ENDPOINT_ID FROM AM_API WHERE UUID = ?";
+                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -126,7 +130,7 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIs() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-            PreparedStatement statement = connection.prepareStatement(API_SUMMARY_SELECT)) {
+             PreparedStatement statement = connection.prepareStatement(API_SUMMARY_SELECT)) {
 
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
@@ -303,8 +307,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
                 "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
-                "CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API,ENDPOINT_ID) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
@@ -343,7 +347,6 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
                 statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
                 statement.setString(25, api.getCopiedFromApiId());
-                statement.setString(26, api.getEndpointId());
                 statement.execute();
 
                 if (API.Visibility.RESTRICTED == api.getVisibility()) {
@@ -361,9 +364,10 @@ public class ApiDAOImpl implements ApiDAO {
                 addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
 */
                 addTransports(connection, apiPrimaryKey, api.getTransport());
-                addUrlMappings(connection, api.getUriTemplates(), apiPrimaryKey);
+                addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
-
+                addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
+                addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -379,44 +383,43 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Update an existing API
      *
-     * @param apiID      The {@link String} of the API that needs to be updated
+     * @param apiID         The {@link String} of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     public void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
-        final String query = "UPDATE AM_API SET IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, " +
-                "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
+        final String query = "UPDATE AM_API SET CONTEXT = ?, IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, "
+                + "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
-                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?," +
-                "ENDPOINT_ID = ? WHERE UUID = ?";
+                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?" +
+                " WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
                 connection.setAutoCommit(false);
-
-                statement.setBoolean(1, substituteAPI.isDefaultVersion());
-                statement.setString(2, substituteAPI.getDescription());
-                statement.setString(3, substituteAPI.getVisibility().toString());
-                statement.setBoolean(4, substituteAPI.isResponseCachingEnabled());
-                statement.setInt(5, substituteAPI.getCacheTimeout());
+                statement.setString(1, substituteAPI.getContext());
+                statement.setBoolean(2, substituteAPI.isDefaultVersion());
+                statement.setString(3, substituteAPI.getDescription());
+                statement.setString(4, substituteAPI.getVisibility().toString());
+                statement.setBoolean(5, substituteAPI.isResponseCachingEnabled());
+                statement.setInt(6, substituteAPI.getCacheTimeout());
 
                 BusinessInformation businessInformation = substituteAPI.getBusinessInformation();
-                statement.setString(6, businessInformation.getTechnicalOwner());
-                statement.setString(7, businessInformation.getTechnicalOwnerEmail());
-                statement.setString(8, businessInformation.getBusinessOwner());
-                statement.setString(9, businessInformation.getBusinessOwnerEmail());
+                statement.setString(7, businessInformation.getTechnicalOwner());
+                statement.setString(8, businessInformation.getTechnicalOwnerEmail());
+                statement.setString(9, businessInformation.getBusinessOwner());
+                statement.setString(10, businessInformation.getBusinessOwnerEmail());
 
                 CorsConfiguration corsConfiguration = substituteAPI.getCorsConfiguration();
-                statement.setBoolean(10, corsConfiguration.isEnabled());
-                statement.setString(11, String.join(",", corsConfiguration.getAllowOrigins()));
-                statement.setBoolean(12, corsConfiguration.isAllowCredentials());
-                statement.setString(13, String.join(",", corsConfiguration.getAllowHeaders()));
-                statement.setString(14, String.join(",", corsConfiguration.getAllowMethods()));
+                statement.setBoolean(11, corsConfiguration.isEnabled());
+                statement.setString(12, String.join(",", corsConfiguration.getAllowOrigins()));
+                statement.setBoolean(13, corsConfiguration.isAllowCredentials());
+                statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
+                statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-                statement.setTimestamp(15, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
-                statement.setString(16, substituteAPI.getEndpointId());
+                statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
                 statement.setString(17, apiID);
 
                 statement.execute();
@@ -448,7 +451,9 @@ public class ApiDAOImpl implements ApiDAO {
                 deleteSubscriptionPolicies(connection, apiID);
                 addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiID);
                 deleteUrlMappings(connection, apiID);
-                addUrlMappings(connection, substituteAPI.getUriTemplates(), apiID);
+                addUrlMappings(connection, substituteAPI.getUriTemplates().values(), apiID);
+                deleteEndPointsForApi(connection, apiID);
+                addEndPointsForApi(connection, apiID, substituteAPI.getEndpoint());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -563,8 +568,8 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Update image of a given API
      *
-     * @param apiID The UUID of the respective API
-     * @param image Image stream
+     * @param apiID    The UUID of the respective API
+     * @param image    Image stream
      * @param dataType Data Type of image
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
@@ -604,7 +609,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void changeLifeCycleStatus(String apiID, String status) throws APIMgtDAOException {
-    final String query = "UPDATE AM_API SET CURRENT_LC_STATUS = ? WHERE UUID = ?";
+        final String query = "UPDATE AM_API SET CURRENT_LC_STATUS = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
@@ -627,7 +632,7 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Return list of all Document info belonging to a given API.
      *
-     * @param apiID  The UUID of the respective API
+     * @param apiID The UUID of the respective API
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -688,7 +693,7 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Add artifact resource meta data to an API
      *
-     * @param apiId    UUID of API
+     * @param apiId        UUID of API
      * @param documentInfo {@link DocumentInfo}
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
@@ -715,8 +720,8 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Add Document File content
      *
-     * @param resourceID         UUID of resource
-     * @param content                File content as an InputStream
+     * @param resourceID UUID of resource
+     * @param content    File content as an InputStream
      * @param fileName
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
@@ -771,7 +776,7 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Delete a resource
      *
-     * @param resourceID   UUID of resource
+     * @param resourceID UUID of resource
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -860,7 +865,7 @@ public class ApiDAOImpl implements ApiDAO {
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
-                        endpointId(rs.getString("ENDPOINT_ID")).
+                        endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -985,22 +990,22 @@ public class ApiDAOImpl implements ApiDAO {
         return roles;
     }
 
-/*    private void addAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
+    private void addAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
         if (!apiDefinition.isEmpty()) {
             ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(), ResourceCategory.SWAGGER,
                     MediaType.APPLICATION_JSON,
                     new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         }
-    }*/
+    }
 
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition) throws SQLException {
         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                                        new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)));
     }
 
     private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
         InputStream apiDefinition = ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
-                                                                ResourceCategory.SWAGGER);
+                ResourceCategory.SWAGGER);
 
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
@@ -1101,36 +1106,40 @@ public class ApiDAOImpl implements ApiDAO {
         return new ArrayList<>();
     }
 
-    private void addUrlMappings(Connection connection, List<UriTemplate> uriTemplates, String apiID)
+    private void addUrlMappings(Connection connection, Collection<UriTemplate> uriTemplates, String apiID)
             throws SQLException {
-        final String query = "INSERT INTO AM_API_URL_MAPPING (API_ID, HTTP_METHOD, URL_PATTERN, "
-                + "AUTH_SCHEME, API_POLICY_ID,ENDPOINT_ID) VALUES (?,?,?,?,?,?)";
+        final String query = "INSERT INTO AM_API_OPERATION_MAPPING (OPERATION_ID,API_ID, HTTP_METHOD, URL_PATTERN, "
+                + "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (UriTemplate uriTemplate : uriTemplates) {
-                statement.setString(1, apiID);
-                statement.setString(2, uriTemplate.getHttpVerb());
-                statement.setString(3, uriTemplate.getUriTemplate());
-                statement.setString(4, uriTemplate.getAuthType());
-                statement.setString(5, getAPIThrottlePolicyID(connection, uriTemplate.getPolicy()));
-                statement.setString(6, uriTemplate.getEndpointId());
+                statement.setString(1, uriTemplate.getTemplateId());
+                statement.setString(2, apiID);
+                statement.setString(3, uriTemplate.getHttpVerb());
+                statement.setString(4, uriTemplate.getUriTemplate());
+                statement.setString(5, uriTemplate.getAuthType());
+                statement.setString(6, getAPIThrottlePolicyID(connection, uriTemplate.getPolicy()));
                 statement.addBatch();
             }
             statement.executeBatch();
+            for (UriTemplate uriTemplate : uriTemplates) {
+                addEndPointsForOperation(connection, apiID, uriTemplate.getTemplateId(), uriTemplate.getEndpoint());
+            }
         }
     }
+
     private void deleteUrlMappings(Connection connection, String apiID) throws
             SQLException {
-        final String query = "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
+        final String query = "DELETE FROM AM_API_OPERATION_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.execute();
         }
     }
 
-    private List<UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
-        String query = "SELECT API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID,ENDPOINT_ID FROM " +
-                "AM_API_URL_MAPPING WHERE API_ID = ?";
-        List<UriTemplate> uriTemplateSet = new ArrayList<>();
+    private Map<String, UriTemplate> getUriTemplates(Connection connection, String apiId) throws SQLException {
+        final String query = "SELECT OPERATION_ID,API_ID,HTTP_METHOD,URL_PATTERN,AUTH_SCHEME,API_POLICY_ID FROM " +
+                "AM_API_OPERATION_MAPPING WHERE API_ID = ?";
+        Map<String, UriTemplate> uriTemplateSet = new HashMap();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
@@ -1139,9 +1148,10 @@ public class ApiDAOImpl implements ApiDAO {
                     UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder()
                             .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME"))
                             .httpVerb(rs.getString("HTTP_METHOD"))
-                            .policy(getAPIThrottlePolicyName(connection, rs.getString("API_POLICY_ID")))
-                            .endpointId(rs.getString("ENDPOINT_ID")).build();
-                    uriTemplateSet.add(uriTemplate);
+                            .policy(getAPIThrottlePolicyName(connection, rs.getString("API_POLICY_ID"))).templateId
+                                    (rs.getString("OPERATION_ID")).endpoint(getEndPointsForOperation(connection,
+                                    apiId, rs.getString("OPERATION_ID"))).build();
+                    uriTemplateSet.put(uriTemplate.getTemplateId(), uriTemplate);
                 }
             }
         }
@@ -1233,17 +1243,18 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void addEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        final String query = "INSERT INTO AM_API_ENDPOINT (UUID,ENDPOINT_CONFIGURATION," +
-                "TPS_SANDBOX,TPS_PRODUCTION,SECURITY_CONFIGURATION) VALUES (?,?,?,?,?)";
+        final String query = "INSERT INTO AM_ENDPOINT (UUID,NAME,ENDPOINT_CONFIGURATION," +
+                "TPS_SANDBOX,TPS_PRODUCTION,SECURITY_CONFIGURATION) VALUES (?,?,?,?,?,?)";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setString(1, endpoint.getId());
+                statement.setString(2, endpoint.getName());
                 InputStream byteArrayInputStream = IOUtils.toInputStream(endpoint.getEndpointConfig());
-                statement.setBinaryStream(2, byteArrayInputStream);
-                statement.setLong(3, endpoint.getMaxTps().getSandbox());
-                statement.setLong(4, endpoint.getMaxTps().getProduction());
-                statement.setBinaryStream(5, IOUtils.toInputStream(endpoint.getSecurity()));
+                statement.setBinaryStream(3, byteArrayInputStream);
+                statement.setLong(4, endpoint.getMaxTps().getSandbox());
+                statement.setLong(5, endpoint.getMaxTps().getProduction());
+                statement.setBinaryStream(6, IOUtils.toInputStream(endpoint.getSecurity()));
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {
@@ -1266,7 +1277,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
-        final String query = "DELETE FROM AM_API_ENDPOINT WHERE UUID = ?";
+        final String query = "DELETE FROM AM_ENDPOINT WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1294,7 +1305,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        final String query = "UPDATE AM_API_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS_SANDBOX = ?,TPS_PRODUCTION = " +
+        final String query = "UPDATE AM_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS_SANDBOX = ?,TPS_PRODUCTION = " +
                 "?,SECURITY_CONFIGURATION =? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -1328,8 +1339,8 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
-        final String query = "SELECT UUID,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION,SECURITY_CONFIGURATION " +
-                "FROM AM_API_ENDPOINT WHERE UUID = ?";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
+                "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, endpointId);
@@ -1337,6 +1348,7 @@ public class ApiDAOImpl implements ApiDAO {
                 if (resultSet.next()) {
                     Endpoint.Builder endpointBuilder = new Endpoint.Builder();
                     endpointBuilder.id(endpointId);
+                    endpointBuilder.name(resultSet.getString("NAME"));
                     endpointBuilder.endpointConfig(IOUtils.toString(resultSet.getBinaryStream
                             ("ENDPOINT_CONFIGURATION")));
                     endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"), resultSet.getLong
@@ -1360,8 +1372,8 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
-        final String query = "SELECT UUID,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION,SECURITY_CONFIGURATION " +
-                "FROM AM_API_ENDPOINT";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
+                "SECURITY_CONFIGURATION FROM AM_ENDPOINT";
         List<Endpoint> endpointList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
@@ -1369,6 +1381,7 @@ public class ApiDAOImpl implements ApiDAO {
             while (resultSet.next()) {
                 Endpoint.Builder endpointBuilder = new Endpoint.Builder();
                 endpointBuilder.id(resultSet.getString("UUID"));
+                endpointBuilder.name(resultSet.getString("NAME"));
                 endpointBuilder.endpointConfig(IOUtils.toString(resultSet.getBinaryStream
                         ("ENDPOINT_CONFIGURATION")));
                 endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"), resultSet.getLong
@@ -1380,5 +1393,78 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return endpointList;
+    }
+
+    private Map<String, String> getEndPointsForApi(Connection connection, String apiId) throws SQLException {
+        Map<String, String> endpointMap = new HashedMap();
+        final String query = "SELECT ENDPOINT_ID,TYPE FROM AM_API_ENDPOINT_MAPPING WHERE API_ID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    endpointMap.put(resultSet.getString("TYPE"), resultSet.getString("ENDPOINT_ID"));
+                }
+            }
+        }
+        return endpointMap;
+    }
+
+    private void addEndPointsForApi(Connection connection, String apiId, Map<String, String> endpointMap) throws
+            SQLException {
+        final String query = "INSERT INTO AM_API_ENDPOINT_MAPPING (API_ID,TYPE,ENDPOINT_ID) VALUES (?,?,?)";
+        if (endpointMap != null && !endpointMap.isEmpty()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                for (Map.Entry<String, String> entry : endpointMap.entrySet()) {
+                    preparedStatement.setString(1, apiId);
+                    preparedStatement.setString(2, entry.getKey());
+                    preparedStatement.setString(3, entry.getValue());
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+            }
+        }
+    }
+
+    private void deleteEndPointsForApi(Connection connection, String apiId) throws SQLException {
+        final String query = "DELETE FROM AM_API_ENDPOINT_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.execute();
+        }
+    }
+
+    private Map<String, String> getEndPointsForOperation(Connection connection, String apiId, String operationId)
+            throws SQLException {
+        Map<String, String> endpointMap = new HashedMap();
+        final String query = "SELECT ENDPOINT_ID,TYPE FROM AM_API_OPERATION_ENDPOINT_MAPPING WHERE API_ID=? AND " +
+                "OPERATION_ID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, operationId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    endpointMap.put(resultSet.getString("TYPE"), resultSet.getString("ENDPOINT_ID"));
+                }
+            }
+        }
+        return endpointMap;
+    }
+
+    private void addEndPointsForOperation(Connection connection, String apiId, String operationId, Map<String,
+            String> endpointMap) throws SQLException {
+        final String query = "INSERT INTO AM_API_OPERATION_ENDPOINT_MAPPING (API_ID,OPERATION_ID,TYPE,ENDPOINT_ID) " +
+                "VALUES (?,?,?,?)";
+        if (endpointMap != null && !endpointMap.isEmpty()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, String> entry : endpointMap.entrySet()) {
+                        preparedStatement.setString(1, apiId);
+                        preparedStatement.setString(2, operationId);
+                        preparedStatement.setString(3, entry.getKey());
+                        preparedStatement.setString(4, entry.getValue());
+                        preparedStatement.addBatch();
+                    }
+                    preparedStatement.executeBatch();
+            }
+        }
     }
 }

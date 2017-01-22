@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.core.util.URITemplateComparator;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -30,6 +29,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -48,7 +48,7 @@ public final class API {
         description = builder.description;
         lifeCycleStatus = builder.lifeCycleStatus;
         lifecycleInstanceId = builder.lifecycleInstanceId;
-            endpointID = builder.endpointId;
+        endpoint = builder.endpoint;
         wsdlUri = builder.wsdlUri;
         isResponseCachingEnabled = builder.isResponseCachingEnabled;
         cacheTimeout = builder.cacheTimeout;
@@ -67,6 +67,7 @@ public final class API {
         uriTemplates = builder.uriTemplates;
         copiedFromApiId = builder.copiedFromApiId;
         gatewayConfig = builder.gatewayConfig;
+        apiDefinition = builder.apiDefinition;
     }
 
     public String getId() {
@@ -101,8 +102,8 @@ public final class API {
         return lifecycleInstanceId;
     }
 
-    public String getEndpointId() {
-        return endpointID;
+    public Map<String, String> getEndpoint() {
+        return endpoint;
     }
 
     public String getGatewayConfig() {
@@ -169,7 +170,7 @@ public final class API {
         return lifecycleState;
     }
 
-    public List<UriTemplate> getUriTemplates() {
+    public Map<String, UriTemplate> getUriTemplates() {
         return uriTemplates;
     }
 
@@ -195,7 +196,7 @@ public final class API {
                 Objects.equals(description, api.description) &&
                 Objects.equals(lifeCycleStatus, api.lifeCycleStatus) &&
                 Objects.equals(lifecycleInstanceId, api.lifecycleInstanceId) &&
-                Objects.equals(endpointID, api.endpointID) &&
+                Objects.equals(endpoint, api.endpoint) &&
                 Objects.equals(gatewayConfig, api.gatewayConfig) &&
                 Objects.equals(wsdlUri, api.wsdlUri) &&
                 APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
@@ -209,14 +210,15 @@ public final class API {
                 Objects.equals(createdBy, api.createdBy) &&
                 APIUtils.isTimeStampsEquals(lastUpdatedTime, api.lastUpdatedTime) &&
                 Objects.equals(lifecycleState, api.lifecycleState) &&
-                APIUtils.isListsEqualIgnoreOrder(uriTemplates, api.uriTemplates, new URITemplateComparator()) &&
-                Objects.equals(copiedFromApiId, api.copiedFromApiId);
+                Objects.equals(uriTemplates, api.uriTemplates) &&
+                Objects.equals(copiedFromApiId, api.copiedFromApiId) &&
+                Objects.equals(endpoint, api.endpoint);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
-                endpointID, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
+                endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime
                 , createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
@@ -237,7 +239,7 @@ public final class API {
     private final String description;
     private final String lifeCycleStatus;
     private final String lifecycleInstanceId;
-    private final String endpointID;
+    private final Map<String, String> endpoint;
     private final String gatewayConfig;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -254,8 +256,9 @@ public final class API {
     private final String createdBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
-    private final List<UriTemplate> uriTemplates;
+    private final Map<String, UriTemplate> uriTemplates;
     private String copiedFromApiId;
+    private final String apiDefinition;
 
     /**
      * {@code API} builder static inner class.
@@ -294,8 +297,8 @@ public final class API {
             return lifecycleInstanceId;
         }
 
-        public String getEndpointId() {
-            return endpointId;
+        public Map<String, String> getEndpoint() {
+            return endpoint;
         }
 
         public String getGatewayConfig() {
@@ -351,7 +354,7 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
-        private String endpointId;
+        private Map<String, String> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
@@ -360,8 +363,8 @@ public final class API {
         private String apiPolicy;
         private List<String> transport = Collections.emptyList();
         private List<String> tags = Collections.emptyList();
-        private List<String> policies;
-        private Visibility visibility;
+        private List<String> policies = Collections.EMPTY_LIST;
+        private Visibility visibility = Visibility.PUBLIC;
         private List<String> visibleRoles = Collections.emptyList();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
@@ -369,9 +372,9 @@ public final class API {
         private String createdBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
-        private List<UriTemplate> uriTemplates = Collections.emptyList();
+        private Map<String, UriTemplate> uriTemplates = Collections.EMPTY_MAP;
         private String copiedFromApiId;
-
+        private String apiDefinition;
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -387,7 +390,7 @@ public final class API {
             this.description = copy.description;
             this.lifeCycleStatus = copy.lifeCycleStatus;
             this.lifecycleInstanceId = copy.lifecycleInstanceId;
-            this.endpointId = copy.endpointID;
+            this.endpoint = copy.endpoint;
             this.wsdlUri = copy.wsdlUri;
             this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
             this.cacheTimeout = copy.cacheTimeout;
@@ -405,6 +408,7 @@ public final class API {
             this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
             this.copiedFromApiId = copy.copiedFromApiId;
+            this.apiDefinition = copy.apiDefinition;
         }
 
         /**
@@ -513,14 +517,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code endpointID} and returns a reference to this APIBuilder so that the methods can be chained
+         * Sets the {@code endpoint} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
-         * @param endpointId the {@code endpointID} to set
+         * @param endpoint the {@code endpoint} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder endpointId(String endpointId) {
-            this.endpointId = endpointId;
+        public APIBuilder endpoint(Map<String, String> endpoint) {
+            this.endpoint = endpoint;
             return this;
         }
 
@@ -638,7 +642,7 @@ public final class API {
          * @param uriTemplates the {@code uriTemplates} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder uriTemplates(List<UriTemplate> uriTemplates) {
+        public APIBuilder uriTemplates(Map<String, UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
@@ -739,6 +743,17 @@ public final class API {
             return this;
         }
 
+        /**
+         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param apiDefinition the {@code apiDefinition} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder apiDefinition(String apiDefinition) {
+            this.apiDefinition = apiDefinition;
+            return this;
+        }
 
         /**
          * Returns a {@code API} built from the parameters previously set.
@@ -809,7 +824,7 @@ public final class API {
             return lastUpdatedTime;
         }
 
-        public List<UriTemplate> getUriTemplates() {
+        public Map<String, UriTemplate> getUriTemplates() {
             return uriTemplates;
         }
 
@@ -820,6 +835,14 @@ public final class API {
         public void setCopiedFromApiId(String copiedFromApiId) {
             this.copiedFromApiId = copiedFromApiId;
         }
+
+        public String getApiDefinition() {
+            return apiDefinition;
+        }
+    }
+
+    public String getApiDefinition() {
+        return apiDefinition;
     }
 
     public String getCopiedFromApiId() {

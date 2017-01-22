@@ -20,18 +20,26 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +65,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddDuplicateProviderNameVersionAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -85,7 +92,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddSameAPIWithDifferentProviders( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -109,7 +115,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testDuplicateContext( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -136,7 +142,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+            testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPISummary(api.getId());
@@ -156,7 +162,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api1 = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api1);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
@@ -191,7 +197,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.provider(provider1);
         API api1 = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api1);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
@@ -244,6 +250,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         // Add APIs
         List<API> publishedAPIsSummary = new ArrayList<>();
+        testAddGetEndpoint();
         for (int i = 0; i < numberOfPublished; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).build();
             publishedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
@@ -352,6 +359,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
 
         // Add APIs
+        testAddGetEndpoint();
         for (Map.Entry<String, API> entry : apis.entrySet()) {
             API api = entry.getValue();
             apiDAO.addAPI(api);
@@ -408,7 +416,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testIsAPINameExists( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-
+        testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
@@ -460,7 +468,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         apiDAO.deleteAPI(api.getId());
@@ -474,7 +482,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();

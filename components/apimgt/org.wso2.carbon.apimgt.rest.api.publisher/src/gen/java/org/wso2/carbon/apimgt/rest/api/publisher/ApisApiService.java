@@ -133,6 +133,11 @@ public abstract class ApisApiService {
  ,String accept
  ,String ifNoneMatch
  ) throws NotFoundException;
+    public abstract Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ ) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
  ,String contentType
  ) throws NotFoundException;

@@ -54,5 +54,15 @@ public interface APIDefinition {
      * @return
      * @throws APIManagementException
      */
-    String generateSwaggerFromResources(API api) throws APIManagementException;
+    String generateSwaggerFromResources(API.APIBuilder api) throws APIManagementException;
+
+    /**
+     * return API Object
+     *
+     * @param apiDefinition
+     * @param provider
+     * @return
+     * @throws APIManagementException
+     */
+    API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 }

@@ -23,7 +23,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
-import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -32,11 +31,13 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
@@ -47,7 +48,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MappingUtil {
 
@@ -88,18 +91,29 @@ public class MappingUtil {
         apiCorsConfigurationDTO.setAccessControlAllowOrigins(corsConfiguration.getAllowOrigins());
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isEnabled());
         apidto.setCorsConfiguration(apiCorsConfigurationDTO);
-        apidto.setEndpointId(api.getEndpointId());
-        List<UriTemplate> uriTemplateList = api.getUriTemplates();
-        for (UriTemplate uriTemplate : uriTemplateList) {
+        apidto.setEndpoint(fromEndpointToList(api.getEndpoint()));
+        for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             API_operationsDTO apiOperationsDTO = new API_operationsDTO();
+            apiOperationsDTO.setId(uriTemplate.getTemplateId());
             apiOperationsDTO.setUritemplate(uriTemplate.getUriTemplate());
             apiOperationsDTO.setAuthType(uriTemplate.getAuthType());
-            apiOperationsDTO.setEndpoint(uriTemplate.getEndpointId());
+            apiOperationsDTO.setEndpoint(fromEndpointToList(uriTemplate.getEndpoint()));
             apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy());
             apidto.addOperationsItem(apiOperationsDTO);
         }
         return apidto;
+    }
+
+    private static List<API_endpointDTO> fromEndpointToList(Map<String, String> endpoint) {
+        List<API_endpointDTO> endpointDTOs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : endpoint.entrySet()) {
+            API_endpointDTO endpointDTO = new API_endpointDTO();
+            endpointDTO.setId(entry.getValue());
+            endpointDTO.setType(entry.getKey());
+            endpointDTOs.add(endpointDTO);
+        }
+        return endpointDTOs;
     }
 
     /**
@@ -124,26 +138,32 @@ public class MappingUtil {
         corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
         corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
         List<API_operationsDTO> operationList = apidto.getOperations();
-        List<UriTemplate> uriTemplateList = new ArrayList<>();
+        Map<String,UriTemplate> uriTemplateList = new HashMap();
         for (API_operationsDTO operationsDTO : operationList){
             UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
             uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
             uriTemplateBuilder.authType(operationsDTO.getAuthType());
             uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
             uriTemplateBuilder.policy(operationsDTO.getPolicy());
-            if (StringUtils.isNotEmpty(operationsDTO.getEndpoint())){
-                uriTemplateBuilder.endpointId(operationsDTO.getEndpoint());
-            }else{
-                uriTemplateBuilder.endpointId(apidto.getEndpointId());
+            if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
+                uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
+            } else {
+                uriTemplateBuilder.endpoint(fromEndpointListToMap(apidto.getEndpoint()));
             }
-            uriTemplateList.add(uriTemplateBuilder.build());
+            if (operationsDTO.getId() != null){
+                uriTemplateBuilder.templateId(operationsDTO.getId());
+            }else{
+                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(operationsDTO.getUritemplate(),
+                        operationsDTO.getHttpVerb()));
+            }
+            uriTemplateList.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
         }
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
-                endpointId(apidto.getEndpointId()).
+                endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getPolicies()).
@@ -156,6 +176,14 @@ public class MappingUtil {
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);
         return apiBuilder;
+    }
+
+    private static Map<String, String> fromEndpointListToMap(List<API_endpointDTO> endpoint) {
+        Map<String, String> endpointMap = new HashMap<>();
+        for (API_endpointDTO endpointDTO : endpoint) {
+            endpointMap.put(endpointDTO.getType(), endpointDTO.getId());
+        }
+        return endpointMap;
     }
 
     /**

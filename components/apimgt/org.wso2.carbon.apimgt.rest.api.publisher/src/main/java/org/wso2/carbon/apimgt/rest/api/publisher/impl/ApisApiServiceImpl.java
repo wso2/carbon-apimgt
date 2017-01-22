@@ -600,7 +600,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 //            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 //        }
     }
-
     @Override
     public Response apisGet(Integer limit
             , Integer offset
@@ -659,6 +658,26 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            API returnAPI = apiPublisher.getAPIbyUUID(uuid);
+            return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
     @Override
     public Response apisPost(APIDTO body
             , String contentType

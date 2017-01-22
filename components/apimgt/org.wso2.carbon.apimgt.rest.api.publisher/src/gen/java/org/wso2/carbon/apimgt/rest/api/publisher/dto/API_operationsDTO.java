@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 
 /**
  * API_operationsDTO
@@ -27,7 +30,7 @@ public class API_operationsDTO   {
   private String policy = null;
 
   @JsonProperty("endpoint")
-  private String endpoint = null;
+  private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
   public API_operationsDTO id(String id) {
     this.id = id;
@@ -119,8 +122,13 @@ public class API_operationsDTO   {
     this.policy = policy;
   }
 
-  public API_operationsDTO endpoint(String endpoint) {
+  public API_operationsDTO endpoint(List<API_endpointDTO> endpoint) {
     this.endpoint = endpoint;
+    return this;
+  }
+
+  public API_operationsDTO addEndpointItem(API_endpointDTO endpointItem) {
+    this.endpoint.add(endpointItem);
     return this;
   }
 
@@ -128,12 +136,12 @@ public class API_operationsDTO   {
    * Get endpoint
    * @return endpoint
   **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  public String getEndpoint() {
+  @ApiModelProperty(value = "")
+  public List<API_endpointDTO> getEndpoint() {
     return endpoint;
   }
 
-  public void setEndpoint(String endpoint) {
+  public void setEndpoint(List<API_endpointDTO> endpoint) {
     this.endpoint = endpoint;
   }
 

@@ -15,6 +15,9 @@ public class EndPointDTO   {
   @JsonProperty("id")
   private String id = null;
 
+  @JsonProperty("name")
+  private String name = null;
+
   @JsonProperty("endpointConfig")
   private String endpointConfig = null;
 
@@ -40,6 +43,24 @@ public class EndPointDTO   {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public EndPointDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+   /**
+   * name of the Endpoint entry 
+   * @return name
+  **/
+  @ApiModelProperty(example = "Endpoint 1", value = "name of the Endpoint entry ")
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public EndPointDTO endpointConfig(String endpointConfig) {
@@ -107,6 +128,7 @@ public class EndPointDTO   {
     }
     EndPointDTO endPoint = (EndPointDTO) o;
     return Objects.equals(this.id, endPoint.id) &&
+        Objects.equals(this.name, endPoint.name) &&
         Objects.equals(this.endpointConfig, endPoint.endpointConfig) &&
         Objects.equals(this.endpointSecurity, endPoint.endpointSecurity) &&
         Objects.equals(this.maxTps, endPoint.maxTps);
@@ -114,7 +136,7 @@ public class EndPointDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, endpointConfig, endpointSecurity, maxTps);
+    return Objects.hash(id, name, endpointConfig, endpointSecurity, maxTps);
   }
 
   @Override
@@ -123,6 +145,7 @@ public class EndPointDTO   {
     sb.append("class EndPointDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
