@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -35,11 +36,21 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
-
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -62,8 +73,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
      * @throws KeyManagementException throws KeyManagerException
      */
 
-    @Override
-    public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
+    @Override public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest)
+            throws KeyManagementException {
         // OAuthApplications are created by calling to DCR endpoint of WSO2 IS
         OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
 
@@ -77,64 +88,77 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         //Create json payload for DCR endpoint
         JsonObject json = new JsonObject();
-        json.addProperty(KeyManagerConstants.OAUTH_REDIRECT_URIS, oAuthApplicationInfo.getCallbackUrl());
-        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientId());
+        JsonArray callbackArray = new JsonArray();
+        callbackArray.add(oAuthApplicationInfo.getCallbackUrl());
+        json.add(KeyManagerConstants.OAUTH_REDIRECT_URIS, callbackArray);
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientName());
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
-        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_GRANTS, oAuthApplicationInfo.getGrantTypes());
+        JsonArray grantArray = new JsonArray();
+        for (String grantType : oAuthApplicationInfo.getGrantTypes()) {
+            grantArray.add(grantType);
+        }
+
+        json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
         URL url;
         HttpURLConnection urlConn = null;
         try {
+            createSSLConnection();
             // Calling DCR endpoint of IS
             String dcrEndpoint = System.getProperty("dcrEndpoint",
-                    "http://localhost:9763/identity/connect/register");
+                    "https://localhost:9443/identity/connect/register");
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
             urlConn.setRequestProperty("content-type", "application/json");
-            urlConn.getOutputStream()
-                    .write((json.toString()).getBytes("UTF-8"));
+            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
+                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
+                    .getBytes(StandardCharsets.UTF_8));
+            log.info("client encodeddd" + clientEncoded);
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
+            urlConn.getOutputStream().write((json.toString()).getBytes("UTF-8"));
+            log.info("payload" + json.toString());
             int responseCode = urlConn.getResponseCode();
-            if (responseCode == 200) {  //If the DCR call is success
+            if (responseCode == 201) {  //If the DCR call is success
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
                 JsonParser parser = new JsonParser();
-                JsonObject jObj =  parser.parse(responseStr).getAsJsonObject();
+                JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
                 String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
                 String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
                 String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
-                String grantTypes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                String grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
 
                 oAuthApplicationInfo.setClientName(clientName);
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setClientSecret(consumerSecret);
-                oAuthApplicationInfo.setGrantTypes(grantTypes);
+                oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
 
             } else { //If DCR call fails
                 throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName);
             }
-
-
         } catch (IOException e) {
-            log.error("Can not create OAuth application  : " + applicationName, e);
-            throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            String errorMsg = "Can not create OAuth application  : " + applicationName;
+            log.error(errorMsg, e);
+            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (JsonSyntaxException e) {
-            log.error("Error while processing the response returned from DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new KeyManagementException("Can not create OAuth application  : " + applicationName, e,
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            String errorMsg = "Error while processing the response returned from DCR endpoint.Can not create" +
+                    " OAuth application : " + applicationName;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
+                    " OAuth application : " + applicationName;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
             }
-
         }
         return oAuthApplicationInfo;
-
     }
 
-    @Override
-    public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws KeyManagementException {
+    @Override public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws KeyManagementException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -145,8 +169,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
      * @throws KeyManagementException -throws KeyManagementException type
      */
 
-    @Override
-    public void deleteApplication(String consumerKey) throws KeyManagementException {
+    @Override public void deleteApplication(String consumerKey) throws KeyManagementException {
         APIUtils.logDebug("Trying to delete OAuth application for consumer key :" + consumerKey, log);
         if (consumerKey == null || consumerKey.isEmpty()) { //If the consumer key empty or null,returns
             return;
@@ -165,8 +188,10 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         try {
             // Calling DCR endpoint of IS
-            String dcrEndpoint = System.getProperty("dcrEndpoint",
-                    "http://localhost:9763/identity/connect/register/") + consumerKey;
+            createSSLConnection();
+            String dcrEndpoint =
+                    System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/") +
+                            consumerKey;
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -179,10 +204,14 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                         ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
             }
 
-
         } catch (IOException e) {
             log.error("Error while deleting the client- " + consumerKey, e);
             throw new KeyManagementException("Error while deleting the client- " + consumerKey, e,
+                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            log.error("Error while connecting to DCR endpoint for deleting the client- " + consumerKey, e);
+            throw new KeyManagementException("Error while connecting to DCR endpoint for deleting the client- "
+                    + consumerKey, e,
                     ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
         } finally {
             if (urlConn != null) {
@@ -192,8 +221,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
     }
 
-    @Override
-    public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
+    @Override public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
         //TO-DO- USE CORRECT DCRM ENDPOINT
 
         APIUtils.logDebug("Trying to retrieve OAuth application for consumer key :" + consumerKey, log);
@@ -206,7 +234,9 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfo.setClientId("2WSDFHF");
         oAuthApplicationInfo.setCallbackUrl("http://google.com");
         oAuthApplicationInfo.setClientSecret("EWSDFFG");
-        oAuthApplicationInfo.setGrantTypes("password");
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        oAuthApplicationInfo.setGrantTypes(grantTypes);
 
 
          /*} TO-DO-Add logic to exception handling in retrieving oauth2 application */
@@ -221,8 +251,8 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
      * @return AccessTokenInfo which wraps application access token data
      * @throws KeyManagementException -throws KeyManagementException type
      */
-    @Override
-    public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
+    @Override public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest)
+            throws KeyManagementException {
         String newAccessToken;
         long validityPeriod;
         AccessTokenInfo tokenInfo = null;
@@ -246,6 +276,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         if (tokenRequest.getTokenToRevoke() != null && !"".equals(tokenRequest.getTokenToRevoke())) {
             //Revoke the Old Access Token
             try {
+                createSSLConnection();
                 url = new URL(revokeEndpoint);
                 urlConn = (HttpURLConnection) url.openConnection();
                 urlConn.setDoOutput(true);
@@ -253,8 +284,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 String postParams = KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() +
                         KeyManagerConstants.OAUTH_CLIENT_SECRET + "=" + tokenRequest.getClientSecret() +
                         KeyManagerConstants.OAUTH_TOKEN + "=" + tokenRequest.getTokenToRevoke();
-                urlConn.getOutputStream()
-                        .write((postParams).getBytes("UTF-8"));
+                urlConn.getOutputStream().write((postParams).getBytes("UTF-8"));
                 int responseCode = urlConn.getResponseCode();
                 if (responseCode != 200) { //If token revoke failed
                     throw new RuntimeException("Token revoke failed : HTTP error code : " + responseCode);
@@ -264,6 +294,11 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 }
             } catch (IOException e) {
                 String msg = "Error while revoking the existing token.";
+                log.error(msg, e);
+                throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
+                        APPLICATION_TOKEN_GENERATION_FAILED);
+            } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+                String msg = "Error while connecting with the revoke endpoint for revoking the existing token.";
                 log.error(msg, e);
                 throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                         APPLICATION_TOKEN_GENERATION_FAILED);
@@ -286,27 +321,33 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
 
         //Generate New Access Token by client credentials grant type with calling Token API
         try {
+            createSSLConnection();
             url = new URL(tokenEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
+            urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            String clientEncoded = Base64.getEncoder().encodeToString(
+                    (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
+                            .getBytes(StandardCharsets.UTF_8));
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
             StringBuilder builder = new StringBuilder();
             builder.append(applicationTokenScope);
             for (String scope : tokenRequest.getScopes()) {
                 builder.append(' ').append(scope);
             }
-            String postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE + "&" +
-                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
-                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +
-                    KeyManagerConstants.OAUTH_CLIENT_SECRET + "=" + tokenRequest.getClientSecret() + "&" +
-                    KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + builder.toString();
+            String postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+//            + "&" +
+//                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
+//                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +
+//                    KeyManagerConstants.OAUTH_CLIENT_SECRET + "=" + tokenRequest.getClientSecret() + "&" +
+//                    KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + builder.toString();
 
-            urlConn.getOutputStream()
-                    .write((postParams).getBytes("UTF-8"));
+            urlConn.getOutputStream().write((postParams).getBytes("UTF-8"));
             int responseCode = urlConn.getResponseCode();
             if (responseCode != 200) { //If token generation failed
-                throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
-                        responseCode);
+                throw new RuntimeException(
+                        "Error occurred while calling token endpoint: HTTP error code : " + responseCode);
             } else {
                 APIUtils.logDebug("Successfully submitted token request for old application token. HTTP status : 200",
                         log);
@@ -314,7 +355,7 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
                 JsonParser parser = new JsonParser();
                 JsonObject obj = parser.parse(responseStr).getAsJsonObject();
-                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).getAsString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
                 if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
                     tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
@@ -333,6 +374,11 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String msg = "Error while connecting to the token generation endpoint.";
+            log.error(msg, e);
+            throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
+                    APPLICATION_TOKEN_GENERATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -342,20 +388,19 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return tokenInfo;
     }
 
-    @Override
-    public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
+    @Override public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            String introspectEndpoint = System.getProperty("introspectEndpoint",
-                    "http://localhost:9763/oauth2/introspect");
+            createSSLConnection();
+            String introspectEndpoint = System
+                    .getProperty("introspectEndpoint", "https://localhost:9443/oauth2/introspect");
             url = new URL(introspectEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
-            urlConn.getOutputStream()
-                    .write(("token=" + accessToken).getBytes("UTF-8"));
+            urlConn.getOutputStream().write(("token=" + accessToken).getBytes("UTF-8"));
             String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
             JsonParser parser = new JsonParser();
             JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
@@ -390,7 +435,6 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
                 tokenInfo.setErrorcode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return tokenInfo;
 
-
             }
 
         } catch (IOException e) {
@@ -401,8 +445,11 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         } catch (JsonSyntaxException e) {
             String msg = "Error while processing the response returned from token introspect endpoint.";
             log.error("Error while processing the response returned from token introspect endpoint.", e);
-            throw new KeyManagementException(msg, e,
-                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String msg = "Error while connecting to the token introspect endpoint.";
+            log.error("Error while connecting to the token introspect endpoint.", e);
+            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -412,15 +459,12 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return tokenInfo;
     }
 
-    @Override
-    public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
+    @Override public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-   
-
-    @Override
-    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException {
+    @Override public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)
+            throws KeyManagementException {
         //initiate OAuthApplicationInfo
         OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getOAuthApplicationInfo();
         //String consumerKey = oAuthApplicationInfo.getClientId();
@@ -433,15 +477,14 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfo.addParameter(KeyManagerConstants.VALIDITY_PERIOD,
                 System.getProperty(KeyManagerConstants.VALIDITY_PERIOD, "3600"));
 
-
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
         try {
             /*  TO-DO -ADD logIC TO RETIRVE OAUTH2 APP
 
                */
         } catch (Exception e) {
-            String msg = "Some thing went wrong while getting OAuth application for given consumer key " +
-                    oAuthApplicationInfo.getClientId();
+            String msg = "Some thing went wrong while getting OAuth application for given consumer key "
+                    + oAuthApplicationInfo.getClientId();
             log.error(msg, e);
             throw new KeyManagementException(msg, e, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         } finally {
@@ -459,35 +502,50 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return oAuthApplicationInfo;
     }
 
-    @Override
-    public void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException {
+    @Override public void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
+    @Override public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
         return true;
     }
 
-    @Override
-    public Map getResourceByApiId(String apiId) throws KeyManagementException {
+    @Override public Map getResourceByApiId(String apiId) throws KeyManagementException {
         return null;
     }
 
-    @Override
-    public boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException {
+    @Override public boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException {
         return false;
     }
 
-    @Override
-    public void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException {
+    @Override public void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException {
 
     }
 
-    @Override
-    public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
+    @Override public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
 
-    
+    }
+
+    private static void createSSLConnection() throws NoSuchAlgorithmException, java.security.KeyManagementException {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[0];
+                    }
+
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }};
+
+
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
 }

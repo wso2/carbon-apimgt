@@ -20,7 +20,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
 import java.util.List;
 
@@ -32,8 +32,20 @@ public interface APIMgtAdminService {
     /**
      * Return all API subscriptions
      *
+     * @param limit Subscription Limit
      * @return all subscriptions
      * @throws APIManagementException
      */
-    List<Subscription> getAPISubscriptions() throws APIManagementException;
+    List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException;
+
+    /**
+     * Return all API subscriptions of a given API
+     *
+     * @param apiContext Context of API
+     * @param apiVersion Version of API
+     * @return all subscriptions
+     * @throws APIManagementException
+     */
+    List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
+            throws APIManagementException;
 }

@@ -57,9 +57,9 @@ authManager.logout = function () {
     if (this.getAuthStatus()) {
         this.setAuthStatus(false);
         delete this.user;
-        $.cookie("token", null);
-        $.cookie("user", null);
-        $.cookie("userRole", null);
+        $.cookie("token", null, { path: '/' });
+        $.cookie("user", null, { path: '/' });
+        $.cookie("userRole", null, { path: '/' });
         //TODO revoke the token
         route.routTo(loginPageUri);
     } else {

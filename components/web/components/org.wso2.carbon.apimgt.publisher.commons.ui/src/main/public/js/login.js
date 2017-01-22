@@ -23,9 +23,9 @@ $(function(){
             authManager.setAuthStatus(true);
             authManager.setUserName('admin');//data.user.username;
             authManager.setUserScope(data.scope);//data.user.role;
-            $.cookie('token', data.access_token);
-            $.cookie('user', 'admin');
-            $.cookie('userScope', data.scope);
+            $.cookie('token', data.access_token, { path: '/' });
+            $.cookie('user', 'admin', { path: '/' });
+            $.cookie('userScope', data.scope, { path: '/' });
             route.routTo(loginRedirectUri);
         });
     };

@@ -1,0 +1,21 @@
+apis: []
+
+bindings:
+  - zoneName: footer
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.store.feature.footer
+  - zoneName: topbar
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.store.feature.globalNavigation
+  - zoneName: sidebar
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.store.feature.sidebar
+
+config:
+  appName : API Store
+  title : "API Store Listing"
+  loginRedirectUri: "/apis"
+  swaggerURL : "http://localhost:9090/swagger?path=/api/am/store/v0.10/"

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -140,5 +141,14 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException if failed to get applications for given subscriber
      */
     boolean isApplicationNameExists(String appName) throws APIMgtDAOException;
+
+    /**
+     * Add application key related information
+     *
+     * @param appId
+     * @param oAuthAppDetails
+     * @throws APIMgtDAOException
+     */
+    void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
 
 }

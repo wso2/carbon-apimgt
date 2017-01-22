@@ -15,20 +15,20 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.util.ArrayStack;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
-import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TokenDTO;
 
-
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class ApplicationKeyMappingUtil {
@@ -55,38 +55,28 @@ public class ApplicationKeyMappingUtil {
 
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
-        applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
-        applicationKeyDTO
-                .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
+        applicationKeyDTO.setConsumerKey((String) keyDetails.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY));
+        applicationKeyDTO.setConsumerSecret((String) keyDetails.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
-        try {
-            String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
-            if (appDetailsString != null) {
-                JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
-                if (appDetailsJsonObj != null) {
-                    applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
-                    String supportedGrantTypes = (String) appDetailsJsonObj
-                            .get(ApplicationConstants.OAUTH_CLIENT_GRANT);
-                    if (supportedGrantTypes != null) {
-                        applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
-                    }
-                }
+        applicationKeyDTO.setSupportedGrantTypes(
+                ((List<String>) keyDetails.get(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES)));
+        String appDetailsString = (String) keyDetails.get(KeyManagerConstants.KeyDetails.APP_DETAILS);
+        if (appDetailsString != null) {
+            JsonObject appDetailsJsonObj = (JsonObject) new JsonParser().parse(appDetailsString);
+            if (appDetailsJsonObj != null) {
+                applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
             }
-
-            TokenDTO tokenDTO = new TokenDTO();
-            tokenDTO.setValidityTime((Long)keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
-            tokenDTO.setAccessToken((String)keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
-            String[] tokenScopes = (String[])keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
-            if (tokenScopes != null) {
-                tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
-            }
-
-            applicationKeyDTO.setToken(tokenDTO);
-        } catch (ParseException e) {
-            String errorMsg = "Error while parsing application details string";
-            log.error(errorMsg, e);
-            throw new InternalServerErrorException(errorMsg, e);
         }
+
+        TokenDTO tokenDTO = new TokenDTO();
+        tokenDTO.setValidityTime((Long) keyDetails.get(KeyManagerConstants.KeyDetails.VALIDITY_TIME));
+        tokenDTO.setAccessToken((String) keyDetails.get(KeyManagerConstants.KeyDetails.ACCESS_TOKEN));
+        String[] tokenScopes = (String[]) keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
+        if (tokenScopes != null) {
+            tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
+        }
+
+        applicationKeyDTO.setToken(tokenDTO);
         return applicationKeyDTO;
     }
 }

@@ -195,6 +195,7 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
+                <scope>test</scope>
                 <version>${testng.version}</version>
             </dependency>
             <dependency>
@@ -327,6 +328,22 @@
                 <groupId>org.wso2.carbon.messaging</groupId>
                 <artifactId>org.wso2.carbon.messaging</artifactId>
                 <version>${carbon.messaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-gson</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <scope>test</scope>
+                <version>${wiremock.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -556,6 +573,7 @@
         <javax.ws.rs.import.version.range>[2.0.0,3.0.0)</javax.ws.rs.import.version.range>
         <apache.commons.lang3.import.version.range>[3.4,4)</apache.commons.lang3.import.version.range>
         <org.wso2.carbon.security.caas.import.version.range>[1.0.0,2.0.0)</org.wso2.carbon.security.caas.import.version.range>
+        <google.code.gson.import.version.range>[2.7,3.0)</google.code.gson.import.version.range>
 
         <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
         <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
@@ -564,7 +582,8 @@
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-SNAPSHOT</carbon.uuf.version>
-        <carbon-uuf-maven-plugin.version>1.0.0-m6</carbon-uuf-maven-plugin.version>
+        <carbon-uuf-maven-plugin.version>1.0.0-m10</carbon-uuf-maven-plugin.version>
+        <carbon.uuf.common.version>1.0.0-SNAPSHOT</carbon.uuf.common.version>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
         <carbon.messaging.version>1.0.10</carbon.messaging.version>
@@ -584,6 +603,7 @@
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
+        <feign.version>9.3.1</feign.version>
+        <wiremock.version>2.5.0</wiremock.version>
     </properties>
-
 </project>

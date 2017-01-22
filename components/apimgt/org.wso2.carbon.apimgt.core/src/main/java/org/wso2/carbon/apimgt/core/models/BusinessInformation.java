@@ -31,17 +31,17 @@ import java.util.Objects;
  * This Class represents the Business information of the API
  */
 public final class BusinessInformation {
-    private String businessOwner = "";
-    private String businessOwnerEmail = "";
-    private String technicalOwner = "";
-    private String technicalOwnerEmail = "";
+    private String businessOwner;
+    private String businessOwnerEmail;
+    private String technicalOwner;
+    private String technicalOwnerEmail;
 
     public String getBusinessOwner() {
         return businessOwner;
     }
 
     public void setBusinessOwner(String businessOwner) {
-        this.businessOwner = businessOwner;
+             this.businessOwner = businessOwner;
     }
 
     public String getBusinessOwnerEmail() {
@@ -49,7 +49,7 @@ public final class BusinessInformation {
     }
 
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
-        this.businessOwnerEmail = businessOwnerEmail;
+             this.businessOwnerEmail = businessOwnerEmail;
     }
 
     public String getTechnicalOwner() {
@@ -57,7 +57,7 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwner(String technicalOwner) {
-        this.technicalOwner = technicalOwner;
+            this.technicalOwner = technicalOwner;
     }
 
     public String getTechnicalOwnerEmail() {
@@ -65,7 +65,7 @@ public final class BusinessInformation {
     }
 
     public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-        this.technicalOwnerEmail = technicalOwnerEmail;
+            this.technicalOwnerEmail = technicalOwnerEmail;
     }
 
 

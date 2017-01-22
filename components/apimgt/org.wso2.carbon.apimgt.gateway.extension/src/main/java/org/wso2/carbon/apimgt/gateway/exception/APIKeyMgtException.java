@@ -25,11 +25,21 @@ package org.wso2.carbon.apimgt.gateway.exception;
 public class APIKeyMgtException extends Exception {
     private static final long serialVersionUID = 595805804854058405L;
 
-    public APIKeyMgtException(String message) {
+    private int errorCode;
+
+    public APIKeyMgtException(int errorCode, String message) {
         super(message);
+        this.errorCode = errorCode;
     }
 
-    public APIKeyMgtException(String message, Throwable e) {
-        super(message, e);
+    public APIKeyMgtException(String message, Throwable cause) {
+        super(message, cause);
+
     }
+
+    public APIKeyMgtException(int errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
 }

@@ -1161,7 +1161,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void addSubscriptionPolicies(Connection connection, List<String> policies, String apiID)
             throws SQLException {
         final String query =
-                "INSERT INTO AM_API_SUBSCRIPTION_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
+                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy : policies) {
                 statement.setString(1, apiID);
@@ -1173,7 +1173,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void deleteSubscriptionPolicies(Connection connection, String apiID) throws SQLException {
-        final String query = "DELETE FROM AM_API_SUBSCRIPTION_POLICY_MAPPING WHERE API_ID = ?";
+        final String query = "DELETE FROM AM_API_SUBS_POLICY_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.execute();
@@ -1197,7 +1197,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<String> getSubscripitonPolciesByAPIId(Connection connection, String apiId) throws SQLException {
-        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBSCRIPTION_POLICY_MAPPING apimsubmapping," +
+        final String query = "SELECT amPolcySub.NAME FROM AM_API_SUBS_POLICY_MAPPING apimsubmapping," +
                 "AM_SUBSCRIPTION_POLICY amPolcySub where apimsubmapping.SUBSCRIPTION_POLICY_ID=amPolcySub.UUID " +
                 "AND apimsubmapping.API_ID = ?";
         List<String> policies = new ArrayList<>();

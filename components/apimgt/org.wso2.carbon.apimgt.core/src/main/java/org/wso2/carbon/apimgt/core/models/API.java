@@ -477,7 +477,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder description(String description) {
-            this.description = description;
+           this.description = description;
             return this;
         }
 
@@ -850,6 +850,6 @@ public final class API {
     }
 
     public void setCopiedFromApiId(String copiedFromApiId) {
-        this.copiedFromApiId = copiedFromApiId;
+             this.copiedFromApiId = copiedFromApiId;
     }
 }

@@ -1,0 +1,16 @@
+theme : "org.wso2.carbon.apimgt.web.store.theme.default"
+
+menus:
+  - name: "main"
+    items:
+      - text: "Home"
+        link: ""
+        icon: "fw-home"
+  - name: "left"
+    items:
+      - text: "APIs"
+        link: ""
+        icon: "fw-home"
+errorPages:
+  "404": /foundation/error/404
+  default: /foundation/error/default
