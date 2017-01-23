@@ -139,8 +139,8 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.store.Application</microservice.mainClass>
-        <private.package>org.wso2.carbon.apimgt.rest.api.publisher.internal</private.package>
+        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.admin.Application</microservice.mainClass>
+        <private.package>org.wso2.carbon.apimgt.rest.api.admin.internal</private.package>
         <import.package>
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
@@ -157,7 +157,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.*; version="${carbon.apimgt.exp.pkg.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="1"
         </carbon.component>
     </properties>
 </project>
