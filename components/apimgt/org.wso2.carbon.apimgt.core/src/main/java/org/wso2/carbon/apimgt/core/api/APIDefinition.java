@@ -66,5 +66,9 @@ public interface APIDefinition {
      */
     API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 
-    void getDefaultSwaggerDefinition(API.APIBuilder apiBuilder);
+    /**
+     * Set the default swagger and uri templates
+     * @param apiBuilder
+     */
+    void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder);
 }

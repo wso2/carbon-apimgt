@@ -242,11 +242,12 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
-    public void getDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
+    public void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
         uriTemplateBuilder.uriTemplate("/*");
+        uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
             if (!"OPTIONS".equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);

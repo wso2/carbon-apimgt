@@ -204,8 +204,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     log.error("Error generating API configuration for API " + apiBuilder.getName(), e);
                 }*/
                 Map<String, UriTemplate> uriTemplateMap = new HashMap();
-                if (uriTemplateMap.isEmpty()) {
-                    apiDefinitionFromSwagger20.getDefaultSwaggerDefinition(apiBuilder);
+                if (apiBuilder.getUriTemplates().isEmpty()) {
+                    apiDefinitionFromSwagger20.setDefaultSwaggerDefinition(apiBuilder);
                 } else {
                     for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
                         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
@@ -219,8 +219,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         }
                         uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
                     }
+                    apiBuilder.uriTemplates(uriTemplateMap);
                 }
-                apiBuilder.uriTemplates(uriTemplateMap);
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
