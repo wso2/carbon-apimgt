@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-function onRequest() {
+function onGet() {
     var user = {
         username: "marcus"
     };

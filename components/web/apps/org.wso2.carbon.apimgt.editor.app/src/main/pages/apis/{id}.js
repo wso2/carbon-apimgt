@@ -1,5 +1,5 @@
 //noinspection JSUnusedGlobalSymbols
-function onRequest(env) {
+function onGet(env) {
     return {"tags": getTags(env.pathParams['id'])};
 }
 
