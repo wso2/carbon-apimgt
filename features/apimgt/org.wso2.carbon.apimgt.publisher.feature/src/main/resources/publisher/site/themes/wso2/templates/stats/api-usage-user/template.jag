@@ -41,7 +41,7 @@
 		            <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
 		</div>
 
-        <div class="pull-right hide " id ="apiUsage_note"><%=i18n.localize("Note : Date Range only applies to hit the count.")%></div>
+        <div class="pull-right hide " id ="apiUsage_note"><%=i18n.localize("Note : Date Range only applies to the hit count.")%></div>
 
         <div id="noData"></div>
         <br/ >
