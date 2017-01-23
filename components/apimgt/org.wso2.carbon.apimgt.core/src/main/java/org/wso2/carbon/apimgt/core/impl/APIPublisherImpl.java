@@ -66,6 +66,8 @@ import java.util.UUID;
  */
 public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
 
+    APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
@@ -202,17 +204,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     log.error("Error generating API configuration for API " + apiBuilder.getName(), e);
                 }*/
                 Map<String, UriTemplate> uriTemplateMap = new HashMap();
-                for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
-                    UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(uriTemplate);
-                    if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
-                        uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate.getUriTemplate
-                                (), uriTemplate.getHttpVerb()));
+                if (uriTemplateMap.isEmpty()) {
+                    apiDefinitionFromSwagger20.getDefaultSwaggerDefinition(apiBuilder);
+                } else {
+                    for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
+                        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
+                                (uriTemplate);
+                        if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
+                            uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
+                                    .getUriTemplate(), uriTemplate.getHttpVerb()));
+                        }
+                        if (uriTemplate.getEndpoint().isEmpty()) {
+                            uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
+                        }
+                        uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
                     }
-                    uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
                 }
                 apiBuilder.uriTemplates(uriTemplateMap);
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
-                    apiBuilder.apiDefinition(new APIDefinitionFromSwagger20().generateSwaggerFromResources(apiBuilder));
+                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
@@ -751,8 +761,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getAPIbyUUID(apiId);
             Map<String, UriTemplate> oldUriTemplateMap = api.getUriTemplates();
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<APIResource> apiResourceList = apiDefinition.parseSwaggerAPIResources(new StringBuilder(jsonText));
+            List<APIResource> apiResourceList = apiDefinitionFromSwagger20.parseSwaggerAPIResources(new StringBuilder
+                    (jsonText));
             Map<String, UriTemplate> updatedUriTemplateMap = new HashMap<>();
             for (APIResource apiResource : apiResourceList) {
                 updatedUriTemplateMap.put(apiResource.getUriTemplate().getTemplateId(), apiResource.getUriTemplate());
@@ -943,7 +953,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
-        APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         try {
             String apiDefinitionString = IOUtils.toString(apiDefinition);
             API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
