@@ -26,7 +26,6 @@ $(function () {
                 function(jsonData) {
                     //Manipulating data for the UI
                     var context=jsonData.obj;
-                    console.info(context);
                     if(context.endpointConfig){
                         var endpointConfig = $.parseJSON(context.endpointConfig);
                         context.productionEndpoint = endpointConfig.production_endpoints.url;
