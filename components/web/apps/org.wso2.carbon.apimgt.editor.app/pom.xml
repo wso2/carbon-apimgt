@@ -36,7 +36,7 @@
     <dependencies>
         <!--UUF Components-->
         <dependency>
-            <groupId>org.wso2.carbon.apimgt.web</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>

@@ -37,7 +37,7 @@
         <!--UUF Components-->
         <!--UUF Themes-->
         <dependency>
-            <groupId>org.wso2.carbon.apimgt.web</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.web.store.theme.default</artifactId>
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>
