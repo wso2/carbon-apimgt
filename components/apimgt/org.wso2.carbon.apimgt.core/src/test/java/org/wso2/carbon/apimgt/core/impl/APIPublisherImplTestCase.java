@@ -163,8 +163,10 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus("CREATED").build());
+        Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         apiPublisher.updateAPI(api.lifeCycleStatus("CREATED").id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiDAO,Mockito.times(0)).isAPIContextExists(api.getContext());
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.lifeCycleStatus("CREATED").build());
     }
 

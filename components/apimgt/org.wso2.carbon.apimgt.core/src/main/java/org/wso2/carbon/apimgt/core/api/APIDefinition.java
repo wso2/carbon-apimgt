@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Scope;
 
@@ -47,4 +48,21 @@ public interface APIDefinition {
      */
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
+    /**
+     * generate the swagger from uri templates.
+     * @param api
+     * @return
+     * @throws APIManagementException
+     */
+    String generateSwaggerFromResources(API.APIBuilder api) throws APIManagementException;
+
+    /**
+     * return API Object
+     *
+     * @param apiDefinition
+     * @param provider
+     * @return
+     * @throws APIManagementException
+     */
+    API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 }

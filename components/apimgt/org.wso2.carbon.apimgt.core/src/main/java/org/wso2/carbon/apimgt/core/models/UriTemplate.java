@@ -24,8 +24,12 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,17 +38,20 @@ import java.util.Objects;
 public final class UriTemplate implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private final String templateId;
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
     private final String policy;
-
+    private final Map<String, String> endpoint;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
         httpVerb = uriTemplateBuilder.httpVerb;
         authType = uriTemplateBuilder.authType;
         policy = uriTemplateBuilder.policy;
+        endpoint = uriTemplateBuilder.endpoint;
+        templateId = uriTemplateBuilder.templateId;
     }
 
     public String getUriTemplate() {
@@ -63,6 +70,13 @@ public final class UriTemplate implements Serializable {
         return policy;
     }
 
+    public Map<String, String> getEndpoint() {
+        return endpoint;
+    }
+
+    public String getTemplateId() {
+        return templateId;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -78,12 +92,14 @@ public final class UriTemplate implements Serializable {
         return Objects.equals(uriTemplate, that.uriTemplate) &&
                 Objects.equals(httpVerb, that.httpVerb) &&
                 Objects.equals(authType, that.authType) &&
-                Objects.equals(policy, that.policy);
+                Objects.equals(policy, that.policy) &&
+                Objects.equals(templateId, that.templateId) &&
+                Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uriTemplate, httpVerb, authType, policy);
+        return Objects.hash(uriTemplate, httpVerb, authType, policy, endpoint);
     }
 
     @Override
@@ -92,22 +108,32 @@ public final class UriTemplate implements Serializable {
                 .append("uriTemplate", uriTemplate)
                 .append("httpVerb", httpVerb)
                 .append("authType", authType)
-                .append("policy", policy)
+                .append("policy", policy).append("endpoint", endpoint)
                 .toString();
     }
 
     /**
-     *  Builder class for getInstance
+     * Builder class for getInstance
      */
     public static final class UriTemplateBuilder {
         private String uriTemplate;
         private String httpVerb;
-        private String authType;
-        private String policy;
+        private String authType = APIMgtConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+        private String policy = APIUtils.getDefaultAPIPolicy();
+        private Map<String, String> endpoint = Collections.emptyMap();
+        public String templateId;
 
         public UriTemplateBuilder() {
         }
 
+        public UriTemplateBuilder(UriTemplate copy) {
+            this.uriTemplate = copy.uriTemplate;
+            this.httpVerb = copy.httpVerb;
+            this.authType = copy.authType;
+            this.endpoint = copy.endpoint;
+            this.policy = copy.policy;
+            this.templateId = copy.templateId;
+        }
         public static UriTemplateBuilder getInstance() {
             return new UriTemplateBuilder();
         }
@@ -126,10 +152,43 @@ public final class UriTemplate implements Serializable {
             this.authType = authType;
             return this;
         }
+        public UriTemplateBuilder templateId(String templateId) {
+            this.templateId = templateId;
+            return this;
+        }
 
         public UriTemplateBuilder policy(String policy) {
             this.policy = policy;
             return this;
+        }
+
+        public UriTemplateBuilder endpoint(Map<String, String> endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public String getUriTemplate() {
+            return uriTemplate;
+        }
+
+        public String getHttpVerb() {
+            return httpVerb;
+        }
+
+        public String getAuthType() {
+            return authType;
+        }
+
+        public String getPolicy() {
+            return policy;
+        }
+
+        public Map<String, String> getEndpoint() {
+            return endpoint;
+        }
+
+        public String getTemplateId() {
+            return templateId;
         }
 
         public UriTemplate build() {
