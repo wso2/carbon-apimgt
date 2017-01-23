@@ -425,7 +425,7 @@
     "The maximum duration that the endpoint is suspended after receiving the suspended error codes .": "The maximum duration that the endpoint is suspended after receiving the suspended error codes .",
     "The number of retries in case of a timeout, caused by the above listed error codes.": "The number of retries in case of a timeout, caused by the above listed error codes.",
     "The Production Endpoint is the actual backend endpoint URL of the API.": "The Production Endpoint is the actual backend endpoint URL of the API.",
-    "The Sandbox Endpoint is the testing/pre-production endpoint URL of the API.": "The Sandbox Endpoint is the testing/pre-production endpoint URL of the API.",
+    "The Sandbox Endpoint is a mock endpoint that resembles the functionality of the actual backend API.": "The Sandbox Endpoint is a mock endpoint that resembles the functionality of the actual backend API.",
     "The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.": "The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.",
     "There is no documentation created for this API. You can add new documentation to this API by clicking the \"Add New Document\" button.": "There is no documentation created for this API. You can add new documentation to this API by clicking the \"Add New Document\" button.",
     "This API is not PUBLISHED. Please remove from external stores.": "This API is not PUBLISHED. Please remove from external stores.",

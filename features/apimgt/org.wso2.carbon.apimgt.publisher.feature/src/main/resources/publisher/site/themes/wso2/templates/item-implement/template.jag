@@ -339,7 +339,7 @@
 														 <p><%= i18n.localize("The Production Endpoint is the actual backend endpoint URL of the API.")%></p>
 													</div>
 													<div id="sandbox_endpoints_help" class="hide">
-														 <p><%= i18n.localize("The Sandbox Endpoint is the testing/pre-production endpoint URL of the API.")%></p>
+														 <p><%= i18n.localize("The Sandbox Endpoint is a mock endpoint that resembles the functionality of the actual backend API.")%></p>
 													</div>
 							<%if(api.type.toUpperCase() != "WS"){%>
 							                         <div class="form-group">

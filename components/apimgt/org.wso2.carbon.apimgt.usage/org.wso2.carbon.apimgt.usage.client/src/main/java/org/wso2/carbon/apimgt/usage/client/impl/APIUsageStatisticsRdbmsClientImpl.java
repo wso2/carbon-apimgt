@@ -107,6 +107,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
@@ -446,18 +447,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws APIMgtUsageQueryServiceClientException
      */
     @Override
-    public ApiTopUsersListDTO getTopApiUsers(String apiName, String version, String tenantDomain, String fromDate, String toDate,
-            int start, int limit) throws APIMgtUsageQueryServiceClientException {
-        List<ApiTopUsersDTO> allTopUsersDTOs = getTopApiUsers(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
-                apiName, version, fromDate, toDate);
-
-        //filter out other tenants' data
-        List<ApiTopUsersDTO> tenantFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
-        for (ApiTopUsersDTO dto : allTopUsersDTOs) {
-            if (tenantDomain != null && tenantDomain.equals(MultitenantUtils.getTenantDomain(dto.getProvider()))) {
-                tenantFilteredTopUsersDTOs.add(dto);
-            }
-        }
+    public ApiTopUsersListDTO getTopApiUsers(String apiName, String version, String tenantDomain, String fromDate,
+            String toDate, int start, int limit) throws APIMgtUsageQueryServiceClientException {
+        List<ApiTopUsersDTO> tenantFilteredTopUsersDTOs = getTopApiUsers(
+                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, apiName, tenantDomain, version, fromDate,
+                toDate);
 
         //filter based on pagination
         List<ApiTopUsersDTO> paginationFilteredTopUsersDTOs = new ArrayList<ApiTopUsersDTO>();
@@ -484,7 +478,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a collection containing the data related to Api usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<ApiTopUsersDTO> getTopApiUsers(String tableName, String apiName, String version,
+    private List<ApiTopUsersDTO> getTopApiUsers(String tableName, String apiName, String tenantDomain, String version,
             String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         //ignoring sql injection for keyString since it construct locally and no public access
         Connection connection = null;
@@ -496,7 +490,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             StringBuilder topApiUserQuery;
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
-                long totalRequestCount = getTotalRequestCountOfAPIVersion(tableName, apiName, version,
+                long totalRequestCount = getTotalRequestCountOfAPIVersion(tableName, apiName, tenantDomain, version,
                         fromDate, toDate);
                 topApiUserQuery = new StringBuilder("SELECT " + APIUsageStatisticsClientConstants.USER_ID + ","
                         + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
@@ -523,24 +517,27 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index, toDate);
                 resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
-                    long requestCount = resultSet.getLong("net_total_requests");
-                    ApiTopUsersDTO apiTopUsersDTO = new ApiTopUsersDTO();
-                    apiTopUsersDTO.setApiName(apiName);
-                    apiTopUsersDTO.setFromDate(fromDate);
-                    apiTopUsersDTO.setToDate(toDate);
-                    apiTopUsersDTO.setVersion(version);
-                    apiTopUsersDTO.setProvider(resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER));
+                    String provider = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
+                    if (provider != null && MultitenantUtils.getTenantDomain(provider).equals(tenantDomain)) {
+                        String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
+                        long requestCount = resultSet.getLong("net_total_requests");
+                        ApiTopUsersDTO apiTopUsersDTO = new ApiTopUsersDTO();
+                        apiTopUsersDTO.setApiName(apiName);
+                        apiTopUsersDTO.setFromDate(fromDate);
+                        apiTopUsersDTO.setToDate(toDate);
+                        apiTopUsersDTO.setVersion(version);
+                        apiTopUsersDTO.setProvider(provider);
 
-                    //remove @carbon.super from super tenant users
-                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(MultitenantUtils
-                            .getTenantDomain(userId))) {
-                        userId = MultitenantUtils.getTenantAwareUsername(userId);
+                        //remove @carbon.super from super tenant users
+                        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(MultitenantUtils
+                                .getTenantDomain(userId))) {
+                            userId = MultitenantUtils.getTenantAwareUsername(userId);
+                        }
+                        apiTopUsersDTO.setUser(userId);
+                        apiTopUsersDTO.setRequestCount(requestCount);
+                        apiTopUsersDTO.setTotalRequestCount(totalRequestCount);
+                        apiTopUsersDataList.add(apiTopUsersDTO);
                     }
-                    apiTopUsersDTO.setUser(userId);
-                    apiTopUsersDTO.setRequestCount(requestCount);
-                    apiTopUsersDTO.setTotalRequestCount(totalRequestCount);
-                    apiTopUsersDataList.add(apiTopUsersDTO);
                 }
             }
         } catch (SQLException e) {
@@ -1752,17 +1749,27 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return Total request count
      * @throws APIMgtUsageQueryServiceClientException
      */
-    private long getTotalRequestCountOfAPIVersion(String tableName, String apiName, String apiVersion, String fromDate, String toDate)
+    private long getTotalRequestCountOfAPIVersion(String tableName, String apiName, String tenantDomain,
+            String apiVersion, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
         List<APIUsage> apiUsages = getUsageByAPIVersionsData (tableName, fromDate, toDate, apiName);
         long totalRequestCount = 0;
-        if (APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(apiVersion)) {
-            for (APIUsage usage : apiUsages) {
-                totalRequestCount += usage.getRequestCount();
-            }
+        Pattern tenantContextPattern;
+        boolean match;
+        if (tenantDomain != null && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            tenantContextPattern = Pattern.compile("^/t/" + tenantDomain +"/.*");
+            //Context should match /t/<tenant-domain>/.. pattern
+            match = true;
         } else {
-            for (APIUsage usage : apiUsages) {
-                if (apiVersion.equals(usage.getApiVersion())) {
+            tenantContextPattern = Pattern.compile("^/t/.*");
+            //Context should NOT match /t/<tenant-domain>/.. pattern
+            match = false;
+        }
+        for (APIUsage usage : apiUsages) {
+            if (tenantContextPattern.matcher(usage.getContext()).find() == match) {
+                if (APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(apiVersion)) {
+                    totalRequestCount += usage.getRequestCount();
+                } else if (apiVersion.equals(usage.getApiVersion())) {
                     totalRequestCount += usage.getRequestCount();
                 }
             }
