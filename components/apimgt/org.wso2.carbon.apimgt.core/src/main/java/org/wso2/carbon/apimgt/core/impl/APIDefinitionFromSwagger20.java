@@ -158,10 +158,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      *
      * @param api
      * @return
-     * @throws APIManagementException
      */
     @Override
-    public String generateSwaggerFromResources(API.APIBuilder api) throws APIManagementException {
+    public String generateSwaggerFromResources(API.APIBuilder api)  {
         Swagger swagger = new Swagger();
         Info info = new Info();
         info.setTitle(api.getName());
@@ -240,6 +239,25 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             apiBuilder.id(UUID.randomUUID().toString());
             return apiBuilder;
         }
+    }
+
+    @Override
+    public void getDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
+        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+        uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
+        uriTemplateBuilder.uriTemplate("/*");
+        for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
+            if (!"OPTIONS".equals(httpVerb)) {
+                uriTemplateBuilder.httpVerb(httpVerb);
+                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
+                        (), httpVerb));
+                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
+            }
+        }
+        apiBuilder.uriTemplates(uriTemplateMap);
+        String swagger = generateSwaggerFromResources(apiBuilder);
+        apiBuilder.apiDefinition(swagger);
     }
 
     public static List<Parameter> getParameters(String uriTemplate) {
