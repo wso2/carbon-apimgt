@@ -48,13 +48,13 @@ function _initDataTable(raw_data) {
                 render: _renderActionButtons // Method to render the action buttons per row
             },
             {
-                targets: ["api-listing-name"], //class name will be matched on the TH for the column
+                targets: ["api-listing-name"],
                 searchable: true,
-                render: _renderNameLink // Method to render the action buttons per row
+                render: _renderNameLink
             },
             {
-                targets: ["api-listing-status"], //class name will be matched on the TH for the column
-                render: _renderStatus // Method to render the action buttons per row
+                targets: ["api-listing-status"],
+                render: _renderStatus
             }
         ]
     });
