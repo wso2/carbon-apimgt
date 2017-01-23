@@ -18,7 +18,6 @@ function loadOverview(jsonData) {
     if (context.endpointConfig) {
         var endpointConfig = $.parseJSON(context.endpointConfig);
         context.productionEndpoint = endpointConfig.production_endpoints.url;
-        console.info(context.productionEndpoint);
     }
     // Grab the template script
     $.get('/editor/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
