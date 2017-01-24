@@ -24,6 +24,7 @@ info:
 # The schemes supported by the API
 schemes:
   - https
+  - http
 
 # The domain of the API.
 # This is configured by the customer during deployment.
@@ -32,7 +33,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/admin/v0.10
+basePath: /api/am/admin/v0.1
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -95,9 +96,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/admin/v0.1/policies/api"
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api
+        GET https://127.0.0.1:9443/api/am/admin/v0.10/policies/api
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 4\n}"
       summary: Get all policies
@@ -202,13 +203,13 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low\""
-      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low\""
+      x-wso2-request: "PUT https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
       summary: Update a Tier
       description: |
         This operation can be used to update an existing policy. The only supported policy level is `api` policies.
-        `PUT https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low`
+        `PUT https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low`
 
         **IMPORTANT:**
         * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations.
@@ -277,15 +278,15 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:tier_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low\""
       x-wso2-request: |
-        DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low
+        DELETE https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete a Tier
       description: |
         This operation can be used to delete an existing policy. The only supported policy level is `api` policies.
-        `DELETE https://127.0.0.1:9443/api/am/publisher/v0.10/policies/api/Low`
+        `DELETE https://127.0.0.1:9443/api/am/admin/v0.10/policies/api/Low`
 
         **IMPORTANT:**
         * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations.
@@ -324,8 +325,8 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v0.10/policies/update-permission?tierName=Bronze&tierLevel=api\""
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v0.10/policies/update-permission?tierName=Bronze&tierLevel=api\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"permissionType\":\"deny\",\n    \"roles\": [\"Internal/everyone\",\"admin\"]\n}"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/admin/v0.10/policies/update-permission?tierName=Bronze&tierLevel=api\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/admin/v0.10/policies/update-permission?tierName=Bronze&tierLevel=api\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"permissionType\":\"deny\",\n    \"roles\": [\"Internal/everyone\",\"admin\"]\n}"
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Update policy permission
       description: |
