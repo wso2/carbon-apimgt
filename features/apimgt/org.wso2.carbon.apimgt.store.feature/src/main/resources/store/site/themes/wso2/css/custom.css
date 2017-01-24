@@ -29,7 +29,6 @@ a.btn .icon-caret, .btn .icon-caret {
     color: #FFF;
     height: 40px;
     margin-top:-3px;
-    line-height:0px;
 }
 .search-wrap>.form-control::-webkit-input-placeholder {
     color: #fff;
