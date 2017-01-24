@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* TODO: analyse usability of https://github.com/flatiron/director#client-side-routing or pagejs front-end routers ~tmkb*/
 var route = {};
 route.routTo = function(location){
     location = contextPath + location;

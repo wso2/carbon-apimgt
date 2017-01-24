@@ -1,5 +1,5 @@
 //noinspection JSUnusedGlobalSymbols
-function onRequest(env) {
+function onGet(env) {
     return {"apiId":env.pathParams['apiId'], "docId":env.pathParams['docId']};
 }
 

@@ -1,5 +1,5 @@
 //noinspection JSUnusedGlobalSymbols
-function onRequest(env) {
+function onGet(env) {
     //TODO get the whole config file and pass it to client side
     //var JSONObject = new Java.type("org.json.JSONObject");
     sendToClient("loginRedirectUri",  env.config.loginRedirectUri);
