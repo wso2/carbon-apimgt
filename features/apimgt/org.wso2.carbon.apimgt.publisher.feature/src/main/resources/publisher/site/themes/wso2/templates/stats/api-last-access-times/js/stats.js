@@ -14,7 +14,7 @@ jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "
                 if (json.usage && json.usage.length > 0) {
                     from = new Date(json.usage[0].year, json.usage[0].month - 1, json.usage[0].day);
                     to = new Date();
-                        
+
                         $("#apiFilter").change(function (e) {
                         	apiFilter = this.value;
                             var table = $('#lastAccessTable').DataTable();
@@ -101,6 +101,33 @@ var drawProviderAPIVersionUserLastAccess = function() {
         { "data": "apiVersion" },
         { "data": "user" },
         { "data": "lastAccessTime" }
-    ]
+    ],
+        "columnDefs": [{
+            "targets": 3,
+            "render": function (data, type, full, meta) {
+                var accessTimeInUTC = new Date(Number(data)); // conversion assumes server time is in current time zone
+                var accessTime = formatTimeIn12HourFormat(accessTimeInUTC);
+                return accessTime;
+            }
+        }]
     } );
+
+    /**
+     * Format Time into MM/DD/YY hh:mm format
+     * @param date
+     * @returns {string}
+     */
+    function formatTimeIn12HourFormat(date) {
+        var year = date.getFullYear();
+        year = year < 2000 ? (year + 100) : year;
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = formatTimeChunk((date.getMonth() + 1)) + "/" + formatTimeChunk(date.getDate()) + "/"
+            + year + ", " + hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
 }
