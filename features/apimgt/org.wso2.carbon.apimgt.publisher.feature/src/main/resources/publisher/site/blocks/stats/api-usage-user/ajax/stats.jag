@@ -31,8 +31,12 @@ include("/jagg/jagg.jag");
                 if (2 <= splitValues.length) { // This is a tenant login
                     // Append tenant domain so that all providers in the tenant domain can be retrieved,
                     // last element will be the domain
-					var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                    allProviders = allProviders + "@" + MultitenantUtils.getTenantDomain(provider);
+                    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                    if (MultitenantUtils.isEmailUserName() && 3 <= splitValues.length) { //email-username
+                        allProviders = allProviders + "@" + splitValues[1] + "@" + MultitenantUtils.getTenantDomain(provider);
+                    } else {
+                        allProviders = allProviders + "@" + MultitenantUtils.getTenantDomain(provider);
+                    }
                 }
 
                 result = mod.getAPIUsageByUser(allProviders, from, to);
