@@ -24,10 +24,15 @@ $(
                     version: $('#new-api-version').val()
                 };
                 var new_api = new API('');
-                debugger;
                 new_api.create(api_data, createAPICallback);
             }
         );
+        $("input[name$='options']").on("change", function () {
+            // debugger;
+            var test = $(this).val();
+            $(".form-horizontal").hide();
+            $("#" + test + "-form").show();
+        });
     }
 );
 
