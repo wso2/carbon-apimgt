@@ -1269,8 +1269,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
-                    accessTimeDTO.setLastAccessTime(APIUsageClientUtil.getFormattedAPILastAccessDate(
-                            accessTime.getAccessTime()));
+                    accessTimeDTO.setLastAccessTime(Long.toString(accessTime.getAccessTime()));
                     accessTimeDTO.setUser(accessTime.getUsername());
                     accessTimeByAPI.add(accessTimeDTO);
                 }
