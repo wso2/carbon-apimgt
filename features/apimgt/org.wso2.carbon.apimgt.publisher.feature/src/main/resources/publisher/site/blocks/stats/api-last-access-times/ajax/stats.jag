@@ -31,8 +31,14 @@ include("/jagg/jagg.jag");
                 provider = jagg.getUser().username;
             }
 
+            var splitValues = provider.split("@");
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
-                provider = allProviders + '@' + org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
+                if (MultitenantUtils.isEmailUserName() && 3 <= splitValues.length) { //email-username
+                    provider = allProviders + "@" + splitValues[1] + "@" +  MultitenantUtils.getTenantDomain(provider);
+                } else {
+                    provider = allProviders + '@' + MultitenantUtils.getTenantDomain(provider);
+                }
             }
 
             result = mod.getProviderAPIVersionUserLastAccess(provider, from, to, limit);
