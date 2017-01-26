@@ -27,14 +27,12 @@ package org.wso2.carbon.apimgt.core.models;
 public class APIResource {
     private final UriTemplate uriTemplate;
     private final Scope scope;
-    private final String templateId;
     private final String produces;
     private final String consumes;
 
     private APIResource(Builder builder) {
         uriTemplate = builder.uriTemplate;
         scope = builder.scope;
-        templateId = builder.templateId;
         produces = builder.produces;
         consumes = builder.consumes;
     }
@@ -48,9 +46,6 @@ public class APIResource {
         return scope;
     }
 
-    public String getTemplateId() {
-        return templateId;
-    }
 
     public String getProduces() {
         return produces;
@@ -66,7 +61,6 @@ public class APIResource {
     public static final class Builder {
         private UriTemplate uriTemplate;
         private Scope scope;
-        private String templateId;
         private String produces;
         private String consumes;
 
@@ -76,7 +70,6 @@ public class APIResource {
         public Builder(APIResource copy) {
             this.uriTemplate = copy.uriTemplate;
             this.scope = copy.scope;
-            this.templateId = copy.templateId;
             this.produces = copy.produces;
             this.consumes = copy.consumes;
         }
@@ -102,18 +95,6 @@ public class APIResource {
          */
         public Builder scope(Scope scope) {
             this.scope = scope;
-            return this;
-        }
-
-        /**
-         * Sets the {@code templateId} and returns a reference to this Builder
-         * so that the methods can be chained together.
-         *
-         * @param templateId the {@code templateId} to set
-         * @return a reference to this Builder
-         */
-        public Builder templateId(String templateId) {
-            this.templateId = templateId;
             return this;
         }
 

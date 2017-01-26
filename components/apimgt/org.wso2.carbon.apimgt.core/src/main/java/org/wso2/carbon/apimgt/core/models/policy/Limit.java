@@ -24,7 +24,7 @@ package org.wso2.carbon.apimgt.core.models.policy;
 public class Limit {
 
     private String timeUnit;
-    private int unitTime;
+    private long unitTime;
 
     public String getTimeUnit() {
         return timeUnit;
@@ -34,11 +34,11 @@ public class Limit {
         this.timeUnit = timeUnit;
     }
 
-    public int getUnitTime() {
+    public long getUnitTime() {
         return unitTime;
     }
 
-    public void setUnitTime(int unitTime) {
+    public void setUnitTime(long unitTime) {
         this.unitTime = unitTime;
     }
 
