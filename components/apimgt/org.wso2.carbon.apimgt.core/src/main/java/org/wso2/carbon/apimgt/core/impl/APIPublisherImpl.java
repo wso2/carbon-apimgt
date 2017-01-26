@@ -703,7 +703,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                apiResults = getApiDAO().searchAPIs(query);
+                apiResults = getApiDAO().searchAPIs(query, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs();
             }

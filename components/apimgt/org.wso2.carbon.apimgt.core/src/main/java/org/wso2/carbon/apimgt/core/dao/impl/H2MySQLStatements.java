@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 /**
  * SQL Statements that are common to H2 and MySQL DBs.
  */
-public class H2MySQLStatements implements ApiDAOVendorSpecificStatements, ApplicationDAOVendorSpecificStatements {
+public class H2MySQLStatements  {
 
     private static final String API_SELECT = "SELECT a.API_ID, a.PROVIDER, a.NAME, a.CONTEXT, a.VERSION, " +
             "a.IS_DEFAULT_VERSION, a.DESCRIPTION, a.VISIBILITY, a.IS_RESPONSE_CACHED, a.CACHE_TIMEOUT, a.UUID, " +
@@ -35,26 +35,22 @@ public class H2MySQLStatements implements ApiDAOVendorSpecificStatements, Applic
     private static final String API_SUMMARY_SELECT = "a.SELECT API_ID, a.PROVIDER, a.NAME, a.CONTEXT, a.VERSION, " +
             "a.DESCRIPTION, a.UUID, a.CURRENT_LC_STATUS FROM AM_API a";
 
-    @Override
     public String getAPIsForRoles(int numberOfRoles) {
         return API_SELECT + ", AM_API_VISIBLE_ROLES b WHERE a.API_ID = b.API_ID AND " +
                 "b.ROLE IN(" + DAOUtil.getParameterString(numberOfRoles) + ") ORDER BY a.CREATED_TIME " +
                 "LIMIT ?,?";
     }
 
-    @Override
     public String getAPIsForProvider() {
         return API_SUMMARY_SELECT + " WHERE a.PROVIDER = ? ORDER BY a.CREATED_TIME LIMIT ?,?";
     }
 
-    @Override
     public String searchAPIsForRoles(int numberOfRoles) {
         return API_SUMMARY_SELECT + ", AM_API_VISIBLE_ROLES b WHERE b.ROLE " +
                 "IN(" + DAOUtil.getParameterString(numberOfRoles) + ") AND a.NAME LIKE ? ORDER BY a.CREATED_TIME " +
                 "LIMIT ?,?";
     }
 
-    @Override
     public String getApplications() {
         return null;
     }

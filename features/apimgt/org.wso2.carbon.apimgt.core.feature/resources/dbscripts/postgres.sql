@@ -153,6 +153,14 @@ CREATE TABLE AM_API (
   UNIQUE (CONTEXT,VERSION)
 );
 
+ALTER TABLE AM_API ADD COLUMN textsearchable_index_col tsvector;
+
+UPDATE AM_API SET textsearchable_index_col = to_tsvector( coalesce(NAME,'') || ' ' || coalesce(CONTEXT,'') || ' ' || coalesce(PROVIDER,'') || ' ' || coalesce(VERSION,'') || ' ' || coalesce(DESCRIPTION,'') || ' ' || coalesce(TECHNICAL_OWNER,'') || ' ' || coalesce(BUSINESS_OWNER,'') || ' ' || coalesce(CURRENT_LC_STATUS,''));
+
+CREATE INDEX API_SEARCH_INDEX ON AM_API USING GIN (textsearchable_index_col);
+
+CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE ON AM_API FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(textsearchable_index_col, 'pg_catalog.english', NAME, CONTEXT, PROVIDER, VERSION, DESCRIPTION, TECHNICAL_OWNER, BUSINESS_OWNER, CURRENT_LC_STATUS);
+
 CREATE TABLE AM_API_VISIBLE_ROLES (
   API_ID VARCHAR(255),
   ROLE VARCHAR(255),

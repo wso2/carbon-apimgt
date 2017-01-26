@@ -20,12 +20,22 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Map;
+
 /**
  *  Interface for getting SQL Statement strings. Implementation of the interface could return different values based
  *  on DB vendor type being used
  */
 public interface ApiDAOVendorSpecificStatements {
-    String getAPIsForRoles(int numberOfRoles);
-    String getAPIsForProvider();
-    String searchAPIsForRoles(int numberOfRoles);
+
+    PreparedStatement search(Connection connection, String query, int offset, int limit) throws APIMgtDAOException;
+
+    PreparedStatement attributeSearch(Connection connection, Map<String, String> attributeMap, int offset, int limit)
+    throws APIMgtDAOException;
+
+
 }

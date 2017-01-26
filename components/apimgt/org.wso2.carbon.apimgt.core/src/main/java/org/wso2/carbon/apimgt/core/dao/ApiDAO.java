@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.CheckForNull;
 
 /**
@@ -79,13 +80,27 @@ public interface ApiDAO {
     List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria.
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
+     * the full text search for API table
      * @param searchString The search string provided
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(String searchString) throws APIMgtDAOException;
+    List<API> searchAPIs(String searchString, int offset, int limit) throws APIMgtDAOException;
+
+    /**
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria.
+     * @param attributeMap Map containing the attributes and search queries for those attributes
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
+     * @return {@link List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> attributeSearchAPIs(Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
