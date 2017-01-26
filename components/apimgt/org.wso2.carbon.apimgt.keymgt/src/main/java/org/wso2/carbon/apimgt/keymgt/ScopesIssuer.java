@@ -16,10 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.issuers;
+package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
@@ -29,30 +30,30 @@ import java.util.*;
  * This is the scope issuing delegation class where it picks the matching issuer class
  * with respect to a prefix.
  */
-public class ScopesIssuingHandler {
+public class ScopesIssuer {
 
-    private static Log log = LogFactory.getLog(ScopesIssuingHandler.class);
+    private static Log log = LogFactory.getLog(ScopesIssuer.class);
     private List<String> scopeSkipList = new ArrayList<String>();
-    private static Map<String, ScopesIssuer> scopesIssuers;
+    private static Map<String, AbstractScopesIssuer> scopesIssuers;
     private static final String DEFAULT_SCOPE_NAME = "default";
     /**
      * Singleton of ScopeIssuer.*
      */
-    private static ScopesIssuingHandler scopesIssuingHandler;
+    private static ScopesIssuer scopesIssuer;
     
-    private ScopesIssuingHandler() {
+    private ScopesIssuer() {
     }
 
     public static void loadInstance(List<String> whitelist) {
-        scopesIssuingHandler = new ScopesIssuingHandler();
+        scopesIssuer = new ScopesIssuer();
         if (whitelist != null && !whitelist.isEmpty()) {
-            scopesIssuingHandler.scopeSkipList.addAll(whitelist);
+            scopesIssuer.scopeSkipList.addAll(whitelist);
         }
         scopesIssuers = APIKeyMgtDataHolder.getScopesIssuers();
     }  
 
-    public static ScopesIssuingHandler getInstance() {
-        return scopesIssuingHandler;
+    public static ScopesIssuer getInstance() {
+        return scopesIssuer;
     }
 
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx) {
@@ -86,7 +87,7 @@ public class ScopesIssuingHandler {
         for (String scope : requestedScopes) {
             boolean scopeAssigned = false;
             for (String prefix : scopesIssuers.keySet()) {
-                if (scope.startsWith(prefix)) {
+                if (scope.startsWith(prefix + ":")) {
                     scopeSets.get(prefix).add(scope);
                     scopeAssigned = true;
                     break;

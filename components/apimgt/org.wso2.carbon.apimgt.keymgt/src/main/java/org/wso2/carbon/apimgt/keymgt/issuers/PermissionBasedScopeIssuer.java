@@ -40,7 +40,7 @@ import java.util.Map;
  * This class represents the functions related to an scope issuer which
  * issues scopes based on user permissions.
  */
-public class PermissionBasedScopeIssuer extends ScopesIssuer {
+public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
 
     private static Log log = LogFactory.getLog(PermissionBasedScopeIssuer.class);
     private static final String DEFAULT_SCOPE_NAME = "default";

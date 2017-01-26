@@ -42,7 +42,7 @@ import java.util.Map;
  * This class represents the functions related to an scope issuer which
  * issues scopes based on user roles.
  */
-public class RoleBasedScopesIssuer extends ScopesIssuer {
+public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
 
     private static Log log = LogFactory.getLog(RoleBasedScopesIssuer.class);
     private static final String DEFAULT_SCOPE_NAME = "default";
