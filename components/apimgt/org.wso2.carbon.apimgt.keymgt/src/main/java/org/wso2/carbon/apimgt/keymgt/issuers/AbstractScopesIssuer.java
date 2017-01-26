@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * This abstract class represents the basic requirements of a scope issuer.
  */
-public abstract class ScopesIssuer {
+public abstract class AbstractScopesIssuer {
 
     private static final String DEFAULT_SCOPE_NAME = "default";
 

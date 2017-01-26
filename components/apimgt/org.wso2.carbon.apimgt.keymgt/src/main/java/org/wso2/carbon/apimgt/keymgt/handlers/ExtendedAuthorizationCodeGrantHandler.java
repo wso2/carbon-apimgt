@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
@@ -45,6 +45,6 @@ public class ExtendedAuthorizationCodeGrantHandler extends AuthorizationCodeGran
 
     @Override
     public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
-        return ScopesIssuingHandler.getInstance().setScopes(tokReqMsgCtx);
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 }

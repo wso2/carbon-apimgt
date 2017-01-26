@@ -27,14 +27,13 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.useradmin.Role;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer;
-import org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuingHandler;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -70,7 +69,7 @@ import java.util.concurrent.Executors;
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
  * @scr.reference name="scope.issuer.service"
- * interface="org.wso2.carbon.apimgt.keymgt.issuers.ScopesIssuer"
+ * interface="org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer"
  * cardinality="0..n"
  * policy="dynamic"
  * bind="addScopeIssuer"
@@ -135,7 +134,7 @@ public class APIKeyMgtServiceComponent {
                 log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
             }
 
-            ScopesIssuingHandler.loadInstance(whitelist);
+            ScopesIssuer.loadInstance(whitelist);
 
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
@@ -229,7 +228,7 @@ public class APIKeyMgtServiceComponent {
      * Add scope issuer to the map.
      * @param scopesIssuer scope issuer.
      */
-    protected void addScopeIssuer(ScopesIssuer scopesIssuer) {
+    protected void addScopeIssuer(AbstractScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
     }
 
@@ -237,7 +236,7 @@ public class APIKeyMgtServiceComponent {
      * unset scope issuer.
      * @param scopesIssuer
      */
-    protected void removeScopeIssuers(ScopesIssuer scopesIssuer) {
+    protected void removeScopeIssuers(AbstractScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.setScopesIssuers(null);
     }
 
