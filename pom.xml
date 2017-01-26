@@ -350,6 +350,16 @@
                 <scope>test</scope>
                 <version>${wiremock.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene</artifactId>
+                <version>${lucene.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -610,5 +620,8 @@
         <slf4j.version>1.7.22</slf4j.version>
         <feign.version>9.3.1</feign.version>
         <wiremock.version>2.5.0</wiremock.version>
+        <lucene.version>3.6.2_1</lucene.version>
+        <lucene.bundle.version>3.6.2.1</lucene.bundle.version>
+        <h2.version>1.4.192</h2.version>
     </properties>
 </project>

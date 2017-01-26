@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,12 +61,13 @@ import javax.ws.rs.core.MediaType;
  */
 public class ApiDAOImpl implements ApiDAO {
 
-    //private final ApiDAOVendorSpecificStatements sqlStatements;
+    private final ApiDAOVendorSpecificStatements sqlStatements;
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
+    private static final String AM_API_TABLE_NAME = "AM_API";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
-        //this.sqlStatements = sqlStatements;
+        this.sqlStatements = sqlStatements;
     }
 
     /**
@@ -187,22 +190,52 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria.
-     *
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
+     * the full text search for API table
      * @param searchString The search string provided
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> searchAPIs(String searchString) throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE LOWER(NAME) LIKE ?";
-
+    public List<API> searchAPIs(String searchString, int offset, int limit) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+                PreparedStatement statement = sqlStatements.search(connection, searchString, offset, limit)) {
             return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria.
+     * @param attributeMap Map containing the attributes and search queries for those attributes
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
+     * @return {@link List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    @Override
+    @SuppressFBWarnings ("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> attributeSearchAPIs(
+            Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = sqlStatements.attributeSearch(connection, attributeMap, offset, limit)) {
+            DatabaseMetaData md = connection.getMetaData();
+            Iterator<Map.Entry<String , String>> entries = attributeMap.entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry<String, String> entry = entries.next();
+                if (!checkTableColumnExists(md, entry.getKey())) {
+                    throw new APIMgtDAOException(
+                            "Wrong search attribute. Attribute does not exist with name : " + entry.getKey());
+                }
+            }
+            return constructAPISummaryList(statement);
+
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1213,6 +1246,16 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return policies;
+    }
+
+    private boolean checkTableColumnExists (DatabaseMetaData databaseMetaData, String columnName) throws
+            APIMgtDAOException {
+        try (ResultSet rs = databaseMetaData.getColumns(null, null, AM_API_TABLE_NAME, columnName.toUpperCase(Locale
+                .ENGLISH))) {
+            return rs.next();
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     static void initResourceCategories() throws APIMgtDAOException {

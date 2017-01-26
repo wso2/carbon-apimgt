@@ -777,6 +777,7 @@
             org.wso2.andes.*;
             javax.jms.*;
             org.wso2.securevault.*;
+            org.apache.lucene.*;
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
