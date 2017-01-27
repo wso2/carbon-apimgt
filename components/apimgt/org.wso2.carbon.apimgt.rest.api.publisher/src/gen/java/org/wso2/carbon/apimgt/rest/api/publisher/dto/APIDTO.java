@@ -17,7 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-04T14:58:24.387+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-24T12:59:39.799+05:30")
 public class APIDTO   {
   @JsonProperty("id")
   private String id = null;
@@ -104,6 +104,9 @@ public class APIDTO   {
 
   @JsonProperty("visibleRoles")
   private List<String> visibleRoles = new ArrayList<String>();
+
+  @JsonProperty("permission")
+  private String permission = null;
 
   @JsonProperty("visibleTenants")
   private List<String> visibleTenants = new ArrayList<String>();
@@ -356,7 +359,7 @@ public class APIDTO   {
    * Supported transports for the API (http and/or https). 
    * @return transport
   **/
-  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https). ")
+  @ApiModelProperty(example = "[&quot;http&quot;,&quot;https&quot;]", required = true, value = "Supported transports for the API (http and/or https). ")
   public List<String> getTransport() {
     return transport;
   }
@@ -379,7 +382,7 @@ public class APIDTO   {
    * Get tags
    * @return tags
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[&quot;substract&quot;,&quot;add&quot;]", value = "")
   public List<String> getTags() {
     return tags;
   }
@@ -402,7 +405,7 @@ public class APIDTO   {
    * Get policies
    * @return policies
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "[&quot;Unlimited&quot;]", required = true, value = "")
   public List<String> getPolicies() {
     return policies;
   }
@@ -443,13 +446,31 @@ public class APIDTO   {
    * Get visibleRoles
    * @return visibleRoles
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<String> getVisibleRoles() {
     return visibleRoles;
   }
 
   public void setVisibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
+  }
+
+  public APIDTO permission(String permission) {
+    this.permission = permission;
+    return this;
+  }
+
+   /**
+   * Get permission
+   * @return permission
+  **/
+  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  public String getPermission() {
+    return permission;
+  }
+
+  public void setPermission(String permission) {
+    this.permission = permission;
   }
 
   public APIDTO visibleTenants(List<String> visibleTenants) {
@@ -466,7 +487,7 @@ public class APIDTO   {
    * Get visibleTenants
    * @return visibleTenants
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<String> getVisibleTenants() {
     return visibleTenants;
   }
@@ -507,7 +528,7 @@ public class APIDTO   {
    * Get sequences
    * @return sequences
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<SequenceDTO> getSequences() {
     return sequences;
   }
@@ -625,6 +646,7 @@ public class APIDTO   {
         Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.visibility, API.visibility) &&
         Objects.equals(this.visibleRoles, API.visibleRoles) &&
+        Objects.equals(this.permission, API.permission) &&
         Objects.equals(this.visibleTenants, API.visibleTenants) &&
         Objects.equals(this.gatewayEnvironments, API.gatewayEnvironments) &&
         Objects.equals(this.sequences, API.sequences) &&
@@ -636,7 +658,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, permission, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
   }
 
   @Override
@@ -661,6 +683,7 @@ public class APIDTO   {
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
+    sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");

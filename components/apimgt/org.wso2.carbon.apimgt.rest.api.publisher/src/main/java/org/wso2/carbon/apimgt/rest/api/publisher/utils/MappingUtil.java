@@ -72,6 +72,7 @@ public class MappingUtil {
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
+        apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
         apidto.setTransport(api.getTransport());
@@ -167,6 +168,7 @@ public class MappingUtil {
                 visibleRoles(apidto.getVisibleRoles()).
                 visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getPolicies()).
+                permission(apidto.getPermission()).
                 tags(apidto.getTags()).
                 transport(apidto.getTransport()).
                 cacheTimeout(apidto.getCacheTimeout()).

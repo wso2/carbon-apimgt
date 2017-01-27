@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,8 +69,17 @@ public final class API {
         copiedFromApiId = builder.copiedFromApiId;
         gatewayConfig = builder.gatewayConfig;
         apiDefinition = builder.apiDefinition;
+        if (builder.apiPermission != null) {
+            apiPermission = builder.apiPermission.toString();
+        } else {
+            apiPermission = "";
+        }
+        permissionMap = builder.permissionMap;
     }
 
+    public HashMap getPermissionMap() {
+        return permissionMap;
+    }
     public String getId() {
         return id;
     }
@@ -174,6 +184,10 @@ public final class API {
         return uriTemplates;
     }
 
+    public String getApiPermission() {
+        return apiPermission;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -259,6 +273,8 @@ public final class API {
     private final Map<String, UriTemplate> uriTemplates;
     private String copiedFromApiId;
     private final String apiDefinition;
+    private final HashMap permissionMap;
+    private final String apiPermission;
 
     /**
      * {@code API} builder static inner class.
@@ -268,6 +284,7 @@ public final class API {
         private String id;
         private String provider;
         private String name;
+        private String permission;
 
         public String getId() {
             return id;
@@ -303,6 +320,10 @@ public final class API {
 
         public String getGatewayConfig() {
             return gatewayConfig;
+        }
+
+        public StringBuilder getApiPermission() {
+            return apiPermission;
         }
 
         public String getWsdlUri() {
@@ -354,6 +375,8 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
+        private HashMap permissionMap;
+        private StringBuilder apiPermission;
         private Map<String, String> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
         private String wsdlUri = "";
@@ -409,6 +432,12 @@ public final class API {
             this.uriTemplates = copy.uriTemplates;
             this.copiedFromApiId = copy.copiedFromApiId;
             this.apiDefinition = copy.apiDefinition;
+            if (copy.apiPermission != null) {
+                this.apiPermission = new StringBuilder(copy.apiPermission);
+            } else {
+                this.apiPermission = new StringBuilder();
+            }
+            this.permissionMap = new HashMap<>();
         }
 
         /**
@@ -528,6 +557,11 @@ public final class API {
             return this;
         }
 
+        public APIBuilder apiPermission(StringBuilder apiPermission) {
+            this.apiPermission = apiPermission;
+            return this;
+        }
+
         /**
          * Sets the {@code gatewayConfig} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
@@ -635,6 +669,12 @@ public final class API {
             return this;
         }
 
+        public APIBuilder permission(String permission) {
+            this.permission = permission;
+            return this;
+        }
+
+
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
@@ -644,6 +684,11 @@ public final class API {
          */
         public APIBuilder uriTemplates(Map<String, UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
+            return this;
+        }
+
+        public APIBuilder permissionMap(HashMap map) {
+            this.permissionMap = map;
             return this;
         }
 
@@ -838,6 +883,22 @@ public final class API {
 
         public String getApiDefinition() {
             return apiDefinition;
+        }
+
+        public void setPermissionMap(HashMap permissionMap) {
+            this.permissionMap =  permissionMap;
+        }
+
+        public Map getPermissionMap() {
+            return permissionMap;
+        }
+
+        public String getPermission() {
+            return permission;
+        }
+
+        public void setPermission(String permission) {
+            this.permission = permission;
         }
     }
 

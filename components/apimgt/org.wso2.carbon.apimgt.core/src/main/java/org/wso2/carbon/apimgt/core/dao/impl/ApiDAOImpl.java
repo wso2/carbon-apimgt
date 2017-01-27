@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -399,6 +400,7 @@ public class ApiDAOImpl implements ApiDAO {
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
                 addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
                 addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+                addAPIPermission(connection,  api.getPermissionMap(), apiPrimaryKey);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -473,6 +475,9 @@ public class ApiDAOImpl implements ApiDAO {
                                 ResourceCategory.WSDL_URI, wsdlUri);
                     }
                 }
+
+                deleteAPIPermission(connection, apiID);
+                updateApiPermission(connection, substituteAPI.getPermissionMap(), apiID);
 
                 deleteTransports(connection, apiID);
                 addTransports(connection, apiID, substituteAPI.getTransport());
@@ -1100,6 +1105,69 @@ public class ApiDAOImpl implements ApiDAO {
             }
             statement.executeBatch();
 
+        }
+    }
+    
+
+    private void deleteAPIPermission(Connection connection, String apiID) throws SQLException {
+        final String query = "DELETE FROM AM_API_GROUP_PERMISSION WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+        }
+    }
+
+    private void addAPIPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+        final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, apiId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
+        } else {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, apiId);
+                statement.setString(2, APIMgtConstants.Permission.EVERYONE_GROUP);
+                statement.setInt(3, 7);
+                statement.execute();
+            }
+        }
+
+    }
+
+    private void updateApiPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+        final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, apiId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
         }
     }
 

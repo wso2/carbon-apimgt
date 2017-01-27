@@ -73,6 +73,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : " +
+                "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder("admin", "WeatherAPI", "1.0.0").
                 id(UUID.randomUUID().toString()).
@@ -96,8 +98,13 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy("admin").
                 lastUpdatedTime(LocalDateTime.now()).
+                permission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
+		        HashMap map = new HashMap();
+                map.put("1000", 6);
+                map.put("1001", 4);
+            	apiBuilder.permissionMap(map);
         return apiBuilder;
     }
 
