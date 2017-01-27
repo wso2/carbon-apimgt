@@ -220,6 +220,7 @@ function renderGraph(fromDate,toDate,drillDown){
             if (!json.error) {
             var data1 = {};
                 if (json.usage && json.usage.length > 0) {
+                  $('#apiLatencyTimeNote').removeClass('hide');
                   for(var usage1 in json.usage ){
                     var apiResponseTimeData = (data1["Total Time"]) ? data1["Total Time"] : [];
                     var backendLatencyData  = (data1["BackEnd"])? data1["BackEnd"] : [] ;
@@ -251,10 +252,12 @@ function renderGraph(fromDate,toDate,drillDown){
                     $('#noData').html('');
                     $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available.")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
                     $('#chartContainer').hide();
+                    $('#apiLatencyTimeNote').addClass('hide');
 
                 }
                 else{
                     $('.stat-page').html("");
+                    $('#apiLatencyTimeNote').addClass('hide');
                     showEnableAnalyticsMsg();
                 }
             }
