@@ -297,7 +297,7 @@
     "None": "None",
     "Not Configured": "Not Configured",
     "Note : Date Range only applies to the hit count.": "Note : Date Range only applies to the hit count.",
-    "Note : Total Time is not the aggregate sum of rest of the components in the graph. It will not include other aspects such as API dispatching time and Mediation Policy execution time.": "<b>Note :</b> Total Time is <b>not</b> the aggregate sum of rest of the components in the graph. It will <b>not</b> include other aspects such as API dispatching time and Mediation Policy execution time.",
+    "Note: The total time represents the complete time taken to process the request, including the time spent in between the other recorded layers. It is not the aggregate sum of the rest of the recorded matrices.": "<b>Note :</b> The total time represents the complete time taken to process the request, including the time spent in between the other recorded layers. It is not the aggregate sum of the rest of the recorded matrices.",
     "Number of API calls": "Number of API calls",
     "OK": "OK",
     "OPTIONS": "OPTIONS",
