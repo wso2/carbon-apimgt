@@ -21,6 +21,10 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -231,6 +235,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
+                if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                    HashMap roleNamePermissionList;
+                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                    apiBuilder.permissionMap(roleNamePermissionList);
+                }
+
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);
@@ -246,6 +256,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
+            String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        } catch (ParseException e) {
             String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
@@ -282,6 +296,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if ((originalAPI.getName().equals(apiBuilder.getName())) && (originalAPI.getVersion().equals
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
+
+                    if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                        HashMap roleNamePermissionList;
+                        roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                        apiBuilder.permissionMap(roleNamePermissionList);
+                    }
+
                     API api = apiBuilder.build();
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
@@ -353,9 +374,45 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Error occurred while parsing the permission json from swagger - " + apiBuilder.getName();
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
     }
 
+    /**
+     * This method will return map with role names and its permission values.
+     * @param permissionJsonString
+     * @return
+     * @throws ParseException
+     */
+    private HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
+
+        HashMap roleNamePermissionList = new HashMap();
+        JSONParser jsonParser = new JSONParser();
+
+        JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
+        for (int i = 0; i < baseJsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) baseJsonArray.get(i);
+            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
+            int totalPermissionValue = 0;
+            for (int j = 0; j < subJsonArray.size(); j++) {
+                if (APIMgtConstants.Permission.READ.equals(subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
+                } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
+                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
+                }
+            }
+            roleNamePermissionList.put(groupId, totalPermissionValue);
+        }
+
+        return roleNamePermissionList;
+
+    }
 
     /**
      * This method used to Update the status of API
