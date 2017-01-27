@@ -23,7 +23,7 @@ import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 
 import java.util.List;
 
@@ -35,9 +35,9 @@ public class ResourceConfigContext extends ConfigContext {
     private API api;
     private ConfigContext configContext;
     private static final Logger log = LoggerFactory.getLogger(ResourceConfigContext.class);
-    private List<APIResource> apiResources;
+    private List<UriTemplate> apiResources;
 
-    public ResourceConfigContext(ConfigContext context, API api, List<APIResource> apiResources) {
+    public ResourceConfigContext(ConfigContext context, API api, List<UriTemplate> apiResources) {
         this.configContext = context;
         this.api = api;
         this.apiResources = apiResources;

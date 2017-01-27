@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
@@ -29,7 +30,7 @@ import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-
+import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -60,7 +61,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
         try {
             ApiDAO apiDAO = DAOFactory.getApiDAO();
             String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
-            publishMessage(gatewayConfig);
+            publishMessage(api, gatewayConfig);
             return true;
         } catch (JMSException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
@@ -79,7 +80,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
      * @throws JMSException       if JMS issue is occurred
      * @throws URLSyntaxException If connection String is invalid
      */
-    private void publishMessage(String content) throws JMSException, URLSyntaxException {
+    private void publishMessage(API api, String content) throws JMSException, URLSyntaxException {
         // create connection factory
         TopicConnectionFactory connFactory = new AMQConnectionFactory(
                 getTCPConnectionURL(config.getUsername(), config.getPassword()));
@@ -89,7 +90,14 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
         // Send message
         Topic topic = topicSession.createTopic(config.getTopicName());
         // create the message to send
-        TextMessage textMessage = topicSession.createTextMessage(content);
+        GatewayConfigDTO dto = new GatewayConfigDTO();
+        dto.setApiName(api.getName());
+        dto.setContext(api.getContext());
+        dto.setVersion(api.getVersion());
+        dto.setCreator(api.getCreatedBy());
+        dto.setConfig(content);
+
+        TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(dto));
         TopicPublisher topicPublisher = topicSession.createPublisher(topic);
         topicPublisher.publish(textMessage);
 
