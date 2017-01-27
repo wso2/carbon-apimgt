@@ -87,7 +87,7 @@
     <div id="noData"></div>
     <br/>
     <div id="chartContainer"  class="col-sm-12" style="margin-bottom :5px;height: 100%"></div>
-    <div id="apiLatencyTimeNote" class="pull-right"  style="margin-bottom :10px;"><%=i18n.localize("Note : Total Time is not the aggregate sum of rest of the components in the graph. It will not include other aspects such as API dispatching time and Mediation Policy execution time.")%></div>
+    <div id="apiLatencyTimeNote" class="pull-right"  style="margin-bottom :10px;"><%=i18n.localize("Note: The total time represents the complete time taken to process the request, including the time spent in between the other recorded layers. It is not the aggregate sum of the rest of the recorded matrices.")%></div>
     <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
     </div>
     <%
