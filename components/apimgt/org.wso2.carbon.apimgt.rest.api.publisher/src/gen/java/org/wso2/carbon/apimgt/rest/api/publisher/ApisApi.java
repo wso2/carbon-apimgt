@@ -4,9 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
@@ -209,65 +207,6 @@ public class ApisApi implements Microservice  {
 )
     throws NotFoundException {
         return delegate.apisApiIdDocumentsPost(apiId,body,contentType);
-    }
-    @GET
-    @Path("/export/{name}/{version}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, tags={ "Export Configuration", })
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Export Configuration returned. ", response = File.class),
-
-            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = File.class),
-
-            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = File.class),
-
-            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
-    public Response apisExportApiNameVersionGet(@ApiParam(value = "Name of the API ",required=true) @PathParam("name") String name
-            ,@ApiParam(value = "Version of the API ",required=true) @PathParam("version") String version
-    )
-            throws NotFoundException {
-        return delegate.apisExportApiApiNameApiVersionGet(name,version);
-    }
-    @POST
-    @Path("/import")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more APIs. ", response = APIListDTO.class, tags={ "Import Configuration", })
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
-    public Response apisImportPost(
-            @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("file") FileInfo fileDetail
-    )
-            throws NotFoundException {
-        return delegate.apisImportPost(fileInputStream, fileDetail);
-    }
-    @PUT
-    @Path("/import")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more existing APIs. ", response = APIListDTO.class, tags={ "Import Configuration", })
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the updated object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
-
-            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
-    public Response apisImportPut(
-            @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("file") FileInfo fileDetail
-    )
-            throws NotFoundException {
-        return delegate.apisImportPut(fileInputStream, fileDetail);
     }
     @GET
     @Path("/{apiId}/gateway-config")

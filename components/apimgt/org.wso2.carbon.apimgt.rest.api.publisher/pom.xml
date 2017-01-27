@@ -82,6 +82,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
 
@@ -181,7 +186,7 @@
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.exp.pkg.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="7"
         </carbon.component>
     </properties>
 </project>

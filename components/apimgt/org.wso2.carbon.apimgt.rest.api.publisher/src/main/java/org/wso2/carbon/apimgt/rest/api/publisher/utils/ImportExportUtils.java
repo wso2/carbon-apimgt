@@ -26,17 +26,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 
-import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -45,48 +43,40 @@ public class ImportExportUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ImportExportUtils.class);
 
-    static void deleteDirectory(String path) throws APIManagementException{
+    public static void deleteDirectory(String path) {
         if (new File(path).isDirectory()) {
             try {
                 FileUtils.deleteDirectory(new File(path));
             } catch (IOException e) {
-                throw new APIManagementException("Error while deleting directory at" + path, e);
+                log.error("Error while deleting directory at" + path, e);
             }
         }
     }
 
-    static void createDirectory(String path) throws APIManagementException {
+    static void createDirectory(String path) throws APIMgtEntityImportExportException {
         try {
             Files.createDirectories(Paths.get(path));
         } catch (IOException e) {
-            throw new APIManagementException("Error in creating directory at: " + path, e);
+            throw new APIMgtEntityImportExportException("Error in creating directory at: " + path, e);
         }
     }
 
     static void createArchiveFromUploadedData (InputStream inputStream, String archivePath)
-            throws APIManagementException {
+            throws APIMgtEntityImportExportException {
 
         FileOutputStream outFileStream = null;
         try {
             outFileStream = new FileOutputStream(new File(archivePath));
             IOUtils.copy(inputStream, outFileStream);
         } catch (IOException e) {
-            throw new APIManagementException("Error in Creating archive from uploaded data", e);
+            throw new APIMgtEntityImportExportException("Error in Creating archive from uploaded data", e);
         } finally {
             IOUtils.closeQuietly(outFileStream);
         }
     }
 
-    /**
-     * This method decompresses API the archive
-     *
-     * @param archiveFilePath  Path to archive containing the API
-     * @param destination location of the archive to be extracted
-     * @return Name of the extracted directory
-     * @throws APIManagementException If the decompressing fails
-     */
-    static String extractArchive(String archiveFilePath, String destination) throws
-            APIManagementException {
+    public static String extractArchive(String archiveFilePath, String destination) throws
+            APIMgtEntityImportExportException {
 
         BufferedInputStream inputStream = null;
         InputStream zipInputStream = null;
@@ -117,7 +107,7 @@ public class ImportExportUtils {
 
                 // create the parent directory structure
                 if (destinationParent.mkdirs()) {
-                    log.info("Creation of folder is successful. Directory Name : " + destinationParent.getName());
+                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
                 }
 
                 if (!entry.isDirectory()) {
@@ -131,7 +121,7 @@ public class ImportExportUtils {
             }
             return archiveName;
         } catch (IOException e) {
-            throw new APIManagementException("Failed to extract archive file", e);
+            throw new APIMgtEntityImportExportException("Failed to extract archive file", e);
         } finally {
             IOUtils.closeQuietly(zipInputStream);
             IOUtils.closeQuietly(inputStream);
@@ -140,15 +130,15 @@ public class ImportExportUtils {
         }
     }
 
-    static void createFile (String location) throws APIManagementException {
+    static void createFile (String location) throws APIMgtEntityImportExportException {
         try {
             Files.createFile(Paths.get(location));
         } catch (IOException e) {
-            throw new APIManagementException("Error in creating file at: " + location, e);
+            throw new APIMgtEntityImportExportException("Error in creating file at: " + location, e);
         }
     }
 
-    static void writeToFile(String path, String content) throws APIManagementException {
+    static void writeToFile(String path, String content) throws APIMgtEntityImportExportException {
         OutputStreamWriter writer = null;
         FileOutputStream fileOutStream = null;
         StringReader stringReader = null;
@@ -159,7 +149,7 @@ public class ImportExportUtils {
             writer = new OutputStreamWriter(fileOutStream, Charset.forName( "UTF-8" ));
             IOUtils.copy(stringReader, writer);
         } catch (IOException e) {
-            throw new APIManagementException("I/O error while writing to file at: " + path, e);
+            throw new APIMgtEntityImportExportException("I/O error while writing to file at: " + path, e);
         } finally {
             IOUtils.closeQuietly(writer);
             IOUtils.closeQuietly(fileOutStream);
@@ -168,27 +158,25 @@ public class ImportExportUtils {
 
     }
 
-    static String readFileContentAsText(String path) throws APIManagementException {
+    public static String readFileContentAsText(String path) throws APIMgtEntityImportExportException {
 
         try {
             return new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading file " + path, e);
+            throw new APIMgtEntityImportExportException("Error while reading file " + path, e);
         }
     }
 
-    static InputStream readFileContentAsStream(String path) throws
-            APIManagementException {
+    static InputStream readFileContentAsStream(String path) throws APIMgtEntityImportExportException {
 
         try {
             return new FileInputStream(path);
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading file " + path, e);
+            throw new APIMgtEntityImportExportException("Error while reading file " + path, e);
         }
     }
 
-    static void writeStreamToFile(String path, InputStream inputStream) throws
-            APIManagementException {
+    static void writeStreamToFile(String path, InputStream inputStream) throws APIMgtEntityImportExportException {
 
         FileOutputStream outputStream = null;
         try {
@@ -196,10 +184,10 @@ public class ImportExportUtils {
             IOUtils.copy(inputStream, outputStream);
 
         } catch (FileNotFoundException e) {
-            throw new APIManagementException(e);
+            throw new APIMgtEntityImportExportException(e);
 
         } catch (IOException e) {
-            throw new APIManagementException("Unable to write to file at path: " + path, e);
+            throw new APIMgtEntityImportExportException("Unable to write to file at path: " + path, e);
 
         } finally {
             IOUtils.closeQuietly(inputStream);
@@ -207,13 +195,8 @@ public class ImportExportUtils {
         }
     }
 
-    /**
-     * Archive a provided source directory to a zipped file
-     *
-     * @param sourceDirectory Source directory
-     */
     static void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
-            throws APIManagementException {
+            throws APIMgtEntityImportExportException {
 
         File directoryToZip = new File(sourceDirectory);
 
@@ -222,21 +205,26 @@ public class ImportExportUtils {
         try {
             writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
         } catch (IOException e) {
-            throw new APIManagementException("Unable to create the archive", e);
+            throw new APIMgtEntityImportExportException("Unable to create the archive", e);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Archived API generated successfully");
-        }
+        log.debug("Archived API generated successfully");
 
     }
 
-    /**
-     * Retrieve all the files included in the source directory to be archived
-     *
-     * @param sourceDirectory Source directory
-     * @param fileList        List of files
-     */
+    public static Set<String> getDirectoryList (String path) throws APIMgtEntityImportExportException {
+        Set<String> directoryNames = new HashSet<>();
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(path))) {
+            for (Path directoryPath : directoryStream) {
+                directoryNames.add(directoryPath.toString());
+            }
+        }
+        catch (IOException e) {
+            throw new APIMgtEntityImportExportException("Error while listing directories under " + path, e);
+        }
+        return directoryNames;
+    }
+
     private static void getAllFiles(File sourceDirectory, List<File> fileList) {
         File[] files = sourceDirectory.listFiles();
         if (files != null) {
@@ -249,12 +237,6 @@ public class ImportExportUtils {
         }
     }
 
-    /**
-     * Generate archive file
-     *
-     * @param directoryToZip Location of the archive
-     * @param fileList       List of files to be included in the archive
-     */
     private static void writeArchiveFile(File directoryToZip, List<File> fileList, String
             archiveLocation, String archiveName)
             throws IOException {
@@ -277,13 +259,6 @@ public class ImportExportUtils {
         }
     }
 
-    /**
-     * Add files of the directory to the archive
-     *
-     * @param directoryToZip  Location of the archive
-     * @param file            File to be included in the archive
-     * @param zipOutputStream Output stream
-     */
     private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream) throws IOException {
 
         FileInputStream fileInputStream = null;
@@ -304,17 +279,5 @@ public class ImportExportUtils {
         } finally {
             IOUtils.closeQuietly(fileInputStream);
         }
-    }
-
-    public static Response handleError (Logger logger, String errorMessage, APIManagementException exception) {
-        logger.error(errorMessage, exception);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(RestApiUtil.buildInternalServerErrorException
-                (errorMessage)).build();
-    }
-
-    public static Response handleError (Logger logger, String errorMessage) {
-        logger.error(errorMessage);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(RestApiUtil.buildInternalServerErrorException
-                (errorMessage)).build();
     }
 }

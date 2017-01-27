@@ -22,23 +22,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 /**
  * Manager class for Import and Export handling
@@ -51,8 +52,6 @@ public class ImportExportManager {
     private static final String DOCUMENTATION_DEFINITION_FILE = "doc.json";
     private static final String SWAGGER_DEFINITION_FILE_NAME = "swagger.json";
     private static final String THUMBNAIL_FILE_NAME = "thumbnail";
-    private static final String EXPORTED_API_DIRECTORY_NAME = "exported-apis";
-    private static final String IMPORTED_API_DIRECTORY_NAME = "imported-apis";
     // private static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-config.json";
     private static final String DOCUMENTS_ROOT_DIRECTORY = "Documents";
 
@@ -66,106 +65,172 @@ public class ImportExportManager {
 
     public String exportAPIs (List<API> apis) throws APIManagementException {
 
-        // this is a directory with a unique path to stop conflicts in case of parallel exports
-        String uniqueDirectory = path + File.separator + EXPORTED_API_DIRECTORY_NAME + "-" + UUID.randomUUID().toString();
+        String exportDirectoryName = "exported-apis";
         // this is the base directory for the archive. after export happens, this directory will
         // be archived to be sent as a application/zip response to the client
-        String archiveBaseDirectory = uniqueDirectory + File.separator + EXPORTED_API_DIRECTORY_NAME;
+        String archiveBaseDirectoryPath = path + File.separator + exportDirectoryName;
+
+        try {
+            ImportExportUtils.createDirectory(archiveBaseDirectoryPath);
+        } catch (APIMgtEntityImportExportException e) {
+            ImportExportUtils.deleteDirectory(archiveBaseDirectoryPath);
+            String errorMsg = "Error in creating base directory for API export archive: " + archiveBaseDirectoryPath;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
+        }
 
         for (API api : apis) {
             // derive the folder structure
             // TODO: use util method to concat strings
-            String apiExportDirectory = archiveBaseDirectory + File.separator + api.getProvider() + "-" + api.getName()
+            String apiExportDirectory = archiveBaseDirectoryPath + File.separator + api.getProvider() + "-" + api.getName()
                     + "-" + api.getVersion();
-            // create api export directory
+            // create per-api export directory
             try {
                 ImportExportUtils.createDirectory(apiExportDirectory);
                 // export API data
-                exportApiDefinitionToFileSystem(api, apiExportDirectory);
+                exportApiDefinitionToFileSystem(apiPublisher.getAPIbyUUID(api.getId()), apiExportDirectory);
+                // TODO: complete Gateway config exporting when its supported
                 // exportGatewayConfigToFileSystem(api);
-                exportDocumentationToFileSystem(api, apiExportDirectory);
-                exportSwaggerDefinitionToFileSystem(api, apiExportDirectory);
-                exportThumbnailToFileSystem(api, apiExportDirectory);
-            } catch (APIManagementException e) {
+                exportSwaggerDefinitionToFileSystem(apiPublisher.getSwagger20Definition(api.getId()), api, apiExportDirectory);
+                exportDocumentationToFileSystem(apiPublisher.getAllDocumentation(api.getId(), 0, Integer.MAX_VALUE), api, apiExportDirectory);
+                exportThumbnailToFileSystem(apiPublisher.getThumbnailImage(api.getId()), api, apiExportDirectory);
+                log.info("Successfully exported API: " + api.getName() + ", version: " + api.getVersion());
+
+            } catch (APIMgtEntityImportExportException e) {
                 // no need to throw, log
                 log.error("Error in exporting API: " + api.getName() + ", version: " + api.getVersion(), e);
                 // cleanup the API directory
                 ImportExportUtils.deleteDirectory(apiExportDirectory);
-                // skip this API and continue
-                continue;
             }
+        }
+
+        // if the directory is empty, no APIs have been exported!
+        if (ImportExportUtils.getDirectoryList(archiveBaseDirectoryPath).isEmpty()) {
+            // cleanup the archive root directory
+            ImportExportUtils.deleteDirectory(path);
+            String errorMsg = "No APIs exported successfully";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.API_EXPORT_ERROR);
         }
 
         // create zip archive
         try {
-            ImportExportUtils.archiveDirectory(archiveBaseDirectory, uniqueDirectory, EXPORTED_API_DIRECTORY_NAME);
-        } catch (APIManagementException e) {
+            ImportExportUtils.archiveDirectory(archiveBaseDirectoryPath, path, exportDirectoryName);
+        } catch (APIMgtEntityImportExportException e) {
             // cleanup the archive root directory
-            ImportExportUtils.deleteDirectory(archiveBaseDirectory);
-            throw e;
+            ImportExportUtils.deleteDirectory(path);
+            String errorMsg = "Error while archiving directory " + archiveBaseDirectoryPath;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
         }
 
-        return archiveBaseDirectory + ".zip";
+        return archiveBaseDirectoryPath + ".zip";
     }
 
-    public void importAPIs (InputStream fileInputStream) throws APIManagementException {
+    public APIListDTO importAPIs (InputStream uploadedApiArchiveInputStream) throws APIManagementException {
 
-        String importedApiArchiveUniqueDirectory = path + File.separator + IMPORTED_API_DIRECTORY_NAME + "-" + UUID.randomUUID()
-                .toString();
-        String importedApiArchive = importedApiArchiveUniqueDirectory + File.separator + IMPORTED_API_DIRECTORY_NAME + ".zip";
+        String importedDirectoryName = "imported-apis";
+        String apiArchiveLocation = path + File.separator + importedDirectoryName + ".zip";
+        String archiveExtractLocation = extractUploadedArchive(uploadedApiArchiveInputStream, importedDirectoryName,
+                path, apiArchiveLocation);
 
-        // create api export directory structure
-        ImportExportUtils.createDirectory(importedApiArchiveUniqueDirectory);
-        // create archive
-        ImportExportUtils.createArchiveFromUploadedData(fileInputStream, importedApiArchive);
-        // extract
-        String archiveExtractLocation = importedApiArchiveUniqueDirectory + File.separator + IMPORTED_API_DIRECTORY_NAME;
-        ImportExportUtils.extractArchive(importedApiArchive, archiveExtractLocation);
-
-        File[] apiDefinitionsRootDirectories = new File(archiveExtractLocation).listFiles(File::isDirectory);
-        if (apiDefinitionsRootDirectories == null) {
-            throw new APIManagementException("Unable to find API definitions at " + archiveExtractLocation);
+        Set<String> apiDefinitionsRootDirectoryPaths = ImportExportUtils.getDirectoryList(archiveExtractLocation);
+        if (apiDefinitionsRootDirectoryPaths.isEmpty()) {
+            ImportExportUtils.deleteDirectory(path);
+            String errorMsg = "Unable to find API definitions at: " + archiveExtractLocation;
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
 
-        for (File apiDefinitionDirectory : apiDefinitionsRootDirectories) {
+        // List to contain newly created/updated APIs
+        List<API> apis = importApisFromExtractedArchive(apiDefinitionsRootDirectoryPaths);
 
-            File apiDefinitionFile = new File(apiDefinitionDirectory + File.separator + API_DEFINITION_FILE_NAME);
+        ImportExportUtils.deleteDirectory(path);
+        // if no APIs are corrected exported, throw an error
+        if (apis.isEmpty()) {
+            String errorMsg = "No APIs imported successfully";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
+        }
+
+        return MappingUtil.toAPIListDTO(apis);
+    }
+
+    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths) {
+
+        List<API> apis = new ArrayList<>();
+
+        for (String apiDefinitionDirectoryPath : apiDefinitionsRootDirectoryPaths) {
+            File apiDefinitionFile = new File(apiDefinitionDirectoryPath + File.separator + API_DEFINITION_FILE_NAME);
             if (!apiDefinitionFile.exists()) {
-                // API definition file not found, can't continue
-                throw new APIManagementException("Unable to locate API definition file at: " + apiDefinitionFile.getPath());
-            }
-
-            String apiDefinitionString = ImportExportUtils.readFileContentAsText(apiDefinitionFile.getPath());
-            // convert to bean
-            Gson gson = new GsonBuilder().create();
-            APIDTO apiDto = gson.fromJson(apiDefinitionString, APIDTO.class);
-            API.APIBuilder apiBuilder = MappingUtil.toAPI(apiDto);
-
-            // import API data - should fail an error occurs
-            importApi(apiBuilder);
-            // import gateway configuration - should fail an error occurs
-            // TODO: uncomment when gateway config is supported
-            // importGatewayConfig(apiDefinitionDirectory.getPath(), apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
-
-            try {
-                importSwaggerDefinition(apiDefinitionDirectory.getPath(), apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
-                importDocumentation(apiDefinitionDirectory.getPath(), apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
-                importThumbnail(apiDefinitionDirectory.getPath(), apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
-
-            } catch (APIManagementException e) {
-                // no need to throw, log
-                log.error("Error in exporting API: " + apiBuilder.getName() + ", version: " + apiBuilder.getVersion(), e);
-                // skip this API and continue
+                // API definition file not found, skip this API
+                log.error("Unable to locate API definition file at: " + apiDefinitionFile.getPath());
                 continue;
             }
+
+            // convert to bean
+            Gson gson = new GsonBuilder().create();
+            String apiDefinitionString;
+            try {
+                apiDefinitionString = ImportExportUtils.readFileContentAsText(apiDefinitionFile.getPath());
+            } catch (APIMgtEntityImportExportException e) {
+                // Unable to read the API definition file, skip this API
+                log.error("Error reading API definition from file system", e);
+                continue;
+            }
+
+            APIDTO apiDto;
+            try {
+                apiDto = gson.fromJson(apiDefinitionString, APIDTO.class);
+            } catch (Exception e) {
+                log.error("Error in building APIDTO from api definition read from file system", e);
+                continue;
+            }
+
+            API.APIBuilder apiBuilder = MappingUtil.toAPI(apiDto);
+            // import API data - should fail for this API if an error occurs,
+            // but should continue with importing other APIs
+            try {
+                importApi(apiBuilder);
+            } catch (APIManagementException e) {
+                log.error("Error in importing API: " + apiBuilder.getName() + ", version: " + apiBuilder.getVersion(), e);
+                continue;
+            }
+            apis.add(apiBuilder.build());
+
+            // importing docs and thumbnails - will still continue if an error occurs
+            importDocumentation(apiDefinitionDirectoryPath, apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
+            importThumbnail(apiDefinitionDirectoryPath, apiBuilder.getId(), apiBuilder.getName(), apiBuilder.getVersion());
+
+            log.info("Successfully imported API: " + apiBuilder.getName() + ", version: " + apiBuilder.getVersion());
         }
 
-        //TODO: delete after importing
+        return apis;
     }
 
-    private void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIManagementException {
+    private String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName, String importedApiArchiveUniqueDirectory, String apiArchiveLocation) throws APIManagementException {
+        String archiveExtractLocation;
+        try {
+            // create api import directory structure
+            ImportExportUtils.createDirectory(importedApiArchiveUniqueDirectory);
+            // create archive
+            ImportExportUtils.createArchiveFromUploadedData(uploadedApiArchiveInputStream, apiArchiveLocation);
+            // extract the archive
+            archiveExtractLocation = importedApiArchiveUniqueDirectory + File.separator + importedDirectoryName;
+            ImportExportUtils.extractArchive(apiArchiveLocation, archiveExtractLocation);
 
-        APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(api.getId()));
+        } catch (APIMgtEntityImportExportException e) {
+            ImportExportUtils.deleteDirectory(importedApiArchiveUniqueDirectory);
+            String errorMsg = "Error in accessing uploaded API archive";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.API_IMPORT_ERROR);
+        }
+        return archiveExtractLocation;
+    }
+
+    private void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIMgtEntityImportExportException {
+
+        APIDTO apidto = MappingUtil.toAPIDto(api);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         ImportExportUtils.createFile(exportLocation + File.separator + API_DEFINITION_FILE_NAME);
@@ -175,7 +240,7 @@ public class ImportExportManager {
     }
 
     /*
-    private void exportGatewayConfigToFileSystem(API api) throws APIManagementException {
+    private void exportGatewayConfigToFileSystem(API api, String exportLocation) throws APIManagementException {
 
         String gatewayConfig = apiPublisher.getApiGatewayConfig(api.getId());
         if (gatewayConfig == null) {
@@ -187,24 +252,27 @@ public class ImportExportManager {
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(gatewayConfig).getAsJsonObject();
 
-        String gatewayConfigFileLocation = path + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
+        String gatewayConfigFileLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
         ImportExportUtils.createFile(gatewayConfigFileLocation);
         ImportExportUtils.writeToFile(gatewayConfigFileLocation, gson.toJson(json));
     }
     */
 
-    private void exportDocumentationToFileSystem(API api, String exportLocation) throws APIManagementException {
+    private void exportDocumentationToFileSystem(List<DocumentInfo> documentInfo, API api, String exportLocation) throws APIMgtEntityImportExportException {
 
-        List<DocumentInfo> documentInfo = apiPublisher.getAllDocumentation(api.getId(), 0, Integer.MAX_VALUE);
         if (documentInfo == null || documentInfo.isEmpty()) {
-            log.info("No documentation found for API with api: " + api.getName() + ", version: " + api.getVersion());
+            log.debug("No documentation found for API with api: " + api.getName() + ", version: " + api.getVersion());
             return;
         }
+
+        // create Documents root directory
+        String documentsBaseDirectory = exportLocation + File.separator + DOCUMENTS_ROOT_DIRECTORY;
+        ImportExportUtils.createDirectory(documentsBaseDirectory);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         for (DocumentInfo aDocumentInfo : documentInfo) {
             // create the root directory for each document
-            String apiExportDir = exportLocation + File.separator+ aDocumentInfo.getId();
+            String apiExportDir = documentsBaseDirectory + File.separator+ aDocumentInfo.getId();
             ImportExportUtils.createDirectory(apiExportDir);
             // for each document, write a DocumentInfo to a separate json file
             String apiDocMetaFileLocation = apiExportDir + File.separator + DOCUMENTATION_DEFINITION_FILE;
@@ -245,9 +313,9 @@ public class ImportExportManager {
         return null;
     }
 
-    private void exportSwaggerDefinitionToFileSystem(API api, String exportLocation) throws APIManagementException {
+    private void exportSwaggerDefinitionToFileSystem(String swaggerDefinition, API api, String exportLocation) throws
+            APIMgtEntityImportExportException {
 
-        String swaggerDefinition = apiPublisher.getSwagger20Definition(api.getId());
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
@@ -259,12 +327,12 @@ public class ImportExportManager {
         log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " + api.getVersion());
     }
 
-    private void exportThumbnailToFileSystem(API api, String exportLocation) throws APIManagementException {
+    private void exportThumbnailToFileSystem(InputStream thumbnailInputStream, API api, String exportLocation) throws
+            APIMgtEntityImportExportException {
 
-        InputStream thumbnailInputStream = apiPublisher.getThumbnailImage(api.getId());
         if (thumbnailInputStream == null) {
             // no thumbnail found, return
-            log.info("No thumbnail found for API with api: " + api.getName() + ", version: " + api.getVersion());
+            log.debug("No thumbnail found for API with api: " + api.getName() + ", version: " + api.getVersion());
             return;
         }
         String thumbnailFileLocation = exportLocation + File.separator + THUMBNAIL_FILE_NAME;
@@ -279,7 +347,6 @@ public class ImportExportManager {
 
         // if the API already exists, can't import again
         if (apiPublisher.getAPIbyUUID(apiBuilder.getId()) != null) {
-            // TODO: should this be moved to PUT operation
             apiPublisher.updateAPI(apiBuilder);
         } else {
             apiPublisher.addAPI(apiBuilder);
@@ -304,6 +371,7 @@ public class ImportExportManager {
     }
     */
 
+    /*
     private void importSwaggerDefinition(String importLocation, String apiId, String apiName, String version) throws APIManagementException {
 
         File swaggerDefinitionFile = new File(importLocation + File.separator + SWAGGER_DEFINITION_FILE_NAME);
@@ -317,13 +385,14 @@ public class ImportExportManager {
         apiPublisher.saveSwagger20Definition(apiId, swaggerDefinitionString);
         log.debug("Successfully imported Swagger definition for API: " + apiName + ", version: " + version);
     }
+    */
 
-    private void importDocumentation (String importLocation, String apiId, String apiName, String version) throws APIManagementException {
+    private void importDocumentation (String importLocation, String apiId, String apiName, String version) {
 
         File rootDocumentationDirectoryForAPI = new File(importLocation + DOCUMENTS_ROOT_DIRECTORY);
         if (!rootDocumentationDirectoryForAPI.isDirectory()) {
             // no Docs!
-            log.warn("No documentation found for API name: " + apiName + ", version: " + version);
+            log.debug("No documentation found for API name: " + apiName + ", version: " + version);
             return;
         }
 
@@ -342,39 +411,48 @@ public class ImportExportManager {
             }
 
             // first read the 'doc.json'
-            String content = ImportExportUtils.readFileContentAsText(documentationPath + DOCUMENTATION_DEFINITION_FILE);
-            Gson gson = new GsonBuilder().create();
-            DocumentInfo aDocumentInfo = gson.fromJson(content, DocumentInfo.class);
-            // add the doc
-            apiPublisher.addDocumentationInfo(apiId, aDocumentInfo);
-            // read doc content, if {@link SourceType} is either File or Inline
-            // TODO: refactor this logic properly
-            if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                InputStream inputStream = ImportExportUtils.readFileContentAsStream(documentationPath + File.separator + aDocumentInfo.getFileName());
-                apiPublisher.uploadDocumentationFile(aDocumentInfo.getId(), inputStream, aDocumentInfo.getFileName());
-            } else if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                String inlineContent = ImportExportUtils.readFileContentAsText(documentationPath + File.separator + aDocumentInfo.getName());
-                apiPublisher.addDocumentationContent(aDocumentInfo.getId(), inlineContent);
+            String content;
+            try {
+                content = ImportExportUtils.readFileContentAsText(documentationPath + DOCUMENTATION_DEFINITION_FILE);
+                Gson gson = new GsonBuilder().create();
+                DocumentInfo aDocumentInfo = gson.fromJson(content, DocumentInfo.class);
+                // add the doc
+                apiPublisher.addDocumentationInfo(apiId, aDocumentInfo);
+                // read doc content, if {@link SourceType} is either File or Inline
+                // TODO: refactor this logic properly
+                if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
+                    InputStream inputStream = ImportExportUtils.readFileContentAsStream(documentationPath + File.separator + aDocumentInfo.getFileName());
+                    apiPublisher.uploadDocumentationFile(aDocumentInfo.getId(), inputStream, aDocumentInfo.getFileName());
+                } else if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
+                    String inlineContent = ImportExportUtils.readFileContentAsText(documentationPath + File.separator + aDocumentInfo.getName());
+                    apiPublisher.addDocumentationContent(aDocumentInfo.getId(), inlineContent);
+                }
+            } catch (APIManagementException e) {
+                // no need to throw, log and continue
+                log.error("Error in importing documentation for API: " + apiName + ", version: " + version);
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully imported documentation for API: " + apiName + ", version: " + version);
-        }
+        log.debug("Successfully imported documentation for API: " + apiName + ", version: " + version);
     }
 
-    private void importThumbnail(String importLocation, String apiId, String apiName, String version) throws APIManagementException {
+    private void importThumbnail(String importLocation, String apiId, String apiName, String version) {
 
         File thumbnailFile = new File(importLocation + File.separator + THUMBNAIL_FILE_NAME);
         if (!thumbnailFile.exists()) {
             // Thumbnail not found
-            log.warn("Thumbnail image not found for API: " + apiName + ", version: " + version + ", hence unable to import the Swagger definition");
+            log.debug("Thumbnail image not found for API: " + apiName + ", version: " + version);
             return;
         }
 
-        InputStream thumbnailStream = ImportExportUtils.readFileContentAsStream(importLocation + File.separator + THUMBNAIL_FILE_NAME);
-        // TODO: get the correct image name instead of THUMBNAIL_FILE_NAME
-        apiPublisher.saveThumbnailImage(apiId, thumbnailStream, THUMBNAIL_FILE_NAME);
+        InputStream thumbnailStream;
+        try {
+            thumbnailStream = ImportExportUtils.readFileContentAsStream(importLocation + File.separator + THUMBNAIL_FILE_NAME);
+            apiPublisher.saveThumbnailImage(apiId, thumbnailStream, THUMBNAIL_FILE_NAME);
+        } catch (APIManagementException e) {
+            // no need to throw, log and continue
+            log.error("Error in importing thumbnail for API: " + apiName + ", version: " + version, e);
+        }
 
         log.debug("Successfully imported Thumbnail for API: " + apiName + ", version: " + version);
     }

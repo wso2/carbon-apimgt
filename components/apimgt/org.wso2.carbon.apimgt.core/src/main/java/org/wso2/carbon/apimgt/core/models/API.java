@@ -828,6 +828,24 @@ public final class API {
         public String getCopiedFromApiId() {
             return copiedFromApiId;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            APIBuilder that = (APIBuilder) o;
+
+            if (!getName().equals(that.getName())) return false;
+            return getVersion().equals(that.getVersion());
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getName().hashCode();
+            result = 31 * result + getVersion().hashCode();
+            return result;
+        }
     }
 
     public String getCopiedFromApiId() {
