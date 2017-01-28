@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -221,7 +222,29 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
 
                 List<UriTemplate> list = new ArrayList<>(uriTemplateMap.values());
-                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, list);
+                List<TemplateBuilderDTO> resourceList = new ArrayList<>();
+
+                for (UriTemplate uriTemplate : list) {
+                    TemplateBuilderDTO dto = new TemplateBuilderDTO();
+                    dto.setTemplateId(uriTemplate.getTemplateId());
+                    dto.setUriTemplate(uriTemplate.getUriTemplate());
+                    dto.setHttpVerb(uriTemplate.getHttpVerb());
+                    dto.setAuthType(uriTemplate.getAuthType());
+                    dto.setPolicy(uriTemplate.getPolicy());
+                    Map<String, String> map = uriTemplate.getEndpoint();
+                    if (map.containsKey("production")) {
+                        String uuid = map.get("production");
+                        Endpoint endpoint = getEndpoint(uuid);
+                        dto.setProductionEndpoint(endpoint);
+                    }
+                    if (map.containsKey("sandbox")) {
+                        String uuid = map.get("sandbox");
+                        Endpoint endpoint = getEndpoint(uuid);
+                        dto.setSandboxEndpoint(endpoint);
+                    }
+                    resourceList.add(dto);
+                }
+                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, resourceList);
                 try {
                     String gatewayConfig = apiTemplateBuilder.getConfigStringForTemplate();
                     if (log.isDebugEnabled()) {
