@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,8 +37,13 @@ import java.util.Map;
 public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
 
     private static Logger log = LoggerFactory.getLogger(OracleSQLStatements.class);
-    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, ROW_NUMBER() OVER (ORDER BY NAME) Row_Num FROM AM_API";
+    /*private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
+            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, ROW_NUMBER() OVER (ORDER BY NAME) Row_Num FROM AM_API";*/
+
+    private static final String API_SUMMARY_SELECT =
+            "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, ROW_NUMBER() OVER (ORDER BY NAME) Row_Num "
+                    + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID ";
 
     /**
      * Creates full text search query specific to database.
@@ -50,20 +56,35 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ("OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE")
-    public PreparedStatement search(Connection connection, String searchString, int offset, int limit) throws
+    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    public PreparedStatement search(Connection connection, List<String> roles, String user, String searchString, int
+            offset, int
+            limit) throws
             APIMgtDAOException {
         /*final String query = API_SUMMARY_SELECT
                 + " WHERE (CONTAINS(DESCRIPTION, ?, 1) > 0) OR (CONTAINS(TECHNICAL_OWNER, ?, 2) > 0) "
                 + "OR (CONTAINS(CURRENT_LC_STATUS, ?, 3) > 0)";*/
-        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT +   " WHERE (CONTAINS(INDEXER, ?, 1) > 0)) "
-                + "WHERE Row_Num BETWEEN ? and ?";
-
+        StringBuilder roleListBuilder = new StringBuilder();
+        roles.forEach(item -> roleListBuilder.append("?,"));
+        roleListBuilder.append("?");
+        final String query =
+                " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE (CONTAINS(INDEXER, ?, 1) > 0) AND ((GROUP_ID IN ("
+                        + roleListBuilder.toString()
+                        + ")) OR (PROVIDER = ?))) WHERE Row_Num BETWEEN ? and ? ";
+        int queryIndex = 1;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
-            statement.setInt(2, offset);
-            statement.setInt(3, (offset + limit - 1));
+            statement.setString(queryIndex, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+            queryIndex++;
+            for (String role : roles) {
+                statement.setString(queryIndex, role);
+                queryIndex++;
+            }
+            statement.setString(queryIndex, EVERYONE_ROLE);
+            statement.setString(++queryIndex, user);
+            statement.setInt(++queryIndex, offset);
+            statement.setInt(++queryIndex, (offset + limit - 1));
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -81,10 +102,14 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ("OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE")
-    public PreparedStatement attributeSearch(Connection connection, Map<String, String> attributeMap, int offset,
+    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    public PreparedStatement attributeSearch(
+            Connection connection, List<String> roles, String user, Map<String, String> attributeMap, int offset,
             int limit) throws APIMgtDAOException {
-
+        StringBuilder roleListBuilder = new StringBuilder();
+        roles.forEach(item -> roleListBuilder.append("?,"));
+        roleListBuilder.append("?");
         StringBuffer searchQuery = new StringBuffer();
         Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
@@ -97,8 +122,9 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() + ") "
-                + "WHERE Row_Num BETWEEN ? and ?";
+        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT +    " WHERE " + searchQuery.toString() + " AND ("
+                + "(GROUP_ID IN (" + roleListBuilder.toString() + ")) OR  (PROVIDER = ?))) "
+                + "WHERE Row_Num  BETWEEN ? and ?";
         try {
             int queryIndex = 1;
             PreparedStatement statement = connection.prepareStatement(query);
@@ -106,7 +132,13 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                 statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
-            statement.setInt(queryIndex, offset);
+            for (String role : roles) {
+                statement.setString(queryIndex, role);
+                queryIndex++;
+            }
+            statement.setString(queryIndex, EVERYONE_ROLE);
+            statement.setString(++queryIndex, user);
+            statement.setInt(++queryIndex, offset);
             statement.setInt(++queryIndex, (offset + limit - 1));
             return statement;
         } catch (SQLException e) {
