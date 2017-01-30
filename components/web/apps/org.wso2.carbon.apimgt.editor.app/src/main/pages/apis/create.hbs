@@ -16,7 +16,7 @@
                 </div>
                 <div class="col-md-10">
                     <!-- Name version context input fields-->
-                    <div class="row">
+                    <div class="row basic-inputs ">
                         <div class="col-xsm-12 col-lg-4">
                             <div class="input-group input-wrap res-wrap">
                                 <label class="control-label">Name</label>
@@ -46,21 +46,26 @@
                             <h4>Implementation Method</h4>
                             <div class="col-sm-12 col-md-12">
                                 <div class="col-sm-12 col-md-12">
-                                    <label class="radio apim-pub-new-api">
-                                        <input type="radio" name="options" value="endpoint-option" checked="checked">
-                                        <span class="helper">Endpoint</span>
-                                    </label>
-                                    <label class="radio apim-pub-new-api no-border">
-                                        <input type="radio" name="options" value="swagger-option">
-                                        <span class="helper">Import Swagger</span>
-                                    </label>
-                                    <label class="radio apim-pub-new-api no-border">
-                                        <input type="radio" name="options" value="mock-option">
-                                        <span class="helper">Mock</span>
-                                    </label>
+                                    <form class="form-horizontal" id="implementation-option-form">
+                                        <div class="form-group">
+                                            <label class="radio apim-pub-new-api">
+                                                <input type="radio" name="implementation-options" value="endpoint-option"
+                                                       checked="checked">
+                                                <span class="helper">Endpoint</span>
+                                            </label>
+                                            <label class="radio apim-pub-new-api no-border">
+                                                <input type="radio" name="implementation-options" value="swagger-option">
+                                                <span class="helper">Import Swagger</span>
+                                            </label>
+                                            <label class="radio apim-pub-new-api no-border">
+                                                <input type="radio" name="implementation-options" value="mock-option">
+                                                <span class="helper">Mock</span>
+                                            </label>
+                                        </div>
+                                    </form>
                                 </div>
                                 <div class="col-sm-12 col-md-12" style="margin-left: 10%;">
-                                    <form class="form-horizontal" id="endpoint-option-form">
+                                    <form class="form-horizontal sub-implementation-option" id="endpoint-option-form">
                                         <div class="form-group">
                                             <div class="col-sm-12">
                                                 <input id="wsdl-url" name="wsdl-url" class="form-control input-small"
@@ -68,11 +73,12 @@
                                             </div>
                                         </div>
                                     </form>
-                                    <form class="form-horizontal" id="swagger-option-form" style="display: none">
+                                    <form class="form-horizontal sub-implementation-option" id="swagger-option-form" style="display: none">
                                         <div class="form-group">
                                             <div class="col-sm-12 toggleRadios">
                                                 <label class="radio sub-labels urlSelect-label"> <input
                                                         type="radio"
+                                                        checked="checked"
                                                         name="import-definition"
                                                         value="swagger-url">
                                                     <span
