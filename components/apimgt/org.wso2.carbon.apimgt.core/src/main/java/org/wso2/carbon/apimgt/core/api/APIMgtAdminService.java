@@ -56,7 +56,7 @@ public interface APIMgtAdminService {
      * @param policy
      * @throws APIManagementException
      */
-    void addPolicy(Policy policy) throws APIManagementException;
+    void addPolicy(String policyLevel, Policy policy) throws APIManagementException;
 
     /**
      * Updates existing @{@link Policy} to the system
@@ -74,4 +74,13 @@ public interface APIMgtAdminService {
      */
     void deletePolicy(Policy policy) throws APIManagementException;
 
+
+    /**
+     * Get a @{@link Policy} by policy name
+     *
+     * @param policyName
+     * @return
+     * @throws APIManagementException
+     */
+    Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
 }
