@@ -126,18 +126,22 @@ public class MappingUtil {
     public static API.APIBuilder toAPI(APIDTO apidto) {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
-        businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
-        businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
-        businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
-        businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        if(apiBusinessInformationDTO != null) {
+            businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
+            businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
+            businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
+            businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        }
 
         API_corsConfigurationDTO apiCorsConfigurationDTO = apidto.getCorsConfiguration();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
-        corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
-        corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
-        corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
-        corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
+        if(apiCorsConfigurationDTO != null) {
+            corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
+            corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
+            corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
+            corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
+            corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
+        }
         List<API_operationsDTO> operationList = apidto.getOperations();
         Map<String,UriTemplate> uriTemplateList = new HashMap();
         for (API_operationsDTO operationsDTO : operationList){
@@ -166,17 +170,22 @@ public class MappingUtil {
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(apidto.getVisibleRoles()).
-                visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getPolicies()).
                 permission(apidto.getPermission()).
                 tags(apidto.getTags()).
                 transport(apidto.getTransport()).
-                cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);
+        if(apidto.getVisibility() != null) {
+            apiBuilder.visibility(API.Visibility.valueOf(apidto.getVisibility().toString()));
+        }
+        if(apidto.getCacheTimeout() != null) {
+            apiBuilder.cacheTimeout(apidto.getCacheTimeout());
+
+        }
         return apiBuilder;
     }
 
