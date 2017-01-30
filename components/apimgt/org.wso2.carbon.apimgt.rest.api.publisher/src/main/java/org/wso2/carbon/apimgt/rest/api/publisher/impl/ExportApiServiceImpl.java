@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,9 @@ public class ExportApiServiceImpl extends ExportApiService {
                 // 404
                 String errorMsg = "No APIs found for query " + query;
                 log.error(errorMsg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<>();
+                paramList.put("query", query);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.API_NOT_FOUND, paramList);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
 

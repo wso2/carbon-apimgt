@@ -1,7 +1,7 @@
 /***********************************************************************************************************************
  *
  *  *
- *  *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *  *
  *  *   WSO2 Inc. licenses this file to you under the Apache License,
  *  *   Version 2.0 (the "License"); you may not use this file except
@@ -39,10 +39,19 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+
+/**
+ * Util class for API import and export
+ */
 public class ImportExportUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ImportExportUtils.class);
 
+    /**
+     * Deletes a directory if exists
+     *
+     * @param path path of the directory to delete
+     */
     public static void deleteDirectory(String path) {
         if (new File(path).isDirectory()) {
             try {
@@ -53,6 +62,12 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Creates a directory
+     *
+     * @param path path of the directory to create
+     * @throws APIMgtEntityImportExportException if an error occurs while creating the directory
+     */
     static void createDirectory(String path) throws APIMgtEntityImportExportException {
         try {
             Files.createDirectories(Paths.get(path));
@@ -61,7 +76,14 @@ public class ImportExportUtils {
         }
     }
 
-    static void createArchiveFromUploadedData (InputStream inputStream, String archivePath)
+    /**
+     * Creates a zip archive from the given {@link InputStream} inputStream
+     *
+     * @param inputStream {@link InputStream} instance
+     * @param archivePath path to create the zip archive
+     * @throws APIMgtEntityImportExportException if an error occurs while creating the archive
+     */
+    static void createArchiveFromInputStream(InputStream inputStream, String archivePath)
             throws APIMgtEntityImportExportException {
 
         FileOutputStream outFileStream = null;
@@ -75,6 +97,14 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Extracts a a given zip archive
+     *
+     * @param archiveFilePath path of the zip archive
+     * @param destination extract location
+     * @return name if the zip archive
+     * @throws APIMgtEntityImportExportException if an error occurs while extracting the archive
+     */
     public static String extractArchive(String archiveFilePath, String destination) throws
             APIMgtEntityImportExportException {
 
@@ -130,6 +160,12 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Creates a file
+     *
+     * @param location full path to create the file
+     * @throws APIMgtEntityImportExportException if an error occurs while extracting the file
+     */
     static void createFile (String location) throws APIMgtEntityImportExportException {
         try {
             Files.createFile(Paths.get(location));
@@ -158,7 +194,14 @@ public class ImportExportUtils {
 
     }
 
-    public static String readFileContentAsText(String path) throws APIMgtEntityImportExportException {
+    /**
+     * Read contents of a file as text
+     *
+     * @param path full path of the file to read
+     * @return text content of the file
+     * @throws APIMgtEntityImportExportException if an error occurs while reading the file
+     */
+    static String readFileContentAsText(String path) throws APIMgtEntityImportExportException {
 
         try {
             return new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
@@ -167,6 +210,13 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Create an {@link InputStream} instance by reading a file
+     *
+     * @param path full path of the file to read
+     * @return {@link InputStream} instance with file data
+     * @throws APIMgtEntityImportExportException if an error occurs while reading the file
+     */
     static InputStream readFileContentAsStream(String path) throws APIMgtEntityImportExportException {
 
         try {
@@ -176,6 +226,13 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Writes date read from {@link InputStream} to a file
+     *
+     * @param path full path of the file to write
+     * @param inputStream {@link InputStream} instance
+     * @throws APIMgtEntityImportExportException if an error occurs while writing to the file
+     */
     static void writeStreamToFile(String path, InputStream inputStream) throws APIMgtEntityImportExportException {
 
         FileOutputStream outputStream = null;
@@ -195,6 +252,14 @@ public class ImportExportUtils {
         }
     }
 
+    /**
+     * Creates a zip archive from of a directory
+     *
+     * @param sourceDirectory directory to create zip archive from
+     * @param archiveLocation path to the archive location, excluding archive name
+     * @param archiveName name of the archive to create
+     * @throws APIMgtEntityImportExportException if an error occurs while creating the archive
+     */
     static void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
             throws APIMgtEntityImportExportException {
 
@@ -212,6 +277,13 @@ public class ImportExportUtils {
 
     }
 
+    /**
+     * Queries the list of directories available under a root directory path
+     *
+     * @param path full path of the root directory
+     * @return Set of directory path under the root directory given by {@parameter path}
+     * @throws APIMgtEntityImportExportException if an error occurs while listing directories
+     */
     public static Set<String> getDirectoryList (String path) throws APIMgtEntityImportExportException {
         Set<String> directoryNames = new HashSet<>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(path))) {
@@ -225,6 +297,12 @@ public class ImportExportUtils {
         return directoryNames;
     }
 
+    /**
+     * Queries all files under a directory recursively
+     *
+     * @param sourceDirectory full path to the root directory
+     * @param fileList list containing the files
+     */
     private static void getAllFiles(File sourceDirectory, List<File> fileList) {
         File[] files = sourceDirectory.listFiles();
         if (files != null) {
