@@ -293,6 +293,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<String, String> attributeMap = new HashMap<>();
+                List<String> roles = new ArrayList<>();
+                String user = "admin";
+                //TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
                 for (String attribute : attributes) {
                     if (attribute.split(":").length > 1) {
@@ -305,9 +308,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
                 }
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(query, offset, limit);
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
-                    apiResults = getApiDAO().attributeSearchAPIs(attributeMap, offset, limit);
+                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
                 }
             } else {
                 List<String> statuses = new ArrayList<>();

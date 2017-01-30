@@ -71,10 +71,10 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        when(apiDAO.searchAPIs("pizza", 1, 2)).thenReturn(apimResultsFromDAO);
+        when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
         Assert.assertNotNull(apis);
-        verify(apiDAO, atLeastOnce()).searchAPIs("pizza", 1, 2);
+        verify(apiDAO, atLeastOnce()).searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2);
     }
 
     @Test(description = "Search APIs with an empty query")
@@ -97,7 +97,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null);
         PowerMockito.mockStatic(APIUtils.class); // TODO
-        when(apiDAO.searchAPIs("select *", 1, 2)).thenThrow(APIMgtDAOException.class);
+        when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "select *", 1, 2)).thenThrow(APIMgtDAOException.class);
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
         apiStore.searchAPIs("select *", 1, 2);
     }

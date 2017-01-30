@@ -37,12 +37,11 @@ import java.util.Map;
 public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
 
     private static Logger log = LoggerFactory.getLogger(OracleSQLStatements.class);
-    /*private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, ROW_NUMBER() OVER (ORDER BY NAME) Row_Num FROM AM_API";*/
 
     private static final String API_SUMMARY_SELECT =
-            "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, ROW_NUMBER() OVER (ORDER BY NAME) Row_Num "
+            "SELECT A.*, rownum rnum from (SELECT  DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API"
+                    + ".VERSION, API.DESCRIPTION,"
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID ";
 
     /**
@@ -62,16 +61,13 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             offset, int
             limit) throws
             APIMgtDAOException {
-        /*final String query = API_SUMMARY_SELECT
-                + " WHERE (CONTAINS(DESCRIPTION, ?, 1) > 0) OR (CONTAINS(TECHNICAL_OWNER, ?, 2) > 0) "
-                + "OR (CONTAINS(CURRENT_LC_STATUS, ?, 3) > 0)";*/
         StringBuilder roleListBuilder = new StringBuilder();
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
         final String query =
                 " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE (CONTAINS(INDEXER, ?, 1) > 0) AND ((GROUP_ID IN ("
-                        + roleListBuilder.toString()
-                        + ")) OR (PROVIDER = ?))) WHERE Row_Num BETWEEN ? and ? ";
+                        + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) ORDER BY NAME ) A WHERE "
+                        + "rownum <= ?) where rnum >= ?";
         int queryIndex = 1;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -83,8 +79,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             }
             statement.setString(queryIndex, EVERYONE_ROLE);
             statement.setString(++queryIndex, user);
-            statement.setInt(++queryIndex, offset);
             statement.setInt(++queryIndex, (offset + limit - 1));
+            statement.setInt(++queryIndex, offset);
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -122,9 +118,9 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT +    " WHERE " + searchQuery.toString() + " AND ("
-                + "(GROUP_ID IN (" + roleListBuilder.toString() + ")) OR  (PROVIDER = ?))) "
-                + "WHERE Row_Num  BETWEEN ? and ?";
+        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() + " AND ("
+                + "(GROUP_ID IN (" + roleListBuilder.toString() + ")) OR  (PROVIDER = ?)) ORDER BY NAME)  A WHERE "
+                + "rownum <= ?) where rnum >= ?";
         try {
             int queryIndex = 1;
             PreparedStatement statement = connection.prepareStatement(query);
@@ -138,8 +134,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             }
             statement.setString(queryIndex, EVERYONE_ROLE);
             statement.setString(++queryIndex, user);
-            statement.setInt(++queryIndex, offset);
             statement.setInt(++queryIndex, (offset + limit - 1));
+            statement.setInt(++queryIndex, offset);
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
