@@ -83,7 +83,7 @@ public class SampleTestObjectCreator {
                 lifeCycleStatus("CREATED").
                 lifecycleInstanceId(UUID.randomUUID().toString()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri("").
+                wsdlUri("http://localhost:9443/echo?wsdl").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).

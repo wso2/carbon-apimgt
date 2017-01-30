@@ -1107,7 +1107,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         }
     }
-    
+
 
     private void deleteAPIPermission(Connection connection, String apiID) throws SQLException {
         final String query = "DELETE FROM AM_API_GROUP_PERMISSION WHERE API_ID = ?";
@@ -1545,7 +1545,7 @@ public class ApiDAOImpl implements ApiDAO {
     private Map<String, String> getEndPointsForOperation(Connection connection, String apiId, String operationId)
             throws SQLException {
         Map<String, String> endpointMap = new HashedMap();
-        final String query = "SELECT ENDPOINT_ID,TYPE FROM AM_API_OPERATION_ENDPOINT_MAPPING WHERE API_ID=? AND " +
+        final String query = "SELECT ENDPOINT_ID,TYPE FROM AM_API_RESOURCE_ENDPOINT WHERE API_ID=? AND " +
                 "OPERATION_ID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
@@ -1561,7 +1561,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addEndPointsForOperation(Connection connection, String apiId, String operationId, Map<String,
             String> endpointMap) throws SQLException {
-        final String query = "INSERT INTO AM_API_OPERATION_ENDPOINT_MAPPING (API_ID,OPERATION_ID,TYPE,ENDPOINT_ID) " +
+        final String query = "INSERT INTO AM_API_RESOURCE_ENDPOINT (API_ID,OPERATION_ID,TYPE,ENDPOINT_ID) " +
                 "VALUES (?,?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
