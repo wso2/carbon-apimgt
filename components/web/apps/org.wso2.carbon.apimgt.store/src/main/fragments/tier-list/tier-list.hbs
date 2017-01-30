@@ -1,0 +1,11 @@
+<div class="form-group" id="tier-list">
+    <label for="tiers-list" class="hidden-xs">{{i18n "Tiers"}}</label>
+    <select id="tiers-list" name="tiers-list" class="form-control">
+        {{#each @params.policies}}
+            <option title="{{tier}}"
+                    data-content="<span><strong>{{this}}</strong><br />{{this}}</span>"
+                    value="{{this}}">{{this}}
+            </option>
+        {{/each}}
+    </select>
+</div>

@@ -1117,7 +1117,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         }
     }
-    
+
 
     private void deleteAPIPermission(Connection connection, String apiID) throws SQLException {
         final String query = "DELETE FROM AM_API_GROUP_PERMISSION WHERE API_ID = ?";

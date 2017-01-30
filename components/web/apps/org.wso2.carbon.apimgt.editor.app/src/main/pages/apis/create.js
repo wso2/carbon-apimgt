@@ -15,6 +15,5 @@
  */
 
 function onGet(env) {
-    sendToClient("swaggerURL", env.config.swaggerURL);
     return {};
 }

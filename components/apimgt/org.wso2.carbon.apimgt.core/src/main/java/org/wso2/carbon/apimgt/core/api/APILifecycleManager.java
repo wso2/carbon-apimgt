@@ -42,8 +42,8 @@ public interface APILifecycleManager {
      * @return                                  {@code LifecycleState} object of updated life cycle state.
      * @throws LifecycleException               If exception occurred while execute life cycle state change.
      */
-    LifecycleState executeLifecycleEvent(String targetState, String uuid, String user, Object resource)
-            throws LifecycleException;
+    LifecycleState executeLifecycleEvent(String currentState, String targetState, String uuid, String user, Object
+            resource) throws LifecycleException;
 
     /**
      * This method need to call for each check list item operation.

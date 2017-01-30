@@ -195,12 +195,12 @@ public class APIPublisherImplTestCase {
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH",
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH",
                 lifecycleId, user, api)).thenReturn
                 (lifecycleState);
         lifecycleState.setState("PUBLISH");
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", new HashMap<>());
-        Mockito.verify(apiLifecycleManager, Mockito.times(1)).executeLifecycleEvent("PUBLISH", lifecycleId, user, api);
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).executeLifecycleEvent("CREATED","PUBLISH", lifecycleId, user, api);
     }
 
     @Test(description = "Update api status", expectedExceptions = {APIManagementException.class})
@@ -211,7 +211,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(null);
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH", uuid, user, api))
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH", uuid, user, api))
                 .thenReturn(SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId));
         Mockito.doThrow(new APIMgtDAOException("Couldn't change the status of api ID ")).when(apiDAO)
                 .changeLifeCycleStatus(uuid, "PUBLISH");
@@ -228,7 +228,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenThrow(new APIMgtDAOException("Couldn't Create connection"));
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH", uuid, user, api))
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH", uuid, user, api))
                 .thenReturn(SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId));
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", Collections.emptyMap());

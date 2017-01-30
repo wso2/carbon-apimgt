@@ -10,7 +10,7 @@
     <title>{{#placeholder "title"}}UUF Foundation{{/placeholder}}</title>
     <!-- Le fav and touch icons -->
     {{#placeholder "favicon"}}
-        <link rel="shortcut icon" href="{{public "images/default-favicon.png"}}" type="image/png" />
+        <link rel="shortcut icon" href="{{public "images/favicon.png"}}" type="image/png" />
     {{/placeholder}}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
@@ -27,8 +27,8 @@
         <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="50" data-side="left" data-width="200">
             <!-- sidebar -->
             {{defineZone "sidebar"}}
-            <!-- tagCloud -->
-            <div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style=""></div>
+            {{defineZone "tagCloud"}}
+
         </div><!-- media left-->
         <!-- Page Content -->
         <!-- media body-->

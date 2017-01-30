@@ -21,6 +21,5 @@ function onGet(env) {
         vars = env.request.queryParams;
     }
     vars['contextPath'] = env.contextPath;
-    sendToClient("swaggerURL", env.config.swaggerURL);
     return vars;
 }
