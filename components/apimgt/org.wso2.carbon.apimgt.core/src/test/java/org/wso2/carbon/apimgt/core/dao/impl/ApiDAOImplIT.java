@@ -20,16 +20,26 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.EndPointComparator;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +52,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPI(api.getId());
@@ -55,7 +65,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddDuplicateProviderNameVersionAPI( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -83,7 +92,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddSameAPIWithDifferentProviders( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -107,7 +115,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testDuplicateContext( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API.APIBuilder duplicateAPIBuilder = SampleTestObjectCreator.createUniqueAPI();
@@ -134,7 +142,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+            testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPISummary(api.getId());
@@ -154,7 +162,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api1 = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api1);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
@@ -189,7 +197,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.provider(provider1);
         API api1 = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api1);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
@@ -242,6 +250,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         // Add APIs
         List<API> publishedAPIsSummary = new ArrayList<>();
+        testAddGetEndpoint();
         for (int i = 0; i < numberOfPublished; ++i) {
             API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).build();
             publishedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
@@ -350,6 +359,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
 
         // Add APIs
+        testAddGetEndpoint();
         for (Map.Entry<String, API> entry : apis.entrySet()) {
             API api = entry.getValue();
             apiDAO.addAPI(api);
@@ -364,39 +374,39 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(commonMixedCaseSearchString);
+        List<API> apiList = apiDAO.searchAPIs(commonMixedCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common lower case
-        apiList = apiDAO.searchAPIs(commonLowerCaseSearchString);
+        apiList = apiDAO.searchAPIs(commonLowerCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(commonUpperCaseSearchString);
+        apiList = apiDAO.searchAPIs(commonUpperCaseSearchString, 0 , 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by symbol
-        apiList = apiDAO.searchAPIs(symbolSearchString);
+        apiList = apiDAO.searchAPIs(symbolSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         API actualAPI = apiList.get(0);
         API expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search by number
-        apiList = apiDAO.searchAPIs(numberSearchString);
+        apiList = apiDAO.searchAPIs(numberSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search with spaces
-        apiList = apiDAO.searchAPIs(spaceIncludedSearchString);
+        apiList = apiDAO.searchAPIs(spaceIncludedSearchString, 0 ,10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(spaceDelimitingString);
@@ -406,7 +416,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testIsAPINameExists( ) throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-
+        testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
@@ -458,7 +468,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         apiDAO.deleteAPI(api.getId());
@@ -472,7 +482,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
@@ -486,7 +496,44 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI,TestUtil.printDiff(apiFromDB,expectedAPI));
     }
+    @Test
+    public void testAddGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertEquals(endpoint,retrieved);
+    }
+    @Test
+    public void testAddUpdateGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
+        Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
+        apiDAO.updateEndpoint(updatedEndpoint);
+        Endpoint retrieved = apiDAO.getEndpoint(updatedEndpoint.getId());
+        Assert.assertEquals(updatedEndpoint,retrieved);
+    }
+    @Test
+    public void testAddDeleteGetEndpoint() throws Exception{
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        apiDAO.deleteEndpoint(endpoint.getId());
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertNull(retrieved);
+    }
 
-
-
+    @Test
+    public void testAddGetAllEndPoints() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
+        Endpoint endpoint2 = SampleTestObjectCreator.createAlternativeEndpoint();
+        apiDAO.addEndpoint(endpoint1);
+        apiDAO.addEndpoint(endpoint2);
+        List<Endpoint> endpointListAdd = new ArrayList<>();
+        endpointListAdd.add(endpoint1);
+        endpointListAdd.add(endpoint2);
+        List<Endpoint> endpointList = apiDAO.getEndpoints();
+        APIUtils.isListsEqualIgnoreOrder(endpointListAdd, endpointList, new EndPointComparator());
+    }
 }

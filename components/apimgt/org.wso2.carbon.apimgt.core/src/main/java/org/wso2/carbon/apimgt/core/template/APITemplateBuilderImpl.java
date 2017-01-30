@@ -22,7 +22,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -33,9 +33,9 @@ import java.util.List;
  */
 public class APITemplateBuilderImpl implements APITemplateBuilder {
     private API api;
-    private List<APIResource> apiResources;
+    private List<TemplateBuilderDTO> apiResources;
 
-    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<APIResource> apiResources) {
+    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<TemplateBuilderDTO> apiResources) {
         this.api = apiBuilder.build();
         this.apiResources = apiResources;
     }

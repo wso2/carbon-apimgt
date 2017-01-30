@@ -51,7 +51,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             Policy tier = apiStore.getPolicy(tierLevel, tierName);
             tierDTO = TierMappingUtil.fromTierToDTO(tier, tierLevel);
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving tiers";
+            String errorMessage = "Error while retrieving tier";
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.TIER_LEVEL, tierLevel);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

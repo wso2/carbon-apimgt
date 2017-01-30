@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.jms;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
@@ -31,8 +32,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -104,7 +103,8 @@ public class APITopicSubscriber {
             if (log.isDebugEnabled()) {
                 log.debug("Got API config from topic subscriber = " + msg);
             }
-            deployApiConfig(msg);
+            GatewayConfigDTO dto = new Gson().fromJson(msg, GatewayConfigDTO.class);
+            deployApiConfig(dto);
         }
     }
 
@@ -151,26 +151,14 @@ public class APITopicSubscriber {
     /**
      * Deploying API config in to FS
      *
-     * @param apiConfig api configuration
+     * @param configDTO api configuration
      */
-    private void deployApiConfig(String apiConfig) {
+    private void deployApiConfig(GatewayConfigDTO configDTO) {
         String apiConfigExtension = ".xyz";
-        String reg = "\"(.*?)\"";
-        Pattern p = Pattern.compile(reg);
 
-        String context;
-        Matcher m = p.matcher(apiConfig);
-        if (m.find()) {
-            context = m.group(1);
-        } else {
-            context = "defaultApiName_" + System.currentTimeMillis();
-            log.warn("unable to find the API name and version. Setting default file name as " + context);
-        }
-        String fileName = context.replaceAll("/", "_") + apiConfigExtension;
-        String path =
-                System.getProperty("carbon.home") + File.separator + "deployment" + File.separator + "integration-flows"
-                        + File.separator + fileName;
-        saveApi(path, apiConfig);
+        String fileName = configDTO.apiName + "_" + configDTO.version + apiConfigExtension;
+        String path = System.getProperty("carbon.home") + File.separator + "samples" + File.separator + fileName;
+        saveApi(path, configDTO.config);
         log.info("Deployed API config in " + path);
     }
 
@@ -201,5 +189,16 @@ public class APITopicSubscriber {
                 log.error("Error closing connections", e);
             }
         }
+    }
+
+    /**
+     * data and config holder dto to publish as json
+     */
+    private class GatewayConfigDTO {
+        private String apiName;
+        private String context;
+        private String version;
+        private String creator;
+        private String config;
     }
 }

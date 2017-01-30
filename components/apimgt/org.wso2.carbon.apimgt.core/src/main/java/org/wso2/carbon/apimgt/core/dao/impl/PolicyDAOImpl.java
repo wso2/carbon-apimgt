@@ -196,7 +196,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         if (resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
                 .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
             RequestCountLimit reqLimit = new RequestCountLimit();
-            reqLimit.setUnitTime(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setUnitTime(resultSet.getLong(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
             reqLimit.setTimeUnit(
                     resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             reqLimit.setRequestCount(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
@@ -510,10 +510,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "Count", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1, 60, "s", "API");
 
                     addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
                     addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");

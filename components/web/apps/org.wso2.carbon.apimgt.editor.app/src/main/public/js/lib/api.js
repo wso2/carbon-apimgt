@@ -208,12 +208,31 @@ class API {
     get(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                let payload = {
-                    apiId: id,
-                };
                 client.setBasePath("");
                 /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
                 return client.default.apisApiIdGet(
+                    {apiId: id, 'Content-Type': "application/json"}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
+
+    /**
+     * Delete an API given an api identifier
+     * @param id {String} UUID of the API which want to delete
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    deleteAPI(id, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                client.setBasePath("");
+                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
+                return client.default.apisApiIdDelete(
                     {apiId: id, 'Content-Type': "application/json"}, this._requestMetaData());
             }
         );

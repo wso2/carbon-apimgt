@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-function onRequest(env) {
+function onGet(env) {
     sendToClient("loginRedirectUri", env.config.loginRedirectUri);
     sendToClient("loginPageUri", env.config.loginPageUri);
     sendToClient("contextPath", env.contextPath);

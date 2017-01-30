@@ -32,7 +32,7 @@ public class APIDTO   {
   @JsonProperty("provider")
   private String provider = null;
 
-  @JsonProperty("apiDefinition")
+  @JsonProperty("endpointId")
   private String apiDefinition = null;
 
   @JsonProperty("status")
@@ -168,7 +168,7 @@ public class APIDTO   {
 
    /**
    * Swagger definition of the API which contains details about URI templates and scopes 
-   * @return apiDefinition
+   * @return endpointId
   **/
   @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes ")
   public String getApiDefinition() {
@@ -343,7 +343,7 @@ public class APIDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
+    sb.append("    endpointId: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");

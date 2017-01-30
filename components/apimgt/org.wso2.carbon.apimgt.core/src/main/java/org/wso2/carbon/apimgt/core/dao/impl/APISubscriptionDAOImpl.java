@@ -130,11 +130,15 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Retrieve all API Subscriptions for validation
      *
+     * @param limit Subscription Limit
      * @return A list of {@link SubscriptionValidationData} objects
      * @throws APIMgtDAOException
      */
     @Override
-    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation() throws APIMgtDAOException {
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(int limit) throws APIMgtDAOException {
+        if (limit == 0) {
+            return new ArrayList<>();
+        }
         final String getSubscriptionsSql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
                 "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +

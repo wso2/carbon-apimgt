@@ -16,7 +16,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.core.models.policy.Limit;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 
@@ -67,6 +71,14 @@ public class TierMappingUtil {
         dto.setName(tier.getPolicyName());
         dto.setDescription(tier.getDescription());
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(StringUtils.upperCase(tierLevel)));
+        dto.setUnitTime(tier.getDefaultQuotaPolicy().getLimit().getUnitTime());
+
+        Limit limit = tier.getDefaultQuotaPolicy().getLimit();
+        if ( limit instanceof RequestCountLimit) {
+            dto.setRequestCount(((RequestCountLimit) limit).getRequestCount());
+        } else if (limit instanceof BandwidthLimit) {
+            dto.setRequestCount(((BandwidthLimit) limit).getDataAmount());
+        }
         //// TODO: 08/12/16 More fields to map 
         return dto;
     }

@@ -22,7 +22,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-30T11:33:50.722+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
@@ -98,7 +98,7 @@ public abstract class ApisApiService {
  ,String ifModifiedSince
  ) throws NotFoundException;
     public abstract Response apisApiIdSwaggerPut(String apiId
- ,String apiDefinition
+ ,String endpointId
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
@@ -132,6 +132,11 @@ public abstract class ApisApiService {
     public abstract Response apisHead(String query
  ,String accept
  ,String ifNoneMatch
+ ) throws NotFoundException;
+    public abstract Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
  ) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
  ,String contentType

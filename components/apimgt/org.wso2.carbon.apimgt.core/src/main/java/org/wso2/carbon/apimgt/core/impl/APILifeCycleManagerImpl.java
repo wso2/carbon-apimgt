@@ -42,9 +42,9 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
      * @throws LifecycleException If exception occurred while execute life cycle state change.
      */
     @Override
-    public LifecycleState executeLifecycleEvent(String targetState, String uuid, String user, Object resource) throws
-            LifecycleException {
-        return LifecycleOperationManager.executeLifecycleEvent(targetState, uuid, user, resource);
+    public LifecycleState executeLifecycleEvent(String currentState, String targetState, String uuid, String user,
+                                                Object resource) throws LifecycleException {
+        return LifecycleOperationManager.executeLifecycleEvent(currentState, targetState, uuid, user, resource);
     }
 
     /**

@@ -13,6 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function onRequest() {
+function onGet() {
     return {showNavigation: true, isNoMobileDevice: true, isallowed: true};
 }
