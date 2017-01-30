@@ -467,7 +467,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
                 API originalAPI = apiBuilder.build();
-                getApiLifecycleManager().executeLifecycleEvent(status, apiBuilder
+                getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), status, apiBuilder
                         .getLifecycleInstanceId(), getUsername(), originalAPI);
                 if (deprecateOlderVersion) {
                     if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
@@ -476,8 +476,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
                                     (previousAPI.getLifecycleInstanceId()));
-                            getApiLifecycleManager().executeLifecycleEvent(APIStatus.DEPRECATED.getStatus(), previousAPI
-                                    .getLifecycleInstanceId(), getUsername(), previousAPI.build());
+                            getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), APIStatus
+                                    .DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(), getUsername(),
+                                    previousAPI.build());
                         }
                     }
                 }
@@ -535,19 +536,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
                 apiBuilder.copiedFromApiId(api.getId());
+                if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
+                }
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
         } catch (APIMgtDAOException e) {
-            if (lifecycleState != null) {
-                try {
-                    getApiLifecycleManager().removeLifecycle(lifecycleState.getLifecycleId());
-                } catch (LifecycleException e1) {
-                    log.error("Couldn't disassociate lifecycle " + lifecycleState.getLifecycleId());
-                }
-            }
             String errorMsg = "Couldn't create new API version from " + apiId;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
