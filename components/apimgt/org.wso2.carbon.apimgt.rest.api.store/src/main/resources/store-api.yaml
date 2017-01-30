@@ -1450,6 +1450,9 @@ definitions:
         type: string
       callbackUrl:
         type: string
+      permission:
+        type: string
+        example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
       description:
         type: string
       lifeCycleStatus:

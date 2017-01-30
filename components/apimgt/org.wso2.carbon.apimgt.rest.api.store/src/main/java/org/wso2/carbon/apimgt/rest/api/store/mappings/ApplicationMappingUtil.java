@@ -65,6 +65,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setPermission(application.getPermissionString());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getCreatedUser());
         List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
@@ -126,6 +127,7 @@ public class ApplicationMappingUtil {
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setId(applicationDTO.getApplicationId());
+        application.setPermissionString(applicationDTO.getPermission());
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;
