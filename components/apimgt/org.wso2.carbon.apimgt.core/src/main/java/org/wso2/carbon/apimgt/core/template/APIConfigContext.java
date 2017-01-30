@@ -48,6 +48,7 @@ public class APIConfigContext extends ConfigContext {
         VelocityContext context = new VelocityContext();
         context.put("version", api.getVersion());
         context.put("apiContext", api.getContext());
+        context.put("apiName", api.getName());
         return context;
     }
 
