@@ -311,7 +311,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 }
             } else {
                 List<String> statuses = new ArrayList<>();
-                statuses.add(APIStatus.PUBLISHED.getStatus());
+                statuses.add("Published");
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
                 apiResults = getApiDAO().getAPIsByStatus(statuses);
             }
