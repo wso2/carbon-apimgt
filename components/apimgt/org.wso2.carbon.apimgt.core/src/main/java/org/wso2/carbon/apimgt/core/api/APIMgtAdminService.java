@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
 
@@ -48,4 +49,29 @@ public interface APIMgtAdminService {
      */
     List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException;
+
+    /**
+     * Adds new @{@link Policy} to the system
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    void addPolicy(Policy policy) throws APIManagementException;
+
+    /**
+     * Updates existing @{@link Policy} to the system
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    void updatePolicy(Policy policy) throws APIManagementException;
+
+    /**
+     * Delete existing @{@link Policy} in the system
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    void deletePolicy(Policy policy) throws APIManagementException;
+
 }
