@@ -103,6 +103,8 @@ class API {
         });
         this.client.then(
             (swagger) => {
+                swagger.setSchemes(["http"]);
+                swagger.setHost("localhost:9090");
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (var index in scopes) {
@@ -120,13 +122,20 @@ class API {
         return swaggerURL;
     }
 
-    _requestMetaData(key_scope = 'default') {
+    /**
+     *
+     * @param data
+     * @returns {{clientAuthorizations: {api_key: SwaggerClient.ApiKeyAuthorization}, requestContentType: (*|string)}}
+     * @private
+     */
+    _requestMetaData(data = {}) {
+        let key_scope = data.key_scope || 'default';
         let access_key_header = "Bearer " + this.keyMan.getKey(key_scope); //TODO: tmkb Depend on result from promise
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
             },
-            requestContentType: "application/json"
+            requestContentType: data['Content-Type'] || "application/json"
         };
         return request_meta;
     }
@@ -140,16 +149,7 @@ class API {
         let template = {
             "name": null,
             "context": null,
-            "version": null,
-            "apiDefinition": "{ \"paths\": { \"\/*\": { \"get\": { \"description\": \"Global Get\" } } }, \"swagger\": \"2.0\" }",
-            "cacheTimeout": 10,
-            "transport": ['https'],
-            "policies": [
-                "Unlimited"
-            ],
-            "visibility": "PUBLIC",
-            "businessInformation": {},
-            "corsConfiguration": {}
+            "version": null
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -168,15 +168,25 @@ class API {
      * @returns {Promise} Promise after creating and optionally calling the callback method.
      */
     create(api_data, callback = null) {
-        let payload = this._updateTemplate(api_data);
-        var promise_create = this.client.then(
-            (client) => {
-                client.setBasePath("");
-                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
-                return client.default.apisPost(
-                    {body: payload, 'Content-Type': "application/json"}, this._requestMetaData());
-            }
-        );
+        let payload;
+        let promise_create;
+        if (api_data.constructor.name == "Blob") {
+            payload = {file: api_data, 'Content-Type': "multipart/form-data"};
+            promise_create = this.client.then(
+                (client) => {
+                    return client["API (Collection)"].post_apis_import_definition(
+                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"}));
+                }
+            );
+        } else {
+            payload = {body: this._updateTemplate(api_data), "Content-Type": "application/json"};
+            promise_create = this.client.then(
+                (client) => {
+                    return client["API (Collection)"].post_apis(
+                        payload, this._requestMetaData());
+                }
+            );
+        }
         if (callback) {
             return promise_create.then(callback);
         } else {
@@ -193,9 +203,7 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                client.setBasePath("");
-                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
-                return client.default.apisGet();
+                return client["API (Collection)"].get_apis();
             }
         );
         if (callback) {
@@ -208,10 +216,8 @@ class API {
     get(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                client.setBasePath("");
-                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
-                return client.default.apisApiIdGet(
-                    {apiId: id, 'Content-Type': "application/json"}, this._requestMetaData());
+                return client["API (Individual)"].get_apis_apiId(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -230,10 +236,8 @@ class API {
     deleteAPI(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                client.setBasePath("");
-                /* TODO: This is a temporary workaround until the MSF4J fix come to register interceptors with given context path tmkb*/
-                return client.default.apisApiIdDelete(
-                    {apiId: id, 'Content-Type': "application/json"}, this._requestMetaData());
+                return client["API (Individual)"].delete_apis_apiId(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
