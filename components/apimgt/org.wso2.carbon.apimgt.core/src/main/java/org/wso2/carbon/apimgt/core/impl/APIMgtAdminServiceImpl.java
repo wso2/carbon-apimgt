@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
 
@@ -46,5 +47,20 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
+    }
+
+    @Override
+    public void addPolicy(Policy policy) throws APIManagementException {
+
+    }
+
+    @Override
+    public void updatePolicy(Policy policy) throws APIManagementException {
+
+    }
+
+    @Override
+    public void deletePolicy(Policy policy) throws APIManagementException {
+
     }
 }
