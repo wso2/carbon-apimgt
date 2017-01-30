@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -18,9 +19,11 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
 
     private APISubscriptionDAO apiSubscriptionDAO;
+    private PolicyDAO policyDAO;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO) {
+    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
     }
 
     /**
@@ -50,8 +53,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     @Override
-    public void addPolicy(Policy policy) throws APIManagementException {
-
+    public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
+        policyDAO.addPolicy(policyLevel, policy);
     }
 
     @Override
@@ -61,6 +64,12 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     @Override
     public void deletePolicy(Policy policy) throws APIManagementException {
+
+    }
+
+    @Override
+    public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
+        return policyDAO.getPolicy(policyLevel, policyName);
 
     }
 }
