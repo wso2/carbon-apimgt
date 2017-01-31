@@ -75,6 +75,18 @@
             <artifactId>org.wso2.carbon.security.caas</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.messaging</groupId>
             <artifactId>org.wso2.carbon.messaging</artifactId>
             <scope>provided</scope>
@@ -106,10 +118,14 @@
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
+            org.wso2.carbon.transport.http.netty.config.*;version="${carbon.transport.package.import.version.range}",
             org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
             org.json.simple.*,
             org.apache.commons.io.*;
             com.google.gson.*,
+            io.swagger.parser.*,
+            io.swagger.models.*,
+            io.swagger.util.*,
         </import.package>
         <export.package>
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.exp.pkg.version}",

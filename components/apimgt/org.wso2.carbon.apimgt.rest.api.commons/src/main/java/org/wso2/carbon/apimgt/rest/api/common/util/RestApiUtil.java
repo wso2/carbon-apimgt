@@ -21,6 +21,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -40,12 +42,16 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
+import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
+import org.wso2.carbon.transport.http.netty.config.TransportsConfiguration;
+import org.wso2.carbon.transport.http.netty.config.YAMLTransportConfigurationBuilder;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -57,6 +63,10 @@ public class RestApiUtil {
     private static String publisherRestAPIDefinition;
     private static String storeRestAPIDefinition;
     private static String adminRestAPIDefinition;
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
+    private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
+            .getApimConfigurations();
 
     /**
      * Get the current logged in user's username
@@ -561,5 +571,39 @@ public class RestApiUtil {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putAll(map);
         return jsonObject.toJSONString();
+    }
+
+    public static String getContext(String appType) {
+        APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
+        if (RestApiConstants.APPType.PUBLISHER.equals(appType)) {
+            return apimConfigurations.getPublisherContext();
+        } else if (RestApiConstants.APPType.STORE.equals(appType)) {
+            return apimConfigurations.getStoreContext();
+        } else {
+            return null;
+        }
+    }
+
+    public static String getHost(String protocol) {
+        TransportsConfiguration transportsConfiguration = YAMLTransportConfigurationBuilder.build();
+        Set<ListenerConfiguration> listenerConfigurationSet = transportsConfiguration.getListenerConfigurations();
+        String host = apimConfigurations.getHostname();
+        if (!apimConfigurations.isReverseProxyEnabled()) {
+            if (HTTP.equals(protocol)) {
+                for (ListenerConfiguration listenerConfiguration : listenerConfigurationSet) {
+                    if (HTTP.equals(listenerConfiguration.getScheme())) {
+                        host = host.concat(":").concat(String.valueOf(listenerConfiguration.getPort()));
+                        break;
+                    }
+                }
+            } else {
+                for (ListenerConfiguration listenerConfiguration : listenerConfigurationSet) {
+                    if (HTTPS.equals(listenerConfiguration.getScheme())) {
+                        host = host.concat(":").concat(String.valueOf(listenerConfiguration.getPort()));
+                    }
+                }
+            }
+        }
+        return host;
     }
 }
