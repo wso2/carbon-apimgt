@@ -39,6 +39,29 @@ public class APIMConfigurations {
     private String username = "admin";
 //    @Element(description = "password for topic")
     private String password = "admin";
+//    @Element(description = "password for topic")
+    private boolean reverseProxyEnabled = false;
+//    @Element(description = "hostname")
+    private String hostname = "localhost";
+//    @Element(description = "context for publisher")
+    private String publisherContext = "/api/am/publisher/v0.10";
+//    @Element(description = "context for store")
+    private String storeContext = "/api/am/store/v0.10";
+    public String getHostname() {
+        return hostname;
+    }
+
+    public boolean isReverseProxyEnabled() {
+        return reverseProxyEnabled;
+    }
+
+    public String getPublisherContext() {
+        return publisherContext;
+    }
+
+    public String getStoreContext() {
+        return storeContext;
+    }
 
     public String getCarbonClientId() {
         return carbonClientId;
