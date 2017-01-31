@@ -178,13 +178,13 @@ public class MappingUtil {
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                corsConfiguration(corsConfiguration);
-        if(apidto.getVisibility() != null) {
+                corsConfiguration(corsConfiguration).
+                isDefaultVersion(apidto.getIsDefaultVersion());
+        if (apidto.getVisibility() != null) {
             apiBuilder.visibility(API.Visibility.valueOf(apidto.getVisibility().toString()));
         }
-        if(apidto.getCacheTimeout() != null) {
+        if (apidto.getCacheTimeout() != null) {
             apiBuilder.cacheTimeout(apidto.getCacheTimeout());
-
         }
         return apiBuilder;
     }
