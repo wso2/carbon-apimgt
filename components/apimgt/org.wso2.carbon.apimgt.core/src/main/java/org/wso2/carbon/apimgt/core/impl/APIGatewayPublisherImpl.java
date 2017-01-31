@@ -68,10 +68,21 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             ApiDAO apiDAO = DAOFactory.getApiDAO();
             String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
             String gwHome = System.getProperty("gwHome");
+            String defaultConfig = null;
+            if (api.isDefaultVersion()) {
+                String newContext = "@BasePath(\"/" + api.getContext() + "\")";
+                defaultConfig = gatewayConfig.replaceAll("@BasePath\\(\"(.)*\"\\)", newContext);
+            }
             if (gwHome == null) {
                 publishMessage(api, gatewayConfig);
+                if (api.isDefaultVersion()) {
+                    publishMessage(api, defaultConfig);
+                }
             } else {
-                saveApi(api, gwHome, gatewayConfig);
+                saveApi(api, gwHome, gatewayConfig, false);
+                if (api.isDefaultVersion()) {
+                    saveApi(api, gwHome, defaultConfig, true);
+                }
             }
             return true;
         } catch (JMSException e) {
@@ -142,7 +153,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
      * @param gwHome  path of the gateway
      * @param content API config
      */
-    private void saveApi(API api, String gwHome, String content) {
+    private void saveApi(API api, String gwHome, String content, boolean isDefaultApi) {
         String gatewayFileExtension = ".xyz";
         String deploymentDirPath = gwHome + File.separator + "deployment";
         File deploymentDir = new File(deploymentDirPath);
@@ -154,9 +165,12 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             }
         }
 
-        String path = deploymentDirPath + File.separator + api.getName() + (api.getVersion() != null ?
-                '_' + api.getVersion() :
-                "") + gatewayFileExtension;
+        String path;
+        if (isDefaultApi) {
+            path = deploymentDirPath + File.separator + api.getName() + gatewayFileExtension;
+        } else {
+            path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
+        }
         Writer writer = null;
         PrintWriter printWriter = null;
         try {

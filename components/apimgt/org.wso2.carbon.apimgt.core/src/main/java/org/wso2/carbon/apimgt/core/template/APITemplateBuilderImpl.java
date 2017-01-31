@@ -41,7 +41,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForTemplate() throws APITemplateException {
+    public String getConfigStringFromTemplate() throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
@@ -51,8 +51,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.init();
-            Template t = velocityengine.getTemplate("resources" + File.separator + "template.xml");
-            t.merge(context, writer);
+            Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
+            template.merge(context, writer);
         } catch (Exception e) {
             //        log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
