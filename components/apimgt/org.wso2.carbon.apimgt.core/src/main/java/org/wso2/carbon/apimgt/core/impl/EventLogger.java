@@ -78,10 +78,10 @@ public class EventLogger implements EventObserver {
     }
 
     @Override
-    public void captureEvent(Component component, Event event) {
+    public void captureEvent(Component component, Event event, String username) {
         // the following statement is used to log any events
-        logger.info("Component Name: " + component.getComponentName() + " - Event: "
-                + event + "\n");
+        logger.info("Component Name: " + component.getComponent() + " - Event: "
+                + event.getEvent() + "- Username: " + username + "\n");
     }
 
     public File getRelativeDirectory() {

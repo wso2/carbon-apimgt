@@ -29,7 +29,7 @@ public interface APIMObservable {
 
     void registerObserver(EventObserver observer);
 
-    void notifyObservers(Component component, Event event);
+    void notifyObservers(Component component, Event event, String username);
 
     void removeObserver(EventObserver observer);
 

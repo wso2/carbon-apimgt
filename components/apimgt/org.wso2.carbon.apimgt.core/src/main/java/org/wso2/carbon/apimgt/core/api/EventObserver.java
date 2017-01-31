@@ -27,5 +27,5 @@ import org.wso2.carbon.apimgt.core.models.Event;
  */
 @FunctionalInterface
 public interface EventObserver {
-    public void captureEvent(Component component, Event event);
+    public void captureEvent(Component component, Event event, String username);
 }

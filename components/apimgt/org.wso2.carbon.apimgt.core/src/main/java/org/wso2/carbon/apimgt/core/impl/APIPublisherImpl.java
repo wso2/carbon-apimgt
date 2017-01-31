@@ -217,7 +217,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
                 ObserverNotifierThread observerNotifierThread =
-                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION, this);
+                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION, getUsername(), this);
                 observerNotifierThread.start();
             } else {
                 String message = "Duplicate API already Exist with name/Context " + apiBuilder.getName();
@@ -280,7 +280,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
                         ObserverNotifierThread observerNotifierThread =
-                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE, this);
+                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE,
+                                        getUsername(), this);
                         observerNotifierThread.start();
                     }
                 } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
@@ -669,7 +670,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                     ObserverNotifierThread observerNotifierThread =
-                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION, this);
+                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION,
+                                    getUsername(), this);
                     observerNotifierThread.start();
                 }
             } else {
@@ -877,8 +879,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public void notifyObservers(Component component, Event event) {
-        observerList.forEach(x -> x.captureEvent(component, event));
+    public void notifyObservers(Component component, Event event, String username) {
+        observerList.forEach(x -> x.captureEvent(component, event, username));
     }
 
     @Override

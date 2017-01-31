@@ -25,13 +25,13 @@ package org.wso2.carbon.apimgt.core.models;
 public enum Component {
     API_PUBLISHER("API_PUBLISHER"), API_STORE("API_STORE"), ADMIN_PORTAL("ADMIN_PORTAL");
 
-    private String componentName;
+    private String component;
 
-    Component(String componentName) {
-        this.componentName = componentName;
+    Component(String component) {
+        this.component = component;
     }
 
-    public String getComponentName() {
-        return componentName;
+    public String getComponent() {
+        return component;
     }
 }

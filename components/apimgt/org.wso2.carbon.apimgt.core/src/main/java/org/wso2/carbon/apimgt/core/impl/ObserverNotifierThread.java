@@ -31,19 +31,21 @@ public class ObserverNotifierThread implements Runnable {
 
     private Component component;
     private Event event;
+    private String username;
     private Thread threadObj;
     private APIMObservable observable;
 
-    public ObserverNotifierThread(Component component, Event event, APIMObservable observable) {
+    public ObserverNotifierThread(Component component, Event event, String username, APIMObservable observable) {
         this.component = component;
         this.event = event;
+        this.username = username;
         this.observable = observable;
     }
 
     @Override
     public void run() {
         if (observable != null) {
-            observable.notifyObservers(component, event);
+            observable.notifyObservers(component, event, username);
         }
     }
 

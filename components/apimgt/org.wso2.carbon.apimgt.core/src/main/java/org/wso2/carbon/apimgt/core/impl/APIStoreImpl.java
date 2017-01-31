@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -363,8 +362,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public void notifyObservers(Component component, Event event) {
-        observerList.forEach(x -> x.captureEvent(component, event));
+    public void notifyObservers(Component component, Event event, String username) {
+        observerList.forEach(x -> x.captureEvent(component, event, username));
     }
 
     @Override
