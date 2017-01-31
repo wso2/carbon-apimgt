@@ -246,7 +246,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
                 APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, resourceList);
                 try {
-                    String gatewayConfig = apiTemplateBuilder.getConfigStringForTemplate();
+                    String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate();
                     if (log.isDebugEnabled()) {
                         log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
                     }

@@ -176,7 +176,8 @@ public class MappingUtil {
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                corsConfiguration(corsConfiguration);
+                corsConfiguration(corsConfiguration).
+                isDefaultVersion(apidto.getIsDefaultVersion());
         return apiBuilder;
     }
 
