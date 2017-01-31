@@ -1,12 +1,13 @@
 $(function () {
 
     var apiId = $("#apiId").val();
-    var apiClient = new SwaggerClient({
-        url: swaggerURL + 'apis',
+    var swaggerClient = new SwaggerClient({
+        url: swaggerURL,
         success: function (swaggerData) {
-            apiClient.setBasePath("");
+            swaggerClient.setSchemes(["http"]);
+            swaggerClient.setHost("localhost:9090");
 
-            apiClient.default.apisApiIdGet({"apiId": apiId},
+            swaggerClient["API (Individual)"].get_apis_apiId({"apiId": apiId},
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
@@ -42,16 +43,6 @@ $(function () {
 
 
                     /*
-                       $.get('/store/public/components/root/base/templates/apis/{apiId}/api-tier-list.hbs', function (templateData) {
-
-                           var apiOverviewTemplate = Handlebars.compile(templateData);
-                           // Inject template data
-                           var compiledTemplate = apiOverviewTemplate(context);
-
-                           // Append compiled template into page
-                           $('#tier-list').append(compiledTemplate);
-                       }, 'html');
-
                        $.get('/store/public/components/root/base/templates/apis/{apiId}/api-subscriptions.hbs', function (templateData) {
 
                            var apiOverviewTemplate = Handlebars.compile(templateData);
@@ -132,6 +123,7 @@ $(function () {
                     }
 
                     $.get('/store/public/components/root/base/templates/apis/{apiId}/api-detail-tab-list.hbs', function (templateData) {
+                       var context = {};
                         context.tabList = tabs;
                         var apiOverviewTemplate = Handlebars.compile(templateData);
                         // Inject template data
@@ -231,14 +223,16 @@ $(function () {
 
                         }
 
-                    }, 'html')
+                    },  function (errorThrown) {
+                        alert("Error occurred while retrieve api with id  : " + apiId);
+                    }, 'html');
 
 
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
-
+/*
             apiClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 12770569-28a9-3864-9f7b-c3fcdc16b890", "header"));
             apiClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (jsonData) {
@@ -294,7 +288,7 @@ $(function () {
                 },
                 function (error) {
                     alert("Error occurred while retrieve Applications" + erro);
-                });
+                });*/
         },
         failure : function(error){
             console.log("Error occurred while loading swagger definition");

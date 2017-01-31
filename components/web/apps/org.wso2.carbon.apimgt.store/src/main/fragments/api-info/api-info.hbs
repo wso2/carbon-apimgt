@@ -1,3 +1,4 @@
+{{log this}}
 <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2 col-md-height col-sm-middle col-lg-top"
      id="api-thumbnail">
     <div class="white-wrapper details-wrapper">
@@ -26,7 +27,7 @@
                         <div class="form-group">
                             <label class="col-xs-4 col-sm-4 control-label"><strong>{{i18n "By"}}:</strong></label>
                             <div class="col-xs-8 col-sm-8">
-                                <p class="form-control-static">{{@params.provider}}</p>
+                                <p class="form-control-static">admin</p>
                             </div>
                         </div>
                         <div class="form-group">
@@ -39,7 +40,7 @@
                             <label class="col-xs-4 col-sm-4 control-label"><strong>{{i18n "Status"}}:</strong></label>
                             <div class="col-xs-8 col-sm-8">
                                 <p class="form-control-static"><span
-                                        class="label label-primary">{{@params.status}}</span></p>
+                                        class="label label-primary">{{@params.lifeCycleStatus}}</span></p>
                             </div>
                         </div>
                         {{#if @params.rating}}
