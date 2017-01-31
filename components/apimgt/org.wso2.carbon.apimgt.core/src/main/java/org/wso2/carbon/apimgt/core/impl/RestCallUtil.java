@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.core.models.ContentType;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.core.impl;
+package org.wso2.carbon.apimgt.core.models;
 
 import javax.ws.rs.core.MediaType;
 
