@@ -110,6 +110,44 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+#-----------------------------------------------------
+#  Retrieve API Infomation Summary
+#-----------------------------------------------------
+
+  /apis-summary:
+    get:
+      summary: Summary of all available apis
+      description: Request summary of all available apis.
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription Validation Information.
+          schema:
+            $ref: '#/definitions/ResponseList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -176,6 +214,59 @@ definitions:
         type: string
         description: |
           Subscription Policy.
+
+#-----------------------------------------------------
+# API Summary Info resource
+#-----------------------------------------------------
+  UriTemplate:
+    title: Uri template Information
+    properties:
+      uriTemplate:
+        type: string
+        description: |
+          uri template of api.
+      httpVerb:
+        type: string
+        description: |
+          http verb of the uri template.
+      authType:
+        type: string
+        description: |
+          auth type of uri tamplate.
+      policy:
+        type: string
+        description: |
+          policy of uri template.
+  APISummary:
+    title: APIs Summary Information
+    properties:
+      id:
+        type: string
+        description: |
+          uuid of the api.
+      name:
+        type: string
+        description: |
+          api name.
+      context:
+        type: string
+        description: |
+          api context.
+      uriTemplates:
+        type: array
+        "items":
+          "$ref": "#/definitions/UriTemplate"
+        description: |
+          List of uriTemplates.
+  ResponseList:
+    title: Response of  a object list
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APISummary'
+        description: |
+          List of apis summery.
 
 #-----------------------------------------------------
 # The Error resource
