@@ -368,7 +368,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().entity(apiGatewayConfig).build();
+            String url = RestApiUtil.getSwaggerGetURL(apiId);
+            return Response.ok().header(RestApiConstants.SWAGGER_GET_URL_HEADER, url).entity(apiGatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -468,7 +469,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().entity(apiSwagger).build();
+            String url = RestApiUtil.getGatewayConfigGetURL(apiId);
+            return Response.ok().header(RestApiConstants.GATEWAY_CONFIG_GET_URL_HEADER, url).entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();

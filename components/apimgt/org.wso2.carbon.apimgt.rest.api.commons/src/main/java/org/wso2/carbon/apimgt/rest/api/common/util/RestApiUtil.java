@@ -428,6 +428,28 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns the gateway config retrieve url
+     *
+     * @param uuid api id
+     * @return constructed gateway config retrieve  url
+     */
+    public static String getGatewayConfigGetURL(String uuid) {
+        String path = RestApiConstants.GATEWAY_CONFIG_GET_URL + "/" + uuid + "/gateway-config";
+        return path;
+    }
+
+    /**
+     * Returns the swagger retrieve url
+     *
+     * @param uuid api id
+     * @return constructed gateway config retrieve  url
+     */
+    public static String getSwaggerGetURL(String uuid) {
+        String path = RestApiConstants.SWAGGER_GET_URL + "/" + uuid + "/swagger";
+        return path;
+    }
+
+    /**
      * Check if the message of the root cause message of 'e' matches with the specified message
      *
      * @param e       throwable to check
