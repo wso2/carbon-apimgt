@@ -1,4 +1,3 @@
-{{log this}}
 <div class="form-group" id="tier-list">
     <label for="tiers-list" class="hidden-xs">{{i18n "Tiers"}}</label>
     <select id="tiers-list" name="tiers-list" class="form-control">
@@ -10,3 +9,17 @@
         {{/each}}
     </select>
 </div>
+<button type="button" id="subscribe-button"
+    {{#unless @params.policies}}
+        disabled="disabled"
+    {{/unless}}
+        class="btn btn-primary btn-mobile">
+                                    <span class="icon fw-stack">
+                                        <i class="fw fw-subscribe fw-stack-1x"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    </span>
+    {{i18n "Subscribe"}}
+    {{#unless @params.policies}}
+        <span id="subsBtnDesc" class="help-block">{{i18n "You may not be entitled to any of the available tiers"}}</span>
+    {{/unless}}
+</button>

@@ -1,0 +1,14 @@
+<button type="button" id="subscribe-button"
+    {{#unless api.tiers}}
+        disabled="disabled"
+    {{/unless}}
+        class="btn btn-primary btn-mobile">
+                                    <span class="icon fw-stack">
+                                        <i class="fw fw-subscribe fw-stack-1x"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    </span>
+    Subscribe
+    {{#unless api.tiers}}
+        <span id="subsBtnDesc" class="help-block">You may not be entitled to any of the available tiers</span>
+    {{/unless}}
+</button>
