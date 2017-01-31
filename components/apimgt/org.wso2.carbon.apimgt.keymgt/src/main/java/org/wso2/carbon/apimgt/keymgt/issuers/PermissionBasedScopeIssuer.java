@@ -29,6 +29,7 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
                         for (String permission : permissions) {
                             if (userRealm != null && userRealm.getAuthorizationManager() != null) {
                                 String userStore = tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain();
-
+                                username = MultitenantUtils.getTenantAwareUsername(username);
                                 if (userStore != null) {
                                     status = userRealm.getAuthorizationManager()
                                             .isUserAuthorized(userStore + "/" + username, permission, UI_EXECUTE);
