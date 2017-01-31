@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -73,7 +73,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private TagDAO tagDAO;
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl());
         this.tagDAO = tagDAO;
     }
@@ -139,10 +139,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public Map<String, Object> generateApplicationKeys(String userId, String applicationName,
-                                                       String tokenType, String callbackUrl, String[] allowedDomains,
-                                                       String validityTime, String tokenScope,
-                                                       String groupingId) throws APIManagementException {
+    public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String groupingId) throws APIManagementException {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, userId, callbackUrl, null); //for now tokenSope = null
@@ -155,27 +154,36 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             AccessTokenRequest accessTokenRequest = null;
 
             if (oauthAppInfo != null) {
-                APIUtils.logDebug("Successfully created oAuth application", log);
+                APIUtils.logDebug("Successfully created OAuth application", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
                 keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
                 keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
                 keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
             } else {
-                throw new KeyManagementException("Error occurred while creating oAuth application");
+                throw new KeyManagementException("Error occurred while creating OAuth application");
             }
             accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
             // adding access token information with key details
             if (accessTokenInfo != null) {
-                APIUtils.logDebug("Successfully created Oauth access token", log);
+                APIUtils.logDebug("Successfully created OAuth access token", log);
                 keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
                 keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
             } else {
                 throw new KeyManagementException("Error occurred while generating access token for OAuth application");
             }
+
+            //todo: temporarily saving to db. later this has to be done via workflow
+            try {
+                getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
+            } catch (APIMgtDAOException e) {
+                String errorMsg = "Error occurred while saving key data - " + applicationId;
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
             return keyDetails;
         } catch (KeyManagementException e) {
-            String errorMsg = "Error occurred while generating oauth keys for application - ";
+            String errorMsg = "Error occurred while generating OAuth keys for application - ";
             log.error(errorMsg, e);
             throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
@@ -227,8 +235,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return subscriptionId;
     }
 
-    @Override
-    public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
+    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         try {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
@@ -308,14 +315,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
-                String message = "An application already exists with a duplicate name - " + application.getName();
+                String message =  "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             //Tier validation
             String tierName = application.getTier();
             if (tierName == null) {
-                String message = "Tier name cannot be null - " + application.getName();
+                String message =  "Tier name cannot be null - " + application.getName();
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
@@ -342,22 +349,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
-    }
-
-    /**
-     * Creates an OAuth2 app for a given APIM Application and generate keys.
-     *
-     * @param application Application for which keys should be generated
-     * @return Generated keys
-     */
-    @Override
-    public APIKey generateKeysForApplication(Application application) {
-        //todo:generate keys
-        APIKey apiKey = new APIKey();
-        apiKey.setConsumerKey("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        apiKey.setConsumerSecret("yyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-
-        return apiKey;
     }
 
     private TagDAO getTagDAO() {

@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
@@ -111,7 +110,8 @@ public interface APIStore extends APIManager {
      * Generates oAuth keys for an application.
      *
      * @param userId          Subsriber name.
-     * @param applicationName of the Application.
+     * @param applicationName name of the Application.
+     * @param applicationId   id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     callback URL
      * @param allowedDomains  allowedDomains for token.
@@ -120,7 +120,7 @@ public interface APIStore extends APIManager {
      * @param tokenScope      Scopes for the requested tokens.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName,
+    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
             String tokenScope, String groupingId) throws APIManagementException;
 
@@ -184,13 +184,4 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException
      */
     Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
-
-    /**
-     * Creates an OAuth2 app for a given APIM Application and generate keys.
-     *
-     * @param application    Application for which keys should be generated
-     * @return Generated keys
-     */
-    APIKey generateKeysForApplication(Application application);
-
 }

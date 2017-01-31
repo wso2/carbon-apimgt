@@ -54,6 +54,7 @@ public class DAOFactory {
                 apiDAO = new ApiDAOImpl(new H2MySQLStatements());
 
             } else if (driverName.contains("Oracle")) {
+                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
 
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -82,7 +83,7 @@ public class DAOFactory {
             } else if (driverName.contains("PostgreSQL")) {
                 appDAO = new ApplicationDAOImpl();
             } else if (driverName.contains("Oracle")) {
-
+                appDAO = new ApplicationDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }
@@ -112,7 +113,7 @@ public class DAOFactory {
                 apiSubscriptionDAO = new APISubscriptionDAOImpl();
 
             } else if (driverName.contains("Oracle")) {
-
+                apiSubscriptionDAO = new APISubscriptionDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }
@@ -142,7 +143,7 @@ public class DAOFactory {
                 policyDAO = new PolicyDAOImpl();
 
             } else if (driverName.contains("Oracle")) {
-
+                policyDAO = new PolicyDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }

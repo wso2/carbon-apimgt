@@ -11,8 +11,10 @@
     {{/placeholder}}
     {{fragment "swaggerjs"}} <!-- TODO: request to maintain swaggerjs library from common.foundation component ~tmkb-->
     {{fragment "handlebarsjs"}}
-    {{fragment "authManager"}}
     <!-- TODO: request to maintain handlebarsjs library from common.foundation component ~tmkb-->
+    {{fragment "authManager"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.select2" }}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
     {{placeholder "headOther"}}
@@ -31,7 +33,7 @@
                     class="icon fw fw-home"></i> <span class="hidden-xs">Home</span></a>
         </li>
         <li class="active">
-            <a href="/publisher/apis" title="API List"
+            <a href="{{@contextPath}}/apis" title="API List"
                onclick="jagg.sessionAwareJS({redirect:'/publisher/apis',e:event})">APIs</a>
         </li>
     </ol>
