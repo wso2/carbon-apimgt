@@ -7,7 +7,7 @@ $(function () {
             swaggerClient.setSchemes(["http"]);
             swaggerClient.setHost("localhost:9090");
 
-            swaggerClient["API (Individual)"].get_apis_apiId({"apiId": apiId},
+            swaggerClient["API (individual)"].get_apis_apiId({"apiId": apiId},
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;

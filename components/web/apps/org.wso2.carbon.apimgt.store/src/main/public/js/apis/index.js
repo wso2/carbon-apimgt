@@ -34,7 +34,7 @@ $(function () {
             //TODO:Need to have a proper fix from swagger definition retrieval service
             swaggerClient.setSchemes(["http"]);
             swaggerClient.setHost("localhost:9090");
-            swaggerClient["API (Collection)"].get_apis(
+            swaggerClient["API Collection"].get_apis(
                 {"responseContentType": 'application/json'},
                 function(jsonData) {
                     var callbacks = {onSuccess: function () {
