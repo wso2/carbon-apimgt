@@ -1,0 +1,36 @@
+<div class="navbar-wrapper ">
+    <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
+        <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar"
+           data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true"
+           aria-expanded="false" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
+                        </span>
+        </a>
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+
+                    <li>
+                        <a title="{{i18n "Go Back"}}" href="{{@contextPath}}">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="{{i18n "Go Back"}}"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="{{ i18n "Go Back"}}"></i>
+	                                </span>
+                            {{ i18n "Go Back"}}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>

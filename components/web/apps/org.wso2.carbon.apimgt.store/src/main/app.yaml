@@ -3,7 +3,10 @@ theme : "org.wso2.carbon.apimgt.web.store.theme.default"
 menus:
   - name: "main"
     items:
-      - text: "Home"
+      - text: "APIs"
+        link: "/apis"
+        icon: "fw-home"
+      - text: "Applications"
         link: ""
         icon: "fw-home"
   - name: "left"

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,10 +33,13 @@ import java.util.Map;
  */
 public interface ApiDAOVendorSpecificStatements {
 
-    PreparedStatement search(Connection connection, String query, int offset, int limit) throws APIMgtDAOException;
+    String EVERYONE_ROLE = "EVERYONE";
 
-    PreparedStatement attributeSearch(Connection connection, Map<String, String> attributeMap, int offset, int limit)
-    throws APIMgtDAOException;
+    PreparedStatement search(Connection connection, List<String> roles, String user, String query, int offset,
+            int limit) throws APIMgtDAOException;
+
+    PreparedStatement attributeSearch(Connection connection, List<String> roles, String user,
+            Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
 
 }

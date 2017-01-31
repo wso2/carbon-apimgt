@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,8 +34,10 @@ import java.util.Map;
  */
 public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
 
-    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
+    private static final String API_SUMMARY_SELECT =
+            "SELECT DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID "
+                    + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
 
     /**
      * Creates full text search query specific to database.
@@ -47,17 +50,31 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ("OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE")
-    public PreparedStatement search(Connection connection, String searchString, int offset, int limit) throws
+    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    public PreparedStatement search(Connection connection, List<String> roles, String user, String searchString, int
+            offset, int
+            limit) throws
             APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE  CONTAINS(*, ?) ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? "
-                + "ROWS ONLY";
-
+        StringBuilder roleListBuilder = new StringBuilder();
+        roles.forEach(item -> roleListBuilder.append("?,"));
+        roleListBuilder.append("?");
+        final String query =
+                API_SUMMARY_SELECT + " WHERE  CONTAINS(API.*, ?) AND ((GROUP_ID IN (" + roleListBuilder.toString()
+                        + ")) OR (PROVIDER = ?))  ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        int queryIndex = 1;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, "\"" + searchString.toLowerCase(Locale.ENGLISH) + "*\"");
-            statement.setInt(2, --offset);
-            statement.setInt(3, limit);
+            statement.setString(queryIndex, "\"" + searchString.toLowerCase(Locale.ENGLISH) + "*\"");
+            queryIndex++;
+            for (String role : roles) {
+                statement.setString(queryIndex, role);
+                queryIndex++;
+            }
+            statement.setString(queryIndex, EVERYONE_ROLE);
+            statement.setString(++queryIndex, user);
+            statement.setInt(++queryIndex, --offset);
+            statement.setInt(++queryIndex, limit);
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -75,10 +92,14 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ("OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE")
-    public PreparedStatement attributeSearch(Connection connection, Map<String, String> attributeMap, int offset,
+    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    public PreparedStatement attributeSearch(Connection connection, List<String> roles, String user, Map<String, String>
+            attributeMap, int offset,
             int limit) throws APIMgtDAOException {
-
+        StringBuilder roleListBuilder = new StringBuilder();
+        roles.forEach(item -> roleListBuilder.append("?,"));
+        roleListBuilder.append("?");
         StringBuffer searchQuery = new StringBuffer();
         Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
@@ -91,8 +112,9 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        final String query = API_SUMMARY_SELECT + " WHERE " + searchQuery.toString()
-                + " ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        final String query =
+                API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() + " AND ((GROUP_ID IN (" + roleListBuilder
+                        .toString() + ")) OR  (PROVIDER = ?)) ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
             int queryIndex = 1;
             PreparedStatement statement = connection.prepareStatement(query);
@@ -100,7 +122,13 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
                 statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
-            statement.setInt(queryIndex, --offset);
+            for (String role : roles) {
+                statement.setString(queryIndex, role);
+                queryIndex++;
+            }
+            statement.setString(queryIndex, EVERYONE_ROLE);
+            statement.setString(++queryIndex, user);
+            statement.setInt(++queryIndex, --offset);
             statement.setInt(++queryIndex, limit);
             return statement;
         } catch (SQLException e) {
