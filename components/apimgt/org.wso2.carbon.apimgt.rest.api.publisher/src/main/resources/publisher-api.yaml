@@ -24,6 +24,7 @@ info:
 # The schemes supported by the API
 schemes:
   - https
+  - http
 
 # The domain of the API.
 # This is configured by the customer during deployment.

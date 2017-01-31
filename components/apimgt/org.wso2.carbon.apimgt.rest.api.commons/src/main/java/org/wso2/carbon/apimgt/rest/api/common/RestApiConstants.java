@@ -93,6 +93,16 @@ public class RestApiConstants {
     public static final String SWAGGER_GET_URL =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION + RESOURCE_PATH_APIS;
     public static final String SWAGGER_GET_URL_HEADER = "Swagger-Config-Location";
+
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+
+        public static final String STORE = "store";
+    }
 }
 
 
