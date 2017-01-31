@@ -4,12 +4,12 @@
 {{js "js/api/index.js"}}
 {{js "js/lib/api.js"}}
 {{css "css/custom.css"}}
-{{fragment "org.wso2.carbon.uuf.common.foundation.data-tables" }}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.data-tables" }}
 {{#fillZone "actionMenu"}}
-    {{fragment "actionMenuApiListing"}}
+    {{fragment "action-menu-api-listing"}}
 {{/fillZone}}
 {{#fillZone "menubar"}}
-    {{fragment "org.wso2.carbon.uuf.common.foundation.menubar"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.ui.menubar"}}
 {{/fillZone}}
 {{#fillZone "content"}}
     {{# if create_success}}
@@ -35,7 +35,22 @@
         </div>
         <div class="content-section shadow-up">
             <div class="content-data" id="apiListingContainer">
-                {{defineZone "apiListingContainer"}}
+                <div class="page-content">
+                    <table id="apim-publisher-listing" class="table table-striped table-bordered" cellspacing="0"
+                           width="100%">
+                        <thead>
+                        <tr>
+                            <th class="api-listing-name">API</th>
+                            <th>{{t "Version"}}</th>
+                            <th>{{t "Provider"}}</th>
+                            <th class="api-listing-status">{{t "Status"}}</th>
+                            <th class="api-listing-action">{{t "Actions"}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

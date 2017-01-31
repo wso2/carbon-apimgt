@@ -160,6 +160,7 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
+            org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.json.simple.*
         </import.package>
         <export.package>
@@ -167,7 +168,7 @@
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.exp.pkg.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="6"
         </carbon.component>
     </properties>
 </project>

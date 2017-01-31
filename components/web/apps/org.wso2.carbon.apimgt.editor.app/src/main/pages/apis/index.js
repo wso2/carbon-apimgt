@@ -14,13 +14,12 @@
  *  limitations under the License.
  */
 
-function onRequest(env) {
+function onGet(env) {
     var vars = {};
     var apiCreated = env.request.queryParams.create_success;
     if (apiCreated) {
         vars = env.request.queryParams;
     }
     vars['contextPath'] = env.contextPath;
-    sendToClient("swaggerURL", env.config.swaggerURL);
     return vars;
 }

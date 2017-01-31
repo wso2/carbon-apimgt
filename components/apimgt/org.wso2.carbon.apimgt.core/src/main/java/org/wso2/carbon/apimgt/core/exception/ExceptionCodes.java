@@ -61,7 +61,9 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_TOKEN_GENERATION_FAILED(900408, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
-    DOCUMENT_NOT_FOUND(900314, "Document not found", 404, "Document not found");
+    DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
+    ENDPOINT_NOT_FOUND(900316, "Endpoint Not Found", 404, "Endpoint Not Found"),
+    API_DEFINITION_MALFORMED(900317, "ApiDefinition not found", 400, "ApiDefinition not found");
 
     private final long errorCode;
     private final String errorMessage;

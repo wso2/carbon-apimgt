@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-function onRequest(env) {
+function onGet(env) {
     sendToClient("swaggerURL", env.config.swaggerURL);
     var id= env.pathParams["id"];
     return {id: id};

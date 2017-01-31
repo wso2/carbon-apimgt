@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-function onRequest(env) {
-    sendToClient("swaggerURL", env.config.swaggerURL);
+function onGet(env) {
     return {};
 }

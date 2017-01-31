@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 
 import java.io.File;
 import java.io.IOException;

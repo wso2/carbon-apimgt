@@ -368,7 +368,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().entity(apiGatewayConfig).build();
+            String url = RestApiUtil.getSwaggerGetURL(apiId);
+            return Response.ok().header(RestApiConstants.SWAGGER_GET_URL_HEADER, url).entity(apiGatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -468,7 +469,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().entity(apiSwagger).build();
+            String url = RestApiUtil.getGatewayConfigGetURL(apiId);
+            return Response.ok().header(RestApiConstants.GATEWAY_CONFIG_GET_URL_HEADER, url).entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -600,7 +602,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 //            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 //        }
     }
-
     @Override
     public Response apisGet(Integer limit
             , Integer offset
@@ -659,6 +660,26 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+    ) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            API returnAPI = apiPublisher.getAPIbyUUID(uuid);
+            return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
     @Override
     public Response apisPost(APIDTO body
             , String contentType

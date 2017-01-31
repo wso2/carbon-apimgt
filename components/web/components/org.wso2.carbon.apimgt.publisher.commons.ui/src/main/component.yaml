@@ -4,18 +4,18 @@ bindings:
   - zoneName: footer
     mode: prepend
     fragments:
-      - footer
+      - org.wso2.carbon.apimgt.publisher.commons.ui.footer
   - zoneName: topbar
     mode: prepend
     fragments:
-      - globalNavigation
+      - org.wso2.carbon.apimgt.publisher.commons.ui.globalNavigation
 
 config:
   appName : Publisher Commons
-  loginPageUri: "/ui/login"
+  loginPageUri: "/commons/login"
   loginRedirectUri: "/apis"
   scopes: "apim:api_view"
   tokenEndpoint: "https://localhost:8243/token"
   keyAndSecret: "dmRNdk05d1R4NkZ5NjNXa2xfb0FEaTdMQXZnYTp3UHNIQkJFS1FPbWU0bGZxYlJRZW1GY3ZqSUlh=="
-  swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
+  swaggerURL: "http://localhost:9090/api/am/publisher/v0.10/apis/swagger.json"
   nonSecureUrl: "/test1,/test2"
