@@ -202,9 +202,11 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> searchAPIs(String searchString, int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
+            APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = sqlStatements.search(connection, searchString, offset, limit)) {
+                PreparedStatement statement = sqlStatements.search(connection, roles, user, searchString, offset,
+                        limit)) {
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -222,15 +224,23 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     @SuppressFBWarnings ("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIs(
+    public List<API> attributeSearchAPIs(List<String> roles, String user,
             Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = sqlStatements.attributeSearch(connection, attributeMap, offset, limit)) {
+                PreparedStatement statement = sqlStatements.attributeSearch(connection, roles, user, attributeMap,
+                        offset,
+                        limit)) {
             DatabaseMetaData md = connection.getMetaData();
             Iterator<Map.Entry<String , String>> entries = attributeMap.entrySet().iterator();
             while (entries.hasNext()) {
                 Map.Entry<String, String> entry = entries.next();
-                if (!checkTableColumnExists(md, entry.getKey())) {
+                String tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                        AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                        AM_API_TABLE_NAME;
+                String columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                        entry.getKey().toLowerCase(Locale.ENGLISH) :
+                        entry.getKey().toUpperCase(Locale.ENGLISH);
+                if (!checkTableColumnExists(md, tableName, columnName)) {
                     throw new APIMgtDAOException(
                             "Wrong search attribute. Attribute does not exist with name : " + entry.getKey());
                 }
@@ -1314,10 +1324,10 @@ public class ApiDAOImpl implements ApiDAO {
         return policies;
     }
 
-    private boolean checkTableColumnExists (DatabaseMetaData databaseMetaData, String columnName) throws
+    private boolean checkTableColumnExists (DatabaseMetaData databaseMetaData, String tableName, String columnName)
+            throws
             APIMgtDAOException {
-        try (ResultSet rs = databaseMetaData.getColumns(null, null, AM_API_TABLE_NAME, columnName.toUpperCase(Locale
-                .ENGLISH))) {
+        try (ResultSet rs = databaseMetaData.getColumns(null, null, tableName, columnName)) {
             return rs.next();
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
