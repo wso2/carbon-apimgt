@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.TestConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.LifecycleOperationManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.LifecycleNode;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleDataProvider;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -194,6 +195,12 @@ public class LifecycleOperationsTest {
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Error while getting lifecycle data for id"));
         }
+    }
+
+    @Test
+    public void testGetLifecycleGraph() throws Exception {
+        List<LifecycleNode> graph = LifecycleDataProvider.getLifecycleGraph(TestConstants.API_LIFE_CYCLE);
+        assertTrue(graph.size() == 6);
     }
 
     private SampleAPI createSampleAPI() {
