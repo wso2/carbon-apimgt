@@ -41,6 +41,7 @@ public class SSOConstants {
     public static final String NAME_ID_POLICY = "nameIdPolicy";
     public static final String NAME_ID_POLICY_DEFAULT = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
     public static final String LOGOUT_USER = "urn:oasis:names:tc:SAML:2.0:logout:user";
+    public static final String TIMESTAMP_SKEW_IN_SECONDS = "timestampSkewInSeconds";
 
     public SSOConstants() {
     }

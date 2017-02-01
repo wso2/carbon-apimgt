@@ -72,6 +72,32 @@
                  return;
             }
 
+           // validating the assertion validity period
+           if(site.ssoConfiguration.verifyAssertionValidityPeriod === 'true'){
+               var timestampSkew=site.ssoConfiguration.timestampSkewInSeconds;
+               if(timestampSkew==undefined){
+                timestampSkew="300";
+               }
+               ssoRelyingParty.setProperty("timestampSkewInSeconds", timestampSkew);
+               var isAssertionValidityPeriodValid = ssoRelyingParty.validateAssertionValidityPeriod(samlResponse);
+               if (!Boolean(isAssertionValidityPeriodValid)) {
+                    log.error("SAML response assertion validity period verification is failed.");
+                    response.sendRedirect("../site/pages/error-pages/401.html");
+                    return;
+               }
+               }
+
+               // validating the audience restrictions
+               var isAudienceRestrictionEnabled=site.ssoConfiguration.audienceRestrictionsEnabled;
+               if(isAudienceRestrictionEnabled === 'true'){
+                  var isAudienceRestrictionsValid = ssoRelyingParty.validateAudienceRestrictions(samlResponse);
+                  if (!Boolean(isAudienceRestrictionsValid)) {
+                  log.error("SAML response audience restrictions verification is failed.");
+                  response.sendRedirect("../site/pages/error-pages/401.html");
+                  return;
+               }
+               }
+
             var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             var domainName = null;

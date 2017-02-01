@@ -1,4 +1,3 @@
-
 /*
 * Copyright (c) 2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -31,31 +30,19 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.EncryptedKey;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
 import org.opensaml.xml.signature.Signature;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.SSOHostObjectDataHolder;
 import org.wso2.carbon.hostobjects.sso.internal.SessionInfo;
 import org.wso2.carbon.hostobjects.sso.internal.builder.AuthReqBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.builder.LogoutRequestBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.util.Util;
-import org.wso2.carbon.hostobjects.sso.internal.util.X509CredentialImpl;
 import org.wso2.carbon.utils.xml.StringUtils;
 
-import javax.crypto.SecretKey;
 import javax.script.ScriptException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -173,8 +160,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
             } catch (SignatureVerificationFailure e) {
                 //do nothing at this point since we want to verify signature using the tenant key-store as well.
-                log.error("Signature verification failed with Super-Tenant Key Store", e);
-                return false;
+                if (log.isDebugEnabled()) {
+                    log.debug("Signature verification failed with Super-Tenant Key Store", e);
+                }
             }
             //If not success, try and validate the signature using tenant key store.
             if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -563,9 +551,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             }
         }
 
-        String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
-                ASSERTIONENCRYPTIONENABLED);
-
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
 
@@ -585,47 +570,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 log.error("Invalid schema for the SAML2 response. Invalid number of assertions  detected.");
                 return false;
             }
-            Assertion assertion = null;
-
-            if ("true".equals(isAssertionEncryptionEnabled)) {
-                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
-                EncryptedAssertion encryptedAssertion = null;
-                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
-                    encryptedAssertion = encryptedAssertions.get(0);
-                    try {
-                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
-                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
-                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-
-                    } catch (Exception e) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Assertion decryption failure : ", e);
-                        }
-                        throw new Exception("Unable to decrypt the SAML2 Assertion");
-                    }
-                }
-                //Validate assertion validity period
-                boolean isTimeValid = relyingPartyObject.validateAssertionValidityPeriod(assertion);
-                if (isTimeValid) {
-                    // Validate the audience restrictions
-                    String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
-                    return relyingPartyObject.validateAudienceRestriction(assertion, issuerId);
-                }
-
-            } else {
-
-                List<Assertion> assertions = samlResponse.getAssertions();
-                //Validate assertion validity period
-                boolean isTimeValid = relyingPartyObject
-                        .validateAssertionValidityPeriod(samlResponse.getAssertions().get(0));
-                if (isTimeValid) {
-                    // Validate the audience restrictions
-                    String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
-                    return relyingPartyObject.validateAudienceRestriction(assertions.get(0), issuerId);
-                }
-            }
+            return true;
 
         }
         return false;
@@ -676,7 +621,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             if ("true".equals(isAssertionEncryptionEnabled)) {
                 List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
                 EncryptedAssertion encryptedAssertion = null;
-                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                if (encryptedAssertions != null && encryptedAssertions.size() == 1) {
                     encryptedAssertion = encryptedAssertions.get(0);
                     try {
                         assertion = Util.getDecryptedAssertion(encryptedAssertion,
@@ -701,6 +646,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                         }
                         throw new Exception("Unable to decrypt the SAML2 Assertion");
                     }
+                }else{
+                    log.error("SAML Response contains invalid number of assertions.");
                 }
 
             } else {
@@ -949,14 +896,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String username = null;
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
-            String isAssertionEncryptionEnabled =  relyingPartyObject.getSSOProperty(SSOConstants.
+            String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
                     ASSERTIONENCRYPTIONENABLED);
             Assertion assertion = null;
 
             if ("true".equals(isAssertionEncryptionEnabled)) {
                 List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
                 EncryptedAssertion encryptedAssertion = null;
-                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                if (encryptedAssertions != null && encryptedAssertions.size() == 1) {
                     encryptedAssertion = encryptedAssertions.get(0);
                     try {
                         assertion = Util.getDecryptedAssertion(encryptedAssertion,
@@ -1514,28 +1461,27 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      * @param assertion SAML Assertion element
      * @throws ScriptException
      */
-    private boolean validateAssertionValidityPeriod(Assertion assertion) throws ScriptException {
-
-        if(assertion == null){
-            return false;
-        }
+    private boolean validateAssertionValidityPeriod(Assertion assertion, int timeStampSkewInSeconds) throws ScriptException {
         DateTime validFrom = assertion.getConditions().getNotBefore();
         DateTime validTill = assertion.getConditions().getNotOnOrAfter();
 
-        if (validFrom != null && validFrom.isAfterNow()) {
-            log.error("SAML Response contains invalid number of assertions.");
+        if (validFrom != null && validFrom.minusSeconds(timeStampSkewInSeconds).isAfterNow()) {
+            log.error("Failed to meet SAML Assertion Condition 'Not Before'");
             return false;
         }
 
-        if (validTill != null && validTill.isBeforeNow()) {
+        if (validTill != null && validTill.plusSeconds(timeStampSkewInSeconds).isBeforeNow()) {
             log.error("Failed to meet SAML Assertion Condition 'Not On Or After'");
             return false;
         }
 
         if (validFrom != null && validTill != null && validFrom.isAfter(validTill)) {
-            log.error("SAML Assertion Condition 'Not Before' must be less than the value of 'Not On Or After'");
+            log.error(
+                    "SAML Assertion Condition 'Not Before' must be less than the " +
+                            "value of 'Not On Or After'");
             return false;
         }
+
         return true;
     }
 
@@ -1619,7 +1565,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             if ("true".equals(isAssertionEncryptionEnabled)) {
                 List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
                 EncryptedAssertion encryptedAssertion = null;
-                if (!CollectionUtils.isEmpty(encryptedAssertions)) {
+                if (encryptedAssertions != null && encryptedAssertions.size() == 1) {
                     encryptedAssertion = encryptedAssertions.get(0);
                     try {
                         assertion = Util.getDecryptedAssertion(encryptedAssertion,
@@ -1688,6 +1634,133 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         return false;
 
+    }
+
+    /* Validate the audience restrictions values in SAML response.
+                *
+                * @param cx
+        * @param thisObj
+        * @param args
+        * @param funObj
+        * @return
+               * @throws Exception
+        */
+    public static boolean jsFunction_validateAudienceRestrictions(Context cx, Scriptable thisObj,
+                                                                  Object[] args,
+                                                                  Function funObj)
+            throws Exception {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. The SAML response is missing.");
+        }
+
+        SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+        String encoded = getSSOSamlEncodingProperty(relyingPartyObject);
+        boolean isEncoded = true;
+        if (encoded != null) {
+            try {
+                isEncoded = Boolean.parseBoolean(encoded);
+            } catch (Exception e) {
+                throw new ScriptException("Invalid property value found for " +
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
+            }
+        }
+
+        String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
+        XMLObject samlObject = Util.unmarshall(decodedString);
+
+        if (samlObject instanceof Response) {
+            Response samlResponse = (Response) samlObject;
+            Assertion assertion = null;
+            String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
+                    ASSERTIONENCRYPTIONENABLED);
+            String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion = null;
+                // Validate the audience restrictions
+                if (encryptedAssertions != null && encryptedAssertions.size() == 1) {
+                    encryptedAssertion = encryptedAssertions.get(0);
+                    try {
+                        assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Assertion decryption failure : ", e);
+                        }
+                        throw new Exception("Unable to decrypt the SAML2 Assertion");
+                    }
+                    return relyingPartyObject.validateAudienceRestriction(assertion, issuerId);
+                } else {
+                    throw new ScriptException("SAML Response contains invalid number of assertions.");
+                }
+            }
+            List<Assertion> assertions = samlResponse.getAssertions();
+
+            // Validate the audience restrictions
+            if (assertions != null && assertions.size() == 1) {
+                return relyingPartyObject.validateAudienceRestriction(assertions.get(0), issuerId);
+            } else {
+                throw new ScriptException("SAML Response contains invalid number of assertions.");
+            }
+
+        }
+        return false;
+    }
+
+    /* Validate the assertion validity period in SAML response.
+              *
+              * @param cx
+      * @param thisObj
+      * @param args
+      * @param funObj
+      * @return
+             * @throws Exception
+      */
+    public static boolean jsFunction_validateAssertionValidityPeriod(Context cx, Scriptable thisObj,
+                                                                     Object[] args,
+                                                                     Function funObj)
+            throws Exception {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. The SAML response is missing.");
+        }
+
+        SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+        String encoded = getSSOSamlEncodingProperty(relyingPartyObject);
+        boolean isEncoded = true;
+        if (encoded != null) {
+            try {
+                isEncoded = Boolean.parseBoolean(encoded);
+            } catch (Exception e) {
+                throw new ScriptException("Invalid property value found for " +
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
+            }
+        }
+
+        String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
+        XMLObject samlObject = Util.unmarshall(decodedString);
+        String timestampSkewString = relyingPartyObject.getSSOProperty(SSOConstants.TIMESTAMP_SKEW_IN_SECONDS);
+        int timestampSkew;
+        if (timestampSkewString != null && !timestampSkewString.isEmpty()) {
+            timestampSkew = Integer.parseInt(timestampSkewString);
+        } else {
+            timestampSkew = 300;
+        }
+
+        if (samlObject instanceof Response) {
+            Response samlResponse = (Response) samlObject;
+            //Validate assertion validity period
+            return relyingPartyObject.validateAssertionValidityPeriod(samlResponse.getAssertions().get(0),
+                    timestampSkew);
+
+
+        }
+        return false;
     }
 
 
