@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -282,16 +286,39 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;
+
         try {
+
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                apiResults = getApiDAO().searchAPIs(query);
+                String[] attributes = query.split(",");
+                Map<String, String> attributeMap = new HashMap<>();
+                List<String> roles = new ArrayList<>();
+                String user = "admin";
+                //TODO get the logged in user and user roles from key manager.
+                boolean isFullTextSearch = false;
+                for (String attribute : attributes) {
+                    if (attribute.split(":").length > 1) {
+                        attributeMap.put(attribute.split(":")[0], attribute.split(":")[1]);
+                    } else if (attribute.contains(":") && attribute.split(":").length > 0) {
+                        attributeMap.put(attribute.split(":")[0], "");
+                    } else {
+                        isFullTextSearch = true;
+                    }
+
+                }
+                if (isFullTextSearch) {
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                } else {
+                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
+                }
             } else {
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
                 apiResults = getApiDAO().getAPIsByStatus(statuses);
             }
+
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating searching APIs - " + query;
             log.error(errorMsg, e);
@@ -340,6 +367,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String generatedUuid = UUID.randomUUID().toString();
             application.setId(generatedUuid);
 
+            String permissionString = application.getPermissionString();
+            if (permissionString != null && !("").equals(permissionString)) {
+                HashMap roleNamePermissionList;
+                roleNamePermissionList = getAPIPermissionArray(permissionString);
+                application.setPermissionMap(roleNamePermissionList);
+            }
+
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
@@ -348,9 +382,49 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             String errorMsg = "Error occurred while creating the application - " + application.getName();
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Error occurred while parsing the permission json from swagger in application - " +
+                    application.getName();
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
         return applicationUuid;
         //// TODO: 16/11/16 Workflow related implementation has to be done 
+    }
+
+    /**
+     * This method will return map with role names and its permission values.
+     * @param permissionJsonString
+     * @return
+     * @throws org.json.simple.parser.ParseException
+     */
+    private HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
+
+        HashMap roleNamePermissionList = new HashMap();
+        JSONParser jsonParser = new JSONParser();
+
+        JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
+        for (int i = 0; i < baseJsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) baseJsonArray.get(i);
+            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
+            int totalPermissionValue = 0;
+            for (int j = 0; j < subJsonArray.size(); j++) {
+                if (APIMgtConstants.Permission.READ.equals(subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
+                } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
+                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
+                } else if (APIMgtConstants.Permission.SUBSCRIPTION.equals (subJsonArray.get(j).toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.SUBSCRIBE_PERMISSION;
+                }
+            }
+            roleNamePermissionList.put(groupId, totalPermissionValue);
+        }
+
+        return roleNamePermissionList;
+
     }
 
     private TagDAO getTagDAO() {

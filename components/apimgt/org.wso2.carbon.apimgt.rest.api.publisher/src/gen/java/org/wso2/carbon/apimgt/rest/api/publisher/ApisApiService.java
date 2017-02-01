@@ -82,7 +82,7 @@ public abstract class ApisApiService {
  ,String ifModifiedSince
  ) throws NotFoundException;
     public abstract Response apisApiIdSwaggerPut(String apiId
- ,String apiDefinition
+ ,String endpointId
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
@@ -116,6 +116,11 @@ public abstract class ApisApiService {
     public abstract Response apisHead(String query
  ,String accept
  ,String ifNoneMatch
+ ) throws NotFoundException;
+    public abstract Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
  ) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
  ,String contentType

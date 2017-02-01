@@ -27,7 +27,7 @@
     <url>http://wso2.org</url>
 
     <parent>
-        <groupId>org.wso2.carbon.apimgt.web</groupId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>web-parent</artifactId>
         <version>7.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
@@ -36,17 +36,24 @@
     <dependencies>
         <!--UUF Components-->
         <dependency>
-            <groupId>org.wso2.carbon.apimgt.web</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
             <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.uuf.common</groupId>
+            <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
+            <version>${carbon.uuf.common.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
         <!--UUF Themes-->
         <dependency>
-            <groupId>org.wso2.carbon.apimgt.web</groupId>
-            <artifactId>org.wso2.carbon.apimgt.web.publisher.theme.default</artifactId>
-            <version>${carbon.apimgt.version}</version>
+            <groupId>org.wso2.carbon.uuf.common</groupId>
+            <artifactId>org.wso2.carbon.uuf.common.default.theme</artifactId>
+            <version>${carbon.uuf.common.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>
         </dependency>

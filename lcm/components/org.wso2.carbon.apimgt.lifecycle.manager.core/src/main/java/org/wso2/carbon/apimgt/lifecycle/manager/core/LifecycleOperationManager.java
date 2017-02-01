@@ -62,6 +62,46 @@ public class LifecycleOperationManager {
     }
 
     /**
+     * This method need to call for each and event life cycle state changes.
+     *
+     * @param currentState {@code String} Current state
+     * @param targetState {@code String} Required target state.
+     * @param uuid        {@code String} Lifecycle id that maps with the asset.
+     * @param resource    {@code Object} The current object to which lifecycle is attached to.
+     * @param user        The user who invoked the action. This will be used for auditing
+     *                    purposes.
+     * @return {@code LifecycleState} object of updated life cycle state.
+     * @throws LifecycleException If exception occurred while execute life cycle state change.
+     */
+    public static LifecycleState executeLifecycleEvent(String currentState, String targetState, String uuid, String
+            user, Object resource)
+            throws LifecycleException {
+        LifecycleState nextState = new LifecycleState();
+        LifecycleState currentLifecycleState = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
+        currentLifecycleState.setState(currentState);
+        if (!validateCheckListItemSelected(currentLifecycleState, targetState)) {
+            throw new LifecycleException(
+                    "Required checklist items are not selected to perform the state transition " + "operation from "
+                            + currentLifecycleState.getState() + " to " + targetState);
+        }
+        String lcName = currentLifecycleState.getLcName();
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        runCustomExecutorsCode(resource, currentLifecycleState.getCustomCodeBeanList(), currentLifecycleState
+                .getState(), targetState);
+        populateItems(nextState, lcContent);
+        nextState.setState(targetState);
+        nextState.setLcName(currentLifecycleState.getLcName());
+        nextState.setLifecycleId(currentLifecycleState.getLifecycleId());
+        LifecycleOperationUtil.changeLifecycleState(currentLifecycleState.getState(), targetState, uuid, user);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Lifecycle state was changed from " + currentLifecycleState.getState() + " to " + targetState
+                    + " for lifecycle id " + uuid);
+        }
+        return nextState;
+    }
+
+    /**
      * This method need to call for each check list item operation.
      *
      * @param uuid                              Object that can use to uniquely identify resource.

@@ -44,17 +44,20 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+            if (driverName.contains("MySQL")) {
+                apiDAO = new ApiDAOImpl(new MysqlSQLStatements());
+            } else if (driverName.contains("H2")) {
+                apiDAO = new ApiDAOImpl(new H2SQLStatements());
+
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+                apiDAO = new ApiDAOImpl(new MssqlSQLStatements());
             } else if (driverName.contains("PostgreSQL")) {
-                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+                apiDAO = new ApiDAOImpl(new PostgresSQLStatements());
 
             } else if (driverName.contains("Oracle")) {
-                apiDAO = new ApiDAOImpl(new H2MySQLStatements());
+                apiDAO = new ApiDAOImpl(new OracleSQLStatements());
 
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");

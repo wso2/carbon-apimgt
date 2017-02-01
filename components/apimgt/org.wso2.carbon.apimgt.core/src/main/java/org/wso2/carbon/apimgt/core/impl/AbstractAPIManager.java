@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
@@ -141,13 +142,18 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if the context already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    @Override public boolean isContextExist(String context) throws APIManagementException {
-        try {
-            return getApiDAO().isAPIContextExists(context);
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Couldn't check API Context " + context + "Exists";
-            log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+    @Override
+    public boolean isContextExist(String context) throws APIManagementException {
+        if (StringUtils.isNotEmpty(context)) {
+            try {
+                return getApiDAO().isAPIContextExists(context);
+            } catch (APIMgtDAOException e) {
+                String errorMsg = "Couldn't check API Context " + context + "Exists";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
+        } else {
+            return false;
         }
     }
 

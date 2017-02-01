@@ -1,4 +1,4 @@
-theme : "org.wso2.carbon.apimgt.web.publisher.theme.default"
+theme : "org.wso2.carbon.uuf.common.default.theme"
 
 menus:
   - name: "main"
@@ -19,5 +19,5 @@ menus:
         link: "/statistics"
 
 errorPages:
-  "404": /commons/error/404
+  404: /commons/error/404
   default: /commons/error/default

@@ -1,0 +1,108 @@
+<div class="row">
+    <div class="col-sm-6">
+        <h1 class="text-primary">{{name}}
+            <small>{{version}}</small>
+        </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <script type="text/javascript">
+            var showTab = function (tabLink) {
+                $('#' + tabLink).tab('show');
+            };
+        </script>
+        <ul class="nav nav-list">
+            <li>
+                <div class="thumbnail icon">
+                    <div class="square-element setbgcolor"
+                         style="background: rgb(92, 107, 192);">
+                        <div class="api-name-icon text-uppercase" style="font-size: 900%">N/A</div>
+                        <div style="display: none">
+                            <a href="" class="api-name" title="{{name}}">{{name}}</a>
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+            <li><a href="#" onclick="showTab('usersLink')" title="User"><i class="icon-user"
+                                                                           title="User"></i>
+                <span class="userCount"><i class="fw fw-user" title="User"></i>
+
+          <b>N/A</b>
+
+          </span></a></li>
+
+
+            <!--li><span><i class="icon-heart"></i> Up time: 90%</span></li-->
+            <li><a href="#" onclick="showTab('lifecyclesLink')" title="CREATED"><span
+                    id="status"><i class="glyphicon glyphicon-pencil" title="CREATED"></i>&nbsp;CREATED</span></a>
+            </li>
+            <li><a href="#" onclick="showTab('docsLink')" title="Docs"><i
+                    class="glyphicon glyphicon-file" title="Docs"></i> Docs</a></li>
+            <li><a href="#"
+                   onclick="location.href='https://localhost:9443/store/apis/info?name=asdad&amp;version=12.21.1&amp;provider=admin&amp;tenant=carbon.super'"
+                   id="goToStore" title="View in Store">
+                <i class="fw fw-deploy"></i>&nbsp;View in Store</a></li>
+        </ul>
+        <script>
+            $(window).load(function () {
+
+                $(".setbgcolor").generateBgcolor({
+                    definite: true
+                });
+
+                $(".api-name-icon").each(function () {
+                    var elem = $(this).next().children(".api-name");
+                    $(this).nametoChar({
+                        nameElement: elem
+                    });
+                });
+
+            });
+
+        </script>
+
+    </div>
+    <div class="col-md-10">
+
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td class="col-sm-3">Visibility</td>
+                <td id="inUrl">
+                    {{visibility}}
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-3">Context</td>
+                <td id="inUrl">{{context}}</td>
+            </tr>
+
+
+            <tr>
+                <td>Date Last Updated</td>
+                <td id="inUpdated" class="dateFull"><b>N/A</b></td>
+            </tr>
+            <tr>
+                <td>Tier Availability</td>
+                <td id="tierAvb"><b>N/A</b></td>
+            </tr>
+            <tr>
+                <td>Default API Version</td>
+                <td id="defaultAPIVersion">
+                    {{isDefaultVersion}}
+                </td>
+
+            </tr>
+
+            <tr>
+                <td>Published Environments</td>
+                <td>
+                    <b>N/A</b>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

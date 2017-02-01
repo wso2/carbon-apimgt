@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +44,8 @@ public final class Application {
     private String updatedUser;
     private LocalDateTime updatedTime;
     private List<APIKey> keys;
+    private String permissionString;
+    private HashMap permissionMap;
 
 
     public Application(String name, String createdUser) {
@@ -168,11 +171,28 @@ public final class Application {
                 Objects.equals(tier, that.tier) &&
                 Objects.equals(status, that.status) &&
                 Objects.equals(callbackUrl, that.callbackUrl) &&
+                Objects.equals(permissionString, that.permissionString) &&
                 Objects.equals(createdUser, that.createdUser);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, groupId, uuid, policyId, description, tier, status, callbackUrl, createdUser);
+    }
+
+    public String getPermissionString() {
+        return permissionString;
+    }
+
+    public void setPermissionString(String permissionString) {
+        this.permissionString = permissionString;
+    }
+
+    public HashMap getPermissionMap() {
+        return permissionMap;
+    }
+
+    public void setPermissionMap(HashMap permissionMap) {
+        this.permissionMap = permissionMap;
     }
 }

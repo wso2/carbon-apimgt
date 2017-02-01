@@ -22,7 +22,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -33,15 +33,15 @@ import java.util.List;
  */
 public class APITemplateBuilderImpl implements APITemplateBuilder {
     private API api;
-    private List<APIResource> apiResources;
+    private List<TemplateBuilderDTO> apiResources;
 
-    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<APIResource> apiResources) {
+    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<TemplateBuilderDTO> apiResources) {
         this.api = apiBuilder.build();
         this.apiResources = apiResources;
     }
 
     @Override
-    public String getConfigStringForTemplate() throws APITemplateException {
+    public String getConfigStringFromTemplate() throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
@@ -51,8 +51,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.init();
-            Template t = velocityengine.getTemplate("resources" + File.separator + "template.xml");
-            t.merge(context, writer);
+            Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
+            template.merge(context, writer);
         } catch (Exception e) {
             //        log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);

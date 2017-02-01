@@ -61,6 +61,7 @@ public class APIMgtConstants {
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
     public static final String EMPTY_STRING_VALUE = " ";
+    public static final String SUPPORTED_HTTP_VERBS = "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS";
 
     /**
      * Application statuses.
@@ -214,5 +215,24 @@ public class APIMgtConstants {
         public static final String SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
         public static final String DOC_ID = "DOC_ID";
         public static final String TIER_LEVEL = "TIER_LEVEL";
+        public static final String ENDPOINT_ID = "ENDPOINT_ID";
+    }
+
+    /**
+     * Permission related constants
+     */
+    public static class Permission {
+        public static final int SUBSCRIBE_PERMISSION = 8;
+        public static final int READ_PERMISSION = 4;
+        public static final int UPDATE_PERMISSION = 2;
+        public static final int DELETE_PERMISSION = 1;
+        public static final String EVERYONE_GROUP = "EVERYONE";
+        public static final String GROUP_ID = "groupId";
+        public static final String PERMISSION = "permission";
+        public static final String READ = "READ";
+        public static final String UPDATE = "UPDATE";
+        public static final String DELETE = "DELETE";
+        public static final String SUBSCRIPTION = "SUBSCRIPTION";
+
     }
 }
