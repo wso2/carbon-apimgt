@@ -66,6 +66,8 @@ public class LifecycleConstants {
 
     public static final String VALUE_ATTRIBUTE = "value";
 
+    public static final String ID_ATTRIBUTE = "id";
+
     public static final String CLASS_ATTRIBUTE = "class";
 
     public static final String REQUIRED = "required";

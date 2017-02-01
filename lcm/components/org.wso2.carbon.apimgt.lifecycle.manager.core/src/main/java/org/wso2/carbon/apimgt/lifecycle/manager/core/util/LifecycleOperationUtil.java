@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.AvailableTransitionBe
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CheckItemBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.CustomCodeBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.LifecycleNode;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.PermissionBean;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.constants.LifecycleConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
@@ -43,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -403,6 +405,40 @@ public class LifecycleOperationUtil {
                     e);
         }
         return permissionBeanList;
+    }
+
+    /**
+     * This method is used to read lifecycle config and provide state chart as graph in order to visually represent the
+     * lifecycle config.
+     *
+     * @param lcConfig                          Lifecycle config document element.
+     * @return Lifecycle config as a graph of states.
+     */
+    public static List<LifecycleNode> buildLifecycleGraph(Document lcConfig) {
+        List<LifecycleNode> lifecycleGraph = new ArrayList<>();
+        NodeList stateList = lcConfig.getElementsByTagName(LifecycleConstants.STATE_TAG);
+        for (int i = 0; i < stateList.getLength(); i++) {
+            LifecycleNode lifecycleNode = new LifecycleNode();
+            List<AvailableTransitionBean> transitions = new LinkedList<>();
+            if (stateList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element state = (Element) stateList.item(i);
+                String stateName = state.getAttribute(LifecycleConstants.ID_ATTRIBUTE);
+                lifecycleNode.setLifecycleState(stateName);
+                NodeList targetList = state.getElementsByTagName(LifecycleConstants.TRANSITION_ATTRIBUTE);
+                for (int targetCount = 0; targetCount < targetList.getLength(); targetCount++) {
+                    if (targetList.item(targetCount).getNodeType() == Node.ELEMENT_NODE) {
+                        Element target = (Element) targetList.item(targetCount);
+                        transitions.add(new AvailableTransitionBean(
+                                target.getAttribute(LifecycleConstants.LIFECYCLE_EVENT_ATTRIBUTE),
+                                target.getAttribute(LifecycleConstants.TARGET_ATTRIBUTE)));
+                    }
+                }
+                lifecycleNode.setTargetStates(transitions);
+                lifecycleGraph.add(lifecycleNode);
+            }
+        }
+
+        return lifecycleGraph;
     }
 
     /**

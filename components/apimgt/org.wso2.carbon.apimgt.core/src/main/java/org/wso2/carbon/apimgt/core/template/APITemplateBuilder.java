@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.template;
  * Used to provide abstract layer to generate API type template
  */
 public interface APITemplateBuilder {
-    String getConfigStringForTemplate() throws APITemplateException;
+    String getConfigStringFromTemplate() throws APITemplateException;
 
     String getConfigStringForPrototypeScriptAPI() throws APITemplateException;
 

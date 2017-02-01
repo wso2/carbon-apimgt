@@ -89,7 +89,8 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(String searchString, int offset, int limit) throws APIMgtDAOException;
+    List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
+            APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria.
@@ -100,7 +101,9 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
+    List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap, int offset, int
+            limit) throws
+            APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided

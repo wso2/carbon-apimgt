@@ -35,7 +35,7 @@
 <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
         <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="Update"/>
-        <a title="Cancel" href="/store/applications" class="btn btn-default">Cancel</a>
+        <a title="Cancel" href="{{@contextPath}}/applications" class="btn btn-default">Cancel</a>
     </div>
 </div>
 <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>

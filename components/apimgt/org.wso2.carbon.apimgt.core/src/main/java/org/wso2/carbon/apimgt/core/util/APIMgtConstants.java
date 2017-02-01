@@ -222,6 +222,7 @@ public class APIMgtConstants {
      * Permission related constants
      */
     public static class Permission {
+        public static final int SUBSCRIBE_PERMISSION = 8;
         public static final int READ_PERMISSION = 4;
         public static final int UPDATE_PERMISSION = 2;
         public static final int DELETE_PERMISSION = 1;
@@ -231,6 +232,7 @@ public class APIMgtConstants {
         public static final String READ = "READ";
         public static final String UPDATE = "UPDATE";
         public static final String DELETE = "DELETE";
+        public static final String SUBSCRIPTION = "SUBSCRIPTION";
 
     }
 }

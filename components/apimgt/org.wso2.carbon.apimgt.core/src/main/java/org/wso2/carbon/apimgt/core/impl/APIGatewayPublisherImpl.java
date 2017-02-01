@@ -31,6 +31,12 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -61,7 +67,23 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
         try {
             ApiDAO apiDAO = DAOFactory.getApiDAO();
             String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
-            publishMessage(api, gatewayConfig);
+            String gwHome = System.getProperty("gwHome");
+            String defaultConfig = null;
+            if (api.isDefaultVersion()) {
+                String newContext = "@BasePath(\"/" + api.getContext() + "\")";
+                defaultConfig = gatewayConfig.replaceAll("@BasePath\\(\"(.)*\"\\)", newContext);
+            }
+            if (gwHome == null) {
+                publishMessage(api, gatewayConfig);
+                if (api.isDefaultVersion()) {
+                    publishMessage(api, defaultConfig);
+                }
+            } else {
+                saveApi(api, gwHome, gatewayConfig, false);
+                if (api.isDefaultVersion()) {
+                    saveApi(api, gwHome, defaultConfig, true);
+                }
+            }
             return true;
         } catch (JMSException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
@@ -122,5 +144,52 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
                 .append(config.getTopicServerHost()).append(":")
                 .append(config.getTopicServerPort()).append("'").toString();
 
+    }
+
+    /**
+     * Save API into FS
+     *
+     * @param api     API object
+     * @param gwHome  path of the gateway
+     * @param content API config
+     */
+    private void saveApi(API api, String gwHome, String content, boolean isDefaultApi) {
+        String gatewayFileExtension = ".xyz";
+        String deploymentDirPath = gwHome + File.separator + "deployment";
+        File deploymentDir = new File(deploymentDirPath);
+        if (!deploymentDir.exists()) {
+            log.info("Creating deployment dir in: " + deploymentDirPath);
+            boolean created = deploymentDir.mkdir();
+            if (!created) {
+                log.error("Error creating directory: " + deploymentDirPath);
+            }
+        }
+
+        String path;
+        if (isDefaultApi) {
+            path = deploymentDirPath + File.separator + api.getName() + gatewayFileExtension;
+        } else {
+            path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
+        }
+        Writer writer = null;
+        PrintWriter printWriter = null;
+        try {
+            writer = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+            printWriter = new PrintWriter(writer);
+            printWriter.println(content);
+        } catch (IOException e) {
+            log.error("Error saving API configuration in " + path, e);
+        } finally {
+            try {
+                if (printWriter != null) {
+                    printWriter.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                log.error("Error closing connections", e);
+            }
+        }
     }
 }

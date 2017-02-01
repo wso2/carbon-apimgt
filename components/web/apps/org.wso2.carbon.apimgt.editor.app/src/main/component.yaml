@@ -10,5 +10,3 @@ config:
   title : "API Editor Tool"
   appName : API Editor
   loginRedirectUri: "/api"
-  swaggerURL: "http://localhost:9090/swagger?path=/api/am/publisher/v0.10/apis"
-

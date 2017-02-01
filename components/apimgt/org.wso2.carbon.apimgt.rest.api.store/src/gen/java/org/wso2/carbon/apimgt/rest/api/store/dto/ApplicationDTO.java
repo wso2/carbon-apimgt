@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 /**
  * ApplicationDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-27T15:58:18.730+05:30")
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
@@ -28,6 +28,9 @@ public class ApplicationDTO   {
 
   @JsonProperty("callbackUrl")
   private String callbackUrl = null;
+
+  @JsonProperty("permission")
+  private String permission = null;
 
   @JsonProperty("description")
   private String description = null;
@@ -131,6 +134,24 @@ public class ApplicationDTO   {
     this.callbackUrl = callbackUrl;
   }
 
+  public ApplicationDTO permission(String permission) {
+    this.permission = permission;
+    return this;
+  }
+
+   /**
+   * Get permission
+   * @return permission
+  **/
+  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  public String getPermission() {
+    return permission;
+  }
+
+  public void setPermission(String permission) {
+    this.permission = permission;
+  }
+
   public ApplicationDTO description(String description) {
     this.description = description;
     return this;
@@ -223,6 +244,7 @@ public class ApplicationDTO   {
         Objects.equals(this.subscriber, application.subscriber) &&
         Objects.equals(this.throttlingTier, application.throttlingTier) &&
         Objects.equals(this.callbackUrl, application.callbackUrl) &&
+        Objects.equals(this.permission, application.permission) &&
         Objects.equals(this.description, application.description) &&
         Objects.equals(this.status, application.status) &&
         Objects.equals(this.groupId, application.groupId) &&
@@ -244,6 +266,7 @@ public class ApplicationDTO   {
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
+    sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");

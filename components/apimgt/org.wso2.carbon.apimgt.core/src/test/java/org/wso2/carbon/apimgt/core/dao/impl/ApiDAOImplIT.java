@@ -374,39 +374,39 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(commonMixedCaseSearchString, 0, 10);
+        List<API> apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonMixedCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common lower case
-        apiList = apiDAO.searchAPIs(commonLowerCaseSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonLowerCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(commonUpperCaseSearchString, 0 , 10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonUpperCaseSearchString, 0 , 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by symbol
-        apiList = apiDAO.searchAPIs(symbolSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", symbolSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         API actualAPI = apiList.get(0);
         API expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search by number
-        apiList = apiDAO.searchAPIs(numberSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", numberSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search with spaces
-        apiList = apiDAO.searchAPIs(spaceIncludedSearchString, 0 ,10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", spaceIncludedSearchString, 0 ,10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(spaceDelimitingString);

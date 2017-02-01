@@ -25,6 +25,7 @@ info:
 # The schemes supported by the API
 schemes: 
   - https
+  - http
 
 # The domain of the API.
 # This is configured by the customer during deployment.
@@ -33,7 +34,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/store/v0.9
+basePath: /api/am/store/v0.10
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -1450,6 +1451,9 @@ definitions:
         type: string
       callbackUrl:
         type: string
+      permission:
+        type: string
+        example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
       description:
         type: string
       lifeCycleStatus:
