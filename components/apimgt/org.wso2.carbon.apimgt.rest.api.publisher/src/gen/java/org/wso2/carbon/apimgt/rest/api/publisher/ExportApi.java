@@ -36,7 +36,7 @@ public class ExportApi implements Microservice  {
 
             @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
     public Response exportApisGet(@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
-            ,@ApiParam(value = "API search query ") @QueryParam("query") String query
+            ,@ApiParam(value = "API search query ",required=true) @QueryParam("query") String query
             ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
             ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
     )

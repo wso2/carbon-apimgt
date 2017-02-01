@@ -1527,7 +1527,7 @@ paths:
           in: query
           description: |
             API search query
-          required: false
+          required: true
           type: string
         - $ref: '#/parameters/Content-Type'
       tags:
@@ -1581,6 +1581,14 @@ paths:
             Zip archive consisting on exported api configuration
           required: true
           type: file
+        - name: provider
+          in: query
+          description: |
+            If defined, updates the existing provider of each API with the specified provider.
+            This is to cater scenarios where the current API provider does not exist in the environment
+            that the API is imported to.
+          required: false
+          type: string
         - $ref: '#/parameters/Content-Type'
       tags:
         - Import Configuration

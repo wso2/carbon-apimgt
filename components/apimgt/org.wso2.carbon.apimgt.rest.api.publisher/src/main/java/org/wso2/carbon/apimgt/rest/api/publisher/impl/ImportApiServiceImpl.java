@@ -24,7 +24,8 @@ public class ImportApiServiceImpl extends ImportApiService {
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
     @Override
-    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType) throws NotFoundException {
+    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
+                                  String provider) throws NotFoundException {
 
         APIPublisher publisher = null;
 
@@ -33,7 +34,7 @@ public class ImportApiServiceImpl extends ImportApiService {
 
             ImportExportManager importManager = new ImportExportManager(publisher, System.getProperty("java.io.tmpdir")
                     + File.separator + "imported-api-archives-" + UUID.randomUUID().toString());
-            APIListDTO apiList = importManager.importAPIs(fileInputStream);
+            APIListDTO apiList = importManager.importAPIs(fileInputStream, provider);
             return Response.status(Response.Status.CREATED).entity(apiList).build();
 
         } catch (APIManagementException e) {

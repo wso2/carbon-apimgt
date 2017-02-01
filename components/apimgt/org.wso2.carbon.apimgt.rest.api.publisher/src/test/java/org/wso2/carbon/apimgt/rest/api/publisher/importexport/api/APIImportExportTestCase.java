@@ -180,7 +180,7 @@ public class APIImportExportTestCase {
         try {
             archiveStream = new FileInputStream(new File(importExportRootDirectory + File.separator + "exported-apis.zip"));
             ImportExportManager importManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-            importManager.importAPIs(archiveStream);
+            importManager.importAPIs(archiveStream, null);
 
         } finally {
             if (archiveStream != null) {
@@ -256,7 +256,7 @@ public class APIImportExportTestCase {
         try {
             archiveStream = new FileInputStream(new File(importExportRootDirectory + File.separator + "exported-apis.zip"));
             ImportExportManager importManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-            apiListDTO = importManager.importAPIs(archiveStream);
+            apiListDTO = importManager.importAPIs(archiveStream, null);
 
         } finally {
             if (archiveStream != null) {
@@ -373,7 +373,7 @@ public class APIImportExportTestCase {
         try {
             exportedApiArchiveStream = new FileInputStream(new File(importDir + File.separator + "exported-apis.zip"));
             ImportExportManager importExportManager = new ImportExportManager(apiPublisher, importDir);
-            importExportManager.importAPIs(exportedApiArchiveStream);
+            importExportManager.importAPIs(exportedApiArchiveStream, null);
         } finally {
             if (exportedApiArchiveStream != null) {
                 exportedApiArchiveStream.close();

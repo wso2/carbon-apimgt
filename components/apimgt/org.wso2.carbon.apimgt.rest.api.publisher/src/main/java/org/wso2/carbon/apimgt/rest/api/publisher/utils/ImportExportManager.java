@@ -140,11 +140,12 @@ public class ImportExportManager {
      * Imports a set of APIs to API Manager by reading and decoding the {@param uploadedApiArchiveInputStream}
      *
      * @param uploadedApiArchiveInputStream  InputStream to be read ana decoded to a set of APIs
+     * @param provider API provider, if needs to be updated
      * @return {@link APIListDTO} object comprising of successfully imported APIs
      * @throws APIManagementException if any error occurs while importing or no APIs are imported
      * successfully
      */
-    public APIListDTO importAPIs (InputStream uploadedApiArchiveInputStream) throws APIManagementException {
+    public APIListDTO importAPIs (InputStream uploadedApiArchiveInputStream, String provider) throws APIManagementException {
 
         String importedDirectoryName = "imported-apis";
         String apiArchiveLocation = path + File.separator + importedDirectoryName + ".zip";
@@ -160,7 +161,7 @@ public class ImportExportManager {
         }
 
         // List to contain newly created/updated APIs
-        List<API> apis = importApisFromExtractedArchive(apiDefinitionsRootDirectoryPaths);
+        List<API> apis = importApisFromExtractedArchive(apiDefinitionsRootDirectoryPaths, provider);
 
         ImportExportUtils.deleteDirectory(path);
         // if no APIs are corrected exported, throw an error
@@ -177,9 +178,10 @@ public class ImportExportManager {
      * Reads and decodes APIs and relevant information from the given set of paths
      *
      * @param apiDefinitionsRootDirectoryPaths path to the directory with API related artifacts
+     * @param provider API provider to be updated
      * @return List of {@link API} objects
      */
-    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths) {
+    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths, String provider) {
 
         List<API> apis = new ArrayList<>();
 
@@ -208,6 +210,11 @@ public class ImportExportManager {
             } catch (Exception e) {
                 log.error("Error in building APIDTO from api definition read from file system", e);
                 continue;
+            }
+
+            if (provider != null && !provider.isEmpty()) {
+                // update the provider
+                apiDto.setProvider(provider);
             }
 
             API.APIBuilder apiBuilder = MappingUtil.toAPI(apiDto);

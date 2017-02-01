@@ -30,20 +30,21 @@ public class ImportApi implements Microservice  {
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more existing APIs. ", response = APIListDTO.class, tags={ "Import Configuration", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the updated object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the updated object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class),
+
+            @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = APIListDTO.class) })
     public Response importApisPut(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
-)
-    throws NotFoundException {
-        return delegate.importApisPut(fileInputStream, fileDetail, contentType);
+            ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
+            ,@ApiParam(value = "If defined, updates the existing provider of each API with the specified provider. This is to cater scenarios where the current API provider does not exist in the environment that the API is imported to. ") @QueryParam("provider") String provider
+    )
+            throws NotFoundException {
+        return delegate.importApisPut(fileInputStream, fileDetail,contentType,provider);
     }
 }
