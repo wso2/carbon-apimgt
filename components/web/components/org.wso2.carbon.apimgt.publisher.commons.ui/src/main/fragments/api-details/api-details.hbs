@@ -66,13 +66,14 @@
                 <div class="card">
                     <div id="overview-content">
                         <div style="height:500px" data-toggle="loading" data-loading-inverse="true"></div>
+
                         <!-- Content will be loaded by an AJAX call -->
                     </div>
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="lc-tab">
                 <div class="card">
-                    LC content
+                    {{defineZone "api-tab-lc-content"}}
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="endpoints-tab">

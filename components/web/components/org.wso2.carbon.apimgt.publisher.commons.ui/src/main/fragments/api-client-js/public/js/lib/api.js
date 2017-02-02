@@ -247,4 +247,25 @@ class API {
         }
     }
 
+    /**
+     *
+     * @param id {string}
+     * @param state {string}
+     * @param callback {function}
+     */
+    updateLcState(id, state, callback = null) {
+        var payload = {action: state, apiId: id, "Content-Type": "application/json"};
+        var promise_lc_update = this.client.then(
+            (client) => {
+                return client["API (Individual)"].post_apis_change_lifecycle(
+                    payload, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_lc_update.then(callback);
+        } else {
+            return promise_lc_update;
+        }
+    }
+
 }

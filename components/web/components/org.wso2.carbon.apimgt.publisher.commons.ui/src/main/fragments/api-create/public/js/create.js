@@ -54,11 +54,11 @@ function createAPIHandler(event) {
     let input_type = $('input[name=import-definition]:checked', '#swagger-option-form').val();
 
     switch (implementation_method) {
-        case "endpoint-option":
-            break;
         case "swagger-option":
             createAPIFromSwagger(input_type);
             break;
+        case "endpoint-option":
+        // break; /* TODO: till endpoint and mock api creation implement ~tmkb */
         case "mock-option":
             var api_data = {
                 name: $("#new-api-name").val(),
