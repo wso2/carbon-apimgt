@@ -35,9 +35,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                                          String ifNoneMatch) throws NotFoundException {
 
         try {
+            log.info("Received Policy GET request with tierLevel=" + tierLevel + ", limit=" + limit);
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Policy policy = apiMgtAdminService.getPolicy(tierLevel, "");
             TierDTO tierDTO = PolicyMappingUtil.fromPolicyToDTO(policy);
+            log.info("Returning Policy : " + tierDTO);
             return Response.ok().entity(tierDTO).build();
         } catch (APIManagementException e) {
             String msg = "Error occurred while retrieving Policy";
