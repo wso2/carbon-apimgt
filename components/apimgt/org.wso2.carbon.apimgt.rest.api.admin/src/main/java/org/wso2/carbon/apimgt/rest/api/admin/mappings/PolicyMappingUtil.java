@@ -8,9 +8,13 @@ public class PolicyMappingUtil {
 
     public static TierDTO fromPolicyToDTO(Policy policy)    {
         TierDTO tierDTO = new TierDTO();
-        tierDTO.setName(policy.getPolicyName());
-        tierDTO.setDescription(policy.getDescription());
-
+        if (policy != null) {
+            tierDTO.setName(policy.getPolicyName());
+            tierDTO.setDescription(policy.getDescription());
+        } else {
+            tierDTO.setName("DummyPolicy");
+            tierDTO.setDescription("Testing Policy");
+        }
 
         return tierDTO;
     }
