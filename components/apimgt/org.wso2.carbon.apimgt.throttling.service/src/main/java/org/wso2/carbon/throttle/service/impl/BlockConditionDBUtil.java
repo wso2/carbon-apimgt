@@ -88,7 +88,7 @@ public final class BlockConditionDBUtil {
                 return dataSource.getConnection();
 
             } catch (Exception e) {
-                throw new SQLException("Data source is not configured properly.");
+                throw new SQLException("Data source is not configured properly.",e);
             }
         }
 

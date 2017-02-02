@@ -1754,8 +1754,33 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
+            Assertion assertion = null;
+            String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
+                    ASSERTIONENCRYPTIONENABLED);
+            if ("true".equals(isAssertionEncryptionEnabled)) {
+                List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
+                EncryptedAssertion encryptedAssertion;
+                encryptedAssertion = encryptedAssertions.get(0);
+                try {
+                    assertion = Util.getDecryptedAssertion(encryptedAssertion,
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                            MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                } catch (Exception e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Assertion decryption failure : ", e);
+                    }
+                    throw new Exception("Unable to decrypt the SAML2 Assertion");
+                }
+            } else {
+                List<Assertion> assertions = samlResponse.getAssertions();
+                assertion = assertions.get(0);
+
+            }
             //Validate assertion validity period
-            return relyingPartyObject.validateAssertionValidityPeriod(samlResponse.getAssertions().get(0),
+            return relyingPartyObject.validateAssertionValidityPeriod(assertion,
                     timestampSkew);
 
 
