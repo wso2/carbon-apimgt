@@ -1757,7 +1757,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             Assertion assertion = null;
             String isAssertionEncryptionEnabled = relyingPartyObject.getSSOProperty(SSOConstants.
                     ASSERTIONENCRYPTIONENABLED);
-            String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
             if ("true".equals(isAssertionEncryptionEnabled)) {
                 List<EncryptedAssertion> encryptedAssertions = samlResponse.getEncryptedAssertions();
                 EncryptedAssertion encryptedAssertion;
