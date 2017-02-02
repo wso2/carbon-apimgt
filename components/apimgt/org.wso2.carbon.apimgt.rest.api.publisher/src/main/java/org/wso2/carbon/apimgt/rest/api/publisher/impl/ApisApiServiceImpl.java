@@ -687,7 +687,6 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
-
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.addAPI(apiBuilder);

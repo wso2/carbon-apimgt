@@ -248,10 +248,10 @@ class API {
     }
 
     /**
-     *
-     * @param id {string}
-     * @param state {string}
-     * @param callback {function}
+     * Update the life cycle state of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param state {string} Target state which need to be transferred
+     * @param callback {function} Callback function which needs to be executed in the success call
      */
     updateLcState(id, state, callback = null) {
         var payload = {action: state, apiId: id, "Content-Type": "application/json"};

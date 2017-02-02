@@ -75,11 +75,9 @@ function lifecycleTabHandler(event) {
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
-
     }
 
     api_client.get(api_id).then(renderLCTab);
-
 }
 
 function mediationTabHandler(event) {
