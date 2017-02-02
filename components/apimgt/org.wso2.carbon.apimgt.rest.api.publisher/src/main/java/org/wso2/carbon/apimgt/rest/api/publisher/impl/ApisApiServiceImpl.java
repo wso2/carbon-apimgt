@@ -555,8 +555,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (lifecycleChecklist != null) {
                 String[] checkList = lifecycleChecklist.split(",");
                 for (String checkList1 : checkList) {
-                    String attributeName = new StringTokenizer(checkList1, ":").nextToken();
-                    Boolean attributeValue = Boolean.valueOf(new StringTokenizer(checkList1, ":").nextToken());
+                    StringTokenizer attributeTokens = new StringTokenizer(checkList1, ":");
+                    String attributeName = attributeTokens.nextToken();
+                    Boolean attributeValue = Boolean.valueOf(attributeTokens.nextToken());
                     lifecycleChecklistMap.put(attributeName, attributeValue);
                 }
             }
@@ -686,6 +687,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
+
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.addAPI(apiBuilder);
