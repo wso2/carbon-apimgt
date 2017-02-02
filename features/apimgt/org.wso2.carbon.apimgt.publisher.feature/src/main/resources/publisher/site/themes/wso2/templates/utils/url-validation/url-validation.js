@@ -61,7 +61,7 @@ $(document).ready(function(){
                                         if (result.response.isContainUriTemplatesOnly) {
                                             $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="missing-complete-url>"></i> ' + i18n.t('Cannot test the endpoint provided. Please specify the full URL for testing.') + '</span>');
                                         } else {
-                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid"></i> ' + i18n.t('Invalid') + '. ' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                            $(btn).parent().parent().after(' <span class="label label-warning url_validate_label"><i class="fw fw-cancel icon-white" title="warning"></i> ' + i18n.t('Warning') + '. ' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
                                         }
                                     }
                               }
