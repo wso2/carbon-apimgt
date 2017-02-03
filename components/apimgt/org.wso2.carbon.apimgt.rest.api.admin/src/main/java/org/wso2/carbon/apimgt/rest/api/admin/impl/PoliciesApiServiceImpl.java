@@ -53,7 +53,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
 
-            Policy policy = PolicyMappingUtil.toPolicy(body);
+            Policy policy = PolicyMappingUtil.toPolicy(tierLevel, body);
 
             apiMgtAdminService.addPolicy(tierLevel, policy);
 

@@ -50,7 +50,7 @@ public class PoliciesApi implements Microservice  {
                                             @ApiParam(value = "List API or Application or Resource type policies. ", required=true, allowableValues="api, application, resource") @PathParam("tierLevel") String tierLevel,
                                             @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,
                                             @ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws NotFoundException {
-        return delegate.policiesTierLevelDelete(tierName,tierLevel,ifMatch,ifUnmodifiedSince);
+        return delegate.policiesTierLevelDelete(tierName, tierLevel, ifMatch, ifUnmodifiedSince);
     }
 
 
@@ -70,7 +70,7 @@ public class PoliciesApi implements Microservice  {
                                          @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,
                                          @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,
                                          @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws NotFoundException {
-        return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch);
+        return delegate.policiesTierLevelGet(tierLevel, limit, offset, accept, ifNoneMatch);
     }
 
 
@@ -87,7 +87,7 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = TierDTO.class) })
     public Response policiesTierLevelPost(@ApiParam(value = "Tier object that should to be added " ,required=true) TierDTO body, @ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @PathParam("tierLevel") String tierLevel,
                                           @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType) throws NotFoundException {
-        return delegate.policiesTierLevelPost(body,tierLevel,contentType);
+        return delegate.policiesTierLevelPost(body, tierLevel, contentType);
     }
 
 
@@ -109,7 +109,7 @@ public class PoliciesApi implements Microservice  {
                                          @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
                                          @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,
                                          @ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws NotFoundException {
-        return delegate.policiesTierLevelPut(tierName,body,tierLevel,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.policiesTierLevelPut(tierName, body, tierLevel, contentType, ifMatch, ifUnmodifiedSince);
     }
 
 
@@ -132,6 +132,6 @@ public class PoliciesApi implements Microservice  {
                                                  @ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @QueryParam("tierLevel") String tierLevel, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,
                                                  @ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince,
                                                  @ApiParam(value = "" ) TierPermissionDTO permissions)  throws NotFoundException {
-        return delegate.policiesUpdatePermissionPost(tierName,tierLevel,ifMatch,ifUnmodifiedSince,permissions);
+        return delegate.policiesUpdatePermissionPost(tierName, tierLevel, ifMatch, ifUnmodifiedSince, permissions);
     }
 }
