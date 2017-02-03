@@ -25,9 +25,6 @@ import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -67,8 +64,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     @Override
     public boolean publishToGateway(API api) throws GatewayException {
         try {
-            ApiDAO apiDAO = DAOFactory.getApiDAO();
-            String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
+            String gatewayConfig = api.getGatewayConfig();
             String gwHome = System.getProperty("gwHome");
             String defaultConfig = null;
             if (api.isDefaultVersion()) {
@@ -95,11 +91,12 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             log.error("Error generating API configuration for API " + api.getName(), e);
             throw new GatewayException("Error generating API configuration for API " + api.getName(),
                     ExceptionCodes.GATEWAY_EXCEPTION);
-        } catch (APIMgtDAOException e) {
-            log.error("Error getting API configuration for API " + api.getName(), e);
-            throw new GatewayException("Error getting API configuration for API " + api.getName(),
-                    ExceptionCodes.GATEWAY_EXCEPTION);
         }
+//        catch (APIMgtDAOException e) {
+//            log.error("Error getting API configuration for API " + api.getName(), e);
+//            throw new GatewayException("Error getting API configuration for API " + api.getName(),
+//                    ExceptionCodes.GATEWAY_EXCEPTION);
+//        }
     }
 
     /**

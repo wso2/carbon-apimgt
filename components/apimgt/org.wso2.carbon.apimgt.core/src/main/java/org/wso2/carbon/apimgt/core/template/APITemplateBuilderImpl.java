@@ -23,6 +23,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -56,6 +58,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new ResourceConfigContext(configcontext, this.api, this.apiResources);
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+            velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             velocityengine.init();
             Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
             template.merge(context, writer);
