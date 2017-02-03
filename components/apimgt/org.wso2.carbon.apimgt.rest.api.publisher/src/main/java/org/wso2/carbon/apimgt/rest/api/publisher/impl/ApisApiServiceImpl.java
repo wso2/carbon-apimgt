@@ -447,7 +447,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String swagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(swagger).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving swagger of API : " + apiId;
+            String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
