@@ -63,8 +63,9 @@ public enum ExceptionCodes implements ErrorHandler {
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
     ENDPOINT_NOT_FOUND(900316, "Endpoint Not Found", 404, "Endpoint Not Found"),
-    API_DEFINITION_MALFORMED(900317, "ApiDefinition not found", 400, "ApiDefinition not found");
-
+    API_DEFINITION_MALFORMED(900317, "ApiDefinition not found", 400, "ApiDefinition not found"),
+    TEMPLATE_EXCEPTION(900318, "Service configuration Error", 500, " Error generate service config"),
+    GATEWAY_EXCEPTION(900319, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

@@ -23,8 +23,4 @@ package org.wso2.carbon.apimgt.core.template;
  */
 public interface APITemplateBuilder {
     String getConfigStringFromTemplate() throws APITemplateException;
-
-    String getConfigStringForPrototypeScriptAPI() throws APITemplateException;
-
-    String getConfigStringForDefaultAPITemplate() throws APITemplateException;
 }
