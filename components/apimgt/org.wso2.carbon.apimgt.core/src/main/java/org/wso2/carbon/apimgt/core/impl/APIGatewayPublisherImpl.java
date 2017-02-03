@@ -92,11 +92,6 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             throw new GatewayException("Error generating API configuration for API " + api.getName(),
                     ExceptionCodes.GATEWAY_EXCEPTION);
         }
-//        catch (APIMgtDAOException e) {
-//            log.error("Error getting API configuration for API " + api.getName(), e);
-//            throw new GatewayException("Error getting API configuration for API " + api.getName(),
-//                    ExceptionCodes.GATEWAY_EXCEPTION);
-//        }
     }
 
     /**
