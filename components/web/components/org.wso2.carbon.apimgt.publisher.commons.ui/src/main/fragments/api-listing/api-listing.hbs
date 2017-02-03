@@ -1,0 +1,46 @@
+<!-- TODO: needs to change the page structure, with the implementation of this feature (https://github.com/wso2/carbon-uuf-maven-tools/issues/52) ~tmkb -->
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.data-tables" }}
+{{js "js/index.js"}}
+{{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
+{{# if create_success}}
+    <!-- TODO: move inline styles to relevant css file tmkb -->
+    <!-- Static alert section top of the page -->
+    <div class="alert alert-success" role="alert"
+         style="position: fixed;top: 0px;width: 50%;left: 50%;transform: translateX(-50%);">
+        <i class="icon fw fw-success"></i><strong>Success!</strong>
+        API created successfully
+        <a href="{{contextPath}}/apis/{{id}}">
+            <span class="text-primary"><b>{{ name }}</b></span>
+        </a>
+        <button type="button" class="close" aria-label="close" data-dismiss="alert">
+            <span aria-hidden="true">
+                <i class="fw fw-cancel"></i>
+            </span>
+        </button>
+    </div>
+{{/if}}
+<div id="listing">
+    <div class="page-header">
+        <h2>All API</h2>
+    </div>
+    <div class="content-section shadow-up">
+        <div class="content-data" id="apiListingContainer">
+            <div class="page-content">
+                <table id="apim-publisher-listing" class="table table-striped table-bordered" cellspacing="0"
+                       width="100%">
+                    <thead>
+                    <tr>
+                        <th class="api-listing-name">API</th>
+                        <th>{{i18n "Version"}}</th>
+                        <th>{{i18n "Provider"}}</th>
+                        <th class="api-listing-status">{{i18n "Status"}}</th>
+                        <th class="api-listing-action">{{i18n "Actions"}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
