@@ -149,6 +149,21 @@ public class LifecycleOperationsTest {
     }
 
     @Test(dependsOnMethods = "testAssociateLifecycle")
+    public void testValidTargetStateProvided() throws Exception {
+        LifecycleState currentState = sampleAPI.getLifecycleState();
+        String uuid = currentState.getLifecycleId();
+        String targetState = "Production";
+        try {
+            sampleAPI.setLifecycleState(
+                    LifecycleOperationManager.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
+        } catch (LifecycleException e) {
+            assertTrue(e.getMessage()
+                    .contains("The specified target state " + targetState + " is not a valid target " + "state"));
+        }
+
+    }
+
+    @Test (dependsOnMethods = { "testAssociateLifecycle", "testValidTargetStateProvided" })
     public void testChangeLifecycleState() throws Exception {
         LifecycleState currentState = sampleAPI.getLifecycleState();
         String uuid = currentState.getLifecycleId();
