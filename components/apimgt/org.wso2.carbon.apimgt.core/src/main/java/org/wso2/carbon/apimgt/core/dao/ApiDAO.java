@@ -251,6 +251,15 @@ public interface ApiDAO {
     void addDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
 
     /**
+     * Add document info meta data to an API
+     *
+     * @param apiId    UUID of API
+     * @param documentInfo {@link DocumentInfo}
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+
+    /**
      * Add Document File content
      *
      * @param resourceID         UUID of resource

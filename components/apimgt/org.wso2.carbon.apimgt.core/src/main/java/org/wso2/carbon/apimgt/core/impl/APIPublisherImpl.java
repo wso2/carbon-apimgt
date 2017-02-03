@@ -579,7 +579,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (StringUtils.isEmpty(docBuilder.getId())) {
                 docBuilder = docBuilder.id(UUID.randomUUID().toString());
             }
+
+            if (documentInfo.getPermission() != null && !("").equals(documentInfo.getPermission())) {
+                HashMap roleNamePermissionList;
+                roleNamePermissionList = getAPIPermissionArray(documentInfo.getPermission());
+                docBuilder.permissionMap(roleNamePermissionList);
+            }
+
             document = docBuilder.build();
+
             if (!getApiDAO().isDocumentExist(apiId, document)) {
                 getApiDAO().addDocumentInfo(apiId, document);
                 return document.getId();
@@ -592,6 +600,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Unable to add documentation";
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Unable to add documentation due to json parse error";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 
@@ -696,12 +708,43 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Updates a given documentation
      *
      * @param apiId         String
-     * @param documentation Documentation
+     * @param documentInfo Documentation
      * @throws APIManagementException if failed to update docs
      */
     @Override
-    public void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException {
+    public String updateDocumentation(String apiId, DocumentInfo documentInfo) throws APIManagementException {
+        try {
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            DocumentInfo document = null;
+            if (StringUtils.isEmpty(docBuilder.getId())) {
+                docBuilder = docBuilder.id(UUID.randomUUID().toString());
+            }
 
+            if (documentInfo.getPermission() != null && !("").equals(documentInfo.getPermission())) {
+                HashMap roleNamePermissionList;
+                roleNamePermissionList = getAPIPermissionArray(documentInfo.getPermission());
+                docBuilder.permissionMap(roleNamePermissionList);
+            }
+
+            document = docBuilder.build();
+
+            if (!getApiDAO().isDocumentExist(apiId, document)) {
+                getApiDAO().updateDocumentInfo(apiId, document);
+                return document.getId();
+            } else {
+                String msg = "Document already exist for the api " + apiId;
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to add documentation";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Unable to add documentation due to json parse error";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
+        }
     }
 
     /**

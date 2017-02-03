@@ -235,7 +235,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
+            //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
@@ -265,8 +265,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //overriding some properties
             body.setName(documentInfoOld.getName());
+            body.setDocumentId(documentInfoOld.getId());
+
+            DocumentInfo documentation = MappingUtil.toDocumentInfo(body);
             //this will fail if user does not have access to the API or the API does not exist
-            apiPublisher.updateDocumentation(apiId, documentInfo);
+            apiPublisher.updateDocumentation(apiId, documentation);
 
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);

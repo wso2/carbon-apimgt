@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.HashMap;
+
 /**
  * Returns a specific document
  */
@@ -36,6 +38,8 @@ public final class DocumentInfo {
         type = builder.type;
         visibility = builder.visibility;
         fileName = builder.fileName;
+        permission = builder.permission;
+        permissionMap = builder.permissionMap;
     }
 
     public SourceType getSourceType() {
@@ -72,6 +76,15 @@ public final class DocumentInfo {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public HashMap getPermissionMap() {
+        return permissionMap;
+
     }
 
     /**
@@ -149,14 +162,17 @@ public final class DocumentInfo {
     private final String id;
     private final String summary;
     private final String name;
+    private final String permission;
     private final DocType type;
     private final Visibility visibility;
     private final String fileName;
+    private final HashMap permissionMap;
 
     /**
      * {@code DocumentInfo} builder static inner class.
      */
     public static final class Builder {
+        private HashMap permissionMap;
         private SourceType sourceType;
         private String sourceURL;
         private String otherType;
@@ -165,6 +181,7 @@ public final class DocumentInfo {
         private String name;
         private DocType type;
         private Visibility visibility;
+        private String permission;
         private  String fileName;
 
         public SourceType getSourceType() {
@@ -216,6 +233,8 @@ public final class DocumentInfo {
             this.type = copy.type;
             this.visibility = copy.visibility;
             this.fileName = copy.fileName;
+            this.permission = copy.permission;
+            this.permissionMap = copy.permissionMap;
         }
 
         /**
@@ -312,6 +331,30 @@ public final class DocumentInfo {
         }
 
         /**
+         * Sets the {@code permission} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param permission the {@code permission} to set
+         * @return a reference to this Builder
+         */
+        public Builder permission(String permission) {
+            this.permission = permission;
+            return this;
+        }
+
+        /**
+         * Sets the {@code permission} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param permissionMap the {@code permission} to set
+         * @return a reference to this Builder
+         */
+        public Builder permissionMap(HashMap permissionMap) {
+            this.permissionMap = permissionMap;
+            return this;
+        }
+
+        /**
          * Sets the {@code fileName} and returns a reference to this Builder
          * so that the methods can be chained together.
          *
@@ -330,6 +373,14 @@ public final class DocumentInfo {
          */
         public DocumentInfo build() {
             return new DocumentInfo(this);
+        }
+
+        public String getPermission() {
+            return permission;
+        }
+
+        public void setPermission(String permission) {
+            this.permission = permission;
         }
     }
 }

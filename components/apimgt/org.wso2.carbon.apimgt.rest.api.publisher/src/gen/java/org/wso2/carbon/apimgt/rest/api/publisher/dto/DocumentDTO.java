@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-01T14:49:23.727+05:30")
 public class DocumentDTO   {
   @JsonProperty("documentId")
   private String documentId = null;
@@ -109,6 +109,9 @@ public class DocumentDTO   {
 
   @JsonProperty("otherTypeName")
   private String otherTypeName = null;
+
+  @JsonProperty("permission")
+  private String permission = null;
 
   /**
    * Gets or Sets visibility
@@ -290,6 +293,24 @@ public class DocumentDTO   {
     this.otherTypeName = otherTypeName;
   }
 
+  public DocumentDTO permission(String permission) {
+    this.permission = permission;
+    return this;
+  }
+
+   /**
+   * Get permission
+   * @return permission
+  **/
+  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
+  public String getPermission() {
+    return permission;
+  }
+
+  public void setPermission(String permission) {
+    this.permission = permission;
+  }
+
   public DocumentDTO visibility(VisibilityEnum visibility) {
     this.visibility = visibility;
     return this;
@@ -326,12 +347,13 @@ public class DocumentDTO   {
         Objects.equals(this.sourceUrl, document.sourceUrl) &&
         Objects.equals(this.inlineContent, document.inlineContent) &&
         Objects.equals(this.otherTypeName, document.otherTypeName) &&
+        Objects.equals(this.permission, document.permission) &&
         Objects.equals(this.visibility, document.visibility);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, visibility);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, permission, visibility);
   }
 
   @Override
@@ -347,6 +369,7 @@ public class DocumentDTO   {
     sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
     sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
+    sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("}");
     return sb.toString();
