@@ -60,11 +60,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
             template.merge(context, writer);
         } catch (ResourceNotFoundException e) {
-            log.error("Template " + "resources" + File.separator + "template.xml not Found");
+            log.error("Template " + "resources" + File.separator + "template.xml not Found", e);
             throw new APITemplateException("Template " + "resources" + File.separator + "template.xml not Found",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
         } catch (ParseErrorException e) {
-            log.error("Syntax error in " + "resources" + File.separator + "template.xml");
+            log.error("Syntax error in " + "resources" + File.separator + "template.xml", e);
             throw new APITemplateException("Syntax error in " + "resources" + File.separator + "template.xml",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
         }

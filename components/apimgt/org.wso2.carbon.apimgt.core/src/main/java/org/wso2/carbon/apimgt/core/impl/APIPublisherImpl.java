@@ -287,11 +287,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         } catch (APITemplateException e) {
             String message = "Error generating API configuration for API " + apiBuilder.getName();
-            log.error(message);
+            log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.TEMPLATE_EXCEPTION);
         } catch (GatewayException e) {
             String message = "Error publishing service configuration to Gateway " + apiBuilder.getName();
-            log.error(message);
+            log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
         return apiBuilder.getId();
