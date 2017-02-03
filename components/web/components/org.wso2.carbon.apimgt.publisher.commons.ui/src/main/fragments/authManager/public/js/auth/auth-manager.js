@@ -17,7 +17,7 @@ var authManager = {};
 authManager.isLogged = false;
 authManager.user = {};
 authManager.getAuthStatus = function () {
-    this.isLogged = !(!$.cookie('token') && !$.cookie('user'));
+    //this.isLogged = !(!$.cookie('token') && !$.cookie('user'));
     return this.isLogged;
 };
 authManager.setAuthStatus = function (status) {
@@ -40,18 +40,24 @@ authManager.login = function () {
         username: $('#username').val(),
         password: $('#password').val(),
         grant_type: 'password',
-        scope: scopes
+        scope: 'apim:api_view'
     };
-
+    var resp;
     return $.ajax({
         type: 'POST',
-        url: tokenEndpoint,
+        url: '/publisher/root/apis/login/token',
+        async: false,
         data: params,
         headers: {
-            'Authorization': 'Basic ' + keyAndSecret,
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Authorization': 'Basic deidwe',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+        },
+        success: function(data) {
+            resp = data;
         }
     });
+    return resp;
 };
 authManager.logout = function () {
     if (this.getAuthStatus()) {
