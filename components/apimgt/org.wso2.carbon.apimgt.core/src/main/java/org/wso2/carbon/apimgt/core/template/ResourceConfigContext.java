@@ -51,7 +51,6 @@ public class ResourceConfigContext extends ConfigContext {
     public VelocityContext getContext() {
         VelocityContext context = configContext.getContext();
         context.put("StringUtils", StringUtils.class);
-        context.put("uriTemplate", api.getUriTemplates());
         context.put("apiResources", this.apiResources);
         return context;
     }

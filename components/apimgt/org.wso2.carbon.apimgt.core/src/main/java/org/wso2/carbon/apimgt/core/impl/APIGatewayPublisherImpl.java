@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
@@ -63,7 +65,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
      * @return is publishing success
      */
     @Override
-    public boolean publishToGateway(API api) {
+    public boolean publishToGateway(API api) throws GatewayException {
         try {
             ApiDAO apiDAO = DAOFactory.getApiDAO();
             String gatewayConfig = apiDAO.getGatewayConfig(api.getId());
@@ -87,12 +89,17 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             return true;
         } catch (JMSException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
+            throw new GatewayException("Template " + "resources" + File.separator + "template.xml not Found",
+                    ExceptionCodes.GATEWAY_EXCEPTION);
         } catch (URLSyntaxException e) {
             log.error("Error generating API configuration for API " + api.getName(), e);
+            throw new GatewayException("Error generating API configuration for API " + api.getName(),
+                    ExceptionCodes.GATEWAY_EXCEPTION);
         } catch (APIMgtDAOException e) {
             log.error("Error getting API configuration for API " + api.getName(), e);
+            throw new GatewayException("Error getting API configuration for API " + api.getName(),
+                    ExceptionCodes.GATEWAY_EXCEPTION);
         }
-        return false;
     }
 
     /**

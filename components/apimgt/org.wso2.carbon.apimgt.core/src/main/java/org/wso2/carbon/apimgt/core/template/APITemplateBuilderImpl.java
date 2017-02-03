@@ -21,6 +21,11 @@ package org.wso2.carbon.apimgt.core.template;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ParseErrorException;
+import org.apache.velocity.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
@@ -32,6 +37,7 @@ import java.util.List;
  * Generate API config template
  */
 public class APITemplateBuilderImpl implements APITemplateBuilder {
+    private static final Logger log = LoggerFactory.getLogger(APITemplateBuilderImpl.class);
     private API api;
     private List<TemplateBuilderDTO> apiResources;
 
@@ -53,21 +59,16 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             velocityengine.init();
             Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
             template.merge(context, writer);
-        } catch (Exception e) {
-            //        log.error("Velocity Error", e);
-            throw new APITemplateException("Velocity Error", e);
-
+        } catch (ResourceNotFoundException e) {
+            log.error("Template " + "resources" + File.separator + "template.xml not Found");
+            throw new APITemplateException("Template " + "resources" + File.separator + "template.xml not Found",
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        } catch (ParseErrorException e) {
+            log.error("Syntax error in " + "resources" + File.separator + "template.xml");
+            throw new APITemplateException("Syntax error in " + "resources" + File.separator + "template.xml",
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
     }
 
-    @Override
-    public String getConfigStringForPrototypeScriptAPI() throws APITemplateException {
-        return null;
-    }
-
-    @Override
-    public String getConfigStringForDefaultAPITemplate() throws APITemplateException {
-        return null;
-    }
 }
