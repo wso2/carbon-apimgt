@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.lifecycle.manager.constants.TestConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.LifecycleOperationManager;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.InputBean;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.LifecycleNode;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleDataProvider;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
@@ -148,6 +149,21 @@ public class LifecycleOperationsTest {
     }
 
     @Test(dependsOnMethods = "testAssociateLifecycle")
+    public void testValidTargetStateProvided() throws Exception {
+        LifecycleState currentState = sampleAPI.getLifecycleState();
+        String uuid = currentState.getLifecycleId();
+        String targetState = "Production";
+        try {
+            sampleAPI.setLifecycleState(
+                    LifecycleOperationManager.executeLifecycleEvent(targetState, uuid, TestConstants.ADMIN, sampleAPI));
+        } catch (LifecycleException e) {
+            assertTrue(e.getMessage()
+                    .contains("The specified target state " + targetState + " is not a valid target " + "state"));
+        }
+
+    }
+
+    @Test (dependsOnMethods = { "testAssociateLifecycle", "testValidTargetStateProvided" })
     public void testChangeLifecycleState() throws Exception {
         LifecycleState currentState = sampleAPI.getLifecycleState();
         String uuid = currentState.getLifecycleId();
@@ -194,6 +210,12 @@ public class LifecycleOperationsTest {
         } catch (LifecycleException e) {
             assertTrue(e.getMessage().contains("Error while getting lifecycle data for id"));
         }
+    }
+
+    @Test
+    public void testGetLifecycleGraph() throws Exception {
+        List<LifecycleNode> graph = LifecycleDataProvider.getLifecycleGraph(TestConstants.API_LIFE_CYCLE);
+        assertTrue(graph.size() == 6);
     }
 
     private SampleAPI createSampleAPI() {

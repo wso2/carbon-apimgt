@@ -764,6 +764,32 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Add artifact resource meta data to an API
+     *
+     * @param apiId        UUID of API
+     * @param documentInfo {@link DocumentInfo}
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                DocMetaDataDAO.updateDocInfo(connection, documentInfo);
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Add Document File content
      *
      * @param resourceID UUID of resource

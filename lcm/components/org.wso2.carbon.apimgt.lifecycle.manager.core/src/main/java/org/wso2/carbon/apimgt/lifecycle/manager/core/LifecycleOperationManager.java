@@ -40,6 +40,10 @@ public class LifecycleOperationManager {
             throws LifecycleException {
         LifecycleState nextState = new LifecycleState();
         LifecycleState currentState = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
+        if (!validateTargetState(currentState, targetState)) {
+            throw new LifecycleException("The specified target state " + targetState + " is not a valid target state. "
+                    + "Can't transit from " + currentState + "to" + targetState);
+        }
         if (!validateCheckListItemSelected(currentState, targetState)) {
             throw new LifecycleException(
                     "Required checklist items are not selected to perform the state transition " + "operation from "
@@ -79,6 +83,10 @@ public class LifecycleOperationManager {
         LifecycleState nextState = new LifecycleState();
         LifecycleState currentLifecycleState = LifecycleOperationUtil.getCurrentLifecycleState(uuid);
         currentLifecycleState.setState(currentState);
+        if (!validateTargetState(currentLifecycleState, targetState)) {
+            throw new LifecycleException("The specified target state " + targetState + " is not a valid target state. "
+                    + "Can't transit from " + currentState + "to" + targetState);
+        }
         if (!validateCheckListItemSelected(currentLifecycleState, targetState)) {
             throw new LifecycleException(
                     "Required checklist items are not selected to perform the state transition " + "operation from "
@@ -202,6 +210,11 @@ public class LifecycleOperationManager {
     private static boolean validateCheckListItemSelected(LifecycleState lifecycleState, String nextState) {
         return !lifecycleState.getCheckItemBeanList().stream()
                 .anyMatch(checkItemBean -> checkItemBean.getTargets().contains(nextState) && !checkItemBean.isValue());
+    }
+
+    private static boolean validateTargetState (LifecycleState lifecycleState, String nextState) {
+        return lifecycleState.getAvailableTransitionBeanList().stream().anyMatch(availableTransitionBean ->
+                availableTransitionBean.getTargetState().equals(nextState));
     }
 }
 

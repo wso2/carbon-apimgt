@@ -63,6 +63,24 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException {
 
+        Connection connection;
+        try {
+            connection = DAOUtil.getConnection();
+
+            if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel))  {
+                addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
+                             policy.getDefaultQuotaPolicy().getType(), 0, 0, null, null);
+            } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
+                addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                     policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, null, 0,
+                                     null);
+            } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
+                addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                      policy.getDescription());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     @Override

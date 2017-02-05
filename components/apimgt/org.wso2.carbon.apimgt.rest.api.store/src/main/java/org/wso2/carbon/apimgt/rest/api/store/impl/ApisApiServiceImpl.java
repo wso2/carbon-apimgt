@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -145,8 +146,19 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
             String ifModifiedSince) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            String swagger = apiStore.getSwagger20Definition(apiId);
+            return Response.ok().entity(swagger).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
     
     /**

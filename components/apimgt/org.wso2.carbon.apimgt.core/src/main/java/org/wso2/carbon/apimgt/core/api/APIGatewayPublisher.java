@@ -18,11 +18,12 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 
 /**
  * Used to define Gateway related operations
  */
 public interface APIGatewayPublisher {
-    boolean publishToGateway(API api);
+    boolean publishToGateway(API api) throws GatewayException;
 }

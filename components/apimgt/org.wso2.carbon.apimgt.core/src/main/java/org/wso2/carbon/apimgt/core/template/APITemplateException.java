@@ -16,16 +16,15 @@
 
 package org.wso2.carbon.apimgt.core.template;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+
 /**
  * Custom exception for template related exceptions
  */
-public class APITemplateException extends Exception {
+public class APITemplateException extends APIManagementException {
 
-    public APITemplateException(String message) {
-        super(message);
-    }
-
-    public APITemplateException(String message, Throwable cause) {
-        super(message, cause);
+    public APITemplateException(String message, ExceptionCodes code) {
+        super(message, code);
     }
 }

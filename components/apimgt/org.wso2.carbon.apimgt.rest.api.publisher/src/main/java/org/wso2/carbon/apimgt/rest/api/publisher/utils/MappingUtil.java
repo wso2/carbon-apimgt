@@ -266,7 +266,9 @@ public class MappingUtil {
                 sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
                 sourceURL(documentDTO.getSourceUrl()).
                 type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
+                permission(documentDTO.getPermission()).
                 visibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString())).build();
+
     }
 
     /**

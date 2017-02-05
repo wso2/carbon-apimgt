@@ -20,14 +20,18 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides data access to Doc Meta data related tables
@@ -62,6 +66,21 @@ class DocMetaDataDAO {
         }
 
         return metaDataList;
+    }
+
+    /**
+     * Update doc info
+     * @param connection DB connection
+     * @param documentInfo document info
+     * @throws SQLException
+     * @throws APIMgtDAOException
+     */
+    static void updateDocInfo(Connection connection, DocumentInfo documentInfo) throws SQLException,
+            APIMgtDAOException {
+
+        deleteDOCPermission(connection,  documentInfo.getId());
+        addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
+
     }
 
     static DocumentInfo getDocumentInfo(Connection connection, String docID) throws SQLException {
@@ -136,7 +155,56 @@ class DocMetaDataDAO {
             statement.setString(8, documentInfo.getVisibility().toString());
 
             statement.execute();
+            addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         }
+
+    }
+
+    private static void deleteDOCPermission(Connection connection, String docID) throws SQLException {
+        final String query = "DELETE FROM AM_DOC_GROUP_PERMISSION WHERE DOC_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, docID);
+            statement.execute();
+        }
+    }
+
+    /**
+     * Add DOC permission
+     * @param connection connection
+     * @param permissionMap  permission map
+     * @param docId document Id.
+     * @throws SQLException
+     */
+    private static void addDOCPermission(Connection connection, HashMap permissionMap, String docId) throws
+            SQLException {
+        final String query = "INSERT INTO AM_DOC_GROUP_PERMISSION (DOC_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, docId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
+        } else {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, docId);
+                statement.setString(2, APIMgtConstants.Permission.EVERYONE_GROUP);
+                statement.setInt(3, 7);
+                statement.execute();
+            }
+        }
+
     }
 
 }
