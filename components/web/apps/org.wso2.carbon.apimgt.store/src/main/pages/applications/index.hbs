@@ -2,14 +2,10 @@
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Applications | " @config.appName}}
-{{js "js/main.js"}}
-{{js "js/left-navigation.js"}}
-{{js "js/script.js"}}
-{{js "js/common.js"}}
 {{js "js/applications/index.js"}}
 {{css "css/custom.css"}}
 {{#fillZone "contentTop"}}
-    {{fragment "org.wso2.carbon.apimgt.web.store.feature.add-application-navbar"}}
+    {{defineZone "top-navbar"}}
 {{/fillZone}}
 {{#fillZone "content"}}
     {{defineZone "applications-list"}}
