@@ -1,0 +1,23 @@
+<p>{{i18n "An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default."}}</p>
+<div id="application-list">
+{{#if @params.list}}
+    <div id="application-table-wrap" class="white-wrapper add-padding-5x">
+        <table id="application-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0">
+            <thead>
+            <tr>
+                <th>{{i18n "Name"}}</th>
+                <th class="col-md-2">{{i18n "Tier"}}</th>
+                <th class="col-md-2">{{i18n "Workflow Status"}}</th>
+                <th class="col-md-2">{{i18n "Subscriptions"}}</th>
+                <th class="col-md-3 application-listing-action">{{i18n "Actions"}}</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+{{else}}
+    <div  id="application-table-nodata" class=" message message-info">
+        <h4><i class="icon fw fw-info"></i> {{i18n "No Applications"}}</h4>
+        <p>{{i18n "No applications yet. Click Add Applications in the action bar to add an application."}}</p>
+    </div>
+{{/if}}
+</div>
