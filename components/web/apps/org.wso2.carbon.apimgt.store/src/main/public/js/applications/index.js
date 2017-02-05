@@ -27,23 +27,26 @@ $(function () {
                     //Render Applications listing page
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.applications-list",jsonData.obj,
                         "applications-list", mode, callbacks);
+
+                    //Delete Application
+                    $(document).on('click', 'a.deleteApp', function () {
+                        alert("Are you sure you want to delete Application");
+
+                        var appId = $(this).attr("data-id")
+
+                        swaggerClient["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
+                            function (success) {
+                                //TODO: Reload element only
+                                window.location.reload(true);
+                            },
+                            function (error) {
+                                alert("Error occurred while deleting application")
+                            });
+                    })
+
                 });
 
-            //Delete Application
-            $('#application-table').on('click', 'a.deleteApp', function () {
-                alert("Are you sure you want to delete Application");
 
-                var appId = $(this).attr("data-id")
-                applicationClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-                applicationClient.default.applicationsApplicationIdDelete({"applicationId": appId},
-                    function (success) {
-                        //TODO: Reload element only
-                        window.location.reload(true);
-                    },
-                    function (error) {
-                        alert("Error occurred while deleting application")
-                    });
-            });
         }
     });
 
@@ -94,7 +97,7 @@ $(function () {
             var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
-            var delete_button = $('<a>', {id: data.id, href: data.id, title: 'delete'})
+            var delete_button = $('<a>', {id: data, href: '#', 'data-id':data,  title: 'delete'})
                 .addClass("btn btn-sm padding-reduce-on-grid-view deleteApp")
                 .append(deleteSpanIcon)
                 .append(deleteSpanText);
@@ -104,6 +107,7 @@ $(function () {
         }
     }
 });
+
 
 
 
