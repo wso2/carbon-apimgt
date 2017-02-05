@@ -8,7 +8,9 @@
 {{js "js/common.js"}}
 {{js "js/applications/index.js"}}
 {{css "css/custom.css"}}
-
+{{#fillZone "contentTop"}}
+    {{fragment "org.wso2.carbon.apimgt.web.store.feature.add-application-navbar"}}
+{{/fillZone}}
 {{#fillZone "content"}}
- {{defineZone "applications-list"}}
+    {{defineZone "applications-list"}}
 {{/fillZone}}
