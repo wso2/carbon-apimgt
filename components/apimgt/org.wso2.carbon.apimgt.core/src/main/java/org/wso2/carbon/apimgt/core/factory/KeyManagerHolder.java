@@ -24,7 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.impl.AMDefaultKeyManagerImpl;
+import org.wso2.carbon.apimgt.core.impl.TestKeyManagerImpl;
+//import org.wso2.carbon.apimgt.core.impl.AMDefaultKeyManagerImpl;
 
 
 
@@ -44,7 +45,8 @@ public class KeyManagerHolder {
      */
     public static void initializeKeyManager()
             throws KeyManagementException {
-        keyManager = new AMDefaultKeyManagerImpl();
+        //keyManager = new AMDefaultKeyManagerImpl();
+        keyManager = new TestKeyManagerImpl();
         //TO-DO- Dynamically set the keymanager based on a config
 
 
