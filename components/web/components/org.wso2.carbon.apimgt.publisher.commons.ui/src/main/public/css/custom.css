@@ -1,0 +1,10 @@
+/* TODO: remove custom notification styles with addition of http://ned.im/noty/ to uuf-foundation-fragment ~tmkb*/
+#general-alerts {
+    position: fixed;
+    top: 5%;
+    width: 80%;
+    left: 10%;
+}
+#general-alerts .alert {
+    display: none;
+}
