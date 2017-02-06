@@ -11,5 +11,5 @@ bindings:
 config:
   title : "API Publisher Application"
   appName : API Publisher
-  loginRedirectUri: "/api"
+  loginRedirectUri: "/apis"
 

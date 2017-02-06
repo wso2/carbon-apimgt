@@ -14,7 +14,9 @@
  *  limitations under the License.
  */
 
+module("loginManager");
 function onGet(env) {
+    loginManager.authenticate(env);
     var vars = {};
     var apiCreated = env.request.queryParams.create_success;
     if (apiCreated) {

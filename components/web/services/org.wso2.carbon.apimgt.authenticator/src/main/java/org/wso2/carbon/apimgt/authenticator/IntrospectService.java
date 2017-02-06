@@ -35,11 +35,11 @@ public class IntrospectService {
      * This method authenticate the user.
      *
      */
-    public AuthResponseBean getAccessTokenData(String userName, String password, String scope) {
+    public AuthResponseBean getAccessTokenData(String userName, String password, String[] scope) {
         AuthResponseBean responseBean = new AuthResponseBean();
         responseBean.setAuthUser(userName);
         responseBean.setCreatedDate(new Date().toString());
-        responseBean.setTokenScope(scope);
+        responseBean.setScopes(scope);
         responseBean.setType("Bearer");
         responseBean.setValidityPeriod(3600);
         return responseBean;
@@ -50,16 +50,16 @@ public class IntrospectService {
      * This method authenticate the user.
      *
      */
-    public String getAccessToken(String userName, String password, String scope) {
-        return generateAccessToken(userName, password, scope);
+    public String getAccessToken(String userName, String password, String[] scopes) {
+        return generateAccessToken(userName, password, scopes);
     }
 
-    private String generateAccessToken(String userName, String password, String scope) {
+    private String generateAccessToken(String userName, String password, String[] scopes) {
         Map<String, String> keys = getConsumerKeySecret("publisher");
         Map.Entry entry = keys.entrySet().iterator().next();
         String key = (String) entry.getKey();
         String secret = (String) entry.getValue();
-        return kmTokenEndpoint(key, secret, userName, password, scope);
+        return kmTokenEndpoint(key, secret, userName, password, scopes);
     }
 
     private Map<String, String> getConsumerKeySecret(String appName) {
@@ -70,8 +70,8 @@ public class IntrospectService {
         return appKeys.get(appName);
     }
 
-    private String kmTokenEndpoint(String key, String secret, String username, String password, String scopes) {
-        String accessToken = key + secret + username + password + scopes;
+    private String kmTokenEndpoint(String key, String secret, String username, String password, String[] scopes) {
+        String accessToken = key + secret + username + password;
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
         while (salt.length() < 18) {

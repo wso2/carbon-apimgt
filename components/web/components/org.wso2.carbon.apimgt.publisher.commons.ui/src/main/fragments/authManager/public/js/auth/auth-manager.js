@@ -36,11 +36,16 @@ authManager.getUserScope = function () {
     return this.user.scope;
 };
 authManager.login = function () {
+
     var params = {
         username: $('#username').val(),
         password: $('#password').val(),
         grant_type: 'password',
-        scope: 'apim:api_view'
+        scopes: [
+            {value: "apim:api_view"},
+            {value: "apim:api_create"}
+        ]
+
     };
     var resp;
     return $.ajax({
