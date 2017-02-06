@@ -419,7 +419,7 @@ public class APIImportExportTestCase {
                 context(UUID.randomUUID().toString()).
                 description(description).
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder(api1Definition)).
+                apiDefinition(api1Definition).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -436,12 +436,8 @@ public class APIImportExportTestCase {
                 createdBy("Adam Doe").
                 lastUpdatedTime(LocalDateTime.now());
 
-        APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-        List<UriTemplate> uriTemplateList = new ArrayList<>();
-        for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-            uriTemplateList.add(apiResource.getUriTemplate());
-        }
-        apiBuilder.uriTemplates(uriTemplateList);
+
+        apiBuilder.uriTemplates(Collections.emptyMap());
 
         return apiBuilder;
     }
