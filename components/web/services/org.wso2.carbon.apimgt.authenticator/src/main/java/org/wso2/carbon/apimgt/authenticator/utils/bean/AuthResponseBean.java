@@ -24,11 +24,20 @@ package org.wso2.carbon.apimgt.authenticator.utils.bean;
  */
 public class AuthResponseBean {
 
+    private boolean isTokenValid;
     private String type;
-    private String tokenScope;
+    private String[] scopes;
     private long validityPeriod;
     private String createdDate;
     private String authUser;
+
+    public boolean isTokenValid() {
+        return isTokenValid;
+    }
+
+    public void setTokenValid(boolean tokenValid) {
+        isTokenValid = tokenValid;
+    }
 
     public String getType() {
         return type;
@@ -38,12 +47,16 @@ public class AuthResponseBean {
         this.type = type;
     }
 
-    public String getTokenScope() {
-        return tokenScope;
+    public String[] getScopes() {
+        if (scopes != null) {
+            return scopes.clone();
+        } else {
+            return new String[0];
+        }
     }
 
-    public void setTokenScope(String tokenScope) {
-        this.tokenScope = tokenScope;
+    public void setScopes(String[] scopes) {
+        this.scopes = scopes.clone();
     }
 
     public long getValidityPeriod() {

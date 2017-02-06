@@ -17,13 +17,18 @@
  */
 package org.wso2.carbon.apimgt.authenticator;
 
+import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FormDataParam;
 
+import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
@@ -40,19 +45,22 @@ public class AuthenticatorAPI implements Microservice {
     @POST
     @Path ("/token")
     @Produces ("application/json")
-    @Consumes ("application/x-www-form-urlencoded")
-    public Response authenticate(
-            @FormParam ("username") String userName, @FormParam ("password") String password, @FormParam ("scope")
-            String scope) {
+    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
+    public Response authenticate(@Context Request request,
+            @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
+            @FormDataParam ("scopes") List<String> scopes) {
         IntrospectService introspectService = new IntrospectService();
-        int a = 1;
-        String accessToken = introspectService.getAccessToken(userName, password, scope);
+        String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2 + 1);
-        NewCookie cookie = new NewCookie("token1", part1 + "; path=/; domain=http://localhost:9090");
-        NewCookie cookie2 = new NewCookie("token2", part2 + "; path=/; domain=http://localhost:9090; HttpOnly");
-        return Response.ok(new IntrospectService().getAccessTokenData(userName, password, scope), "application/json")
-                .cookie(cookie, cookie2).build();
+        NewCookie cookie = new NewCookie("token1",
+                part1 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST"));
+        NewCookie cookie2 = new NewCookie("token2",
+                part2 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST") + "; "
+                        + "HttpOnly");
+        return Response
+                .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
+                        "application/json").cookie(cookie, cookie2).build();
 
     }
 }
