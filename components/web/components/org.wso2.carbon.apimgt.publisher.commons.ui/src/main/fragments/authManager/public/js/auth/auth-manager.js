@@ -36,27 +36,29 @@ authManager.getUserScope = function () {
     return this.user.scope;
 };
 authManager.login = function () {
-
+    var scopes = [];
+    scopes[0] = 'apim:api_view';
+    scopes[1] = 'apim:api_create';
     var params = {
         username: $('#username').val(),
         password: $('#password').val(),
         grant_type: 'password',
-        scopes: [
-            {value: "apim:api_view"},
-            {value: "apim:api_create"}
-        ]
+        scopes: scopes
 
     };
+    var referrer = document.referrer;
     var resp;
     return $.ajax({
         type: 'POST',
         url: '/publisher/root/apis/login/token',
         async: false,
         data: params,
+        traditional:true,
         headers: {
             'Authorization': 'Basic deidwe',
+            'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
+            'X-Alt-Referer': referrer
         },
         success: function(data) {
             resp = data;

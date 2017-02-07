@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.authenticator;
 
+import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
@@ -53,14 +54,20 @@ public class AuthenticatorAPI implements Microservice {
         String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2 + 1);
-        NewCookie cookie = new NewCookie("token1",
-                part1 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST"));
-        NewCookie cookie2 = new NewCookie("token2",
-                part2 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST") + "; "
-                        + "HttpOnly");
+        NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
+                part1 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty(
+                        AuthenticatorConstants.REMOTE_HOST_HEADER));
+        NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
+                part2 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty(
+                        AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
+                        + AuthenticatorConstants.HTTP_ONLY_COOKIE);
         return Response
                 .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
-                        "application/json").cookie(cookie, cookie2).build();
+                        MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                .header(AuthenticatorConstants.REFERER_HEADER, request.getHeader(AuthenticatorConstants.REFERER_HEADER)
+                        .equals(request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)) ?
+                        "" :
+                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)).build();
 
     }
 }
