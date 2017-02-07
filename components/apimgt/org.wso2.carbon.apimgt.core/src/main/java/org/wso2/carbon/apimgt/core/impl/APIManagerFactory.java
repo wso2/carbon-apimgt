@@ -108,7 +108,7 @@ public class APIManagerFactory {
     private APIStore newConsumer(String username) throws APIManagementException {
         // if (username.equals(ANONYMOUS_USER)) {
         // username = null;
-        // }        git status
+        // }
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
                     DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
