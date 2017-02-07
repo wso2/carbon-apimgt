@@ -70,6 +70,10 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
         return policyDAO.getPolicy(policyLevel, policyName);
+    }
 
+    @Override
+    public List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException {
+        return policyDAO.getPolicies(policyLevel);
     }
 }

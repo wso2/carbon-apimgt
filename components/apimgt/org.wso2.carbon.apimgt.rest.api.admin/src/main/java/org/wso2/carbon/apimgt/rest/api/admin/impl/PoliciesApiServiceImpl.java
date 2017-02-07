@@ -37,10 +37,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         try {
             log.info("Received Policy GET request with tierLevel=" + tierLevel + ", limit=" + limit);
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            Policy policy = apiMgtAdminService.getPolicy(tierLevel, "");
-            TierDTO tierDTO = PolicyMappingUtil.fromPolicyToDTO(policy);
-            log.info("Returning Policy : " + tierDTO);
-            return Response.ok().entity(tierDTO).build();
+            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(tierLevel);
+            List<TierDTO> tiers = PolicyMappingUtil.fromPoliciesToDTOs(policies);
+            return Response.ok().entity(tiers).build();
         } catch (APIManagementException e) {
             String msg = "Error occurred while retrieving Policy";
             RestApiUtil.handleInternalServerError(msg, e, log);
