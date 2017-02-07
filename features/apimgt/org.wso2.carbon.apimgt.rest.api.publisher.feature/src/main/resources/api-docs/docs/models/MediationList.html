@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>Sequence</h2>
+        <h2>MediationList</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,22 +21,52 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>name</p>
+                            <p>count</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Number of mediation sequences returned. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#integer">integer</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">1</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>next</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Link to the next subset of sequences qualified. Empty if no more sequences are to be returned. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">log_in_message</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>type</p>
+                            <p>previous</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Link to the previous subset of sequences qualified. Empty if current subset is the first subset returned. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>list</p>
                             <p class="param-required">
                                 
                                 optional
@@ -44,40 +74,10 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">in</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>id</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">69ea3fa6-55c6-472e-896d-e449dd34a824</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>shared</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#boolean">boolean</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">true</p></td>
                     </tr>
                 </tbody>
             </table>

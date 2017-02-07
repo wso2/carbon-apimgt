@@ -105,10 +105,6 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
 <code>api</code>
 
-<code>application</code>
-
-<code>resource</code>
-
                         </td>
                         <td>
                             <span class="param-type">
@@ -227,6 +223,8 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
+Note that the scope of the API is mandatory while retreiving the access token with the following cURL command : &#x60;curl -k -d \&quot;grant_type&#x3D;password&amp;username&#x3D;username&amp;password&#x3D;password&amp;scope&#x3D;apim:tier_view\&quot; -H \&quot;Authorization: Basic &lt;token&gt;\&quot; https://127.0.0.1:8243/token&#x60;.
+You will receive the access token as the response, for example &#x60;&quot;access_token&quot;:&quot;8644c013-7ff1-3217-b150-d7b92cae6be7&quot;&#x60;.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -654,10 +652,6 @@ Content-Type: application/json
                                 <p><b>Accepted values: </b></p>
 
 <code>api</code>
-
-<code>application</code>
-
-<code>resource</code>
 
                         </td>
                         <td>

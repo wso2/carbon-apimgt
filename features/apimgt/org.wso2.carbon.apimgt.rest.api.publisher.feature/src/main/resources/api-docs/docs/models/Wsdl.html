@@ -1,0 +1,75 @@
+<div class="main-content">
+
+        <h2>Wsdl</h2>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 30%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 30%;"/>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                    <th>Example</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter">
+                            <p>id</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">01234567-0123-0123-0123-012345678901</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>name</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">admin--calculatorAPI2.0.wsdl</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>config</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">&lt;definitions name&#x3D;&quot;HelloService&quot; targetNamespace&#x3D;&quot;http://www.examples.com/wsdl/HelloService.wsdl&quot; xmlns&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:tns&#x3D;&quot;http://www.examples.com/wsdl/HelloService.wsdl&quot; xmlns:xsd&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
+&lt;message name&#x3D;&quot;SayHelloRequest&quot;&gt; &lt;part name&#x3D;&quot;firstName&quot; type&#x3D;&quot;xsd:string&quot;/&gt; &lt;/message&gt;
+&lt;message name&#x3D;&quot;SayHelloResponse&quot;&gt; &lt;part name&#x3D;&quot;greeting&quot; type&#x3D;&quot;xsd:string&quot;/&gt; &lt;/message&gt;
+&lt;portType name&#x3D;&quot;Hello_PortType&quot;&gt; &lt;operation name&#x3D;&quot;sayHello&quot;&gt; &lt;input message&#x3D;&quot;tns:SayHelloRequest&quot;/&gt; &lt;output message&#x3D;&quot;tns:SayHelloResponse&quot;/&gt; &lt;/operation&gt; &lt;/portType&gt;
+&lt;binding name&#x3D;&quot;Hello_Binding&quot; type&#x3D;&quot;tns:Hello_PortType&quot;&gt; &lt;soap:binding style&#x3D;&quot;rpc&quot; transport&#x3D;&quot;http://schemas.xmlsoap.org/soap/http&quot;/&gt; &lt;operation name&#x3D;&quot;sayHello&quot;&gt; &lt;soap:operation soapAction&#x3D;&quot;sayHello&quot;/&gt; &lt;input&gt; &lt;soap:body encodingStyle&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; namespace&#x3D;&quot;urn:examples:helloservice&quot; use&#x3D;&quot;encoded&quot;/&gt; &lt;/input&gt;
+&lt;output&gt; &lt;soap:body encodingStyle&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; namespace&#x3D;&quot;urn:examples:helloservice&quot; use&#x3D;&quot;encoded&quot;/&gt; &lt;/output&gt; &lt;/operation&gt; &lt;/binding&gt;
+&lt;service name&#x3D;&quot;Hello_Service&quot;&gt; &lt;documentation&gt;WSDL File for HelloService&lt;/documentation&gt; &lt;port binding&#x3D;&quot;tns:Hello_Binding&quot; name&#x3D;&quot;Hello_Port&quot;&gt; &lt;soap:address location&#x3D;&quot;http://www.examples.com/SayHello/&quot; /&gt; &lt;/port&gt; &lt;/service&gt; &lt;/definitions&gt;</p></td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

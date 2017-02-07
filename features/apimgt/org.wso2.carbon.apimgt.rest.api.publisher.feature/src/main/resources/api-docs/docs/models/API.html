@@ -42,7 +42,7 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Name of the API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -57,7 +57,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">A brief description about the API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -72,7 +72,7 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">A string that represents the context of the user&#39;s request</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -87,7 +87,7 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">The version of the API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -113,8 +113,8 @@
                         <td class="parameter">
                             <p>apiDefinition</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked">Swagger definition of the API which contains details about URI templates and scopes </p></td>
@@ -122,7 +122,7 @@
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">{&quot;paths&quot;:{&quot;\/substract&quot;:{&quot;get&quot;:{&quot;x-auth-type&quot;:&quot;Application &amp; Application User&quot;,&quot;x-throttling-tier&quot;:&quot;Unlimited&quot;,&quot;parameters&quot;:[{&quot;name&quot;:&quot;x&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;},{&quot;name&quot;:&quot;y&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;}],&quot;responses&quot;:{&quot;200&quot;:{}}}},&quot;\/add&quot;:{&quot;get&quot;:{&quot;x-auth-type&quot;:&quot;Application &amp; Application User&quot;,&quot;x-throttling-tier&quot;:&quot;Unlimited&quot;,&quot;parameters&quot;:[{&quot;name&quot;:&quot;x&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;},{&quot;name&quot;:&quot;y&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;}],&quot;responses&quot;:{&quot;200&quot;:{}}}}},&quot;swagger&quot;:&quot;2.0&quot;,&quot;info&quot;:{&quot;title&quot;:&quot;CalculatorAPI&quot;,&quot;version&quot;:&quot;1.0.0&quot;}}</p></td>
+                        <td class="parameter"> <p class="marked">{&quot;paths&quot;:{&quot;/substract&quot;:{&quot;get&quot;:{&quot;x-auth-type&quot;:&quot;Application &amp; Application User&quot;,&quot;x-throttling-tier&quot;:&quot;Unlimited&quot;,&quot;parameters&quot;:[{&quot;name&quot;:&quot;x&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;},{&quot;name&quot;:&quot;y&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;}],&quot;responses&quot;:{&quot;200&quot;:{}}}},&quot;/add&quot;:{&quot;get&quot;:{&quot;x-auth-type&quot;:&quot;Application &amp; Application User&quot;,&quot;x-throttling-tier&quot;:&quot;Unlimited&quot;,&quot;parameters&quot;:[{&quot;name&quot;:&quot;x&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;},{&quot;name&quot;:&quot;y&quot;,&quot;required&quot;:true,&quot;type&quot;:&quot;string&quot;,&quot;in&quot;:&quot;query&quot;}],&quot;responses&quot;:{&quot;200&quot;:{}}}}},&quot;swagger&quot;:&quot;2.0&quot;,&quot;info&quot;:{&quot;title&quot;:&quot;CalculatorAPI&quot;,&quot;version&quot;:&quot;1.0.0&quot;}}</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -147,7 +147,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">This describes in which status of the lifecycle the API is</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -216,6 +216,21 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <p>type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">HTTP</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
                             <p>transport</p>
                             <p class="param-required">
                                 required
@@ -237,7 +252,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Search keywords related to the API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#array">array</a>
                         </td>
@@ -252,7 +267,7 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">The subscription tiers selected for the particular API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#array">array</a>
                         </td>
@@ -312,7 +327,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">The user roles that are able to access the API</p></td>
                         <td class="parameter">
                                 <a href="#!/models#array">array</a>
                         </td>
