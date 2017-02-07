@@ -1664,15 +1664,19 @@ definitions:
         example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        description: Name of the API
         example: CalculatorAPI
       description:
         type: string
+        description: A brief description about the API
         example: A calculator API that supports basic operations
       context:
         type: string
+        description: A string that represents thecontext of the user's request
         example: CalculatorAPI
       version:
         type: string
+        description: The version of the API
         example: 1.0.0
       provider:
         description: |
@@ -1683,7 +1687,7 @@ definitions:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
-        example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+        example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
       wsdlUri:
         description: |
           WSDL URL if the API is based on a WSDL endpoint
@@ -1691,6 +1695,7 @@ definitions:
         example: "http://www.webservicex.com/globalweather.asmx?wsdl"
       status:
         type: string
+        description: This describes in which status of the lifecycle the API is.
         example: PUBLISHED
       isDefaultVersion:
         type: boolean
@@ -1704,11 +1709,13 @@ definitions:
         example: ["http","https"]
       tags:
         type: array
+        description: Search keywords related to the API
         items:
           type: string
         example: ["substract","add"]
       tiers:
         type: array
+        description: The subscription tiers selected for the particular API
         items:
           type: string
         example: ["Unlimited"]
@@ -2185,24 +2192,24 @@ definitions:
     properties:
       consumerKey:
         type: string
-        description: Consumer key of the application
+        description: The consumer key associated with the application and identifying the client
         example: vYDoc9s7IgAFdkSyNDaswBX7ejoa
       consumerSecret:
         type: string
-        description: Consumer secret of the application
+        description: The client secret that is used to authenticate the client with the authentication server
         example: TIDlOFkpzB7WjufO3OJUhy1fsvAa
       supportedGrantTypes:
         type: array
         items:
           type: string
-        description: Supported grant types for the application
+        description: The grant types that are supported by the application
         example: ["client_credentials","password"]
       keyState:
         type: string
-        description: State of the key generation of the application
+        description: Describes the state of the key generation.
         example: APPROVED
       keyType:
-        description: Key type
+        description: Describes to which endpoint the key belongs
         type: string
         enum:
           - PRODUCTION
