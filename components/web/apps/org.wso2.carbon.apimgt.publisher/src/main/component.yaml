@@ -1,5 +1,5 @@
 apis:
-    - className: "org.wso2.carbon.apimgt.authenticator.AuthenticatorAPI"
+    - className: "org.wso2.carbon.apimgt.authenticator.PublisherAuthenticatorAPI"
       uri: "/login/"
 
 bindings:
