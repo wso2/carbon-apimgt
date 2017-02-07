@@ -68,6 +68,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             APISummary apiSummary = new APISummary(apiInfo.getId());
             apiSummary.setName(apiInfo.getName());
             apiSummary.setContext(apiInfo.getContext());
+            apiSummary.setVersion(apiInfo.getVersion());
             apiSummary.setUriTemplates(apiInfo.getUriTemplates());
             apiSummaryList.add(apiSummary);
         });
