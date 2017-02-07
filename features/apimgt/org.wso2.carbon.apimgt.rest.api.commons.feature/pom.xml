@@ -19,6 +19,11 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
+            <version>7.0.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -52,6 +57,11 @@
 									<symbolicName>org.wso2.carbon.apimgt.rest.api.commons</symbolicName>
 									<version>${carbon.apimgt.version}</version>
 								</bundle>
+                                <!-- Remove following bundle ones keymanager mock interface is removed-->
+                                <bundle>
+                                    <symbolicName>org.wso2.carbon.apimgt.keymanager</symbolicName>
+                                    <version>${carbon.apimgt.version}</version>
+                                </bundle>
 							</bundles>
 							<importFeatures>
 								<feature>

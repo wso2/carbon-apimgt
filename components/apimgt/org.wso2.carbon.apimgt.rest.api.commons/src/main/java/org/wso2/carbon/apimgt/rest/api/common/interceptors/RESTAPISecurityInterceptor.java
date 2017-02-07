@@ -113,7 +113,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 return false;
             }
             return true;
-        } else if (requestURI.contains("/editor")) {
+        } else if (requestURI.contains("/editor") || requestURI.contains("oauth2")) {
             return true;
         }
         try {
