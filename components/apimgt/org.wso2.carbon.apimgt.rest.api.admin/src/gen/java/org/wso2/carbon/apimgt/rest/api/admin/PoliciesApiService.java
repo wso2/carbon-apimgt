@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-19T14:57:15.952+05:30")
 public abstract class PoliciesApiService {
+
     public abstract Response policiesTierLevelDelete(String tierName, String tierLevel, String ifMatch,
                                                      String ifUnmodifiedSince) throws NotFoundException;
 
