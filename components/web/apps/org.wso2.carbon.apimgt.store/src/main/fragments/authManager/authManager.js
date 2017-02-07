@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-function onGet() {
-    var user = {
-        username: "admin"
-    };
-    return {user: user};
+function onGet(env) {
+    sendToClient("loginRedirectUri", env.config.loginRedirectUri);
+    sendToClient("loginPageUri", env.config.loginPageUri);
+    sendToClient("contextPath", env.contextPath);
+    sendToClient("uri", env.request.uri);
+    sendToClient("scopes", env.config.scopes);
+    sendToClient("tokenEndpoint", env.config.tokenEndpoint);
+    sendToClient("keyAndSecret", env.config.keyAndSecret);
+    return {};
 }

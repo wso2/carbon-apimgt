@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
  * This method authenticate the user.
  *
  */
-public class AuthenticatorAPI implements Microservice {
+public class PublisherAuthenticatorAPI implements Microservice {
 
     /**
      * This method authenticate the user.
@@ -55,10 +55,10 @@ public class AuthenticatorAPI implements Microservice {
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2 + 1);
         NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                part1 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty(
+                part1 + "; path=" + AuthUtil.getAppContext("publisher") + "; domain=" + request.getProperty(
                         AuthenticatorConstants.REMOTE_HOST_HEADER));
         NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                part2 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty(
+                part2 + "; path=" + AuthUtil.getAppContext("publisher") + "; domain=" + request.getProperty(
                         AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
                         + AuthenticatorConstants.HTTP_ONLY_COOKIE);
         return Response

@@ -1,4 +1,6 @@
-apis: []
+apis:
+    - className: "org.wso2.carbon.apimgt.authenticator.StoreAuthenticatorAPI"
+      uri: "/login/"
 
 bindings:
   - zoneName: footer
