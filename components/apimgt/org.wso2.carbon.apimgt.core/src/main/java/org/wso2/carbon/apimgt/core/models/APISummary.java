@@ -25,12 +25,17 @@ import java.util.List;
 /**
  * Bean Class for API summery to be loaded at server startup
  */
-public class APISummary implements Serializable{
+public class APISummary implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String id;
 
     private String name;
 
     private String context;
+
+    private String version;
 
     private List<UriTemplate> uriTemplates = new ArrayList<UriTemplate>();
 
@@ -66,18 +71,36 @@ public class APISummary implements Serializable{
         this.uriTemplates = uriTemplates;
     }
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getContextWithVersion() {
+        return context + version;
+    }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof APISummary)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof APISummary)) {
+            return false;
+        }
 
         APISummary apiInfo = (APISummary) o;
 
-        if (context != null ? !context.equals(apiInfo.context) : apiInfo.context != null) return false;
-        if (!id.equals(apiInfo.id)) return false;
-        if (name != null ? !name.equals(apiInfo.name) : apiInfo.name != null) return false;
-        if (uriTemplates != null ? !uriTemplates.equals(apiInfo.uriTemplates) : apiInfo.uriTemplates != null)
+        if (context != null ? !context.equals(apiInfo.context) : apiInfo.context != null) {
             return false;
+        }
+        if (!id.equals(apiInfo.id)) {
+            return false;
+        }
+        if (name != null ? !name.equals(apiInfo.name) : apiInfo.name != null) {
+            return false;
+        }
+        if (uriTemplates != null ? !uriTemplates.equals(apiInfo.uriTemplates) : apiInfo.uriTemplates != null) {
+            return false;
+        }
 
         return true;
     }
