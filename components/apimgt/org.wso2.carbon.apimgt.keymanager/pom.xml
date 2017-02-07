@@ -12,7 +12,7 @@
     <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Sample: Stockquote microservice (OSGi Bundle)</name>
+    <name>Key Manager Backend module</name>
     <dependencies>
         <dependency>
             <groupId>org.wso2.eclipse.osgi</groupId>

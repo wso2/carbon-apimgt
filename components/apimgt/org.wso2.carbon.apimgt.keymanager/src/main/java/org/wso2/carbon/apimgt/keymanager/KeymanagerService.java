@@ -10,7 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 /**
- * This method authenticate the user.
+ * This class is used to mock the key manager apis.
  *
  */
 @Component (
