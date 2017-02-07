@@ -202,6 +202,11 @@
             <version>12.1.0.1-atlassian-hosted</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>4.34</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

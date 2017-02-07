@@ -8,7 +8,7 @@ public enum ContentType {
 
     private String mediaType;
 
-    private ContentType(String mediaType) {
+    ContentType(String mediaType) {
         this.mediaType = mediaType;
     }
 
@@ -16,3 +16,4 @@ public enum ContentType {
         return mediaType;
     }
 }
+
