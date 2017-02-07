@@ -85,8 +85,8 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = TierDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = TierDTO.class) })
-    public Response policiesTierLevelPost(@ApiParam(value = "Tier object that should to be added " ,required=true) TierDTO body, @ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @PathParam("tierLevel") String tierLevel,
-                                          @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType) throws NotFoundException {
+    public Response policiesTierLevelPost(@ApiParam(value = "Tier object that should to be added " , required=true) TierDTO body, @ApiParam(value = "List API or Application or Resource type policies. ", required=true, allowableValues="api, application, resource") @PathParam("tierLevel") String tierLevel,
+                                          @ApiParam(value = "Media type of the entity in the body. Default is application/json. " , required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType) throws NotFoundException {
         return delegate.policiesTierLevelPost(body, tierLevel, contentType);
     }
 

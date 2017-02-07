@@ -83,4 +83,6 @@ public interface APIMgtAdminService {
      * @throws APIManagementException
      */
     Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
+
+    List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException;
 }
