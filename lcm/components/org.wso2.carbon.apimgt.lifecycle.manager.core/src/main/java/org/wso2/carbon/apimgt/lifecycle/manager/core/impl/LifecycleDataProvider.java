@@ -17,8 +17,11 @@
  */
 package org.wso2.carbon.apimgt.lifecycle.manager.core.impl;
 
+import org.w3c.dom.Document;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.beans.LifecycleNode;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleOperationUtil;
+import org.wso2.carbon.apimgt.lifecycle.manager.core.util.LifecycleUtils;
 import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 
 import java.util.List;
@@ -50,5 +53,18 @@ public class LifecycleDataProvider {
      */
     public static List<String> getIdsFromState(String state, String lcName) throws LifecycleException {
         return LifecycleOperationUtil.getLifecycleIds(state, lcName);
+    }
+
+    /**
+     * This method is used to read lifecycle config and provide state chart as graph in order to visually represent the
+     * lifecycle config.
+     *
+     * @param lcName                          Name of the lifecycle.
+     * @return Lifecycle config as a graph of states.
+     * @throws LifecycleException
+     */
+    public static List<LifecycleNode> getLifecycleGraph(String lcName) throws LifecycleException {
+        Document lcContent = LifecycleUtils.getLifecycleConfiguration(lcName);
+        return LifecycleOperationUtil.buildLifecycleGraph(lcContent);
     }
 }

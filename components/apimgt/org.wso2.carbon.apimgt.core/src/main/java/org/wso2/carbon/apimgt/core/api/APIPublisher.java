@@ -213,7 +213,7 @@ public interface APIPublisher extends APIManager {
      * @param documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
+    String updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.

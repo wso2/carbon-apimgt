@@ -1,0 +1,111 @@
+{{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
+{{js "js/api-info.js"}}
+{{js "js/{id}.js"}}
+<style>
+    .card {
+        border: 1px solid gray;
+        padding: 20px;
+        border-top: 0;
+        height: 600px;
+    }
+
+    .tabs-holder {
+        padding-bottom: 10px;
+        border-bottom: 1px solid darkcyan
+    }
+
+    .tab-content {
+        padding-left: 0;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="tabs-holder">
+            <div class="button-bar">
+                <ul class="nav nav-pills tab-effect">
+                    <li id="tab-1" role="presentation" class="active"><a href="#overview-tab"
+                                                                         aria-controls="overview-tab"
+                                                                         role="tab" data-toggle="tab">
+                        &nbsp;Overview</a>
+                    </li>
+                    <li id="tab-2" role="presentation"><a href="#lc-tab" aria-controls="lc-tab" role="tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-lifecycle"></i>&nbsp;
+                        Life-Cycle</a>
+                    </li>
+                    <li id="tab-3" role="presentation"><a href="#endpoints-tab" role="tab" aria-controls="endpoints-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-endpoint"></i>&nbsp; Endpoints</a>
+                    </li>
+                    <li id="tab-4" role="presentation"><a href="#resources-tab" role="tab" aria-controls="resources-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-tabesource"></i>&nbsp;
+                        Resources</a></li>
+                    <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab" aria-controls="documents-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-document"></i>&nbsp; Documents</a>
+                    </li>
+                    <li id="tab-6" role="presentation"><a href="#actrl-tab" role="tab" aria-controls="actrl-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-contract"></i>&nbsp; Access Control</a>
+                    </li>
+                    <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab" aria-controls="mediation-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-sequence"></i>&nbsp;
+                        Mediation</a>
+                    </li>
+                    <li id="tab-8" role="presentation"><a href="#scripting-tab" role="tab" aria-controls="scripting-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-prototype"></i>&nbsp; Scripting</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="overview-tab">
+                <div class="card">
+                    <div id="overview-content">
+                        <div style="height:500px" data-toggle="loading" data-loading-inverse="true"></div>
+                        <!-- Content will be loaded by an AJAX call -->
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="lc-tab">
+                <div class="card">
+                    {{defineZone "api-tab-lc-content"}}
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="endpoints-tab">
+                <div class="card">
+                    endpoints content
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="resources-tab">
+                <div class="card">
+                    resources
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="documents-tab">
+                <div class="card">
+                    documents-tab...
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="actrl-tab">
+                <div class="card">
+                    actrl-tab...
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="mediation-tab">
+                <div class="card">
+                    mediation-tab...
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="scripting-tab">
+                <div class="card">
+                    scripting-tab...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="apiId" value="{{@pathParams.id}}"/>

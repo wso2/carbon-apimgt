@@ -41,18 +41,58 @@ $(function () {
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
                         "tier-list", mode, callbacks);
 
+                    //Get application details
+                    swaggerClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
+                        function (jsonData) {
+                            var context = {};
+                            var applications = jsonData.obj.list;
+                            if (applications.length > 0) {
+                                swaggerClient["Subscription Collection"].get_subscriptions({
+                                        "apiId": apiId,
+                                        "applicationId": "",
+                                        "responseContentType": 'application/json'
+                                    },
+                                    function (jsonData) {
+                                        var availableApplications = [], subscription = {};
+                                        var isSubscribedToDefault = false;
+                                        var subscriptions = jsonData.obj.list;
+                                        var application = {};
 
-                    /*
-                       $.get('/store/public/components/root/base/templates/apis/{apiId}/api-subscriptions.hbs', function (templateData) {
+                                        applicationsLoop:
+                                            for (var i = 0; i < applications.length; i++) {
+                                                application = applications[i];
+                                                for (var j = 0; j < subscriptions.length; j++) {
+                                                    subscription = subscriptions[j];
+                                                    if (subscription.applicationId === application.applicationId) {
+                                                        continue applicationsLoop;
+                                                    }
+                                                }
+                                                if (application.name == "DefaultApplication") {
+                                                    isSubscribedToDefault = true;
+                                                    application.isDefault = true;
+                                                }
+                                                availableApplications.push(application);
+                                            }
+                                        var context = {};
+                                        context.applications = availableApplications;
+                                        context.isSubscribedToDefault = isSubscribedToDefault;
 
-                           var apiOverviewTemplate = Handlebars.compile(templateData);
-                           // Inject template data
-                           var compiledTemplate = apiOverviewTemplate(context);
+                                        //Render application list drop-down
+                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-list",context,
+                                            "application-list", mode, callbacks);
 
-                           // Append compiled template into page
-                           $(compiledTemplate).insertAfter("#tier-list");
-                       }, 'html');
-   */
+
+                                    },
+                                    function (error) {
+                                        alert("Error occurred while retrieve Applications" + error);
+                                    });
+                            }
+
+                        },
+                        function (error) {
+                            alert("Error occurred while retrieve Applications" + erro);
+                        });
+
                     //TODO: Embed actual values
                     var isAPIConsoleEnabled = true;
                     var apiType = "REST";
@@ -162,7 +202,7 @@ $(function () {
                             }
 
                             if (tab.id == "api-documentation") {
-                                apiClient["API (individual)"].get_apis_apiId_documents({"apiId": apiId}, {"responseContentType": 'application/json'},
+                                swaggerClient["API (individual)"].get_apis_apiId_documents({"apiId": apiId}, {"responseContentType": 'application/json'},
                                     function (jsonData) {
 
                                         var documentationList = jsonData.obj.list, length, documentations = {}, doc, obj;
@@ -232,68 +272,56 @@ $(function () {
                 function (jqXHR, textStatus, errorThrown) {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
-/*
-            apiClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 12770569-28a9-3864-9f7b-c3fcdc16b890", "header"));
-            apiClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
-                function (jsonData) {
-                    var context = {};
-                    var applications = jsonData.obj.list;
-                    if (applications.length > 0) {
-                        apiClient["Subscription Collection"].get_subscriptions({
-                                "apiId": apiId,
-                                "applicationId": "",
-                                "responseContentType": 'application/json'
-                            },
-                            function (jsonData) {
-                                var availableApplications = [], subscription = {};
-                                var isSubscribedToDefault = false;
-                                var subscriptions = jsonData.obj.list;
-                                var application = {};
 
-                                applicationsLoop:
-                                    for (var i = 0; i < applications.length; i++) {
-                                        application = applications[i];
-                                        for (var j = 0; j < subscriptions.length; j++) {
-                                            subscription = subscriptions[j];
-                                            if (subscription.applicationId === application.applicationId) {
-                                                continue applicationsLoop;
-                                            }
-                                        }
-                                        if (application.name == "DefaultApplication") {
-                                            isSubscribedToDefault = true;
-                                            application.isDefault = true;
-                                        }
-                                        availableApplications.push(application);
-                                    }
-
-                                $.get('/store/public/components/root/base/templates/apis/{apiId}/api-applications-list.hbs', function (templateData) {
-                                    var applicationsTemplate = Handlebars.compile(templateData);
-                                    // Define our data object
-                                    var context = {};
-                                    context.applications = availableApplications;
-                                    context.isSubscribedToDefault = isSubscribedToDefault;
-
-                                    // Pass our data to the template
-                                    var applicationsCompiledTemplate = applicationsTemplate(context);
-
-                                    // Add the compiled html to the page
-                                    $('#applications-list').append(applicationsCompiledTemplate);
-                                }, 'html');
-                            },
-                            function (error) {
-                                alert("Error occurred while retrieve Applications" + error);
-                            });
+            $('.page-content').on('click', 'button', function (e) {
+                var element = e.target;
+                if (element.id == "subscribe-button") {
+                    var applicationId = $("#application-list option:selected").val();
+                    if (applicationId == "-" || applicationId == "createNewApp") {
+                        alert('Please select an application before subscribing')
+                        return;
                     }
+                    $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
+                    var tier = $("#tiers-list").val();
+                    var apiIdentifier = $("#apiId").val();
 
-                },
-                function (error) {
-                    alert("Error occurred while retrieve Applications" + erro);
-                });*/
+
+                    var subscriptionData = {};
+                    subscriptionData.tier = tier;
+                    subscriptionData.applicationId = applicationId;
+                    subscriptionData.apiIdentifier = apiIdentifier;
+
+                    swaggerClient["Subscription (individual)"].post_subscriptions({
+                            "body": subscriptionData,
+                            "Content-Type": "application/json"
+                        },
+                        function (jsonData) {
+                            $("#subscribe-button").html('Subscribe');
+                            $("#subscribe-button").removeAttr('disabled');
+                            var subscription = jsonData.obj;
+
+                            location.href = contextPath + "/apis/" + apiId;
+
+                            //TODO : Embedding message model
+
+
+                        },
+                        function (error) {
+                            alert("Error occurred while adding Application : " + applicationName);
+                        });
+                }
+
+            });
         },
         failure : function(error){
             console.log("Error occurred while loading swagger definition");
         }
+
+
+
     });
+
+
 
 });
 

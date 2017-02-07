@@ -72,6 +72,7 @@ public class MappingUtil {
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
+        apidto.setProvider(api.getProvider());
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
@@ -178,8 +179,10 @@ public class MappingUtil {
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                corsConfiguration(corsConfiguration).
-                isDefaultVersion(apidto.getIsDefaultVersion());
+                corsConfiguration(corsConfiguration);
+        if (apidto.getIsDefaultVersion() != null) {
+            apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
+        }
         if (apidto.getVisibility() != null) {
             apiBuilder.visibility(API.Visibility.valueOf(apidto.getVisibility().toString()));
         }
@@ -266,7 +269,9 @@ public class MappingUtil {
                 sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
                 sourceURL(documentDTO.getSourceUrl()).
                 type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
+                permission(documentDTO.getPermission()).
                 visibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString())).build();
+
     }
 
     /**
