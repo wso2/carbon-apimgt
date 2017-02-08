@@ -1,0 +1,86 @@
+<!-- navbar -->
+<div class="navbar-wrapper ">
+    <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
+        <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar"
+           data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true"
+           aria-expanded="false" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
+                        </span>
+        </a>
+
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+
+                    {{#if @params.isApplicationAdd}}
+                    <li>
+                        <a title="Applications List" href="{{@contextPath}}/applications/">
+                                   <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                            {{i18n "Application List"}}
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{#if @params.isApplicationsView}}
+                        <li>
+                            <a title="<%=i18n.localize('Application List')%>" href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                            <%=i18n.localize('Application List')%>
+                            </a>
+                        </li>
+                        <li>
+                            <a title="<%=i18n.localize("Edit")%>" href="<%= jagg.urlTenanted("/site/pages/application-edit.jag?name="+request.getParameter("name")) %>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-edit fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                            <%=i18n.localize("Edit")%>
+                            </a>
+                        </li>
+                    {{/if}}
+                    {{#if @params.isGoBack}}
+                        <li>
+                            <a href="<%= jagg.url('/app-policy-manage')%>" title="<%=i18n.localize("Go Back")%>">
+                                    <span class="icon fw-stack">
+                                        <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
+                                    </span>
+                            <%=i18n.localize("Go Back")%>
+                            </a>
+                        </li>
+                    {{/if}}
+                    {{#if @params.isApplicationList}}
+                        <li>
+                            <a title="<%=i18n.localize('Add Application')%>" href="{{@contextPath}}/applications/add">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+                            {{i18n "Add Application"}}
+                            </a>
+                        </li>
+                    {{/if}}
+
+                </ul>
+
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+
+    </nav>
+</div>
