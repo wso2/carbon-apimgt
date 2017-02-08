@@ -39,9 +39,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         } catch (APIManagementException e) {
             String msg = "Error occurred while retrieving Policy";
             RestApiUtil.handleInternalServerError(msg, e, log);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(msg, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
-        return null;
     }
 
     @Override
