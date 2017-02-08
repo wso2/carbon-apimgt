@@ -2939,6 +2939,9 @@ definitions:
       otherTypeName:
         type: string
         example: ""
+      permission:
+        type: string
+        example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
       visibility:
         type: string
         enum:

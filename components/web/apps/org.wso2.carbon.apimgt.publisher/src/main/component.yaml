@@ -1,4 +1,6 @@
-apis: []
+apis:
+    - className: "org.wso2.carbon.apimgt.authenticator.PublisherAuthenticatorAPI"
+      uri: "/login/"
 
 bindings:
   - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondaryMenu"
@@ -9,5 +11,5 @@ bindings:
 config:
   title : "API Publisher Application"
   appName : API Publisher
-  loginRedirectUri: "/api"
+  loginRedirectUri: "/apis"
 

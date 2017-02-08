@@ -272,11 +272,56 @@ $(function () {
                 function (jqXHR, textStatus, errorThrown) {
                     alert("Error occurred while retrieve api with id  : " + apiId);
                 });
+
+            $('.page-content').on('click', 'button', function (e) {
+                var element = e.target;
+                if (element.id == "subscribe-button") {
+                    var applicationId = $("#application-list option:selected").val();
+                    if (applicationId == "-" || applicationId == "createNewApp") {
+                        alert('Please select an application before subscribing')
+                        return;
+                    }
+                    $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
+                    var tier = $("#tiers-list").val();
+                    var apiIdentifier = $("#apiId").val();
+
+
+                    var subscriptionData = {};
+                    subscriptionData.tier = tier;
+                    subscriptionData.applicationId = applicationId;
+                    subscriptionData.apiIdentifier = apiIdentifier;
+
+                    swaggerClient["Subscription (individual)"].post_subscriptions({
+                            "body": subscriptionData,
+                            "Content-Type": "application/json"
+                        },
+                        function (jsonData) {
+                            $("#subscribe-button").html('Subscribe');
+                            $("#subscribe-button").removeAttr('disabled');
+                            var subscription = jsonData.obj;
+
+                            location.href = contextPath + "/apis/" + apiId;
+
+                            //TODO : Embedding message model
+
+
+                        },
+                        function (error) {
+                            alert("Error occurred while adding Application : " + applicationName);
+                        });
+                }
+
+            });
         },
         failure : function(error){
             console.log("Error occurred while loading swagger definition");
         }
+
+
+
     });
+
+
 
 });
 

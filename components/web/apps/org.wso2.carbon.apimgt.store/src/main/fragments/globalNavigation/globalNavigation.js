@@ -16,7 +16,7 @@
 
 function onGet() {
     var user = {
-        username: "marcus"
+        username: "admin"
     };
     return {user: user};
 }

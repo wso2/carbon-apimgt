@@ -19,14 +19,15 @@ $(function(){
     }
     var doLogin = function(){
         var loginPromise = authManager.login();
-        loginPromise.then(function(data){
+        loginPromise.then(function(data,status,xhr){
             authManager.setAuthStatus(true);
             authManager.setUserName('admin');//data.user.username;
             authManager.setUserScope(data.scope);//data.user.role;
-            $.cookie('token', data.access_token, { path: '/' });
+            /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
-            $.cookie('userScope', data.scope, { path: '/' });
-            route.routTo(loginRedirectUri);
+            $.cookie('userScope', data.scope, { path: '/' });*/
+            var redirectUri = xhr.getResponseHeader("Referer") == '' ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
+            window.location = redirectUri;
         });
     };
     $('#loginForm').on('keydown','input.form-control',function(e){

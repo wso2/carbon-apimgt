@@ -325,8 +325,7 @@ public class RestApiUtil {
      * @param errorHandler The error handler object.
      * @return A generic errorDTO with the specified details
      */
-    public static ErrorDTO
-    getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMoreInfo(paramList);

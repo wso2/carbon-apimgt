@@ -28,6 +28,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIContext;
 import org.wso2.carbon.apimgt.core.models.APIResource;
@@ -110,13 +112,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public List<API> getAPIsByProvider(String providerName) throws APIManagementException {
         try {
-            getApiDAO().getAPI(providerName); //todo: call correct doa method
+            return getApiDAO().getAPIsForProvider(providerName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to fetch APIs of " + providerName;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return null;
     }
 
     /**
@@ -249,15 +250,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     resourceList.add(dto);
                 }
                 APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, resourceList);
-                try {
-                    String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate();
-                    if (log.isDebugEnabled()) {
-                        log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
-                    }
-                    apiBuilder.gatewayConfig(gatewayConfig);
-                } catch (APITemplateException e) {
-                    log.error("Error generating API configuration for API " + apiBuilder.getName(), e);
+                String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate();
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
                 }
+                apiBuilder.gatewayConfig(gatewayConfig);
 
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
@@ -271,6 +268,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);
+                //publishing config to gateway
+                publishToGateway(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
             } else {
@@ -290,6 +289,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        } catch (APITemplateException e) {
+            String message = "Error generating API configuration for API " + apiBuilder.getName();
+            log.error(message, e);
+            throw new APIManagementException(message, ExceptionCodes.TEMPLATE_EXCEPTION);
+        } catch (GatewayException e) {
+            String message = "Error publishing service configuration to Gateway " + apiBuilder.getName();
+            log.error(message, e);
+            throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
         return apiBuilder.getId();
     }
@@ -576,7 +583,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (StringUtils.isEmpty(docBuilder.getId())) {
                 docBuilder = docBuilder.id(UUID.randomUUID().toString());
             }
+
+            if (documentInfo.getPermission() != null && !("").equals(documentInfo.getPermission())) {
+                HashMap roleNamePermissionList;
+                roleNamePermissionList = getAPIPermissionArray(documentInfo.getPermission());
+                docBuilder.permissionMap(roleNamePermissionList);
+            }
+
             document = docBuilder.build();
+
             if (!getApiDAO().isDocumentExist(apiId, document)) {
                 getApiDAO().addDocumentInfo(apiId, document);
                 return document.getId();
@@ -589,6 +604,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Unable to add documentation";
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Unable to add documentation due to json parse error";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
         }
     }
 
@@ -693,12 +712,43 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Updates a given documentation
      *
      * @param apiId         String
-     * @param documentation Documentation
+     * @param documentInfo Documentation
      * @throws APIManagementException if failed to update docs
      */
     @Override
-    public void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException {
+    public String updateDocumentation(String apiId, DocumentInfo documentInfo) throws APIManagementException {
+        try {
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            DocumentInfo document = null;
+            if (StringUtils.isEmpty(docBuilder.getId())) {
+                docBuilder = docBuilder.id(UUID.randomUUID().toString());
+            }
 
+            if (documentInfo.getPermission() != null && !("").equals(documentInfo.getPermission())) {
+                HashMap roleNamePermissionList;
+                roleNamePermissionList = getAPIPermissionArray(documentInfo.getPermission());
+                docBuilder.permissionMap(roleNamePermissionList);
+            }
+
+            document = docBuilder.build();
+
+            if (!getApiDAO().isDocumentExist(apiId, document)) {
+                getApiDAO().updateDocumentInfo(apiId, document);
+                return document.getId();
+            } else {
+                String msg = "Document already exist for the api " + apiId;
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to add documentation";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ParseException e) {
+            String errorMsg = "Unable to add documentation due to json parse error";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
+        }
     }
 
     /**
@@ -1222,6 +1272,23 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (IOException e) {
             throw new APIManagementException("Couldn't Generate ApiDefinition from file", ExceptionCodes
                     .API_DEFINITION_MALFORMED);
+        }
+    }
+
+    /**
+     * Publishing new API configurations to the subscribers
+     *
+     * @param api API object
+     */
+    private void publishToGateway(API api) throws GatewayException {
+        APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
+        boolean isPublished = gateway.publishToGateway(api);
+        if (isPublished) {
+            APIUtils.logDebug(
+                    "API " + api.getName() + "-" + api.getVersion() + " was published to gateway successfully.", log);
+        } else {
+            APIUtils.logDebug("Error when publishing API " + api.getName() + "-" + api.getVersion() + " to gateway.",
+                    log);
         }
     }
 }

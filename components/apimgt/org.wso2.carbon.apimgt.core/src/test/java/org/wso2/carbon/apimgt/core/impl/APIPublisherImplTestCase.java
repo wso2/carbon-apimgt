@@ -20,8 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.common.io.Files;
 import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
@@ -36,12 +38,20 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 
 public class APIPublisherImplTestCase {
     private static final String user = "admin";
+
+    @BeforeClass
+    void init() {
+        File temp = Files.createTempDir();
+        temp.deleteOnExit();
+        System.setProperty("gwHome", temp.getAbsolutePath());
+    }
 
     @Test(description = "Test add api")
     void addApi() throws APIManagementException, LifecycleException {

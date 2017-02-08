@@ -235,7 +235,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
+            //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
@@ -265,8 +265,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //overriding some properties
             body.setName(documentInfoOld.getName());
+            body.setDocumentId(documentInfoOld.getId());
+
+            DocumentInfo documentation = MappingUtil.toDocumentInfo(body);
             //this will fail if user does not have access to the API or the API does not exist
-            apiPublisher.updateDocumentation(apiId, documentInfo);
+            apiPublisher.updateDocumentation(apiId, documentation);
 
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
@@ -447,7 +450,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String swagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(swagger).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving swagger of API : " + apiId;
+            String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -555,8 +558,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (lifecycleChecklist != null) {
                 String[] checkList = lifecycleChecklist.split(",");
                 for (String checkList1 : checkList) {
-                    String attributeName = new StringTokenizer(checkList1, ":").nextToken();
-                    Boolean attributeValue = Boolean.valueOf(new StringTokenizer(checkList1, ":").nextToken());
+                    StringTokenizer attributeTokens = new StringTokenizer(checkList1, ":");
+                    String attributeName = attributeTokens.nextToken();
+                    Boolean attributeValue = Boolean.valueOf(attributeTokens.nextToken());
                     lifecycleChecklistMap.put(attributeName, attributeValue);
                 }
             }

@@ -247,4 +247,25 @@ class API {
         }
     }
 
+    /**
+     * Update the life cycle state of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param state {string} Target state which need to be transferred
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    updateLcState(id, state, callback = null) {
+        var payload = {action: state, apiId: id, "Content-Type": "application/json"};
+        var promise_lc_update = this.client.then(
+            (client) => {
+                return client["API (Individual)"].post_apis_change_lifecycle(
+                    payload, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_lc_update.then(callback);
+        } else {
+            return promise_lc_update;
+        }
+    }
+
 }

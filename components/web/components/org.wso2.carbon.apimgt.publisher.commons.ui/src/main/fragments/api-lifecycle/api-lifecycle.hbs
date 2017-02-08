@@ -1,0 +1,46 @@
+<div id="lifecycle-content" class="tab-content">
+    <form class="form-horizontal lifecycle-state">
+        <div class="well remove-padding-top remove-padding-bottom">
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4>
+                    Current State:</h4></label>
+                <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
+                    <h4><p class="form-control-static" name="stateValue"><strong>{{@params.lifeCycleStatus}}</strong>
+                    </p></h4>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-actions">
+            <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+                <div class="btn-group" role="group">
+                    <input type="button" {{#if @params.isPublished}}disabled=""{{/if}}
+                           class="btn btn-primary lc-state-btn" data-lcstate="Published" value="Publish">
+                </div>
+
+                <div class="btn-group" role="group">
+                    <input type="button"  {{#if @params.isPublished}}disabled=""{{/if}} data-lcstate="Prototyped"
+                           class="btn btn-secondary lc-state-btn"
+                           value="Deploy as a Prototype">
+                </div>
+            </div>
+            <div class="page-header">
+                <h4 class="lead">Lifecycle History</h4>
+            </div>
+            <table class="lifeCycleTable" id="lifeCycleTable">
+                <thead>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull">N/A</span></b>
+                    </td>
+                    <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
+                            href="/publisher/apis?query=provider:admin" title="user">admin</a>
+                        created the API.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
