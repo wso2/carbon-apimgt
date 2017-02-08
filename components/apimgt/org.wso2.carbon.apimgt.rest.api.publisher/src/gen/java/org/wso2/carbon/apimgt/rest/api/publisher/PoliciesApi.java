@@ -29,7 +29,7 @@ public class PoliciesApi implements Microservice  {
     private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
     @GET
-    @Path("/{tierLevel}")
+    @Path("/tierLevel/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all policies", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`. ", response = TierListDTO.class, tags={ "Throttling Tier (Collection)", })
@@ -44,11 +44,11 @@ public class PoliciesApi implements Microservice  {
                                          @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json") @HeaderParam("Accept") String accept,
                                          @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " ) @HeaderParam("If-None-Match") String ifNoneMatch) throws NotFoundException {
 
-        return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch);
+        return delegate.policiesTierLevelGet(tierLevel, limit, offset, accept, ifNoneMatch);
     }
 
     @GET
-    @Path("/{tierLevel}/{tierName}")
+    @Path("/tierName/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get details of a policy", notes = "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name. ", response = TierDTO.class, tags={ "Throttling Tier (Individual)", })
@@ -64,7 +64,7 @@ public class PoliciesApi implements Microservice  {
                                                  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " ) @HeaderParam("If-None-Match") String ifNoneMatch,
                                                  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " ) @HeaderParam("If-Modified-Since") String ifModifiedSince) throws NotFoundException {
 
-        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.policiesTierLevelTierNameGet(tierName, tierLevel, accept, ifNoneMatch, ifModifiedSince);
     }
 
     @POST
@@ -85,6 +85,6 @@ public class PoliciesApi implements Microservice  {
                                                  @ApiParam(value = "Validator for conditional requests; based on Last Modified header. " ) @HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince,
                                                  @ApiParam(value = "" ) TierPermissionDTO permissions) throws NotFoundException {
 
-        return delegate.policiesUpdatePermissionPost(tierName,tierLevel,ifMatch,ifUnmodifiedSince,permissions);
+        return delegate.policiesUpdatePermissionPost(tierName, tierLevel, ifMatch, ifUnmodifiedSince, permissions);
     }
 }

@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
@@ -1102,6 +1103,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException("Couldn't Generate ApiDefinition from file", ExceptionCodes
                     .API_DEFINITION_MALFORMED);
         }
+    }
+
+    /**
+     * Retrieve all policies based on tier Level
+     *
+     * @param tierLevel
+     * @return
+     * @throws APIManagementException
+     */
+
+    @Override
+    public List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException {
+        return getPolicyDAO().getPolicies(tierLevel);
     }
 
     /**

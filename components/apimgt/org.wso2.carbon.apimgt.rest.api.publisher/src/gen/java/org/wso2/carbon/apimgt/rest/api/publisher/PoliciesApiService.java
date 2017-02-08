@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
 public abstract class PoliciesApiService {
+
     public abstract Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
                                                   String ifNoneMatch) throws NotFoundException;
 
