@@ -34,19 +34,19 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 /**
- * This method authenticate the user.
+ * This class provides access token during login from store app.
  *
  */
-public class PublisherAuthenticatorAPI implements Microservice {
+public class AuthenticatorAPI implements Microservice {
 
     /**
-     * This method authenticate the user.
+     * This method authenticate the user for store app.
      *
      */
     @POST
     @Path ("/token")
     @Produces ("application/json")
-    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
+    @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(@Context Request request,
             @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
             @FormDataParam ("scopes") List<String> scopes) {
@@ -55,10 +55,10 @@ public class PublisherAuthenticatorAPI implements Microservice {
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2 + 1);
         NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                part1 + "; path=" + AuthUtil.getAppContext("publisher") + "; domain=" + request.getProperty(
+                part1 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
                         AuthenticatorConstants.REMOTE_HOST_HEADER));
         NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                part2 + "; path=" + AuthUtil.getAppContext("publisher") + "; domain=" + request.getProperty(
+                part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
                         AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
                         + AuthenticatorConstants.HTTP_ONLY_COOKIE);
         return Response

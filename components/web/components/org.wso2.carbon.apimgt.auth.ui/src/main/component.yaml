@@ -1,0 +1,22 @@
+apis:
+    - className: "org.wso2.carbon.apimgt.authenticator.AuthenticatorAPI"
+      uri: "/login/"
+
+#bindings:
+#  - zoneName: footer
+#    mode: prepend
+#    fragments:
+#      - org.wso2.carbon.apimgt.login.ui.footer
+#  - zoneName: topbar
+#    mode: prepend
+#    fragments:
+#      - org.wso2.carbon.apimgt.login.ui.globalNavigation
+
+config:
+  appName : Log In UI
+  loginRedirectUri: "/apis"
+  scopes: "apim:api_view"
+  tokenEndpoint: "https://localhost:8243/token"
+  keyAndSecret: "dmRNdk05d1R4NkZ5NjNXa2xfb0FEaTdMQXZnYTp3UHNIQkJFS1FPbWU0bGZxYlJRZW1GY3ZqSUlh=="
+  swaggerURL: "http://localhost:9090/api/am/publisher/v0.10/apis/swagger.json"
+  nonSecureUrl: "/test1,/test2"

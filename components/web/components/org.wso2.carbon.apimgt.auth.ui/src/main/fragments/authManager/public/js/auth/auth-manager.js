@@ -47,10 +47,11 @@ authManager.login = function () {
 
     };
     var referrer = document.referrer;
+    var url = contextPath + '/auth/apis/login/token';
     var resp;
     return $.ajax({
         type: 'POST',
-        url: '/store/root/apis/login/token',
+        url: url,
         async: false,
         data: params,
         traditional:true,

@@ -1,6 +1,4 @@
-apis:
-    - className: "org.wso2.carbon.apimgt.authenticator.PublisherAuthenticatorAPI"
-      uri: "/login/"
+apis: []
 
 bindings:
   - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondaryMenu"

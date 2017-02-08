@@ -49,6 +49,18 @@
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.auth.ui</artifactId>
+            <version>${carbon.apimgt.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.authenticator</artifactId>
+            <version>${carbon.apimgt.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -66,13 +78,6 @@
                         <goals>
                             <goal>create-app</goal>
                         </goals>
-                        <configuration>
-                            <instructions>
-                                <Import-Package>
-                                    org.wso2.carbon.apimgt.authenticator
-                                </Import-Package>
-                            </instructions>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
