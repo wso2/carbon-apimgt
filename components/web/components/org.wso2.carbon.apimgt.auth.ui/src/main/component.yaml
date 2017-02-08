@@ -1,17 +1,10 @@
-apis: []
+apis:
+    - className: "org.wso2.carbon.apimgt.authenticator.AuthenticatorAPI"
+      uri: "/login/"
 
-bindings:
-  - zoneName: footer
-    mode: prepend
-    fragments:
-      - org.wso2.carbon.apimgt.publisher.commons.ui.footer
-  - zoneName: topbar
-    mode: prepend
-    fragments:
-      - org.wso2.carbon.apimgt.publisher.commons.ui.globalNavigation
 
 config:
-  appName : Publisher Commons
+  appName : Log In UI
   loginRedirectUri: "/apis"
   scopes: "apim:api_view"
   tokenEndpoint: "https://localhost:8243/token"

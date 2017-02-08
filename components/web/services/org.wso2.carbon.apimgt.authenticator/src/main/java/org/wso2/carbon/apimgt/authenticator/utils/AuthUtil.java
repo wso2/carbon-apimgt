@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.authenticator.utils;
 
+import org.wso2.msf4j.Request;
+
 import javax.ws.rs.core.Cookie;
 
 /**
@@ -34,8 +36,8 @@ public class AuthUtil {
         return cookie + "; HttpOnly";
     }
 
-    public static String getAppContext(String appContext) {
+    public static String getAppContext(Request request) {
         //TODO this method should provide uuf app context. Consider the scenarios of reverse proxy as well.
-        return "/" + appContext;
+        return "/" + request.getProperty("REQUEST_URL").toString().split("/")[1];
     }
 }
