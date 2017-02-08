@@ -2,15 +2,6 @@ apis:
     - className: "org.wso2.carbon.apimgt.authenticator.AuthenticatorAPI"
       uri: "/login/"
 
-#bindings:
-#  - zoneName: footer
-#    mode: prepend
-#    fragments:
-#      - org.wso2.carbon.apimgt.login.ui.footer
-#  - zoneName: topbar
-#    mode: prepend
-#    fragments:
-#      - org.wso2.carbon.apimgt.login.ui.globalNavigation
 
 config:
   appName : Log In UI
