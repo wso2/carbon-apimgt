@@ -66,6 +66,13 @@
                         <goals>
                             <goal>create-app</goal>
                         </goals>
+                        <configuration>
+                            <instructions>
+                                <Import-Package>
+                                    org.wso2.carbon.apimgt.authenticator
+                                </Import-Package>
+                            </instructions>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

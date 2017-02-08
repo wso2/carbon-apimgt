@@ -34,8 +34,8 @@ public class AuthUtil {
         return cookie + "; HttpOnly";
     }
 
-    public static String getAppContext() {
+    public static String getAppContext(String appContext) {
         //TODO this method should provide uuf app context. Consider the scenarios of reverse proxy as well.
-        return "/publisher";
+        return "/" + appContext;
     }
 }

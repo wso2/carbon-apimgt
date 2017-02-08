@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ authManager.login = function () {
     var resp;
     return $.ajax({
         type: 'POST',
-        url: '/publisher/root/apis/login/token',
+        url: '/store/root/apis/login/token',
         async: false,
         data: params,
         traditional:true,

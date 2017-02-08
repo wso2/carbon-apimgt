@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ $(function(){
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
             $.cookie('userScope', data.scope, { path: '/' });*/
-            var redirectUri = xhr.getResponseHeader("Referer") == '' ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
+            var redirectUri = (xhr.getResponseHeader("Referer") == '' || !xhr.getResponseHeader("Referer")) ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
             window.location = redirectUri;
         });
     };
