@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.rest.api.common.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
@@ -21,7 +21,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
-                                         String ifNoneMatch) throws NotFoundException {
+                                         String ifNoneMatch, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
 
         log.info("Received Policy GET request for tierLevel " + tierLevel);
@@ -41,16 +41,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince) throws NotFoundException {
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "Tier Name magic!")).build();
     }
 
-    @Override
-    public Response policiesUpdatePermissionPost(String tierName, String tierLevel, String ifMatch,
-                                                 String ifUnmodifiedSince, TierPermissionDTO permissions)
-            throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "Permission magic!")).build();
-    }
 }
