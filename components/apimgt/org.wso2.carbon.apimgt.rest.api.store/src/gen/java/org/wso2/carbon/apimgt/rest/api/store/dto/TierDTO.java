@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * TierDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class TierDTO   {
   @JsonProperty("name")
   private String name = null;
@@ -65,7 +65,7 @@ public class TierDTO   {
   private Long unitTime = null;
 
   /**
-   * This attribute declares whether this tier is available under commercial or free 
+   * This attribute declares whether this policy is available under commercial or free 
    */
   public enum TierPlanEnum {
     FREE("FREE"),
@@ -166,10 +166,10 @@ public class TierDTO   {
   }
 
    /**
-   * Custom attributes added to the tier policy 
+   * Custom attributes added to the policy policy 
    * @return attributes
   **/
-  @ApiModelProperty(value = "Custom attributes added to the tier policy ")
+  @ApiModelProperty(value = "Custom attributes added to the policy policy ")
   public Map<String, String> getAttributes() {
     return attributes;
   }
@@ -220,10 +220,10 @@ public class TierDTO   {
   }
 
    /**
-   * This attribute declares whether this tier is available under commercial or free 
+   * This attribute declares whether this policy is available under commercial or free 
    * @return tierPlan
   **/
-  @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free ")
+  @ApiModelProperty(required = true, value = "This attribute declares whether this policy is available under commercial or free ")
   public TierPlanEnum getTierPlan() {
     return tierPlan;
   }
