@@ -35,7 +35,7 @@ public class APISummary implements Serializable {
 
     private String context;
 
-    private String version;
+    private String version;    //todo remove if version is appended in context
 
     private List<UriTemplate> uriTemplates = new ArrayList<UriTemplate>();
 

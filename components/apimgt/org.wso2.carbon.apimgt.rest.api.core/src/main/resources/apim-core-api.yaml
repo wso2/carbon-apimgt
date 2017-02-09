@@ -124,7 +124,7 @@ paths:
             OK.
             Subscription Validation Information.
           schema:
-            $ref: '#/definitions/ResponseList'
+            $ref: '#/definitions/APISummaryList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -252,13 +252,17 @@ definitions:
         type: string
         description: |
           api context.
+      version:
+        type: string
+        description: |
+          api version.
       uriTemplates:
         type: array
         "items":
           "$ref": "#/definitions/UriTemplate"
         description: |
           List of uriTemplates.
-  ResponseList:
+  APISummaryList:
     title: Response of  a object list
     properties:
       list:

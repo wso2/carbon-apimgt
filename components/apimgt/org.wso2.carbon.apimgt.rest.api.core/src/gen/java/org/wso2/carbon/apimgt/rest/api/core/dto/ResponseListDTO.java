@@ -31,7 +31,8 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
  */
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-16T15:55:32.437+05:30")
 public class ResponseListDTO   {
-  private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
+    @JsonProperty("list")
+    private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
 
   public ResponseListDTO list(List<APISummaryDTO> list) {
     this.list = list;

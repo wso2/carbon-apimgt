@@ -1,41 +1,22 @@
-/*
-*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 /**
  * APISummaryDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-16T15:55:32.437+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T14:55:54.962+05:30")
 public class APISummaryDTO   {
   private String id = null;
 
   private String name = null;
 
   private String context = null;
+
+  private String version = null;
 
   private List<UriTemplateDTO> uriTemplates = new ArrayList<UriTemplateDTO>();
 
@@ -93,6 +74,24 @@ public class APISummaryDTO   {
     this.context = context;
   }
 
+  public APISummaryDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+   /**
+   * api version. 
+   * @return version
+  **/
+  @ApiModelProperty(value = "api version. ")
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
   public APISummaryDTO uriTemplates(List<UriTemplateDTO> uriTemplates) {
     this.uriTemplates = uriTemplates;
     return this;
@@ -129,12 +128,13 @@ public class APISummaryDTO   {
     return Objects.equals(this.id, aPISummary.id) &&
         Objects.equals(this.name, aPISummary.name) &&
         Objects.equals(this.context, aPISummary.context) &&
+        Objects.equals(this.version, aPISummary.version) &&
         Objects.equals(this.uriTemplates, aPISummary.uriTemplates);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, uriTemplates);
+    return Objects.hash(id, name, context, version, uriTemplates);
   }
 
   @Override
@@ -145,6 +145,7 @@ public class APISummaryDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    uriTemplates: ").append(toIndentedString(uriTemplates)).append("\n");
     sb.append("}");
     return sb.toString();
