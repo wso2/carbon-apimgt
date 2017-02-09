@@ -69,8 +69,8 @@ public class SubscriptionMappingUtil {
         if (subscription.getApplication() != null) {
             subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         }
-        subscriptionDTO.setTier(subscription.getSubscriptionTier());
-        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getStatus().toString()));
+        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
+        subscriptionDTO.setLifeCycleStatus(SubscriptionDTO.LifeCycleStatusEnum.valueOf(subscription.getStatus().toString()));
         return subscriptionDTO;
     }
 }

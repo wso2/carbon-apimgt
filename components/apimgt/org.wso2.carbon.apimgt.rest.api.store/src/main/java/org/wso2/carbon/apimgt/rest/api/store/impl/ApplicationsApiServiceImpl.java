@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.rest.api.common.ApplicationConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -23,20 +21,22 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30") public class ApplicationsApiServiceImpl
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
+public class ApplicationsApiServiceImpl
         extends ApplicationsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
-    @Override public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
-            String ifUnmodifiedSince) throws NotFoundException {
+    @Override
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
+                                                    String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -52,8 +52,9 @@ import javax.ws.rs.core.Response;
         return Response.ok().build();
     }
 
-    @Override public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-            String ifModifiedSince) throws NotFoundException {
+    @Override
+    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
         ApplicationDTO applicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -82,8 +83,10 @@ import javax.ws.rs.core.Response;
         return Response.ok().entity(applicationDTO).build();
     }
 
-    @Override public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
+    @Override
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
+                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                 String minorVersion) throws NotFoundException {
         ApplicationDTO updatedApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -106,8 +109,10 @@ import javax.ws.rs.core.Response;
         return Response.ok().entity(updatedApplicationDTO).build();
     }
 
-    @Override public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
+    @Override
+    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
+                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                 String minorVersion) throws NotFoundException {
         ApplicationKeyDTO applicationKeyDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -144,8 +149,9 @@ import javax.ws.rs.core.Response;
         return Response.ok().entity(applicationKeyDTO).build();
     }
 
-    @Override public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
-            String ifNoneMatch) throws NotFoundException {
+    @Override
+    public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
+                                    String ifNoneMatch, String minorVersion) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -181,7 +187,9 @@ import javax.ws.rs.core.Response;
         return Response.ok().entity(applicationListDTO).build();
     }
 
-    @Override public Response applicationsPost(ApplicationDTO body, String contentType) throws NotFoundException {
+    @Override
+    public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
         URI location = null;
         ApplicationDTO createdApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();

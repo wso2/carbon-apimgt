@@ -64,7 +64,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
-        applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setLifeCycleStatus(application.getStatus());
         applicationDTO.setPermission(application.getPermissionString());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getCreatedUser());
@@ -113,7 +113,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setApplicationId(application.getId());
         applicationInfoDTO.setThrottlingTier(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
-        applicationInfoDTO.setStatus(application.getStatus());
+        applicationInfoDTO.setLifeCycleStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getCreatedUser());

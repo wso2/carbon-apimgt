@@ -4,8 +4,8 @@ import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
@@ -23,11 +23,11 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v0.10/tags")
+@Path("/api/am/store/v1/tags")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class TagsApi implements Microservice  {
    private final TagsApiService delegate = TagsApiServiceFactory.getTagsApi();
 
@@ -48,8 +48,9 @@ public class TagsApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.tagsGet(limit,offset,accept,ifNoneMatch);
+        return delegate.tagsGet(limit,offset,accept,ifNoneMatch,minorVersion);
     }
 }

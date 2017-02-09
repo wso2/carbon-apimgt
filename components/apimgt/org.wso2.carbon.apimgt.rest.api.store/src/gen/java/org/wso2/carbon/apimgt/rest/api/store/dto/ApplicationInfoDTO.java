@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * ApplicationInfoDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class ApplicationInfoDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
@@ -26,8 +26,8 @@ public class ApplicationInfoDTO   {
   @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("status")
-  private String status = null;
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
 
   @JsonProperty("groupId")
   private String groupId = null;
@@ -122,22 +122,22 @@ public class ApplicationInfoDTO   {
     this.description = description;
   }
 
-  public ApplicationInfoDTO status(String status) {
-    this.status = status;
+  public ApplicationInfoDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
   **/
   @ApiModelProperty(value = "")
-  public String getStatus() {
-    return status;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
   public ApplicationInfoDTO groupId(String groupId) {
@@ -173,13 +173,13 @@ public class ApplicationInfoDTO   {
         Objects.equals(this.subscriber, applicationInfo.subscriber) &&
         Objects.equals(this.throttlingTier, applicationInfo.throttlingTier) &&
         Objects.equals(this.description, applicationInfo.description) &&
-        Objects.equals(this.status, applicationInfo.status) &&
+        Objects.equals(this.lifeCycleStatus, applicationInfo.lifeCycleStatus) &&
         Objects.equals(this.groupId, applicationInfo.groupId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, description, status, groupId);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, description, lifeCycleStatus, groupId);
   }
 
   @Override
@@ -192,7 +192,7 @@ public class ApplicationInfoDTO   {
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");
     return sb.toString();
