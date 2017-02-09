@@ -6,14 +6,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.keymanager.exception.KeyManagerException;
+import org.wso2.carbon.apimgt.keymanager.util.KeyManagerUtil;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.formparam.FormDataParam;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -43,6 +44,15 @@ public class KeymanagerService implements Microservice {
     @Activate
     protected void activate(BundleContext bundleContext) {
         // Nothing to do
+        KeyManagerUtil.addUsersAndScopes();
+        OAuthApplication pubApp = new OAuthApplication();
+        pubApp.setClientId("publisher");
+        pubApp.setClientSecret("1234-5678-9101");
+        appsByClientId.put("publisher", pubApp);
+        OAuthApplication storeApp = new OAuthApplication();
+        storeApp.setClientId("store");
+        storeApp.setClientSecret("1234-5678-9101");
+        appsByClientId.put("store", storeApp);
     }
 
     @Deactivate
@@ -52,11 +62,14 @@ public class KeymanagerService implements Microservice {
 
     @POST
     @Path ("/token")
-    @Consumes({ "application/json" })
+    @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     @Produces({ "application/json" })
-    public Response getNewAccessToken(OAuthRequest body, @HeaderParam("Authorization") String authzHeader) {
+    public Response getNewAccessToken(@FormDataParam("username") String username, @FormDataParam("password") String
+            password , @FormDataParam("grant_type") String grantType, @HeaderParam("Authorization")
+            String authzHeader)
+            throws KeyManagerException {
 
-        if (!"client_credentials".equals(body.getGrantType())) {
+        if (!"client_credentials".equals(grantType) && !"password".equals(grantType)) {
             ErrorDTO errorDTO = new ErrorDTO();
             errorDTO.setCode("900501");
             errorDTO.setMessage("Unsupported Grant Type");
@@ -70,12 +83,8 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
         }
 
-        String[] decoded = new String[0];
-        try {
-            decoded = new String(Base64.getDecoder().decode(authzHeader.getBytes("UTF-8")), "UTF-8").split(":");
-        } catch (UnsupportedEncodingException e) {
-            log.error("Error getting header");
-        }
+        String[] decoded;
+        decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
         String clientId = decoded[0];
         String clientSecret = decoded[1];
 
@@ -86,9 +95,19 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
+        OAuthTokenResponse oAuthTokenResponse = new OAuthTokenResponse();
+        if ("password".equals(grantType)) {
+            if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password)) {
+                return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).build();
+            }
+        }
+
         OAuthTokenResponse tokenResponse = new OAuthTokenResponse();
         tokenResponse.setToken(UUID.randomUUID().toString());
         tokenResponse.setRefreshToken(UUID.randomUUID().toString());
+        tokenResponse.setExpiresIn(KeyManagerUtil.getExpiresTime());
         return Response.status(Response.Status.OK).entity(tokenResponse).build();
     }
 

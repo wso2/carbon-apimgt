@@ -27,13 +27,13 @@ import java.util.List;
  */
 public class OAuthTokenResponse {
 
-    @JsonProperty("token")
+    @JsonProperty("access_token")
     private String token;
 
-    @JsonProperty("refreshToken")
+    @JsonProperty("refresh_token")
     private String refreshToken;
 
-    @JsonProperty("expiresIn")
+    @JsonProperty("expires_in")
     private long expiresIn;
 
     @JsonProperty("scopes")

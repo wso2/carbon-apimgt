@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.authenticator;
 
 import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
+import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
@@ -51,7 +52,9 @@ public class AuthenticatorAPI implements Microservice {
             @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
             @FormDataParam ("scopes") List<String> scopes) {
         IntrospectService introspectService = new IntrospectService();
-        String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
+        AuthResponseBean authResponseBean = new AuthResponseBean();
+        String accessToken = introspectService
+                .getAccessToken(authResponseBean, userName, password, scopes.toArray(new String[0]));
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2 + 1);
         NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
@@ -61,9 +64,7 @@ public class AuthenticatorAPI implements Microservice {
                 part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
                         AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
                         + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-        return Response
-                .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
-                        MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+        return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
                 .header(AuthenticatorConstants.REFERER_HEADER, request.getHeader(AuthenticatorConstants.REFERER_HEADER)
                         .equals(request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)) ?
                         "" :

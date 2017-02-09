@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -61,9 +60,10 @@ import javax.net.ssl.X509TrustManager;
 public class TestKeyManagerImpl implements KeyManager {
     private static final Logger log = LoggerFactory.getLogger(TestKeyManagerImpl.class);
 
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "token";
+    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expiresIn";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
+    private static final String PASSWORD_GRANT_TYPE = "password";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     /**
@@ -264,7 +264,7 @@ public class TestKeyManagerImpl implements KeyManager {
         }
 
         //TO-DO -ADD A CONFIG FOR TOKEN ENDPOINT
-        String tokenEndpoint = System.getProperty("TokenEndpoint", "https://localhost:9443/oauth2/token");
+        String tokenEndpoint = System.getProperty("TokenEndpoint", "http://localhost:9090/keyserver/token");
         //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
         String revokeEndpoint = System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
         ;
@@ -322,7 +322,7 @@ public class TestKeyManagerImpl implements KeyManager {
 
         //Generate New Access Token by client credentials grant type with calling Token API
         try {
-            createSSLConnection();
+            //createSSLConnection();
             url = new URL(tokenEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -337,7 +337,14 @@ public class TestKeyManagerImpl implements KeyManager {
             for (String scope : tokenRequest.getScopes()) {
                 builder.append(' ').append(scope);
             }
-            String postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+            String postParams = "";
+            if (PASSWORD_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                postParams =
+                        KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + PASSWORD_GRANT_TYPE + "&username=" + tokenRequest
+                                .getResourceOwnerUsername() + "&password=" + tokenRequest.getResourceOwnerPassword();
+            } else {
+                postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+            }
 //            + "&" +
 //                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
 //                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +
@@ -358,9 +365,10 @@ public class TestKeyManagerImpl implements KeyManager {
                 JsonObject obj = parser.parse(responseStr).getAsJsonObject();
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).getAsString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
-                    tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
-                            split(" "));
+                if (obj.has("scopes")) {
+                    tokenInfo.setScopes(
+                            (obj.getAsJsonArray("scopes").toString().replaceAll("\\[", "").replaceAll("\\]", "")
+                                    .replaceAll("\"", "").split(",")));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
@@ -375,11 +383,11 @@ public class TestKeyManagerImpl implements KeyManager {
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
-        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String msg = "Error while connecting to the token generation endpoint.";
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
-                    APPLICATION_TOKEN_GENERATION_FAILED);
+                    APPLICATION_TOKEN_GENERATION_FAILED);*/
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
