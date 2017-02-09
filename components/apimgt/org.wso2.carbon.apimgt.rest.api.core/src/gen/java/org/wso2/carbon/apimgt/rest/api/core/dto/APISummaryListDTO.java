@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,8 @@ import java.util.List;
  */
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T14:55:54.962+05:30")
 public class APISummaryListDTO   {
-  private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
+    @JsonProperty("list")
+    private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
 
   public APISummaryListDTO list(List<APISummaryDTO> list) {
     this.list = list;
