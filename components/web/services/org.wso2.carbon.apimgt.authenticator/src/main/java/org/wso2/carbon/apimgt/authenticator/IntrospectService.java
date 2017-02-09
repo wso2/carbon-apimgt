@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.authenticator;
 
+import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 
 import java.util.Date;
@@ -62,12 +63,27 @@ public class IntrospectService {
         return kmTokenEndpoint(key, secret, userName, password, scopes);
     }
 
+    /**
+     * This method will return map of consumer key and secret
+     * @return Consumer key and secret.
+     */
+
     private Map<String, String> getConsumerKeySecret(String appName) {
-        Map<String, Map<String, String>> appKeys = new HashMap<>();
-        Map<String, String> keys = new HashMap<>();
-        keys.put("publisher", "ewewer-4324-fwefwe");
-        appKeys.put("publisher", keys);
-        return appKeys.get(appName);
+        HashMap<String, String> consumerKeySecretMap;
+        if (AuthUtil.getConsumerKeySecretMap() == null) {
+            consumerKeySecretMap = new HashMap<>();
+            consumerKeySecretMap.put("CONSUMER_KEY", "XXXX");
+            consumerKeySecretMap.put("CONSUMER_SECRET", "YYYY");
+            AuthUtil.setConsumerKeySecretMap(consumerKeySecretMap);
+        }
+
+        return AuthUtil.getConsumerKeySecretMap();
+
+//        Map<String, Map<String, String>> appKeys = new HashMap<>();
+//        Map<String, String> keys = new HashMap<>();
+//        keys.put("publisher", "ewewer-4324-fwefwe");
+//        appKeys.put("publisher", keys);
+//        return appKeys.get(appName);
     }
 
     private String kmTokenEndpoint(String key, String secret, String username, String password, String[] scopes) {
