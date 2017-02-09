@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * EnvironmentEndpointsDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public class EnvironmentEndpointsDTO   {
   @JsonProperty("http")
   private String http = null;
