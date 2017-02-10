@@ -17,7 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-24T12:59:39.799+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public class APIDTO   {
   @JsonProperty("id")
   private String id = null;

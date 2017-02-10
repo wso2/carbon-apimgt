@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 /**
  * ApplicationDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-27T15:58:18.730+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
@@ -35,8 +35,8 @@ public class ApplicationDTO   {
   @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("status")
-  private String status = null;
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
 
   @JsonProperty("groupId")
   private String groupId = null;
@@ -170,22 +170,22 @@ public class ApplicationDTO   {
     this.description = description;
   }
 
-  public ApplicationDTO status(String status) {
-    this.status = status;
+  public ApplicationDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
   **/
   @ApiModelProperty(value = "")
-  public String getStatus() {
-    return status;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
   public ApplicationDTO groupId(String groupId) {
@@ -246,14 +246,14 @@ public class ApplicationDTO   {
         Objects.equals(this.callbackUrl, application.callbackUrl) &&
         Objects.equals(this.permission, application.permission) &&
         Objects.equals(this.description, application.description) &&
-        Objects.equals(this.status, application.status) &&
+        Objects.equals(this.lifeCycleStatus, application.lifeCycleStatus) &&
         Objects.equals(this.groupId, application.groupId) &&
         Objects.equals(this.keys, application.keys);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, description, status, groupId, keys);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, permission, description, lifeCycleStatus, groupId, keys);
   }
 
   @Override
@@ -268,7 +268,7 @@ public class ApplicationDTO   {
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("}");

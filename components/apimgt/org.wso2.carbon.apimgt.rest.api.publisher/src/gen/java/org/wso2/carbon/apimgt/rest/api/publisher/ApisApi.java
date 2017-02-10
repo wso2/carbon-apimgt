@@ -26,11 +26,11 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/publisher/v0.10/apis")
+@Path("/api/am/publisher/v1/apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-06T13:57:53.911+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -50,9 +50,10 @@ public class ApisApi implements Microservice  {
     public Response apisApiIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
@@ -74,9 +75,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @POST
     @Path("/{apiId}/documents/{documentId}/content")
@@ -100,9 +102,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Inline content of the document")@FormDataParam("inlineContent")  String inlineContent
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,contentType,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,contentType,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @DELETE
     @Path("/{apiId}/documents/{documentId}")
@@ -119,9 +122,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/documents/{documentId}")
@@ -141,9 +145,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @PUT
     @Path("/{apiId}/documents/{documentId}")
@@ -164,9 +169,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/documents")
@@ -186,9 +192,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsGet(apiId,limit,offset,accept,ifNoneMatch);
+        return delegate.apisApiIdDocumentsGet(apiId,limit,offset,accept,ifNoneMatch,minorVersion);
     }
     @POST
     @Path("/{apiId}/documents")
@@ -204,9 +211,12 @@ public class ApisApi implements Microservice  {
     public Response apisApiIdDocumentsPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdDocumentsPost(apiId,body,contentType);
+        return delegate.apisApiIdDocumentsPost(apiId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/gateway-config")
@@ -225,9 +235,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdGatewayConfigGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdGatewayConfigGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @PUT
     @Path("/{apiId}/gateway-config")
@@ -249,9 +260,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}")
@@ -270,9 +282,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @PUT
     @Path("/{apiId}")
@@ -294,9 +307,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/swagger")
@@ -315,9 +329,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdSwaggerGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdSwaggerGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @PUT
     @Path("/{apiId}/swagger")
@@ -339,9 +354,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdSwaggerPut(apiId,endpointId,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdSwaggerPut(apiId,endpointId,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{apiId}/thumbnail")
@@ -360,9 +376,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdThumbnailGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+        return delegate.apisApiIdThumbnailGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
     @POST
     @Path("/{apiId}/thumbnail")
@@ -384,9 +401,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisApiIdThumbnailPost(apiId,fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisApiIdThumbnailPost(apiId,fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @POST
     @Path("/change-lifecycle")
@@ -406,9 +424,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = " You can specify additional checklist items by using an **\"attribute:\"** modifier.  Eg: \"Deprecate Old Versions:true\" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in \"attribute1:true, attribute2:false\" format.  Supported checklist items are as follows. 1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state. 2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version. ") @QueryParam("lifecycleChecklist") String lifecycleChecklist
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisChangeLifecyclePost(action,apiId,lifecycleChecklist,ifMatch,ifUnmodifiedSince);
+        return delegate.apisChangeLifecyclePost(action,apiId,lifecycleChecklist,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @POST
     @Path("/copy-api")
@@ -423,9 +442,10 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. API to copy does not exist. ", response = void.class) })
     public Response apisCopyApiPost(@ApiParam(value = "Version of the new API.",required=true) @QueryParam("newVersion") String newVersion
 ,@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true) @QueryParam("apiId") String apiId
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisCopyApiPost(newVersion,apiId);
+        return delegate.apisCopyApiPost(newVersion,apiId,minorVersion);
     }
     @GET
     
@@ -443,9 +463,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisGet(limit,offset,query,accept,ifNoneMatch);
+        return delegate.apisGet(limit,offset,query,accept,ifNoneMatch,minorVersion);
     }
     @HEAD
     
@@ -463,9 +484,10 @@ public class ApisApi implements Microservice  {
     public Response apisHead(@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisHead(query,accept,ifNoneMatch);
+        return delegate.apisHead(query,accept,ifNoneMatch,minorVersion);
     }
     @POST
     @Path("/import-definition")
@@ -484,9 +506,10 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisImportDefinitionPost(fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince);
+        return delegate.apisImportDefinitionPost(fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @POST
     
@@ -501,8 +524,9 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = APIDTO.class) })
     public Response apisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisPost(body,contentType);
+        return delegate.apisPost(body,contentType,minorVersion);
     }
 }

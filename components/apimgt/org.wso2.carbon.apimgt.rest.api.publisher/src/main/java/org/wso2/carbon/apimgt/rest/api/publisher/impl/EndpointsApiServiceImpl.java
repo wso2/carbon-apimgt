@@ -27,8 +27,10 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
 
     @Override
     public Response endpointsEndpointIdDelete(String endpointId
+            , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = "";
         try {
@@ -48,6 +50,10 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
 
     @Override
     public Response endpointsEndpointIdGet(String endpointId
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = "";
         try {
@@ -80,6 +86,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = "";
         try {
@@ -107,7 +114,10 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     }
 
     @Override
-    public Response endpointsGet() throws NotFoundException {
+    public Response endpointsGet(String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+            , String minorVersion) throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -129,6 +139,10 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsPost(EndPointDTO body
             , String contentType
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = "";
         try {

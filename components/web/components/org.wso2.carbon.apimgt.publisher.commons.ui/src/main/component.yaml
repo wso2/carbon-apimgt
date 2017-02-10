@@ -12,7 +12,6 @@ bindings:
 
 config:
   appName : Publisher Commons
-  loginPageUri: "/commons/login"
   loginRedirectUri: "/apis"
   scopes: "apim:api_view"
   tokenEndpoint: "https://localhost:8243/token"

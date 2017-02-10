@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.authenticator.utils;
 
-import javax.ws.rs.core.Cookie;
+import org.wso2.msf4j.Request;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.ws.rs.core.Cookie;
 /**
  * This method authenticate the user.
  *
@@ -34,8 +37,18 @@ public class AuthUtil {
         return cookie + "; HttpOnly";
     }
 
-    public static String getAppContext(String appContext) {
+    private static Map<String, String> consumerKeySecretMap;
+
+    public static String getAppContext(Request request) {
         //TODO this method should provide uuf app context. Consider the scenarios of reverse proxy as well.
-        return "/" + appContext;
+        return "/" + request.getProperty("REQUEST_URL").toString().split("/")[1];
+    }
+
+    public static HashMap<String, String> getConsumerKeySecretMap() {
+        return (HashMap<String, String>) consumerKeySecretMap;
+    }
+
+    public static void setConsumerKeySecretMap(HashMap<String, String> consumerKeySecretMap) {
+        AuthUtil.consumerKeySecretMap = consumerKeySecretMap;
     }
 }

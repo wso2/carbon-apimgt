@@ -21,14 +21,15 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdGet(String applicationId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+            , String minorVersion
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Application application = apiPublisher.getApplication(applicationId,username,null);
+            Application application = apiPublisher.getApplication(applicationId, username, null);
 
             if (application == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

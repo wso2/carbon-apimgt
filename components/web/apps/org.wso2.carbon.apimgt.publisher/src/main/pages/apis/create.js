@@ -16,6 +16,6 @@
 
 module("loginManager");
 function onGet(env) {
-    loginManager.authenticate(env);
+    //loginManager.authenticate(env);
     return {};
 }
