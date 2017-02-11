@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -146,5 +147,24 @@ public class KeymanagerService implements Microservice {
         errorDTO.setCode("900404");
         errorDTO.setMessage("Client not found with id " + clientId);
         return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+    }
+
+    @POST
+    @Path("/introspect")
+    @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
+    @Produces({ "application/json" })
+    public Response introspect(@FormParam ("token") String token, @FormParam("token_type_hint") String tokenTypeHint) {
+        OAuth2IntrospectionResponse oAuth2IntrospectionResponse = new OAuth2IntrospectionResponse();
+        if (tokenTypeHint == null) {
+            tokenTypeHint = "bearer";
+        }
+
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Invalid input\"}").build();
+        }
+        if (KeyManagerUtil.validateToken(token, oAuth2IntrospectionResponse)) {
+            return Response.status(Response.Status.OK).entity(oAuth2IntrospectionResponse).build();
+        }
+        return Response.status(Response.Status.OK).entity("{\"active\":false}").build();
     }
 }

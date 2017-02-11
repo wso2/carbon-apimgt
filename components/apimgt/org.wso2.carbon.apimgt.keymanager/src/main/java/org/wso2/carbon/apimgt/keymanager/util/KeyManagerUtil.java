@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.keymanager.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.keymanager.OAuth2IntrospectionResponse;
 import org.wso2.carbon.apimgt.keymanager.OAuthTokenResponse;
 import org.wso2.carbon.apimgt.keymanager.exception.KeyManagerException;
 
@@ -42,6 +43,7 @@ public class KeyManagerUtil {
 
     private static Map<String, String> userMap = new HashMap();
     private static Map<String , List<String>> userScopesMap = new HashMap<>();
+    private static Map<String, OAuthTokenResponse> tokenMap = new HashMap<>();
 
     /**
      * Extracts the clientId and secret info from the HTTP Authorization Header
@@ -80,7 +82,29 @@ public class KeyManagerUtil {
             oAuthTokenResponse.setToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setScopes(userScopesMap.get(username));
+            tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
             return true;
+        }
+        return false;
+    }
+
+    public static boolean validateToken(String accessToken, OAuth2IntrospectionResponse oAuth2IntrospectionResponse) {
+        if (tokenMap.containsKey(accessToken)) {
+            long expireTime = tokenMap.get(accessToken).getExpiresIn();
+            if (new Timestamp(System.currentTimeMillis()).getTime() <= expireTime) {
+                OAuthTokenResponse oAuthTokenResponse = tokenMap.get(accessToken);
+                oAuth2IntrospectionResponse.setActive(true);
+                StringBuilder builder = new StringBuilder();
+                oAuthTokenResponse.getScopes().forEach(scope -> {
+                            builder.append(scope);
+                            builder.append(" ");
+
+                        }
+                    );
+                oAuth2IntrospectionResponse.setScope(builder.toString());
+                oAuth2IntrospectionResponse.setNbf(oAuthTokenResponse.getExpiresIn());
+                return true;
+            }
         }
         return false;
     }

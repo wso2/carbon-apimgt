@@ -56,19 +56,28 @@ public class AuthenticatorAPI implements Microservice {
         String accessToken = introspectService
                 .getAccessToken(authResponseBean, userName, password, scopes.toArray(new String[0]));
         String part1 = accessToken.substring(0, accessToken.length() / 2);
-        String part2 = accessToken.substring(accessToken.length() / 2 + 1);
+        String part2 = accessToken.substring(accessToken.length() / 2);
         NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                part1 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
-                        AuthenticatorConstants.REMOTE_HOST_HEADER));
+                part1 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request
+                        .getProperty(AuthenticatorConstants.REMOTE_HOST_HEADER));
         NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
-                        AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
+                part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request
+                        .getProperty(AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
                         + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-        return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
-                .header(AuthenticatorConstants.REFERER_HEADER, request.getHeader(AuthenticatorConstants.REFERER_HEADER)
-                        .equals(request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)) ?
-                        "" :
-                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)).build();
+        NewCookie backendCookie = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_1,
+                part1 + "; path=/api/am; domain=" + request.getProperty(AuthenticatorConstants.REMOTE_HOST_HEADER));
+        NewCookie backendCookie2 = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_2,
+                part2 + "; path=/api/am; domain=" + request.getProperty(AuthenticatorConstants.REMOTE_HOST_HEADER)
+                        + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+        return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
+                .cookie(cookie, cookie2, backendCookie, backendCookie2).header(AuthenticatorConstants.REFERER_HEADER,
+                        (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                "" :
+                                request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                        "").build();
 
     }
 }
