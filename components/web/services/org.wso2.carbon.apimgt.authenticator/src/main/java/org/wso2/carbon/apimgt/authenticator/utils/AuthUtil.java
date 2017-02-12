@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.authenticator.utils;
 
+import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
@@ -44,11 +45,30 @@ public class AuthUtil {
         return "/" + request.getProperty("REQUEST_URL").toString().split("/")[1];
     }
 
+
     public static HashMap<String, String> getConsumerKeySecretMap() {
         return (HashMap<String, String>) consumerKeySecretMap;
     }
 
     public static void setConsumerKeySecretMap(HashMap<String, String> consumerKeySecretMap) {
         AuthUtil.consumerKeySecretMap = consumerKeySecretMap;
+    }
+
+    /**
+     * This method is used to generate access token request to login for uuf apps.
+     *
+     */
+    public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
+            String[] scopes, String clientId, String clientSecret) {
+
+        AccessTokenRequest tokenRequest = new AccessTokenRequest();
+        tokenRequest.setClientId(clientId);
+        tokenRequest.setClientSecret(clientSecret);
+        tokenRequest.setGrantType(grantType);
+        tokenRequest.setResourceOwnerUsername(username);
+        tokenRequest.setResourceOwnerPassword(password);
+        tokenRequest.setScopes(scopes);
+        return tokenRequest;
+
     }
 }

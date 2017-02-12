@@ -30,6 +30,8 @@ public class AuthResponseBean {
     private long validityPeriod;
     private String createdDate;
     private String authUser;
+    private String accessToken;
+    private String refreshToken;
 
     public boolean isTokenValid() {
         return isTokenValid;
@@ -81,5 +83,21 @@ public class AuthResponseBean {
 
     public void setAuthUser(String authUser) {
         this.authUser = authUser;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

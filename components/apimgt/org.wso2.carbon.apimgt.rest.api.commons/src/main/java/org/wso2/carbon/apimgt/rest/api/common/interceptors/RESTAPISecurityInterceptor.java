@@ -38,11 +38,12 @@ import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-import static org.wso2.carbon.messaging.Constants.PROTOCOL;
 
 import java.util.HashMap;
 import java.util.Locale;
 import javax.ws.rs.core.MediaType;
+
+import static org.wso2.carbon.messaging.Constants.PROTOCOL;
 
 
 /**
@@ -57,7 +58,7 @@ import javax.ws.rs.core.MediaType;
 public class RESTAPISecurityInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(RESTAPISecurityInterceptor.class);
     //todo authenticatorName should be read from a configuration
-    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.BasicAuthAuthenticator";
+    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.OAuth2Authenticator";
     private RESTAPIAuthenticator authenticatorImplClass = null;
 
     /**
@@ -80,6 +81,9 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
          * Consider this as a tempory fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
+        if (!requestURI.contains("/api/am/")) {
+            return true;
+        }
         String yamlContent = null;
         String protocol = (String) request.getProperty(PROTOCOL);
         Swagger swagger = null;
@@ -97,7 +101,6 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-            return true;
         } else if (requestURI.contains("/store")) {
             if (requestURI.contains("swagger.json")) {
                 try {
@@ -112,7 +115,6 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-            return true;
         } else if (requestURI.contains("/editor") || requestURI.contains("keyserver")) {
             return true;
         }

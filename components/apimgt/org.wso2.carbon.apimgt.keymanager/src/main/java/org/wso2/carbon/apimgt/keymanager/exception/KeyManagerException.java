@@ -16,19 +16,27 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.authenticator.constants;
+package org.wso2.carbon.apimgt.keymanager.exception;
 
 /**
- * This class holds the constants for the authenticator module for uuf apps .
- *
+ * Top level exception class of Key manager Exceptions
  */
-public class AuthenticatorConstants {
+public class KeyManagerException extends Exception {
 
-    public static final String TOKEN_1 = "token1";
-    public static final String TOKEN_2 = "token2";
-    public static final String MSF4J_TOKEN_1 = "msf4j_1";
-    public static final String MSF4J_TOKEN_2 = "msf4j_2";
-    public static final String REFERER_HEADER = "Referer";
-    public static final String X_ALT_REFERER_HEADER = "X-Alt-Referer";
-    public static final String HTTP_ONLY_COOKIE = "HttpOnly";
+    public KeyManagerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public KeyManagerException(Throwable cause) {
+        super(cause);
+    }
+
+    protected KeyManagerException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public KeyManagerException(String message) {
+        super(message);
+    }
 }

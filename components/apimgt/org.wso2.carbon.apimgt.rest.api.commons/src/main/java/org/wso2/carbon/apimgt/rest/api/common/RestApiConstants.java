@@ -79,7 +79,7 @@ public class RestApiConstants {
     public static final String AUTH_TYPE_OAUTH2 = "OAuth2";
     public static final String BEARER_PREFIX = "bearer";
     public static final String AUTH_SERVER_URL_KEY = "AUTH_SERVER_URL";
-    public static final String AUTH_SERVER_URL = "https://localhost:9443/oauth2/introspect";
+    public static final String AUTH_SERVER_URL = "http://localhost:9090/keyserver/introspect";
     public static final String SCOPE = "scope";
     public static final String PUBLISHER_API = "/publisher-api.yaml";
     public static final String STORE_API = "/store-api.yaml";
@@ -93,6 +93,8 @@ public class RestApiConstants {
     public static final String SWAGGER_GET_URL =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION + RESOURCE_PATH_APIS;
     public static final String SWAGGER_GET_URL_HEADER = "Swagger-Config-Location";
+
+    public static final String COOKIE_HEADER = "Cookie";
 
 
     /**
