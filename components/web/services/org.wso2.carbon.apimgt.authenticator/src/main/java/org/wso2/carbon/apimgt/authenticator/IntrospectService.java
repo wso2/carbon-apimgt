@@ -41,6 +41,8 @@ public class IntrospectService {
      *
      */
     public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo) {
+        responseBean.setTokenValid(true);
+        responseBean.setAccessToken(accessTokenInfo.getAccessToken());
         responseBean.setAuthUser(accessTokenInfo.getEndUserName());
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType("Bearer");

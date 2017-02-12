@@ -203,7 +203,9 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["API (Collection)"].get_apis();
+                return client["API (Collection)"].get_apis().catch(function () {
+                    window.location = contextPath + "/auth/login";
+                });
             }
         );
         if (callback) {

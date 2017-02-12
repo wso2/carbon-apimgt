@@ -58,7 +58,7 @@ import static org.wso2.carbon.messaging.Constants.PROTOCOL;
 public class RESTAPISecurityInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(RESTAPISecurityInterceptor.class);
     //todo authenticatorName should be read from a configuration
-    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.OAuthAuthenticator";
+    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.OAuth2Authenticator";
     private RESTAPIAuthenticator authenticatorImplClass = null;
 
     /**
