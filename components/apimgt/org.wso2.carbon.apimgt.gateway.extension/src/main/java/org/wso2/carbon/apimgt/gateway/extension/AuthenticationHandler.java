@@ -54,7 +54,7 @@ public class AuthenticationHandler implements MessagingHandler {
 
     @Override
     public boolean validateRequestContinuation(CarbonMessage carbonMessage, CarbonCallback carbonCallback) {
-        return false;
+        return true;
     }
 
     @Override

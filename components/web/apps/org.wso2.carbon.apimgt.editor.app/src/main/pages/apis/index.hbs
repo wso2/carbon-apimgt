@@ -1,42 +1,13 @@
 {{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Listing | " @config.appName}}
-{{js "js/api/index.js"}}
-{{js "js/lib/api.js"}}
 {{css "css/custom.css"}}
-{{fragment "org.wso2.carbon.uuf.common.foundation.data-tables" }}
 {{#fillZone "actionMenu"}}
-    {{fragment "actionMenuApiListing"}}
+    {{fragment "action-menu-api-listing"}}
 {{/fillZone}}
 {{#fillZone "menubar"}}
-    {{fragment "org.wso2.carbon.uuf.common.foundation.menubar"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.ui.menubar"}}
 {{/fillZone}}
 {{#fillZone "content"}}
-    {{# if create_success}}
-        <!-- TODO: move inline styles to relevant css file tmkb -->
-        <!-- Static alert section top of the page -->
-        <div class="alert alert-success" role="alert"
-             style="position: fixed;top: 0px;width: 50%;left: 50%;transform: translateX(-50%);">
-            <i class="icon fw fw-success"></i><strong>Success!</strong>
-            API created successfully
-            <a href="{{contextPath}}/apis/{{id}}">
-                <span class="text-primary"><b>{{ name }}</b></span>
-            </a>
-            <button type="button" class="close" aria-label="close" data-dismiss="alert">
-            <span aria-hidden="true">
-                <i class="fw fw-cancel"></i>
-            </span>
-            </button>
-        </div>
-    {{/if}}
-    <div id="listing">
-        <div class="page-header">
-            <h2>All API</h2>
-        </div>
-        <div class="content-section shadow-up">
-            <div class="content-data" id="apiListingContainer">
-                {{defineZone "apiListingContainer"}}
-            </div>
-        </div>
-    </div>
+    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-listing"}}
 {{/fillZone}}

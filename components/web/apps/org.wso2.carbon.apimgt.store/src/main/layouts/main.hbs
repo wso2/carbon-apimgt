@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +9,22 @@
     <meta name="author" content="">
     <meta name="description" content=""/>
 
+    <script>
+        var token = getCookie("token1");
+        if(!token) {
+            window.location =  "{{@contextPath}}/auth/login";
+        }
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length == 2) return parts.pop().split(";").shift();
+        }
+    </script>
+
     <title>{{#placeholder "title"}}UUF Foundation{{/placeholder}}</title>
     <!-- Le fav and touch icons -->
     {{#placeholder "favicon"}}
-        <link rel="shortcut icon" href="{{public "images/default-favicon.png"}}" type="image/png" />
+        <link rel="shortcut icon" href="{{public "images/favicon.png"}}" type="image/png" />
     {{/placeholder}}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
@@ -27,8 +41,8 @@
         <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="50" data-side="left" data-width="200">
             <!-- sidebar -->
             {{defineZone "sidebar"}}
-            <!-- tagCloud -->
-            <div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style=""></div>
+            {{defineZone "tagCloud"}}
+
         </div><!-- media left-->
         <!-- Page Content -->
         <!-- media body-->

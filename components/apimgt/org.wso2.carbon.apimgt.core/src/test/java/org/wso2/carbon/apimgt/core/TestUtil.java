@@ -60,6 +60,7 @@ public class TestUtil {
 
     public static API addTestAPI() throws APIManagementException {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
         return api;

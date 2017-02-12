@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.lifecycle.manager.constants;
 public class TestConstants {
 
     public static final String SERVICE_LIFE_CYCLE = "ServiceLifeCycle";
+    public static final String API_LIFE_CYCLE = "APILifeCycle";
     public static final String ADMIN = "admin";
     public static final String DEVELOPMENT = "Development";
     public static final String TESTING = "Testing";

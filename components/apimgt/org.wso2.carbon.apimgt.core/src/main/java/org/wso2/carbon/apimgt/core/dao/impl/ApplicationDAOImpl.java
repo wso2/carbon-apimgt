@@ -33,8 +33,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
  * Hence is considered as the default due to its re-usability.
@@ -210,6 +211,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(10, application.getCreatedUser());
                 ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
                 ps.executeUpdate();
+                addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
@@ -219,6 +221,72 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
+        }
+    }
+
+    /**
+     * This method will save permission in to AM_APPLICATION_GROUP_PERMISSION table.
+     *
+     * @param connection Database connection
+     * @param permissionMap Permission Data
+     * @param applicationId Application Id
+     * @throws SQLException
+     */
+    private void addApplicationPermission(Connection connection, HashMap permissionMap, String applicationId)
+            throws SQLException {
+        final String query = "INSERT INTO AM_APPLICATION_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
+                "VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, applicationId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
+        } else {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, applicationId);
+                statement.setString(2, APIMgtConstants.Permission.EVERYONE_GROUP);
+                statement.setInt(3, 7);
+                statement.execute();
+            }
+        }
+
+    }
+
+    private void updateApplicationPermission(Connection connection, HashMap permissionMap, String applicationId)
+            throws SQLException {
+        final String query = "INSERT INTO AM_APPLICATION_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
+                "VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, applicationId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+            }
         }
     }
 
@@ -248,6 +316,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(7, updatedApp.getUpdatedUser());
                 ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
                 ps.executeUpdate();
+                updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
@@ -315,7 +384,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails)
             throws APIMgtDAOException {
-        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE,"
+        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE,"
                 + "STATE, CREATE_MODE) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);

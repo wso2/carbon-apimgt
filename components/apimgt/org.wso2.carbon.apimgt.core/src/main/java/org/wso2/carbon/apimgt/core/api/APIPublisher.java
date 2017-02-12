@@ -23,8 +23,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
@@ -212,7 +214,7 @@ public interface APIPublisher extends APIManager {
      * @param documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    void updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
+    String updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
@@ -267,8 +269,7 @@ public interface APIPublisher extends APIManager {
      * @param newPolicy New Subscription Policy
      * @throws APIManagementException If failed to update subscription policy
      */
-    void updateSubscriptionPolicy(String subId, String newPolicy) throws
-            APIManagementException;
+    void updateSubscriptionPolicy(String subId, String newPolicy) throws APIManagementException;
 
 
     /**
@@ -346,4 +347,51 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     * Return list of endpoints
+     * @return
+     * @throws APIManagementException
+     */
+    List<Endpoint> getAllEndpoints() throws APIManagementException;
+
+
+    /**
+     * Get endpoint details according to the endpointId
+     * @param endpointId uuid of endpoint
+     * @return details of endpoint
+     * @throws APIManagementException
+     */
+    Endpoint getEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Add an endpoint
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    String addEndpoint(Endpoint endpoint) throws APIManagementException;
+
+    /**
+     * Update and endpoint
+     * @param endpoint
+     * @throws APIManagementException
+     */
+    void updateEndpoint(Endpoint endpoint) throws APIManagementException;
+
+    /**
+     * Delete an endpoint
+     * @param endpointId
+     * @throws APIManagementException
+     */
+    void deleteEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Create api from Definition
+     * @param apiDefinition
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
+
+    List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
 }

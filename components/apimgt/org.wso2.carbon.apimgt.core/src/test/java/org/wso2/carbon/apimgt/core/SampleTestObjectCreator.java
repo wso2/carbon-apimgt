@@ -20,27 +20,38 @@
 
 package org.wso2.carbon.apimgt.core;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
-import org.wso2.carbon.apimgt.core.api.APIDefinition;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class SampleTestObjectCreator {
-    static String apiDefinition;
+    public static String apiDefinition;
+    public static InputStream inputStream;
+    static String endpointId = UUID.randomUUID().toString();
     static {
         byte[] bytes = new byte[0];
         try {
-            apiDefinition =  IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("swagger.json"));
+            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
+            apiDefinition = IOUtils.toString(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,6 +73,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : " +
+                "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder("admin", "WeatherAPI", "1.0.0").
                 id(UUID.randomUUID().toString()).
@@ -69,8 +82,8 @@ public class SampleTestObjectCreator {
                 description("Get Weather Info").
                 lifeCycleStatus("CREATED").
                 lifecycleInstanceId(UUID.randomUUID().toString()).
-                apiDefinition(new StringBuilder(apiDefinition)).
-                wsdlUri(" ").
+                endpoint(Collections.emptyMap()).
+                wsdlUri("http://localhost:9443/echo?wsdl").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
@@ -84,18 +97,14 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
                 createdBy("admin").
-                lastUpdatedTime(LocalDateTime.now());
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
+                lastUpdatedTime(LocalDateTime.now()).
+                permission(permissionJson).
+                uriTemplates(getMockUriTemplates()).
+                apiDefinition(apiDefinition);
+		        HashMap map = new HashMap();
+                map.put("1000", 6);
+                map.put("1001", 4);
+            	apiBuilder.permissionMap(map);
         return apiBuilder;
     }
 
@@ -163,10 +172,10 @@ public class SampleTestObjectCreator {
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
-                context("yummy").
+                context("weather").
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder(apiDefinition)).
+                endpoint(Collections.emptyMap()).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -181,18 +190,8 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
+                apiDefinition(apiDefinition).
                 lastUpdatedTime(LocalDateTime.now());
-
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
 
         return apiBuilder;
     }
@@ -227,7 +226,7 @@ public class SampleTestObjectCreator {
                 context(UUID.randomUUID().toString()).
                 description("Get Food & Beverage Info").
                 lifeCycleStatus("CREATED").
-                apiDefinition(new StringBuilder(apiDefinition)).
+                endpoint(Collections.emptyMap()).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
@@ -242,18 +241,9 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
                 createdBy("Adam Doe").
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
                 lastUpdatedTime(LocalDateTime.now());
-
-        try {
-            APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
-            List<UriTemplate> uriTemplateList = new ArrayList<>();
-            for (APIResource apiResource : apiDefinition.parseSwaggerAPIResources(apiBuilder.getApiDefinition())){
-                uriTemplateList.add(apiResource.getUriTemplate());
-            }
-            apiBuilder.uriTemplates(uriTemplateList);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
 
         return apiBuilder;
     }
@@ -264,6 +254,8 @@ public class SampleTestObjectCreator {
         apiBuilder.name(name);
         apiBuilder.version(version);
         apiBuilder.context(context);
+        apiBuilder.endpoint(Collections.emptyMap());
+        apiBuilder.uriTemplates(Collections.EMPTY_MAP);
         return apiBuilder;
     }
 
@@ -317,5 +309,59 @@ public class SampleTestObjectCreator {
         application.setUpdatedUser("admin");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
+    }
+
+
+    public static DocumentInfo getMockDocumentInfoObject(String docId) {
+
+        DocumentInfo.Builder builder = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide")
+                .id(docId);
+        return builder.build();
+    }
+
+    public static List<DocumentInfo> getMockDocumentInfoObjectsList() {
+        List<DocumentInfo> docList = new ArrayList<>();
+
+        DocumentInfo doc1 = new DocumentInfo.Builder().fileName("sample1").id("123").build();
+        DocumentInfo doc2 = new DocumentInfo.Builder().fileName("sample1").id("124").build();
+        DocumentInfo doc3 = new DocumentInfo.Builder().fileName("sample1").id("125").build();
+
+        docList.add(doc1);
+        docList.add(doc2);
+        docList.add(doc3);
+
+        return docList;
+    }
+
+    public static Endpoint createMockEndpoint() {
+        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").name("Endpoint1").build();
+    }
+    public static Endpoint createUpdatedEndpoint() {
+        return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").name("Endpoint1").build();
+    }
+    public static Endpoint createAlternativeEndpoint() {
+        String uuid = UUID.randomUUID().toString();
+        return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
+                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").build();
+
+    }
+    public static Map<String,String> getMockEndpointMap(){
+        Map<String,String > endpointMap = new HashedMap();
+        endpointMap.put("PRODUCTION",endpointId);
+        return endpointMap;
+    }
+    public static Map<String,UriTemplate> getMockUriTemplates(){
+        Map<String,UriTemplate> uriTemplateMap = new HashMap();
+        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+        uriTemplateBuilder.endpoint(getMockEndpointMap());
+        uriTemplateBuilder.templateId("getApisApiIdGet");
+        uriTemplateBuilder.uriTemplate("/apis/{apiId}");
+        uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
+        uriTemplateBuilder.policy("Unlimited");
+        uriTemplateBuilder.httpVerb("GET");
+        uriTemplateMap.put("getApisApiIdGet", uriTemplateBuilder.build());
+        return uriTemplateMap;
     }
 }

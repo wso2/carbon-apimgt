@@ -28,20 +28,29 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_maxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MappingUtil {
 
@@ -58,12 +67,13 @@ public class MappingUtil {
         apidto.version(api.getVersion());
         apidto.setContext(api.getContext());
         apidto.setDescription(api.getDescription());
-        apidto.setApiDefinition(api.getApiDefinition());
         apidto.setIsDefaultVersion(api.isDefaultVersion());
         apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
         apidto.setVisibleRoles(api.getVisibleRoles());
+        apidto.setProvider(api.getProvider());
+        apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
         apidto.setTransport(api.getTransport());
@@ -83,8 +93,29 @@ public class MappingUtil {
         apiCorsConfigurationDTO.setAccessControlAllowOrigins(corsConfiguration.getAllowOrigins());
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isEnabled());
         apidto.setCorsConfiguration(apiCorsConfigurationDTO);
-
+        apidto.setEndpoint(fromEndpointToList(api.getEndpoint()));
+        for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
+            API_operationsDTO apiOperationsDTO = new API_operationsDTO();
+            apiOperationsDTO.setId(uriTemplate.getTemplateId());
+            apiOperationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+            apiOperationsDTO.setAuthType(uriTemplate.getAuthType());
+            apiOperationsDTO.setEndpoint(fromEndpointToList(uriTemplate.getEndpoint()));
+            apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
+            apiOperationsDTO.setPolicy(uriTemplate.getPolicy());
+            apidto.addOperationsItem(apiOperationsDTO);
+        }
         return apidto;
+    }
+
+    private static List<API_endpointDTO> fromEndpointToList(Map<String, String> endpoint) {
+        List<API_endpointDTO> endpointDTOs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : endpoint.entrySet()) {
+            API_endpointDTO endpointDTO = new API_endpointDTO();
+            endpointDTO.setId(entry.getValue());
+            endpointDTO.setType(entry.getKey());
+            endpointDTOs.add(endpointDTO);
+        }
+        return endpointDTOs;
     }
 
     /**
@@ -96,36 +127,77 @@ public class MappingUtil {
     public static API.APIBuilder toAPI(APIDTO apidto) {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
-        businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
-        businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
-        businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
-        businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        if(apiBusinessInformationDTO != null) {
+            businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
+            businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
+            businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
+            businessInformation.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        }
 
         API_corsConfigurationDTO apiCorsConfigurationDTO = apidto.getCorsConfiguration();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
-        corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
-        corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
-        corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
-        corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
-
+        if(apiCorsConfigurationDTO != null) {
+            corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
+            corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
+            corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
+            corsConfiguration.setAllowOrigins(apiCorsConfigurationDTO.getAccessControlAllowOrigins());
+            corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
+        }
+        List<API_operationsDTO> operationList = apidto.getOperations();
+        Map<String,UriTemplate> uriTemplateList = new HashMap();
+        for (API_operationsDTO operationsDTO : operationList){
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+            uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
+            uriTemplateBuilder.authType(operationsDTO.getAuthType());
+            uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
+            uriTemplateBuilder.policy(operationsDTO.getPolicy());
+            if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
+                uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
+            } else {
+                uriTemplateBuilder.endpoint(fromEndpointListToMap(apidto.getEndpoint()));
+            }
+            if (operationsDTO.getId() != null){
+                uriTemplateBuilder.templateId(operationsDTO.getId());
+            }else{
+                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(operationsDTO.getUritemplate(),
+                        operationsDTO.getHttpVerb()));
+            }
+            uriTemplateList.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
+        }
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
-                apiDefinition(new StringBuilder(apidto.getApiDefinition())).
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
+                endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(apidto.getVisibleRoles()).
-                visibility(API.Visibility.valueOf(apidto.getVisibility().toString())).
                 policies(apidto.getPolicies()).
+                permission(apidto.getPermission()).
                 tags(apidto.getTags()).
                 transport(apidto.getTransport()).
-                cacheTimeout(apidto.getCacheTimeout()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getPolicies()).
                 businessInformation(businessInformation).
+                uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);
+        if (apidto.getIsDefaultVersion() != null) {
+            apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
+        }
+        if (apidto.getVisibility() != null) {
+            apiBuilder.visibility(API.Visibility.valueOf(apidto.getVisibility().toString()));
+        }
+        if (apidto.getCacheTimeout() != null) {
+            apiBuilder.cacheTimeout(apidto.getCacheTimeout());
+        }
         return apiBuilder;
+    }
+
+    private static Map<String, String> fromEndpointListToMap(List<API_endpointDTO> endpoint) {
+        Map<String, String> endpointMap = new HashMap<>();
+        for (API_endpointDTO endpointDTO : endpoint) {
+            endpointMap.put(endpointDTO.getType(), endpointDTO.getId());
+        }
+        return endpointMap;
     }
 
     /**
@@ -197,7 +269,9 @@ public class MappingUtil {
                 sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
                 sourceURL(documentDTO.getSourceUrl()).
                 type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
+                permission(documentDTO.getPermission()).
                 visibility(DocumentInfo.Visibility.valueOf(documentDTO.getVisibility().toString())).build();
+
     }
 
     /**
@@ -260,5 +334,41 @@ public class MappingUtil {
         subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
         subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
         return subscriptionDTO;
+    }
+
+    /**
+     * Convert {@link Endpoint} to {@link EndPointDTO}
+     * @param endpoint
+     * @return
+     */
+    public static EndPointDTO toEndPointDTO(Endpoint endpoint) {
+        EndPointDTO endPointDTO = new EndPointDTO();
+        endPointDTO.setId(endpoint.getId());
+        endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
+        endPointDTO.setEndpointSecurity(endpoint.getSecurity());
+        EndPoint_maxTpsDTO endPointMaxTpsDTO = new EndPoint_maxTpsDTO();
+        Endpoint.MaxTps maxTps = endpoint.getMaxTps();
+        if (maxTps != null) {
+            endPointMaxTpsDTO.setProduction(maxTps.getProduction());
+            endPointMaxTpsDTO.setSandbox(maxTps.getSandbox());
+        }
+        endPointDTO.setMaxTps(endPointMaxTpsDTO);
+        return endPointDTO;
+    }
+
+    /**
+     * Convert {@link EndPointDTO} to {@link Endpoint}
+     * @param endPointDTO
+     * @return
+     */
+    public static Endpoint toEndpoint(EndPointDTO endPointDTO) {
+        Endpoint.Builder endPointBuilder = new Endpoint.Builder();
+        endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
+        EndPoint_maxTpsDTO maxTpsDTO = endPointDTO.getMaxTps();
+        if (maxTpsDTO != null) {
+            endPointBuilder.maxTps(new Endpoint.MaxTps(maxTpsDTO.getProduction(), maxTpsDTO.getSandbox()));
+        }
+        endPointBuilder.security(endPointDTO.getEndpointSecurity());
+        return endPointBuilder.build();
     }
 }

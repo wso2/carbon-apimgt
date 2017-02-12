@@ -20,8 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.common.io.Files;
 import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
@@ -36,12 +38,20 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
 import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 
 public class APIPublisherImplTestCase {
     private static final String user = "admin";
+
+    @BeforeClass
+    void init() {
+        File temp = Files.createTempDir();
+        temp.deleteOnExit();
+        System.setProperty("gwHome", temp.getAbsolutePath());
+    }
 
     @Test(description = "Test add api")
     void addApi() throws APIManagementException, LifecycleException {
@@ -163,8 +173,10 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus("CREATED").build());
+        Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         apiPublisher.updateAPI(api.lifeCycleStatus("CREATED").id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiDAO,Mockito.times(0)).isAPIContextExists(api.getContext());
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.lifeCycleStatus("CREATED").build());
     }
 
@@ -193,12 +205,12 @@ public class APIPublisherImplTestCase {
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH",
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH",
                 lifecycleId, user, api)).thenReturn
                 (lifecycleState);
         lifecycleState.setState("PUBLISH");
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", new HashMap<>());
-        Mockito.verify(apiLifecycleManager, Mockito.times(1)).executeLifecycleEvent("PUBLISH", lifecycleId, user, api);
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).executeLifecycleEvent("CREATED","PUBLISH", lifecycleId, user, api);
     }
 
     @Test(description = "Update api status", expectedExceptions = {APIManagementException.class})
@@ -209,7 +221,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(null);
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH", uuid, user, api))
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH", uuid, user, api))
                 .thenReturn(SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId));
         Mockito.doThrow(new APIMgtDAOException("Couldn't change the status of api ID ")).when(apiDAO)
                 .changeLifeCycleStatus(uuid, "PUBLISH");
@@ -226,7 +238,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenThrow(new APIMgtDAOException("Couldn't Create connection"));
-        Mockito.when(apiLifecycleManager.executeLifecycleEvent("PUBLISH", uuid, user, api))
+        Mockito.when(apiLifecycleManager.executeLifecycleEvent("CREATED","PUBLISH", uuid, user, api))
                 .thenReturn(SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId));
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         apiPublisher.updateAPIStatus(uuid, "PUBLISH", Collections.emptyMap());

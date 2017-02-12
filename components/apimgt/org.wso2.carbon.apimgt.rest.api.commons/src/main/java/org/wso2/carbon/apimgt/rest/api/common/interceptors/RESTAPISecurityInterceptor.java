@@ -20,6 +20,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.interceptors;
 
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import javax.ws.rs.core.MediaType;
 
+import static org.wso2.carbon.messaging.Constants.PROTOCOL;
+
+
 /**
  * Security Interceptor that does basic authentication for REST ApI requests.
  *
@@ -52,7 +58,7 @@ import javax.ws.rs.core.MediaType;
 public class RESTAPISecurityInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(RESTAPISecurityInterceptor.class);
     //todo authenticatorName should be read from a configuration
-    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.BasicAuthAuthenticator";
+    private static String authenticatorName = "org.wso2.carbon.apimgt.rest.api.common.impl.OAuth2Authenticator";
     private RESTAPIAuthenticator authenticatorImplClass = null;
 
     /**
@@ -75,32 +81,41 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
          * Consider this as a tempory fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
-        String publisherYml = null;
+        if (!requestURI.contains("/api/am/")) {
+            return true;
+        }
+        String yamlContent = null;
+        String protocol = (String) request.getProperty(PROTOCOL);
+        Swagger swagger = null;
         if (requestURI.contains("/publisher")) {
             if (requestURI.contains("swagger.json")) {
                 try {
-                    publisherYml = RestApiUtil.getPublisherRestAPIResource();
+                    yamlContent = RestApiUtil.getPublisherRestAPIResource();
+                    swagger = new SwaggerParser().parse(yamlContent);
+                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.PUBLISHER));
+                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
                 } catch (APIManagementException e) {
                     log.error("Couldn't find swagger.json for publisher", e);
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(RestApiUtil
-                        .convertYmlToJson(publisherYml)).setMediaType(MediaType.APPLICATION_JSON).send();
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
+                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-            return true;
         } else if (requestURI.contains("/store")) {
             if (requestURI.contains("swagger.json")) {
                 try {
-                    publisherYml = RestApiUtil.getStoreRestAPIResource();
+                    yamlContent = RestApiUtil.getStoreRestAPIResource();
+                    swagger = new SwaggerParser().parse(yamlContent);
+                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.STORE));
+
                 } catch (APIManagementException e) {
                     log.error("Couldn't find swagger.json for publisher", e);
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(RestApiUtil
-                        .convertYmlToJson(publisherYml)).setMediaType(MediaType.APPLICATION_JSON).send();
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
+                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-            return true;
-        } else if (requestURI.contains("/editor")) {
+        } else if (requestURI.contains("/editor") || requestURI.contains("keyserver")) {
             return true;
         }
         try {

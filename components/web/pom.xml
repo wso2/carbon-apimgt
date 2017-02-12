@@ -20,7 +20,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.carbon.apimgt.web</groupId>
     <artifactId>web-parent</artifactId>
     <packaging>pom</packaging>
 
@@ -36,11 +35,13 @@
 
     <modules>
         <module>components/org.wso2.carbon.apimgt.publisher.commons.ui</module>
+        <module>components/org.wso2.carbon.apimgt.auth.ui</module>
         <module>themes/org.wso2.carbon.apimgt.theme.store</module>
         <module>themes/org.wso2.carbon.apimgt.theme.publisher</module>
         <module>apps/org.wso2.carbon.apimgt.store</module>
         <module>apps/org.wso2.carbon.apimgt.publisher</module>
         <module>apps/org.wso2.carbon.apimgt.editor.app</module>
+        <module>services/org.wso2.carbon.apimgt.authenticator</module>
     </modules>
 
 </project>

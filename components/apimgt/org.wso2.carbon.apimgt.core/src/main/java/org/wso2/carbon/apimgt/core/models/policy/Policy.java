@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.core.models.policy;
 /**
  * Contains the common model attributes for policy
  */
-public class Policy {
+public abstract class Policy {
     private String uuid;
     private String policyName;
     private String displayName;

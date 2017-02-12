@@ -130,15 +130,19 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Retrieve all API Subscriptions for validation
      *
+     * @param limit Subscription Limit
      * @return A list of {@link SubscriptionValidationData} objects
      * @throws APIMgtDAOException
      */
     @Override
-    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation() throws APIMgtDAOException {
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(int limit) throws APIMgtDAOException {
+        if (limit == 0) {
+            return new ArrayList<>();
+        }
         final String getSubscriptionsSql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
                 "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
-                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CONSUMER_KEY AS CONSUMER_KEY, " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS CLIENT_ID, " +
                 "KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
                 "AM_APP_KEY_MAPPING KEY_MAP " +
@@ -168,7 +172,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
                 "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
-                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CONSUMER_KEY AS CONSUMER_KEY, " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS CLIENT_ID, " +
                 "KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
                 "AM_APP_KEY_MAPPING KEY_MAP " +
@@ -426,18 +430,18 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiContext  Context of the API
      * @param apiVersion  Version of the API
-     * @param consumerKey Consumer key of the application
+     * @param clientId    Client id of the application
      * @return Subscription Validation Information
      * @throws APIManagementException
      */
-    public SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String consumerKey)
+    public SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String clientId)
             throws APIMgtDAOException {
         final String validateSubscriptionSql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
                 "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
                 "APP.NAME AS APP_NAME, APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
                 "AM_APP_KEY_MAPPING KEYS " +
-                "WHERE API.CONTEXT = ? AND API.VERSION = ? AND KEYS.CONSUMER_KEY = ? " +
+                "WHERE API.CONTEXT = ? AND API.VERSION = ? AND KEYS.CLIENT_ID= ? " +
                 "AND APP.AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID " +
                 "AND SUBS.TIER_ID = POLICY.UUID AND KEYS.APPLICATION_ID = APP.UUID";
         SubscriptionValidationResult validationInfo = new SubscriptionValidationResult(false);
@@ -445,7 +449,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
              PreparedStatement ps = conn.prepareStatement(validateSubscriptionSql)) {
             ps.setString(1, apiContext);
             ps.setString(2, apiVersion);
-            ps.setString(3, consumerKey);
+            ps.setString(3, clientId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     validationInfo.setValid(true);
@@ -476,7 +480,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         try {
             while (rs.next()) {
                 SubscriptionValidationData subValidationData = new SubscriptionValidationData(
-                        rs.getString("API_CONTEXT"), rs.getString("API_VERSION"), rs.getString("CONSUMER_KEY"));
+                        rs.getString("API_CONTEXT"), rs.getString("API_VERSION"), rs.getString("CLIENT_ID"));
                 subValidationData.setSubscriptionPolicy(rs.getString("SUBS_POLICY"));
                 subValidationData.setApiName(rs.getString("API_NAME"));
                 subValidationData.setApiProvider(rs.getString("API_PROVIDER"));

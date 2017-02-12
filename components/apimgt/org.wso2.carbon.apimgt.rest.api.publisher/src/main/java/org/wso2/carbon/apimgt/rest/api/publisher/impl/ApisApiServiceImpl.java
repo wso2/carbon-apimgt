@@ -15,11 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
@@ -44,6 +40,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDelete(String apiId
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -65,6 +62,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String accept
             , String ifNoneMatch
             , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -109,6 +107,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String inlineContent
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -176,6 +175,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String documentId
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -199,6 +199,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String accept
             , String ifNoneMatch
             , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -231,11 +232,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
+            //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
@@ -265,8 +267,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //overriding some properties
             body.setName(documentInfoOld.getName());
+            body.setDocumentId(documentInfoOld.getId());
+
+            DocumentInfo documentation = MappingUtil.toDocumentInfo(body);
             //this will fail if user does not have access to the API or the API does not exist
-            apiPublisher.updateDocumentation(apiId, documentInfo);
+            apiPublisher.updateDocumentation(apiId, documentation);
 
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
@@ -276,7 +281,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID,documentId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -289,6 +294,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , Integer offset
             , String accept
             , String ifNoneMatch
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -310,6 +316,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsPost(String apiId
             , DocumentDTO body
             , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -340,7 +349,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince)
+    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -362,13 +371,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
-                                              String ifUnmodifiedSince) throws NotFoundException {
+                                              String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().entity(apiGatewayConfig).build();
+            String url = RestApiUtil.getSwaggerGetURL(apiId);
+            return Response.ok().header(RestApiConstants.SWAGGER_GET_URL_HEADER, url).entity(apiGatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -387,6 +397,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String accept
             , String ifNoneMatch
             , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -415,6 +426,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -439,6 +451,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String accept
             , String ifNoneMatch
             , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -446,7 +459,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String swagger = apiPublisher.getSwagger20Definition(apiId);
             return Response.ok().entity(swagger).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving swagger of API : " + apiId;
+            String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -462,13 +475,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().entity(apiSwagger).build();
+            String url = RestApiUtil.getGatewayConfigGetURL(apiId);
+            return Response.ok().header(RestApiConstants.GATEWAY_CONFIG_GET_URL_HEADER, url).entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -484,6 +499,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String accept
             , String ifNoneMatch
             , String ifModifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -511,6 +527,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -546,6 +563,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String lifecycleChecklist
             , String ifMatch
             , String ifUnmodifiedSince
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
@@ -553,8 +571,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (lifecycleChecklist != null) {
                 String[] checkList = lifecycleChecklist.split(",");
                 for (String checkList1 : checkList) {
-                    String attributeName = new StringTokenizer(checkList1, ":").nextToken();
-                    Boolean attributeValue = Boolean.valueOf(new StringTokenizer(checkList1, ":").nextToken());
+                    StringTokenizer attributeTokens = new StringTokenizer(checkList1, ":");
+                    String attributeName = attributeTokens.nextToken();
+                    Boolean attributeValue = Boolean.valueOf(attributeTokens.nextToken());
                     lifecycleChecklistMap.put(attributeName, attributeValue);
                 }
             }
@@ -573,6 +592,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisCopyApiPost(String newVersion
             , String apiId
+            , String minorVersion
     ) throws NotFoundException {
         //  URI newVersionedApiUri;
         APIDTO newVersionedApi;
@@ -607,6 +627,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             , String query
             , String accept
             , String ifNoneMatch
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
@@ -624,7 +645,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisHead(String query, String accept, String ifNoneMatch) throws NotFoundException {
+    public Response apisHead(String query, String accept, String ifNoneMatch, String minorVersion) throws NotFoundException {
         //TODO improve the query parameters searching options
         String username = RestApiUtil.getLoggedInUsername();
         String context = "context";
@@ -660,8 +681,31 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
+    public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+            , String contentType
+            , String ifMatch
+            , String ifUnmodifiedSince
+            , String minorVersion
+    ) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            API returnAPI = apiPublisher.getAPIbyUUID(uuid);
+            return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
     public Response apisPost(APIDTO body
             , String contentType
+            , String minorVersion
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);

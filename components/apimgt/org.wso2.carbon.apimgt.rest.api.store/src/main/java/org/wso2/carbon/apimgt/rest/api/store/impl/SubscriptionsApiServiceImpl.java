@@ -47,7 +47,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
-            String accept, String ifNoneMatch) throws NotFoundException {
+                                     String accept, String ifNoneMatch, String minorVersion) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
         SubscriptionListDTO subscriptionListDTO = null;
@@ -57,11 +57,11 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            if(!StringUtils.isEmpty(apiId)) {
+            if (!StringUtils.isEmpty(apiId)) {
                 subscribedApiList = apiStore.getSubscriptionsByAPI(apiId);
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
                         offset);
-            } else if(!StringUtils.isEmpty(applicationId)) {
+            } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
                 if (application != null) {
                     subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
@@ -74,7 +74,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     HashMap<String, String> paramList = new HashMap<String, String>();
                     paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                    log.error(errorMessage,e);
+                    log.error(errorMessage, e);
                     return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 }
             } else {
@@ -99,14 +99,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, String contentType) throws NotFoundException {
+    public Response subscriptionsPost(SubscriptionDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String apiId = body.getApiIdentifier();
-            String tier = body.getTier();
+            String tier = body.getPolicy();
 
             Application application = apiStore.getApplicationByUuid(applicationId);
             API api = apiStore.getAPIbyUUID(apiId);
@@ -137,7 +138,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiIdentifier());
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, body.getApplicationId());
-            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, body.getTier());
+            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, body.getPolicy());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -148,7 +149,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-            String ifUnmodifiedSince) throws NotFoundException {
+                                                      String ifUnmodifiedSince, String minorVersion)
+            throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -167,7 +169,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
-            String ifModifiedSince) throws NotFoundException {
+                                                   String ifModifiedSince, String minorVersion)
+            throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         SubscriptionDTO subscriptionDTO = null;
         try {

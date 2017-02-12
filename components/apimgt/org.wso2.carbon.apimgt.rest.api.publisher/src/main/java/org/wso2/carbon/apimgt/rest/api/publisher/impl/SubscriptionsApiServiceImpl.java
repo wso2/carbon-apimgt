@@ -25,10 +25,11 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     @Override
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId
-, String blockState
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String blockState
+            , String ifMatch
+            , String ifUnmodifiedSince
+            , String minorVersion
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -42,13 +43,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
         return null;
     }
+
     @Override
     public Response subscriptionsGet(String apiId
-, Integer limit
-, Integer offset
-, String accept
-, String ifNoneMatch
- ) throws NotFoundException {
+            , Integer limit
+            , Integer offset
+            , String accept
+            , String ifNoneMatch
+            , String minorVersion
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -68,12 +71,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
         return null;
     }
+
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId
-, String accept
-, String ifNoneMatch
-, String ifModifiedSince
- ) throws NotFoundException {
+            , String accept
+            , String ifNoneMatch
+            , String ifModifiedSince
+            , String minorVersion
+    ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -90,11 +95,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
         return null;
     }
+
     @Override
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId
-, String ifMatch
-, String ifUnmodifiedSince
- ) throws NotFoundException {
+            , String ifMatch
+            , String ifUnmodifiedSince
+            , String minorVersion
+    ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

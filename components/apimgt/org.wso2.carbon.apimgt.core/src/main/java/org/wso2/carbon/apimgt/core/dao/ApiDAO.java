@@ -23,9 +23,11 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.CheckForNull;
 
 /**
@@ -78,13 +80,30 @@ public interface ApiDAO {
     List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
 
     /**
-     * Retrieves summary data of all available APIs that match the given search criteria.
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
+     * the full text search for API table
      * @param searchString The search string provided
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(String searchString) throws APIMgtDAOException;
+    List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
+            APIMgtDAOException;
+
+    /**
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria.
+     * @param attributeMap Map containing the attributes and search queries for those attributes
+     * @param offset  The starting point of the search results.
+     * @param limit   Number of search results that will be returned.
+     * @return {@link List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap, int offset, int
+            limit) throws
+            APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
@@ -232,6 +251,15 @@ public interface ApiDAO {
     void addDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
 
     /**
+     * Add document info meta data to an API
+     *
+     * @param apiId    UUID of API
+     * @param documentInfo {@link DocumentInfo}
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+
+    /**
      * Add Document File content
      *
      * @param resourceID         UUID of resource
@@ -272,6 +300,53 @@ public interface ApiDAO {
      * @throws APIMgtDAOException
      */
     boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+
+
+    /**
+     * Add an Endpoint
+     *
+     * @param endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    void addEndpoint(Endpoint endpoint) throws APIMgtDAOException;
+
+
+
+    /**
+     * Delete an Endpoint
+     *
+     * @param endpointId
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean deleteEndpoint(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Update an Endpoint
+     *
+     * @param endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException;
+
+    /**
+     * Get an Endpoint
+     *
+     * @param endpointId uuid of endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    Endpoint getEndpoint(String endpointId) throws APIMgtDAOException;
+
+
+    /**
+     * get all Endpoints
+     * @return
+     * @throws APIMgtDAOException
+     */
+    List<Endpoint> getEndpoints() throws APIMgtDAOException;
 
     /**
      * Get gateway configuration of a given API

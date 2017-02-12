@@ -63,6 +63,28 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException {
 
+        Connection connection;
+        try {
+            connection = DAOUtil.getConnection();
+
+            //TODO : instead of checking policyLevel, check class type, and remove passing policy level to here
+
+            if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel))  {
+                addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
+                             policy.getDefaultQuotaPolicy().getType(), 0,
+                             policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), "API");
+            } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
+                addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                     policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, null, 0,
+                                     "APPLICATION");
+            } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
+                addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                      policy.getDescription());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     @Override
@@ -196,7 +218,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         if (resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
                 .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
             RequestCountLimit reqLimit = new RequestCountLimit();
-            reqLimit.setUnitTime(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setUnitTime(resultSet.getLong(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
             reqLimit.setTimeUnit(
                     resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             reqLimit.setRequestCount(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
@@ -510,10 +532,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "Count", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "Count", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1, 60, "s", "API");
 
                     addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
                     addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");
@@ -552,7 +574,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     private static void addAPIPolicy(Connection connection, String name, String displayName, String description,
-                              String quotaType, int quota, int unitTime, String timeUnit, String applicableLevel)
+                              String quotaType, int quota, long unitTime, String timeUnit, String applicableLevel)
                                                                                                 throws SQLException {
         final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, " +
                 "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, APPLICABLE_LEVEL) " +
@@ -565,7 +587,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(4, description);
             statement.setString(5, quotaType);
             statement.setInt(6, quota);
-            statement.setInt(7, unitTime);
+            statement.setLong(7, unitTime);
             statement.setString(8, timeUnit);
             statement.setString(9, applicableLevel);
 
