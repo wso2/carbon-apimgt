@@ -24,7 +24,6 @@ import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -50,11 +49,11 @@ public class AuthenticatorAPI implements Microservice {
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(@Context Request request,
             @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
-            @FormDataParam ("scopes") List<String> scopes) {
+            @FormDataParam ("scopes") String scopesList) {
         IntrospectService introspectService = new IntrospectService();
         AuthResponseBean authResponseBean = new AuthResponseBean();
         String accessToken = introspectService
-                .getAccessToken(authResponseBean, userName, password, scopes.toArray(new String[0]));
+                .getAccessToken(authResponseBean, userName, password, scopesList.split(" "));
         String part1 = accessToken.substring(0, accessToken.length() / 2);
         String part2 = accessToken.substring(accessToken.length() / 2);
         NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
