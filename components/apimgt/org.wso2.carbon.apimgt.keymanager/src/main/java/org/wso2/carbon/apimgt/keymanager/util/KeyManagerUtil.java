@@ -128,6 +128,7 @@ public class KeyManagerUtil {
         adminScopes.add("apim:tier_manage");
         adminScopes.add("apim:subscription_view");
         adminScopes.add("apim:subscription_block");
+        adminScopes.add("apim:subscribe");
         List<String> subsciberScopes = new ArrayList<>();
         subsciberScopes.add("apim:subscribe");
         userMap.put("admin", "admin");

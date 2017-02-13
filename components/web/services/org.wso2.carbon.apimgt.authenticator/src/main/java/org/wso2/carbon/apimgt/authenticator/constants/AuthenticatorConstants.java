@@ -24,8 +24,8 @@ package org.wso2.carbon.apimgt.authenticator.constants;
  */
 public class AuthenticatorConstants {
 
-    public static final String TOKEN_1 = "token1";
-    public static final String TOKEN_2 = "token2";
+    public static final String TOKEN_1 = "WSO2_AM_TOKEN_1";
+    public static final String TOKEN_2 = "WSO2_AM_TOKEN_2";
     public static final String MSF4J_TOKEN_1 = "msf4j_1";
     public static final String MSF4J_TOKEN_2 = "msf4j_2";
     public static final String REFERER_HEADER = "Referer";
