@@ -26,8 +26,9 @@ public class AuthenticatorConstants {
 
     public static final String TOKEN_1 = "token1";
     public static final String TOKEN_2 = "token2";
+    public static final String MSF4J_TOKEN_1 = "msf4j_1";
+    public static final String MSF4J_TOKEN_2 = "msf4j_2";
     public static final String REFERER_HEADER = "Referer";
-    public static final String REMOTE_HOST_HEADER = "REMOTE_HOST";
     public static final String X_ALT_REFERER_HEADER = "X-Alt-Referer";
     public static final String HTTP_ONLY_COOKIE = "HttpOnly";
 }

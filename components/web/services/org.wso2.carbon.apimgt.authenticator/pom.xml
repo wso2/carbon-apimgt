@@ -16,6 +16,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.msf4j</groupId>
             <artifactId>msf4j-core</artifactId>
         </dependency>
@@ -34,7 +38,9 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.msf4j.*;version="${msf4j.package.import.version.range}",
-                            javax.ws.rs.*
+                            javax.ws.rs.*,
+                            org.slf4j.*,
+                            org.wso2.carbon.apimgt.core.*
                         </Import-Package>
                     </instructions>
                 </configuration>

@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * TierDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public class TierDTO   {
   @JsonProperty("name")
   private String name = null;
@@ -174,7 +174,7 @@ public class TierDTO   {
    * Custom attributes added to the policy policy 
    * @return attributes
   **/
-  @ApiModelProperty(value = "Custom attributes added to the policy policy ")
+  @ApiModelProperty(example = "{}", value = "Custom attributes added to the policy policy ")
   public Map<String, String> getAttributes() {
     return attributes;
   }

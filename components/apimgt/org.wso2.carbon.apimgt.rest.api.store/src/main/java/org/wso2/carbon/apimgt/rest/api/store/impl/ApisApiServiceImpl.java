@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -12,7 +11,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
@@ -32,13 +30,13 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
-                                                           String ifNoneMatch, String ifModifiedSince) throws
-            NotFoundException {
+                                                           String ifNoneMatch, String ifModifiedSince,
+                                                           String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -75,8 +73,10 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
 
-    @Override public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
+    @Override
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
+                                                    String ifNoneMatch, String ifModifiedSince, String minorVersion)
+            throws NotFoundException {
 
         DocumentDTO documentDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -92,8 +92,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
 
-    @Override public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
-            String ifNoneMatch) throws NotFoundException {
+    @Override
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
+                                          String ifNoneMatch, String minorVersion) throws NotFoundException {
 
         DocumentListDTO documentListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -111,18 +112,20 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         return Response.ok().entity(documentListDTO).build();
     }
-    
+
     /**
      * Get API of given ID
      *
-     * @param apiId  API ID
-     * @param accept accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           API ID
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion    Minor-Version header value
      * @return API of the given ID
+     * @throws NotFoundException
      */
     @Override
-    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince)
+    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)
             throws NotFoundException {
 
         APIDTO apiToReturn = null;
@@ -141,11 +144,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return Response.ok().entity(apiToReturn).build();
     }
-    
-    
+
+
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince) throws NotFoundException {
+                                        String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -160,20 +163,21 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
-    
+
     /**
-     * Retrieves APIs qualifying under given search condition 
-     * @param limit maximum number of APIs returns
-     * @param offset starting index
-     * @param query search condition
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * Retrieves APIs qualifying under given search condition
+     *
+     * @param limit        maximum number of APIs returns
+     * @param offset       starting index
+     * @param query        search condition
+     * @param accept       Accept header value
+     * @param ifNoneMatch  If-None-Match header value
+     * @param minorVersion Minor-Version header value
      * @return matched APIs for the given search condition
-     * 
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch)
-            throws NotFoundException {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
+                            String minorVersion) throws NotFoundException {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {

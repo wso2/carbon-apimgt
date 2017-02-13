@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_endpointDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-15T22:14:45.821+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public class API_endpointDTO   {
   @JsonProperty("id")
   private String id = null;
