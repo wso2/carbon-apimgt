@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Cookie;
 /**
@@ -39,6 +40,8 @@ public class AuthUtil {
     }
 
     private static Map<String, String> consumerKeySecretMap;
+
+    private static List<String> roleList;
 
     public static String getAppContext(Request request) {
         //TODO this method should provide uuf app context. Consider the scenarios of reverse proxy as well.
@@ -71,4 +74,15 @@ public class AuthUtil {
         return tokenRequest;
 
     }
+
+    public static List<String> getRoleList() {
+        return roleList;
+    }
+
+    public static void setRoleList(List<String> roleList) {
+        AuthUtil.roleList = roleList;
+    }
+
+
+
 }

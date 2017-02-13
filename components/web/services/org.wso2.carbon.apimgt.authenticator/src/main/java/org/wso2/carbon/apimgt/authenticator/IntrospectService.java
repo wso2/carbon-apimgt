@@ -23,10 +23,24 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
+
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 
 /**
  * This method authenticate the user.
@@ -85,12 +99,27 @@ public class IntrospectService {
      * @return Consumer key and secret.
      */
 
-    /*private Map<String, String> getConsumerKeySecret(String appName) {
+
+    private Map<String, String> getConsumerKeySecret(String appName) throws APIManagementException {
+
         HashMap<String, String> consumerKeySecretMap;
         if (AuthUtil.getConsumerKeySecretMap() == null) {
             consumerKeySecretMap = new HashMap<>();
-            consumerKeySecretMap.put("CONSUMER_KEY", "XXXX");
-            consumerKeySecretMap.put("CONSUMER_SECRET", "YYYY");
+            KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
+            OAuthAppRequest oauthAppRequest = null;
+
+                oauthAppRequest = ApplicationUtils
+                        .createOauthAppRequest("DCR_APP", "ADMIN", null,
+                                null);
+            //for now tokenSope = null
+            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
+            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
+            OAuthApplicationInfo oAuthApplicationInfo;
+            oAuthApplicationInfo = keyManager.createApplication(oauthAppRequest);
+
+            consumerKeySecretMap.put("CONSUMER_KEY", oAuthApplicationInfo.getClientId());
+            consumerKeySecretMap.put("CONSUMER_SECRET", oAuthApplicationInfo.getClientSecret());
+
             AuthUtil.setConsumerKeySecretMap(consumerKeySecretMap);
         }
 

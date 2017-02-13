@@ -17,12 +17,21 @@
  */
 package org.wso2.carbon.apimgt.authenticator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -38,6 +47,8 @@ import javax.ws.rs.core.Response;
  *
  */
 public class AuthenticatorAPI implements Microservice {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
 
     /**
      * This method authenticate the user for store app.
@@ -72,6 +83,39 @@ public class AuthenticatorAPI implements Microservice {
                                 request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
                                         request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
                                         "").build();
+
+            IntrospectService introspectService = new IntrospectService();
+            String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
+            String part1 = accessToken.substring(0, accessToken.length() / 2);
+            String part2 = accessToken.substring(accessToken.length() / 2 + 1);
+            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
+                    part1 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
+                            AuthenticatorConstants.REMOTE_HOST_HEADER));
+            NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
+                    part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
+                            AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
+                            + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+            List<String> roleList = new ArrayList<>();
+            roleList.add("ENG");
+            roleList.add("QA");
+            roleList.add("UI");
+            AuthUtil.setRoleList(roleList);
+            return Response
+                    .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
+                            MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                    .header(AuthenticatorConstants.REFERER_HEADER, request.getHeader(AuthenticatorConstants.
+                            REFERER_HEADER)
+                            .equals(request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)) ?
+                            "" :
+                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while doing introspection.";
+
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), null);
+
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
 
     }
 }
