@@ -1,7 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- TODO: Move  js and css as the first children of head -->
+    {{css "css/custom.css"}}
     <title>{{#placeholder "title"}}{{/placeholder}}</title>
     <meta charset="UTF-8">
     <meta name="description" content="WSO2 API Manager"/>
@@ -28,12 +29,15 @@
     <!-- TODO: request to maintain handlebarsjs library from common.foundation component ~tmkb-->
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.select2" }}
-    {{css "css/custom.css"}}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
     {{placeholder "headOther"}}
 </head>
 <body class="sticky-footer ">
+<!-- TODO: load all the fragments into libraries zone from component.yaml
+Remove handlebarjs lib
+-->
+{{defineZone "libraries"}}
 <!-- header -->
 {{defineZone "topbar"}}
 <!-- End header -->

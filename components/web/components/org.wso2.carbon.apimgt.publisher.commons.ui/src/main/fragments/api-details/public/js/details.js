@@ -22,7 +22,7 @@ function loadOverview(jsonData) {
         var endpointConfig = $.parseJSON(context.endpointConfig);
         context.productionEndpoint = endpointConfig.production_endpoints.url;
     }
-    // Grab the template script
+    // Grab the template script TODO: Replace with UUF client
     $.get('/editor/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
         var template = Handlebars.compile(templateData);
         // Pass our data to the template
@@ -74,7 +74,7 @@ function lifecycleTabHandler(event) {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
         };
-        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, callbacks);
     }
 
     api_client.get(api_id).then(renderLCTab);
