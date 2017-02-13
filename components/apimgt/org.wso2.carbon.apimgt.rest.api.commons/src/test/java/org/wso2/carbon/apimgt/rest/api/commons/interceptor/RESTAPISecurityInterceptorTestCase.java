@@ -64,7 +64,7 @@ public class RESTAPISecurityInterceptorTestCase {
 
         Header pathHeader = Mockito.mock(Header.class);
         pathHeader.setName("REQUEST_URL");
-        pathHeader.setValue("http://localhost:9090/api/am/publisher/v0.10/api");
+        pathHeader.setValue("http://localhost:9090/api/am/publisher/v1/api");
 
         List<Header> headersList = new ArrayList<Header>(2);
         headersList.add(authHeader);
