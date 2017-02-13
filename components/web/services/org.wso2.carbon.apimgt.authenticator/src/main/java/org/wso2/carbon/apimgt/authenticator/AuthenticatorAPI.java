@@ -54,28 +54,23 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/token")
     @Produces ("application/json")
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(@Context Request request,
-                                 @FormDataParam ("username") String userName, @FormDataParam ("password")
-                                             String password,
-                                 @FormDataParam ("scopes") String scopesList) {
+    public Response authenticate(
+            @Context Request request, @FormDataParam ("username") String userName,
+            @FormDataParam ("password") String password, @FormDataParam ("scopes") String scopesList) {
         try {
             IntrospectService introspectService = new IntrospectService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
+            String appContext = AuthUtil.getAppContext(request);
+            String restAPIContext = "/api/am" + appContext;
             String accessToken = introspectService
                     .getAccessToken(authResponseBean, userName, password, scopesList.split(" "));
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                    part1 + "; path=" + AuthUtil.getAppContext(request));
+            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1, part1 + "; path=" + appContext);
             NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                    part2 + "; path=" + AuthUtil.getAppContext(request) + "; " +
-                            AuthenticatorConstants.HTTP_ONLY_COOKIE);
-            NewCookie backendCookie = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_1, part1 +
-                    "; path=/api/am");
-            NewCookie backendCookie2 = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_2,
-                    part2 + "; path=/api/am; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                    .cookie(cookie, cookie2, backendCookie, backendCookie2).header(AuthenticatorConstants.
+                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                    .header(AuthenticatorConstants.
                                     REFERER_HEADER,
                             (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
                                     .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
@@ -92,6 +87,6 @@ public class AuthenticatorAPI implements Microservice {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
+
 }

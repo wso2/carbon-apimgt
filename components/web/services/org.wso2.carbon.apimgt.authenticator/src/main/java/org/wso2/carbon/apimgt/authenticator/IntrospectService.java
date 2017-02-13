@@ -76,7 +76,7 @@ public class IntrospectService {
                 .createAccessTokenRequest(userName, password, "password", scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         try {
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
             setAccessTokenData(authResponseBean, accessTokenInfo);
             return accessTokenInfo.getAccessToken();
