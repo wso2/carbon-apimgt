@@ -4,11 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,10 +24,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
+    private ApiDAO apiDAO;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO) {
+    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
+        this.apiDAO = apiDAO;
+
     }
 
     /**
@@ -50,6 +57,27 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
+    }
+
+    /**
+     * Load api info from db
+     *
+     * @return List summery of al the available apis
+     * @throws APIManagementException
+     */
+    @Override
+    public List<APISummary> getAPIInfo() throws APIManagementException {
+        List<API> apiList = apiDAO.getAPIs();
+        List<APISummary> apiSummaryList = new ArrayList<APISummary>();
+        apiList.forEach(apiInfo -> {
+            APISummary apiSummary = new APISummary(apiInfo.getId());
+            apiSummary.setName(apiInfo.getName());
+            apiSummary.setContext(apiInfo.getContext());
+            apiSummary.setVersion(apiInfo.getVersion());
+            apiSummary.setUriTemplates(new ArrayList<>(apiInfo.getUriTemplates().values()));
+            apiSummaryList.add(apiSummary);
+        });
+        return apiSummaryList;
     }
 
     @Override
