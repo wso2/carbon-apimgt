@@ -25,13 +25,9 @@ import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -59,55 +55,35 @@ public class AuthenticatorAPI implements Microservice {
     @Produces ("application/json")
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(@Context Request request,
-            @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
-            @FormDataParam ("scopes") String scopesList) {
-        IntrospectService introspectService = new IntrospectService();
-        AuthResponseBean authResponseBean = new AuthResponseBean();
-        String accessToken = introspectService
-                .getAccessToken(authResponseBean, userName, password, scopesList.split(" "));
-        String part1 = accessToken.substring(0, accessToken.length() / 2);
-        String part2 = accessToken.substring(accessToken.length() / 2);
-        NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                part1 + "; path=" + AuthUtil.getAppContext(request));
-        NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                part2 + "; path=" + AuthUtil.getAppContext(request) + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-        NewCookie backendCookie = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_1, part1 + "; path=/api/am");
-        NewCookie backendCookie2 = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_2,
-                part2 + "; path=/api/am; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-        return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                .cookie(cookie, cookie2, backendCookie, backendCookie2).header(AuthenticatorConstants.REFERER_HEADER,
-                        (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
-                                .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
-                                .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
-                                "" :
-                                request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
-                                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
-                                        "").build();
-
+                                 @FormDataParam ("username") String userName, @FormDataParam ("password")
+                                             String password,
+                                 @FormDataParam ("scopes") String scopesList) {
+        try {
             IntrospectService introspectService = new IntrospectService();
-            String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
+            AuthResponseBean authResponseBean = new AuthResponseBean();
+            String accessToken = introspectService
+                    .getAccessToken(authResponseBean, userName, password, scopesList.split(" "));
             String part1 = accessToken.substring(0, accessToken.length() / 2);
-            String part2 = accessToken.substring(accessToken.length() / 2 + 1);
+            String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                    part1 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
-                            AuthenticatorConstants.REMOTE_HOST_HEADER));
+                    part1 + "; path=" + AuthUtil.getAppContext(request));
             NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                    part2 + "; path=" + AuthUtil.getAppContext(request) + "; domain=" + request.getProperty(
-                            AuthenticatorConstants.REMOTE_HOST_HEADER) + "; "
-                            + AuthenticatorConstants.HTTP_ONLY_COOKIE);
-            List<String> roleList = new ArrayList<>();
-            roleList.add("ENG");
-            roleList.add("QA");
-            roleList.add("UI");
-            AuthUtil.setRoleList(roleList);
-            return Response
-                    .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
-                            MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
-                    .header(AuthenticatorConstants.REFERER_HEADER, request.getHeader(AuthenticatorConstants.
-                            REFERER_HEADER)
-                            .equals(request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)) ?
-                            "" :
-                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)).build();
+                    part2 + "; path=" + AuthUtil.getAppContext(request) + "; " +
+                            AuthenticatorConstants.HTTP_ONLY_COOKIE);
+            NewCookie backendCookie = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_1, part1 +
+                    "; path=/api/am");
+            NewCookie backendCookie2 = new NewCookie(AuthenticatorConstants.MSF4J_TOKEN_2,
+                    part2 + "; path=/api/am; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
+                    .cookie(cookie, cookie2, backendCookie, backendCookie2).header(AuthenticatorConstants.
+                                    REFERER_HEADER,
+                            (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                    .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                    .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                    "" :
+                                    request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                            "").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while doing introspection.";
 

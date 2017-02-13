@@ -24,22 +24,20 @@ import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 
 /**
@@ -69,12 +67,14 @@ public class IntrospectService {
      * This method authenticate the user.
      *
      */
-    public String getAccessToken(AuthResponseBean authResponseBean, String userName, String password, String[] scopes) {
+    public String getAccessToken(AuthResponseBean authResponseBean, String userName, String password, String[] scopes)
+            throws APIManagementException {
         //TODO - call method which provides client id and secret.
-        String clientId = "publisher";
-        String clientSecret = "1234-5678-9101";
+
+        Map<String, String> consumerKeySecretMap = getConsumerKeySecret("publisher");
         AccessTokenRequest accessTokenRequest = AuthUtil
-                .createAccessTokenRequest(userName, password, "password", scopes, clientId, clientSecret);
+                .createAccessTokenRequest(userName, password, "password", scopes,
+                        consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         try {
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
@@ -109,7 +109,7 @@ public class IntrospectService {
             OAuthAppRequest oauthAppRequest = null;
 
                 oauthAppRequest = ApplicationUtils
-                        .createOauthAppRequest("DCR_APP", "ADMIN", null,
+                        .createOauthAppRequest(appName, "ADMIN", null,
                                 null);
             //for now tokenSope = null
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
@@ -132,15 +132,15 @@ public class IntrospectService {
 //        return appKeys.get(appName);
     }
 
-    private String kmTokenEndpoint(String key, String secret, String username, String password, String[] scopes) {
-        String accessToken = key + secret + username + password;
-        StringBuilder salt = new StringBuilder();
-        Random rnd = new Random();
-        while (salt.length() < 18) {
-            int index = (int) (rnd.nextFloat() * accessToken.length());
-            salt.append(accessToken.charAt(index));
-        }
-        String saltStr = salt.toString();
-        return saltStr;
-    }*/
+//    private String kmTokenEndpoint(String key, String secret, String username, String password, String[] scopes) {
+//        String accessToken = key + secret + username + password;
+//        StringBuilder salt = new StringBuilder();
+//        Random rnd = new Random();
+//        while (salt.length() < 18) {
+//            int index = (int) (rnd.nextFloat() * accessToken.length());
+//            salt.append(accessToken.charAt(index));
+//        }
+//        String saltStr = salt.toString();
+//        return saltStr;
+//    }
 }

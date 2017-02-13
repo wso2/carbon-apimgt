@@ -103,8 +103,8 @@ public class TestKeyManagerImpl implements KeyManager {
 
         try {
                 oAuthApplicationInfo.setClientName("DCR_APP");
-                oAuthApplicationInfo.setClientId("consumer_key");
-                oAuthApplicationInfo.setClientSecret("consumer_secret");
+                oAuthApplicationInfo.setClientId("publisher");
+                oAuthApplicationInfo.setClientSecret("1234-5678-9101");
 
         } catch (JsonSyntaxException e) {
             String errorMsg = "Error while processing the response returned from DCR endpoint.Can not create" +
