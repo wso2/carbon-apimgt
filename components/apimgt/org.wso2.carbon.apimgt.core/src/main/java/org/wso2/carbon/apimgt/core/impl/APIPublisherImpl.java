@@ -1118,6 +1118,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return getPolicyDAO().getPolicies(tierLevel);
     }
 
+
+    @Override
+    public Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException {
+        return getPolicyDAO().getPolicy(tierLevel, tierName);
+    }
+
     /**
      * Publishing new API configurations to the subscribers
      *

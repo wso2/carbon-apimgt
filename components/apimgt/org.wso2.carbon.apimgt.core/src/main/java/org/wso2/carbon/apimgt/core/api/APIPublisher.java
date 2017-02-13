@@ -394,4 +394,6 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
     List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
+
+    Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
 }
