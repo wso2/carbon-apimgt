@@ -19,7 +19,7 @@ import javax.ws.rs.*;
         service = Microservice.class,
         immediate = true)
 
-@Path("/api/am/publisher/v0.10/policies")
+@Path("/api/am/publisher/v1/policies")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the policies API")

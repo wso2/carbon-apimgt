@@ -16,7 +16,7 @@ mvn clean package jetty:run
 You can then view the swagger listing here:
 
 ```
-http://localhost:8080/api/am/admin/v0.10/swagger.json
+http://localhost:8080/api/am/admin/v1/swagger.json
 ```
 
 Note that if you have configured the `host` to be something other than localhost, the calls through

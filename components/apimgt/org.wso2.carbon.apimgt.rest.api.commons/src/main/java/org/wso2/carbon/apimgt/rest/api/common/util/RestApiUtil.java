@@ -83,7 +83,8 @@ public class RestApiUtil {
      *
      * @return group id of the current logged in user.
      */
-    @SuppressWarnings("unchecked") public static String getLoggedInUserGroupId() {
+    @SuppressWarnings("unchecked")
+    public static String getLoggedInUserGroupId() {
         //        String username = RestApiUtil.getLoggedInUsername();
         //        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         //        JSONObject loginInfoJsonObj = new JSONObject();
@@ -254,7 +255,8 @@ public class RestApiUtil {
      * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
      * existing resource, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToResourceAlreadyExists(
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceAlreadyExists(
             Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
@@ -266,7 +268,8 @@ public class RestApiUtil {
      * @param e throwable to check
      * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToResourceNotFound(Throwable e) {
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceNotFound(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceNotFoundException;
     }
@@ -277,7 +280,8 @@ public class RestApiUtil {
      * @param e throwable to check
      * @return true if the specified throwable e is due to an authorization failure, false otherwise
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean isDueToAuthorizationFailure(
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAuthorizationFailure(
             Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtAuthorizationFailedException;
@@ -465,8 +469,8 @@ public class RestApiUtil {
      * @param message error message
      * @return true if the message of the root cause of 'e' matches with 'message'
      */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored") public static boolean rootCauseMessageMatches(Throwable e,
-            String message) {
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean rootCauseMessageMatches(Throwable e, String message) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause.getMessage().contains(message);
     }
@@ -475,9 +479,9 @@ public class RestApiUtil {
      * Logs the error, builds a NotFoundException with specified details and throws it
      *
      * @param resource requested resource
-     * @param id id of resource
-     * @param t Throwable instance
-     * @param log Log instance
+     * @param id       id of resource
+     * @param t        Throwable instance
+     * @param log      Log instance
      * @throws NotFoundException
      */
     public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
@@ -490,11 +494,11 @@ public class RestApiUtil {
     /**
      * Search the Policy in the given collection of Policies. Returns it if it is included there. Otherwise return null
      *
-     * @param policies    Policy Collection
+     * @param policies Policy Collection
      * @param tierName Policy to find
      * @return Matched Policy with its name
      */
-     public static Policy findPolicy(Collection<Policy> policies, String tierName) {
+    public static Policy findPolicy(Collection<Policy> policies, String tierName) {
         for (Policy policy : policies) {
             if (policy.getPolicyName() != null && tierName != null && policy.getPolicyName().equals(tierName)) {
                 return policy;
@@ -561,6 +565,7 @@ public class RestApiUtil {
 
     /**
      * used to convert yaml to json
+     *
      * @param yamlString yaml String
      * @return
      */
@@ -578,6 +583,8 @@ public class RestApiUtil {
             return apimConfigurations.getPublisherContext();
         } else if (RestApiConstants.APPType.STORE.equals(appType)) {
             return apimConfigurations.getStoreContext();
+        } else if (RestApiConstants.APPType.ADMIN.equals(appType)) {
+            return apimConfigurations.getAdminContext();
         } else {
             return null;
         }

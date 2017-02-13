@@ -69,11 +69,11 @@ public class RestApiConstants {
 
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_STORE_CONTEXT = "/api/am/store/";
-    public static final String REST_API_STORE_VERSION = "v0.10";
-    public static final String REST_API_PUBLISHER_VERSION = "v0.10";
+    public static final String REST_API_STORE_VERSION = "v1";
+    public static final String REST_API_PUBLISHER_VERSION = "v1";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
-    public static final String REST_API_ADMIN_VERSION = "v0.10";
+    public static final String REST_API_ADMIN_VERSION = "v1";
 
     public static final String AUTHORIZATION_HTTP_HEADER = "Authorization";
     public static final String AUTH_TYPE_OAUTH2 = "OAuth2";
@@ -104,6 +104,7 @@ public class RestApiConstants {
         public static final String PUBLISHER = "publisher";
 
         public static final String STORE = "store";
+        public static final String ADMIN = "admin";
     }
 }
 
