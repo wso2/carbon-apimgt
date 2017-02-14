@@ -5,7 +5,7 @@ $(function () {
         url: 'https://apis.wso2.com/api/am/store/v1/swagger.json',
         success: function (swaggerData) {
             var documentName = null;
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer 12770569-28a9-3864-9f7b-c3fcdc16b890", "header"));
+            setAuthHeader(client);
             client["API (individual)"].get_apis_apiId_documents_documentId({"documentId": docId, "apiId": apiId},
                 function (jsonData) {
                      documentName = jsonData.obj.name;
