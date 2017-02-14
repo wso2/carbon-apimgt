@@ -41,8 +41,6 @@ var _renderApplicationAddPage = function(){
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (data) {
-            swaggerClient.setSchemes(["http"]);
-            swaggerClient.setHost("localhost:9090");
 
             //TODO:Replace this once the tierList retrieval api is implemented
             var tier = {};
@@ -67,8 +65,6 @@ var addApplication = function () {
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (swaggerData) {
-            swaggerClient.setSchemes(["http"]);
-            swaggerClient.setHost("localhost:9090");
 
             var applicationName = $("#application-name").val();
             var tier = $("#appTier").val();
@@ -80,7 +76,7 @@ var addApplication = function () {
                 throttlingTier: tier,
                 description: description
             };
-
+            setAuthHeader(swaggerClient);
             swaggerClient["Application (individual)"].post_applications({
                     "body": application,
                     "Content-Type": "application/json"
@@ -89,7 +85,9 @@ var addApplication = function () {
                     window.location = "/store/applications/" + data.obj.applicationId;
                 },
                 function (error) {
-                    alert("Error occurred while adding Application : " + applicationName + " " + error.obj.message);
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
+                    }
                 });
         }
     });

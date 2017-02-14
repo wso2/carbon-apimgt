@@ -107,6 +107,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                     yamlContent = RestApiUtil.getStoreRestAPIResource();
                     swagger = new SwaggerParser().parse(yamlContent);
                     swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.STORE));
+                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
 
                 } catch (APIManagementException e) {
                     log.error("Couldn't find swagger.json for publisher", e);
