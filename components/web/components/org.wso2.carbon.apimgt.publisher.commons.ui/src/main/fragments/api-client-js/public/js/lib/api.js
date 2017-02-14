@@ -141,10 +141,10 @@ class API {
     }
 
     _getCookie(name) {
-    var value = "; " + document.cookie;
-    var parts = value.split("; " + name + "=");
-    if (parts.length == 2) return parts.pop().split(";").shift();
-}
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
 
     /**
      *
@@ -153,9 +153,7 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        let key_scope = data.key_scope || 'default';
-        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1") //TODO: tmkb Depend on result from
-        // promise
+        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -230,6 +228,7 @@ class API {
             (client) => {
                 return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(function () {
                     window.location = contextPath + "/auth/login";
+                    /* TODO: This also redirect unsecure pages(context) to login page which is not required ~tmkb*/
                 });
             }
         );

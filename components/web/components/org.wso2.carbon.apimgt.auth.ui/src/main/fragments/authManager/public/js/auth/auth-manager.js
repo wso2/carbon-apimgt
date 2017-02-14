@@ -45,7 +45,6 @@ authManager.login = function () {
     };
     var referrer = document.referrer;
     var url = contextPath + '/auth/apis/login/token';
-    var resp;
     return $.ajax({
         type: 'POST',
         url: url,
@@ -57,12 +56,8 @@ authManager.login = function () {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer
-        },
-        success: function(data) {
-            resp = data;
         }
     });
-    return resp;
 };
 authManager.logout = function () {
     if (this.getAuthStatus()) {
