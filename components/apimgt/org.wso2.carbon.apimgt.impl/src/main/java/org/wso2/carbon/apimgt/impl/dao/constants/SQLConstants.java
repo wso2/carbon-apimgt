@@ -655,7 +655,7 @@ public class SQLConstants {
             " SELECT " +
             "   IAT.ACCESS_TOKEN, " +
             "   IAT.AUTHZ_USER, " +
-            "   IAT.DOMAIN_NAME, " +
+            "   IAT.USER_DOMAIN, " +
             "   ISAT.TOKEN_SCOPE, " +
             "   ICA.CONSUMER_KEY, " +
             "   IAT.TIME_CREATED, " +
