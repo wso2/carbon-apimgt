@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.InputStream;
 import java.util.List;

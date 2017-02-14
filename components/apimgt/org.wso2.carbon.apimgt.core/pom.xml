@@ -103,8 +103,8 @@
             <artifactId>annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.lifecycle.manager.core</artifactId>
+            <groupId>org.wso2.carbon.lcm</groupId>
+            <artifactId>org.wso2.carbon.lcm.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
@@ -763,7 +763,7 @@
             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
-            org.wso2.carbon.apimgt.lifecycle.manager.*,
+            org.wso2.carbon.lcm.*,
             io.swagger.models.*,
             io.swagger.util.*,
             com.google.gson.*,
