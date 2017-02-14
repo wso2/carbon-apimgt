@@ -572,7 +572,6 @@ public class RestApiUtil {
     public static String getAdminRestAPIResource() throws APIManagementException {
 
         if (adminRestAPIDefinition == null) {
-            //if(basePath.contains("/api/am/admin/")){
             // this is admin API and pick resources accordingly
             try {
                 adminRestAPIDefinition = IOUtils
@@ -584,7 +583,7 @@ public class RestApiUtil {
             }
 
         }
-        return storeRestAPIDefinition;
+        return adminRestAPIDefinition;
     }
 
     /**
