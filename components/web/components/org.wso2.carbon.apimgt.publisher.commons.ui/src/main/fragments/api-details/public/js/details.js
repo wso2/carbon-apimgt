@@ -22,7 +22,7 @@ function loadOverview(jsonData) {
         var endpointConfig = $.parseJSON(context.endpointConfig);
         context.productionEndpoint = endpointConfig.production_endpoints.url;
     }
-    // Grab the template script
+    // Grab the template script TODO: Replace with UUF client
     $.get('/editor/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
         var template = Handlebars.compile(templateData);
         // Pass our data to the template
