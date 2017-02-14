@@ -35,7 +35,7 @@ $(function () {
             swaggerClient.setSchemes(["http"]);
             swaggerClient.setHost("localhost:9090");
             swaggerClient["API Collection"].get_apis(
-                {"responseContentType": 'application/json'},
+
                 function(jsonData) {
                     var callbacks = {onSuccess: function () {
                         $(".setbgcolor").generateBgcolor({
@@ -54,7 +54,7 @@ $(function () {
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-listing",jsonData.obj,
                         "api-listing", mode, callbacks);
                 }
-            );
+            ,requestMetaData());
 
             //TAGs
         /*    swaggerClient.default.tagsGet(

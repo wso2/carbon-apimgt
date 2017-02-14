@@ -42,7 +42,7 @@ $(function () {
                         "tier-list", mode, callbacks);
 
                     //Get application details
-                    swaggerClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
+                    swaggerClient["Application Collection"].get_applications(
                         function (jsonData) {
                             var context = {};
                             var applications = jsonData.obj.list;
@@ -51,7 +51,7 @@ $(function () {
                                         "apiId": apiId,
                                         "applicationId": "",
                                         "responseContentType": 'application/json'
-                                    },
+                                    }, requestMetaData(),
                                     function (jsonData) {
                                         var availableApplications = [], subscription = {};
                                         var isSubscribedToDefault = false;
@@ -85,7 +85,7 @@ $(function () {
                                     },
                                     function (error) {
                                         alert("Error occurred while retrieve Applications" + error);
-                                    });
+                                    },requestMetaData());
                             }
 
                         },

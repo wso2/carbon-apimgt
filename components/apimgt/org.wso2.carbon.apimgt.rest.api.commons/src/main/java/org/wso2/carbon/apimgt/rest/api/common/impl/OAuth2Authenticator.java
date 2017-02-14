@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
@@ -80,29 +81,32 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         ErrorHandler errorHandler = null;
-        boolean isScopeValid = false;
+        boolean isTokenValid = false;
         Headers headers = request.getHeaders();
-        if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
+        if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER)) {
+            String accessToken = null;
+            String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
+            String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
+            if (partialTokenFromCookie != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
+                String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
+                String partialTokenFromHeader = extractAccessToken(authHeader);
+                accessToken = (partialTokenFromHeader != null) ?
+                        partialTokenFromHeader + partialTokenFromCookie :
+                        partialTokenFromCookie;
+            }
+            isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+        } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
             String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
-                isScopeValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
-            } else if (headers.contains(RestApiConstants.COOKIE_HEADER)) {
-                String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
-                accessToken = extractAccessTokenFromCookies(cookies);
-                isScopeValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+                isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
             }
-
-        } else if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER)) {
-            String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
-            String accessToken = extractAccessTokenFromCookies(cookies);
-            isScopeValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
                     ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
         }
 
-        return isScopeValid;
+        return isTokenValid;
     }
 
     private boolean validateTokenAndScopes(Request request, ServiceMethodInfo serviceMethodInfo, String accessToken)
@@ -137,20 +141,18 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
     /**
      * @param cookie Cookies  header which contains the access token
-     * @return access token
+     * @return partial access token present in the cookie.
      * @throws APIMgtSecurityException if the Authorization header is invalid
      */
-    private String extractAccessTokenFromCookies(String cookie) throws APIMgtSecurityException {
+    private String extractPartialAccessTokenFromCookie(String cookie) {
         cookie = cookie.trim();
         String[] cookies = cookie.split(";");
-        if (cookies.length >= 2) {
-            return cookies[0].split("=")[0].contains("1") ?
-                    cookies[0].split("=")[1] + cookies[1].split("=")[1] :
-                    cookies[1].split("=")[1] + cookies[0].split("=")[1];
+        String token2 = Arrays.stream(cookies).filter(name -> name.contains(APIConstants.AccessTokenConstants.TOKEN_2))
+                .findFirst().get();
+        if (token2.split("=").length == 2) {
+            return token2.split("=")[1];
         }
-
-        throw new APIMgtSecurityException("Invalid Authorization header: " + cookie,
-                ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
+        return null;
     }
 
     /*
