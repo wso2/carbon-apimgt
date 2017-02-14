@@ -168,6 +168,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 restAPIResource = RestApiUtil.getPublisherRestAPIResource();
             } else if (path.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
                 restAPIResource = RestApiUtil.getStoreRestAPIResource();
+            } else if (path.contains(RestApiConstants.REST_API_ADMIN_CONTEXT))  {
+                restAPIResource = RestApiUtil.getAdminRestAPIResource();
             } else {
                 throw new APIMgtSecurityException("No matching Rest Api definition found for path:" + path);
             }

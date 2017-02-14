@@ -560,6 +560,30 @@ public class RestApiUtil {
     }
 
     /**
+     * This method return API swagger definition of Admin REST API
+     *
+     * @return
+     * @throws APIManagementException
+     */
+    public static String getAdminRestAPIResource() throws APIManagementException {
+
+        if (adminRestAPIDefinition == null) {
+            //if(basePath.contains("/api/am/admin/")){
+            // this is admin API and pick resources accordingly
+            try {
+                adminRestAPIDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+            } catch (IOException e) {
+                String message = "Error while reading the swagger definition of Admin Rest API";
+                log.error(message, e);
+                throw new APIMgtSecurityException(message, ExceptionCodes.API_NOT_FOUND);
+            }
+
+        }
+        return storeRestAPIDefinition;
+    }
+
+    /**
      * used to convert yaml to json
      * @param yamlString yaml String
      * @return
