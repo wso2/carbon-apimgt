@@ -88,6 +88,9 @@ class KeyManager {
     }
 }
 
+class AuthClient {
+
+}
 /**
  * An abstract representation of an API
  */
@@ -101,6 +104,7 @@ class API {
             url: this._getSwaggerURL(),
             usePromise: true
         });
+        this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
                 swagger.setSchemes(["http"]);
@@ -114,6 +118,20 @@ class API {
                         /* Fill with available scopes */
                     }
                 }
+            }
+        );
+        this.client.catch(
+            error => {
+                var n = noty({
+                    text: error,
+                    type: 'warning',
+                    dismissQueue: true,
+                    layout: 'top',
+                    theme: 'relax',
+                    progressBar: true,
+                    timeout: 5000,
+                    closeWith: ['click']
+                });
             }
         );
     }
