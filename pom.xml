@@ -515,7 +515,7 @@
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
-        <org.wso2.msf4j.version>2.1.0</org.wso2.msf4j.version>
+        <org.wso2.msf4j.version>2.1.1</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
