@@ -20,9 +20,9 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
-import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
+import org.wso2.carbon.lcm.core.exception.LifecycleException;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.util.List;
 
