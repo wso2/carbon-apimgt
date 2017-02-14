@@ -280,10 +280,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(HttpMethod.POST);
-            urlConn.getOutputStream()
-                    .write(("token=" + accessToken + "&token_type_hint=" +
-                            RestApiConstants.BEARER_PREFIX).getBytes(Charsets.UTF_8));
-            return new String(IOUtils.toByteArray(urlConn.getInputStream()), Charsets.UTF_8);
+            String payload = "token=" + accessToken + "&token_type_hint=" + RestApiConstants.BEARER_PREFIX;
+            urlConn.getOutputStream().write(payload.getBytes(Charsets.UTF_8));
+
+            String response = new String(IOUtils.toByteArray(urlConn.getInputStream()), Charsets.UTF_8);
+            log.debug("Response received from Auth Server : " + response);
+            return response;
         } catch (java.io.IOException e) {
             log.error("Error invoking Authorization Server", e);
             throw new APIMgtSecurityException("Error invoking Authorization Server", ExceptionCodes.AUTH_GENERAL_ERROR);
@@ -297,6 +299,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private Map<String, String> getResponseDataMap(String responseStr) {
         Gson gson = new Gson();
         Type typeOfMapOfStrings = new ExtendedTypeToken<Map<String, String>>() {
+
         }.getType();
         return gson.fromJson(responseStr, typeOfMapOfStrings);
     }
@@ -308,6 +311,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param <T> Generic type
      */
     private static class ExtendedTypeToken<T> extends TypeToken {
+
     }
 
 }
