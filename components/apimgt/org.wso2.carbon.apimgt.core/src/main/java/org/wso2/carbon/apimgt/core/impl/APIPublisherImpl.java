@@ -246,8 +246,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     resourceList.add(dto);
                 }
-                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder, resourceList);
-                String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate();
+                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder.build());
+                String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
                 }
@@ -909,8 +909,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     updatedUriTemplateMap);
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
-            getApiDAO().updateAPI(apiId, apiBuilder.build());
+
+            api = apiBuilder.build();
+            APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+            String existingGatewayConfig = getApiGatewayConfig(apiId);
+            String updatedGatewayConfig = apiTemplateBuilder
+                    .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
+            getApiDAO().updateAPI(apiId, api);
             getApiDAO().updateSwaggerDefinition(apiId, jsonText);
+            getApiDAO().updateGatewayConfig(apiId, updatedGatewayConfig);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't update the Swagger Definition";
             log.error(errorMsg, e);
@@ -1007,7 +1014,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
-        //TODO implement logic here
+        API api = getAPIbyUUID(apiId);
+        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+
+        try {
+            String swagger = apiTemplateBuilder.getSwaggerFromGatewayConfig(configString);
+            getApiDAO().updateSwaggerDefinition(apiId, swagger);
+            getApiDAO().updateGatewayConfig(apiId, configString);
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't update configuration for apiId " + apiId, e);
+            throw new APIMgtDAOException("Couldn't update configuration for apiId " + apiId,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (APITemplateException e) {
+            log.error("Error generating swagger from gateway config " + apiId, e);
+            throw new APIMgtDAOException("Error generating swagger from gateway config " + apiId,
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        }
     }
 
     @Override
