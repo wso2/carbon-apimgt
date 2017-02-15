@@ -102,9 +102,17 @@ public class KeyManagerUtil {
                         }
                     );
                 oAuth2IntrospectionResponse.setScope(builder.toString());
-                oAuth2IntrospectionResponse.setNbf(oAuthTokenResponse.getExpiresIn());
+                oAuth2IntrospectionResponse.setExp(oAuthTokenResponse.getExpiresIn());
+                oAuth2IntrospectionResponse.setIat(System.currentTimeMillis());
                 return true;
             }
+        }
+        return false;
+    }
+
+    public static boolean validateUser(String userName, String password) {
+        if (userMap.containsKey(userName) && password.equals(userMap.get(userName))) {
+            return true;
         }
         return false;
     }

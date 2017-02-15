@@ -39,7 +39,7 @@ public class AuthUtil {
         return cookie + "; HttpOnly";
     }
 
-    private static Map<String, String> consumerKeySecretMap;
+    private static Map<String, Map<String, String>> consumerKeySecretMap = new HashMap<>();
 
     private static List<String> roleList;
 
@@ -48,14 +48,10 @@ public class AuthUtil {
         return "/" + request.getProperty("REQUEST_URL").toString().split("/")[1];
     }
 
-
-    public static HashMap<String, String> getConsumerKeySecretMap() {
-        return (HashMap<String, String>) consumerKeySecretMap;
+    public static Map<String, Map<String, String>> getConsumerKeySecretMap() {
+        return consumerKeySecretMap;
     }
 
-    public static void setConsumerKeySecretMap(HashMap<String, String> consumerKeySecretMap) {
-        AuthUtil.consumerKeySecretMap = consumerKeySecretMap;
-    }
 
     /**
      * This method is used to generate access token request to login for uuf apps.
