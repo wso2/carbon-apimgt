@@ -287,7 +287,6 @@ class API {
     policies(tier_level) {
         var promise_policies = this.client.then(
             (client) => {
-                client["Throttling Tier (Collection)"].operations.get_policies_tierLevel.path = "/policies/tierLevel/{tierLevel}";
                 return client["Throttling Tier (Collection)"].get_policies_tierLevel(
                     {tierLevel: 'api'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
