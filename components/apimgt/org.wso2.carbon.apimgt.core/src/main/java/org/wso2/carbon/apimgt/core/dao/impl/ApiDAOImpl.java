@@ -596,6 +596,22 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * update gateway config
+     *
+     * @param apiID         api uuid
+     * @param gatewayConfig config text
+     * @throws APIMgtDAOException throws if any error occurred
+     */
+    @Override
+    public void updateGatewayConfig(String apiID, String gatewayConfig) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            updateGatewayConfig(connection, apiID, gatewayConfig);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Get image of a given API
      *
      * @param apiID The UUID of the respective API
@@ -1096,6 +1112,13 @@ public class ApiDAOImpl implements ApiDAO {
                 .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
 
         return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+    }
+
+    private void updateGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
+        if (!gatewayConfig.isEmpty()) {
+            ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
+                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)));
+        }
     }
 
     private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
