@@ -41,21 +41,19 @@ import java.util.List;
 public class APITemplateBuilderImpl implements APITemplateBuilder {
     private static final Logger log = LoggerFactory.getLogger(APITemplateBuilderImpl.class);
     private API api;
-    private List<TemplateBuilderDTO> apiResources;
 
-    public APITemplateBuilderImpl(API.APIBuilder apiBuilder, List<TemplateBuilderDTO> apiResources) {
-        this.api = apiBuilder.build();
-        this.apiResources = apiResources;
+    public APITemplateBuilderImpl(API api) {
+        this.api = api;
     }
 
     @Override
-    public String getConfigStringFromTemplate() throws APITemplateException {
+    public String getConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new ResourceConfigContext(configcontext, this.api, this.apiResources);
+            configcontext = new ResourceConfigContext(configcontext, this.api, apiResources);
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
@@ -73,6 +71,18 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
+    }
+
+    @Override
+    public String getGatewayConfigFromSwagger(String gatewayConfig, String swagger) throws APITemplateException {
+        //TODO implement logic
+        return "";
+    }
+
+    @Override
+    public String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException {
+        //TODO implement logic
+        return "";
     }
 
 }

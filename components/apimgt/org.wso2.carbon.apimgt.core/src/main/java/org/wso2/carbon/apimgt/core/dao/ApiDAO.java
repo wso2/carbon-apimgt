@@ -356,4 +356,13 @@ public interface ApiDAO {
      *
      */
     String getGatewayConfig(String apiID) throws APIMgtDAOException;
+
+    /**
+     * update gateway config
+     *
+     * @param apiID         api uuid
+     * @param gatewayConfig config text
+     * @throws APIMgtDAOException throws if any error occurred
+     */
+    void updateGatewayConfig(String apiID, String gatewayConfig) throws APIMgtDAOException;
 }
