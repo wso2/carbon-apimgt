@@ -20,20 +20,29 @@ $(function () {
     var prev = $(".navigation ul li:first")
     $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
-    client = new SwaggerClient({
-        url: swaggerURL + "applications",
+    var client = new SwaggerClient({
+
+        url: swaggerURL,
         success: function () {
-            client.setBasePath("");
             var id = document.getElementById("appid").value;
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Basic YWRtaW46YWRtaW4=", "header"));
-            client.default.applicationsApplicationIdGet({"applicationId": id},
+            setAuthHeader(client);
+            client["Application (individual)"].get_applications_applicationId
+            ({"applicationId": id},
                 function (data) {
                     renderAppDetails(data);
                     renderApplicationKeys(data);
-                });
+                },
+            function (error) {
+                if(error.status==401){
+                    redirectToLogin(contextPath);
+                }
+            });
         },
         error: function (e) {
             alert("Error occurred while creating client");
+            if(error.status==401){
+                redirectToLogin(contextPath);
+            }
         }
     });
 

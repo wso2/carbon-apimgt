@@ -22,9 +22,9 @@ package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.ManagedLifecycle;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.core.ManagedLifecycle;
+import org.wso2.carbon.lcm.core.exception.LifecycleException;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
 import java.util.Collections;

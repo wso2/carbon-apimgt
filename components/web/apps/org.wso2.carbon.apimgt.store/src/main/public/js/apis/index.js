@@ -32,9 +32,8 @@ $(function () {
         url: swaggerURL,
         success: function(swaggerData) {
             //TODO:Need to have a proper fix from swagger definition retrieval service
-            swaggerClient.setSchemes(["http"]);
-            swaggerClient.setHost("localhost:9090");
-            swaggerClient["API Collection"].get_apis(
+            setAuthHeader(swaggerClient);
+            swaggerClient["API Collection"].get_apis({},
 
                 function(jsonData) {
                     var callbacks = {onSuccess: function () {
@@ -53,8 +52,13 @@ $(function () {
                     //Render APIs listing page
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-listing",jsonData.obj,
                         "api-listing", mode, callbacks);
+                },
+                function (error) {
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
+                    }
                 }
-            ,requestMetaData());
+            );
 
             //TAGs
         /*    swaggerClient.default.tagsGet(

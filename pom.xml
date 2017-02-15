@@ -45,7 +45,6 @@
         <module>components/apimgt</module>
         <module>components/web</module>
         <module>features/apimgt</module>
-        <module>lcm</module>
     </modules>
 
     <pluginRepositories>
@@ -56,6 +55,10 @@
         <pluginRepository>
             <id>wso2-maven2-repository-2</id>
             <url>http://dist.wso2.org/snapshots/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>wso2-maven2-repository-3</id>
+            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -365,6 +368,11 @@
                 <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
                 <version>${carbon.transport.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.lcm</groupId>
+                <artifactId>org.wso2.carbon.lcm.core</artifactId>
+                <version>${carbon.lcm.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -515,7 +523,7 @@
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
-        <org.wso2.msf4j.version>2.1.0</org.wso2.msf4j.version>
+        <org.wso2.msf4j.version>2.1.1</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
@@ -628,5 +636,6 @@
         <lucene.version>3.6.2_1</lucene.version>
         <lucene.bundle.version>3.6.2.1</lucene.bundle.version>
         <h2.version>1.4.192</h2.version>
+        <carbon.lcm.version>1.0.0-SNAPSHOT</carbon.lcm.version>
     </properties>
 </project>

@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
 import java.io.InputStream;

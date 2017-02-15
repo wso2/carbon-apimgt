@@ -15,9 +15,10 @@ $(function () {
     var tierClient = new SwaggerClient({
         url: swaggerURL + "tiers",
         success: function (swaggerData) {
-            tierClient.setBasePath("");
+            setAuthHeader(tierClient);
             //Get available tiers
-            tierClient.default.tiersTierLevelGet({"tierLevel": "application"},
+            tierClient["Tier Collection"].get_policies_tierLevel
+            ({"tierLevel": "application"},
                 function (jsonData) {
                     tierList = jsonData.obj.list;
                 },
@@ -32,10 +33,10 @@ $(function () {
         url: swaggerURL + "applications",
         success: function (swaggerData) {
 
-            applicationClient.setBasePath("");
             var applicationId = $("#applicationId").val();
-            applicationClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-            applicationClient.default.applicationsApplicationIdGet({"applicationId": applicationId},
+            setAuthHeader(applicationClient);
+            applicationClient["Application (individual)"].get_applications_applicationId
+            ({"applicationId": applicationId},
                 function (jsonData) {
 
                     var application = jsonData.obj;
@@ -55,6 +56,9 @@ $(function () {
                 },
                 function (error) {
                     console.log('failed with the following: ' + error.statusText);
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
+                    }
                 });
         }
     });

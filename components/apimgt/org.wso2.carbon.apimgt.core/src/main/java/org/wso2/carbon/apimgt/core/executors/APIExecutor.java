@@ -26,8 +26,8 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.Executor;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.exception.LifecycleException;
+import org.wso2.carbon.lcm.core.Executor;
+import org.wso2.carbon.lcm.core.exception.LifecycleException;
 
 import java.util.Map;
 
