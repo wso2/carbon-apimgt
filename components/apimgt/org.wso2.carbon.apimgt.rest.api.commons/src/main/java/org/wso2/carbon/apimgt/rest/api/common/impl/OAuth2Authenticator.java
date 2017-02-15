@@ -19,19 +19,19 @@
  */
 package org.wso2.carbon.apimgt.rest.api.common.impl;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -42,18 +42,13 @@ import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-import org.wso2.msf4j.security.oauth2.IntrospectionResponse;
 import org.wso2.msf4j.util.SystemVariableUtil;
 
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import javax.ws.rs.HttpMethod;
 
 /**
  * OAuth2 implementation class
@@ -111,11 +106,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
     private boolean validateTokenAndScopes(Request request, ServiceMethodInfo serviceMethodInfo, String accessToken)
             throws APIMgtSecurityException {
-        Map<String, String> tokenInfo = validateToken(accessToken);
+        //Map<String, String> tokenInfo = validateToken(accessToken);
+        AccessTokenInfo accessTokenInfo = validateToken(accessToken);
         String restAPIResource = getRestAPIResource(request);
 
         //scope validation
-        return validateScopes(request, serviceMethodInfo, tokenInfo.get(RestApiConstants.SCOPE), restAPIResource);
+        return validateScopes(request, serviceMethodInfo, accessTokenInfo.getScopes(), restAPIResource);
     }
 
     /**
@@ -125,8 +121,17 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param accessToken  the access token
      * @return responseData if the token is a valid token
      */
-    private Map<String, String> validateToken(String accessToken) throws APIMgtSecurityException {
+    private AccessTokenInfo validateToken(String accessToken) throws APIMgtSecurityException {
+        // 1. Send a request to key server's introspect endpoint to validate this token
+        AccessTokenInfo accessTokenInfo = getValidatedTokenResponse(accessToken);
 
+        // 2. Process the response and return true if the token is valid.
+        if (!accessTokenInfo.isTokenValid()) {
+            throw new APIMgtSecurityException("Invalid Access token.", ExceptionCodes.ACCESS_TOKEN_INACTIVE);
+        }
+        return accessTokenInfo;
+
+        /*
         // 1. Send a request to key server's introspect endpoint to validate this token
         String responseStr = getValidatedTokenResponse(accessToken);
         Map<String, String> responseData = getResponseDataMap(responseStr);
@@ -137,6 +142,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         }
 
         return responseData;
+        */
     }
 
     /**
@@ -191,7 +197,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     * @return true if scope validation successful
     * */
     @SuppressFBWarnings({"DLS_DEAD_LOCAL_STORE"})
-    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String scopesToValidate,
+    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String[] scopesToValidate,
                                    String restAPIResource) throws APIMgtSecurityException {
         final boolean authorized[] = {false};
 
@@ -199,9 +205,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         String verb = (String) request.getProperty("HTTP_METHOD");
         String resource = path.substring(path.length() - 1);
 
-
-        if (!StringUtils.isEmpty(scopesToValidate)) {
-            final List<String> scopes = Arrays.asList(scopesToValidate.split(" "));
+        if (scopesToValidate.length > 0) {
+            final List<String> scopes = Arrays.asList(scopesToValidate);
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                 try {
@@ -238,7 +243,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         }
 
         if (!authorized[0]) {
-            String message = "Scope validation fails for the scope " + scopesToValidate;
+            String message = "Scope validation fails for the scopes " + Arrays.toString(scopesToValidate);
             throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
 
         }
@@ -273,9 +278,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param accessToken AccessToken to be validated.
      * @return the response from the key manager server.
      */
-    private String getValidatedTokenResponse(String accessToken) throws APIMgtSecurityException {
-        URL url;
+    private AccessTokenInfo getValidatedTokenResponse(String accessToken) throws APIMgtSecurityException {
         try {
+            KeyManager loginKeyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
+            AccessTokenInfo accessTokenInfo = loginKeyManager.getTokenMetaData(accessToken);
+            return accessTokenInfo;
+            /*
             url = new URL(authServerURL);
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -289,6 +297,10 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         } catch (java.io.IOException e) {
             log.error("Error invoking Authorization Server", e);
             throw new APIMgtSecurityException("Error invoking Authorization Server", ExceptionCodes.AUTH_GENERAL_ERROR);
+        */
+        } catch (KeyManagementException e) {
+            log.error("Error while validating access token", e);
+            throw new APIMgtSecurityException("Error while validating access token", ExceptionCodes.AUTH_GENERAL_ERROR);
         }
     }
 
@@ -296,13 +308,13 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param responseStr validated token response string returned from the key server.
      * @return a Map of key, value pairs available the response String.
      */
-    private Map<String, String> getResponseDataMap(String responseStr) {
+    /*private Map<String, String> getResponseDataMap(String responseStr) {
         Gson gson = new Gson();
         Type typeOfMapOfStrings = new ExtendedTypeToken<Map<String, String>>() {
 
         }.getType();
         return gson.fromJson(responseStr, typeOfMapOfStrings);
-    }
+    }*/
 
     /**
      * This class extends the {@link com.google.gson.reflect.TypeToken}.
