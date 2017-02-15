@@ -36,14 +36,11 @@ authManager.getUserScope = function () {
     return this.user.scope;
 };
 authManager.login = function () {
-    var scopes = [];
-    scopes[0] = 'apim:api_view';
-    scopes[1] = 'apim:api_create';
     var params = {
         username: $('#username').val(),
         password: $('#password').val(),
         grant_type: 'password',
-        scopes: scopes
+        scopes: 'apim:api_view apim:api_create'
 
     };
     var referrer = document.referrer;

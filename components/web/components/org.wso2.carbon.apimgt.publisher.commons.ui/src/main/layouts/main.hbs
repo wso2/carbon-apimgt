@@ -1,14 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- TODO: Move  js and css as the first children of head -->
+    {{css "css/custom.css"}}
     <title>{{#placeholder "title"}}{{/placeholder}}</title>
     <meta charset="UTF-8">
     <meta name="description" content="WSO2 API Manager"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
     <script >
-        var token = getCookie("token1");
+        var token = getCookie("WSO2_AM_TOKEN_1");
         var request_path =  window.location.pathname.split('/');
         if(!request_path.includes('editor') && !token) {
             window.location = "{{@contextPath}}/auth/login";
@@ -27,13 +28,18 @@
     {{fragment "handlebarsjs"}}
     <!-- TODO: request to maintain handlebarsjs library from common.foundation component ~tmkb-->
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.ui.noty"}}
+    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.select2" }}
-    {{css "css/custom.css"}}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
     {{placeholder "headOther"}}
 </head>
 <body class="sticky-footer ">
+<!-- TODO: load all the fragments into libraries zone from component.yaml
+Remove handlebarjs lib
+-->
+{{defineZone "libraries"}}
 <!-- header -->
 {{defineZone "topbar"}}
 <!-- End header -->
@@ -42,13 +48,11 @@
 <div class="breadcrumb-wrapper">
     <ol class="breadcrumb">
         <li>
-            <a href="{{@contextPath}}/apis" title="Home"
-               onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/index.jag',e:event})"><i
+            <a href="{{@contextPath}}/" title="Home" ><i
                     class="icon fw fw-home"></i> <span class="hidden-xs">Home</span></a>
         </li>
         <li class="active">
-            <a href="{{@contextPath}}/apis" title="API List"
-               onclick="jagg.sessionAwareJS({redirect:'/publisher/apis',e:event})">APIs</a>
+            <a href="{{@contextPath}}/apis" title="API List">APIs</a>
         </li>
     </ol>
 </div>

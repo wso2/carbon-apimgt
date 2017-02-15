@@ -44,6 +44,9 @@ public class APIConstants {
         public static final String ACCESS_TOKEN = "accessToken";
         public static final String VALIDITY_TIME = "validityTime";
         public static final String TOKEN_SCOPES = "tokenScope";
+
+        public static final String TOKEN_1 = "WSO2_AM_TOKEN_1";
+        public static final String TOKEN_2 = "WSO2_AM_TOKEN_2";
     }
 
     public static final int POLICY_APPLICATION_TYPE = 2;

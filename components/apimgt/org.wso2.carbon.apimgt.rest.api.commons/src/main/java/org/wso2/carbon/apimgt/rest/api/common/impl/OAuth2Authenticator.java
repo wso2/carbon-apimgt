@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
@@ -52,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.ws.rs.HttpMethod;
 
 /**
@@ -81,46 +81,78 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         ErrorHandler errorHandler = null;
-        boolean isScopeValid = false;
+        boolean isTokenValid = false;
         Headers headers = request.getHeaders();
-        if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
+        if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER)) {
+            String accessToken = null;
+            String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
+            String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
+            if (partialTokenFromCookie != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
+                String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
+                String partialTokenFromHeader = extractAccessToken(authHeader);
+                accessToken = (partialTokenFromHeader != null) ?
+                        partialTokenFromHeader + partialTokenFromCookie :
+                        partialTokenFromCookie;
+            }
+            isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+        } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
             String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-            Map<String, String> tokenInfo = validateToken(authHeader);
-            String restAPIResource = getRestAPIResource(request);
-
-            //scope validation
-            isScopeValid = validateScopes(request, serviceMethodInfo, tokenInfo.get(RestApiConstants.SCOPE),
-                    restAPIResource);
-
+            String accessToken = extractAccessToken(authHeader);
+            if (accessToken != null) {
+                isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            }
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
                     ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
         }
 
-        return isScopeValid;
+        return isTokenValid;
+    }
+
+    private boolean validateTokenAndScopes(Request request, ServiceMethodInfo serviceMethodInfo, String accessToken)
+            throws APIMgtSecurityException {
+        Map<String, String> tokenInfo = validateToken(accessToken);
+        String restAPIResource = getRestAPIResource(request);
+
+        //scope validation
+        return validateScopes(request, serviceMethodInfo, tokenInfo.get(RestApiConstants.SCOPE), restAPIResource);
     }
 
     /**
      * Extract the accessToken from the give Authorization header value and validates the accessToken
      * with an external key manager.
      *
-     * @param authHeader Authorization Bearer header which contains the access token
+     * @param accessToken  the access token
      * @return responseData if the token is a valid token
      */
-    private Map<String, String> validateToken(String authHeader) throws APIMgtSecurityException {
-        // 1. Check whether this token is bearer token, if not return false
-        String accessToken = extractAccessToken(authHeader);
+    private Map<String, String> validateToken(String accessToken) throws APIMgtSecurityException {
 
-        // 2. Send a request to key server's introspect endpoint to validate this token
+        // 1. Send a request to key server's introspect endpoint to validate this token
         String responseStr = getValidatedTokenResponse(accessToken);
         Map<String, String> responseData = getResponseDataMap(responseStr);
 
-        // 3. Process the response and return true if the token is valid.
+        // 2. Process the response and return true if the token is valid.
         if (responseData == null || !Boolean.parseBoolean(responseData.get(IntrospectionResponse.ACTIVE))) {
             throw new APIMgtSecurityException("Invalid Access token.", ExceptionCodes.ACCESS_TOKEN_INACTIVE);
         }
 
         return responseData;
+    }
+
+    /**
+     * @param cookie Cookies  header which contains the access token
+     * @return partial access token present in the cookie.
+     * @throws APIMgtSecurityException if the Authorization header is invalid
+     */
+    private String extractPartialAccessTokenFromCookie(String cookie) {
+        cookie = cookie.trim();
+        String[] cookies = cookie.split(";");
+        String token2 = Arrays.stream(cookies).filter(name -> name.contains(APIConstants.AccessTokenConstants.TOKEN_2))
+                .findFirst().get();
+        if (token2.split("=").length == 2) {
+            return token2.split("=")[1];
+        }
+        return null;
     }
 
     /*
@@ -138,6 +170,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 restAPIResource = RestApiUtil.getPublisherRestAPIResource();
             } else if (path.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
                 restAPIResource = RestApiUtil.getStoreRestAPIResource();
+            } else if (path.contains(RestApiConstants.REST_API_ADMIN_CONTEXT))  {
+                restAPIResource = RestApiUtil.getAdminRestAPIResource();
             } else {
                 throw new APIMgtSecurityException("No matching Rest Api definition found for path:" + path);
             }
@@ -224,6 +258,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             String[] authHeaderParts = authHeader.split(" ");
             if (authHeaderParts.length == 2) {
                 return authHeaderParts[1];
+            } else if (authHeaderParts.length < 2) {
+                return null;
             }
         }
 
@@ -244,10 +280,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(HttpMethod.POST);
-            urlConn.getOutputStream()
-                    .write(("token=" + accessToken + "&token_type_hint=" +
-                            RestApiConstants.BEARER_PREFIX).getBytes(Charsets.UTF_8));
-            return new String(IOUtils.toByteArray(urlConn.getInputStream()), Charsets.UTF_8);
+            String payload = "token=" + accessToken + "&token_type_hint=" + RestApiConstants.BEARER_PREFIX;
+            urlConn.getOutputStream().write(payload.getBytes(Charsets.UTF_8));
+
+            String response = new String(IOUtils.toByteArray(urlConn.getInputStream()), Charsets.UTF_8);
+            log.debug("Response received from Auth Server : " + response);
+            return response;
         } catch (java.io.IOException e) {
             log.error("Error invoking Authorization Server", e);
             throw new APIMgtSecurityException("Error invoking Authorization Server", ExceptionCodes.AUTH_GENERAL_ERROR);
@@ -261,6 +299,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private Map<String, String> getResponseDataMap(String responseStr) {
         Gson gson = new Gson();
         Type typeOfMapOfStrings = new ExtendedTypeToken<Map<String, String>>() {
+
         }.getType();
         return gson.fromJson(responseStr, typeOfMapOfStrings);
     }
@@ -272,6 +311,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param <T> Generic type
      */
     private static class ExtendedTypeToken<T> extends TypeToken {
+
     }
 
 }

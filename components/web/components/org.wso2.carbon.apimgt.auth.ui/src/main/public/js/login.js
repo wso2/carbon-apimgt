@@ -29,6 +29,16 @@ $(function(){
             var redirectUri = (xhr.getResponseHeader("Referer") == '' || !xhr.getResponseHeader("Referer")) ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
             window.location = redirectUri;
         });
+        loginPromise.error(
+            function (error) {
+                console.log(error);
+                // alert("Invalid username and password");
+                var element = $("#general-alerts").find('.alert-danger');
+                element.find('.alert-message').html(error.responseText);
+                element.fadeIn('slow');
+
+            }
+        );
     };
     $('#loginForm').on('keydown','input.form-control',function(e){
         if(e.keyCode == 13){

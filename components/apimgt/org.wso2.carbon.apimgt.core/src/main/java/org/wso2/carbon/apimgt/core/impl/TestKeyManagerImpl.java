@@ -36,14 +36,12 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +59,10 @@ import javax.net.ssl.X509TrustManager;
 public class TestKeyManagerImpl implements KeyManager {
     private static final Logger log = LoggerFactory.getLogger(TestKeyManagerImpl.class);
 
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "token";
+    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expiresIn";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
+    private static final String PASSWORD_GRANT_TYPE = "password";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     /**
@@ -95,66 +94,25 @@ public class TestKeyManagerImpl implements KeyManager {
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientName());
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
         JsonArray grantArray = new JsonArray();
-        for (String grantType : oAuthApplicationInfo.getGrantTypes()) {
-            grantArray.add(grantType);
+        if (oAuthApplicationInfo.getGrantTypes() != null) {
+            for (String grantType : oAuthApplicationInfo.getGrantTypes()) {
+                grantArray.add(grantType);
+            }
+            json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
         }
 
-        json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
-        URL url;
-        HttpURLConnection urlConn = null;
         try {
-            createSSLConnection();
-            // Calling DCR endpoint of IS
-            String dcrEndpoint = System.getProperty("dcrEndpoint",
-                    "https://localhost:9443/identity/connect/register");
-            url = new URL(dcrEndpoint);
-            urlConn = (HttpURLConnection) url.openConnection();
-            urlConn.setDoOutput(true);
-            urlConn.setRequestMethod("POST");
-            urlConn.setRequestProperty("content-type", "application/json");
-            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
-                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
-                    .getBytes(StandardCharsets.UTF_8));
-            log.info("client encodeddd" + clientEncoded);
-            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
-            urlConn.getOutputStream().write((json.toString()).getBytes("UTF-8"));
-            log.info("payload" + json.toString());
-            int responseCode = urlConn.getResponseCode();
-            if (responseCode == 201) {  //If the DCR call is success
-                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                JsonParser parser = new JsonParser();
-                JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
-                String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
-                String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
-                String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
-                String grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                oAuthApplicationInfo.setClientName("DCR_APP");
+                oAuthApplicationInfo.setClientId("publisher");
+                oAuthApplicationInfo.setClientSecret("1234-5678-9101");
 
-                oAuthApplicationInfo.setClientName(clientName);
-                oAuthApplicationInfo.setClientId(consumerKey);
-                oAuthApplicationInfo.setClientSecret(consumerSecret);
-                oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
-
-            } else { //If DCR call fails
-                throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName);
-            }
-        } catch (IOException e) {
-            String errorMsg = "Can not create OAuth application  : " + applicationName;
-            log.error(errorMsg, e);
-            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (JsonSyntaxException e) {
             String errorMsg = "Error while processing the response returned from DCR endpoint.Can not create" +
                     " OAuth application : " + applicationName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
-            String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName;
-            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
-            if (urlConn != null) {
-                urlConn.disconnect();
-            }
+
         }
         return oAuthApplicationInfo;
     }
@@ -264,7 +222,7 @@ public class TestKeyManagerImpl implements KeyManager {
         }
 
         //TO-DO -ADD A CONFIG FOR TOKEN ENDPOINT
-        String tokenEndpoint = System.getProperty("TokenEndpoint", "https://localhost:9443/oauth2/token");
+        String tokenEndpoint = System.getProperty("TokenEndpoint", "http://localhost:9090/keyserver/token");
         //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
         String revokeEndpoint = System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
         ;
@@ -322,7 +280,7 @@ public class TestKeyManagerImpl implements KeyManager {
 
         //Generate New Access Token by client credentials grant type with calling Token API
         try {
-            createSSLConnection();
+            //createSSLConnection();
             url = new URL(tokenEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -337,7 +295,14 @@ public class TestKeyManagerImpl implements KeyManager {
             for (String scope : tokenRequest.getScopes()) {
                 builder.append(' ').append(scope);
             }
-            String postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+            String postParams = "";
+            if (PASSWORD_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                postParams =
+                        KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + PASSWORD_GRANT_TYPE + "&username=" + tokenRequest
+                                .getResourceOwnerUsername() + "&password=" + tokenRequest.getResourceOwnerPassword();
+            } else {
+                postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+            }
 //            + "&" +
 //                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
 //                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +
@@ -358,9 +323,10 @@ public class TestKeyManagerImpl implements KeyManager {
                 JsonObject obj = parser.parse(responseStr).getAsJsonObject();
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).getAsString();
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
-                    tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
-                            split(" "));
+                if (obj.has("scopes")) {
+                    tokenInfo.setScopes(
+                            (obj.getAsJsonArray("scopes").toString().replaceAll("\\[", "").replaceAll("\\]", "")
+                                    .replaceAll("\"", "").split(",")));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
@@ -375,11 +341,11 @@ public class TestKeyManagerImpl implements KeyManager {
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
-        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String msg = "Error while connecting to the token generation endpoint.";
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
-                    APPLICATION_TOKEN_GENERATION_FAILED);
+                    APPLICATION_TOKEN_GENERATION_FAILED);*/
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

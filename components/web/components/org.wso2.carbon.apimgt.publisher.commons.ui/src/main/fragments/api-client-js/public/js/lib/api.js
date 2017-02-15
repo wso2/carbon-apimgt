@@ -88,6 +88,9 @@ class KeyManager {
     }
 }
 
+class AuthClient {
+
+}
 /**
  * An abstract representation of an API
  */
@@ -101,6 +104,7 @@ class API {
             url: this._getSwaggerURL(),
             usePromise: true
         });
+        this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
                 swagger.setSchemes(["http"]);
@@ -116,11 +120,31 @@ class API {
                 }
             }
         );
+        this.client.catch(
+            error => {
+                var n = noty({
+                    text: error,
+                    type: 'warning',
+                    dismissQueue: true,
+                    layout: 'top',
+                    theme: 'relax',
+                    progressBar: true,
+                    timeout: 5000,
+                    closeWith: ['click']
+                });
+            }
+        );
     }
 
     _getSwaggerURL() {
         return swaggerURL;
     }
+
+    _getCookie(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+}
 
     /**
      *
@@ -130,7 +154,8 @@ class API {
      */
     _requestMetaData(data = {}) {
         let key_scope = data.key_scope || 'default';
-        let access_key_header = "Bearer " + this.keyMan.getKey(key_scope); //TODO: tmkb Depend on result from promise
+        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1") //TODO: tmkb Depend on result from
+        // promise
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -203,7 +228,9 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["API (Collection)"].get_apis();
+                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(function () {
+                    window.location = contextPath + "/auth/login";
+                });
             }
         );
         if (callback) {

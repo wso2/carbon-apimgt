@@ -11,16 +11,14 @@ $(function () {
         url: swaggerURL,
         success: function (swaggerData) {
             //TODO:Need to have a proper fix from swagger definition retrieval service
-            swaggerClient.setSchemes(["http"]);
-            swaggerClient.setHost("localhost:9090");
             //List Applications
+            setAuthHeader(swaggerClient);
             swaggerClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
                 function (jsonData) {
 
                     var raw_data = {
                         data: jsonData.obj.list
                     };
-
                     var callbacks = {
                         onSuccess: function () {
                             _initDataTable(raw_data);
@@ -38,7 +36,7 @@ $(function () {
                         alert("Are you sure you want to delete Application");
 
                         var appId = $(this).attr("data-id")
-
+                        setAuthHeader(swaggerClient);
                         swaggerClient["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
                             function (success) {
                                 //TODO: Reload element only
@@ -49,7 +47,13 @@ $(function () {
                             });
                     })
 
-                });
+                },
+                function (error) {
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
+                    }
+                }
+            );
 
 
         }
