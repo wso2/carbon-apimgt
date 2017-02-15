@@ -29,7 +29,7 @@ public class PoliciesApi implements Microservice  {
     private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
     @GET
-    @Path("/tierLevel/{tierLevel}")
+    @Path("/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all policies", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`. ", response = TierListDTO.class, tags={ "Throttling Tier (Collection)", })
@@ -48,7 +48,7 @@ public class PoliciesApi implements Microservice  {
     }
 
     @GET
-    @Path("/tierName/{tierName}")
+    @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get details of a policy", notes = "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name. ", response = TierDTO.class, tags={ "Throttling Tier (Individual)", })
