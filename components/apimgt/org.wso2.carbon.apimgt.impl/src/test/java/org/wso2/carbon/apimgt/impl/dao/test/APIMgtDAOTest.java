@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -167,6 +168,12 @@ public class APIMgtDAOTest extends TestCase {
         APIInfoDTO[] apis = apiMgtDAO.getSubscribedAPIsOfUser("SUMEDHA");
         assertNotNull(apis);
         assertTrue(apis.length > 1);
+    }
+
+    public void testGetAccessTokenData() throws Exception {
+        APIKey apiKey = apiMgtDAO.getAccessTokenData("a1b2c3d4");
+        assertNotNull(apiKey);
+        assertTrue(apiKey.getAuthUser().equals("UDAYANGA"));
     }
 
     //Commented out due to identity version update and cannot use apiMgtDAO.validateKey to validate anymore
