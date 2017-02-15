@@ -39,7 +39,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             return Response.status(Response.Status.CREATED).entity(apiList).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while importing APIs from extracted archive";
+            String errorMessage = "Error while importing the APIs";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
