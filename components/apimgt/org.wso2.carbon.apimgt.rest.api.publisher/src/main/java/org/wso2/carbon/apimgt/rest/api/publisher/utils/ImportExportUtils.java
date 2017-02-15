@@ -1,23 +1,21 @@
 /***********************************************************************************************************************
- *
- *  *
- *  *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *  *
- *  *   WSO2 Inc. licenses this file to you under the Apache License,
- *  *   Version 2.0 (the "License"); you may not use this file except
- *  *   in compliance with the License.
- *  *   You may obtain a copy of the License at
- *  *
- *  *     http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  *  Unless required by applicable law or agreed to in writing,
- *  *  software distributed under the License is distributed on an
- *  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  *  KIND, either express or implied.  See the License for the
- *  *  specific language governing permissions and limitations
- *  *  under the License.
- *  *
- *
+ * *
+ * *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * *
+ * *   WSO2 Inc. licenses this file to you under the Apache License,
+ * *   Version 2.0 (the "License"); you may not use this file except
+ * *   in compliance with the License.
+ * *   You may obtain a copy of the License at
+ * *
+ * *     http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * *  Unless required by applicable law or agreed to in writing,
+ * *  software distributed under the License is distributed on an
+ * *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * *  KIND, either express or implied.  See the License for the
+ * *  specific language governing permissions and limitations
+ * *  under the License.
+ * *
  */
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
@@ -38,7 +36,6 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
 
 /**
  * Util class for API import and export
@@ -120,8 +117,8 @@ public class ImportExportUtils {
      * @return name if the zip archive
      * @throws APIMgtEntityImportExportException if an error occurs while extracting the archive
      */
-    public static String extractArchive(String archiveFilePath, String destination) throws
-            APIMgtEntityImportExportException {
+    public static String extractArchive(String archiveFilePath, String destination)
+            throws APIMgtEntityImportExportException {
 
         BufferedInputStream inputStream = null;
         InputStream zipInputStream = null;
@@ -181,7 +178,7 @@ public class ImportExportUtils {
      * @param location full path to create the file
      * @throws APIMgtEntityImportExportException if an error occurs while extracting the file
      */
-    public static void createFile (String location) throws APIMgtEntityImportExportException {
+    public static void createFile(String location) throws APIMgtEntityImportExportException {
         try {
             Files.createFile(Paths.get(location));
         } catch (IOException e) {
@@ -197,7 +194,7 @@ public class ImportExportUtils {
         try {
             fileOutStream = new FileOutputStream(path);
             stringReader = new StringReader(content);
-            writer = new OutputStreamWriter(fileOutStream, Charset.forName( "UTF-8" ));
+            writer = new OutputStreamWriter(fileOutStream, Charset.forName("UTF-8"));
             IOUtils.copy(stringReader, writer);
         } catch (IOException e) {
             throw new APIMgtEntityImportExportException("I/O error while writing to file at: " + path, e);
@@ -299,14 +296,13 @@ public class ImportExportUtils {
      * @return Set of directory path under the root directory given by {@parameter path}
      * @throws APIMgtEntityImportExportException if an error occurs while listing directories
      */
-    public static Set<String> getDirectoryList (String path) throws APIMgtEntityImportExportException {
+    public static Set<String> getDirectoryList(String path) throws APIMgtEntityImportExportException {
         Set<String> directoryNames = new HashSet<>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(path))) {
             for (Path directoryPath : directoryStream) {
                 directoryNames.add(directoryPath.toString());
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new APIMgtEntityImportExportException("Error while listing directories under " + path, e);
         }
         return directoryNames;
@@ -330,9 +326,8 @@ public class ImportExportUtils {
         }
     }
 
-    private static void writeArchiveFile(File directoryToZip, List<File> fileList, String
-            archiveLocation, String archiveName)
-            throws IOException {
+    private static void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
+            String archiveName) throws IOException {
 
         FileOutputStream fileOutputStream = null;
         ZipOutputStream zipOutputStream = null;
@@ -352,7 +347,8 @@ public class ImportExportUtils {
         }
     }
 
-    private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream) throws IOException {
+    private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
+            throws IOException {
 
         FileInputStream fileInputStream = null;
         try {

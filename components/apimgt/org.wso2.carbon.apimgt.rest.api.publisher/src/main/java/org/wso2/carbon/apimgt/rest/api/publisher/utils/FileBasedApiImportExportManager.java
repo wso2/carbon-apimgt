@@ -1,23 +1,21 @@
 /***********************************************************************************************************************
- *
- *  *
- *  *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *  *
- *  *   WSO2 Inc. licenses this file to you under the Apache License,
- *  *   Version 2.0 (the "License"); you may not use this file except
- *  *   in compliance with the License.
- *  *   You may obtain a copy of the License at
- *  *
- *  *     http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  *  Unless required by applicable law or agreed to in writing,
- *  *  software distributed under the License is distributed on an
- *  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  *  KIND, either express or implied.  See the License for the
- *  *  specific language governing permissions and limitations
- *  *  under the License.
- *  *
- *
+ * *
+ * *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * *
+ * *   WSO2 Inc. licenses this file to you under the Apache License,
+ * *   Version 2.0 (the "License"); you may not use this file except
+ * *   in compliance with the License.
+ * *   You may obtain a copy of the License at
+ * *
+ * *     http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * *  Unless required by applicable law or agreed to in writing,
+ * *  software distributed under the License is distributed on an
+ * *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * *  KIND, either express or implied.  See the License for the
+ * *  specific language governing permissions and limitations
+ * *  under the License.
+ * *
  */
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
@@ -72,7 +70,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @throws APIManagementException if an error occurred while exporting APIs to file system or
      * no APIs are exported successfully
      */
-    public String exportAPIs (Set<APIDetails> apiDetailSet) throws APIManagementException {
+    public String exportAPIs(Set<APIDetails> apiDetailSet) throws APIManagementException {
 
         String exportDirectoryName = "exported-apis";
         // this is the base directory for the archive. after export happens, this directory will
@@ -99,13 +97,15 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 ImportExportUtils.createDirectory(apiExportDirectory);
                 // export API data
                 exportApiDefinitionToFileSystem(apiDetails.getApi(), apiExportDirectory);
-                exportSwaggerDefinitionToFileSystem(apiDetails.getSwaggerDefinition(), apiDetails.getApi(), apiExportDirectory);
+                exportSwaggerDefinitionToFileSystem(apiDetails.getSwaggerDefinition(), apiDetails.getApi(),
+                        apiExportDirectory);
                 //exportGatewayConfigToFileSystem(apiDetails.getGatewayConfiguration(), apiDetails.getApi(), apiExportDirectory);
 
             } catch (APIMgtEntityImportExportException e) {
                 // no need to throw, log
-                log.error("Error in exporting API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi()
-                        .getVersion(), e);
+                log.error(
+                        "Error in exporting API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi()
+                                .getVersion(), e);
                 // cleanup the API directory
                 ImportExportUtils.deleteDirectory(apiExportDirectory);
                 // skip this API
@@ -117,8 +117,9 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             exportDocumentationToFileSystem(apiDetails.getAllDocumentInformation(), apiDetails, apiExportDirectory);
             exportThumbnailToFileSystem(apiDetails.getThumbnailStream(), apiDetails.getApi(), apiExportDirectory);
 
-            log.info("Successfully exported API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().
-                    getVersion());
+            log.info(
+                    "Successfully exported API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().
+                            getVersion());
         }
 
         // if the directory is empty, no APIs have been exported!
@@ -153,7 +154,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @throws APIManagementException if any error occurs while importing or no APIs are imported
      * successfully
      */
-    public APIListDTO importAPIs (InputStream uploadedApiArchiveInputStream, String provider) throws APIManagementException {
+    public APIListDTO importAPIs(InputStream uploadedApiArchiveInputStream, String provider)
+            throws APIManagementException {
 
         String importedDirectoryName = "imported-apis";
         String apiArchiveLocation = path + File.separator + importedDirectoryName + ".zip";
@@ -189,7 +191,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param newApiProvider API newApiProvider to be updated
      * @return List of {@link API} objects
      */
-    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths, String newApiProvider) {
+    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths,
+            String newApiProvider) {
 
         List<API> apis = new ArrayList<>();
 
@@ -292,7 +295,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @return {@link APIDTO} instance
      * @throws APIManagementException if an error occurs while creating API definition object
      */
-    private APIDTO getApiDefinitionFromExtractedArchive (String apiDefinitionFilePath) throws APIManagementException {
+    private APIDTO getApiDefinitionFromExtractedArchive(String apiDefinitionFilePath) throws APIManagementException {
 
         String apiDefinitionString;
         try {
@@ -308,7 +311,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         try {
             return gson.fromJson(apiDefinitionString, APIDTO.class);
         } catch (Exception e) {
-            String errorMsg = "Error in building APIDTO from api definition read from file at: " + apiDefinitionFilePath;
+            String errorMsg =
+                    "Error in building APIDTO from api definition read from file at: " + apiDefinitionFilePath;
             throw new APIManagementException(errorMsg, e);
         }
     }
@@ -320,7 +324,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @return swagger definition
      * @throws APIManagementException if an error occurs while swagger definition
      */
-    private String getSwaggerDefinitionFromExtractedArchive (String swaggerDefinitionFilePath) throws APIManagementException {
+    private String getSwaggerDefinitionFromExtractedArchive(String swaggerDefinitionFilePath)
+            throws APIManagementException {
 
         try {
             return ImportExportUtils.readFileContentAsText(swaggerDefinitionFilePath);
@@ -349,7 +354,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param documentContentPath path to document content file
      * @return {@link DocumentContent} instance
      */
-    private DocumentContent getDocumentContentFromExtractedArchive (DocumentInfo documentInfo, String documentContentPath) {
+    private DocumentContent getDocumentContentFromExtractedArchive(DocumentInfo documentInfo,
+            String documentContentPath) {
 
         DocumentContent.Builder documentContentBuilder = new DocumentContent.Builder();
         if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
@@ -375,7 +381,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param documentPath path to document content file
      * @return document content as text
      */
-    private String getDocumentContentAsText (String documentPath) {
+    private String getDocumentContentAsText(String documentPath) {
 
         try {
             return ImportExportUtils.readFileContentAsText(documentPath);
@@ -391,7 +397,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param documentPath path to document content file
      * @return document content as a stream
      */
-    private InputStream getDocumentContentAsStream (String documentPath) {
+    private InputStream getDocumentContentAsStream(String documentPath) {
 
         try {
             return ImportExportUtils.readFileContentAsStream(documentPath);
@@ -410,7 +416,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @return location to which APIs were extracted
      * @throws APIManagementException if an error occurs while extracting the archive
      */
-    private String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName,  String apiArchiveLocation) throws APIManagementException {
+    private String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName,
+            String apiArchiveLocation) throws APIManagementException {
         String archiveExtractLocation;
         try {
             // create api import directory structure
@@ -437,7 +444,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param exportLocation file system location to write the API definition
      * @throws APIMgtEntityImportExportException if an error occurs while writing the API definition
      */
-    private void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIMgtEntityImportExportException {
+    private void exportApiDefinitionToFileSystem(API api, String exportLocation)
+            throws APIMgtEntityImportExportException {
 
         APIDTO apidto = MappingUtil.toAPIDto(api);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -471,7 +479,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param apiDetails {@link APIDetails} instance, to which the documents are related to
      * @param exportLocation file system location to which documents will be written
      */
-    private void exportDocumentationToFileSystem(Set<DocumentInfo> documentInfo, APIDetails apiDetails, String exportLocation) {
+    private void exportDocumentationToFileSystem(Set<DocumentInfo> documentInfo, APIDetails apiDetails,
+            String exportLocation) {
 
         if (documentInfo == null || documentInfo.isEmpty()) {
             log.debug("No documentation found for API with api: " + apiDetails.getApi().getName() + ", " + "version: " +
@@ -486,7 +495,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             for (DocumentInfo aDocumentInfo : documentInfo) {
                 // create the root directory for each document
-                String apiExportDir = documentsBaseDirectory + File.separator+ aDocumentInfo.getId();
+                String apiExportDir = documentsBaseDirectory + File.separator + aDocumentInfo.getId();
                 ImportExportUtils.createDirectory(apiExportDir);
                 // for each document, write a DocumentInfo to a separate json file
                 String apiDocMetaFileLocation = apiExportDir + File.separator + DOCUMENTATION_DEFINITION_FILE;
@@ -498,24 +507,30 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     content = apiDetails.getDocumentContent(aDocumentInfo.getId());
                     if (content != null) {
-                        ImportExportUtils.createFile(apiExportDir + File.separator + content.getDocumentInfo().getFileName());
-                        ImportExportUtils.writeStreamToFile(apiExportDir + File.separator + content.getDocumentInfo().getFileName(),
+                        ImportExportUtils
+                                .createFile(apiExportDir + File.separator + content.getDocumentInfo().getFileName());
+                        ImportExportUtils.writeStreamToFile(
+                                apiExportDir + File.separator + content.getDocumentInfo().getFileName(),
                                 content.getFileContent());
                         // modify the document metadata to contain the file name
-                        DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(aDocumentInfo).fileName(content.getDocumentInfo().
-                                getFileName()).build();
+                        DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(aDocumentInfo)
+                                .fileName(content.getDocumentInfo().
+                                        getFileName()).build();
                         ImportExportUtils.writeToFile(apiDocMetaFileLocation, gson.toJson(modifiedDocInfo));
                     }
 
                 } else if (aDocumentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     content = apiDetails.getDocumentContent(aDocumentInfo.getId());
                     if (content != null) {
-                        ImportExportUtils.createFile(apiExportDir + File.separator + content.getDocumentInfo().getName());
-                        ImportExportUtils.writeToFile(apiExportDir + File.separator + content.getDocumentInfo().getName(),
-                                content.getInlineContent());
+                        ImportExportUtils
+                                .createFile(apiExportDir + File.separator + content.getDocumentInfo().getName());
+                        ImportExportUtils
+                                .writeToFile(apiExportDir + File.separator + content.getDocumentInfo().getName(),
+                                        content.getInlineContent());
                         // modify the document metadata to contain the inline content name
-                        DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(aDocumentInfo).name(content.getDocumentInfo().
-                                getName()).build();
+                        DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(aDocumentInfo)
+                                .name(content.getDocumentInfo().
+                                        getName()).build();
                         ImportExportUtils.writeToFile(apiDocMetaFileLocation, gson.toJson(modifiedDocInfo));
                     }
                 }
@@ -527,7 +542,6 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             // cleanup
             ImportExportUtils.deleteDirectory(documentsBaseDirectory);
         }
-
 
         log.debug("Successfully exported documentation for api: " + apiDetails.getApi().getName() + ", version: " +
                 apiDetails.getApi().getVersion());
@@ -542,8 +556,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @throws APIMgtEntityImportExportException if an error occurs while writing swagger
      * definition to the file system
      */
-    private void exportSwaggerDefinitionToFileSystem(String swaggerDefinition, API api, String exportLocation) throws
-            APIMgtEntityImportExportException {
+    private void exportSwaggerDefinitionToFileSystem(String swaggerDefinition, API api, String exportLocation)
+            throws APIMgtEntityImportExportException {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser parser = new JsonParser();
@@ -553,7 +567,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         ImportExportUtils.createFile(swaggerFileLocation);
         ImportExportUtils.writeToFile(swaggerFileLocation, gson.toJson(json));
 
-        log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " + api.getVersion());
+        log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " + api
+                .getVersion());
     }
 
     /**
@@ -563,7 +578,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param api {@link API} instance relevant to thumbnail
      * @param exportLocation file system location to which the thumbnail will be written
      */
-    private void exportThumbnailToFileSystem(InputStream thumbnailInputStream, API api, String exportLocation)  {
+    private void exportThumbnailToFileSystem(InputStream thumbnailInputStream, API api, String exportLocation) {
 
         if (thumbnailInputStream == null) {
             // no thumbnail found, return
@@ -593,7 +608,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @return {@link API} instance that was imported
      * @throws APIManagementException if an error occurs while importing the API
      */
-    private API importApi (APIDetails apiDetails) throws APIManagementException {
+    private API importApi(APIDetails apiDetails) throws APIManagementException {
 
         // if the API already exists, can't import again
         if (apiPublisher.checkIfAPIExists(apiDetails.getApi().getId())) {
@@ -615,8 +630,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param version API version
      * @return Set of {@link DocumentInfo} insjtaces
      */
-    private Set<DocumentInfo> getDocumentInfoFromExtractedArchive (String documentImportLocation, String apiName,
-                                                                   String version) {
+    private Set<DocumentInfo> getDocumentInfoFromExtractedArchive(String documentImportLocation, String apiName,
+            String version) {
 
         Set<DocumentInfo> documents = new HashSet<>();
 
@@ -638,7 +653,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             // read the 'doc.json'
             String content;
             try {
-                content = ImportExportUtils.readFileContentAsText(docDir.getPath() + File.separator + DOCUMENTATION_DEFINITION_FILE);
+                content = ImportExportUtils
+                        .readFileContentAsText(docDir.getPath() + File.separator + DOCUMENTATION_DEFINITION_FILE);
                 Gson gson = new GsonBuilder().create();
                 documents.add(gson.fromJson(content, DocumentInfo.class));
                 // add the doc
@@ -658,7 +674,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param thumbnailFilePath path to file
      * @return thumbnail as a {@link InputStream} instance
      */
-    private InputStream getThumbnailFromExtractedArchive (String thumbnailFilePath) {
+    private InputStream getThumbnailFromExtractedArchive(String thumbnailFilePath) {
 
         File thumbnailFile = new File(thumbnailFilePath);
         if (!thumbnailFile.exists()) {

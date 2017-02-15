@@ -18,14 +18,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-19T18:39:38.447+05:30")
-public class ImportApiServiceImpl extends ImportApiService {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-19T18:39:38.447+05:30") public class ImportApiServiceImpl
+        extends ImportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
-    @Override
-    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
-                                  String provider) throws NotFoundException {
+    @Override public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
+            String provider) throws NotFoundException {
 
         APIPublisher publisher = null;
 

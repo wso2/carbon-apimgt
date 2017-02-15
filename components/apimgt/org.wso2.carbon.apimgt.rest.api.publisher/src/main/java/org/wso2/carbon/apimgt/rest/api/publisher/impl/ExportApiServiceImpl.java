@@ -19,23 +19,22 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
-
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-13T09:50:10.416+05:30")
-public class ExportApiServiceImpl extends ExportApiService {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-13T09:50:10.416+05:30") public class ExportApiServiceImpl
+        extends ExportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ExportApiServiceImpl.class);
 
-    @Override
-    public Response exportApisGet(String contentType, String query, Integer limit, Integer offset) throws NotFoundException {
+    @Override public Response exportApisGet(String contentType, String query, Integer limit, Integer offset)
+            throws NotFoundException {
 
         APIPublisher publisher = null;
         String exportedFilePath = null;
         Set<APIDetails> apiDetails;
         try {
             publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
-            FileBasedApiImportExportManager importExportManager = new
-                    FileBasedApiImportExportManager(publisher, System.getProperty("java.io.tmpdir") +
-                    File.separator + "exported-api-archives-" + UUID.randomUUID().toString());
+            FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(publisher,
+                    System.getProperty("java.io.tmpdir") +
+                            File.separator + "exported-api-archives-" + UUID.randomUUID().toString());
             apiDetails = importExportManager.getAPIDetails(limit, offset, query);
             if (apiDetails.isEmpty()) {
                 // 404
@@ -57,17 +56,18 @@ public class ExportApiServiceImpl extends ExportApiService {
 
         File exportedApiArchiveFile = new File(exportedFilePath);
         Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK).entity(exportedApiArchiveFile);
-        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedApiArchiveFile.getName() + "\"");
+        responseBuilder
+                .header("Content-Disposition", "attachment; filename=\"" + exportedApiArchiveFile.getName() + "\"");
         Response response = responseBuilder.build();
 
         //
         // TODO: remove the local directory to which api info. was imported
-//        try {
-//            ImportExportUtils.deleteDirectory(apiUniqueDirectory);
-//        } catch (APIManagementException e) {
-//            // no need to throw, log and continue
-//            log.error("Error while deleteing directory " + apiUniqueDirectory, e);
-//        }
+        //        try {
+        //            ImportExportUtils.deleteDirectory(apiUniqueDirectory);
+        //        } catch (APIManagementException e) {
+        //            // no need to throw, log and continue
+        //            log.error("Error while deleteing directory " + apiUniqueDirectory, e);
+        //        }
 
         return response;
     }
