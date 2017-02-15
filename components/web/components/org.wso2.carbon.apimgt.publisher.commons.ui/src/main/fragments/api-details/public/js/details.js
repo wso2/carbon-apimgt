@@ -63,21 +63,28 @@ function lifecycleTabHandler(event) {
     var api_id = event.data.api_id;
 
     function renderLCTab(response) {
+        var api = response[0];
+        var policies = response[1];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
-        var api_data = JSON.parse(response.data);
+        var api_data = JSON.parse(api.data);
+        var policies_data = JSON.parse(policies.data);
         var callbacks = {
             onSuccess: function (data) {
+                $('#policies-list-dropdown').multiselect();
             }, onFailure: function (data) {
             }
         };
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
+            policies: policies_data
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
     }
 
-    api_client.get(api_id).then(renderLCTab);
+    var promised_api = api_client.get(api_id);
+    var promised_tiers = api_client.policies('api');
+    Promise.all([promised_api, promised_tiers]).then(renderLCTab)
 }
 
 function mediationTabHandler(event) {

@@ -31,8 +31,6 @@ $(function(){
         });
         loginPromise.error(
             function (error) {
-                console.log(error);
-                // alert("Invalid username and password");
                 var element = $("#general-alerts").find('.alert-danger');
                 element.find('.alert-message').html(error.responseText);
                 element.fadeIn('slow');
