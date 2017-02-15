@@ -23,9 +23,16 @@ function deleteAPIHandler(event) {
     let current_row = data_table.row($(this).closest('tr'));
     let api_id = current_row.data().id;
     let api = event.data.api_instance;
-    api.deleteAPI(api_id); /*TODO: Need to handle success and error cases ~tmkb */
-    current_row.remove();
-    data_table.draw();
+    let promised_delete = api.deleteAPI(api_id);
+    promised_delete.then(
+        function (response) {
+            if (!response) {
+                return;
+            }
+            current_row.remove();
+            data_table.draw();
+        }
+    );
 }
 
 function initDataTable(raw_data) {

@@ -1,4 +1,7 @@
-<div id="lifecycle-content" class="tab-content">
+<div id="lifecycle-content " class="tab-content col-md-6 col-sm-6">
+    <div class="page-header">
+        <h4 class="lead">Change Lifecycle</h4>
+    </div>
     <form class="form-horizontal lifecycle-state">
         <div class="well remove-padding-top remove-padding-bottom">
             <div class="form-group">
@@ -43,4 +46,22 @@
             </table>
         </div>
     </form>
+</div>
+<div class="col-md-6 col-sm-6">
+    <div class="page-header">
+        <h4 class="lead">Change Policies</h4>
+    </div>
+    <div class="col-md-6">
+        <label for="policies-list-dropdown">
+            Policies :
+        </label>
+        <select id="policies-list-dropdown" multiple="multiple">
+            {{#each @params.policies}}
+                <option value="{{this.uuid}}">{{this.displayName}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="button" class="btn btn-primary">Change</button>
+    </div>
 </div>
