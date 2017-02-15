@@ -57,7 +57,22 @@ public class ImportExportUtils {
             try {
                 FileUtils.deleteDirectory(new File(path));
             } catch (IOException e) {
-                log.error("Error while deleting directory at" + path, e);
+                log.error("Error while deleting directory at " + path, e);
+            }
+        }
+    }
+
+    /**
+     * Deletes a file if exists
+     *
+     * @param path path of the file to delete
+     */
+    public static void deleteFile(String path) {
+        if (new File(path).exists()) {
+            try {
+                FileUtils.forceDelete(new File(path));
+            } catch (IOException e) {
+                log.error("Error while deleting file at " + path, e);
             }
         }
     }
@@ -166,7 +181,7 @@ public class ImportExportUtils {
      * @param location full path to create the file
      * @throws APIMgtEntityImportExportException if an error occurs while extracting the file
      */
-    static void createFile (String location) throws APIMgtEntityImportExportException {
+    public static void createFile (String location) throws APIMgtEntityImportExportException {
         try {
             Files.createFile(Paths.get(location));
         } catch (IOException e) {

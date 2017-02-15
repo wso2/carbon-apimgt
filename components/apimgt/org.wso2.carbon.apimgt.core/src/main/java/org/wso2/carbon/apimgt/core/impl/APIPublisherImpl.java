@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIContext;
+import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
@@ -68,7 +68,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -825,173 +824,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Error occurred while Disassociating the API with Lifecycle id " + identifier;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
-        }
-    }
-
-    public Set<APIContext> getAPIContexts (Integer limit, Integer offset, String query) throws APIManagementException {
-
-        Set<APIContext> apiContexts = new HashSet<>();
-        // search for APIs
-        List<API> apis = searchAPIs(limit, offset, query);
-        if (apis == null || apis.isEmpty()) {
-            // no APIs found, return
-            return apiContexts;
-        }
-
-        // iterate and collect all information
-        for (API api : apis) {
-            // get swagger definition
-            String swaggerDefinition;
-            try {
-                swaggerDefinition = getSwagger20Definition(api.getId());
-            } catch (APIManagementException e) {
-                log.error("Error in getting Swagger configuration for api: " + api.getName() + ", version: " +
-                        api.getVersion(), e);
-                // skip this API
-                continue;
-            }
-
-            // get gateway configuration
-            String gatewayConfig;
-            try {
-                gatewayConfig = getApiGatewayConfig(api.getId());
-            } catch (APIManagementException e) {
-                log.error("Error in getting gateway configuration for api: " + api.getName() + ", version: " +
-                        api.getVersion(), e);
-                // skip this API
-                continue;
-            }
-
-            // get doc information
-            List<DocumentInfo> documentInfo = null;
-            try {
-                documentInfo = getAllDocumentation(api.getId(), 0, Integer.MAX_VALUE);
-            } catch (APIManagementException e) {
-                log.error("Error in getting documentation content for api: " + api.getName() +
-                        ", version: " + api.getVersion(), e);
-                // no need to skip the API as docs don't affect API functionality
-            }
-            Set<DocumentContent> documentContents = new HashSet<>();
-            if (documentInfo != null && !documentInfo.isEmpty()) {
-                // iterate and collect document content
-                for (DocumentInfo aDocumentInfo : documentInfo) {
-                    try {
-                        documentContents.add(getDocumentationContent(aDocumentInfo.getId()));
-                    } catch (APIManagementException e) {
-                        log.error("Error in getting documentation content for api: " + api.getName() +
-                                ", version: " + api.getVersion() + ", doc id: " + aDocumentInfo.getId(), e);
-                        // no need to skip the API as docs don't affect API functionality
-                    }
-                }
-            }
-
-            // get thumbnail
-            InputStream thumbnailStream = null;
-            try {
-                thumbnailStream = getThumbnailImage(api.getId());
-            } catch (APIManagementException e) {
-                log.error("Error in getting thumbnail for api: " + api.getName() + ", version: " + api.getVersion(), e);
-                // no need to skip the API as thumbnail don't affect API functionality
-            }
-
-            APIContext apiContext = new APIContext(api, swaggerDefinition);
-            if (gatewayConfig != null) {
-                apiContext.setGatewayConfiguration(gatewayConfig);
-            }
-            if (documentInfo != null && !documentInfo.isEmpty()) {
-                apiContext.addDocumentInformation(documentInfo);
-            }
-            if (!documentContents.isEmpty()) {
-                apiContext.addDocumentContents(documentContents);
-            }
-            if (thumbnailStream != null) {
-                apiContext.setThumbnailStream(thumbnailStream);
-            }
-            apiContexts.add(apiContext);
-        }
-
-        return apiContexts;
-    }
-
-    public void addAPIContext (APIContext apiContext) throws APIManagementException {
-
-        // update everything
-        String swaggerDefinition = apiContext.getSwaggerDefinition();
-        String gatewayConfig = apiContext.getGatewayConfiguration();
-
-        addAPI(new API.APIBuilder(apiContext.getApi()).apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig));
-
-        // docs
-        try {
-            Set<DocumentInfo> documentInfo = apiContext.getAllDocumentInformation();
-            for (DocumentInfo aDocInfo : documentInfo) {
-                addDocumentationInfo(aDocInfo.getId(), aDocInfo);
-            }
-            for (DocumentContent aDocContent : apiContext.getDocumentContents()) {
-                // add documentation
-                if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                    uploadDocumentationFile(aDocContent.getDocumentInfo().getId(), aDocContent
-                            .getFileContent(), aDocContent.getDocumentInfo().getFileName());
-                } else if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    addDocumentationContent(aDocContent.getDocumentInfo().getId(), aDocContent.getInlineContent());
-                }
-            }
-
-        } catch (APIManagementException e) {
-            // no need to throw, log and continue
-            log.error("Error while adding Document details for API: " + apiContext.getApi().getName() + ", version: " +
-                    apiContext.getApi().getVersion());
-        }
-
-        // add thumbnail
-        try {
-            saveThumbnailImage(apiContext.getApi().getId(), apiContext.getThumbnailStream(), "thumbnail");
-        } catch (APIManagementException e) {
-            // no need to throw, log and continue
-            log.error("Error while adding thumbnail for API: " + apiContext.getApi().getName() + ", version: " +
-                    apiContext.getApi().getVersion());
-        }
-    }
-
-    public void updateAPIContext (APIContext apiContext) throws APIManagementException {
-
-        // update everything
-        String swaggerDefinition = apiContext.getSwaggerDefinition();
-        String gatewayConfig = apiContext.getGatewayConfiguration();
-
-        updateAPI(new API.APIBuilder(apiContext.getApi()).apiDefinition(swaggerDefinition).gatewayConfig
-                (gatewayConfig));
-
-        // docs
-        try {
-            Set<DocumentInfo> documentInfo = apiContext.getAllDocumentInformation();
-            for (DocumentInfo aDocInfo : documentInfo) {
-                updateDocumentation(aDocInfo.getId(), aDocInfo);
-            }
-            Collection<DocumentContent> docContents = apiContext.getDocumentContents();
-            for (DocumentContent docContent : docContents) {
-                // update documentation
-                if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                    uploadDocumentationFile(docContent.getDocumentInfo().getId(), docContent.getFileContent(),
-                            docContent.getDocumentInfo().getFileName());
-                } else if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    addDocumentationContent(docContent.getDocumentInfo().getId(), docContent.getInlineContent());
-                }
-            }
-
-        } catch (APIManagementException e) {
-            // no need to throw, log and continue
-            log.error("Error while adding Document details for API: " + apiContext.getApi().getName() + ", version: " +
-                    apiContext.getApi().getVersion());
-        }
-
-        // update thumbnail
-        try {
-            saveThumbnailImage(apiContext.getApi().getId(), apiContext.getThumbnailStream(), "thumbnail");
-        } catch (APIManagementException e) {
-            // no need to throw, log and continue
-            log.error("Error while updating thumbnail for API: " + apiContext.getApi().getName() + ", version: " +
-                    apiContext.getApi().getVersion());
         }
     }
 

@@ -5,18 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -30,11 +30,14 @@ public class ExportApiServiceImpl extends ExportApiService {
 
         APIPublisher publisher = null;
         String exportedFilePath = null;
-        List<API> apis;
+        Set<APIDetails> apiDetails;
         try {
             publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
-            apis = publisher.searchAPIs(limit, offset, query);
-            if (apis.isEmpty()) {
+            FileBasedApiImportExportManager importExportManager = new
+                    FileBasedApiImportExportManager(publisher, System.getProperty("java.io.tmpdir") +
+                    File.separator + "exported-api-archives-" + UUID.randomUUID().toString());
+            apiDetails = importExportManager.getAPIDetails(limit, offset, query);
+            if (apiDetails.isEmpty()) {
                 // 404
                 String errorMsg = "No APIs found for query " + query;
                 log.error(errorMsg);
@@ -44,9 +47,7 @@ public class ExportApiServiceImpl extends ExportApiService {
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
 
-            ImportExportManager importExportManager = new ImportExportManager(publisher, System.getProperty("java.io.tmpdir")
-                    + File.separator + "exported-api-archives-" + UUID.randomUUID().toString());
-            exportedFilePath = importExportManager.exportAPIs(apis);
+            exportedFilePath = importExportManager.exportAPIs(apiDetails);
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while exporting APIs";
@@ -59,7 +60,8 @@ public class ExportApiServiceImpl extends ExportApiService {
         responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedApiArchiveFile.getName() + "\"");
         Response response = responseBuilder.build();
 
-        // remove the local directory to which api info. was imported
+        //
+        // TODO: remove the local directory to which api info. was imported
 //        try {
 //            ImportExportUtils.deleteDirectory(apiUniqueDirectory);
 //        } catch (APIManagementException e) {

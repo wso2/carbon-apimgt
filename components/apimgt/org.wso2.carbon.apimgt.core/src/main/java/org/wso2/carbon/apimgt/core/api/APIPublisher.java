@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIContext;
+import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
@@ -242,33 +242,6 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to remove the API
      */
     void deleteAPI(String identifier) throws APIManagementException;
-
-    /**
-     * Returns a Set of {@link APIContext} instances matching to the given search query
-     *
-     * @param limit
-     * @param offset
-     * @param query
-     * @return
-     * @throws APIManagementException
-     */
-    Set<APIContext> getAPIContexts (Integer limit, Integer offset, String query) throws APIManagementException;
-
-    /**
-     * Adds the API information included in {@link APIContext} instance
-     *
-     * @param apiContext
-     * @throws APIManagementException
-     */
-    void addAPIContext (APIContext apiContext) throws APIManagementException;
-
-    /**
-     * Updates the API information included in {@link APIContext} instance
-     *
-     * @param apiContext
-     * @throws APIManagementException
-     */
-    void updateAPIContext (APIContext apiContext) throws APIManagementException;
 
     /**
      *

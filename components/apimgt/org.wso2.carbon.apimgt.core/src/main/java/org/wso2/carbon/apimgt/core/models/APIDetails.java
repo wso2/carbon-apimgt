@@ -36,9 +36,29 @@ import java.util.Set;
  *      5. Gateway Definition
  *      6. Thumbnail content
  */
-public class APIContext {
+public class APIDetails {
 
     private API api;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        APIDetails that = (APIDetails) o;
+
+        return getApi().getId().equals(that.getApi().getId());
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getApi().getId().hashCode();
+    }
 
     private String swaggerDefinition;
 
@@ -51,7 +71,7 @@ public class APIContext {
     // mapping from document id to Document Content
     private Map<String, DocumentContent> documentContentMap;
 
-    public APIContext (API api, String swaggerDefinition) {
+    public APIDetails (API api, String swaggerDefinition) {
         this.api = api;
         this.swaggerDefinition = swaggerDefinition;
         documentInformation = new HashSet<>();
@@ -68,10 +88,6 @@ public class APIContext {
 
     public String getGatewayConfiguration() {
         return gatewayConfiguration;
-    }
-
-    public Set<DocumentInfo> getDocumentInformation() {
-        return documentInformation;
     }
 
     public Map<String, DocumentContent> getDocumentContentMap() {

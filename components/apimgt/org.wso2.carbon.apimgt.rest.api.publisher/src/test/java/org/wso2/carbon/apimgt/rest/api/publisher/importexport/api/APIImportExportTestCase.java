@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.importexport.api;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,272 +27,49 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.mockito.Mockito;
-import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
-import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportUtils;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-
 public class APIImportExportTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(APIImportExportTestCase.class);
 
     private static String api1Definition;
+    private static String api1GatewayConfig;
     private static String api2Definition;
+    private static String api2GatewayConfig;
     private static InputStream api1Doc2Stream;
     private static String importExportRootDirectory = System.getProperty("java.io.tmpdir") + File.separator +
             "import-export-test";
+    private APIPublisher apiPublisher;
 
     @BeforeClass(description = "Initialize")
     protected void setUp () throws Exception  {
         api1Definition = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("api1_swagger_definition.json"));
+        api1GatewayConfig = "api 1 dummy gateway config";
         api2Definition = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("api2_swagger_definition.json"));
+        api2GatewayConfig = "api 2 dummy gateway config";
         api1Doc2Stream = getClass().getClassLoader().getResourceAsStream("api1_doc2.pdf");
-        // if importExportRootDirectory exists, delete it
-        if (new File(importExportRootDirectory).exists()) {
-            log.info("The directory " + importExportRootDirectory + " already exists, and will be deleted");
-            ImportExportUtils.deleteDirectory(importExportRootDirectory);
-        }
+        log.info("Test directory: " + importExportRootDirectory);
     }
 
-    @Test(description = "Test Single API export error", expectedExceptions=APIManagementException.class)
-    void testSingleApiExportError () throws APIManagementException {
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
-        String apiId = UUID.randomUUID().toString();
-        API api1 = createApi("providerz", apiId, "testapi1", "1.0.0", "Test API version 1").build();
-        List<API> apis = new ArrayList<>();
-        apis.add(api1);
+    @Test(description = "Test getAPIDetails - single API")
+    void testGetApiDetails () throws APIManagementException {
+        printTestMethodName();
+        apiPublisher = Mockito.mock(APIPublisher.class);
 
-        Mockito.when(apiPublisher.getAPIbyUUID(apiId)).thenReturn(api1);
-        Mockito.when(apiPublisher.getSwagger20Definition(apiId)).thenReturn(api1Definition);
-
-        // throw an exception when apiPublisher.getAPIbyUUID method is called
-        Mockito.when(apiPublisher.getAllDocumentation(apiId, 0, Integer.MAX_VALUE)).thenThrow(APIMgtEntityImportExportException.class);
-        ImportExportManager importExportManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-        importExportManager.exportAPIs(apis);
-    }
-
-    @Test(description = "Test Multiple APIs export with error in one API export")
-    void testMultipleApiExportError () throws APIManagementException, IOException {
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
-        String api1Id = UUID.randomUUID().toString();
-        API api1 = createApi("providera", api1Id, "testapi1", "1.0.0", "Test API version 1").build();
-        String api2Id = UUID.randomUUID().toString();
-        API api2 = createApi("providerb", api2Id, "testapi2", "1.0.0", "Test API version 2").build();
-        List<API> apis = new ArrayList<>();
-        apis.add(api1);
-        apis.add(api2);
-
-        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
-        Mockito.when(apiPublisher.getAPIbyUUID(api2Id)).thenReturn(api2);
-        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
-        Mockito.when(apiPublisher.getSwagger20Definition(api2Id)).thenReturn(api2Definition);
-
-        String api1Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api2doc1", "", "API 2 DOC 1", DocumentInfo.DocType.API_MESSAGE_FORMAT,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.API_LEVEL);
-        String api1Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api2doc2", "", "API 2 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM,
-                "other type", DocumentInfo.SourceType.URL, "http://api2.org/documentation/1", DocumentInfo.Visibility.PRIVATE);
-
-        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
-        api1DocumentInfo.add(api1Doc1Info);
-        api1DocumentInfo.add(api1Doc2Info);
-
-        String api2Doc1Cotent = "Sample inline content for API2 DOC 1";
-        DocumentContent.Builder api1Doc1ContentBuilder = new DocumentContent.Builder();
-        api1Doc1ContentBuilder.documentInfo(api1Doc1Info);
-        api1Doc1ContentBuilder.inlineContent(api2Doc1Cotent);
-        DocumentContent.Builder api1Doc2ContentBuilder = new DocumentContent.Builder();
-        api1Doc2ContentBuilder.documentInfo(api1Doc2Info);
-
-        Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc1Id)).thenReturn(api1Doc1ContentBuilder.build());
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc2Id)).thenReturn(api1Doc2ContentBuilder.build());
-
-        // throw an exception when apiPublisher.getAPIbyUUID method is called
-        Mockito.when(apiPublisher.getAllDocumentation(api2Id, 0, Integer.MAX_VALUE)).thenThrow(APIMgtEntityImportExportException.class);
-        ImportExportManager importExportManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-        String exportedApiArchiveFilePath = importExportManager.exportAPIs(apis);
-
-        // check if only one API is exported
-        String unzipPath = importExportRootDirectory + File.separator + "unzipped-export-archive";
-        ImportExportUtils.extractArchive(exportedApiArchiveFilePath, unzipPath);
-        Assert.assertEquals(ImportExportUtils.getDirectoryList(unzipPath).size() == 1, true,"Exported API count is not equal to 1");
-
-        testApiImport(importExportRootDirectory);
-    }
-
-    @Test(description = "Test API export and import")
-    void testCorrectApiExportAndImport () throws Exception {
-        testApiExport(importExportRootDirectory);
-        testApiImport(importExportRootDirectory);
-    }
-
-    @Test(description = "Test single API and import error", expectedExceptions = APIManagementException.class)
-    void testSingleApiImportError () throws APIManagementException, IOException {
-
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
         String api1Id = UUID.randomUUID().toString();
         API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0").build();
-        List<API> apis = new ArrayList<>();
-        apis.add(api1);
 
-        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
-
-        String api1Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
-
-        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
-        api1DocumentInfo.add(api1Doc3Info);
-
-        DocumentContent.Builder api1Doc3ContentBuilder = new DocumentContent.Builder();
-        api1Doc3ContentBuilder.documentInfo(api1Doc3Info);
-
-        Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc3Id)).thenReturn(api1Doc3ContentBuilder.build());
-
-        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
-        Mockito.when(apiPublisher.getThumbnailImage(api1Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api1_thumbnail.png"));
-
-        // export
-        ImportExportManager exportManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-        exportManager.exportAPIs(apis);
-
-        // import
-        FileInputStream archiveStream = null;
-        doThrow(new APIManagementException("Error in updating API: " + api1.getName() + ", version: " +
-                api1.getVersion())).when(apiPublisher).updateAPI(any(API.APIBuilder.class));
-        try {
-            archiveStream = new FileInputStream(new File(importExportRootDirectory + File.separator + "exported-apis.zip"));
-            ImportExportManager importManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-            importManager.importAPIs(archiveStream, null);
-
-        } finally {
-            if (archiveStream != null) {
-                archiveStream.close();
-            }
-        }
-
-        try {
-            FileUtils.deleteDirectory(new File(importExportRootDirectory));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    @Test(description = "Test multiple APIs and import error")
-    void testMultipleApisImportError () throws APIManagementException, IOException {
-
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
-        String api1Id = UUID.randomUUID().toString();
-        API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0").build();
-        String api2Id = UUID.randomUUID().toString();
-        API api2 = createApi("provider2", api2Id, "testapi2", "2.0.0", "Test API 2 - version 2.0.0").build();
-        List<API> apis = new ArrayList<>();
-        apis.add(api1);
-        apis.add(api2);
-
-        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
-        Mockito.when(apiPublisher.getAPIbyUUID(api2Id)).thenReturn(api2);
-
-        String api1Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
-
-        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
-        api1DocumentInfo.add(api1Doc3Info);
-
-        DocumentContent.Builder api1Doc3ContentBuilder = new DocumentContent.Builder();
-        api1Doc3ContentBuilder.documentInfo(api1Doc3Info);
-
-        Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc3Id)).thenReturn(api1Doc3ContentBuilder.build());
-
-        String api2Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc3Info = createAPIDoc(api2Doc3Id, "api2doc3", "", "API 2 DOC 3",
-                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.PRIVATE);
-
-        List<DocumentInfo> api2DocumentInfo = new ArrayList<>();
-        api1DocumentInfo.add(api2Doc3Info);
-
-        DocumentContent.Builder api2Doc3ContentBuilder = new DocumentContent.Builder();
-        api1Doc3ContentBuilder.documentInfo(api2Doc3Info);
-
-        Mockito.when(apiPublisher.getAllDocumentation(api2Id, 0, Integer.MAX_VALUE)).thenReturn(api2DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api2Doc3Id)).thenReturn(api2Doc3ContentBuilder.build());
-
-        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
-        Mockito.when(apiPublisher.getThumbnailImage(api1Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api1_thumbnail.png"));
-
-        Mockito.when(apiPublisher.getSwagger20Definition(api2Id)).thenReturn(api2Definition);
-        Mockito.when(apiPublisher.getThumbnailImage(api2Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api2_thumbnail.jpg"));
-
-        // export
-        ImportExportManager exportManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-        exportManager.exportAPIs(apis);
-        // throw when update is called for API 2
-        Mockito.when(apiPublisher.getAPIbyUUID(api2.getId())).thenThrow(APIManagementException.class);
-//        doThrow(APIManagementException.class).when(apiPublisher).updateAPI(new API.APIBuilder("provider2", "testapi2", "2.0.0"));
-
-        FileInputStream archiveStream = null;
-        APIListDTO apiListDTO;
-        try {
-            archiveStream = new FileInputStream(new File(importExportRootDirectory + File.separator + "exported-apis.zip"));
-            ImportExportManager importManager = new ImportExportManager(apiPublisher, importExportRootDirectory);
-            apiListDTO = importManager.importAPIs(archiveStream, null);
-
-        } finally {
-            if (archiveStream != null) {
-                archiveStream.close();
-            }
-        }
-
-        try {
-            FileUtils.deleteDirectory(new File(importExportRootDirectory));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-
-        // only one API should be imported
-        Assert.assertEquals(apiListDTO.getCount() == 1, true, "Imported API count is not equal to 1, but is " +
-                apiListDTO.getCount());
-        Assert.assertEquals(apiListDTO.getList().get(0).getName(), "testapi1", "Test API 1 not exported");
-        Assert.assertEquals(apiListDTO.getList().get(0).getVersion(), "1.0.0", "Test API 1 not exported");
-    }
-
-    private void testApiExport (String exportDir) throws Exception {
-
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
-        String api1Id = UUID.randomUUID().toString();
-        API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0").build();
-        String api2Id = UUID.randomUUID().toString();
-        API api2 = createApi("provider2", api2Id, "testapi2", "3.0.0", "Test API 2 - version 3.0.0").build();
-        List<API> apis = new ArrayList<>();
-        apis.add(api1);
-        apis.add(api2);
-
-        // mock the method calls for retrieving APIs
-        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
-        Mockito.when(apiPublisher.getAPIbyUUID(api2Id)).thenReturn(api2);
-
-        // create mock DocumentInfo objects
-        // API 1
         String api1Doc1Id = UUID.randomUUID().toString();
         DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1", DocumentInfo.DocType.HOWTO,
                 "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
@@ -303,7 +79,284 @@ public class APIImportExportTestCase {
         String api1Doc3Id = UUID.randomUUID().toString();
         DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
                 "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
-        // API 2
+
+        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
+        api1DocumentInfo.add(api1Doc1Info);
+        api1DocumentInfo.add(api1Doc2Info);
+        api1DocumentInfo.add(api1Doc3Info);
+
+        // contents for documents
+        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, "", api1Doc2Stream);
+        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, "", null);
+
+        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
+        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiGatewayConfig(api1Id)).thenReturn(api1GatewayConfig);
+        Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
+        Mockito.when(apiPublisher.getDocumentationContent(api1Doc1Id)).thenReturn(api1Doc1Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api1Doc2Id)).thenReturn(api1Doc2Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api1Doc3Id)).thenReturn(api1Doc3Content);
+        Mockito.when(apiPublisher.getThumbnailImage(api1Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
+                ("api1_thumbnail.png"));
+        List<API> apis = new ArrayList<>();
+        apis.add(api1);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+
+        ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
+        Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
+        Assert.assertEquals(new ArrayList<>(apiDetailsSet).get(0).getApi().getId().equals(api1Id), true,
+                "APIDetails not retrieved correctly for API: " + api1.getName() + ", version: " + api1.getVersion());
+    }
+
+    @Test(description = "Test getAPIDetails - multiple APIs with non-critical error in retrieving information of one API")
+    void testGetMultipleApiDetailsWithNonFatalErrors () throws APIManagementException {
+        printTestMethodName();
+        apiPublisher = Mockito.mock(APIPublisher.class);
+
+        String api4Id = UUID.randomUUID().toString();
+        API api4 = createApi("provider4", api4Id, "testapi4", "1.0.0", "Test API 4 - version 1.0.0").build();
+
+        String api4Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api4Doc1Info = createAPIDoc(api4Doc1Id, "api1doc1", "", "API 4 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api4Doc2Id = UUID.randomUUID().toString();
+        DocumentInfo api4Doc2Info = createAPIDoc(api4Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 4 DOC 2",
+                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        String api4Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api4Doc3Info = createAPIDoc(api4Doc3Id, "api1doc3", "", "API 4 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
+        api1DocumentInfo.add(api4Doc1Info);
+        api1DocumentInfo.add(api4Doc2Info);
+        api1DocumentInfo.add(api4Doc3Info);
+
+        // contents for documents
+        DocumentContent api4Doc1Content = createDocContent(api4Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api4Doc2Content = createDocContent(api4Doc2Info, "", api1Doc2Stream);
+        DocumentContent api4Doc3Content = createDocContent(api4Doc3Info, "", null);
+
+        Mockito.when(apiPublisher.getAPIbyUUID(api4Id)).thenReturn(api4);
+        Mockito.when(apiPublisher.getSwagger20Definition(api4Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiGatewayConfig(api4Id)).thenReturn(api1GatewayConfig);
+        Mockito.when(apiPublisher.getAllDocumentation(api4Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
+        Mockito.when(apiPublisher.getDocumentationContent(api4Doc1Id)).thenReturn(api4Doc1Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api4Doc2Id)).thenReturn(api4Doc2Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api4Doc3Id)).thenReturn(api4Doc3Content);
+        Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
+                ("api1_thumbnail.png"));
+
+        String api5Id = UUID.randomUUID().toString();
+        API api5 = createApi("provider5", api5Id, "testapi4", "1.0.0", "Test API 5 - version 1.0.0").build();
+
+        String api5Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api5Doc1Info = createAPIDoc(api5Doc1Id, "api1doc1", "", "API 5 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api5Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api5Doc3Info = createAPIDoc(api5Doc3Id, "api1doc3", "", "API 5 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        List<DocumentInfo> api5DocumentInfo = new ArrayList<>();
+        api5DocumentInfo.add(api5Doc1Info);
+        api5DocumentInfo.add(api5Doc3Info);
+
+        // contents for documents
+        DocumentContent api5Doc1Content = createDocContent(api5Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api5Doc3Content = createDocContent(api5Doc3Info, "", null);
+
+        Mockito.when(apiPublisher.getAPIbyUUID(api5Id)).thenReturn(api5);
+        Mockito.when(apiPublisher.getSwagger20Definition(api5Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiGatewayConfig(api5Id)).thenReturn(api1GatewayConfig);
+        Mockito.when(apiPublisher.getAllDocumentation(api5Id, 0, Integer.MAX_VALUE)).thenReturn(api5DocumentInfo);
+        Mockito.when(apiPublisher.getDocumentationContent(api5Doc1Id)).thenReturn(api5Doc1Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api5Doc3Id)).thenReturn(api5Doc3Content);
+        Mockito.when(apiPublisher.getThumbnailImage(api5Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
+                ("api1_thumbnail.png"));
+
+        Mockito.when(apiPublisher.getAllDocumentation(api4Id, 0, Integer.MAX_VALUE)).thenThrow(APIManagementException.class);
+
+        List<API> apis = new ArrayList<>();
+        apis.add(api4);
+        apis.add(api5);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+
+        ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
+        Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
+        Assert.assertEquals(apiDetailsSet.size() == 2, true, "Error getting API details");
+    }
+
+    @Test(description = "Test getAPIDetails - multiple APIs with critical error in retrieving information of one API")
+    void testGetMultipleApiDetailsWithFatalErrors () throws APIManagementException {
+        printTestMethodName();
+        apiPublisher = Mockito.mock(APIPublisher.class);
+
+        String api6Id = UUID.randomUUID().toString();
+        API api6 = createApi("provider4", api6Id, "testapi6", "1.0.0", "Test API 6 - version 1.0.0").build();
+
+        String api6Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api6Doc1Info = createAPIDoc(api6Doc1Id, "api1doc1", "", "API 6 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api6Doc2Id = UUID.randomUUID().toString();
+        DocumentInfo api6Doc2Info = createAPIDoc(api6Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 4 DOC 2",
+                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        String api6Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api6Doc3Info = createAPIDoc(api6Doc3Id, "api1doc3", "", "API 6 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
+        api1DocumentInfo.add(api6Doc1Info);
+        api1DocumentInfo.add(api6Doc2Info);
+        api1DocumentInfo.add(api6Doc3Info);
+
+        // contents for documents
+        DocumentContent api6Doc1Content = createDocContent(api6Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api6Doc2Content = createDocContent(api6Doc2Info, "", api1Doc2Stream);
+        DocumentContent api6Doc3Content = createDocContent(api6Doc3Info, "", null);
+
+        Mockito.when(apiPublisher.getAPIbyUUID(api6Id)).thenReturn(api6);
+        Mockito.when(apiPublisher.getSwagger20Definition(api6Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiGatewayConfig(api6Id)).thenReturn(api1GatewayConfig);
+        Mockito.when(apiPublisher.getAllDocumentation(api6Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
+        Mockito.when(apiPublisher.getDocumentationContent(api6Doc1Id)).thenReturn(api6Doc1Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api6Doc2Id)).thenReturn(api6Doc2Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api6Doc3Id)).thenReturn(api6Doc3Content);
+        Mockito.when(apiPublisher.getThumbnailImage(api6Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
+                ("api1_thumbnail.png"));
+
+        String api7Id = UUID.randomUUID().toString();
+        API api7 = createApi("provider5", api7Id, "testapi4", "1.0.0", "Test API 7 - version 1.0.0").build();
+
+        String api7Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api7Doc1Info = createAPIDoc(api7Doc1Id, "api1doc1", "", "API 7 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api7Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api7Doc3Info = createAPIDoc(api7Doc3Id, "api1doc3", "", "API 7 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        List<DocumentInfo> api7DocumentInfo = new ArrayList<>();
+        api7DocumentInfo.add(api7Doc1Info);
+        api7DocumentInfo.add(api7Doc3Info);
+
+        // contents for documents
+        DocumentContent api7Doc1Content = createDocContent(api7Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api7Doc3Content = createDocContent(api7Doc3Info, "", null);
+
+        Mockito.when(apiPublisher.getAPIbyUUID(api7Id)).thenReturn(api7);
+        Mockito.when(apiPublisher.getSwagger20Definition(api7Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiGatewayConfig(api7Id)).thenReturn(api1GatewayConfig);
+        Mockito.when(apiPublisher.getAllDocumentation(api7Id, 0, Integer.MAX_VALUE)).thenReturn(api7DocumentInfo);
+        Mockito.when(apiPublisher.getDocumentationContent(api7Doc1Id)).thenReturn(api7Doc1Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api7Doc3Id)).thenReturn(api7Doc3Content);
+        Mockito.when(apiPublisher.getThumbnailImage(api7Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
+                ("api1_thumbnail.png"));
+
+        Mockito.when(apiPublisher.getSwagger20Definition(api7Id)).thenThrow(APIManagementException.class);
+
+        List<API> apis = new ArrayList<>();
+        apis.add(api6);
+        apis.add(api7);
+        Mockito.when(apiPublisher.searchAPIs(Integer.MAX_VALUE, 0, "*")).thenReturn(apis);
+
+        ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
+        Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
+        Assert.assertEquals(apiDetailsSet.size() == 1, true, "Error getting API details");
+    }
+
+    @Test(description = "Test updateAPIDetails")
+    void testUpdateApiDetails () throws APIManagementException {
+        printTestMethodName();
+        apiPublisher = Mockito.mock(APIPublisher.class);
+
+        String api2Id = UUID.randomUUID().toString();
+        API api2 = createApi("provider1", api2Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0").build();
+
+        String api2Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api1doc1", "", "API 2 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api2Doc2Id = UUID.randomUUID().toString();
+        DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 2 DOC 2",
+                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "",
+                DocumentInfo.Visibility.API_LEVEL);
+        String api2Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api2Doc3Info = createAPIDoc(api2Doc3Id, "api1doc3", "", "API 2 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        Set<DocumentInfo> api2DocumentInfo = new HashSet<>();
+        api2DocumentInfo.add(api2Doc1Info);
+        api2DocumentInfo.add(api2Doc2Info);
+        api2DocumentInfo.add(api2Doc3Info);
+
+        // contents for documents
+        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, "", api1Doc2Stream);
+        DocumentContent api2Doc3Content = createDocContent(api2Doc3Info, "", null);
+
+        Set<DocumentContent> api2DocContents = new HashSet<>();
+        api2DocContents.add(api2Doc1Content);
+        api2DocContents.add(api2Doc2Content);
+        api2DocContents.add(api2Doc3Content);
+
+        APIDetails api2Details = new APIDetails(api2, api2Definition);
+        api2Details.setGatewayConfiguration(api2GatewayConfig);
+        api2Details.addDocumentInformation(api2DocumentInfo);
+        api2Details.addDocumentContents(api2DocContents);
+        api2Details.setThumbnailStream(getClass().getClassLoader().getResourceAsStream("api2_thumbnail.jpg"));
+
+        ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
+        importExportManager.addAPIDetails(api2Details);
+    }
+
+    @Test(description = "Test API export and import")
+    void testApiExportAndImport () throws Exception {
+        printTestMethodName();
+        apiPublisher = Mockito.mock(APIPublisher.class);
+        testApiExport(importExportRootDirectory);
+        testApiImport(importExportRootDirectory);
+    }
+
+    private void testApiExport (String exportDir) throws Exception {
+
+        String api1Id = UUID.randomUUID().toString();
+        API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0").build();
+
+        String api1Doc1Id = UUID.randomUUID().toString();
+        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1", DocumentInfo.DocType.HOWTO,
+                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        String api1Doc2Id = UUID.randomUUID().toString();
+        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 1 DOC 2",
+                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        String api1Doc3Id = UUID.randomUUID().toString();
+        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
+                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+
+        Set<DocumentInfo> api1DocumentInfo = new HashSet<>();
+        api1DocumentInfo.add(api1Doc1Info);
+        api1DocumentInfo.add(api1Doc2Info);
+        api1DocumentInfo.add(api1Doc3Info);
+
+        // contents for documents
+        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, "Sample inline content for API1 DOC 1", null);
+        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, "", api1Doc2Stream);
+        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, "", null);
+
+        Set<DocumentContent> api1DocContent = new HashSet<>();
+        api1DocContent.add(api1Doc1Content);
+        api1DocContent.add(api1Doc2Content);
+        api1DocContent.add(api1Doc3Content);
+
+        APIDetails api1Details = new APIDetails(api1, api1Definition);
+        api1Details.setGatewayConfiguration(api1GatewayConfig);
+        api1Details.addDocumentInformation(api1DocumentInfo);
+        api1Details.addDocumentContents(api1DocContent);
+        api1Details.setThumbnailStream(getClass().getClassLoader().getResourceAsStream("api1_thumbnail.png"));
+
+        String api2Id = UUID.randomUUID().toString();
+        API api2 = createApi("provider2", api2Id, "testapi2", "3.0.0", "Test API 2 - version 3.0.0").build();
+        List<API> apis = new ArrayList<>();
+        apis.add(api1);
+        apis.add(api2);
+
         String api2Doc1Id = UUID.randomUUID().toString();
         DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api2doc1", "", "API 2 DOC 1", DocumentInfo.DocType.API_MESSAGE_FORMAT,
                 "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.API_LEVEL);
@@ -311,79 +364,58 @@ public class APIImportExportTestCase {
         DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api2doc2", "", "API 2 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM,
                 "other type", DocumentInfo.SourceType.URL, "http://api2.org/documentation/1", DocumentInfo.Visibility.PRIVATE);
 
-        List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
-        api1DocumentInfo.add(api1Doc1Info);
-        api1DocumentInfo.add(api1Doc2Info);
-        api1DocumentInfo.add(api1Doc3Info);
-
-        List<DocumentInfo> api2DocumentInfo = new ArrayList<>();
+        Set<DocumentInfo> api2DocumentInfo = new HashSet<>();
         api2DocumentInfo.add(api2Doc1Info);
         api2DocumentInfo.add(api2Doc2Info);
 
-        // contents for documents
-        // API 1
-        String api1Doc1Cotent = "Sample inline content for API1 DOC 1";
-        DocumentContent.Builder api1Doc1ContentBuilder = new DocumentContent.Builder();
-        api1Doc1ContentBuilder.documentInfo(api1Doc1Info);
-        api1Doc1ContentBuilder.inlineContent(api1Doc1Cotent);
-        DocumentContent.Builder api1Doc2ContentBuilder = new DocumentContent.Builder();
-        api1Doc2ContentBuilder.documentInfo(api1Doc2Info);
-        api1Doc2ContentBuilder.fileContent(api1Doc2Stream);
-        DocumentContent.Builder api1Doc3ContentBuilder = new DocumentContent.Builder();
-        api1Doc3ContentBuilder.documentInfo(api1Doc3Info);
-        // API 2
-        String api2Doc1Cotent = "Sample inline content for API2 DOC 1";
-        DocumentContent.Builder api2Doc1ContentBuilder = new DocumentContent.Builder();
-        api2Doc1ContentBuilder.documentInfo(api2Doc1Info);
-        api2Doc1ContentBuilder.inlineContent(api2Doc1Cotent);
-        DocumentContent.Builder api2Doc2ContentBuilder = new DocumentContent.Builder();
-        api2Doc1ContentBuilder.documentInfo(api2Doc2Info);
+        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info, "Sample inline content for API2 DOC 1", null);
+        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, "", null);
 
-        // mock method calls for retrieving Docs and content
-        // API 1
-        Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc1Id)).thenReturn(api1Doc1ContentBuilder.build());
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc2Id)).thenReturn(api1Doc2ContentBuilder.build());
-        Mockito.when(apiPublisher.getDocumentationContent(api1Doc3Id)).thenReturn(api1Doc3ContentBuilder.build());
-        // API 2
-        Mockito.when(apiPublisher.getAllDocumentation(api2Id, 0, Integer.MAX_VALUE)).thenReturn(api2DocumentInfo);
-        Mockito.when(apiPublisher.getDocumentationContent(api2Doc1Id)).thenReturn(api2Doc1ContentBuilder.build());
-        Mockito.when(apiPublisher.getDocumentationContent(api2Doc2Id)).thenReturn(api2Doc2ContentBuilder.build());
+        Set<DocumentContent> api2DocContent = new HashSet<>();
+        api2DocContent.add(api2Doc1Content);
+        api2DocContent.add(api2Doc2Content);
 
-        // mock method call to retrieve swagger definition
-        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
-        Mockito.when(apiPublisher.getSwagger20Definition(api2Id)).thenReturn(api2Definition);
+        APIDetails api2Details = new APIDetails(api2, api2Definition);
+        api2Details.setGatewayConfiguration(api2GatewayConfig);
+        api2Details.addDocumentInformation(api2DocumentInfo);
+        api2Details.addDocumentContents(api2DocContent);
+        api2Details.setThumbnailStream(getClass().getClassLoader().getResourceAsStream("api2_thumbnail.jpg"));
 
-        // mock method call to retrieve thumbnail
-        Mockito.when(apiPublisher.getThumbnailImage(api1Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api1_thumbnail.png"));
-        Mockito.when(apiPublisher.getThumbnailImage(api2Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api2_thumbnail.jpg"));
+        Set<APIDetails> apiDetailsSet = new HashSet<>();
+        apiDetailsSet.add(api1Details);
+        apiDetailsSet.add(api2Details);
+
+        // mock the method calls for retrieving APIs
+        Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
+        Mockito.when(apiPublisher.getAPIbyUUID(api2Id)).thenReturn(api2);
 
         // export
-        ImportExportManager importExportManager = new ImportExportManager(apiPublisher, exportDir);
-        importExportManager.exportAPIs(apis);
+        FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(apiPublisher, exportDir);
+
+        String exportedApiArchiveFilePath = importExportManager.exportAPIs(apiDetailsSet);
+
+        // check if two APIs are written to the file system
+        String unzipPath = importExportRootDirectory + File.separator + "unzipped-export-archive";
+        ImportExportUtils.extractArchive(exportedApiArchiveFilePath, unzipPath);
+        Assert.assertEquals(ImportExportUtils.getDirectoryList(unzipPath).size() == 2, true,
+                "Exported API count is not equal to 2");
+
+        Mockito.when(apiPublisher.checkIfAPIExists(api2Id)).thenReturn(true);
     }
 
-    private void testApiImport (String importDir) throws APIManagementException, IOException {
+    private APIListDTO testApiImport(String importDir) throws APIManagementException, IOException {
 
-        APIPublisher apiPublisher = Mockito.mock(APIPublisher.class);
         // Read the export archive
         FileInputStream exportedApiArchiveStream = null;
         try {
             exportedApiArchiveStream = new FileInputStream(new File(importDir + File.separator + "exported-apis.zip"));
-            ImportExportManager importExportManager = new ImportExportManager(apiPublisher, importDir);
-            importExportManager.importAPIs(exportedApiArchiveStream, null);
+            FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(apiPublisher, importDir);
+            return importExportManager.importAPIs(exportedApiArchiveStream, null);
+
         } finally {
             if (exportedApiArchiveStream != null) {
                 exportedApiArchiveStream.close();
             }
-        }
-
-        try {
-            FileUtils.deleteDirectory(new File(importDir));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
         }
     }
 
@@ -458,8 +490,21 @@ public class APIImportExportTestCase {
                 visibility(visibility).build();
     }
 
+    private static DocumentContent createDocContent (DocumentInfo documentInfo, String
+            inlineContent, InputStream fileContent) {
+
+        return new DocumentContent.Builder().documentInfo(documentInfo).inlineContent(inlineContent).
+                fileContent(fileContent).build();
+
+    }
+
+    private static void printTestMethodName () {
+        log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
+                " ------------------");
+    }
+
     @AfterClass
     protected void tearDown () {
-       ImportExportUtils.deleteDirectory(importExportRootDirectory);
+        ImportExportUtils.deleteDirectory(importExportRootDirectory);
     }
 }

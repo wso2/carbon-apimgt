@@ -9,7 +9,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.formparam.FileInfo;
 
@@ -32,8 +32,9 @@ public class ImportApiServiceImpl extends ImportApiService {
         try {
             publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
 
-            ImportExportManager importManager = new ImportExportManager(publisher, System.getProperty("java.io.tmpdir")
-                    + File.separator + "imported-api-archives-" + UUID.randomUUID().toString());
+            FileBasedApiImportExportManager importManager = new FileBasedApiImportExportManager(publisher,
+                    System.getProperty("java.io.tmpdir") + File.separator + "imported-api-archives-" +
+                            UUID.randomUUID().toString());
             APIListDTO apiList = importManager.importAPIs(fileInputStream, provider);
             return Response.status(Response.Status.CREATED).entity(apiList).build();
 

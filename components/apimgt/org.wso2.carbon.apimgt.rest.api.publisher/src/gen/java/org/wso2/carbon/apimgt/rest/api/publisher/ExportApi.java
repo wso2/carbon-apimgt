@@ -14,7 +14,7 @@ import java.io.File;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/publisher/v0.10/export")
+@Path("/api/am/publisher/v1/export")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the export API")
