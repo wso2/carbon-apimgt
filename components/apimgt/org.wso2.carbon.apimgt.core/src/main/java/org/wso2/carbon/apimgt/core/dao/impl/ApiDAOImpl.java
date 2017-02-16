@@ -98,34 +98,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Retrieves an instance of an API for the given name and version
-     * @param apiName name of the API
-     * @param version version of the API
-     * @return valid {@link API} object or null
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    @Override
-    public API getAPI(String apiName, String version) throws APIMgtDAOException {
-        final String query = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, DESCRIPTION, " +
-                "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
-                "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
-                "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API FROM AM_API WHERE NAME = ? " +
-                "AND VERSION = ?";
-
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiName);
-            statement.setString(2, version);
-
-            return constructAPIFromResultSet(connection, statement);
-        } catch (SQLException | IOException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-
-    /**
      * Retrieve a given instance of an APISummary object
      *
      * @param apiID The UUID that uniquely identifies an API

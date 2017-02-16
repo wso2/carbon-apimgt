@@ -56,15 +56,6 @@ public interface APIManager {
     API getAPIbyUUID(String uuid) throws APIManagementException;
 
     /**
-     * Returns an {@link API} object for the given api name and version
-     * @param apiName name of the API
-     * @param version version of the API
-     * @return an instance of {@link API} corresponding to the given name & version or null
-     * @throws APIManagementException
-     */
-    API getAPIbyNameAndVersion(String apiName, String version) throws APIManagementException;
-
-    /**
      * Checks the Availability of given String
      *@api
      * @return true, if already exists. False, otherwise
