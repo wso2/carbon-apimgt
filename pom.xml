@@ -636,6 +636,6 @@
         <lucene.version>3.6.2_1</lucene.version>
         <lucene.bundle.version>3.6.2.1</lucene.bundle.version>
         <h2.version>1.4.192</h2.version>
-        <carbon.lcm.version>1.0.0-SNAPSHOT</carbon.lcm.version>
+        <carbon.lcm.version>1.0.0</carbon.lcm.version>
     </properties>
 </project>
