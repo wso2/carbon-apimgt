@@ -57,11 +57,12 @@
         </label>
         <select id="policies-list-dropdown" multiple="multiple">
             {{#each @params.policies}}
-                <option value="{{this.uuid}}">{{this.displayName}}</option>
+                <option {{#if this.isSelected }}selected{{/if}}
+                        value="{{this.policyName}}">{{this.displayName}}</option>
             {{/each}}
         </select>
     </div>
     <div class="col-md-3">
-        <button type="button" class="btn btn-primary">Change</button>
+        <button id="update-tiers-button" type="button" class="btn btn-primary">Update</button>
     </div>
 </div>
