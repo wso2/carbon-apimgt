@@ -334,16 +334,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
 
+                    String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
+                    String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
+                    APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder.build());
+                    String updatedGatewayConfig = apiTemplateBuilder
+                            .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
+
                     API api = apiBuilder.build();
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
                             getApiDAO().updateAPI(api.getId(), api);
+                            getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
+                            getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
                         } else {
                             throw new APIManagementException("Context already Exist", ExceptionCodes
                                     .API_ALREADY_EXISTS);
                         }
                     } else {
                         getApiDAO().updateAPI(api.getId(), api);
+                        getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
+                        getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
