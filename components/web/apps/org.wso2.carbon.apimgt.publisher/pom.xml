@@ -43,13 +43,6 @@
             <classifier>uuf-component</classifier>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.auth.ui</artifactId>
-            <version>${carbon.apimgt.version}</version>
-            <type>zip</type>
-            <classifier>uuf-component</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
             <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
             <version>${carbon.uuf.common.version}</version>
@@ -65,11 +58,6 @@
             <classifier>uuf-theme</classifier>
         </dependency>
         <!--Backend dependencies-->
-        <dependency>
-            <groupId>org.wso2.carbon.uuf.sample</groupId>
-            <artifactId>org.wso2.carbon.uuf.sample.simple-auth.bundle</artifactId>
-            <version>${carbon.uuf.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator</artifactId>
