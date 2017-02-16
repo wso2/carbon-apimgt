@@ -60,6 +60,18 @@ public class OAuth2IntrospectionResponse {
      */
     private long nbf;
 
+    /*
+     * OPTIONAL. Integer time-stamp, measured in the number of seconds since January 1 1970 UTC, indicating when this
+     * token will expire, as defined in JWT
+     */
+    private long exp;
+
+    /*
+     * OPTIONAL. Integer time-stamp, measured in the number of seconds since January 1 1970 UTC, indicating when this
+     * token was originally issued, as defined in JWT
+     */
+    private long iat;
+
     public boolean isActive() {
         return active;
     }
@@ -106,5 +118,21 @@ public class OAuth2IntrospectionResponse {
 
     public void setNbf(long nbf) {
         this.nbf = nbf;
+    }
+
+    public long getExp() {
+        return exp;
+    }
+
+    public void setExp(long exp) {
+        this.exp = exp;
+    }
+
+    public long getIat() {
+        return iat;
+    }
+
+    public void setIat(long iat) {
+        this.iat = iat;
     }
 }

@@ -63,7 +63,8 @@ public class AuthenticatorAPI implements Microservice {
             String appContext = AuthUtil.getAppContext(request);
             String restAPIContext = "/api/am" + appContext;
             String accessToken = introspectService
-                    .getAccessToken(authResponseBean, userName, password, scopesList.split(" "));
+                    .getAccessToken(authResponseBean, appContext.substring(1), userName, password,
+                            scopesList.split(" "));
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1, part1 + "; path=" + appContext);

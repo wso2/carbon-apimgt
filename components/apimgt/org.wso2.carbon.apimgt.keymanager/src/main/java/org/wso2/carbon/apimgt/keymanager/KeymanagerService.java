@@ -116,13 +116,32 @@ public class KeymanagerService implements Microservice {
     @Path("/register")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    public Response registerClient(OAuthApplication body) {
+    public Response registerClient(OAuthApplication body, @HeaderParam("Authorization")
+            String authzHeader) throws KeyManagerException {
+        if (authzHeader == null || authzHeader.isEmpty()) {
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setCode("900401");
+            errorDTO.setMessage("Unauthorized. Authorization header not provided");
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
+        }
         if (applications.containsKey(body.getClientName())) {
             ErrorDTO errorDTO = new ErrorDTO();
             errorDTO.setCode("900409");
             errorDTO.setMessage("Client already exists with name " + body.getClientName());
             return Response.status(Response.Status.CONFLICT).entity(errorDTO).
                     build();
+        }
+
+        String[] decoded;
+        decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
+        String userName = decoded[0];
+        String password = decoded[1];
+
+        if (!KeyManagerUtil.validateUser(userName, password)) {
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setCode("900401");
+            errorDTO.setMessage("Unauthorized. Wrong Authorization header provided");
+            return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
         }
         String clientId = UUID.randomUUID().toString();
         String clientSecret = UUID.randomUUID().toString();
