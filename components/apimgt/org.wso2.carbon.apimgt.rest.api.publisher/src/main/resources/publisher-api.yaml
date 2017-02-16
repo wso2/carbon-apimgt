@@ -1062,6 +1062,63 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /apis/import-definition:
+
+  #----------------------------------------------------------------------------
+  # Import API from API Definition
+  #----------------------------------------------------------------------------
+    post:
+      consumes:
+         - multipart/form-data
+      x-scope: apim:api_create
+      summary: Import API Definition
+      description: |
+         This operation can be used to create api from api definition.
+      parameters:
+         - in: formData
+           name: file
+           description: Document to upload
+           type: file
+           required: true
+         - $ref: '#/parameters/Content-Type'
+         - $ref: '#/parameters/If-Match'
+         - $ref: '#/parameters/If-Unmodified-Since'
+         - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/API'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
 ######################################################
 # The "Document Collection" resource APIs
 ######################################################
