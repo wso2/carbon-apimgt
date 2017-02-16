@@ -67,7 +67,9 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900318, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900319, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
 
-    JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error");
+    JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error"),
+    TOKEN_CACHE_EXCEPTION(900322, "Token cache retrieving error", 500, " Error occurred while retrieving access token"
+            + "from cache");
 
     private final long errorCode;
     private final String errorMessage;
