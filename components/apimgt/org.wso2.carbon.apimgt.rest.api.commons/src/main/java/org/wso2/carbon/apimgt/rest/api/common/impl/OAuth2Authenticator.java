@@ -24,18 +24,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.common.cache.TokenCache;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.messaging.Headers;
@@ -49,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * OAuth2 implementation class
@@ -89,7 +88,9 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                         partialTokenFromHeader + partialTokenFromCookie :
                         partialTokenFromCookie;
             }
-            isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            if (accessToken != null) {
+                isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            }
         } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
             String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
@@ -122,14 +123,22 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @return responseData if the token is a valid token
      */
     private AccessTokenInfo validateToken(String accessToken) throws APIMgtSecurityException {
-        // 1. Send a request to key server's introspect endpoint to validate this token
-        AccessTokenInfo accessTokenInfo = getValidatedTokenResponse(accessToken);
 
-        // 2. Process the response and return true if the token is valid.
-        if (!accessTokenInfo.isTokenValid()) {
-            throw new APIMgtSecurityException("Invalid Access token.", ExceptionCodes.ACCESS_TOKEN_INACTIVE);
+        AccessTokenInfo accessTokenInfo;
+        try {
+            // 1. Send a request to key server's introspect endpoint to validate this token
+            accessTokenInfo = TokenCache.getInstance().getTokenCache().get(accessToken);
+            // 2. Process the response and return true if the token is valid.
+            if (!accessTokenInfo.isTokenValid()) {
+                throw new APIMgtSecurityException("Invalid Access token.", ExceptionCodes.ACCESS_TOKEN_INACTIVE);
+            }
+            return accessTokenInfo;
+        } catch (ExecutionException e) {
+            throw new APIMgtSecurityException("Error occurred while retrieving access token",
+                    ExceptionCodes.TOKEN_CACHE_EXCEPTION);
         }
-        return accessTokenInfo;
+
+
 
         /*
         // 1. Send a request to key server's introspect endpoint to validate this token
@@ -278,12 +287,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @param accessToken AccessToken to be validated.
      * @return the response from the key manager server.
      */
-    private AccessTokenInfo getValidatedTokenResponse(String accessToken) throws APIMgtSecurityException {
+    /*private AccessTokenInfo getValidatedTokenResponse(String accessToken) throws APIMgtSecurityException {
         try {
             KeyManager loginKeyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
             AccessTokenInfo accessTokenInfo = loginKeyManager.getTokenMetaData(accessToken);
             return accessTokenInfo;
-            /*
+
             url = new URL(authServerURL);
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -297,12 +306,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         } catch (java.io.IOException e) {
             log.error("Error invoking Authorization Server", e);
             throw new APIMgtSecurityException("Error invoking Authorization Server", ExceptionCodes.AUTH_GENERAL_ERROR);
-        */
+
         } catch (KeyManagementException e) {
             log.error("Error while validating access token", e);
             throw new APIMgtSecurityException("Error while validating access token", ExceptionCodes.AUTH_GENERAL_ERROR);
         }
-    }
+    }*/
 
     /**
      * @param responseStr validated token response string returned from the key server.

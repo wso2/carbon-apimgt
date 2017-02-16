@@ -123,6 +123,7 @@
             org.json.simple.*,
             org.apache.commons.io.*;
             com.google.gson.*,
+            com.google.common.cache.*,
             io.swagger.parser.*,
             io.swagger.models.*,
             io.swagger.util.*,
