@@ -23,14 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-
-
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
@@ -54,7 +51,6 @@ public class IntrospectService {
      */
     public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo) {
         responseBean.setTokenValid(true);
-        responseBean.setAccessToken(accessTokenInfo.getAccessToken());
         responseBean.setAuthUser(accessTokenInfo.getEndUserName());
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType("Bearer");
@@ -67,11 +63,10 @@ public class IntrospectService {
      * This method authenticate the user.
      *
      */
-    public String getAccessToken(AuthResponseBean authResponseBean, String userName, String password, String[] scopes)
-            throws APIManagementException {
+    public String getAccessToken(AuthResponseBean authResponseBean, String appName, String userName, String password,
+            String[] scopes) throws APIManagementException {
         //TODO - call method which provides client id and secret.
-
-        Map<String, String> consumerKeySecretMap = getConsumerKeySecret("publisher");
+        Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest(userName, password, "password", scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
@@ -103,7 +98,7 @@ public class IntrospectService {
     private Map<String, String> getConsumerKeySecret(String appName) throws APIManagementException {
 
         HashMap<String, String> consumerKeySecretMap;
-        if (AuthUtil.getConsumerKeySecretMap() == null) {
+        if (!AuthUtil.getConsumerKeySecretMap().containsKey(appName)) {
             consumerKeySecretMap = new HashMap<>();
             KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
             OAuthAppRequest oauthAppRequest = null;
@@ -120,10 +115,12 @@ public class IntrospectService {
             consumerKeySecretMap.put("CONSUMER_KEY", oAuthApplicationInfo.getClientId());
             consumerKeySecretMap.put("CONSUMER_SECRET", oAuthApplicationInfo.getClientSecret());
 
-            AuthUtil.setConsumerKeySecretMap(consumerKeySecretMap);
+            AuthUtil.getConsumerKeySecretMap().put(appName, consumerKeySecretMap);
+            return consumerKeySecretMap;
+        } else {
+            return AuthUtil.getConsumerKeySecretMap().get(appName);
         }
 
-        return AuthUtil.getConsumerKeySecretMap();
 
 //        Map<String, Map<String, String>> appKeys = new HashMap<>();
 //        Map<String, String> keys = new HashMap<>();

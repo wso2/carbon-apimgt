@@ -70,11 +70,23 @@ function createAPIHandler(event) {
             promised_create
                 .then(createAPICallback)
                 .catch(
-                    error => {
-                        let message_element = $("#general-alerts").find(".alert-danger");
-                        message_element.find(".alert-message").html(error.statusText);
-                        message_element.fadeIn("slow");
+                    function (error_response) {
+                        var error_data = JSON.parse(error_response.data);
+                        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            closeWith: ['click', 'backdrop'],
+                            progressBar: true,
+                            timeout: 5000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10
+                        });
                         $('[data-toggle="loading"]').loading('hide');
+                        console.debug(error_response);
                     });
             break;
     }
@@ -95,11 +107,23 @@ function createAPIFromSwagger(input_type) {
                 new_api.create(data)
                     .then(createAPICallback)
                     .catch(
-                        error => {
-                            let message_element = $("#general-alerts").find(".alert-danger");
-                            message_element.find(".alert-message").html(error.statusText);
-                            message_element.fadeIn("slow");
+                        function (error_response) {
+                            var error_data = JSON.parse(error_response.data);
+                            var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                closeWith: ['click', 'backdrop'],
+                                progressBar: true,
+                                timeout: 5000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10
+                            });
                             $('[data-toggle="loading"]').loading('hide');
+                            console.debug(error_response);
                         });
             });
     } else if (input_type === "swagger-file") {

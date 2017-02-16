@@ -90,6 +90,36 @@ class KeyManager {
 
 class AuthClient {
 
+    /**
+     * Static method to handle unauthorized user action error catch, It will look for response status code and skip !401 errors
+     * @param {object} error_response
+     */
+    static unauthorizedErrorHandler(error_response) {
+        if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+            console.debug(error_response);
+            throw error_response;
+            /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
+        }
+        var error_data = JSON.parse(error_response.data);
+        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".<br/> You will be redirect to the login page ...";
+        noty({
+            text: message,
+            type: 'error',
+            dismissQueue: true,
+            modal: true,
+            progressBar: true,
+            timeout: 5000,
+            layout: 'top',
+            theme: 'relax',
+            maxVisible: 10,
+            callback: {
+                afterClose: function () {
+                    window.location = contextPath + "/auth/login";
+                },
+            }
+        });
+    }
+
 }
 /**
  * An abstract representation of an API
@@ -141,10 +171,10 @@ class API {
     }
 
     _getCookie(name) {
-    var value = "; " + document.cookie;
-    var parts = value.split("; " + name + "=");
-    if (parts.length == 2) return parts.pop().split(";").shift();
-}
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
 
     /**
      *
@@ -153,9 +183,7 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        let key_scope = data.key_scope || 'default';
-        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1") //TODO: tmkb Depend on result from
-        // promise
+        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -200,7 +228,7 @@ class API {
             promise_create = this.client.then(
                 (client) => {
                     return client["API (Collection)"].post_apis_import_definition(
-                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"}));
+                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
         } else {
@@ -208,7 +236,7 @@ class API {
             promise_create = this.client.then(
                 (client) => {
                     return client["API (Collection)"].post_apis(
-                        payload, this._requestMetaData());
+                        payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
         }
@@ -228,9 +256,7 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(function () {
-                    window.location = contextPath + "/auth/login";
-                });
+                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         if (callback) {
@@ -244,7 +270,7 @@ class API {
         var promise_get = this.client.then(
             (client) => {
                 return client["API (Individual)"].get_apis_apiId(
-                    {apiId: id}, this._requestMetaData());
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         if (callback) {
@@ -255,23 +281,34 @@ class API {
     }
 
     /**
+     * Get the available policies information by tier level.
+     * @param {String} tier_level List API or Application or Resource type policies.parameter should be one of api, application and resource
+     * @returns {Promise.<TResult>}
+     */
+    policies(tier_level) {
+        var promise_policies = this.client.then(
+            (client) => {
+                return client["Throttling Tier (Collection)"].get_policies_tierLevel(
+                    {tierLevel: 'api'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promise_policies;
+    }
+
+    /**
      * Delete an API given an api identifier
      * @param id {String} UUID of the API which want to delete
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    deleteAPI(id, callback = null) {
-        var promise_get = this.client.then(
+    deleteAPI(id) {
+        var promised_delete = this.client.then(
             (client) => {
                 return client["API (Individual)"].delete_apis_apiId(
                     {apiId: id}, this._requestMetaData());
             }
-        );
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_delete;
     }
 
     /**
@@ -285,7 +322,7 @@ class API {
         var promise_lc_update = this.client.then(
             (client) => {
                 return client["API (Individual)"].post_apis_change_lifecycle(
-                    payload, this._requestMetaData());
+                    payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         if (callback) {
@@ -293,6 +330,21 @@ class API {
         } else {
             return promise_lc_update;
         }
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    update(api) {
+        var promised_delete = this.client.then(
+            (client) => {
+                let payload = {apiId: api.id, body: api, "Content-Type": "application/json"};
+                client["API (Individual)"].put_apis_apiId(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_delete;
     }
 
 }

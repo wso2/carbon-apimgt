@@ -15,4 +15,5 @@
  */
 
 function onGet(env) {
+    sendRedirect("apis");
 }

@@ -42,6 +42,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +57,8 @@ import javax.net.ssl.X509TrustManager;
  * This is the default key manager supported by API Manager
  */
 
-public class TestKeyManagerImpl implements KeyManager {
-    private static final Logger log = LoggerFactory.getLogger(TestKeyManagerImpl.class);
+public class LogInKeyManagerImpl implements KeyManager {
+    private static final Logger log = LoggerFactory.getLogger(LogInKeyManagerImpl.class);
 
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expiresIn";
@@ -101,18 +102,62 @@ public class TestKeyManagerImpl implements KeyManager {
             json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
         }
 
+        URL url;
+        HttpURLConnection urlConn = null;
         try {
-                oAuthApplicationInfo.setClientName("DCR_APP");
-                oAuthApplicationInfo.setClientId("publisher");
-                oAuthApplicationInfo.setClientSecret("1234-5678-9101");
+            //createSSLConnection();
+            // Calling DCR endpoint of IS
+            String dcrEndpoint = System.getProperty("dcrEndpoint",
+                    "http://localhost:9090/keyserver/register");
+            url = new URL(dcrEndpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("POST");
+            urlConn.setRequestProperty("content-type", "application/json");
+            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
+                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
+                    .getBytes(StandardCharsets.UTF_8));
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
+            urlConn.getOutputStream().write((json.toString()).getBytes("UTF-8"));
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode == 201) {  //If the DCR call is success
+                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
+                JsonParser parser = new JsonParser();
+                JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
+                String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
+                String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
+                String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
+                String grantTypes = "";
+                if (jObj.has(KeyManagerConstants.OAUTH_CLIENT_GRANTS)) {
+                    grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                }
 
+                oAuthApplicationInfo.setClientName(clientName);
+                oAuthApplicationInfo.setClientId(consumerKey);
+                oAuthApplicationInfo.setClientSecret(consumerSecret);
+                oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
+
+            } else { //If DCR call fails
+                throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName);
+            }
+        } catch (IOException e) {
+            String errorMsg = "Can not create OAuth application  : " + applicationName;
+            log.error(errorMsg, e);
+            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } catch (JsonSyntaxException e) {
             String errorMsg = "Error while processing the response returned from DCR endpoint.Can not create" +
                     " OAuth application : " + applicationName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
+                    " OAuth application : " + applicationName;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);*/
         } finally {
-
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
         return oAuthApplicationInfo;
     }
@@ -360,9 +405,9 @@ public class TestKeyManagerImpl implements KeyManager {
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            createSSLConnection();
+            //createSSLConnection();
             String introspectEndpoint = System
-                    .getProperty("introspectEndpoint", "https://localhost:9443/oauth2/introspect");
+                    .getProperty("introspectEndpoint", "http://localhost:9090/keyserver/introspect");
             url = new URL(introspectEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -373,19 +418,19 @@ public class TestKeyManagerImpl implements KeyManager {
             JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
             boolean active = jObj.getAsJsonPrimitive("active").getAsBoolean();
             if (active) {
-                String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
-                String endUser = jObj.getAsJsonPrimitive(KeyManagerConstants.USERNAME).getAsString();
+                //String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
+                //String endUser = jObj.getAsJsonPrimitive(KeyManagerConstants.USERNAME).getAsString();
                 long exp = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME).getAsLong();
                 long issuedTime = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME).getAsLong();
                 String scopes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString();
                 if (scopes != null) {
-                    String[] scopesArray = scopes.split("\\s+");
+                    String[] scopesArray = scopes.split(" ");
                     tokenInfo.setScopes(scopesArray);
                 }
                 tokenInfo.setTokenValid(true);
                 tokenInfo.setAccessToken(accessToken);
-                tokenInfo.setConsumerKey(consumerKey);
-                tokenInfo.setEndUserName(endUser);
+                //tokenInfo.setConsumerKey(consumerKey);
+                //tokenInfo.setEndUserName(endUser);
                 tokenInfo.setIssuedTime(issuedTime);
 
                 // Convert Expiry Time to milliseconds.
@@ -413,10 +458,10 @@ public class TestKeyManagerImpl implements KeyManager {
             String msg = "Error while processing the response returned from token introspect endpoint.";
             log.error("Error while processing the response returned from token introspect endpoint.", e);
             throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String msg = "Error while connecting to the token introspect endpoint.";
             log.error("Error while connecting to the token introspect endpoint.", e);
-            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);*/
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();

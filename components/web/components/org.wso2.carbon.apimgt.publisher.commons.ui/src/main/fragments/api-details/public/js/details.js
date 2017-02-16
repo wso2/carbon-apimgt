@@ -13,6 +13,7 @@ $(function () {
     $('#tab-7').bind('show.bs.tab', mediationTabHandler);
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
 });
 
 function loadOverview(jsonData) {
@@ -63,21 +64,34 @@ function lifecycleTabHandler(event) {
     var api_id = event.data.api_id;
 
     function renderLCTab(response) {
+        var api = response[0];
+        var policies = response[1];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
-        var api_data = JSON.parse(response.data);
+        var api_data = JSON.parse(api.data);
+        var policies_data = JSON.parse(policies.data);
         var callbacks = {
             onSuccess: function (data) {
+                $('#policies-list-dropdown').multiselect();
             }, onFailure: function (data) {
             }
         };
+        for (var index in policies_data) {
+            if (policies_data.hasOwnProperty(index)) {
+                var policy = policies_data[index];
+                policies_data[index].isSelected = api_data.policies.indexOf(policy.policyName) >= 0;
+            }
+        }
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
+            policies: policies_data
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
     }
 
-    api_client.get(api_id).then(renderLCTab);
+    var promised_api = api_client.get(api_id);
+    var promised_tiers = api_client.policies('api');
+    Promise.all([promised_api, promised_tiers]).then(renderLCTab)
 }
 
 function mediationTabHandler(event) {
@@ -114,4 +128,32 @@ function updateLifecycleHandler(event) {
             lifecycleTabHandler(event);
         }
     );
+}
+
+function updateTiersHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var data = {
+        api_client: api_client,
+        api_id: api_id
+    };
+    var selected_policy_uuids = $('#policies-list-dropdown').val();
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            api_data.policies = selected_policy_uuids;
+            var promised_update = this.api_client.update(api_data);
+            /* TODO: Handle the error sequence in promised_update ~tmkb*/
+            var message = "Update policies successfully.";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }.bind(data));
 }
