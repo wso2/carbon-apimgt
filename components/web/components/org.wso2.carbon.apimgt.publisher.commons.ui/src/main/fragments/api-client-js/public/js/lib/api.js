@@ -96,6 +96,7 @@ class AuthClient {
      */
     static unauthorizedErrorHandler(error_response) {
         if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+            console.debug(error_response);
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
@@ -329,6 +330,21 @@ class API {
         } else {
             return promise_lc_update;
         }
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    update(api) {
+        var promised_delete = this.client.then(
+            (client) => {
+                let payload = {apiId: api.id, body: api, "Content-Type": "application/json"};
+                client["API (Individual)"].put_apis_apiId(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_delete;
     }
 
 }

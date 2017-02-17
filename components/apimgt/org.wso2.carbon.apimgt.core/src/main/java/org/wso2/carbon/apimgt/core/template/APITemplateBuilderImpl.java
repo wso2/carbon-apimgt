@@ -76,13 +76,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     @Override
     public String getGatewayConfigFromSwagger(String gatewayConfig, String swagger) throws APITemplateException {
         //TODO implement logic
-        return "";
+        return "to be implement";
     }
 
     @Override
     public String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException {
         //TODO implement logic
-        return "";
+        return "to be implement";
     }
 
 }
