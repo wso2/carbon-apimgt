@@ -1,20 +1,27 @@
-$(function () {
-    var client = new API();
-    var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
-    client.get(api_id).then(loadOverview);
-    /* TODO: Need to handle error path ~tmkb*/
-    $('#bodyWrapper').on('click', 'button', function (e) {
-        var elementName = $(this).attr('data-name');
-        if (elementName == "editApiButton") {
-            $('#apiOverviewForm').toggleClass('edit').toggleClass('view');
+'use strict';
+/**
+ * Handle errors while getting API data by UUID, when loading the details page.
+ * @param {object} error_response object returned from Swagger-client library
+ */
+function apiGetErrorHandler(error_response) {
+    var message = "Error[" + error_response.status + "]: " + error_response.data;
+    noty({
+        text: message,
+        type: 'error',
+        dismissQueue: true,
+        modal: true,
+        progressBar: true,
+        timeout: 5000,
+        layout: 'top',
+        theme: 'relax',
+        maxVisible: 10,
+        callback: {
+            afterClose: function () {
+                window.location = contextPath + "/";
+            },
         }
     });
-    loadFromHash();
-    $('#tab-7').bind('show.bs.tab', mediationTabHandler);
-    $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
-    $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
-    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
-});
+}
 
 function loadOverview(jsonData) {
     //Manipulating data for the UI
@@ -143,17 +150,53 @@ function updateTiersHandler(event) {
             var api_data = JSON.parse(response.data);
             api_data.policies = selected_policy_uuids;
             var promised_update = this.api_client.update(api_data);
-            /* TODO: Handle the error sequence in promised_update ~tmkb*/
-            var message = "Update policies successfully.";
-            noty({
-                text: message,
-                type: 'success',
-                dismissQueue: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'topCenter',
-                theme: 'relax',
-                maxVisible: 10,
-            });
+            promised_update.then(
+                function (response) {
+                    var message = "Update policies successfully.";
+                    noty({
+                        text: message,
+                        type: 'success',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+            promised_update.catch(
+                function (error_response) {
+                    $('#policies-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
+                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
         }.bind(data));
 }
+
+$(function () {
+    var client = new API();
+    var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
+    client.get(api_id).then(loadOverview).catch(apiGetErrorHandler);
+    $('#bodyWrapper').on('click', 'button', function (e) {
+        var elementName = $(this).attr('data-name');
+        if (elementName == "editApiButton") {
+            $('#apiOverviewForm').toggleClass('edit').toggleClass('view');
+        }
+    });
+    $('#tab-7').bind('show.bs.tab', mediationTabHandler);
+    $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
+    $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    loadFromHash();
+});
