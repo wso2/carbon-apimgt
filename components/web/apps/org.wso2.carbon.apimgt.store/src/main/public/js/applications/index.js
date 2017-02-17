@@ -67,7 +67,7 @@ $(function () {
             columns: [
                 {'data': 'name'},
                 {'data': 'throttlingTier'},
-                {'data': 'status'},
+                {'data': 'lifeCycleStatus'},
                 {'data': 'subscriber'},
                 {'data': 'applicationId'},
             ],

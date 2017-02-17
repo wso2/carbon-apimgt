@@ -34,7 +34,7 @@ $(function () {
                         },onFailure: function (message, e) {}});
 
                     //TODO:Since the tiers are not setting from the rest api, the default tier is attached
-                    if(!api.policies){
+                    if (!api.policies || api.policies.length == 0) {
                         api.policies = ["Unlimited"];
                     }
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
@@ -288,7 +288,18 @@ $(function () {
                 if (element.id == "subscribe-button") {
                     var applicationId = $("#application-list option:selected").val();
                     if (applicationId == "-" || applicationId == "createNewApp") {
-                        alert('Please select an application before subscribing')
+                        var message = "Please select an application before subscribing";
+                        noty({
+                            text: message,
+                            type: 'warning',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10,
+                        });
                         return;
                     }
                     $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
@@ -297,7 +308,7 @@ $(function () {
 
 
                     var subscriptionData = {};
-                    subscriptionData.tier = tier;
+                    subscriptionData.policy = tier;
                     subscriptionData.applicationId = applicationId;
                     subscriptionData.apiIdentifier = apiIdentifier;
                     setAuthHeader(swaggerClient);
