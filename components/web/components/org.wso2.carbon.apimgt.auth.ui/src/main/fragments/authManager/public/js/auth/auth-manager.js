@@ -60,15 +60,25 @@ authManager.login = function () {
     });
 };
 authManager.logout = function () {
-    if (this.getAuthStatus()) {
-        this.setAuthStatus(false);
-        delete this.user;
-        $.cookie("token", null, { path: '/' });
-        $.cookie("user", null, { path: '/' });
-        $.cookie("userRole", null, { path: '/' });
-        //TODO revoke the token
-        route.routTo(loginPageUri);
-    } else {
-        route.routTo(loginPageUri);
-    }
+    var url = contextPath + '/auth/apis/login/remove';
+    return $.ajax({
+        type: 'POST',
+        url: url,
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+};
+
+var doLogout = function () {
+    var logoutPromise = authManager.logout();
+    logoutPromise.then(function (data, status, xhr) {
+        delete_cookie("WSO2_AM_TOKEN_1");
+        window.location.href = contextPath + "/auth/login";
+    })
+
+};
+
+function delete_cookie(name) {
+    document.cookie = name +'=; Path=' + contextPath + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 };

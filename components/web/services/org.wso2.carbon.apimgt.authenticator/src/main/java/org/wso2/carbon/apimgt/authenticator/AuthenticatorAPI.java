@@ -20,11 +20,10 @@ package org.wso2.carbon.apimgt.authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
+import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
@@ -52,7 +51,7 @@ public class AuthenticatorAPI implements Microservice {
      */
     @POST
     @Path ("/token")
-    @Produces ("application/json")
+    @Produces (MediaType.APPLICATION_JSON)
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(
             @Context Request request, @FormDataParam ("username") String userName,
@@ -81,13 +80,23 @@ public class AuthenticatorAPI implements Microservice {
                                             request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
                                             "").build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while doing introspection.";
 
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), null);
+            ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
 
-            log.error(errorMessage, e);
+            log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+
+    @POST
+    @Produces (MediaType.APPLICATION_JSON)
+    @Path ("/remove")
+    public Response logout(@Context Request request) {
+        String appContext = AuthUtil.getAppContext(request);
+        String restAPIContext = "/api/am" + appContext;
+        return Response.ok().header("Set-Cookie",
+                AuthenticatorConstants.TOKEN_2 + "=;Path=" + restAPIContext + ";Expires=Thu, 01-Jan-1970 00:00:01 GMT")
+                .build();
     }
 
 }
