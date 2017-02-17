@@ -1107,7 +1107,67 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
-
+######################################################
+# The "Multiple Subscriptions" resource API
+######################################################
+  '/subscriptions/multiple':
+#-----------------------------------------------------
+# Create a batch of Subscriptions
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.11/subscriptions/multiple\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/store/v0.11/subscriptions\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"tier\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
+      summary: |
+        Add a new subscription
+      description: |
+        This operation can be used to add a new subscription providing the id of the API and the application.
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Subscription object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+            items:
+              type: array
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Subscription (Multitple)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created objects as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Subscription'
+          headers:
+            Location:
+              description: |
+                Location to the newly created entity.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+            
 ######################################################
 # The "Individual Subscription" resource APIs
 ######################################################

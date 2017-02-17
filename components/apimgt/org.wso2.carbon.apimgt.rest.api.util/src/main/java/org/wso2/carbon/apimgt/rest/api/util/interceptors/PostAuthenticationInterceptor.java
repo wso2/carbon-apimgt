@@ -28,10 +28,13 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(PostAuthenticationInterceptor.class);
+    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public PostAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
@@ -41,6 +44,7 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
     public void handleMessage(Message message) throws Fault {
         String username = RestApiUtil.getLoggedInUsername();
         String groupId = RestApiUtil.getLoggedInUserGroupId();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
             //takes a consumer object using the user set in thread local carbon context
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -56,6 +60,9 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     }
                     return;
                 }
+                if (!SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
+                    loadTenantRegistry();
+                }
                 apiConsumer.addSubscriber(username, groupId);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Subscriber " + username + " added to AM_SUBSCRIBER database");
@@ -65,4 +72,21 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
             RestApiUtil.handleInternalServerError("Unable to add the subscriber " + username, e, logger);
         }
     }
+
+    private void loadTenantRegistry() throws APIManagementException {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            APIUtil.loadTenantRegistry(tenantId);
+            APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
+            APIUtil.loadTenantExternalStoreConfig(tenantId);
+            APIUtil.loadTenantWorkFlowExtensions(tenantId);
+            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
+            APIUtil.loadTenantConf(tenantId);
+
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error occured while loading registry for tenant '" + tenantDomain + "'");
+        }
+    }
+
 }

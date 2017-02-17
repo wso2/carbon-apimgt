@@ -229,6 +229,78 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     /**
+     * Creates a new subscriptions with the details specified in the body parameter
+     *
+     * @param body        new subscription details
+     * @param contentType Content-Type header
+     * @return newly added subscription as a SubscriptionDTO if successful
+     */
+    @Override
+    public Response subscriptionsPost(List<SubscriptionDTO> body, String contentType) {
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        List<SubscriptionDTO> subscriptions = new ArrayList<>();
+        for (SubscriptionDTO subscriptionDTO : body) {
+            APIConsumer apiConsumer;
+            try {
+                apiConsumer = RestApiUtil.getConsumer(username);
+                String applicationId = subscriptionDTO.getApplicationId();
+
+                //check whether user is permitted to access the API. If the API does not exist,
+                // this will throw a APIMgtResourceNotFoundException
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(subscriptionDTO.getApiIdentifier(), tenantDomain)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, subscriptionDTO.getApiIdentifier(), log);
+                }
+                APIIdentifier apiIdentifier = APIMappingUtil
+                        .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiIdentifier(), tenantDomain);
+
+                Application application = apiConsumer.getApplicationByUUID(applicationId);
+                if (application == null) {
+                    //required application not found
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    //application access failure occurred
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
+                //  throw an APIMgtAuthorizationFailedException with the reason as the message
+                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, subscriptionDTO.getTier());
+
+                apiIdentifier.setTier(subscriptionDTO.getTier());
+                SubscriptionResponse subscriptionResponse = apiConsumer
+                        .addSubscription(apiIdentifier, username, application.getId());
+                SubscribedAPI addedSubscribedAPI = apiConsumer
+                        .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
+                SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+                subscriptions.add(addedSubscriptionDTO);
+
+            } catch (APIMgtAuthorizationFailedException e) {
+                //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
+                // the message of the exception e
+                RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+            } catch (SubscriptionAlreadyExistingException e) {
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "Specified subscription already exists for API " + subscriptionDTO.getApiIdentifier() + " for application "
+                                + subscriptionDTO.getApplicationId(), e, log);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    //this happens when the specified API identifier does not exist
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, subscriptionDTO.getApiIdentifier(), e, log);
+                } else {
+                    //unhandled exception
+                    RestApiUtil.handleInternalServerError(
+                            "Error while adding the subscription API:" + subscriptionDTO.getApiIdentifier() + ", application:" + subscriptionDTO
+                                    .getApplicationId() + ", tier:" + subscriptionDTO.getTier(), e, log);
+                }
+            }
+        }
+        return Response.ok().entity(subscriptions).build();
+    }
+
+    /**
      * Gets a subscription by identifier
      *
      * @param subscriptionId  subscription identifier

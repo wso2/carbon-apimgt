@@ -69,7 +69,25 @@ public class SubscriptionsApi  {
     public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) SubscriptionDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
-    return delegate.subscriptionsPost(body,contentType);
+    return delegate.subscriptionsPost(body, contentType);
+    }
+
+    @POST
+    @Path("/multiple")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Add new subscriptions\n", notes = "Add new subscriptions\n", response = SubscriptionDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+
+            @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
+
+    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) List<SubscriptionDTO> body,
+                                      @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
+    {
+        return delegate.subscriptionsPost(body,contentType);
     }
 
     public String subscriptionsPostGetLastUpdatedTime(SubscriptionDTO body,String contentType)
