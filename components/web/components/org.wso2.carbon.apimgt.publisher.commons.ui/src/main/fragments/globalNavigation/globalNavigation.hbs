@@ -1,3 +1,4 @@
+{{fragment "org.wso2.carbon.apimgt.auth.ui.authManager"}}
 <header class="header header-default">
     <div class="container-fluid">
         <div class="pull-left brand float-remove-xs text-center-xs">
@@ -16,7 +17,7 @@
 	                   <i class="fw fw-user fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
                     <span class="hidden-xs">
-							<span class="userNameContainer">admin</span>
+							<span class="userNameContainer" id="userNameContainer"></span>
 							 <span class="caret"></span>
 					</span>
                 </a>
@@ -27,10 +28,12 @@
                         <span class="caret"></span>
                     </li>
                     <li class="divider visible-xs"></li>
-                    <li><a title="Logout" id="logoutLink">Logout</a></li>
+                    <li><a onclick="doLogout()" title="Logout" id="logoutLink">Logout</a></li>
                 </ul>
             </li>
         </ul>
 
     </div>
+    <script>document.getElementById('userNameContainer').textContent = (window.localStorage.getItem("user"));</script>
 </header>
+

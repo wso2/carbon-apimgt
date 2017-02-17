@@ -21,8 +21,9 @@ $(function(){
         var loginPromise = authManager.login();
         loginPromise.then(function(data,status,xhr){
             authManager.setAuthStatus(true);
-            authManager.setUserName('admin');//data.user.username;
+            authManager.setUserName(data.authUser);//data.user.username;
             authManager.setUserScope(data.scope);//data.user.role;
+            window.localStorage.setItem("user", data.authUser);
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
             $.cookie('userScope', data.scope, { path: '/' });*/
@@ -31,9 +32,22 @@ $(function(){
         });
         loginPromise.error(
             function (error) {
-                var element = $("#general-alerts").find('.alert-danger');
+                /*var element = $("#general-alerts").find('.alert-danger');
                 element.find('.alert-message').html(error.responseText);
-                element.fadeIn('slow');
+                element.fadeIn('slow');*/
+                var error_data = JSON.parse(error.responseText);
+                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message ;
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
 
             }
         );
