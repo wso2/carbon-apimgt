@@ -32,7 +32,7 @@ public class H2DataSource implements DataSource {
     static HikariDataSource dataSource = new HikariDataSource();
 
     H2DataSource() throws SQLException {
-        dataSource.setJdbcUrl("jdbc:h2:src/test/resources/amdb");
+        dataSource.setJdbcUrl("jdbc:h2:./src/test/resources/amdb");
         dataSource.setUsername("sa");
         dataSource.setPassword("sa");
         dataSource.setDriverClassName("org.h2.Driver");

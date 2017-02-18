@@ -193,20 +193,20 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
      * the full text search for API table
+     *
      * @param searchString The search string provided
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
-     *
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
             APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = sqlStatements.search(connection, roles, user, searchString, offset,
-                        limit)) {
+             PreparedStatement statement = sqlStatements.search(connection, roles, user, searchString, offset,
+                     limit)) {
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -215,23 +215,22 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria.
+     *
      * @param attributeMap Map containing the attributes and search queries for those attributes
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
-     *
      */
     @Override
-    @SuppressFBWarnings ("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIs(List<String> roles, String user,
-            Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException {
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap,
+                                         int offset, int limit) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = sqlStatements.attributeSearch(connection, roles, user, attributeMap,
-                        offset,
-                        limit)) {
+             PreparedStatement statement = sqlStatements.attributeSearch(connection, roles, user, attributeMap, offset,
+                     limit)) {
             DatabaseMetaData md = connection.getMetaData();
-            Iterator<Map.Entry<String , String>> entries = attributeMap.entrySet().iterator();
+            Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
             while (entries.hasNext()) {
                 Map.Entry<String, String> entry = entries.next();
                 String tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
@@ -410,7 +409,7 @@ public class ApiDAOImpl implements ApiDAO {
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
                 addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
                 addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
-                addAPIPermission(connection,  api.getPermissionMap(), apiPrimaryKey);
+                addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -1099,7 +1098,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void addGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
-        if (!gatewayConfig.isEmpty()) {
+        if (gatewayConfig != null && !gatewayConfig.isEmpty()) {
             ApiResourceDAO
                     .addBinaryResource(connection, apiID, UUID.randomUUID().toString(), ResourceCategory.GATEWAY_CONFIG,
                             MediaType.APPLICATION_JSON,
@@ -1115,7 +1114,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void updateGatewayConfig(Connection connection, String apiID, String gatewayConfig) throws SQLException {
-        if (!gatewayConfig.isEmpty()) {
+        if (gatewayConfig != null && !gatewayConfig.isEmpty()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
                     new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)));
         }
@@ -1373,7 +1372,7 @@ public class ApiDAOImpl implements ApiDAO {
         return policies;
     }
 
-    private boolean checkTableColumnExists (DatabaseMetaData databaseMetaData, String tableName, String columnName)
+    private boolean checkTableColumnExists(DatabaseMetaData databaseMetaData, String tableName, String columnName)
             throws
             APIMgtDAOException {
         try (ResultSet rs = databaseMetaData.getColumns(null, null, tableName, columnName)) {
@@ -1624,14 +1623,14 @@ public class ApiDAOImpl implements ApiDAO {
                 "VALUES (?,?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                    for (Map.Entry<String, String> entry : endpointMap.entrySet()) {
-                        preparedStatement.setString(1, apiId);
-                        preparedStatement.setString(2, operationId);
-                        preparedStatement.setString(3, entry.getKey());
-                        preparedStatement.setString(4, entry.getValue());
-                        preparedStatement.addBatch();
-                    }
-                    preparedStatement.executeBatch();
+                for (Map.Entry<String, String> entry : endpointMap.entrySet()) {
+                    preparedStatement.setString(1, apiId);
+                    preparedStatement.setString(2, operationId);
+                    preparedStatement.setString(3, entry.getKey());
+                    preparedStatement.setString(4, entry.getValue());
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
             }
         }
     }

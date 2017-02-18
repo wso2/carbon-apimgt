@@ -42,16 +42,16 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
     /**
      * Creates full text search query specific to database.
      *
-     * @param connection  Database connection.
+     * @param connection   Database connection.
      * @param searchString The search string provided
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link   PreparedStatement} Statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement search(Connection connection,
             List<String> roles, String user, String searchString, int offset, int limit) throws APIMgtDAOException {
 
@@ -59,9 +59,9 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
         final String query =
-                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(?) AND ((GROUP_ID IN (" +
-                        roleListBuilder.toString() + ")) OR (PROVIDER = ?)) GROUP BY UUID ORDER BY NAME LIMIT ? "
-                        + "OFFSET ?";
+                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '&')) AND "
+                        + "((GROUP_ID IN (" + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) GROUP BY UUID "
+                        + "ORDER BY NAME LIMIT ? OFFSET ?";
         int queryIndex = 1;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
@@ -74,7 +74,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             statement.setString(queryIndex, EVERYONE_ROLE);
             statement.setString(++queryIndex, user);
             statement.setInt(++queryIndex, limit);
-            statement.setInt(++queryIndex, --offset);
+            statement.setInt(++queryIndex, offset);
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -84,23 +84,23 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
     /**
      * Creates attribute search query specific to database.
      *
-     * @param connection  Database connection.
+     * @param connection   Database connection.
      * @param attributeMap Map containing the attributes and search queries for those attributes
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link   PreparedStatement} Statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement attributeSearch(
             Connection connection, List<String> roles, String user, Map<String, String> attributeMap, int offset,
             int limit) throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
-        StringBuffer searchQuery = new StringBuffer();
+        StringBuilder searchQuery = new StringBuilder();
         Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, String> entry = entries.next();
