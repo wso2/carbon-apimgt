@@ -40,34 +40,124 @@ $(function () {
 
                             var subData = {};
                             subData.data=JSON.parse(subscriptionData.data).list;
-                            //_initDataTable(subData);
-                            renderSubscriptionDetails(subData);
+                            var mode = "PREPEND";
+                            var context = {
+                                "subscriptionsAvailable": subData.data.length>0?true:false,
+                                "contextPath":contextPath
+
+                            };
+                            //Render APIs listing page
+                            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.subscription-listing", context, {
+                                onSuccess: function (data) {
+                                    $("#subscription").append(data);
+
+
+                                    $('#subscription-table').DataTable({
+                                        ajax: function (raw_data, callback, settings) {
+                                            callback(subData);
+                                        },
+                                        columns: [
+                                            {
+                                                "data": "apiIdentifier",
+                                                "render": function (data, type, row, meta) {
+                                                    if (type === 'display') {
+                                                        var api = row.apiName + " - "+ row.apiVersion;
+                                                        return $('<a>')
+                                                            .attr('href', contextPath + "/apis/" + data)
+                                                            .text(api)
+                                                            .wrap('<div></div>')
+                                                            .parent()
+                                                            .html();
+
+                                                    } else {
+                                                        return subData;
+                                                    }
+                                                }
+                                            },
+                                            {'data': 'policy'},
+                                            {'data': 'lifeCycleStatus'},
+                                            {'data': 'subscriptionId'}
+                                        ],
+                                        columnDefs: [
+                                            {
+                                                targets: ["subscription-listing-action"], //class name will be matched on the TH for the column
+                                                searchable: false,
+                                                sortable: false,
+                                                render: _renderActionButtons // Method to render the action buttons per row
+                                            }
+                                        ]
+                                    });
+                                }, onFailure: function (message, e) {
+                                    var message = "Error occurred while getting subscription details subscription." + message;
+                                    noty({
+                                        text: message,
+                                        type: 'error',
+                                        dismissQueue: true,
+                                        modal: true,
+                                        progressBar: true,
+                                        timeout: 2000,
+                                        layout: 'top',
+                                        theme: 'relax',
+                                        maxVisible: 10,
+                                    });
+                                }
+                            });
 
                             $(document).on('click', 'a.deleteSub', function () {
-                                alert("Are you sure you want to delete Application");
-
                                 var subId = $(this).attr("data-id");
-                                setAuthHeader(client);
-                                client["Subscription (individual)"].delete_subscriptions_subscriptionId({"subscriptionId": subId},
-                                    function (success) {
-                                        //TODO: Reload element only
-                                        window.location.reload(true);
+                                var type="alert";
+                                var layout="topCenter";
+                                noty({
+                                    text : "Do you want to un subscribe",
+                                    type : type,
+                                    dismissQueue: true,
+                                    layout : layout,
+                                    theme : 'relax',
+                                    buttons : [
+                                        {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                            $noty.close();
 
-                                    },
-                                    function (error) {
-                                        var message = "Error occurred while deleting subscription";
-                                        noty({
-                                            text: message,
-                                            type: 'warning',
-                                            dismissQueue: true,
-                                            modal: true,
-                                            progressBar: true,
-                                            timeout: 2000,
-                                            layout: 'top',
-                                            theme: 'relax',
-                                            maxVisible: 10,
-                                        });
-                                    });
+                                            setAuthHeader(client);
+                                            client["Subscription (individual)"].delete_subscriptions_subscriptionId({"subscriptionId": subId},
+                                                function (success) {
+                                                    var message = "Subscription removed successfully";
+                                                    noty({
+                                                        text: message,
+                                                        type: 'success',
+                                                        dismissQueue: true,
+                                                        modal: true,
+                                                        progressBar: true,
+                                                        timeout: 2000,
+                                                        layout: 'top',
+                                                        theme: 'relax',
+                                                        maxVisible: 10,
+                                                    });
+                                                    //TODO: Reload element only
+                                                    window.location.reload(true);
+
+                                                },
+                                                function (error) {
+                                                    var message = "Error occurred while deleting subscription";
+                                                    noty({
+                                                        text: message,
+                                                        type: 'warning',
+                                                        dismissQueue: true,
+                                                        modal: true,
+                                                        progressBar: true,
+                                                        timeout: 2000,
+                                                        layout: 'top',
+                                                        theme: 'relax',
+                                                        maxVisible: 10,
+                                                    });
+                                                });
+                                        }
+                                        },
+                                        {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                            $noty.close();
+                                        }
+                                        }
+                                    ]
+                                });
                             })
                         },
                         function (error) {
@@ -91,27 +181,30 @@ $(function () {
     });
 
     var renderAppDetails = function (data) {
-
-        $.ajax({
-            url: '/store/public/components/root/base/templates/applications/appDetails.hbs',
-            type: 'GET',
-            success: function (result) {
-                var templateScript = result;
-                var template = Handlebars.compile(templateScript);
-
-                var context = {
-                    "name": data.obj.name,
-                    "tier": data.obj.throttlingTier,
-                    "status": data.obj.status,
-                    "description": data.obj.description
-                };
-                var compiledHtml = template(context);
-                $("#details").append(compiledHtml);
-            },
-            error: function (e) {
-                alert("Error occurred while viewing application details");
-            }
-        });
+        var callbacks = {onSuccess: function () {
+        },onFailure: function (message, e) {
+            var message = "Error occurred while viewing application details";
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 2000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }};
+        var mode = "PREPEND";
+        var context = {
+            "name": data.obj.name,
+            "tier": data.obj.throttlingTier,
+            "status": data.obj.lifeCycleStatus,
+            "description": data.obj.description
+        };
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-details",context,
+            "application-details", mode, callbacks);
     };
 
     var renderApplicationKeys = function (data) {
@@ -208,72 +301,6 @@ $(function () {
         });
     };
 
-    var renderSubscriptionDetails = function (data) {
-        $.ajax({
-            url: '/store/public/components/root/base/templates/applications/app-subscriptions.hbs',
-            type: 'GET',
-            success: function (result) {
-                var templateScript = result;
-                var template = Handlebars.compile(templateScript);
-                var context = {
-                    "subscriptionsAvailable": data.data.length>0?true:false,
-                    "contextPath":contextPath
-
-                };
-
-                var compiledHtml = template(context);
-                $("#subscription").append(compiledHtml);
-                $('#subscription-table').DataTable({
-                    ajax: function (raw_data, callback, settings) {
-                        callback(data);
-                    },
-                    columns: [
-                        {
-                            "data": "apiIdentifier",
-                            "render" : function(data, type, row, meta){
-                                if(type === 'display'){
-                                    return $('<a>')
-                                        .attr('href', contextPath+"/apis/" + data)
-                                        .text(data)
-                                        .wrap('<div></div>')
-                                        .parent()
-                                        .html();
-
-                                } else {
-                                    return data;
-                                }
-                            }
-                        },
-                        {'data': 'policy'},
-                        {'data': 'lifeCycleStatus'},
-                        {'data': 'subscriptionId'}
-                    ],
-                    columnDefs: [
-                        {
-                            targets: ["subscription-listing-action"], //class name will be matched on the TH for the column
-                            searchable: false,
-                            sortable: false,
-                            render: _renderActionButtons // Method to render the action buttons per row
-                        }
-                    ]
-                });
-            },
-            error: function (e) {
-                var message = "Error occurred while viewing subscription details";
-                noty({
-                    text: message,
-                    type: 'warning',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 2000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                });
-            }
-        });
-    };
 
     var setDefaultContext = function (data) {
 
