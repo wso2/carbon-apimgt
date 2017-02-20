@@ -104,7 +104,6 @@ $(function () {
                             });
 
                             $(document).on('click', 'a.deleteSub', function () {
-                                //alert("Are you sure you want to delete Application");
                                 var subId = $(this).attr("data-id");
                                 var type="alert";
                                 var layout="topCenter";
@@ -155,34 +154,10 @@ $(function () {
                                         },
                                         {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
                                             $noty.close();
-                                            //noty({dismissQueue: true, force: true, layout: layout, theme:
-                                            // 'defaultTheme', text: 'You clicked "Cancel" button', type: 'error'});
                                         }
                                         }
                                     ]
-                                })
-                                // var subId = $(this).attr("data-id");
-                                // setAuthHeader(client);
-                                // client["Subscription (individual)"].delete_subscriptions_subscriptionId({"subscriptionId": subId},
-                                //     function (success) {
-                                //         //TODO: Reload element only
-                                //         window.location.reload(true);
-                                //
-                                //     },
-                                //     function (error) {
-                                //         var message = "Error occurred while deleting subscription";
-                                //         noty({
-                                //             text: message,
-                                //             type: 'warning',
-                                //             dismissQueue: true,
-                                //             modal: true,
-                                //             progressBar: true,
-                                //             timeout: 2000,
-                                //             layout: 'top',
-                                //             theme: 'relax',
-                                //             maxVisible: 10,
-                                //         });
-                                //     });
+                                });
                             })
                         },
                         function (error) {
@@ -326,72 +301,6 @@ $(function () {
         });
     };
 
-    var renderSubscriptionDetails = function (data) {
-        $.ajax({
-            url: '/store/public/components/root/base/templates/applications/subscription-listing.hbs',
-            type: 'GET',
-            success: function (result) {
-                var templateScript = result;
-                var template = Handlebars.compile(templateScript);
-                var context = {
-                    "subscriptionsAvailable": data.data.length>0?true:false,
-                    "contextPath":contextPath
-
-                };
-
-                var compiledHtml = template(context);
-                $("#subscription").append(compiledHtml);
-                $('#subscription-table').DataTable({
-                    ajax: function (raw_data, callback, settings) {
-                        callback(data);
-                    },
-                    columns: [
-                        {
-                            "data": "apiIdentifier",
-                            "render" : function(data, type, row, meta){
-                                if(type === 'display'){
-                                    return $('<a>')
-                                        .attr('href', contextPath+"/apis/" + data)
-                                        .text(data)
-                                        .wrap('<div></div>')
-                                        .parent()
-                                        .html();
-
-                                } else {
-                                    return data;
-                                }
-                            }
-                        },
-                        {'data': 'policy'},
-                        {'data': 'lifeCycleStatus'},
-                        {'data': 'subscriptionId'}
-                    ],
-                    columnDefs: [
-                        {
-                            targets: ["subscription-listing-action"], //class name will be matched on the TH for the column
-                            searchable: false,
-                            sortable: false,
-                            render: _renderActionButtons // Method to render the action buttons per row
-                        }
-                    ]
-                });
-            },
-            error: function (e) {
-                var message = "Error occurred while viewing subscription details";
-                noty({
-                    text: message,
-                    type: 'warning',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 2000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                });
-            }
-        });
-    };
 
     var setDefaultContext = function (data) {
 
