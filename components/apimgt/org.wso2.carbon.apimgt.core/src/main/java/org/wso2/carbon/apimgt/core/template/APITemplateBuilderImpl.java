@@ -63,6 +63,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = new APIConfigContext(this.api, packageName);
+            configcontext.validate();
             configcontext = new ResourceConfigContext(configcontext, this.api, apiResources);
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();

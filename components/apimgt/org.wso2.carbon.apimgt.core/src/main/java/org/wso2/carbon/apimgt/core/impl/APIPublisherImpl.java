@@ -223,7 +223,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiBuilder.uriTemplates(uriTemplateMap);
                 }
 
-                List<UriTemplate> list = new ArrayList<>(uriTemplateMap.values());
+                List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
                 List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
                 for (UriTemplate uriTemplate : list) {

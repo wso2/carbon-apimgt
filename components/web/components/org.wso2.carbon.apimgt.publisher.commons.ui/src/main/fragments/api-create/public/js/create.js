@@ -58,7 +58,8 @@ function createAPIHandler(event) {
             createAPIFromSwagger(input_type);
             break;
         case "endpoint-option":
-        // break; /* TODO: till endpoint and mock api creation implement ~tmkb */
+            addEndpoint(createAPIUsingEndpoint);
+            break; /* TODO: till endpoint and mock api creation implement ~tmkb */
         case "mock-option":
             var api_data = {
                 name: $("#new-api-name").val(),
@@ -129,4 +130,96 @@ function createAPIFromSwagger(input_type) {
     } else if (input_type === "swagger-file") {
         /* TODO: Implement swagger file  upload support ~tmkb*/
     }
+}
+
+/**
+ * Do create API with endpoint
+ *
+ * @param response
+ */
+function createAPIUsingEndpoint(response) {
+    var endpoint = [];
+    var responseObject = JSON.parse(response.data);
+    var id = responseObject.id;
+    endpoint.push({
+        'id' : id,
+        'type' : 'production'
+    });
+    endpoint.push({
+        'id' : id,
+        'type' : 'sandbox'
+    });
+    var api_data = {
+        name: $("#new-api-name").val(),
+        context: $('#new-api-context').val(),
+        version: $('#new-api-version').val(),
+        endpoint: endpoint
+    };
+    var new_api = new API('');
+    var promised_create = new_api.create(api_data);
+    promised_create
+        .then(createAPICallback)
+        .catch(
+            function (error_response) {
+                var error_data = JSON.parse(error_response.data);
+                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    closeWith: ['click', 'backdrop'],
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+                $('[data-toggle="loading"]').loading('hide');
+                console.debug(error_response);
+            });
+}
+
+/**
+ * Add endpoint when api is added by providing endpoint
+ *
+ * @param callBack function
+ */
+function addEndpoint(callBack) {
+    var url = $('#wsdl-url').val();
+    var name = $("#new-api-name").val();
+    var context = $('#new-api-context').val();
+    var version = $('#new-api-version').val();
+
+    //todo: need to endpoint type after it is defined
+	var body = {
+		name: 'endpoint_' + name + '_' + version,
+		endpointConfig: url,
+		endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
+		maxTps: {"production":10000,"sandbox":132}
+	};
+
+    var new_api = new API('');
+    var promised_create = new_api.addEndpoint(body);
+    promised_create
+        .then(callBack)
+        .catch(
+            function (error_response) {
+                var error_data = JSON.parse(error_response.data);
+                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    closeWith: ['click', 'backdrop'],
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+                $('[data-toggle="loading"]').loading('hide');
+                console.debug(error_response);
+            });
 }

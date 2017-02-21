@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ConfigContext {
     private static final Logger log = LoggerFactory.getLogger(ConfigContext.class);
 
-    public abstract void validate() throws Exception;
+    public abstract void validate() throws APITemplateException;
 
     public abstract VelocityContext getContext();
 
