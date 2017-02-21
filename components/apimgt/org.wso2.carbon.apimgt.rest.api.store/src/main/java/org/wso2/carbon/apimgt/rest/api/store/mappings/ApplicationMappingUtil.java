@@ -128,6 +128,7 @@ public class ApplicationMappingUtil {
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setId(applicationDTO.getApplicationId());
         application.setPermissionString(applicationDTO.getPermission());
+        application.setStatus(applicationDTO.getLifeCycleStatus());
         //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
         //application.setGroupId(applicationDTO.getGroupId());
         return application;
