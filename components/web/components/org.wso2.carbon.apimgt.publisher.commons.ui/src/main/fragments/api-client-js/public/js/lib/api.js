@@ -143,8 +143,7 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setSchemes(["http"]);
-                swagger.setHost("localhost:9090");
+                swagger.setHost(location.host);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (var index in scopes) {
