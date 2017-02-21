@@ -356,10 +356,13 @@ public class LogInKeyManagerImpl implements KeyManager {
 
             urlConn.getOutputStream().write((postParams).getBytes("UTF-8"));
             int responseCode = urlConn.getResponseCode();
-            if (responseCode != 200) { //If token generation failed
-                throw new RuntimeException(
+            if (responseCode == 404) { //If token endpoint not found
+                throw new KeyManagementException(
                         "Error occurred while calling token endpoint: HTTP error code : " + responseCode);
-            } else {
+            } else if (responseCode == 401) { //If token generation failed
+                throw new KeyManagementException("Invalid credentials provided. HTTP status code: " + responseCode,
+                        ExceptionCodes.INVALID_CREDENTIALS);
+            } else if (responseCode == 200) {
                 APIUtils.logDebug("Successfully submitted token request for old application token. HTTP status : 200",
                         log);
                 tokenInfo = new AccessTokenInfo();
@@ -375,6 +378,9 @@ public class LogInKeyManagerImpl implements KeyManager {
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
+            } else {
+                throw new KeyManagementException(
+                        "Error occurred while getting token for user : " + responseCode);
             }
         } catch (IOException e) {
             String msg = "Error while creating the new token for token regeneration.";

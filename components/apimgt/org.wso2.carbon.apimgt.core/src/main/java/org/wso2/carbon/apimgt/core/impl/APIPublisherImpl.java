@@ -237,12 +237,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (map.containsKey("production")) {
                         String uuid = map.get("production");
                         Endpoint endpoint = getEndpoint(uuid);
-                        dto.setProductionEndpoint(endpoint);
+                        dto.setProductionEndpoint(endpoint.getName());
                     }
                     if (map.containsKey("sandbox")) {
                         String uuid = map.get("sandbox");
                         Endpoint endpoint = getEndpoint(uuid);
-                        dto.setSandboxEndpoint(endpoint);
+                        dto.setSandboxEndpoint(endpoint.getName());
                     }
                     resourceList.add(dto);
                 }
@@ -1089,6 +1089,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         builder.id(UUID.randomUUID().toString());
         Endpoint endpoint1 = builder.build();
         getApiDAO().addEndpoint(endpoint1);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
         return endpoint1.getId();
     }
 
@@ -1101,6 +1103,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
         getApiDAO().updateEndpoint(endpoint);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
     }
 
     /**
@@ -1112,6 +1116,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
         getApiDAO().deleteEndpoint(endpointId);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
     }
 
     /**
@@ -1170,6 +1176,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } else {
             APIUtils.logDebug("Error when publishing API " + api.getName() + "-" + api.getVersion() + " to gateway.",
                     log);
+        }
+    }
+
+    /**
+     * Publishing new endpoint configurations to the subscribers
+     */
+    private void publishEndpointConfigToGateway() throws APIManagementException {
+        APITemplateBuilder template = new APITemplateBuilderImpl();
+        String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
+        APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
+        boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
+        if (status) {
+            log.info("Endpoint configuration published successfully");
+        } else {
+            log.error("Error in endpoint configuration publishing");
         }
     }
 }

@@ -120,6 +120,12 @@ class AuthClient {
         });
     }
 
+    static getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+
 }
 /**
  * An abstract representation of an API
@@ -170,12 +176,6 @@ class API {
         return swaggerURL;
     }
 
-    _getCookie(name) {
-        var value = "; " + document.cookie;
-        var parts = value.split("; " + name + "=");
-        if (parts.length == 2) return parts.pop().split(";").shift();
-    }
-
     /**
      *
      * @param data
@@ -183,7 +183,7 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1");
+        let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -337,14 +337,14 @@ class API {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
-        var promised_delete = this.client.then(
+        var promised_update = this.client.then(
             (client) => {
                 let payload = {apiId: api.id, body: api, "Content-Type": "application/json"};
-                client["API (Individual)"].put_apis_apiId(
-                    payload, this._requestMetaData());
+                return client["API (Individual)"].put_apis_apiId(
+                    payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
-        return promised_delete;
+        );
+        return promised_update;
     }
 
 }
