@@ -39,7 +39,6 @@ $(function () {
                                             tierList[i].selected = true;
                                         }
                                     }
-                                    console.log(tierList);
                                     context.appTiers = tierList;
                                     context.application = application;
 
