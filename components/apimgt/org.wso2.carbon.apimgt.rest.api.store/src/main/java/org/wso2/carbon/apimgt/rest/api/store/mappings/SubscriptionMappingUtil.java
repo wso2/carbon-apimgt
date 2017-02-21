@@ -65,6 +65,8 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setSubscriptionId(subscription.getId());
         if (subscription.getApi() != null) {
             subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
+            subscriptionDTO.setApiName(subscription.getApi().getName());
+            subscriptionDTO.setApiVersion(subscription.getApi().getVersion());
         }
         if (subscription.getApplication() != null) {
             subscriptionDTO.setApplicationId(subscription.getApplication().getId());
