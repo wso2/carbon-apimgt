@@ -162,6 +162,7 @@ public class Endpoint {
         }
 
         public Builder(Endpoint copy) {
+            this.name = copy.name;
             this.id = copy.id;
             this.endpointConfig = copy.endpointConfig;
             this.maxTps = copy.maxTps;

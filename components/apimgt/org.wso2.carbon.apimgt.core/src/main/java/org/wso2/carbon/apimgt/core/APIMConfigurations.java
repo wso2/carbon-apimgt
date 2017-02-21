@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.core;
 //import org.wso2.carbon.kernel.annotations.Configuration;
 //import org.wso2.carbon.kernel.annotations.Element;
 
+import java.io.File;
+
 /**
  * Class to hold APIM configuration parameters and generate yaml file
  * TODO refactor class when kernal is updated to 5.2.0
@@ -49,6 +51,13 @@ public class APIMConfigurations {
     private String storeContext = "/api/am/store/v1";
     //    @Element(description = "context for admin")
     private String adminContext = "/api/am/admin/v1";
+
+    //    @Element(description = "package name for gateway configs")
+    private String gatewayPackageName = "deployment.org.wso2.apim";
+
+    //    @Element(description = "package name path for gateway configs")
+    private String gatewayPackageNamePath =
+            "deployment" + File.separator + "org" + File.separator + "wso2" + File.separator + "apim";
 
     public String getHostname() {
         return hostname;
@@ -96,5 +105,13 @@ public class APIMConfigurations {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getGatewayPackageName() {
+        return gatewayPackageName;
+    }
+
+    public String getGatewayPackageNamePath() {
+        return gatewayPackageNamePath;
     }
 }

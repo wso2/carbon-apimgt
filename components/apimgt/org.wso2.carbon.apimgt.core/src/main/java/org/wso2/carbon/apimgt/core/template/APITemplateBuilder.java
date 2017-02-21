@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.template;
 
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.util.List;
@@ -33,6 +34,14 @@ public interface APITemplateBuilder {
      * @throws APITemplateException throws if an error occurred
      */
     String getConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources) throws APITemplateException;
+
+    /**
+     * Generate initial endpoint config
+     *
+     * @return endpoint source as Text
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException;
 
     /**
      * Used to update or create service implementation using a swagger
