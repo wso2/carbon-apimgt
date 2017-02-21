@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -65,6 +66,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(1, appId);
             try (ResultSet rs = ps.executeQuery()) {
                 application = this.createApplicationFromResultSet(rs);
+                setApplicationKeys(conn, application, appId);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -401,6 +403,26 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 throw new APIMgtDAOException(ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+    }
+
+    private void setApplicationKeys(Connection conn, Application application, String applicationId)
+            throws APIMgtDAOException {
+        final String getApplicationKeysQuery =
+                "SELECT CLIENT_ID, KEY_TYPE, STATE FROM AM_APP_KEY_MAPPING WHERE " + "APPLICATION_ID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(getApplicationKeysQuery)) {
+            ps.setString(1, applicationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setConsumerKey(rs.getString("CLIENT_ID"));
+                    apiKey.setType(rs.getString("KEY_TYPE"));
+                    apiKey.setState(rs.getString("STATE"));
+                    application.addKey(apiKey);
+                }
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);

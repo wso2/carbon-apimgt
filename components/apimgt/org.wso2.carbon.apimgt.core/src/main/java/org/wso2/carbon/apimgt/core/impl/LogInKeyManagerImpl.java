@@ -92,7 +92,7 @@ public class LogInKeyManagerImpl implements KeyManager {
         JsonArray callbackArray = new JsonArray();
         callbackArray.add(oAuthApplicationInfo.getCallbackUrl());
         json.add(KeyManagerConstants.OAUTH_REDIRECT_URIS, callbackArray);
-        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, oAuthApplicationInfo.getClientName());
+        json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, applicationName);
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
         JsonArray grantArray = new JsonArray();
         if (oAuthApplicationInfo.getGrantTypes() != null) {
@@ -226,11 +226,67 @@ public class LogInKeyManagerImpl implements KeyManager {
     }
 
     @Override public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
-        //TO-DO- USE CORRECT DCRM ENDPOINT
 
         APIUtils.logDebug("Trying to retrieve OAuth application for consumer key :" + consumerKey, log);
-
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        URL url;
+        HttpURLConnection urlConn = null;
+        try {
+            //createSSLConnection();
+            // Calling DCR endpoint of IS using consumer key
+            String dcrEndpoint = System
+                    .getProperty("dcrEndpoint", "http://localhost:9090/keyserver/register/" + consumerKey);
+            url = new URL(dcrEndpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod("GET");
+            urlConn.setRequestProperty("content-type", "application/json");
+            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
+                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
+                    .getBytes(StandardCharsets.UTF_8));
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
+            int responseCode = urlConn.getResponseCode();
+            if (responseCode == 200) {  //If the DCR call is success
+                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
+                JsonParser parser = new JsonParser();
+                JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
+                String consumerSecret = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SECRET).getAsString();
+                String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
+                String grantTypes = "";
+                if (jObj.has(KeyManagerConstants.OAUTH_CLIENT_GRANTS)) {
+                    grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                }
+
+                oAuthApplicationInfo.setClientName(clientName);
+                oAuthApplicationInfo.setClientId(consumerKey);
+                oAuthApplicationInfo.setClientSecret(consumerSecret);
+                oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
+
+            } else { //If DCR call fails
+                throw new KeyManagementException("Error while getting oauth application info for key : " + consumerKey,
+                        ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+            }
+        } catch (IOException e) {
+            String errorMsg = "Error while getting application with key : " + consumerKey;
+            log.error(errorMsg, e);
+            throw new KeyManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        } catch (JsonSyntaxException e) {
+            String errorMsg = "Error while processing the response returned from DCR endpoint.Can not find" +
+                    " OAuth application : " + consumerKey;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
+                    " OAuth application : " + applicationName;
+            log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);*/
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
+
+
        /* try {
            TO-DO-Add logic to retrieve oauth2 application
             }  */

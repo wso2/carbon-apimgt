@@ -125,11 +125,10 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
         }
         if (applications.containsKey(body.getClientName())) {
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setCode("900409");
-            errorDTO.setMessage("Client already exists with name " + body.getClientName());
-            return Response.status(Response.Status.CONFLICT).entity(errorDTO).
-                    build();
+            OAuthApplication oAuthApplication = applications.get(body.getClientName());
+            body.setClientId(oAuthApplication.getClientId());
+            body.setClientSecret(oAuthApplication.getClientSecret());
+            return Response.status(Response.Status.CREATED).entity(body).build();
         }
 
         String[] decoded;
