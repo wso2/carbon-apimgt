@@ -31,7 +31,7 @@ public enum Component {
         this.component = component;
     }
 
-    public String getComponent() {
+    public String getComponentAsString() {
         return component;
     }
 }

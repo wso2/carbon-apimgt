@@ -20,16 +20,21 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
-import org.wso2.carbon.apimgt.core.models.Component;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.LambdaFunction;
 
-//import java.io.BufferedReader;
-//import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation which observes to the API Manager events and trigger corresponding lambda function that belongs to
@@ -37,74 +42,56 @@ import java.net.URL;
  */
 public class LambdaFunctionTrigger implements EventObserver {
 
-
     private static final Logger log = LoggerFactory.getLogger(EventObserver.class);
 
-    private static final LambdaFunctionTrigger LAMBDA_FUNCTION_TRIGGER = new LambdaFunctionTrigger();
+    private LambdaFunctionTrigger() {
+
+    }
+
+    private static class SingletonHelper {
+        static final LambdaFunctionTrigger instance = new LambdaFunctionTrigger();
+    }
+
+    public static LambdaFunctionTrigger getInstance() {
+        return SingletonHelper.instance;
+    }
 
     @Override
-    public void captureEvent(Component component, Event event, String username) {
-
-        log.info("Testing 1 - Send Http GET request");
+    public void captureEvent(Event event, String username, ZonedDateTime eventTime,
+                             Map<String, String> payload) {
+        List<LambdaFunction> functions = null;
+        String jsonPayload = null;
+        
+        payload.put("Event", event.getEventAsString());
+        payload.put("Component", event.getComponent().getComponentAsString());
+        payload.put("Username", username);
+        payload.put("Event_Time", eventTime.toString());
+        
         try {
-            this.sendGet();
-        } catch (Exception e) {
-            log.error("Cannot invoke URI.");
+            functions = DAOFactory.getLambdaFunctionDAO().getUserFunctionsForEvent(username, event);
+            jsonPayload = new ObjectMapper().writeValueAsString(payload);
+        } catch (APIMgtDAOException e) {
+            log.error("Error loading functions for event from DB: -event: " + event + " -Username: " + username, e);
+        } catch (JsonProcessingException e) {
+            log.error("Error creating json string from map: -event: " + event + " -Username: " + username, e);
         }
-    }
 
-    /*public static void main(String[] args) throws Exception {
+        if (functions != null && !functions.isEmpty()) {
+            for (LambdaFunction function : functions) {
+                Response response = RestCallUtil.postRequest(function.getEndpointURI(), null, null,
+                        Entity.json(jsonPayload));
 
-        LambdaFunctionTrigger http = new LambdaFunctionTrigger();
+                int responseStatusCode = response.getStatus();
 
-        log.info("Testing 1 - Send Http GET request");
-        http.sendGet();
-
-    }*/
-
-    // HTTP GET request
-    private void sendGet() throws Exception {
-
-        //final String userAgent = "Mozilla/50.1.0";
-        String url = "http://wso2.com/products/api-manager";
-
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        // optional default is GET
-        con.setRequestMethod("GET");
-
-        //add request header
-        //con.setRequestProperty("User-Agent", userAgent);
-
-        int responseCode = con.getResponseCode();
-        log.info("\nSending 'GET' request to URL : " + url);
-        log.info("Response Code : " + responseCode);
-
-        String[] browsers = {"firefox", "opera", "chrome"}; // common browser names
-        String browser = null;
-        for (int count = 0; count < browsers.length && browser == null; count++) {
-            if (Runtime.getRuntime().exec(new String[]{"which", browsers[count]}).waitFor() == 0) {
-                browser = browsers[count]; // have found a browser
+                if(responseStatusCode / 100 == 2) {
+                    log.info("Function successfully invoked: " + function.getName() + " -event: " + event +
+                            " -Username: " + username + " -Response code: " + responseStatusCode);
+                }
+                else {
+                    log.error("Problem invoking function: " + function.getName() + " -event: " + event  +
+                            " -Username: " + username + " -Response code: " + responseStatusCode);
+                }
             }
         }
-        Runtime.getRuntime().exec(new String[]{browser, url}); // open using a browser
-
-       /* BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        //print result
-        log.info(response.toString());*/
-    }
-
-    public static LambdaFunctionTrigger getLambdaFunctionTriggerObject() {
-        return LAMBDA_FUNCTION_TRIGGER;
     }
 }

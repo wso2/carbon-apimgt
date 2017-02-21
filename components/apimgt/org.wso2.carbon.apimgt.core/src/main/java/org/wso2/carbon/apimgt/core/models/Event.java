@@ -19,22 +19,39 @@
  */
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Enum for selecting Event options
  */
 public enum Event {
-    API_CREATION("API_CREATION"), API_DELETION("API_DELETION"), API_UPDATE("API_UPDATE"),
-    LIFE_CYCLE_CHANGE("LIFE_CYCLE_CHANGE"), DOC_CREATION("DOC_CREATION"),
-    DOC_MODIFICATION("DOC_MODIFICATION"), DOC_DELETION("DOC_DELETION"),
-    SUBSCRIPTION_REQUEST("SUBSCRIPTION_REQUEST"), UNIDENTIFIED("UNIDENTIFIED");
+    API_CREATION("API_CREATION", Component.API_PUBLISHER), API_DELETION("API_DELETION", Component.API_PUBLISHER), API_UPDATE("API_UPDATE", Component.API_PUBLISHER), LIFE_CYCLE_CHANGE("LIFE_CYCLE_CHANGE", Component.API_PUBLISHER), DOC_CREATION("DOC_CREATION", Component.API_PUBLISHER), DOC_MODIFICATION("DOC_MODIFICATION", Component.API_PUBLISHER), DOC_DELETION("DOC_DELETION", Component.API_PUBLISHER), SUBSCRIPTION_REQUEST("SUBSCRIPTION_REQUEST", Component.API_PUBLISHER), APP_CREATION("APP_CREATION", Component.API_STORE), APP_MODIFICATION("APP_MODIFICATION", Component.API_STORE), APP_DELETION("APP_DELETION", Component.API_STORE), FORUM_CREATION("FORUM_CREATION", Component.API_STORE);
 
     private String event;
+    private Component component;
 
-    Event(String event) {
+    Event(String event, Component component) {
         this.event = event;
+        this.component = component;
     }
 
-    public String getEvent() {
+    public String getEventAsString() {
         return event;
+    }
+
+    public Component getComponent() {
+        return component;
+    }
+
+    public List<Event> getEventsForComponent(Component component) {
+        List<Event> componentSpecificEvents = new ArrayList<>();
+
+        for (Event event : Event.values()) {
+            if(event.getComponent().equals(component)) {
+                componentSpecificEvents.add(event);
+            }
+        }
+        return componentSpecificEvents;
     }
 }

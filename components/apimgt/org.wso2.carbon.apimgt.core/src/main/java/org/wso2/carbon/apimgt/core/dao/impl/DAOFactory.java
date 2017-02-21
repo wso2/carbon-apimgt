@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LambdaFunctionDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -185,6 +186,36 @@ public class DAOFactory {
         setup();
 
         return tagDAO;
+    }
+
+    public static LambdaFunctionDAO getLambdaFunctionDAO() throws APIMgtDAOException {
+        LambdaFunctionDAO lambdaFunctionDAO = null;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+            } else if (driverName.contains("DB2")) {
+
+            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+
+            } else if (driverName.contains("PostgreSQL")) {
+                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+
+            } else if (driverName.contains("Oracle")) {
+                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+            } else {
+                throw new APIMgtDAOException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+        setup();
+
+        return lambdaFunctionDAO;
     }
 
     private static void setup() throws APIMgtDAOException {

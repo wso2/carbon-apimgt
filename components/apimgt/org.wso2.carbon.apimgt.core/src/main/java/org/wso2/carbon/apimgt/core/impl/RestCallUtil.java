@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.core.exception.CookieNotFoundException;
 import org.wso2.carbon.apimgt.core.models.ContentType;
 
 import javax.ws.rs.client.Client;
@@ -10,9 +9,11 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class RestCallUtil {
@@ -21,9 +22,9 @@ public class RestCallUtil {
 
     }
 
-    public static Response loginRequest(String URL, String userName, String password) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
+    public static Response loginRequest(URI uri, String userName, String password, ContentType requestContentType) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         if (userName == null) {
             throw new IllegalArgumentException("UserName must not be null");
@@ -32,18 +33,19 @@ public class RestCallUtil {
             throw new IllegalArgumentException("Password must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
+        WebTarget target = client.target(uri);
         JSONObject loginInfoJsonObj = new JSONObject();
         loginInfoJsonObj.put("userName", userName);
         loginInfoJsonObj.put("password", password);
-        Invocation.Builder invocationBuilder = target.request(MediaType.TEXT_PLAIN);
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
         return invocationBuilder.post(Entity.json(loginInfoJsonObj.toJSONString()));
     }
 
-    public static Response rsaSignedFetchUserRequest(String URL, String userName, String userTenantDomain, String
-            rsaSignedToken) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
+    public static Response rsaSignedFetchUserRequest(URI uri, String userName, String userTenantDomain,
+                                                     String rsaSignedToken, ContentType requestContentType) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         if (userName == null) {
             throw new IllegalArgumentException("UserName must not be null");
@@ -55,76 +57,87 @@ public class RestCallUtil {
             throw new IllegalArgumentException("RSA signed token must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
+        WebTarget target = client.target(uri);
         JSONObject loginInfoJsonObj = new JSONObject();
         loginInfoJsonObj.put("userName", userName);
         loginInfoJsonObj.put("userTenantDomain", userTenantDomain);
-        Invocation.Builder invocationBuilder = target.request(MediaType.TEXT_PLAIN).header("rsaSignedToken",
-                rsaSignedToken);
-        return invocationBuilder.post(Entity.json(loginInfoJsonObj.toJSONString()));
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
+        return invocationBuilder.header("rsaSignedToken", rsaSignedToken).
+                post(Entity.json(loginInfoJsonObj.toJSONString()));
     }
 
-    public static Cookie captureCookie(Response response) throws CookieNotFoundException {
+    public static List<Cookie> captureCookies(Response response) {
         if (response == null) {
             throw new IllegalArgumentException("The response must not be null");
         }
-        Map<String, NewCookie> cookies = response.getCookies();
-        if (cookies.isEmpty()) {
-            throw new CookieNotFoundException("No cookies found");
-        }
-        Map.Entry<String, NewCookie> cookieEntry = cookies.entrySet().iterator().next();
-        return cookieEntry.getValue();
+        List<Cookie> cookies = new ArrayList<>();
+        Map<String, NewCookie> responseCookies = response.getCookies();
+        cookies.addAll(responseCookies.values());
+        return cookies;
     }
 
-    public static Response getRequest(String URL, Cookie cookie, ContentType requestContentType) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
-        }
-        if (requestContentType == null) {
-            throw new IllegalArgumentException("The request content type must not be null");
+    public static Response getRequest(URI uri, ContentType requestContentType, List<Cookie> cookies) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
-        Invocation.Builder invocationBuilder = target.request(requestContentType.getMediaType());
-        return invocationBuilder.cookie(cookie).get();
+        WebTarget target = client.target(uri);
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
+        if (cookies != null && !cookies.isEmpty()) {
+            for (Cookie cookie : cookies) {
+                invocationBuilder = invocationBuilder.cookie(cookie);
+            }
+        }
+        return invocationBuilder.get();
     }
 
-    public static Response postRequest(String URL, Cookie cookie, ContentType requestContentType, Entity entity) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
-        }
-        if (requestContentType == null) {
-            throw new IllegalArgumentException("The request content type must not be null");
+    public static Response postRequest(URI uri, ContentType requestContentType, List<Cookie> cookies, Entity entity) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
-        Invocation.Builder invocationBuilder = target.request(requestContentType.getMediaType());
-        return invocationBuilder.cookie(cookie).post(entity);
+        WebTarget target = client.target(uri);
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
+        if (cookies != null && !cookies.isEmpty()) {
+            for (Cookie cookie : cookies) {
+                invocationBuilder = invocationBuilder.cookie(cookie);
+            }
+        }
+        return invocationBuilder.post(entity);
     }
 
-    public static Response putRequest(String URL, Cookie cookie, ContentType requestContentType, Entity entity) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
-        }
-        if (requestContentType == null) {
-            throw new IllegalArgumentException("The request content type must not be null");
+    public static Response putRequest(URI uri, ContentType requestContentType, List<Cookie> cookies, Entity entity) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
-        Invocation.Builder invocationBuilder = target.request(requestContentType.getMediaType());
-        return invocationBuilder.cookie(cookie).put(entity);
+        WebTarget target = client.target(uri);
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
+        if (cookies != null && !cookies.isEmpty()) {
+            for (Cookie cookie : cookies) {
+                invocationBuilder = invocationBuilder.cookie(cookie);
+            }
+        }
+        return invocationBuilder.put(entity);
     }
 
-    public static Response deleteRequest(String URL, Cookie cookie, ContentType requestContentType) {
-        if (URL == null) {
-            throw new IllegalArgumentException("The URL must not be null");
-        }
-        if (requestContentType == null) {
-            throw new IllegalArgumentException("The request content type must not be null");
+    public static Response deleteRequest(URI uri, ContentType requestContentType, List<Cookie> cookies) {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
         }
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URL);
-        Invocation.Builder invocationBuilder = target.request(requestContentType.getMediaType());
-        return invocationBuilder.cookie(cookie).delete();
+        WebTarget target = client.target(uri);
+        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
+                target.request(requestContentType.getMediaType());
+        if (cookies != null && !cookies.isEmpty()) {
+            for (Cookie cookie : cookies) {
+                invocationBuilder = invocationBuilder.cookie(cookie);
+            }
+        }
+        return invocationBuilder.delete();
     }
 }

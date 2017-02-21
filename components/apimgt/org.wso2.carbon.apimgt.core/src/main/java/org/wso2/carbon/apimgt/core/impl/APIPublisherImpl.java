@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Event;
@@ -68,6 +67,8 @@ import org.wso2.carbon.apimgt.lifecycle.manager.sql.beans.LifecycleHistoryBean;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +85,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    private List<EventObserver> observerList = new ArrayList<EventObserver>();
+    private List<EventObserver> observerList = new ArrayList<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager) {
@@ -167,7 +168,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
-       long subscriptionCount = 0;
+        long subscriptionCount = 0;
         try {
             subscriptionCount = getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
@@ -273,9 +274,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 publishToGateway(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
-                ObserverNotifierThread observerNotifierThread =
-                        new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_CREATION, getUsername(), this);
-                observerNotifierThread.start();
+                Map<String, String> eventPayload = new HashMap<>();
+                eventPayload.put("API_Id", createdAPI.getId());
+                eventPayload.put("API_Name", createdAPI.getName());
+                eventPayload.put("API_Version", createdAPI.getVersion());
+                eventPayload.put("API_Description", createdAPI.getDescription());
+                eventPayload.put("API_Context", createdAPI.getContext());
+                eventPayload.put("API_LCStatus", createdAPI.getLifeCycleStatus());
+                eventPayload.put("API_Permission", createdAPI.getApiPermission());
+                ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_CREATION, getUsername(),
+                        ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
             } else {
                 String message = "Duplicate API already Exist with name/Context " + apiBuilder.getName();
                 log.error(message);
@@ -354,10 +363,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
-                        ObserverNotifierThread observerNotifierThread =
-                                new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_UPDATE,
-                                        getUsername(), this);
-                        observerNotifierThread.start();
+                        Map<String, String> eventPayload = new HashMap<>();
+                        eventPayload.put("API_Id", api.getId());
+                        eventPayload.put("API_Name", api.getName());
+                        eventPayload.put("API_Version", api.getVersion());
+                        eventPayload.put("API_Description", api.getDescription());
+                        eventPayload.put("API_Context", api.getContext());
+                        eventPayload.put("API_LCStatus", api.getLifeCycleStatus());
+                        ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_UPDATE, getUsername(),
+                                ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                        ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
                     }
                 } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
@@ -425,6 +440,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method will return map with role names and its permission values.
+     *
      * @param permissionJsonString
      * @return
      * @throws ParseException
@@ -445,7 +461,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
                 } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
-                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.DELETE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
@@ -496,7 +512,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
                                     (previousAPI.getLifecycleInstanceId()));
                             getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), APIStatus
-                                    .DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(), getUsername(),
+                                            .DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(), getUsername(),
                                     previousAPI.build());
                         }
                     }
@@ -536,7 +552,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param apiId        The API to be copied
+     * @param apiId      The API to be copied
      * @param newVersion The version of the new API
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
@@ -622,8 +638,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param resourceId         UUID of API
-     * @param content       content of the file as an Input Stream
+     * @param resourceId UUID of API
+     * @param content    content of the file as an Input Stream
      * @param fileName
      * @throws APIManagementException if failed to add the file
      */
@@ -719,7 +735,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Updates a given documentation
      *
-     * @param apiId         String
+     * @param apiId        String
      * @param documentInfo Documentation
      * @throws APIManagementException if failed to update docs
      */
@@ -820,10 +836,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
-                    ObserverNotifierThread observerNotifierThread =
-                            new ObserverNotifierThread(Component.API_PUBLISHER, Event.API_DELETION,
-                                    getUsername(), this);
-                    observerNotifierThread.start();
+                    Map<String, String> eventPayload = new HashMap<>();
+                    eventPayload.put("API_Id", api.getId());
+                    eventPayload.put("API_Name", api.getName());
+                    eventPayload.put("API_Version", api.getVersion());
+                    eventPayload.put("API_Provider", api.getProvider());
+                    eventPayload.put("API_Description", api.getDescription());
+                    ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
+                            ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                    ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
                 }
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
@@ -987,13 +1008,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * Save the thumbnail icon for api
-     * @param apiId apiId of api
+     *
+     * @param apiId       apiId of api
      * @param inputStream inputStream of image
      * @throws APIManagementException
      */
     @Override
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
-                                                                            throws APIManagementException {
+            throws APIManagementException {
         try {
             getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
@@ -1145,8 +1167,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public void notifyObservers(Component component, Event event, String username) {
-        observerList.forEach(x -> x.captureEvent(component, event, username));
+    public void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation) {
+        observerList.forEach(eventObserver -> eventObserver.captureEvent(event, username, eventTime, extraInformation));
     }
 
     @Override

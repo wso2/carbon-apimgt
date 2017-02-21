@@ -21,38 +21,35 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
-import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
+
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 /**
  * Thread used to notify the observers whenever an event occurs in an Observable
  */
-public class ObserverNotifierThread implements Runnable {
+public class ObserverNotifier implements Runnable {
 
-    private Component component;
     private Event event;
     private String username;
-    private Thread threadObj;
     private APIMObservable observable;
+    private ZonedDateTime eventTime;
+    private Map<String, String> extraInformation;
 
-    public ObserverNotifierThread(Component component, Event event, String username, APIMObservable observable) {
-        this.component = component;
+    public ObserverNotifier(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation,
+                            APIMObservable observable) {
         this.event = event;
         this.username = username;
         this.observable = observable;
+        this.eventTime = eventTime;
+        this.extraInformation = extraInformation;
     }
 
     @Override
     public void run() {
         if (observable != null) {
-            observable.notifyObservers(component, event, username);
-        }
-    }
-
-    public void start() {
-        if (threadObj == null) {
-            threadObj = new Thread(this);
-            threadObj.start();
+            observable.notifyObservers(event, username, eventTime, extraInformation);
         }
     }
 }

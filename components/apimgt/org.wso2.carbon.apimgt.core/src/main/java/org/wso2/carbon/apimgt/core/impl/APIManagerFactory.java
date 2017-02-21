@@ -86,8 +86,9 @@ public class APIManagerFactory {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
-            userAwareAPIPublisher.registerObserver(EventLogger.getEventLoggerObject());
-            userAwareAPIPublisher.registerObserver(LambdaFunctionTrigger.getLambdaFunctionTriggerObject());
+            userAwareAPIPublisher.registerObserver(EventLogger.getInstance());
+            userAwareAPIPublisher.registerObserver(LambdaFunctionTrigger.getInstance());
+
             return userAwareAPIPublisher;
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Provider", e);
@@ -116,8 +117,8 @@ public class APIManagerFactory {
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
-            userAwareAPIStore.registerObserver(EventLogger.getEventLoggerObject());
-            userAwareAPIStore.registerObserver(LambdaFunctionTrigger.getLambdaFunctionTriggerObject());
+            userAwareAPIStore.registerObserver(EventLogger.getInstance());
+            userAwareAPIStore.registerObserver(LambdaFunctionTrigger.getInstance());
 
             return userAwareAPIStore;
         } catch (APIMgtDAOException e) {

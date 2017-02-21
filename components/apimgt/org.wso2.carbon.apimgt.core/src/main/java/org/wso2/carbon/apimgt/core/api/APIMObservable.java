@@ -19,8 +19,10 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.core.models.Component;
 import org.wso2.carbon.apimgt.core.models.Event;
+
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 /**
  * Observable interface which can be observed by Observers whenever an event occurs in API manager.
@@ -29,7 +31,7 @@ public interface APIMObservable {
 
     void registerObserver(EventObserver observer);
 
-    void notifyObservers(Component component, Event event, String username);
+    void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation);
 
     void removeObserver(EventObserver observer);
 
