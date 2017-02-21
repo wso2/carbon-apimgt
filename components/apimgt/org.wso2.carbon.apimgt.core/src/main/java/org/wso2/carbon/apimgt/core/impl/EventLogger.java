@@ -40,7 +40,7 @@ public class EventLogger implements EventObserver {
     }
 
     private static class SingletonHelper {
-        static final EventLogger instance = new EventLogger();
+        private static final EventLogger instance = new EventLogger();
     }
 
     public static EventLogger getInstance() {
@@ -48,9 +48,10 @@ public class EventLogger implements EventObserver {
     }
 
     @Override
-    public void captureEvent(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation) {
+    public void captureEvent(Event event, String username, ZonedDateTime eventTime,
+                             Map<String, String> extraInformation) {
         // the following statement is used to log any events
-        log.info("New event occurred: -Event: " + event.getEventAsString() + " -Component Name: " + event.getComponent() +
-                " -Username: " + username + "\n");
+        log.info("New event occurred: -Event: " + event.getEventAsString() + " -Component Name: " +
+                event.getComponent() + " -Username: " + username + "\n");
     }
 }

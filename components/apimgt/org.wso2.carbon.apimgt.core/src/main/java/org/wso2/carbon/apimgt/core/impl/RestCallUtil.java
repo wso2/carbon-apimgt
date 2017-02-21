@@ -3,6 +3,11 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.core.models.ContentType;
 
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -11,11 +16,11 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
+/**
+ * Utility class which handles basics of a rest call.
+ * Specifically used in this project to enable inter-cloud rest communication.
+ */
 public class RestCallUtil {
 
     private RestCallUtil() {

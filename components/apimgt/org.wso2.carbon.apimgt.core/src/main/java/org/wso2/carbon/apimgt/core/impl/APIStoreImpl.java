@@ -445,7 +445,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation) {
+    public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
+                                Map<String, String> extraInformation) {
         observerList.forEach(x -> x.captureEvent(event, username, eventTime, extraInformation));
     }
 

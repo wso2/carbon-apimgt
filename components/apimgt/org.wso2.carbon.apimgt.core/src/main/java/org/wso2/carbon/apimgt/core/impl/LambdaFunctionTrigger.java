@@ -30,11 +30,11 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.LambdaFunction;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
 /**
  * Implementation which observes to the API Manager events and trigger corresponding lambda function that belongs to
@@ -49,7 +49,7 @@ public class LambdaFunctionTrigger implements EventObserver {
     }
 
     private static class SingletonHelper {
-        static final LambdaFunctionTrigger instance = new LambdaFunctionTrigger();
+        private static final LambdaFunctionTrigger instance = new LambdaFunctionTrigger();
     }
 
     public static LambdaFunctionTrigger getInstance() {
@@ -61,12 +61,12 @@ public class LambdaFunctionTrigger implements EventObserver {
                              Map<String, String> payload) {
         List<LambdaFunction> functions = null;
         String jsonPayload = null;
-        
+
         payload.put("Event", event.getEventAsString());
         payload.put("Component", event.getComponent().getComponentAsString());
         payload.put("Username", username);
         payload.put("Event_Time", eventTime.toString());
-        
+
         try {
             functions = DAOFactory.getLambdaFunctionDAO().getUserFunctionsForEvent(username, event);
             jsonPayload = new ObjectMapper().writeValueAsString(payload);
@@ -83,12 +83,11 @@ public class LambdaFunctionTrigger implements EventObserver {
 
                 int responseStatusCode = response.getStatus();
 
-                if(responseStatusCode / 100 == 2) {
+                if (responseStatusCode / 100 == 2) {
                     log.info("Function successfully invoked: " + function.getName() + " -event: " + event +
                             " -Username: " + username + " -Response code: " + responseStatusCode);
-                }
-                else {
-                    log.error("Problem invoking function: " + function.getName() + " -event: " + event  +
+                } else {
+                    log.error("Problem invoking function: " + function.getName() + " -event: " + event +
                             " -Username: " + username + " -Response code: " + responseStatusCode);
                 }
             }

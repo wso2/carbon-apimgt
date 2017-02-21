@@ -1,5 +1,9 @@
 package org.wso2.carbon.apimgt.core.exception;
 
+/**
+ * This exception has to be thrown when key is not found in the keystore or in case of other exceptions when trying to
+ * get key.
+ */
 public class NoSuchKeyException extends Exception {
 
     // Constructor without parameters

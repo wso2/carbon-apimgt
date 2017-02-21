@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * DAO implementation for Lambda functions
+ */
 public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
 
     @Override
@@ -155,15 +158,15 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
 
         for (LambdaFunction function : functions) {
             boolean isFunctionExist = false;
-            for (Iterator<LambdaFunction> iterator = userFunctionsInDB.iterator(); iterator.hasNext();) {
+            for (Iterator<LambdaFunction> iterator = userFunctionsInDB.iterator(); iterator.hasNext(); ) {
                 LambdaFunction localStoredFunction = iterator.next();
-                if(function.equals(localStoredFunction)) {
+                if (function.equals(localStoredFunction)) {
                     isFunctionExist = true;
                     iterator.remove();
                     break;
                 }
             }
-            if(!isFunctionExist) {
+            if (!isFunctionExist) {
                 addNewFunction(userName, function);
             }
         }

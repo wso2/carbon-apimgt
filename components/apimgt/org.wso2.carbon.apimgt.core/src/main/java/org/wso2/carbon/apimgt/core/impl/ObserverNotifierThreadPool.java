@@ -24,6 +24,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Thread pool implementation which accepts ObserverNotifier objects(Runnable) and run them in seperate threads
+ * using a pool of threads.
+ */
 public class ObserverNotifierThreadPool {
 
     private static final int CORE_POOL_SIZE = 5;
@@ -41,7 +45,7 @@ public class ObserverNotifierThreadPool {
     }
 
     private static class SingletonHelper {
-        static final ObserverNotifierThreadPool instance = new ObserverNotifierThreadPool();
+        private static final ObserverNotifierThreadPool instance = new ObserverNotifierThreadPool();
     }
 
     public static ObserverNotifierThreadPool getInstance() {

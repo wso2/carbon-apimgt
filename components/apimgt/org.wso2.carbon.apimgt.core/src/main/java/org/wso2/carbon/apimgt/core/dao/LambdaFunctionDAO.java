@@ -25,6 +25,9 @@ import org.wso2.carbon.apimgt.core.models.LambdaFunction;
 
 import java.util.List;
 
+/**
+ * DAO Interface for Lambda function.
+ */
 public interface LambdaFunctionDAO {
 
     List<LambdaFunction> getUserDeployedFunctions(String userName) throws APIMgtDAOException;

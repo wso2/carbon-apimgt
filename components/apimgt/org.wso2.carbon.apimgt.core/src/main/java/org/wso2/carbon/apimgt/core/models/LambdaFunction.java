@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.net.URI;
 
+/**
+ * Object mapper for Lambda function.
+ */
 public class LambdaFunction {
 
     private String name;
@@ -41,11 +44,13 @@ public class LambdaFunction {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         LambdaFunction function = (LambdaFunction) o;
-
         return name.equals(function.name) && endpointURI.equals(function.endpointURI);
     }
 

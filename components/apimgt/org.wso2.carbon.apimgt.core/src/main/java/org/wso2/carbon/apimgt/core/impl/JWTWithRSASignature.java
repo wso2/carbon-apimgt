@@ -27,9 +27,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 
-/*
- RSA signatures require a public and private RSA key pair. Get the private key from keyStore to sign and
- get the public key from trustStore to verify the validity of the signature.
+/**
+ * RSA signatures require a public and private RSA key pair. Get the private key from keyStore to sign and
+ * get the public key from trustStore to verify the validity of the signature.
  */
 public class JWTWithRSASignature {
 

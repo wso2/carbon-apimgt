@@ -1238,7 +1238,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation) {
+    public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
+                                Map<String, String> extraInformation) {
         observerList.forEach(eventObserver -> eventObserver.captureEvent(event, username, eventTime, extraInformation));
     }
 
