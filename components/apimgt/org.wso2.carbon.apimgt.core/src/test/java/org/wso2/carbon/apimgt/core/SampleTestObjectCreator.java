@@ -28,9 +28,10 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.lifecycle.manager.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +49,6 @@ public class SampleTestObjectCreator {
     public static InputStream inputStream;
     static String endpointId = UUID.randomUUID().toString();
     static {
-        byte[] bytes = new byte[0];
         try {
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
             apiDefinition = IOUtils.toString(inputStream);
@@ -363,5 +363,12 @@ public class SampleTestObjectCreator {
         uriTemplateBuilder.httpVerb("GET");
         uriTemplateMap.put("getApisApiIdGet", uriTemplateBuilder.build());
         return uriTemplateMap;
+    }
+
+    public static Label createLabel(String name, String accessUrl) {
+        Label label = new Label.Builder().
+                name(name).
+                accessUrl(accessUrl).build();
+        return label;
     }
 }

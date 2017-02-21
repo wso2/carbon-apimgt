@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{#placeholder "favicon"}}
+        <link rel="shortcut icon" href="{{public "images/default-favicon.png"}}" type="image/png" />
+    {{/placeholder}}
+    <title>{{#placeholder "title"}}Simple Auth{{/placeholder}}</title>
+    {{placeholder "css"}}
+    {{placeholder "headJs"}}
+    {{placeholder "headOther"}}
+</head>
+
+<body>
+<header class="header header-default">
+    <div class="container-fluid">
+        <div class="pull-left brand float-remove-xs text-center-xs">
+            <a href="{{@contextPath}}/">
+                <img src="{{public "images/logo.png"}}" class="logo" />
+                <h1>{{@config.appName}}</h1>
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="page-content-wrapper">
+    <div class="container-fluid body-wrapper">
+        <div id="general-alerts">
+
+            <div class="alert alert-danger" role="alert" style="display: none">
+                <div class="alert-message">
+                </div>
+                <button type="button" class="close" aria-label="close" data-dismiss="alert">
+                    <span aria-hidden="true">
+                        <i class="fw fw-cancel"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+        {{defineZone "content"}}
+    </div>
+</div>
+<!-- footer -->
+<footer class="footer">
+    <div class="container-fluid">
+        <p>
+            WSO2 | &copy; 2016
+            <a href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.
+        </p>
+    </div>
+</footer>
+<!-- /footer -->
+{{placeholder "js"}}
+</body>
+</html>

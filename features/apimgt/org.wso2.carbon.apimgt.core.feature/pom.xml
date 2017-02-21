@@ -345,8 +345,8 @@
                             </bundles>
                             <importFeatures>
                                 <feature>
-                                    <id>org.wso2.carbon.apimgt.lifecycle.manager.feature</id>
-                                    <version>${carbon.apimgt.version}</version>
+                                    <id>org.wso2.carbon.lcm.core.feature</id>
+                                    <version>${carbon.lcm.version}</version>
                                 </feature>
                             </importFeatures>
                         </configuration>

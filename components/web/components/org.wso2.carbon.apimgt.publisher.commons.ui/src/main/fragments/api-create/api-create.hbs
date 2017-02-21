@@ -1,12 +1,12 @@
 {{js "js/create.js"}}
-{{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-12">
             <div class="page-header" id="apiTitleContainer">
                 <h2>Add New API</h2>
             </div>
-            <div class="col-md-10">
+            <div class="col-md-10" data-toggle="loading" data-loading-style="overlay"
+                 data-loading-text="Creating API ..." data-loading-inverse="true">
                 <!-- Name version context input fields-->
                 <div class="row basic-inputs ">
                     <div class="col-xsm-12 col-lg-4">
@@ -121,11 +121,9 @@
                 </div>
                 <!-- Button -->
                 <hr/>
-                <div class="form-group">
-                    <button id="api-create-submit" class="btn btn-primary" data-toggle="modal"
-                            data-target="#myModal2">Create API
-                    </button>
-                </div>
+                <button id="api-create-submit" class="btn btn-primary" data-toggle="modal"
+                        data-target="#myModal2">Create API
+                </button>
             </div>
         </div>
     </div>

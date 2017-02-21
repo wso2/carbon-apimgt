@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-module("loginManager");
 function onGet(env) {
-    loginManager.authenticate(env);
+    sendRedirect("apis");
 }

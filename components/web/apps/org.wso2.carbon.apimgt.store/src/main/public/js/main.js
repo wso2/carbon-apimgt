@@ -37,4 +37,33 @@ $(document).ready(function(){
       }
     });
 
+
 });
+
+var requestMetaData = function(data={}) {
+    var access_key_header = "Bearer " + getCookie("WSO2_AM_TOKEN_1"); //TODO: tmkb Depend on result from
+    // promise
+    var request_meta = {
+        clientAuthorizations: {
+            api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
+        },
+        responseContentType: data['Content-Type'] || "application/json"
+    };
+    return request_meta;
+};
+
+var getCookie = function(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+};
+
+var setAuthHeader = function(swaggerClient) {
+    var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
+    swaggerClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
+
+};
+
+var redirectToLogin = function (contextPath) {
+    window.location = contextPath + "/auth/login";
+}

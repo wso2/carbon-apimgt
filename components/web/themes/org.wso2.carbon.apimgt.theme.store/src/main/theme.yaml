@@ -1,5 +1,5 @@
 css:
- - lib/bootstrap-v3.3.5/bootstrap.min.css
+ - lib/bootstrap_3.3.5/css/bootstrap.min.css
  - lib/theme-wso2_1.0/css/theme-wso2.css
  - lib/font-wso2-1.0.2/css/font-wso2.min.css
  - lib/font-awesome/css/font-awesome.min.css
@@ -9,7 +9,7 @@ css:
  - lib/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css
 headJs:
  - lib/jquery-v2.2.3/jquery.min.js
- - lib/bootstrap-v3.3.5/bootstrap.min.js
+ - lib/bootstrap_3.3.5/js/bootstrap.min.js
  - lib/i18n/i18next-1.5.9.js
 # - lib/jquery-csrf/jquery-csrf.js
  - lib/handlebars-v4.0.5.js

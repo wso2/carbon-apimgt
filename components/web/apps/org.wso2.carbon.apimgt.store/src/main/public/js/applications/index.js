@@ -2,72 +2,139 @@ $(function () {
 
     $(".navigation ul li.active").removeClass('active');
     var prev = $(".navigation ul li:first")
-    $(".green").insertBefore(prev).css('top','0px').addClass('active');
+    $(".green").insertBefore(prev).css('top', '0px').addClass('active');
+
+    _renderTopNavBar();
 
     var bearerToken = "Basic YWRtaW46YWRtaW4=";
-    var applicationClient = new SwaggerClient({
-        url: swaggerURL + "applications",
+    var swaggerClient = new SwaggerClient({
+        url: swaggerURL,
         success: function (swaggerData) {
-            applicationClient.setBasePath("");
+            //TODO:Need to have a proper fix from swagger definition retrieval service
             //List Applications
-            applicationClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-            applicationClient.default.applicationsGet({"responseContentType": 'application/json'},
-                function (data) {
-                    $.ajax({
-                        url: '/store/public/components/root/base/templates/applications/appListRow.hbs',
-                        type: 'GET',
-                        success: function (result) {
-                            var theTemplateScript = result;
-                            var theTemplate = Handlebars.compile(theTemplateScript);
-                            var theCompiledHtml, context,ifNotApprovedStatus,ifNotRejectedStatus;
+            setAuthHeader(swaggerClient);
+            swaggerClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
+                function (jsonData) {
 
-                            if(data.obj.status != "APPROVED"){
-                                ifNotApprovedStatus = true;
-                            }
-                            else{
-                                ifNotApprovedStatus = false;
-                            }
-                            if(data.obj.status != "REJECTED"){
-                                ifNotRejectedStatus = true;
-                            }
-                            else{
-                                ifNotRejectedStatus = false;
-                            }
-                            for (var i in data.obj.list) {
-                                context = {
-                                    "name": data.obj.list[i].name,
-                                    "applicationId": data.obj.list[i].applicationId,
-                                    "tier": data.obj.list[i].throttlingTier,
-                                    "status": data.obj.list[i].status,
-                                    "subscriptions": data.obj.list[i].subscriptions || 0,
-                                    "ifNotApprovedStatus": ifNotApprovedStatus,
-                                    "ifNotRejectedStatus": ifNotRejectedStatus
-                                };
-                                theCompiledHtml = theTemplate(context);
-                                $("tbody").append(theCompiledHtml);
-                            }
-                        },
-                        error: function (e) {
-                            alert("Error occurred while listing applications");
+                    var raw_data = {
+                        data: jsonData.obj.list
+                    };
+                    var callbacks = {
+                        onSuccess: function () {
+                            _initDataTable(raw_data);
+
+                        }, onFailure: function (message, e) {
                         }
-                    });
-                });
+                    };
+                    var mode = "OVERWRITE";
+                    //Render Applications listing page
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.applications-list", jsonData.obj,
+                        "applications-list", mode, callbacks);
 
-            //Delete Application
-            $('#application-table').on('click', 'a.deleteApp', function () {
-                alert("Are you sure you want to delete Application");
+                    //Delete Application
+                    $(document).on('click', 'a.deleteApp', function () {
+                        alert("Are you sure you want to delete Application");
 
-                var appId = $(this).attr("data-id")
-                applicationClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-                applicationClient.default.applicationsApplicationIdDelete({"applicationId": appId},
-                    function (success) {
-                        //TODO: Reload element only
-                        window.location.reload(true);
-                    },
-                    function (error) {
-                        alert("Error occurred while deleting application")
-                    });
-            });
+                        var appId = $(this).attr("data-id")
+                        setAuthHeader(swaggerClient);
+                        swaggerClient["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
+                            function (success) {
+                                //TODO: Reload element only
+                                window.location.reload(true);
+                            },
+                            function (error) {
+                                alert("Error occurred while deleting application")
+                            });
+                    })
+
+                },
+                function (error) {
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
+                    }
+                }
+            );
+
+
         }
     });
+
+    function _initDataTable(raw_data) {
+        $('#application-table').DataTable({
+            ajax: function (data, callback, settings) {
+                callback(raw_data);
+            },
+            columns: [
+                {'data': 'name'},
+                {'data': 'throttlingTier'},
+                {'data': 'lifeCycleStatus'},
+                {'data': 'subscriber'},
+                {'data': 'applicationId'},
+            ],
+            columnDefs: [
+                {
+                    targets: ["application-listing-action"], //class name will be matched on the TH for the column
+                    searchable: false,
+                    sortable: false,
+                    render: _renderActionButtons // Method to render the action buttons per row
+                }
+            ]
+        });
+    }
+
+    function _renderActionButtons(data, type, row) {
+        if (type === "display") {
+            var viewIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            var viewIcon2 = $("<i>").addClass("fw fw-view fw-stack-1x");
+            var viewSpanIcon = $("<span>").addClass("fw-stack").append(viewIcon1).append(viewIcon2);
+            var viewSpanText = $("<span>").addClass("hidden-xs").text("View");
+            var view_button = $('<a>', {id: data, href: contextPath + '/applications/' + data, title: 'View'})
+                .addClass("btn  btn-sm padding-reduce-on-grid-view")
+                .append(viewSpanIcon)
+                .append(viewSpanText);
+
+            var editIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            var editIcon2 = $("<i>").addClass("fw fw-edit fw-stack-1x");
+            var editSpanIcon = $("<span>").addClass("fw-stack").append(editIcon1).append(editIcon2);
+            var editSpanText = $("<span>").addClass("hidden-xs").text("Edit");
+            var edit_button = $('<a>', {
+                id: data.id,
+                href: contextPath + '/applications/' + data + '/edit',
+                title: 'Edit'
+            })
+                .addClass("btn  btn-sm padding-reduce-on-grid-view")
+                .append(editSpanIcon)
+                .append(editSpanText);
+
+            var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
+            var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
+            var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
+            var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
+                .addClass("btn btn-sm padding-reduce-on-grid-view deleteApp")
+                .append(deleteSpanIcon)
+                .append(deleteSpanText);
+            return $('<div></div>').append(view_button).append(edit_button).append(delete_button).html();
+        } else {
+            return data;
+        }
+    }
+
+    function _renderTopNavBar() {
+        var data = {};
+        data.isApplicationList = true;
+        var mode = "OVERWRITE";
+        //Render Applications listing page
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.top-navbar", data,
+            "top-navbar", mode, {
+                onSuccess: function () {
+
+                }, onFailure: function (message, e) {
+                }
+            });
+    }
 });
+
+
+
+

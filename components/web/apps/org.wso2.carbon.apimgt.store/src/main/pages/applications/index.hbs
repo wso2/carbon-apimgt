@@ -1,134 +1,13 @@
 {{layout "main"}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Applications | " @config.appName}}
-{{js "js/main.js"}}
-{{js "js/left-navigation.js"}}
-{{js "js/script.js"}}
-{{js "js/common.js"}}
 {{js "js/applications/index.js"}}
+{{js "js/main.js"}}
 {{css "css/custom.css"}}
 {{#fillZone "contentTop"}}
-    {{fragment "searchBar"}}
-    <!-- navbar -->
-    <div class="navbar-wrapper ">
-        <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
-            <a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="false" rel="leftmenu-sidebar">
-                        <span class="icon fw-stack">
-                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
-                        </span>
-            </a>
-
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
-                <div id="navbar" class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        <li>
-                            <a title="Add Application" href="/store/applications/add">
-	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-add fw-stack-1x"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                                </span>
-                                Add Application
-                            </a>
-                        </li>
-                    </ul>
-                </div><!--/.nav-collapse -->
-            </div>
-        </nav>
-    </div>
-
+    {{defineZone "top-navbar"}}
 {{/fillZone}}
 {{#fillZone "content"}}
-    <div class="page-header">
-        <h1>{{i18n "Applications"}}</h1>
-    </div>
-
-    <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke
-        a collection of APIs and to subscribe to one API multiple times with different SLA levels. The
-        DefaultApplication is pre-created and allows unlimited access by default.</p>
-
-    <div id="application-list">
-        <div id="application-table-nodata" class="hide message message-info">
-            <h4><i class="icon fw fw-info"></i>No Applications</h4>
-
-            <p>No applications yet. Click Add Applications in the action bar to add an application.</p>
-        </div>
-
-        <div id="application-table-wrap" class="white-wrapper add-padding-5x">
-            <div id="application-table_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
-                <div class="dataTablesTop">
-                    <div id="application-table_filter" class="dataTables_filter"><label><i
-                            class="fw fw-search search-icon"></i><input type="search" class="form-control"
-                                                                        placeholder="Filter by ..."
-                                                                        aria-controls="application-table"></label>
-                    </div>
-                    <div class="dataTables_toolbar"></div>
-                </div>
-                <div id="application-table_processing" class="dataTables_processing" style="display: none;">
-                    Processing...
-                </div>
-                <table id="application-table"
-                       class="table table-striped table-hover table-bordered display data-table dataTable no-footer"
-                       cellspacing="0" role="grid" aria-describedby="application-table_info">
-                    <thead>
-                    <tr role="row">
-                        <th class="sorting_asc" tabindex="0" aria-controls="application-table" rowspan="1"
-                            colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">
-                            Name
-                        </th>
-                        <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
-                            colspan="1" aria-label="Tier: activate to sort column ascending">Tier
-                        </th>
-                        <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
-                            colspan="1" aria-label="Workflow Status: activate to sort column ascending">Workflow
-                            Status
-                        </th>
-                        <th class="col-md-2 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
-                            colspan="1" aria-label="Subscriptions: activate to sort column ascending">Subscriptions
-                        </th>
-                        <th class="col-md-3 sorting" tabindex="0" aria-controls="application-table" rowspan="1"
-                            colspan="1" aria-label="Actions: activate to sort column ascending">Actions
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <div class="dataTablesBottom">
-                    <div class="dataTables_length" id="application-table_length"><label>Show <select
-                            name="application-table_length" aria-controls="application-table"
-                            class="form-control input-sm">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select> entries</label></div>
-                    <div class="dataTables_info" id="application-table_info" role="status" aria-live="polite">
-                        Showing 1 to 1 of 1 entries
-                    </div>
-                    <div class="dataTables_paginate paging_simple_numbers" id="application-table_paginate">
-                        <ul class="pagination">
-                            <li class="paginate_button previous disabled" id="application-table_previous"><a
-                                    href="#" aria-controls="application-table" data-dt-idx="0"
-                                    tabindex="0">Previous</a></li>
-                            <li class="paginate_button active"><a href="#" aria-controls="application-table"
-                                                                  data-dt-idx="1" tabindex="0">1</a></li>
-                            <li class="paginate_button next disabled" id="application-table_next"><a href="#"
-                                                                                                     aria-controls="application-table"
-                                                                                                     data-dt-idx="2"
-                                                                                                     tabindex="0">Next</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{defineZone "applications-list"}}
 {{/fillZone}}

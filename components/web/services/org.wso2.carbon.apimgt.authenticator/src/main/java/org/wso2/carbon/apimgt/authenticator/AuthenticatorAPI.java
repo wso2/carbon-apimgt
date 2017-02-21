@@ -17,12 +17,17 @@
  */
 package org.wso2.carbon.apimgt.authenticator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
+import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
+import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -33,34 +38,65 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 /**
- * This method authenticate the user.
+ * This class provides access token during login from store app.
  *
  */
 public class AuthenticatorAPI implements Microservice {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
+
     /**
-     * This method authenticate the user.
+     * This method authenticate the user for store app.
      *
      */
     @POST
     @Path ("/token")
-    @Produces ("application/json")
-    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(@Context Request request,
-            @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
-            @FormDataParam ("scopes") List<String> scopes) {
-        IntrospectService introspectService = new IntrospectService();
-        String accessToken = introspectService.getAccessToken(userName, password, scopes.toArray(new String[0]));
-        String part1 = accessToken.substring(0, accessToken.length() / 2);
-        String part2 = accessToken.substring(accessToken.length() / 2 + 1);
-        NewCookie cookie = new NewCookie("token1",
-                part1 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST"));
-        NewCookie cookie2 = new NewCookie("token2",
-                part2 + "; path=" + AuthUtil.getAppContext() + "; domain=" + request.getProperty("REMOTE_HOST") + "; "
-                        + "HttpOnly");
-        return Response
-                .ok(new IntrospectService().getAccessTokenData(userName, password, scopes.toArray(new String[0])),
-                        "application/json").cookie(cookie, cookie2).build();
+    @Produces (MediaType.APPLICATION_JSON)
+    @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
+    public Response authenticate(
+            @Context Request request, @FormDataParam ("username") String userName,
+            @FormDataParam ("password") String password, @FormDataParam ("scopes") String scopesList) {
+        try {
+            IntrospectService introspectService = new IntrospectService();
+            AuthResponseBean authResponseBean = new AuthResponseBean();
+            String appContext = AuthUtil.getAppContext(request);
+            String restAPIContext = "/api/am" + appContext;
+            String accessToken = introspectService
+                    .getAccessToken(authResponseBean, appContext.substring(1), userName, password,
+                            scopesList.split(" "));
+            String part1 = accessToken.substring(0, accessToken.length() / 2);
+            String part2 = accessToken.substring(accessToken.length() / 2);
+            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1, part1 + "; path=" + appContext);
+            NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
+                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                    .header(AuthenticatorConstants.
+                                    REFERER_HEADER,
+                            (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                    .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                    .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                    "" :
+                                    request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                            "").build();
+        } catch (APIManagementException e) {
 
+            ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+
+            log.error(e.getMessage(), e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
+
+    @POST
+    @Produces (MediaType.APPLICATION_JSON)
+    @Path ("/remove")
+    public Response logout(@Context Request request) {
+        String appContext = AuthUtil.getAppContext(request);
+        String restAPIContext = "/api/am" + appContext;
+        return Response.ok().header("Set-Cookie",
+                AuthenticatorConstants.TOKEN_2 + "=;Path=" + restAPIContext + ";Expires=Thu, 01-Jan-1970 00:00:01 GMT")
+                .build();
+    }
+
 }

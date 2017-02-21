@@ -20,45 +20,191 @@ $(function () {
     var prev = $(".navigation ul li:first")
     $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
-    client = new SwaggerClient({
-        url: swaggerURL + "applications",
+    var client = new SwaggerClient({
+
+        url: swaggerURL,
         success: function () {
-            client.setBasePath("");
             var id = document.getElementById("appid").value;
-            client.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", "Basic YWRtaW46YWRtaW4=", "header"));
-            client.default.applicationsApplicationIdGet({"applicationId": id},
+            setAuthHeader(client);
+            client["Application (individual)"].get_applications_applicationId
+            ({"applicationId": id},
                 function (data) {
                     renderAppDetails(data);
                     renderApplicationKeys(data);
-                });
+                    client["Subscription Collection"].get_subscriptions({
+                        "apiId": "",
+                        "applicationId": id,
+                        "responseContentType": 'application/json'
+                    },
+                        function (subscriptionData) {
+
+                            var subData = {};
+                            subData.data=JSON.parse(subscriptionData.data).list;
+                            var mode = "PREPEND";
+                            var context = {
+                                "subscriptionsAvailable": subData.data.length>0?true:false,
+                                "contextPath":contextPath
+
+                            };
+                            //Render APIs listing page
+                            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.subscription-listing", context, {
+                                onSuccess: function (data) {
+                                    $("#subscription").append(data);
+
+
+                                    $('#subscription-table').DataTable({
+                                        ajax: function (raw_data, callback, settings) {
+                                            callback(subData);
+                                        },
+                                        columns: [
+                                            {
+                                                "data": "apiIdentifier",
+                                                "render": function (data, type, row, meta) {
+                                                    if (type === 'display') {
+                                                        var api = row.apiName + " - "+ row.apiVersion;
+                                                        return $('<a>')
+                                                            .attr('href', contextPath + "/apis/" + data)
+                                                            .text(api)
+                                                            .wrap('<div></div>')
+                                                            .parent()
+                                                            .html();
+
+                                                    } else {
+                                                        return subData;
+                                                    }
+                                                }
+                                            },
+                                            {'data': 'policy'},
+                                            {'data': 'lifeCycleStatus'},
+                                            {'data': 'subscriptionId'}
+                                        ],
+                                        columnDefs: [
+                                            {
+                                                targets: ["subscription-listing-action"], //class name will be matched on the TH for the column
+                                                searchable: false,
+                                                sortable: false,
+                                                render: _renderActionButtons // Method to render the action buttons per row
+                                            }
+                                        ]
+                                    });
+                                }, onFailure: function (message, e) {
+                                    var message = "Error occurred while getting subscription details subscription." + message;
+                                    noty({
+                                        text: message,
+                                        type: 'error',
+                                        dismissQueue: true,
+                                        modal: true,
+                                        progressBar: true,
+                                        timeout: 2000,
+                                        layout: 'top',
+                                        theme: 'relax',
+                                        maxVisible: 10,
+                                    });
+                                }
+                            });
+
+                            $(document).on('click', 'a.deleteSub', function () {
+                                var subId = $(this).attr("data-id");
+                                var type="alert";
+                                var layout="topCenter";
+                                noty({
+                                    text : "Do you want to un subscribe",
+                                    type : type,
+                                    dismissQueue: true,
+                                    layout : layout,
+                                    theme : 'relax',
+                                    buttons : [
+                                        {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                            $noty.close();
+
+                                            setAuthHeader(client);
+                                            client["Subscription (individual)"].delete_subscriptions_subscriptionId({"subscriptionId": subId},
+                                                function (success) {
+                                                    var message = "Subscription removed successfully";
+                                                    noty({
+                                                        text: message,
+                                                        type: 'success',
+                                                        dismissQueue: true,
+                                                        modal: true,
+                                                        progressBar: true,
+                                                        timeout: 2000,
+                                                        layout: 'top',
+                                                        theme: 'relax',
+                                                        maxVisible: 10,
+                                                    });
+                                                    //TODO: Reload element only
+                                                    window.location.reload(true);
+
+                                                },
+                                                function (error) {
+                                                    var message = "Error occurred while deleting subscription";
+                                                    noty({
+                                                        text: message,
+                                                        type: 'warning',
+                                                        dismissQueue: true,
+                                                        modal: true,
+                                                        progressBar: true,
+                                                        timeout: 2000,
+                                                        layout: 'top',
+                                                        theme: 'relax',
+                                                        maxVisible: 10,
+                                                    });
+                                                });
+                                        }
+                                        },
+                                        {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                            $noty.close();
+                                        }
+                                        }
+                                    ]
+                                });
+                            })
+                        },
+                        function (error) {
+                            if(error.status==401){
+                                redirectToLogin(contextPath);
+                            }
+                        });
+                },
+            function (error) {
+                if(error.status==401){
+                    redirectToLogin(contextPath);
+                }
+            });
         },
         error: function (e) {
             alert("Error occurred while creating client");
+            if(error.status==401){
+                redirectToLogin(contextPath);
+            }
         }
     });
 
     var renderAppDetails = function (data) {
-
-        $.ajax({
-            url: '/store/public/components/root/base/templates/applications/appDetails.hbs',
-            type: 'GET',
-            success: function (result) {
-                var templateScript = result;
-                var template = Handlebars.compile(templateScript);
-
-                var context = {
-                    "name": data.obj.name,
-                    "tier": data.obj.throttlingTier,
-                    "status": data.obj.status,
-                    "description": data.obj.description
-                };
-                var compiledHtml = template(context);
-                $("#details").append(compiledHtml);
-            },
-            error: function (e) {
-                alert("Error occurred while viewing application details");
-            }
-        });
+        var callbacks = {onSuccess: function () {
+        },onFailure: function (message, e) {
+            var message = "Error occurred while viewing application details";
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 2000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }};
+        var mode = "PREPEND";
+        var context = {
+            "name": data.obj.name,
+            "tier": data.obj.throttlingTier,
+            "status": data.obj.lifeCycleStatus,
+            "description": data.obj.description
+        };
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-details",context,
+            "application-details", mode, callbacks);
     };
 
     var renderApplicationKeys = function (data) {
@@ -154,6 +300,7 @@ $(function () {
             }
         });
     };
+
 
     var setDefaultContext = function (data) {
 
@@ -297,3 +444,21 @@ var show_Keys = function () {
         document.getElementById("show_keys").childNodes[0].nodeValue = 'Show Keys';
     }
 };
+
+
+function _renderActionButtons(data, type, row) {
+    if (type === "display") {
+
+        var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+        var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
+        var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
+        var deleteSpanText = $("<span>").addClass("hidden-xs").text("Unsubscribe");
+        var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
+            .addClass("btn btn-sm padding-reduce-on-grid-view deleteSub")
+            .append(deleteSpanIcon)
+            .append(deleteSpanText);
+        return $('<div></div>').append(delete_button).html();
+    } else {
+        return data;
+    }
+}

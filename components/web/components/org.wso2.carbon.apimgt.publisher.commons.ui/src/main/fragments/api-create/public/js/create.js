@@ -29,7 +29,6 @@ function createAPICallback(response) {
     var responseObject = JSON.parse(response.data);
     window.location.replace(contextPath + "/apis?create_success=true&id=" + responseObject.id + "&name=" + encodeURI(responseObject.name));
 }
-
 /**
  * Jquery event handler for options element for switch between implementation types
  * @param event
@@ -50,6 +49,7 @@ function implementationOptionsHandler(event) {
  */
 function createAPIHandler(event) {
     event.preventDefault();
+    $('[data-toggle="loading"]').loading('show');
     let implementation_method = $('input[name=implementation-options]:checked', '#implementation-option-form').val();
     let input_type = $('input[name=import-definition]:checked', '#swagger-option-form').val();
 
@@ -66,7 +66,28 @@ function createAPIHandler(event) {
                 version: $('#new-api-version').val()
             };
             var new_api = new API('');
-            new_api.create(api_data, createAPICallback);
+            var promised_create = new_api.create(api_data);
+            promised_create
+                .then(createAPICallback)
+                .catch(
+                    function (error_response) {
+                        var error_data = JSON.parse(error_response.data);
+                        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            closeWith: ['click', 'backdrop'],
+                            progressBar: true,
+                            timeout: 5000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10
+                        });
+                        $('[data-toggle="loading"]').loading('hide');
+                        console.debug(error_response);
+                    });
             break;
     }
 }
@@ -83,7 +104,27 @@ function createAPIFromSwagger(input_type) {
             (swagger_json) => {
                 let data = new Blob([JSON.stringify(swagger_json)], {type: 'application/json'});
                 var new_api = new API('');
-                new_api.create(data, createAPICallback);
+                new_api.create(data)
+                    .then(createAPICallback)
+                    .catch(
+                        function (error_response) {
+                            var error_data = JSON.parse(error_response.data);
+                            var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                closeWith: ['click', 'backdrop'],
+                                progressBar: true,
+                                timeout: 5000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10
+                            });
+                            $('[data-toggle="loading"]').loading('hide');
+                            console.debug(error_response);
+                        });
             });
     } else if (input_type === "swagger-file") {
         /* TODO: Implement swagger file  upload support ~tmkb*/

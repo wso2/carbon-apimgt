@@ -23,12 +23,12 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class KeyManagerConstants {
 
-    public static final String OAUTH_CLIENT_ID = "client_id"; //this means consumer key
-    public static final String OAUTH_CLIENT_SECRET = "client_secret";
+    public static final String OAUTH_CLIENT_ID = "clientId"; //this means consumer key
+    public static final String OAUTH_CLIENT_SECRET = "clientSecret";
     public static final String OAUTH_REDIRECT_URIS = "redirect_uris";
     public static final String OAUTH_CLIENT_OWNER = "ext_param_owner";
     public static final String OAUTH_CALLBACK_URIS = "callback_url";
-    public static final String OAUTH_CLIENT_NAME = "client_name";
+    public static final String OAUTH_CLIENT_NAME = "clientName";
     public static final String OAUTH_CLIENT_TYPE = "client_type";
     public static final String OAUTH_TOKEN = "token";
     public static final String APP_KEY_TYPE = "key_type";
@@ -39,7 +39,7 @@ public class KeyManagerConstants {
     public static final String OAUTH_CLIENT_SCOPE = "scope";
     public static final String OAUTH_CLIENT_TOKEN_SCOPE = "tokenScope";
     public static final String OAUTH_CLIENT_GRANT = "grant_type";
-    public static final String OAUTH_CLIENT_GRANTS = "grant_types";
+    public static final String OAUTH_CLIENT_GRANTS = "grantTypes";
     public static final String OAUTH_CLIENT_RESPONSETYPE = "response_types";
     public static final String OAUTH_CLIENT_AUTHMETHOD = "token_endpoint_auth_method";
     public static final String OAUTH_CLIENT_REGISTRATION_CLIENT_URI = "registration_client_uri";

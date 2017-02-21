@@ -18,22 +18,37 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-15T22:14:45.821+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
 public abstract class EndpointsApiService {
     public abstract Response endpointsEndpointIdDelete(String endpointId
+ ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
+ ,String minorVersion
  ) throws NotFoundException;
     public abstract Response endpointsEndpointIdGet(String endpointId
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ ,String minorVersion
  ) throws NotFoundException;
     public abstract Response endpointsEndpointIdPut(String endpointId
  ,EndPointDTO body
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
+ ,String minorVersion
  ) throws NotFoundException;
-    public abstract Response endpointsGet() throws NotFoundException;
+    public abstract Response endpointsGet(String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
     public abstract Response endpointsPost(EndPointDTO body
  ,String contentType
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
  ) throws NotFoundException;
 }

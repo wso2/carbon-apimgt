@@ -16,6 +16,7 @@
 
 function onGet(env) {
     sendToClient("swaggerURL", env.config.swaggerURL);
+    sendToClient("contextPath", env.contextPath);
     var id= env.pathParams["id"];
     return {id: id};
 }

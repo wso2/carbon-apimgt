@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_businessInformationDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class API_businessInformationDTO   {
   @JsonProperty("businessOwner")
   private String businessOwner = null;
@@ -104,11 +104,11 @@ public class API_businessInformationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_businessInformationDTO aPIBusinessInformation = (API_businessInformationDTO) o;
-    return Objects.equals(this.businessOwner, aPIBusinessInformation.businessOwner) &&
-        Objects.equals(this.businessOwnerEmail, aPIBusinessInformation.businessOwnerEmail) &&
-        Objects.equals(this.technicalOwner, aPIBusinessInformation.technicalOwner) &&
-        Objects.equals(this.technicalOwnerEmail, aPIBusinessInformation.technicalOwnerEmail);
+    API_businessInformationDTO apIBusinessInformation = (API_businessInformationDTO) o;
+    return Objects.equals(this.businessOwner, apIBusinessInformation.businessOwner) &&
+        Objects.equals(this.businessOwnerEmail, apIBusinessInformation.businessOwnerEmail) &&
+        Objects.equals(this.technicalOwner, apIBusinessInformation.technicalOwner) &&
+        Objects.equals(this.technicalOwnerEmail, apIBusinessInformation.technicalOwnerEmail);
   }
 
   @Override

@@ -82,4 +82,6 @@ public class AuthResponseBean {
     public void setAuthUser(String authUser) {
         this.authUser = authUser;
     }
+
+
 }

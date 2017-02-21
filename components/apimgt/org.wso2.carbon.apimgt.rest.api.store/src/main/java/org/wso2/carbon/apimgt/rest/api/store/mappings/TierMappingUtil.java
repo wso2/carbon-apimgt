@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Limit;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
@@ -38,7 +37,7 @@ public class TierMappingUtil {
      * @return TierListDTO object containing TierDTOs
      */
     public static TierListDTO fromTierListToDTO(List<Policy> tiers, String tierLevel, int limit,
-            int offset) {
+                                                int offset) {
         TierListDTO tierListDTO = new TierListDTO();
         List<TierDTO> tierDTOs = tierListDTO.getList();
         if (tierDTOs == null) {
@@ -62,7 +61,7 @@ public class TierMappingUtil {
     /**
      * Converts a Tier object into TierDTO
      *
-     * @param tier Tier object
+     * @param tier      Tier object
      * @param tierLevel tier level (api/application or resource)
      * @return TierDTO corresponds to Tier object
      */
@@ -74,7 +73,7 @@ public class TierMappingUtil {
         dto.setUnitTime(tier.getDefaultQuotaPolicy().getLimit().getUnitTime());
 
         Limit limit = tier.getDefaultQuotaPolicy().getLimit();
-        if ( limit instanceof RequestCountLimit) {
+        if (limit instanceof RequestCountLimit) {
             dto.setRequestCount(((RequestCountLimit) limit).getRequestCount());
         } else if (limit instanceof BandwidthLimit) {
             dto.setRequestCount(((BandwidthLimit) limit).getDataAmount());

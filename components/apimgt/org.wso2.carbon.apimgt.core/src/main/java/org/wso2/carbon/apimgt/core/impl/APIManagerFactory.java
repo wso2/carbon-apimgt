@@ -36,7 +36,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ *
  * Creates API Producers and API Consumers.
+ *
  */
 public class APIManagerFactory {
 
@@ -54,13 +56,13 @@ public class APIManagerFactory {
     // Thread safe Cache for API Providers
     private static Map<String, APIPublisher> providers =
             Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
-                    (MAX_PROVIDERS + 1, 1, false) {
-                // This method is called just after a new entry has been added
-                @Override
-                public boolean removeEldestEntry(Map.Entry eldest) {
-                    return size() > MAX_PROVIDERS;
-                }
-            });
+                                        (MAX_PROVIDERS + 1, 1, false) {
+        // This method is called just after a new entry has been added
+        @Override
+        public boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_PROVIDERS;
+        }
+    });
 
     // Thread safe Cache for API Consumers
     private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
@@ -99,7 +101,8 @@ public class APIManagerFactory {
 
     private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
         try {
-            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
+            return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
+                    DAOFactory.getApiDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",

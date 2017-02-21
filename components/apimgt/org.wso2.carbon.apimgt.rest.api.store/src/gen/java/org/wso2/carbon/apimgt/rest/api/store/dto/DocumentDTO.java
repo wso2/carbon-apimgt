@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class DocumentDTO   {
   @JsonProperty("documentId")
   private String documentId = null;
@@ -103,6 +103,9 @@ public class DocumentDTO   {
 
   @JsonProperty("sourceUrl")
   private String sourceUrl = null;
+
+  @JsonProperty("inlineContent")
+  private String inlineContent = null;
 
   @JsonProperty("otherTypeName")
   private String otherTypeName = null;
@@ -215,6 +218,24 @@ public class DocumentDTO   {
     this.sourceUrl = sourceUrl;
   }
 
+  public DocumentDTO inlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+    return this;
+  }
+
+   /**
+   * Get inlineContent
+   * @return inlineContent
+  **/
+  @ApiModelProperty(value = "")
+  public String getInlineContent() {
+    return inlineContent;
+  }
+
+  public void setInlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+  }
+
   public DocumentDTO otherTypeName(String otherTypeName) {
     this.otherTypeName = otherTypeName;
     return this;
@@ -249,12 +270,13 @@ public class DocumentDTO   {
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
         Objects.equals(this.sourceUrl, document.sourceUrl) &&
+        Objects.equals(this.inlineContent, document.inlineContent) &&
         Objects.equals(this.otherTypeName, document.otherTypeName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, otherTypeName);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName);
   }
 
   @Override
@@ -268,6 +290,7 @@ public class DocumentDTO   {
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
+    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("}");
     return sb.toString();

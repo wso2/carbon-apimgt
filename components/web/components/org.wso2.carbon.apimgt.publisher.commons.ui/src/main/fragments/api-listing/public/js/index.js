@@ -9,8 +9,8 @@ $(function () {
  * @param response {object} Raw response object returned from swagger client
  */
 function getAPIsCallback(response) {
-    var dt_data = _apiResponseToData(response);
-    _initDataTable(dt_data);
+    var dt_data = apiResponseToData(response);
+    initDataTable(dt_data);
 }
 
 /**
@@ -23,12 +23,19 @@ function deleteAPIHandler(event) {
     let current_row = data_table.row($(this).closest('tr'));
     let api_id = current_row.data().id;
     let api = event.data.api_instance;
-    api.deleteAPI(api_id); /*TODO: Need to handle success and error cases ~tmkb */
-    current_row.remove();
-    data_table.draw();
+    let promised_delete = api.deleteAPI(api_id);
+    promised_delete.then(
+        function (response) {
+            if (!response) {
+                return;
+            }
+            current_row.remove();
+            data_table.draw();
+        }
+    );
 }
 
-function _initDataTable(raw_data) {
+function initDataTable(raw_data) {
     $('#apim-publisher-listing').DataTable({
         ajax: function (data, callback, settings) {
             callback(raw_data);
@@ -77,9 +84,9 @@ function _initDataTable(raw_data) {
     }
 
     /**
-     * Retrun the data which need to render, filter or other action related to Name column in the table
+     * Return the data which need to render, filter or other action related to Name column in the table
      * @param data {object} Data need to be sent to the server
-     * @param type {string} Type of the action currently performing i:e desplay, filter ect
+     * @param type {string} Type of the action currently performing i:e display, filter ect
      * @param row {object} Data for the currently processing row
      * @returns {*} {string} HTML for name column if display action name data if filtering action
      * @private
@@ -112,11 +119,10 @@ function _initDataTable(raw_data) {
     }
 }
 
-function _apiResponseToData(response) {
+function apiResponseToData(response) {
     var raw_data = {
         data: response.obj.list
     };
-
     return raw_data;
 }
 

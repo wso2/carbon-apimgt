@@ -21,15 +21,22 @@ package org.wso2.carbon.apimgt.core.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.models.API;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 /**
  * Used to generate API meta info related template
  */
 public class APIConfigContext extends ConfigContext {
 
     private API api;
+    private String packageName;
 
-    public APIConfigContext(API api) {
+    public APIConfigContext(API api, String packageName) {
         this.api = api;
+        this.packageName = packageName;
     }
 
     @Override
@@ -48,7 +55,11 @@ public class APIConfigContext extends ConfigContext {
         VelocityContext context = new VelocityContext();
         context.put("version", api.getVersion());
         context.put("apiContext", api.getContext());
-        context.put("apiName", api.getName());
+        LocalDateTime ldt = api.getCreatedTime();
+        Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+        Date res = Date.from(instant);
+        context.put("serviceName", api.getName() + "_" + res.getTime());
+        context.put("package", packageName);
         return context;
     }
 

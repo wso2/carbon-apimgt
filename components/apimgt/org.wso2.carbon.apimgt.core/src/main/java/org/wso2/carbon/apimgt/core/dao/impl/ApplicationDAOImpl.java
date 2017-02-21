@@ -384,7 +384,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails)
             throws APIMgtDAOException {
-        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE,"
+        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE,"
                 + "STATE, CREATE_MODE) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);

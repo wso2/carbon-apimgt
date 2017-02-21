@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * TokenDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
 public class TokenDTO   {
   @JsonProperty("accessToken")
   private String accessToken = null;

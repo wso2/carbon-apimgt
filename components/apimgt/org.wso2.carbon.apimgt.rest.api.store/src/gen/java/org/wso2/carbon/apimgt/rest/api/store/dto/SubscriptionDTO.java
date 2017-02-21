@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-04T10:24:30.459+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-20T12:49:23.977+05:30")
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
@@ -21,26 +21,32 @@ public class SubscriptionDTO   {
   @JsonProperty("apiIdentifier")
   private String apiIdentifier = null;
 
-  @JsonProperty("tier")
-  private String tier = null;
+  @JsonProperty("policy")
+  private String policy = null;
+
+  @JsonProperty("apiName")
+  private String apiName = null;
+
+  @JsonProperty("apiVersion")
+  private String apiVersion = null;
 
   /**
-   * Gets or Sets status
+   * Gets or Sets lifeCycleStatus
    */
-  public enum StatusEnum {
+  public enum LifeCycleStatusEnum {
     BLOCKED("BLOCKED"),
-    
+
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
 
     ACTIVE("ACTIVE"),
-    
+
     ON_HOLD("ON_HOLD"),
-    
+
     REJECTED("REJECTED");
 
     private String value;
 
-    StatusEnum(String value) {
+    LifeCycleStatusEnum(String value) {
       this.value = value;
     }
 
@@ -51,8 +57,8 @@ public class SubscriptionDTO   {
     }
 
     @JsonCreator
-    public static StatusEnum fromValue(String text) {
-      for (StatusEnum b : StatusEnum.values()) {
+    public static LifeCycleStatusEnum fromValue(String text) {
+      for (LifeCycleStatusEnum b : LifeCycleStatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
           return b;
         }
@@ -61,18 +67,18 @@ public class SubscriptionDTO   {
     }
   }
 
-  @JsonProperty("status")
-  private StatusEnum status = null;
+  @JsonProperty("lifeCycleStatus")
+  private LifeCycleStatusEnum lifeCycleStatus = null;
 
   public SubscriptionDTO subscriptionId(String subscriptionId) {
     this.subscriptionId = subscriptionId;
     return this;
   }
 
-   /**
+  /**
    * Get subscriptionId
    * @return subscriptionId
-  **/
+   **/
   @ApiModelProperty(value = "")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -87,10 +93,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-   /**
+  /**
    * Get applicationId
    * @return applicationId
-  **/
+   **/
   @ApiModelProperty(required = true, value = "")
   public String getApplicationId() {
     return applicationId;
@@ -105,10 +111,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-   /**
+  /**
    * Get apiIdentifier
    * @return apiIdentifier
-  **/
+   **/
   @ApiModelProperty(required = true, value = "")
   public String getApiIdentifier() {
     return apiIdentifier;
@@ -118,40 +124,76 @@ public class SubscriptionDTO   {
     this.apiIdentifier = apiIdentifier;
   }
 
-  public SubscriptionDTO tier(String tier) {
-    this.tier = tier;
+  public SubscriptionDTO policy(String policy) {
+    this.policy = policy;
     return this;
   }
 
-   /**
-   * Get tier
-   * @return tier
-  **/
+  /**
+   * Get policy
+   * @return policy
+   **/
   @ApiModelProperty(required = true, value = "")
-  public String getTier() {
-    return tier;
+  public String getPolicy() {
+    return policy;
   }
 
-  public void setTier(String tier) {
-    this.tier = tier;
+  public void setPolicy(String policy) {
+    this.policy = policy;
   }
 
-  public SubscriptionDTO status(StatusEnum status) {
-    this.status = status;
+  public SubscriptionDTO apiName(String apiName) {
+    this.apiName = apiName;
     return this;
   }
 
-   /**
-   * Get status
-   * @return status
-  **/
-  @ApiModelProperty(value = "")
-  public StatusEnum getStatus() {
-    return status;
+  /**
+   * Get apiName
+   * @return apiName
+   **/
+  @ApiModelProperty(required = true, value = "")
+  public String getApiName() {
+    return apiName;
   }
 
-  public void setStatus(StatusEnum status) {
-    this.status = status;
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
+  }
+
+  public SubscriptionDTO apiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+    return this;
+  }
+
+  /**
+   * Get apiVersion
+   * @return apiVersion
+   **/
+  @ApiModelProperty(required = true, value = "")
+  public String getApiVersion() {
+    return apiVersion;
+  }
+
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+  }
+
+  public SubscriptionDTO lifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+    return this;
+  }
+
+  /**
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
+   **/
+  @ApiModelProperty(value = "")
+  public LifeCycleStatusEnum getLifeCycleStatus() {
+    return lifeCycleStatus;
+  }
+
+  public void setLifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
 
@@ -165,27 +207,31 @@ public class SubscriptionDTO   {
     }
     SubscriptionDTO subscription = (SubscriptionDTO) o;
     return Objects.equals(this.subscriptionId, subscription.subscriptionId) &&
-        Objects.equals(this.applicationId, subscription.applicationId) &&
-        Objects.equals(this.apiIdentifier, subscription.apiIdentifier) &&
-        Objects.equals(this.tier, subscription.tier) &&
-        Objects.equals(this.status, subscription.status);
+            Objects.equals(this.applicationId, subscription.applicationId) &&
+            Objects.equals(this.apiIdentifier, subscription.apiIdentifier) &&
+            Objects.equals(this.policy, subscription.policy) &&
+            Objects.equals(this.apiName, subscription.apiName) &&
+            Objects.equals(this.apiVersion, subscription.apiVersion) &&
+            Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiIdentifier, tier, status);
+    return Objects.hash(subscriptionId, applicationId, apiIdentifier, policy, apiName, apiVersion, lifeCycleStatus);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
-    
+
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    apiIdentifier: ").append(toIndentedString(apiIdentifier)).append("\n");
-    sb.append("    tier: ").append(toIndentedString(tier)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -18,9 +18,47 @@
 */
 package org.wso2.carbon.apimgt.core.template;
 
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
+
+import java.util.List;
+
 /**
  * Used to provide abstract layer to generate API type template
  */
 public interface APITemplateBuilder {
-    String getConfigStringFromTemplate() throws APITemplateException;
+    /**
+     * Generate initial service implementation for a API
+     *
+     * @return service impl as Text
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources) throws APITemplateException;
+
+    /**
+     * Generate initial endpoint config
+     *
+     * @return endpoint source as Text
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException;
+
+    /**
+     * Used to update or create service implementation using a swagger
+     *
+     * @param gatewayConfig service impl text
+     * @param swagger       swagger text
+     * @return updated service impl
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getGatewayConfigFromSwagger(String gatewayConfig, String swagger) throws APITemplateException;
+
+    /**
+     * Used to generate swagger from a service implementation
+     *
+     * @param gatewayConfig service impl text
+     * @return generated swagger
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException;
 }

@@ -59,16 +59,11 @@
         </dependency>
         <!--Backend dependencies-->
         <dependency>
-            <groupId>org.wso2.carbon.uuf.sample</groupId>
-            <artifactId>org.wso2.carbon.uuf.sample.simple-auth.bundle</artifactId>
-            <version>${carbon.uuf.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator</artifactId>
             <version>${carbon.apimgt.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -85,19 +80,6 @@
                         <goals>
                             <goal>create-app</goal>
                         </goals>
-                        <configuration>
-                            <instructions>
-                                <Import-Package>
-                                    org.wso2.carbon.apimgt.authenticator
-                                </Import-Package>
-                            </instructions>
-                            <bundles>
-                                <bundle>
-                                    <symbolicName>org.wso2.carbon.apimgt.authenticator</symbolicName>
-                                    <version>${carbon.apimgt.version}</version>
-                                </bundle>
-                            </bundles>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

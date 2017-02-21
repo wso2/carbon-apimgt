@@ -60,7 +60,7 @@ public class APIMappingUtil {
             apiInfo.setDescription(apiSummary.getDescription());
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
-            apiInfo.setStatus(apiSummary.getLifeCycleStatus());
+            apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfoList.add(apiInfo);
         }
@@ -78,7 +78,7 @@ public class APIMappingUtil {
         apiDTO.setId(api.getId());
         apiDTO.setName(api.getName());
         apiDTO.setProvider(api.getProvider());
-        apiDTO.setStatus(api.getLifeCycleStatus());
+        apiDTO.setLifeCycleStatus(api.getLifeCycleStatus());
         apiDTO.setVersion(api.getVersion());
         apiDTO.setContext(api.getContext());
         apiDTO.setDescription(api.getDescription());

@@ -4,9 +4,8 @@ $(function () {
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (swaggerData) {
-            swaggerClient.setSchemes(["http"]);
-            swaggerClient.setHost("localhost:9090");
 
+            setAuthHeader(swaggerClient);
             swaggerClient["API (individual)"].get_apis_apiId({"apiId": apiId},
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
@@ -35,14 +34,15 @@ $(function () {
                         },onFailure: function (message, e) {}});
 
                     //TODO:Since the tiers are not setting from the rest api, the default tier is attached
-                    if(!api.policies){
+                    if (!api.policies || api.policies.length == 0) {
                         api.policies = ["Unlimited"];
                     }
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
                         "tier-list", mode, callbacks);
 
                     //Get application details
-                    swaggerClient["Application Collection"].get_applications({"responseContentType": 'application/json'},
+                    setAuthHeader(swaggerClient);
+                    swaggerClient["Application Collection"].get_applications({},
                         function (jsonData) {
                             var context = {};
                             var applications = jsonData.obj.list;
@@ -51,7 +51,7 @@ $(function () {
                                         "apiId": apiId,
                                         "applicationId": "",
                                         "responseContentType": 'application/json'
-                                    },
+                                    }, requestMetaData(),
                                     function (jsonData) {
                                         var availableApplications = [], subscription = {};
                                         var isSubscribedToDefault = false;
@@ -85,12 +85,18 @@ $(function () {
                                     },
                                     function (error) {
                                         alert("Error occurred while retrieve Applications" + error);
+                                        if(error.status==401){
+                                            redirectToLogin(contextPath);
+                                        }
                                     });
                             }
 
                         },
                         function (error) {
-                            alert("Error occurred while retrieve Applications" + erro);
+                            alert("Error occurred while retrieve Applications" + error);
+                            if(error.status==401){
+                                redirectToLogin(contextPath);
+                            }
                         });
 
                     //TODO: Embed actual values
@@ -202,6 +208,7 @@ $(function () {
                             }
 
                             if (tab.id == "api-documentation") {
+                                setAuthHeader(swaggerClient);
                                 swaggerClient["API (individual)"].get_apis_apiId_documents({"apiId": apiId}, {"responseContentType": 'application/json'},
                                     function (jsonData) {
 
@@ -271,6 +278,9 @@ $(function () {
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     alert("Error occurred while retrieve api with id  : " + apiId);
+                    if(jqXHR.status==401){
+                        redirectToLogin(contextPath);
+                    }
                 });
 
             $('.page-content').on('click', 'button', function (e) {
@@ -278,7 +288,18 @@ $(function () {
                 if (element.id == "subscribe-button") {
                     var applicationId = $("#application-list option:selected").val();
                     if (applicationId == "-" || applicationId == "createNewApp") {
-                        alert('Please select an application before subscribing')
+                        var message = "Please select an application before subscribing";
+                        noty({
+                            text: message,
+                            type: 'warning',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10,
+                        });
                         return;
                     }
                     $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
@@ -287,10 +308,10 @@ $(function () {
 
 
                     var subscriptionData = {};
-                    subscriptionData.tier = tier;
+                    subscriptionData.policy = tier;
                     subscriptionData.applicationId = applicationId;
                     subscriptionData.apiIdentifier = apiIdentifier;
-
+                    setAuthHeader(swaggerClient);
                     swaggerClient["Subscription (individual)"].post_subscriptions({
                             "body": subscriptionData,
                             "Content-Type": "application/json"
