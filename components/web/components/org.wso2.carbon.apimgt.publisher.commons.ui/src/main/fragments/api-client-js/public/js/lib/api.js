@@ -202,7 +202,8 @@ class API {
         let template = {
             "name": null,
             "context": null,
-            "version": null
+            "version": null,
+            "endpoint": []
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -345,6 +346,23 @@ class API {
             }
         ).catch(AuthClient.unauthorizedErrorHandler);
         return promised_delete;
+    }
+
+    /**
+     * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
+     * @param body {Object} Endpoint to be added
+     * @param callback {function} Callback function
+     */
+    addEndpoint(body, callback) {
+        var promised_addEndpoint = this.client.then(
+            (client) => {
+                let payload = {body: body, "Content-Type": "application/json"};
+                return client["Endpoint (Collection)"].post_endpoints(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+
+        return promised_addEndpoint;
     }
 
 }

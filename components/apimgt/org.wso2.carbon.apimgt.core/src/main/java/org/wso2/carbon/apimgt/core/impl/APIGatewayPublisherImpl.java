@@ -101,7 +101,7 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             return true;
         } catch (JMSException e) {
             log.error("Error deploying API configuration for API " + api.getName(), e);
-            throw new GatewayException("Template " + "resources" + File.separator + "template.xml not Found",
+            throw new GatewayException("Error deploying API configuration for API " + api.getName(),
                     ExceptionCodes.GATEWAY_EXCEPTION);
         } catch (URLSyntaxException e) {
             log.error("Error deploying API configuration for API " + api.getName(), e);

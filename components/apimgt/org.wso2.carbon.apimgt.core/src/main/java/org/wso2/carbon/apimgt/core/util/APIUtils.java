@@ -176,7 +176,9 @@ public class APIUtils {
 /*
                 stringBuilder.append("By" + pathParam);
 */
-            }  else {
+            } else if (part1.contains("*")) {
+                stringBuilder.append(part1.replaceAll("\\*", "_star_"));
+            } else {
                 stringBuilder.append(part1);
             }
         }
