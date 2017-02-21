@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -162,7 +163,10 @@ class ApiResourceDAO {
 
             try (ResultSet rs =  statement.getResultSet()) {
                 if (rs.next()) {
-                    return rs.getBlob("RESOURCE_BINARY_VALUE").getBinaryStream();
+                    Blob blob = rs.getBlob("RESOURCE_BINARY_VALUE");
+                    if (blob != null) {
+                        return blob.getBinaryStream();
+                    }
                 }
             }
         }
