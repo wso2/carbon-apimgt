@@ -28,6 +28,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.nio.charset.Charset;
 
 public class APIMRegistryServiceImpl implements APIMRegistryService {
+
+
     @Override
     public String getConfigRegistryResourceContent(String tenantDomain, final String registryLocation)
                                         throws UserStoreException, RegistryException {
@@ -48,8 +50,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
                 Resource resource = registry.get(registryLocation);
                 content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
             }
-        }
-        finally {
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
