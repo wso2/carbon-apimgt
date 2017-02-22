@@ -133,7 +133,7 @@ $(function () {
                                                         maxVisible: 10,
                                                     });
                                                     //TODO: Reload element only
-                                                    window.location.reload(true);
+                                                    setTimeout(function(){ window.location.reload(true); }, 3000);
 
                                                 },
                                                 function (error) {
@@ -208,6 +208,160 @@ $(function () {
     };
 
     var renderApplicationKeys = function (data) {
+        //TODO : Following part is commented due to issue in uuf client render fragment method. Once that is fixed
+        //TODO : we need to use following code and we need to remove the Handlebars.compile(keyTemplateScript);
+        //var keyTemplateScript = result;
+        //AppkeyTemplate = Handlebars.compile(keyTemplateScript);
+        //var  context;
+
+        /*if (typeof data.obj.keys[0] !== 'undefined') {
+
+            for (var i = 0; i < data.obj.keys.length; i++) {
+                var keyType = data.obj.keys[i].keyType;
+
+                for (var j = 0; j < Object.keys(grantTypes).length; j++) {
+                    if ((data.obj.callbackUrl == undefined || data.obj.callbackUrl == "" ) &&
+                        (grantTypes[j].key == "authorization_code" || grantTypes[j].key == "implicit")) {
+                        grantTypes[j].selected = false;
+                        grantTypes[j].disabled = true;
+                    } else {
+                        //TODO check with supportedGrantTypes
+                        grantTypes[j].selected = true;
+                        grantTypes[j].disabled = false;
+                    }
+                }
+
+                context = {
+                    "callbackUrl": data.obj.callbackUrl,
+                    "grantTypes": grantTypes,
+                    "name": data.obj.name,
+                    "show_keys": false,
+                    "Key": data.obj.keys[i].token.accessToken,
+                    "ConsumerKey": data.obj.keys[i].consumerKey,
+                    "ConsumerSecret": data.obj.keys[i].consumerSecret,
+                    "username": "Username",
+                    "password": "Password",
+                    //"basickey": window.btoa(data.obj.keys[i].consumerKey + ":" + data.obj.keys[i].consumerSecret),
+                    "ValidityTime": data.obj.keys[i].token.validityTime,
+                    "Scopes": "",
+                    "tokenScopes": data.obj.keys[i].token.tokenScopes,
+                    "provide_keys_form": false,
+                    "provide_keys": false,
+                    "gatewayurlendpoint": "(gatewayurl)/token"
+
+                };
+                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
+                    onSuccess: function (renderedData) {
+                        if (keyType.toLowerCase() == "production") {
+                            $("#production").append(renderedData);
+
+                            if (data.obj.keys.length == 1) {
+                                context = setDefaultContext(data);
+                                //compiledHtml = AppkeyTemplate(context);
+                                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
+                                    onSuccess: function (renderedData) {
+                                        $("#sandbox").append(renderedData);
+                                    }, onFailure: function (message, e) {
+                                        var message = "Error occurred while getting default application key details." + message;
+                                        noty({
+                                            text: message,
+                                            type: 'error',
+                                            dismissQueue: true,
+                                            modal: true,
+                                            progressBar: true,
+                                            timeout: 2000,
+                                            layout: 'top',
+                                            theme: 'relax',
+                                            maxVisible: 10,
+                                        });
+                                    }
+                                })
+                            }
+                        }
+                        else {
+                            $("#sandbox").append(renderedData);
+
+                            if (data.obj.keys.length == 1) {
+                                context = setDefaultContext(data);
+                                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
+                                    onSuccess: function (renderedData) {
+                                        $("#production").append(renderedData);
+                                    }, onFailure: function (message, e) {
+                                        var message = "Error occurred while getting default application key details." + message;
+                                        noty({
+                                            text: message,
+                                            type: 'error',
+                                            dismissQueue: true,
+                                            modal: true,
+                                            progressBar: true,
+                                            timeout: 2000,
+                                            layout: 'top',
+                                            theme: 'relax',
+                                            maxVisible: 10,
+                                        });
+                                    }
+                                })
+
+                            }
+                        }
+                        $('.selectpicker').selectpicker('refresh');
+
+                    }, onFailure: function (message, e) {
+                        var message = "Error occurred while getting subscription details subscription." + message;
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10,
+                        });
+                    }
+                    //compiledHtml = AppkeyTemplate(context);
+
+                })
+            }
+        }else {
+            context = setDefaultContext(data);
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
+                onSuccess: function (renderedData) {
+                    $("#production").append(renderedData);
+                    $("#sandbox").append(renderedData);
+                    $('.selectpicker').selectpicker('refresh');
+                }, onFailure: function (message, e) {
+                    var message = "Error occurred while getting default application key details." + message;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        progressBar: true,
+                        timeout: 2000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            })
+
+
+        }
+        var ClipboardClient = new ZeroClipboard($('.copy-button'));
+
+        ClipboardClient.on('ready', function (event) {
+            ClipboardClient.on('copy', function (event) {
+                event.clipboardData.setData('text/plain', event.target.value);
+            });
+        });
+
+        ClipboardClient.on('error', function (event) {
+            alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
+            ZeroClipboard.destroy();
+        });
+    }*/
         $.ajax({
             url: '/store/public/components/root/base/templates/applications/applicationKeys.hbs',
             type: 'GET',
@@ -444,7 +598,6 @@ var renderGeneratedKeys = function (data, keyType) {
 
 var show_Keys = function (obj) {
     var parentCont = $(obj).parent().parent();
-    $('#ConsumerKey', parentCont)[0].type
     if ($('#ConsumerKey', parentCont)[0].type == 'password') {
         $('#ConsumerKey', parentCont)[0].type = 'text';
         $('#ConsumerSecret', parentCont)[0].type = 'text';
