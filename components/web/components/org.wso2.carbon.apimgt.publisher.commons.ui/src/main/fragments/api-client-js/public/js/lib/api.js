@@ -143,8 +143,7 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setSchemes(["http"]);
-                swagger.setHost("localhost:9090");
+                swagger.setHost(location.host);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (var index in scopes) {
@@ -202,7 +201,8 @@ class API {
         let template = {
             "name": null,
             "context": null,
-            "version": null
+            "version": null,
+            "endpoint": []
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -345,6 +345,23 @@ class API {
             }
         );
         return promised_update;
+    }
+
+    /**
+     * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
+     * @param body {Object} Endpoint to be added
+     * @param callback {function} Callback function
+     */
+    addEndpoint(body, callback) {
+        var promised_addEndpoint = this.client.then(
+            (client) => {
+                let payload = {body: body, "Content-Type": "application/json"};
+                return client["Endpoint (Collection)"].post_endpoints(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+
+        return promised_addEndpoint;
     }
 
 }

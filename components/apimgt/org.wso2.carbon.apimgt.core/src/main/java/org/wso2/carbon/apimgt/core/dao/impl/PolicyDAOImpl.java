@@ -542,9 +542,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                     addSubscriptionPolicy(connection, "Silver", "Silver", "Silver");
                     addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze");
 
-                    addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier", "x", 10, "REQ", 1, "s");
-                    addApplicationPolicy(connection, "20PerMin", "20PerMin", "20PerMin Tier", "x", 50, "REQ", 1, "s");
-
+                    addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier",
+                                                                                    "requestCount", 10, "REQ", 1, "s");
+                    addApplicationPolicy(connection, "20PerMin", "20PerMin", "20PerMin Tier",
+                                                                                    "requestCount", 50, "REQ", 1, "s");
                     connection.commit();
                 }
             } catch (SQLException e) {

@@ -1532,6 +1532,40 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * Get an Endpoint
+     *
+     * @param name name of endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    @Override
+    public Endpoint getEndpointByName(String name) throws APIMgtDAOException {
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION,"
+                + "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE name = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, name);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Endpoint.Builder endpointBuilder = new Endpoint.Builder();
+                    endpointBuilder.id(resultSet.getString("UUID"));
+                    endpointBuilder.name(resultSet.getString("NAME"));
+                    endpointBuilder
+                            .endpointConfig(IOUtils.toString(resultSet.getBinaryStream("ENDPOINT_CONFIGURATION")));
+                    endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"),
+                            resultSet.getLong("TPS_SANDBOX")));
+                    endpointBuilder.security(IOUtils.toString(resultSet.getBinaryStream("SECURITY_CONFIGURATION")));
+                    return endpointBuilder.build();
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * get all Endpoints
      *
      * @return

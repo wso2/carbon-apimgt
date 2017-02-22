@@ -20,7 +20,7 @@ $(function () {
     var prev = $(".navigation ul li:first")
     $(".green").insertBefore(prev).css('top','0px').addClass('active');
 
-    var client = new SwaggerClient({
+     client = new SwaggerClient({
 
         url: swaggerURL,
         success: function () {
@@ -208,7 +208,6 @@ $(function () {
     };
 
     var renderApplicationKeys = function (data) {
-
         $.ajax({
             url: '/store/public/components/root/base/templates/applications/applicationKeys.hbs',
             type: 'GET',
@@ -281,7 +280,6 @@ $(function () {
                     $("#sandbox").append(compiledHtml);
                     $('.selectpicker').selectpicker('refresh');
                 }
-                
                 var ClipboardClient = new ZeroClipboard($('.copy-button'));
 
                 ClipboardClient.on('ready', function (event) {
@@ -374,7 +372,7 @@ var generateKeys = function () {
 
     var id = document.getElementById("appid").value;
 
-    client.default.applicationsGenerateKeysPost(
+    client["Generate Keys"].post_applications_generate_keys(
         {
             "applicationId": id,
             "Content-Type": "application/json",
@@ -392,8 +390,22 @@ var generateKeys = function () {
     );
 };
 
-var renderGeneratedKeys = function (data, keyType) {
+var updateClick = function () {
+    var message = "This functionality is not supported yet";
+    noty({
+        text: message,
+        type: 'warning',
+        dismissQueue: true,
+        modal: true,
+        progressBar: true,
+        timeout: 3000,
+        layout: 'top',
+        theme: 'relax',
+        maxVisible: 10,
+    });
+};
 
+var renderGeneratedKeys = function (data, keyType) {
     var compiledHtml, context;
 
     for (var j = 0; j < Object.keys(grantTypes).length; j++) {
@@ -406,20 +418,21 @@ var renderGeneratedKeys = function (data, keyType) {
             grantTypes[j].disabled = false;
         }
     }
+    var jsonData = JSON.parse(data.data);
     context = {
         "callbackUrl": document.getElementById("callbackUrl").value,
         "grantTypes": grantTypes,
         "keyState": data.obj.keyState,
         "show_keys": false,
-        "Key": data.obj.token.accessToken,
-        "ConsumerKey": data.obj.consumerKey,
-        "ConsumerSecret": data.obj.consumerSecret,
+        "Key": jsonData.token.accessToken,
+        "ConsumerKey": jsonData.consumerKey,
+        "ConsumerSecret": jsonData.consumerSecret,
         "username": "Username",
         "password": "Password",
-        "basickey": window.btoa(data.obj.consumerKey + ":" + data.obj.consumerSecret),
-        "ValidityTime": data.obj.token.validityTime,
+        "basickey": window.btoa(jsonData.consumerKey + ":" + jsonData.consumerSecret),
+        "ValidityTime": jsonData.token.validityTime,
         "Scopes": "",
-        "tokenScopes": data.obj.token.tokenScopes,
+        "tokenScopes": jsonData.token.tokenScopes,
         "provide_keys_form": false,
         "provide_keys": false,
         "gatewayurlendpoint": "(gatewayurl)/token"
@@ -429,19 +442,20 @@ var renderGeneratedKeys = function (data, keyType) {
     document.getElementById(keyType.toLowerCase()).innerHTML = compiledHtml;
 };
 
-var show_Keys = function () {
-
-    if (document.getElementById("ConsumerKey").type == 'password') {
-        document.getElementById("ConsumerKey").type = 'text';
-        document.getElementById("ConsumerSecret").type = 'text';
-        document.getElementById("Key").type = 'text';
-        document.getElementById("show_keys").childNodes[0].nodeValue = 'Hide Keys';
+var show_Keys = function (obj) {
+    var parentCont = $(obj).parent().parent();
+    $('#ConsumerKey', parentCont)[0].type
+    if ($('#ConsumerKey', parentCont)[0].type == 'password') {
+        $('#ConsumerKey', parentCont)[0].type = 'text';
+        $('#ConsumerSecret', parentCont)[0].type = 'text';
+        $('#Key', parentCont)[0].type = 'text';
+        $('#show_keys', parentCont).html("Hide Keys");
     }
     else {
-        document.getElementById("ConsumerKey").type = 'password';
-        document.getElementById("ConsumerSecret").type = 'password';
-        document.getElementById("Key").type = 'password';
-        document.getElementById("show_keys").childNodes[0].nodeValue = 'Show Keys';
+        $('#ConsumerKey', parentCont)[0].type = 'password';
+        $('#ConsumerSecret', parentCont)[0].type = 'password';
+        $('#Key', parentCont)[0].type = 'password';
+        $('#show_keys', parentCont).html("Show Keys");
     }
 };
 

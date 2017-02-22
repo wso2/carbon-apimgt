@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.template;
 
 import org.apache.velocity.VelocityContext;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 
 import java.time.Instant;
@@ -33,21 +34,23 @@ public class APIConfigContext extends ConfigContext {
 
     private API api;
     private String packageName;
-
+    private String serviceNamePrefix = "";
     public APIConfigContext(API api, String packageName) {
         this.api = api;
         this.packageName = packageName;
     }
 
     @Override
-    public void validate() throws Exception {
+    public void validate() throws APITemplateException {
         //see if api name ,version, context sets
-        if (!api.getName().isEmpty() && !api.getContext().isEmpty() && !api.getVersion().isEmpty()) {
-            return;
-        } else {
-            this.handleException("Required API mapping not provided");
+        if (api.getName().isEmpty() || api.getContext().isEmpty() || api.getVersion().isEmpty()) {
+            throw new APITemplateException("API property validation failed", ExceptionCodes.TEMPLATE_EXCEPTION);
         }
 
+        //adding string prefix if api name starting with a number
+        if (api.getName().matches("^(\\d)+")) {
+            serviceNamePrefix = "prefix_";
+        }
     }
 
     @Override
@@ -58,7 +61,11 @@ public class APIConfigContext extends ConfigContext {
         LocalDateTime ldt = api.getCreatedTime();
         Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
         Date res = Date.from(instant);
-        context.put("serviceName", api.getName() + "_" + res.getTime());
+        String serviceName = serviceNamePrefix + api.getName() + "_" + res.getTime();
+        if (serviceName.contains(" ")) {
+            serviceName = serviceName.replaceAll(" ", "_");
+        }
+        context.put("serviceName", serviceName);
         context.put("package", packageName);
         return context;
     }
