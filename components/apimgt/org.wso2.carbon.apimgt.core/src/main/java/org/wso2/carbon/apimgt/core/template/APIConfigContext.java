@@ -61,7 +61,11 @@ public class APIConfigContext extends ConfigContext {
         LocalDateTime ldt = api.getCreatedTime();
         Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
         Date res = Date.from(instant);
-        context.put("serviceName", serviceNamePrefix + api.getName() + "_" + res.getTime());
+        String serviceName = serviceNamePrefix + api.getName() + "_" + res.getTime();
+        if (serviceName.contains(" ")) {
+            serviceName = serviceName.replaceAll(" ", "_");
+        }
+        context.put("serviceName", serviceName);
         context.put("package", packageName);
         return context;
     }
