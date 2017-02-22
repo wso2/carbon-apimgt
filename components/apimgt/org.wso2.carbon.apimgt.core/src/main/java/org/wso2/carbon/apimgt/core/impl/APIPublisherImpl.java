@@ -1088,6 +1088,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         Endpoint.Builder builder = new Endpoint.Builder(endpoint);
         builder.id(UUID.randomUUID().toString());
         Endpoint endpoint1 = builder.build();
+        String key = endpoint.getName();
+        if (key == null || StringUtils.isEmpty(key)) {
+            log.error("Endpoint name not provided");
+            throw new APIManagementException("Endpoint name is not provided", ExceptionCodes.ENDPOINT_ADD_FAILED);
+        }
+        Endpoint endpoint2 = getApiDAO().getEndpointByName(endpoint.getName());
+        if (endpoint2 != null) {
+            log.error("Endpoint already exist with name " + key);
+            throw new APIManagementException("Endpoint already exist with name " + key,
+                    ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
+        }
         getApiDAO().addEndpoint(endpoint1);
         //update endpoint config in gateway
         publishEndpointConfigToGateway();
