@@ -504,7 +504,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-mssql-server-linux</name>
+                                    <name>microsoft/mssql-server-linux</name>
                                     <alias>apim-mssql</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -523,7 +523,7 @@
                                     </run>
                                 </image>
                                 <image>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-mssql-client</name>
+                                    <name>tharindu1st/mssql-client</name>
                                     <alias>apim-mssql-client</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -711,7 +711,7 @@
                             <images>
                                 <image>
                                     <alias>apim-oracle</alias>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-oracle-database:11.2.0.2-xe</name>
+                                    <name>tharindu1st/oracle-xe:11.2.0.2-xe</name>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
                                         <env>

@@ -12,7 +12,6 @@ import javax.ws.rs.*;
 import java.io.InputStream;
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
-
 import javax.ws.rs.core.Response;
 
 @Component(

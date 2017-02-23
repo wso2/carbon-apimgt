@@ -7,12 +7,10 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
-
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
-
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
