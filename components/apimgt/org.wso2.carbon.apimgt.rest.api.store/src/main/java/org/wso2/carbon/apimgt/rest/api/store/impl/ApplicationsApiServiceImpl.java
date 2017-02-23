@@ -11,9 +11,12 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
+import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -66,7 +69,6 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
-                applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                 if (application.getKeys() != null) {
                     //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
                     // available to get oauth app details by providing consumer
@@ -76,6 +78,8 @@ public class ApplicationsApiServiceImpl
                             OAuthApplicationInfo oAuthApplicationInfo = keyManager
                                     .retrieveApplication(apiKey.getConsumerKey());
                             apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                            //TODO : When showing keys in the application view page , we need to get the access token
+                            // as well
                         } catch (KeyManagementException e) {
                             // This is exception is not thrown intentionally because key manager mock servie does not
                             // have keys once the server is started. We need to re write this properly once the key
@@ -85,6 +89,8 @@ public class ApplicationsApiServiceImpl
                     }
 
                 }
+                applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,

@@ -41,10 +41,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -285,19 +283,6 @@ public class LogInKeyManagerImpl implements KeyManager {
                 urlConn.disconnect();
             }
         }
-
-
-       /* try {
-           TO-DO-Add logic to retrieve oauth2 application
-            }  */
-        oAuthApplicationInfo.setClientName("TEST");
-        oAuthApplicationInfo.setClientId("2WSDFHF");
-        oAuthApplicationInfo.setCallbackUrl("http://google.com");
-        oAuthApplicationInfo.setClientSecret("EWSDFFG");
-        List<String> grantTypes = new ArrayList<>();
-        grantTypes.add("password");
-        oAuthApplicationInfo.setGrantTypes(grantTypes);
-
 
          /*} TO-DO-Add logic to exception handling in retrieving oauth2 application */
         //}
