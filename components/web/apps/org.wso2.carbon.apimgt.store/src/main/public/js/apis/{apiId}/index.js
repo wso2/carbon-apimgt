@@ -10,7 +10,6 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
-
                     var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
