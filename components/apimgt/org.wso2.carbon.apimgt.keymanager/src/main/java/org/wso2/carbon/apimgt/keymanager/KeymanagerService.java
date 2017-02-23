@@ -46,6 +46,7 @@ public class KeymanagerService implements Microservice {
     protected void activate(BundleContext bundleContext) {
         // Nothing to do
         KeyManagerUtil.addUsersAndScopes();
+        getData();
         OAuthApplication pubApp = new OAuthApplication();
         pubApp.setClientId("publisher");
         pubApp.setClientSecret("1234-5678-9101");
@@ -58,7 +59,8 @@ public class KeymanagerService implements Microservice {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        // Nothing to do
+        KeyManagerUtil.backUpOauthData(applications, appsByClientId);
+        KeyManagerUtil.backUpTokenData();
     }
 
     @POST
@@ -105,10 +107,20 @@ public class KeymanagerService implements Microservice {
             }
         }
 
+        OAuthApplication oAuthApplication = appsByClientId.get(clientId);
         OAuthTokenResponse tokenResponse = new OAuthTokenResponse();
-        tokenResponse.setToken(UUID.randomUUID().toString());
-        tokenResponse.setRefreshToken(UUID.randomUUID().toString());
+        String accessToken = UUID.randomUUID().toString();
+        String refreshToken = UUID.randomUUID().toString();
+        if (oAuthApplication.getAccessToken() != null) {
+            accessToken = oAuthApplication.getAccessToken();
+            refreshToken = oAuthApplication.getRefreshToken();
+        }
+        tokenResponse.setToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
         tokenResponse.setExpiresIn(KeyManagerUtil.getExpiresTime());
+        oAuthApplication.setAccessToken(accessToken);
+        oAuthApplication.setRefreshToken(refreshToken);
+        appsByClientId.put(clientId, oAuthApplication);
         return Response.status(Response.Status.OK).entity(tokenResponse).build();
     }
 
@@ -184,5 +196,11 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.OK).entity(oAuth2IntrospectionResponse).build();
         }
         return Response.status(Response.Status.OK).entity("{\"active\":false}").build();
+    }
+
+    private static void getData() {
+        applications = KeyManagerUtil.getBackedUpData("applications.data");
+        appsByClientId = KeyManagerUtil.getBackedUpData("appsByClientId.data");
+        KeyManagerUtil.getBackedUpTokenData("token.data");
     }
 }

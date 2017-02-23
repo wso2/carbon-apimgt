@@ -12,7 +12,7 @@ import java.util.List;
  * CORS configuration for the API 
  */
 @ApiModel(description = "CORS configuration for the API ")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T11:40:36.320+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T13:03:03.175+05:30")
 public class API_corsConfigurationDTO   {
   @JsonProperty("corsConfigurationEnabled")
   private Boolean corsConfigurationEnabled = false;

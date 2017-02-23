@@ -7,20 +7,17 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * SequenceDTO
+ * LabelDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T13:03:03.175+05:30")
-public class SequenceDTO   {
+public class LabelDTO   {
   @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("config")
-  private String config = null;
+  @JsonProperty("access_url")
+  private String accessUrl = null;
 
-  @JsonProperty("type")
-  private String type = null;
-
-  public SequenceDTO name(String name) {
+  public LabelDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -29,7 +26,7 @@ public class SequenceDTO   {
    * Get name
    * @return name
   **/
-  @ApiModelProperty(example = "log_in_message", required = true, value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getName() {
     return name;
   }
@@ -38,40 +35,22 @@ public class SequenceDTO   {
     this.name = name;
   }
 
-  public SequenceDTO config(String config) {
-    this.config = config;
+  public LabelDTO accessUrl(String accessUrl) {
+    this.accessUrl = accessUrl;
     return this;
   }
 
    /**
-   * Get config
-   * @return config
+   * Get accessUrl
+   * @return accessUrl
   **/
-  @ApiModelProperty(example = "", value = "")
-  public String getConfig() {
-    return config;
+  @ApiModelProperty(required = true, value = "")
+  public String getAccessUrl() {
+    return accessUrl;
   }
 
-  public void setConfig(String config) {
-    this.config = config;
-  }
-
-  public SequenceDTO type(String type) {
-    this.type = type;
-    return this;
-  }
-
-   /**
-   * Get type
-   * @return type
-  **/
-  @ApiModelProperty(example = "in", value = "")
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
+  public void setAccessUrl(String accessUrl) {
+    this.accessUrl = accessUrl;
   }
 
 
@@ -83,25 +62,23 @@ public class SequenceDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SequenceDTO sequence = (SequenceDTO) o;
-    return Objects.equals(this.name, sequence.name) &&
-        Objects.equals(this.config, sequence.config) &&
-        Objects.equals(this.type, sequence.type);
+    LabelDTO label = (LabelDTO) o;
+    return Objects.equals(this.name, label.name) &&
+        Objects.equals(this.accessUrl, label.accessUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, config, type);
+    return Objects.hash(name, accessUrl);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SequenceDTO {\n");
+    sb.append("class LabelDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    accessUrl: ").append(toIndentedString(accessUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
