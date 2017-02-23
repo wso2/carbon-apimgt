@@ -314,8 +314,23 @@ $(function () {
                             $("#subscribe-button").html('Subscribe');
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
-
-                            location.href = contextPath + "/apis/" + apiId;
+                            var message = "Subscription created successfully";
+                            noty({
+                                text: message,
+                                type: 'success',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 1000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10,
+                                callback: {
+                                    afterClose: function () {
+                                        location.href = contextPath + "/apis/" + apiId;
+                                    },
+                                }
+                            });
 
                             //TODO : Embedding message model
 
