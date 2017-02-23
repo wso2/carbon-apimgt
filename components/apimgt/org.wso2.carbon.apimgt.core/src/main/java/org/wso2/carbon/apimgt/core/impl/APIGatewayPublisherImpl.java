@@ -68,6 +68,10 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
         try {
             String gatewayConfig = api.getGatewayConfig();
             String gwHome = System.getProperty("gwHome");
+            //TODO: remove temp fix to ignore gateway home
+            if (gwHome == null) {
+                gwHome = System.getProperty("carbon.home");
+            }
             String defaultConfig = null;
             if (api.isDefaultVersion()) {
                 //change the context name without version
@@ -210,9 +214,15 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     public boolean publishEndpointConfigToGateway(String config) throws GatewayException {
         try {
             String gwHome = System.getProperty("gwHome");
+
+            //TODO: remove temp fix to ignore gateway home
+            if (gwHome == null) {
+                gwHome = System.getProperty("carbon.home");
+            }
+
             if (gwHome == null) {
                 GatewayConfigDTO dto = new GatewayConfigDTO();
-                dto.setType("api");
+                dto.setType("endpoint");
                 dto.setApiName(endpointConfigName);
                 dto.setConfig(config);
                 publishMessage(dto); //TODO publish endpoint configs correctly
