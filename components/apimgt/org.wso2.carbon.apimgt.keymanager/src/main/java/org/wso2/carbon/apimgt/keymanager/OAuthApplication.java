@@ -20,13 +20,14 @@ package org.wso2.carbon.apimgt.keymanager;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
 /**
  *The Data-holder for OAuth Applications in the Key Manager Service
  */
-public class OAuthApplication {
+public class OAuthApplication implements Serializable {
 
     @JsonProperty("clientName")
     private String clientName;
@@ -42,6 +43,14 @@ public class OAuthApplication {
 
     @JsonProperty("grantTypes")
     private List<String> grantTypes;
+
+    @JsonProperty("accessToken")
+    private String accessToken;
+
+    @JsonProperty("refreshToken")
+    private String refreshToken;
+
+    private static final long serialVersionUID = 1;
 
     public OAuthApplication() {
         this.clientName = "";
@@ -85,6 +94,22 @@ public class OAuthApplication {
 
     public void setRedirectURIs(List<URL> redirectURIs) {
         this.redirectURIs = redirectURIs;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Override

@@ -259,6 +259,8 @@ public class LogInKeyManagerImpl implements KeyManager {
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setClientSecret(consumerSecret);
                 oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
+                oAuthApplicationInfo.addParameter(KeyManagerConstants
+                        .VALIDITY_PERIOD, "3600");
 
             } else { //If DCR call fails
                 throw new KeyManagementException("Error while getting oauth application info for key : " + consumerKey,
