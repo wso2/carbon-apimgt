@@ -4,10 +4,15 @@ import io.swagger.annotations.ApiParam;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.EndpointsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
 
 import javax.ws.rs.*;
+import java.io.InputStream;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.wso2.msf4j.formparam.FileInfo;
+
 import javax.ws.rs.core.Response;
 
 @Component(
@@ -19,7 +24,7 @@ import javax.ws.rs.core.Response;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the endpoints API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T11:40:36.320+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T13:03:03.175+05:30")
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 

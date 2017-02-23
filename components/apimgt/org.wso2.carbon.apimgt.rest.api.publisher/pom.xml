@@ -168,7 +168,7 @@
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.exp.pkg.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="6"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="7"
         </carbon.component>
     </properties>
 </project>

@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 
 /**
- * SubscriptionListDTO
+ * LabelListDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T13:03:03.175+05:30")
-public class SubscriptionListDTO   {
+public class LabelListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
@@ -24,18 +24,18 @@ public class SubscriptionListDTO   {
   private String previous = null;
 
   @JsonProperty("list")
-  private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
+  private List<LabelDTO> list = new ArrayList<LabelDTO>();
 
-  public SubscriptionListDTO count(Integer count) {
+  public LabelListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of Subscriptions returned. 
+   * Number of Labels returned. 
    * @return count
   **/
-  @ApiModelProperty(example = "1", value = "Number of Subscriptions returned. ")
+  @ApiModelProperty(value = "Number of Labels returned. ")
   public Integer getCount() {
     return count;
   }
@@ -44,7 +44,7 @@ public class SubscriptionListDTO   {
     this.count = count;
   }
 
-  public SubscriptionListDTO next(String next) {
+  public LabelListDTO next(String next) {
     this.next = next;
     return this;
   }
@@ -53,7 +53,7 @@ public class SubscriptionListDTO   {
    * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    * @return next
   **/
-  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;2&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   public String getNext() {
     return next;
   }
@@ -62,7 +62,7 @@ public class SubscriptionListDTO   {
     this.next = next;
   }
 
-  public SubscriptionListDTO previous(String previous) {
+  public LabelListDTO previous(String previous) {
     this.previous = previous;
     return this;
   }
@@ -71,7 +71,7 @@ public class SubscriptionListDTO   {
    * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    * @return previous
   **/
-  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;0&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   public String getPrevious() {
     return previous;
   }
@@ -80,12 +80,12 @@ public class SubscriptionListDTO   {
     this.previous = previous;
   }
 
-  public SubscriptionListDTO list(List<SubscriptionDTO> list) {
+  public LabelListDTO list(List<LabelDTO> list) {
     this.list = list;
     return this;
   }
 
-  public SubscriptionListDTO addListItem(SubscriptionDTO listItem) {
+  public LabelListDTO addListItem(LabelDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -95,11 +95,11 @@ public class SubscriptionListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<SubscriptionDTO> getList() {
+  public List<LabelDTO> getList() {
     return list;
   }
 
-  public void setList(List<SubscriptionDTO> list) {
+  public void setList(List<LabelDTO> list) {
     this.list = list;
   }
 
@@ -112,11 +112,11 @@ public class SubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriptionListDTO subscriptionList = (SubscriptionListDTO) o;
-    return Objects.equals(this.count, subscriptionList.count) &&
-        Objects.equals(this.next, subscriptionList.next) &&
-        Objects.equals(this.previous, subscriptionList.previous) &&
-        Objects.equals(this.list, subscriptionList.list);
+    LabelListDTO labelList = (LabelListDTO) o;
+    return Objects.equals(this.count, labelList.count) &&
+        Objects.equals(this.next, labelList.next) &&
+        Objects.equals(this.previous, labelList.previous) &&
+        Objects.equals(this.list, labelList.list);
   }
 
   @Override
@@ -127,7 +127,7 @@ public class SubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriptionListDTO {\n");
+    sb.append("class LabelListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    next: ").append(toIndentedString(next)).append("\n");
