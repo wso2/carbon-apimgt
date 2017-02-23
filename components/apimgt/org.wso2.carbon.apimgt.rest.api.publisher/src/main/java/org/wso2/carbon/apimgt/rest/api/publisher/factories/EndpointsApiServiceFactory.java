@@ -4,7 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.EndpointsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.impl.EndpointsApiServiceImpl;
 
 public class EndpointsApiServiceFactory {
-    private final static EndpointsApiService service = new EndpointsApiServiceImpl();
+    private static final EndpointsApiService service = new EndpointsApiServiceImpl();
 
     public static EndpointsApiService getEndpointsApi() {
         return service;

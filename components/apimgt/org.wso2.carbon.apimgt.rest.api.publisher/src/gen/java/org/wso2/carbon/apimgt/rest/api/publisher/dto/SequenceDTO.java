@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * SequenceDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T13:03:03.175+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
 public class SequenceDTO   {
   @JsonProperty("name")
   private String name = null;
