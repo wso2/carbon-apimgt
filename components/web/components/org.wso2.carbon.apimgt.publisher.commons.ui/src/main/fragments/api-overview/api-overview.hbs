@@ -1,0 +1,102 @@
+<div class="row">
+    <div class="col-sm-2 col-md-2">
+        <div class="thumbnail">
+            <div class="square-element setbgcolor"
+                 style="background: rgb(92, 107, 192);">
+                <div class="api-name-icon text-uppercase" style="font-size: 900%;color: white;text-align: center;">A
+                </div>
+                <div style="display: none">
+                    <a href="" class="api-name" title="{{@params.name}}">{{@params.name}}</a>
+                </div>
+            </div>
+            <div class="caption">
+                <h1 class="text-primary">{{@params.name}}
+                    <small>{{@params.version}}</small>
+                </h1>
+                <script>
+                    $(window).load(function () {
+
+                        $(".setbgcolor").generateBgcolor({
+                            definite: true
+                        });
+
+                        $(".api-name-icon").each(function () {
+                            var elem = $(this).next().children(".api-name");
+                            $(this).nametoChar({
+                                nameElement: elem
+                            });
+                        });
+
+                    });
+
+                </script>
+                <ul class="nav nav-list">
+                    <li>
+                        <a href="#" onclick="showTab('usersLink')" title="User">
+                            <i class="fw fw-user" title="User"></i>
+                            <span class="userCount"><b>N/A</b> Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showTab('lc-tab')" title="{{@params.lifeCycleStatus}}">
+                            <span id="status"><i class="fw fw-lifecycle" title="{{@params.lifeCycleStatus}}"></i>
+                                &nbsp;{{@params.lifeCycleStatus}}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showTab('documents-tab')" title="Docs">
+                            <i class="fw fw-document" title="Docs"></i> Docs
+                        </a>
+                    </li>
+                    <li>
+                        <a target="_blank" href="/store/apis/{{@params.id}}" id="goToStore" title="View in Store">
+                            <i class="fw fw-store"></i>&nbsp;View in Store
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td class="col-sm-3">Visibility</td>
+                <td id="inUrl">
+                    {{@params.visibility}}
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-3">Context</td>
+                <td id="inUrl">{{@params.context}}</td>
+            </tr>
+
+
+            <tr>
+                <td>Date Last Updated</td>
+                <td id="inUpdated" class="dateFull">{{@params.lastUpdatedTime}}</td>
+            </tr>
+            <tr>
+                <td>Tier Availability</td>
+                <td id="tierAvb">{{@params.policies}}</td>
+            </tr>
+            <tr>
+                <td>Default API Version</td>
+                <td id="defaultAPIVersion">
+                    {{@params.isDefaultVersion}}
+                </td>
+
+            </tr>
+
+            <tr>
+                <td>Published Environments</td>
+                <td>
+                    <b>N/A</b>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
