@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
+import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
@@ -1171,6 +1172,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException {
         return getPolicyDAO().getPolicy(tierLevel, tierName);
+    }
+
+    @Override
+    public List<LifecycleHistoryBean> getLifeCycleHistoryFromUUID(String uuid)
+            throws APIManagementException {
+
+        LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
+        try {
+            return lifecycleEventManager.getLifecycleHistoryFromId(uuid);
+        } catch (LifecycleException e) {
+            String errorMsg = "Error while retrieving the lifecycle history of the API ";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        }
     }
 
     /**
