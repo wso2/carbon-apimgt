@@ -61,6 +61,7 @@ var getCookie = function(name) {
 var setAuthHeader = function(swaggerClient) {
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     swaggerClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
+    swaggerClient.setHost(location.host);
 
 };
 
