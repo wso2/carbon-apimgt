@@ -68,7 +68,8 @@ public class KeymanagerService implements Microservice {
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     @Produces({ "application/json" })
     public Response getNewAccessToken(@FormDataParam("username") String username, @FormDataParam("password") String
-            password , @FormDataParam("grant_type") String grantType, @HeaderParam("Authorization")
+            password , @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period")
+            String validityPeriod, @HeaderParam("Authorization")
             String authzHeader)
             throws KeyManagerException {
 
@@ -90,6 +91,7 @@ public class KeymanagerService implements Microservice {
         decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
         String clientId = decoded[0];
         String clientSecret = decoded[1];
+        Long validPeriod = Long.parseLong(validityPeriod);
 
         if (!appsByClientId.containsKey(clientId) ||
                 !appsByClientId.get(clientId).getClientSecret().equals(clientSecret)) {
@@ -100,7 +102,7 @@ public class KeymanagerService implements Microservice {
 
         OAuthTokenResponse oAuthTokenResponse = new OAuthTokenResponse();
         if ("password".equals(grantType)) {
-            if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password)) {
+            if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password, validPeriod)) {
                 return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -117,7 +119,8 @@ public class KeymanagerService implements Microservice {
         }
         tokenResponse.setToken(accessToken);
         tokenResponse.setRefreshToken(refreshToken);
-        tokenResponse.setExpiresIn(KeyManagerUtil.getExpiresTime());
+        tokenResponse.setExpiresTimestamp(KeyManagerUtil.getExpiresTime(validPeriod));
+        tokenResponse.setExpiresIn(validPeriod);
         oAuthApplication.setAccessToken(accessToken);
         oAuthApplication.setRefreshToken(refreshToken);
         appsByClientId.put(clientId, oAuthApplication);
