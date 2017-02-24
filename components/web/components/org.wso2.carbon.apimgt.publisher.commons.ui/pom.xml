@@ -43,6 +43,13 @@
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.auth.ui</artifactId>
+            <version>${carbon.apimgt.version}</version>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
+        </dependency>
     </dependencies>
 
     <build>

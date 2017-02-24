@@ -18,27 +18,41 @@
         </button>
     </div>
 {{/if}}
-<div id="listing">
-    <div class="page-header">
-        <h2>All API</h2>
-    </div>
-    <div class="content-section shadow-up">
-        <div class="content-data" id="apiListingContainer">
-            <div class="page-content">
-                <table id="apim-publisher-listing" class="table table-striped table-bordered" cellspacing="0"
-                       width="100%">
-                    <thead>
-                    <tr>
-                        <th class="api-listing-name">API</th>
-                        <th>{{i18n "Version"}}</th>
-                        <th>{{i18n "Provider"}}</th>
-                        <th class="api-listing-status">{{i18n "Status"}}</th>
-                        <th class="api-listing-action">{{i18n "Actions"}}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+<div class="row">
+    <div class="col-md-12 col-sm-12" data-toggle="loading" data-loading-style="overlay"
+         data-loading-text="Loading APIs ...">
+        <div id="listing">
+            <div class="hidden" id="api-listing-welcome-message">
+                <div class="message message-success">
+                    <h4><i class="icon fw fw-success"></i>No APIs to list</h4>
+                    <p>You don't have any APIs to list here.Click on the <b>ADD</b> button above to add new API.</p>
+                </div>
+            </div>
+            <div class="hidden" id="api-listing-container">
+                <div class="page-header">
+                    <h2>All APIs</h2>
+                </div>
+                <div class="content-section shadow-up">
+                    <div class="content-data">
+                        <div class="page-content">
+                            <table id="apim-publisher-listing" class="table table-striped table-bordered"
+                                   cellspacing="0"
+                                   width="100%">
+                                <thead>
+                                <tr>
+                                    <th class="api-listing-name">API</th>
+                                    <th>{{i18n "Version"}}</th>
+                                    <th>{{i18n "Provider"}}</th>
+                                    <th class="api-listing-status">{{i18n "Status"}}</th>
+                                    <th class="api-listing-action">{{i18n "Actions"}}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

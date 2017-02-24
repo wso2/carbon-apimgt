@@ -104,6 +104,8 @@ public class MappingUtil {
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy());
             apidto.addOperationsItem(apiOperationsDTO);
         }
+        apidto.setCreatedTime(api.getCreatedTime().toString());
+        apidto.setLastUpdatedTime(api.getLastUpdatedTime().toString());
         return apidto;
     }
 
@@ -364,6 +366,7 @@ public class MappingUtil {
     public static Endpoint toEndpoint(EndPointDTO endPointDTO) {
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
         endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
+        endPointBuilder.name(endPointDTO.getName());
         EndPoint_maxTpsDTO maxTpsDTO = endPointDTO.getMaxTps();
         if (maxTpsDTO != null) {
             endPointBuilder.maxTps(new Endpoint.MaxTps(maxTpsDTO.getProduction(), maxTpsDTO.getSandbox()));

@@ -26,4 +26,6 @@ import org.wso2.carbon.apimgt.core.models.API;
  */
 public interface APIGatewayPublisher {
     boolean publishToGateway(API api) throws GatewayException;
+
+    boolean publishEndpointConfigToGateway(String config) throws GatewayException;
 }

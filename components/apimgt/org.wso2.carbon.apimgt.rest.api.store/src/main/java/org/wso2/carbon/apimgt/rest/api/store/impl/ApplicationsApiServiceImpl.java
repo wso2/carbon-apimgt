@@ -4,11 +4,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -21,12 +28,12 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl
@@ -61,7 +68,32 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
+                if (application.getKeys() != null) {
+                    //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
+                    // available to get oauth app details by providing consumer
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                    for (APIKey apiKey : application.getKeys()) {
+                        try {
+                            OAuthApplicationInfo oAuthApplicationInfo = keyManager
+                                    .retrieveApplication(apiKey.getConsumerKey());
+                            apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                            AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(
+                                    ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo));
+                            apiKey.setAccessToken(accessTokenInfo.getAccessToken());
+                            apiKey.setValidityPeriod(accessTokenInfo.getValidityPeriod());
+                            //TODO : When showing keys in the application view page , we need to get the access token
+                            // as well
+                        } catch (KeyManagementException e) {
+                            // This is exception is not thrown intentionally because key manager mock servie does not
+                            // have keys once the server is started. We need to re write this properly once the key
+                            // manager is available.
+                            log.error("Error while getting keys fo application : " + applicationId, e);
+                        }
+                    }
+
+                }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,

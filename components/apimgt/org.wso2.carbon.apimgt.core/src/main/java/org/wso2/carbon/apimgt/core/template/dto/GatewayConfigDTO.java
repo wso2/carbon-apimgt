@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.template.dto;
  */
 public class GatewayConfigDTO {
     private String apiName;
+    private String type;
     private String context;
     private String version;
     private String creator;
@@ -45,6 +46,14 @@ public class GatewayConfigDTO {
 
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getApiName() {

@@ -33,18 +33,62 @@ $(function () {
 
                     //Delete Application
                     $(document).on('click', 'a.deleteApp', function () {
-                        alert("Are you sure you want to delete Application");
 
-                        var appId = $(this).attr("data-id")
-                        setAuthHeader(swaggerClient);
-                        swaggerClient["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
-                            function (success) {
-                                //TODO: Reload element only
-                                window.location.reload(true);
-                            },
-                            function (error) {
-                                alert("Error occurred while deleting application")
-                            });
+                        var appId = $(this).attr("data-id");
+                        var type="alert";
+                        var layout="topCenter";
+                        noty({
+                            text : "Do you want to delete the application",
+                            type : type,
+                            dismissQueue: true,
+                            layout : layout,
+                            theme : 'relax',
+                            buttons : [
+                                {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                    $noty.close();
+                                    setAuthHeader(swaggerClient);
+                                    swaggerClient["Application (individual)"].delete_applications_applicationId({"applicationId": appId},
+                                        function (success) {
+                                            //TODO: Reload element only
+                                            var message = "Application deleted successfully";
+                                            noty({
+                                                text: message,
+                                                type: 'success',
+                                                dismissQueue: true,
+                                                modal: true,
+                                                progressBar: true,
+                                                timeout: 3000,
+                                                layout: 'top',
+                                                theme: 'relax',
+                                                maxVisible: 10,
+                                            });
+                                            setTimeout(function(){ window.location.reload(true); }, 3000);
+
+
+                                        },
+                                        function (error) {
+                                            var message = "Error occurred while deleting application";
+                                            noty({
+                                                text: message,
+                                                type: 'warning',
+                                                dismissQueue: true,
+                                                modal: true,
+                                                progressBar: true,
+                                                timeout: 2000,
+                                                layout: 'top',
+                                                theme: 'relax',
+                                                maxVisible: 10,
+                                            });
+                                        });
+                                }
+                                },
+                                {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                    $noty.close();
+                                }
+                                }
+                            ]
+                        });
+
                     })
 
                 },
@@ -67,7 +111,7 @@ $(function () {
             columns: [
                 {'data': 'name'},
                 {'data': 'throttlingTier'},
-                {'data': 'status'},
+                {'data': 'lifeCycleStatus'},
                 {'data': 'subscriber'},
                 {'data': 'applicationId'},
             ],

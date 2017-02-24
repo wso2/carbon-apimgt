@@ -44,16 +44,16 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     /**
      * Creates full text search query specific to database.
      *
-     * @param connection  Database connection.
+     * @param connection   Database connection.
      * @param searchString The search string provided
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link   PreparedStatement} Statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement search(
             Connection connection, List<String> roles, String user, String searchString, int offset, int limit)
             throws APIMgtDAOException {
@@ -62,18 +62,14 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
 
-        /*final String query = "SELECT APIS.* FROM FTL_SEARCH_DATA (?, ?, ?) FT, AM_API APIS "
-                                + "WHERE FT.TABLE='AM_API' AND APIS.UUID=FT.KEYS[0] ORDER BY FT.KEYS[2]";*/
-
-        final String query =
-                    API_SUMMARY_SELECT + " LEFT JOIN  FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0] WHERE ("
-                        + "(`GROUP_ID` IN (" + roleListBuilder.toString()
-                        + ")) OR (PROVIDER = ?)) GROUP BY UUID ORDER BY NAME LIMIT ? OFFSET ?";
-
-         int queryIndex = 1;
+        final String query = API_SUMMARY_SELECT + " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0] "
+                + "WHERE ((`GROUP_ID` IN (" + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) AND FT.TABLE='AM_API'"
+                + " GROUP BY UUID ORDER BY NAME LIMIT ? OFFSET ?";
+        int queryIndex = 1;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(queryIndex, searchString.toLowerCase(Locale.ENGLISH) + '*');
+            statement.setString(queryIndex, searchString.toLowerCase(Locale.ENGLISH).replaceAll("[^a-zA-Z0-9\\s]", "")
+                    + '*');  // Replacing special characters and allowing only alphabetical letters, numbers and space
             queryIndex++;
             for (String role : roles) {
                 statement.setString(queryIndex, role);
@@ -82,7 +78,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             statement.setString(queryIndex, EVERYONE_ROLE);
             statement.setString(++queryIndex, user);
             statement.setInt(++queryIndex, limit);
-            statement.setInt(++queryIndex, --offset);
+            statement.setInt(++queryIndex, offset);
             return statement;
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -92,16 +88,16 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     /**
      * Creates attribute search query specific to database.
      *
-     * @param connection  Database connection.
+     * @param connection   Database connection.
      * @param attributeMap Map containing the attributes and search queries for those attributes
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param offset       The starting point of the search results.
+     * @param limit        Number of search results that will be returned.
      * @return {@link   PreparedStatement} Statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement attributeSearch(
             Connection connection, List<String> roles, String user, Map<String, String> attributeMap, int offset, int
             limit)
@@ -109,7 +105,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         StringBuilder roleListBuilder = new StringBuilder();
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
-        StringBuffer searchQuery = new StringBuffer();
+        StringBuilder searchQuery = new StringBuilder();
         Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, String> entry = entries.next();
@@ -117,12 +113,12 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             searchQuery.append(entry.getKey());
             searchQuery.append(") LIKE ?");
             if (entries.hasNext()) {
-                searchQuery.append(" OR ");
+                searchQuery.append(" AND ");
             }
         }
 
         final String query =
-                API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +  " AND ((GROUP_ID IN (" + roleListBuilder
+                API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() + " AND ((GROUP_ID IN (" + roleListBuilder
                         .toString() + ")) OR  (PROVIDER = ?)) GROUP BY UUID ORDER BY NAME LIMIT ? OFFSET ?";
         try {
             int queryIndex = 1;

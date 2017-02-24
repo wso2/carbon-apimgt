@@ -48,7 +48,7 @@ import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test
-    public void testAddGetAPI( ) throws Exception {
+    public void testAddGetAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -62,7 +62,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testAddDuplicateProviderNameVersionAPI( ) throws Exception {
+    public void testAddDuplicateProviderNameVersionAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -76,8 +76,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         try {
             apiDAO.addAPI(duplicateAPI);
             Assert.fail("Exception not thrown for adding duplicate API");
-        }
-        catch (APIMgtDAOException e) {
+        } catch (APIMgtDAOException e) {
             // Just catch the exception so that we can continue execution
         }
 
@@ -89,7 +88,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testAddSameAPIWithDifferentProviders( ) throws Exception {
+    public void testAddSameAPIWithDifferentProviders() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
@@ -112,7 +111,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDuplicateContext( ) throws Exception {
+    public void testDuplicateContext() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         testAddGetEndpoint();
@@ -125,8 +124,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         try {
             apiDAO.addAPI(duplicateAPI);
             Assert.fail("Exception not thrown for adding duplicate API context");
-        }
-        catch (APIMgtDAOException e) {
+        } catch (APIMgtDAOException e) {
             // Just catch the exception so that we can continue execution
         }
 
@@ -137,12 +135,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
-        @Test
-    public void testGetAPISummary( ) throws Exception {
+    @Test
+    public void testGetAPISummary() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-            testAddGetEndpoint();
+        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPISummary(api.getId());
@@ -154,7 +152,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIs( ) throws Exception {
+    public void testGetAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         List<API> apiList = apiDAO.getAPIs();
@@ -179,11 +177,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(apiList.size() == 2);
 
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
-                                        TestUtil.printDiff(apiList, expectedAPIs));
+                TestUtil.printDiff(apiList, expectedAPIs));
     }
 
     @Test
-    public void testGetAPIsForProvider( ) throws Exception {
+    public void testGetAPIsForProvider() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String provider1 = "Watson";
         String provider2 = "Holmes";
@@ -235,7 +233,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIsByStatus( ) throws Exception {
+    public void testGetAPIsByStatus() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Define statuses used in test
@@ -308,8 +306,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         apiList = apiDAO.getAPIsByStatus(multipleStatuses);
 
-        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() +
-                                            blockedAPIsSummary.size() + createdAPIsSummary.size());
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size()
+                + createdAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
@@ -330,24 +328,24 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testSearchAPIs( ) throws Exception {
+    public void testSearchAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
         // Sample API names
-        final String mixedCaseString = "MixedCase";
-        final String lowerCaseString = "lowercase";
-        final String upperCaseString = "UPPERCASE";
-        final String charSymbolNumString = "mi^-@123";
-        final String spaceDelimitingString = " Sp ace ";
+        final String mixedCaseString = "Mixed Case";
+        final String lowerCaseString = "lower case";
+        final String upperCaseString = "UPPER CASE";
+        final String charSymbolNumString = "mi ##symbol 12num";
+        final String spaceDelimitingString = " S p ace ";
         final String symbolSpaceString = "_under & Score_";
 
         // Search string cases
         final String commonMixedCaseSearchString = "CaSe";
         final String commonLowerCaseSearchString = "case";
         final String commonUpperCaseSearchString = "CASE";
-        final String symbolSearchString = "^-@";
-        final String numberSearchString = "12";
-        final String spaceIncludedSearchString = "p a";
+        final String symbolSearchString = "##symbol";
+        final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
+        final String spaceIncludedSearchString = "s p ace";
 
         // Create test data
         Map<String, API> apis = new HashMap<>();
@@ -386,7 +384,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonUpperCaseSearchString, 0 , 10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonUpperCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
@@ -406,7 +404,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search with spaces
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", spaceIncludedSearchString, 0 ,10);
+        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", spaceIncludedSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(spaceDelimitingString);
@@ -414,7 +412,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testIsAPINameExists( ) throws Exception {
+    public void testIsAPINameExists() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
@@ -464,7 +462,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDeleteAPI( ) throws Exception {
+    public void testDeleteAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -478,7 +476,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateAPI( ) throws Exception {
+    public void testUpdateAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
@@ -494,27 +492,30 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB, expectedAPI,TestUtil.printDiff(apiFromDB,expectedAPI));
+        Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
     }
+
     @Test
-    public void testAddGetEndpoint() throws Exception{
+    public void testAddGetEndpoint() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
-        Assert.assertEquals(endpoint,retrieved);
+        Assert.assertEquals(endpoint, retrieved);
     }
+
     @Test
-    public void testAddUpdateGetEndpoint() throws Exception{
+    public void testAddUpdateGetEndpoint() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
         Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
         apiDAO.updateEndpoint(updatedEndpoint);
         Endpoint retrieved = apiDAO.getEndpoint(updatedEndpoint.getId());
-        Assert.assertEquals(updatedEndpoint,retrieved);
+        Assert.assertEquals(updatedEndpoint, retrieved);
     }
+
     @Test
-    public void testAddDeleteGetEndpoint() throws Exception{
+    public void testAddDeleteGetEndpoint() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);

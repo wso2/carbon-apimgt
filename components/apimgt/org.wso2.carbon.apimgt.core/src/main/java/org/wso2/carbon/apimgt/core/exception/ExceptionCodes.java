@@ -65,11 +65,14 @@ public enum ExceptionCodes implements ErrorHandler {
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     ENDPOINT_NOT_FOUND(900316, "Endpoint Not Found", 404, "Endpoint Not Found"),
+    ENDPOINT_ALREADY_EXISTS(900322, "Endpoint Already EXISTS", 400, "Endpoint Not Found"),
+    ENDPOINT_ADD_FAILED(900323, "Endpoint adding failed", 400, "Endpoint adding failed"),
     API_DEFINITION_MALFORMED(900317, "ApiDefinition not found", 400, "ApiDefinition not found"),
     TEMPLATE_EXCEPTION(900318, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900319, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
 
-    JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error");
+    JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error"),
+    INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password");
 
     private final long errorCode;
     private final String errorMessage;

@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.core.template.dto;
  * under the License.
  */
 
-import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 /**
  * hold the field require to build gateway configuration from template
@@ -30,8 +29,8 @@ public class TemplateBuilderDTO {
     private String policy;
     private String produce;
     private String consume;
-    private Endpoint productionEndpoint;
-    private Endpoint sandboxEndpoint;
+    private String productionEndpoint;
+    private String sandboxEndpoint;
 
     public String getTemplateId() {
         return templateId;
@@ -89,19 +88,19 @@ public class TemplateBuilderDTO {
         this.consume = consume;
     }
 
-    public Endpoint getProductionEndpoint() {
+    public String getProductionEndpoint() {
         return productionEndpoint;
     }
 
-    public void setProductionEndpoint(Endpoint productionEndpoint) {
+    public void setProductionEndpoint(String productionEndpoint) {
         this.productionEndpoint = productionEndpoint;
     }
 
-    public Endpoint getSandboxEndpoint() {
+    public String getSandboxEndpoint() {
         return sandboxEndpoint;
     }
 
-    public void setSandboxEndpoint(Endpoint sandboxEndpoint) {
+    public void setSandboxEndpoint(String sandboxEndpoint) {
         this.sandboxEndpoint = sandboxEndpoint;
     }
 }

@@ -45,6 +45,7 @@ var _renderApplicationAddPage = function(){
             //TODO:Replace this once the tierList retrieval api is implemented
             var tier = {};
             tier.name = "50PerMin";
+            tier.description = "Allows 50000 requests per minute";
             var list = [];
             list.push(tier);
             //TODO:Replace this once the tierList retrieval api is implemented

@@ -28,7 +28,8 @@
     <div class="row" id="keys">
         <div class="col-md-12 col-lg-9">
             <div class="add-margin-bottom-4x">
-                <button id="show_keys" type="button" class="btn btn-secondary show_keys" onclick="show_Keys()">{{# if show_keys }}Hide Keys{{else}}Show Keys{{/if}}</button>
+                <button id="show_keys" type="button" class="btn btn-secondary show_keys" onclick="show_Keys(this)">{{#
+                if show_keys }}Hide Keys{{else}}Show Keys{{/if}}</button>
             </div>
             <div class="form-group" id="cons">
                 <label class="" for="ConsumerKey">Consumer Key></label>
@@ -55,7 +56,7 @@
 
             {{> grants this}}
             {{> callback_url this}}
-            <button class=" btn btn-primary update_grants" onclick="updateclick()">Update</button>
+            <button class=" btn btn-primary update_grants" onclick="updateClick()">Update</button>
             <div class="row add-margin-top-5x">
                 <div class="col-md-12">
                     <h4>Generating Access Tokens</h4>

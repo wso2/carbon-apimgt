@@ -10,7 +10,6 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
-
                     var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
@@ -34,7 +33,7 @@ $(function () {
                         },onFailure: function (message, e) {}});
 
                     //TODO:Since the tiers are not setting from the rest api, the default tier is attached
-                    if(!api.policies){
+                    if (!api.policies || api.policies.length == 0) {
                         api.policies = ["Unlimited"];
                     }
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
@@ -46,7 +45,6 @@ $(function () {
                         function (jsonData) {
                             var context = {};
                             var applications = jsonData.obj.list;
-                            if (applications.length > 0) {
                                 swaggerClient["Subscription Collection"].get_subscriptions({
                                         "apiId": apiId,
                                         "applicationId": "",
@@ -54,28 +52,25 @@ $(function () {
                                     }, requestMetaData(),
                                     function (jsonData) {
                                         var availableApplications = [], subscription = {};
-                                        var isSubscribedToDefault = false;
                                         var subscriptions = jsonData.obj.list;
                                         var application = {};
-
-                                        applicationsLoop:
-                                            for (var i = 0; i < applications.length; i++) {
+                                        var subscribedApp = false;
+                                        for (var i = 0; i < applications.length; i++) {
+                                               subscribedApp = false;
                                                 application = applications[i];
                                                 for (var j = 0; j < subscriptions.length; j++) {
                                                     subscription = subscriptions[j];
                                                     if (subscription.applicationId === application.applicationId) {
-                                                        continue applicationsLoop;
+                                                        subscribedApp = true;
+                                                        continue;
                                                     }
                                                 }
-                                                if (application.name == "DefaultApplication") {
-                                                    isSubscribedToDefault = true;
-                                                    application.isDefault = true;
+                                                if(!subscribedApp) {
+                                                    availableApplications.push(application);
                                                 }
-                                                availableApplications.push(application);
                                             }
                                         var context = {};
                                         context.applications = availableApplications;
-                                        context.isSubscribedToDefault = isSubscribedToDefault;
 
                                         //Render application list drop-down
                                         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-list",context,
@@ -89,8 +84,6 @@ $(function () {
                                             redirectToLogin(contextPath);
                                         }
                                     });
-                            }
-
                         },
                         function (error) {
                             alert("Error occurred while retrieve Applications" + error);
@@ -288,7 +281,18 @@ $(function () {
                 if (element.id == "subscribe-button") {
                     var applicationId = $("#application-list option:selected").val();
                     if (applicationId == "-" || applicationId == "createNewApp") {
-                        alert('Please select an application before subscribing')
+                        var message = "Please select an application before subscribing";
+                        noty({
+                            text: message,
+                            type: 'warning',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10,
+                        });
                         return;
                     }
                     $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
@@ -297,7 +301,7 @@ $(function () {
 
 
                     var subscriptionData = {};
-                    subscriptionData.tier = tier;
+                    subscriptionData.policy = tier;
                     subscriptionData.applicationId = applicationId;
                     subscriptionData.apiIdentifier = apiIdentifier;
                     setAuthHeader(swaggerClient);
@@ -309,8 +313,23 @@ $(function () {
                             $("#subscribe-button").html('Subscribe');
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
-
-                            location.href = contextPath + "/apis/" + apiId;
+                            var message = "Subscription created successfully";
+                            noty({
+                                text: message,
+                                type: 'success',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 1000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10,
+                                callback: {
+                                    afterClose: function () {
+                                        location.href = contextPath + "/apis/" + apiId;
+                                    },
+                                }
+                            });
 
                             //TODO : Embedding message model
 
@@ -330,13 +349,15 @@ $(function () {
 
 
     });
-
-
-
 });
 
 
-
+function applicationSelectionChange() {
+    var selectedVal = $('#application-list option:selected').val();
+    if(selectedVal == "createNewApp") {
+        location.href = contextPath + "/applications/add";
+    }
+}
 
 
 

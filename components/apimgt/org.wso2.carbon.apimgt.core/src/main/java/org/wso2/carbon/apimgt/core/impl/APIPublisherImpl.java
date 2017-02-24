@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
+import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
@@ -223,7 +224,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiBuilder.uriTemplates(uriTemplateMap);
                 }
 
-                List<UriTemplate> list = new ArrayList<>(uriTemplateMap.values());
+                List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
                 List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
                 for (UriTemplate uriTemplate : list) {
@@ -237,12 +238,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (map.containsKey("production")) {
                         String uuid = map.get("production");
                         Endpoint endpoint = getEndpoint(uuid);
-                        dto.setProductionEndpoint(endpoint);
+                        dto.setProductionEndpoint(endpoint.getName());
                     }
                     if (map.containsKey("sandbox")) {
                         String uuid = map.get("sandbox");
                         Endpoint endpoint = getEndpoint(uuid);
-                        dto.setSandboxEndpoint(endpoint);
+                        dto.setSandboxEndpoint(endpoint.getName());
                     }
                     resourceList.add(dto);
                 }
@@ -334,16 +335,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
 
+                    String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
+                    String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
+                    APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder.build());
+                    String updatedGatewayConfig = apiTemplateBuilder
+                            .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
+
                     API api = apiBuilder.build();
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
                             getApiDAO().updateAPI(api.getId(), api);
+                            getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
+                            getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
                         } else {
                             throw new APIManagementException("Context already Exist", ExceptionCodes
                                     .API_ALREADY_EXISTS);
                         }
                     } else {
                         getApiDAO().updateAPI(api.getId(), api);
+                        getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
+                        getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
@@ -1078,7 +1089,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         Endpoint.Builder builder = new Endpoint.Builder(endpoint);
         builder.id(UUID.randomUUID().toString());
         Endpoint endpoint1 = builder.build();
+        String key = endpoint.getName();
+        if (key == null || StringUtils.isEmpty(key)) {
+            log.error("Endpoint name not provided");
+            throw new APIManagementException("Endpoint name is not provided", ExceptionCodes.ENDPOINT_ADD_FAILED);
+        }
+        Endpoint endpoint2 = getApiDAO().getEndpointByName(endpoint.getName());
+        if (endpoint2 != null) {
+            log.error("Endpoint already exist with name " + key);
+            throw new APIManagementException("Endpoint already exist with name " + key,
+                    ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
+        }
         getApiDAO().addEndpoint(endpoint1);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
         return endpoint1.getId();
     }
 
@@ -1091,6 +1115,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
         getApiDAO().updateEndpoint(endpoint);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
     }
 
     /**
@@ -1102,6 +1128,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
         getApiDAO().deleteEndpoint(endpointId);
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
     }
 
     /**
@@ -1146,6 +1174,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return getPolicyDAO().getPolicy(tierLevel, tierName);
     }
 
+    @Override
+    public List<LifecycleHistoryBean> getLifeCycleHistoryFromUUID(String uuid)
+            throws APIManagementException {
+
+        LifecycleEventManager lifecycleEventManager = new LifecycleEventManager();
+        try {
+            return lifecycleEventManager.getLifecycleHistoryFromId(uuid);
+        } catch (LifecycleException e) {
+            String errorMsg = "Error while retrieving the lifecycle history of the API ";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        }
+    }
+
     /**
      * Publishing new API configurations to the subscribers
      *
@@ -1160,6 +1202,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } else {
             APIUtils.logDebug("Error when publishing API " + api.getName() + "-" + api.getVersion() + " to gateway.",
                     log);
+        }
+    }
+
+    /**
+     * Publishing new endpoint configurations to the subscribers
+     */
+    private void publishEndpointConfigToGateway() throws APIManagementException {
+        APITemplateBuilder template = new APITemplateBuilderImpl();
+        String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
+        APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
+        boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
+        if (status) {
+            log.info("Endpoint configuration published successfully");
+        } else {
+            log.error("Error in endpoint configuration publishing");
         }
     }
 }

@@ -120,6 +120,12 @@ class AuthClient {
         });
     }
 
+    static getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+
 }
 /**
  * An abstract representation of an API
@@ -137,8 +143,7 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setSchemes(["http"]);
-                swagger.setHost("localhost:9090");
+                swagger.setHost(location.host);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (var index in scopes) {
@@ -170,12 +175,6 @@ class API {
         return swaggerURL;
     }
 
-    _getCookie(name) {
-        var value = "; " + document.cookie;
-        var parts = value.split("; " + name + "=");
-        if (parts.length == 2) return parts.pop().split(";").shift();
-    }
-
     /**
      *
      * @param data
@@ -183,7 +182,7 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        let access_key_header = "Bearer " + this._getCookie("WSO2_AM_TOKEN_1");
+        let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -202,7 +201,8 @@ class API {
         let template = {
             "name": null,
             "context": null,
-            "version": null
+            "version": null,
+            "endpoint": []
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -337,14 +337,31 @@ class API {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
-        var promised_delete = this.client.then(
+        var promised_update = this.client.then(
             (client) => {
                 let payload = {apiId: api.id, body: api, "Content-Type": "application/json"};
-                client["API (Individual)"].put_apis_apiId(
+                return client["API (Individual)"].put_apis_apiId(
+                    payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promised_update;
+    }
+
+    /**
+     * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
+     * @param body {Object} Endpoint to be added
+     * @param callback {function} Callback function
+     */
+    addEndpoint(body, callback) {
+        var promised_addEndpoint = this.client.then(
+            (client) => {
+                let payload = {body: body, "Content-Type": "application/json"};
+                return client["Endpoint (Collection)"].post_endpoints(
                     payload, this._requestMetaData());
             }
         ).catch(AuthClient.unauthorizedErrorHandler);
-        return promised_delete;
+
+        return promised_addEndpoint;
     }
 
 }

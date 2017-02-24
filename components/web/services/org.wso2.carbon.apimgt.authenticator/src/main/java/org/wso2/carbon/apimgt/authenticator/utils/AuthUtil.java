@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.authenticator.utils;
 
+import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
@@ -71,12 +75,52 @@ public class AuthUtil {
 
     }
 
+    /**
+     * This method will parse json String and set properties in  OAuthApplicationInfo object.
+     * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
+     * @param clientName client Name.
+     * @param callbackURL This is the call back URL of the application
+     * @param tokenScope The token scope
+     * @param clientId The ID of the client
+     * @return appRequest object of OauthAppRequest.
+     */
+    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
+            String tokenScope) {
+
+        OAuthAppRequest appRequest = new OAuthAppRequest();
+        OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
+        authApplicationInfo.setClientName(clientName);
+        authApplicationInfo.setCallbackUrl(callbackURL);
+        //authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
+        authApplicationInfo.setClientId(clientId);
+        authApplicationInfo.setAppOwner(clientId);
+
+        //set applicationInfo object
+        appRequest.setOAuthApplicationInfo(authApplicationInfo);
+        return appRequest;
+    }
+
     public static List<String> getRoleList() {
         return roleList;
     }
 
     public static void setRoleList(List<String> roleList) {
         AuthUtil.roleList = roleList;
+    }
+
+    /**
+     * Returns a generic errorDTO
+     *
+     * @param errorHandler The error handler object.
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMoreInfo(paramList);
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
     }
 
 

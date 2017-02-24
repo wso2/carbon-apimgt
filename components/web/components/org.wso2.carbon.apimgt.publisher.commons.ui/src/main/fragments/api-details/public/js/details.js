@@ -1,36 +1,59 @@
-$(function () {
-    var client = new API();
-    var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
-    client.get(api_id).then(loadOverview);
-    /* TODO: Need to handle error path ~tmkb*/
-    $('#bodyWrapper').on('click', 'button', function (e) {
-        var elementName = $(this).attr('data-name');
-        if (elementName == "editApiButton") {
-            $('#apiOverviewForm').toggleClass('edit').toggleClass('view');
+'use strict';
+/**
+ * Handle errors while getting API data by UUID, when loading the details page.
+ * @param {object} error_response object returned from Swagger-client library
+ */
+function apiGetErrorHandler(error_response) {
+    var message = "Error[" + error_response.status + "]: " + error_response.data;
+    noty({
+        text: message,
+        type: 'error',
+        dismissQueue: true,
+        modal: true,
+        progressBar: true,
+        timeout: 5000,
+        layout: 'top',
+        theme: 'relax',
+        maxVisible: 10,
+        callback: {
+            afterClose: function () {
+                window.location = contextPath + "/";
+            },
         }
     });
-    loadFromHash();
-    $('#tab-7').bind('show.bs.tab', mediationTabHandler);
-    $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
-    $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
-    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
-});
+}
 
-function loadOverview(jsonData) {
-    //Manipulating data for the UI
-    var context = jsonData.obj;
-    if (context.endpointConfig) {
-        var endpointConfig = $.parseJSON(context.endpointConfig);
-        context.productionEndpoint = endpointConfig.production_endpoints.url;
-    }
-    // Grab the template script TODO: Replace with UUF client
-    $.get('/editor/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
-        var template = Handlebars.compile(templateData);
-        // Pass our data to the template
-        var theCompiledHtml = template(context);
-        // Add the compiled html to the page
-        $('#overview-content').html(theCompiledHtml);
-    }, 'html');
+function overviewTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var context = response.obj;
+            if (context.endpointConfig) {
+                var endpointConfig = $.parseJSON(context.endpointConfig);
+                context.productionEndpoint = endpointConfig.production_endpoints.url;
+            }
+            var callbacks = {
+                onSuccess: function (renderedHTML) {
+                    $('#overview-content').html(renderedHTML);
+                }, onFailure: function (data) {
+                }
+            };
+            var data = {
+                name: context.name,
+                version: context.version,
+                context: context.context,
+                isDefaultVersion: context.isDefaultVersion,
+                visibility: context.visibility,
+                lastUpdatedTime: context.lastUpdatedTime,
+                provider: context.provider,
+                id: context.id,
+                lifeCycleStatus: context.lifeCycleStatus,
+                policies: context.policies.join(', ')
+            };
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-overview", data, callbacks);
+        }
+    ).catch(apiGetErrorHandler);
 }
 
 /**
@@ -43,13 +66,16 @@ function addHashToURL(event) {
 }
 
 /**
- * Javascript to enable link to tab. Change hash for page-reload
+ * Javascript to enable link to tab. Change hash for page-reload, If hashed page name is available load that page
+ * If no hash value is present load the default page which is overview-tab
  */
 function loadFromHash() {
     var hash = document.location.hash;
     if (hash) {
         $('a[href="#' + hash.substr(1) + '"]').tab('show');
         window.scrollTo(0, 0);
+    } else {
+        showTab('overview-tab');
     }
     // Register tab click event to append hashed page name to current URL
     $('a[role="tab"]').on('shown.bs.tab', addHashToURL);
@@ -94,6 +120,10 @@ function lifecycleTabHandler(event) {
     Promise.all([promised_api, promised_tiers]).then(renderLCTab)
 }
 
+/**
+ * Load ballerina composer from here
+ * @param event {object} Click event
+ */
 function mediationTabHandler(event) {
 
 }
@@ -143,17 +173,59 @@ function updateTiersHandler(event) {
             var api_data = JSON.parse(response.data);
             api_data.policies = selected_policy_uuids;
             var promised_update = this.api_client.update(api_data);
-            /* TODO: Handle the error sequence in promised_update ~tmkb*/
-            var message = "Update policies successfully.";
-            noty({
-                text: message,
-                type: 'success',
-                dismissQueue: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'topCenter',
-                theme: 'relax',
-                maxVisible: 10,
-            });
+            promised_update.then(
+                function (response) {
+                    var message = "Update policies successfully.";
+                    noty({
+                        text: message,
+                        type: 'success',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+            promised_update.catch(
+                function (error_response) {
+                    $('#policies-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
+                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
         }.bind(data));
 }
+
+function showTab(tab_name) {
+    $('.nav a[href="#' + tab_name + '"]').tab('show');
+}
+
+/**
+ * Execute once the page load is done.
+ */
+$(function () {
+    var client = new API(); /* Re-use same api client in all the tab show events */
+    var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
+    $('#bodyWrapper').on('click', 'button', function (e) {
+        var elementName = $(this).attr('data-name');
+        if (elementName == "editApiButton") {
+            $('#apiOverviewForm').toggleClass('edit').toggleClass('view');
+        }
+    });
+    $('#tab-1').bind('show.bs.tab', {api_client: client, api_id: api_id}, overviewTabHandler);
+    $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
+    $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    loadFromHash();
+});
