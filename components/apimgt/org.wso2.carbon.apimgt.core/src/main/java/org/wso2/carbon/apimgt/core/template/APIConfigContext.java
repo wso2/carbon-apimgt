@@ -57,7 +57,7 @@ public class APIConfigContext extends ConfigContext {
     public VelocityContext getContext() {
         VelocityContext context = new VelocityContext();
         context.put("version", api.getVersion());
-        context.put("apiContext", api.getContext());
+        context.put("apiContext", api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
         LocalDateTime ldt = api.getCreatedTime();
         Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
         Date res = Date.from(instant);
