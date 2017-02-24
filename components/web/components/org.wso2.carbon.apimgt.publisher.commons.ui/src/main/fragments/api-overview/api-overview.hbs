@@ -73,14 +73,13 @@
                 <td id="inUrl">{{@params.context}}</td>
             </tr>
 
-
             <tr>
                 <td>Date Last Updated</td>
                 <td id="inUpdated" class="dateFull">{{@params.lastUpdatedTime}}</td>
             </tr>
             <tr>
                 <td>Tier Availability</td>
-                <td id="tierAvb">{{@params.policies}}</td>
+                <td id="tierAvb">{{@params.policies}}{{#unless @params.policies}}<b>N/A</b>{{/unless}}</td>
             </tr>
             <tr>
                 <td>Default API Version</td>

@@ -97,7 +97,26 @@ function lifecycleTabHandler(event) {
         var policies_data = JSON.parse(policies.data);
         var callbacks = {
             onSuccess: function (data) {
-                $('#policies-list-dropdown').multiselect();
+                $('#policies-list-dropdown').multiselect(
+                    {
+                        onChange: function (option, checked, select) {
+                            if (!checked && !option.parent().val()) {
+                                var message = "Please select at least one subscription tier.";
+                                noty({
+                                    text: message,
+                                    type: 'warning',
+                                    dismissQueue: true,
+                                    progressBar: true,
+                                    timeout: 5000,
+                                    layout: 'topCenter',
+                                    theme: 'relax',
+                                    maxVisible: 10,
+                                });
+                                return false;
+                            }
+                        }
+                    }
+                );
             }, onFailure: function (data) {
             }
         };
@@ -145,9 +164,17 @@ function updateLifecycleHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-            let message_element = $("#general-alerts").find(".alert-success");
-            message_element.find(".alert-message").html("Life cycle state updated successfully!");
-            message_element.fadeIn("slow");
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
             lifecycleTabHandler(event);
         }
     ).catch(
@@ -168,6 +195,20 @@ function updateTiersHandler(event) {
         api_id: api_id
     };
     var selected_policy_uuids = $('#policies-list-dropdown').val();
+    if (!selected_policy_uuids) {
+        var message = "Please select at least one subscription tier.";
+        noty({
+            text: message,
+            type: 'warning',
+            dismissQueue: true,
+            progressBar: true,
+            timeout: 5000,
+            layout: 'topCenter',
+            theme: 'relax',
+            maxVisible: 10,
+        });
+        return false;
+    }
     api_client.get(api_id).then(
         function (response) {
             var api_data = JSON.parse(response.data);
@@ -215,7 +256,8 @@ function showTab(tab_name) {
  * Execute once the page load is done.
  */
 $(function () {
-    var client = new API(); /* Re-use same api client in all the tab show events */
+    var client = new API();
+    /* Re-use same api client in all the tab show events */
     var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
     $('#bodyWrapper').on('click', 'button', function (e) {
         var elementName = $(this).attr('data-name');
