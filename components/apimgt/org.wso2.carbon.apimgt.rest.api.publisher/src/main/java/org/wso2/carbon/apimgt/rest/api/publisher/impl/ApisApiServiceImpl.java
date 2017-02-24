@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -405,6 +406,38 @@ public class ApisApiServiceImpl extends ApisApiService {
                         (apiId));
                 return Response.ok().entity(apidto).build();
             } else {
+                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdLifecycleHistoryGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+                String lifecycleInstanceId =
+                        RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId).getLifecycleInstanceId();
+                if(lifecycleInstanceId != null) {
+                    List lifecyclestatechangehistory =
+                            RestAPIPublisherUtil.getApiPublisher(username)
+                                    .getLifeCycleHistoryFromUUID(lifecycleInstanceId);
+                    return Response.ok().entity(lifecyclestatechangehistory).build();
+                } else {
+                    throw new APIManagementException("Could not find lifecycle information for the requested API"
+                            + apiId, ExceptionCodes. APIMGT_LIFECYCLE_EXCEPTION);
+                }
+           } else {
                 RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             }
         } catch (APIManagementException e) {

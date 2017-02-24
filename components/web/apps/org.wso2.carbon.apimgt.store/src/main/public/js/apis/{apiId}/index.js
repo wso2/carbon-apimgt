@@ -10,7 +10,6 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
-
                     var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
@@ -46,7 +45,6 @@ $(function () {
                         function (jsonData) {
                             var context = {};
                             var applications = jsonData.obj.list;
-                            if (applications.length > 0) {
                                 swaggerClient["Subscription Collection"].get_subscriptions({
                                         "apiId": apiId,
                                         "applicationId": "",
@@ -54,28 +52,25 @@ $(function () {
                                     }, requestMetaData(),
                                     function (jsonData) {
                                         var availableApplications = [], subscription = {};
-                                        var isSubscribedToDefault = false;
                                         var subscriptions = jsonData.obj.list;
                                         var application = {};
-
-                                        applicationsLoop:
-                                            for (var i = 0; i < applications.length; i++) {
+                                        var subscribedApp = false;
+                                        for (var i = 0; i < applications.length; i++) {
+                                               subscribedApp = false;
                                                 application = applications[i];
                                                 for (var j = 0; j < subscriptions.length; j++) {
                                                     subscription = subscriptions[j];
                                                     if (subscription.applicationId === application.applicationId) {
-                                                        continue applicationsLoop;
+                                                        subscribedApp = true;
+                                                        continue;
                                                     }
                                                 }
-                                                if (application.name == "DefaultApplication") {
-                                                    isSubscribedToDefault = true;
-                                                    application.isDefault = true;
+                                                if(!subscribedApp) {
+                                                    availableApplications.push(application);
                                                 }
-                                                availableApplications.push(application);
                                             }
                                         var context = {};
                                         context.applications = availableApplications;
-                                        context.isSubscribedToDefault = isSubscribedToDefault;
 
                                         //Render application list drop-down
                                         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-list",context,
@@ -89,8 +84,6 @@ $(function () {
                                             redirectToLogin(contextPath);
                                         }
                                     });
-                            }
-
                         },
                         function (error) {
                             alert("Error occurred while retrieve Applications" + error);
@@ -356,13 +349,15 @@ $(function () {
 
 
     });
-
-
-
 });
 
 
-
+function applicationSelectionChange() {
+    var selectedVal = $('#application-list option:selected').val();
+    if(selectedVal == "createNewApp") {
+        location.href = contextPath + "/applications/add";
+    }
+}
 
 
 
