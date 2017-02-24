@@ -40,6 +40,17 @@ public class OAuthTokenResponse implements Serializable {
     @JsonProperty("scopes")
     private List<String> scopes;
 
+    @JsonProperty("expires_timestamp")
+    private long expiresTimestamp;
+
+    public long getExpiresTimestamp() {
+        return expiresTimestamp;
+    }
+
+    public void setExpiresTimestamp(long expiresTimestamp) {
+        this.expiresTimestamp = expiresTimestamp;
+    }
+
     private static final long serialVersionUID = 2;
 
     public String getToken() {
