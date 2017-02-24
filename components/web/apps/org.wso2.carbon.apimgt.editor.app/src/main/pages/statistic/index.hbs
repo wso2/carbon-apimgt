@@ -1,10 +1,10 @@
 {{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
 {{favicon "images/favicon.png" type="image/png"}}
-{{title "Listing | " @config.appName}}
+{{title "Statistics | " @config.appName}}
 {{js "js/api/api.js"}}
 {{css "css/custom.css"}}
 {{#fillZone "content"}}
-    <div class="body-wrapper">
+    {{!--<div class="body-wrapper">
         <div class="page-header"> <h2>Statistics</h2> </div>
         <div class="message message-warning">
             <h4><i class="icon fw fw-warning"></i>Not Configured</h4>
@@ -81,6 +81,14 @@
                     <i class="icon fw fw-table" title="Subscriptions Created Over Time"></i>
                     Subscriptions Created Over Time</a></li>
             </ul>
+        </div>
+    </div>--}}
+    <div class="page-header">
+        <h1>{{i18n "Statistics"}}</h1>
+    </div>
+    <div class="page-content">
+        <div class="message message-info">
+            <h4><i class="icon fw fw-info"></i>This feature is not supported yet.</h4>
         </div>
     </div>
 {{/fillZone}}
