@@ -101,7 +101,7 @@ class AuthClient {
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
         var error_data = JSON.parse(error_response.data);
-        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".<br/> You will be redirect to the login page ...";
+        var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         noty({
             text: message,
             type: 'error',
