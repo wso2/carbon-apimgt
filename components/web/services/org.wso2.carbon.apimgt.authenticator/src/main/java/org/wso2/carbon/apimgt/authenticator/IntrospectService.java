@@ -62,11 +62,11 @@ public class IntrospectService {
      *
      */
     public String getAccessToken(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String[] scopes) throws KeyManagementException {
+            String[] scopes, Long validityPeriod) throws KeyManagementException {
         //TODO - call method which provides client id and secret.
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
-                .createAccessTokenRequest(userName, password, "password", scopes,
+                .createAccessTokenRequest(userName, password, "password", validityPeriod, scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
         AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);

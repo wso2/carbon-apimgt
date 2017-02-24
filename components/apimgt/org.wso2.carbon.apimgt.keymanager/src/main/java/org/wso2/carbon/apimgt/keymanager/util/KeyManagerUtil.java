@@ -85,9 +85,11 @@ public class KeyManagerUtil {
      *
      *
      */
-    public static boolean getLoginAccessToken(OAuthTokenResponse oAuthTokenResponse, String username, String password) {
+    public static boolean getLoginAccessToken(OAuthTokenResponse oAuthTokenResponse, String username, String password,
+            Long validityPeriod) {
         if (userMap.containsKey(username) && password.equals(userMap.get(username))) {
-            oAuthTokenResponse.setExpiresIn(getExpiresTime());
+            oAuthTokenResponse.setExpiresTimestamp(getExpiresTime(validityPeriod));
+            oAuthTokenResponse.setExpiresIn(validityPeriod);
             oAuthTokenResponse.setToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setScopes(userScopesMap.get(username));
@@ -99,7 +101,7 @@ public class KeyManagerUtil {
 
     public static boolean validateToken(String accessToken, OAuth2IntrospectionResponse oAuth2IntrospectionResponse) {
         if (tokenMap.containsKey(accessToken)) {
-            long expireTime = tokenMap.get(accessToken).getExpiresIn();
+            long expireTime = tokenMap.get(accessToken).getExpiresTimestamp();
             if (new Timestamp(System.currentTimeMillis()).getTime() <= expireTime) {
                 OAuthTokenResponse oAuthTokenResponse = tokenMap.get(accessToken);
                 oAuth2IntrospectionResponse.setActive(true);
@@ -131,9 +133,9 @@ public class KeyManagerUtil {
      *
      *
      */
-    public static long getExpiresTime() {
+    public static long getExpiresTime(Long validityPeriod) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        return (timestamp.getTime() + 3600000);
+        return (timestamp.getTime() + validityPeriod * 1000);
     }
 
     public static void addUsersAndScopes() {
