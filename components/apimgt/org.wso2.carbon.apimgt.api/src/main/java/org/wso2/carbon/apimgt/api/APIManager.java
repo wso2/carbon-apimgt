@@ -193,12 +193,12 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param docId                 DocumentID
+     * @param docId   DocumentID
      * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-    Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+     Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
@@ -327,8 +327,9 @@ public interface APIManager {
     APIKey getAccessTokenData(String accessToken) throws APIManagementException;
 
     /**
-     * /**
+    /**
      * Return information related to access token by a searchTerm and searchType       *
+     *
      *
      * @param searchType
      * @param searchTerm
@@ -423,9 +424,9 @@ public interface APIManager {
      * Check if a given context template already exists
      *
      * @param contextTemplate - The contextTemplate to be checked for
-     *                        <p>
-     *                        Ex: /foo/{version}/bar
-     *                        </p>
+        *                        <p>
+        *                        Ex: /foo/{version}/bar
+        *                        </p>
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
