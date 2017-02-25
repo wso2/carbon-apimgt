@@ -161,43 +161,50 @@ $(function () {
                         }
                     }
 
-                    $.get('/store/public/components/root/base/templates/apis/{apiId}/api-detail-tab-list.hbs', function (templateData) {
                        var context = {};
                         context.tabList = tabs;
-                        var apiOverviewTemplate = Handlebars.compile(templateData);
-                        // Inject template data
-                        var compiledTemplate = apiOverviewTemplate(context);
-
-                        // Append compiled template into page
-                        $("#tab-list").append(compiledTemplate);
-
+                    var callback = {onSuccess: function ( tabdata
+                    ) {
+                        $("#tab-list").append(tabdata);
                         //Load each tab content
                         for (var i = 0; i < tabs.length; i++) {
                             var tab = tabs[i];
                             if (tab.id == "api-overview") {
-                                $.get('/store/public/components/root/base/templates/apis/{apiId}/api-overview.hbs', function (templateData) {
-                                    for (var endpointURL in  api.endpointURLs) {
-                                        var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
-                                        for (var environmentURL in environmentURLs) {
-                                            var currentEnvironmentURL = [];
-                                            currentEnvironmentURL.push(environmentURLs[environmentURL]);
-                                            if (api.isDefaultVersion) {
-                                                var defaultEnvironmentURL = null;
-                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
-                                                defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version, "");
-                                                currentEnvironmentURL.push(defaultEnvironmentURL);
-                                            }
-                                            api.endpointURLs[endpointURL].environmentURLs[environmentURL] = currentEnvironmentURL;
+                                for (var endpointURL in  api.endpointURLs) {
+                                    var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
+                                    for (var environmentURL in environmentURLs) {
+                                        var currentEnvironmentURL = [];
+                                        currentEnvironmentURL.push(environmentURLs[environmentURL]);
+                                        if (api.isDefaultVersion) {
+                                            var defaultEnvironmentURL = null;
+                                            defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
+                                            defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version, "");
+                                            currentEnvironmentURL.push(defaultEnvironmentURL);
                                         }
+                                        api.endpointURLs[endpointURL].environmentURLs[environmentURL] = currentEnvironmentURL;
                                     }
-                                    var apiOverviewTemplate = Handlebars.compile(templateData);
-                                    // Inject template data
-                                    var compiledTemplate = apiOverviewTemplate(context);
+                                }
+                                context.api = api;
+                                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview",context, {
+                                    onSuccess: function (renderedData) {
+                                        $("#api-overview").append(renderedData);
+                                        setOverviewTabData();
 
-                                    // Append compiled template into page
-                                    $("#api-overview").append(compiledTemplate);
-
-                                }, 'html');
+                                    }.bind(context), onFailure: function (message, e) {
+                                        var message = "Error occurred while getting api overview details." + message;
+                                        noty({
+                                            text: message,
+                                            type: 'error',
+                                            dismissQueue: true,
+                                            modal: true,
+                                            progressBar: true,
+                                            timeout: 2000,
+                                            layout: 'top',
+                                            theme: 'relax',
+                                            maxVisible: 10,
+                                        });
+                                    }
+                                });
                             }
 
                             if (tab.id == "api-documentation") {
@@ -262,10 +269,22 @@ $(function () {
                             }
 
                         }
-
-                    },  function (errorThrown) {
-                        alert("Error occurred while retrieve api with id  : " + apiId);
-                    }, 'html');
+                    }.bind(context),onFailure: function (message, e) {
+                        var message = "Error occurred while viewing API details";
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10,
+                        });
+                    }};
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-detail-tab-list",context,
+                         callback);
 
 
                 },
@@ -357,6 +376,29 @@ function applicationSelectionChange() {
     if(selectedVal == "createNewApp") {
         location.href = contextPath + "/applications/add";
     }
+}
+
+function setOverviewTabData() {
+    var link = window.location+'';
+    $('#api_mailto').on("click",function(){
+        location.href = "mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location);
+    });
+    $('#embed_iframe').text('<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
+    $('#embed-copy').attr('data-clipboard-text', '<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
+
+    $('.share_links,#api_mailto').click(function(){
+        $('.share_links,#api_mailto').parent().removeClass('active');
+        $(this).parent().addClass('active');
+        $('.share_dives').hide();
+        $('#share_div_' + $(this).attr('ref')).show();
+        return false;
+    });
+    var api_url = encodeURIComponent(window.location+'');
+    var description = document.title + " : try this API at "+window.location;
+    $("#facebook").attr("href","http://www.facebook.com/sharer.php?u="+api_url);
+    $("#twitter").attr("href","http://twitter.com/share?url="+api_url+"&text="+encodeURIComponent(description));
+    $("#googleplus").attr("href","https://plus.google.com/share?url="+api_url);
+    $("#digg").attr("href","http://www.digg.com/submit?url="+api_url);
 }
 
 
