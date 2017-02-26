@@ -80,7 +80,7 @@ public class LambdaFunctionTrigger implements EventObserver {
                     response = RestCallUtil.postRequest(function.getEndpointURI(), null, null,
                             Entity.json(jsonPayload));
                 } catch (IOException e) {
-                    log.error("Error making connection");
+                    log.error("Error making connection", e);
                 }
 
                 if (response != null) {
