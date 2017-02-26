@@ -64,7 +64,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -208,9 +207,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.nimbusds</groupId>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>4.34</version>
+            <version>2.26.1.wso2v3</version>
         </dependency>
     </dependencies>
     <build>
@@ -778,6 +777,7 @@
             io.swagger.util.*,
             com.google.gson.*,
             com.google.common.*;
+            com.nimbusds.*;
             io.swagger.parser.*,
             org.json.simple.*,
             org.apache.commons.lang3.*,
@@ -786,6 +786,7 @@
             org.apache.velocity.*;
             org.wso2.andes.*;
             javax.jms.*;
+            javax.ws.rs.*;
             org.wso2.securevault.*;
             org.apache.lucene.*;
         </import.package>

@@ -20,8 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
@@ -30,11 +29,11 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.LambdaFunction;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
 
 /**
  * Implementation which observes to the API Manager events and trigger corresponding lambda function that belongs to
@@ -69,26 +68,31 @@ public class LambdaFunctionTrigger implements EventObserver {
 
         try {
             functions = DAOFactory.getLambdaFunctionDAO().getUserFunctionsForEvent(username, event);
-            jsonPayload = new ObjectMapper().writeValueAsString(payload);
+            jsonPayload = new Gson().toJson(payload);
         } catch (APIMgtDAOException e) {
             log.error("Error loading functions for event from DB: -event: " + event + " -Username: " + username, e);
-        } catch (JsonProcessingException e) {
-            log.error("Error creating json string from map: -event: " + event + " -Username: " + username, e);
         }
 
         if (functions != null && !functions.isEmpty()) {
             for (LambdaFunction function : functions) {
-                Response response = RestCallUtil.postRequest(function.getEndpointURI(), null, null,
-                        Entity.json(jsonPayload));
+                HttpResponse response = null;
+                try {
+                    response = RestCallUtil.postRequest(function.getEndpointURI(), null, null,
+                            Entity.json(jsonPayload));
+                } catch (IOException e) {
+                    log.error("Error making connection");
+                }
 
-                int responseStatusCode = response.getStatus();
+                if (response != null) {
+                    int responseStatusCode = response.getResponseCode();
 
-                if (responseStatusCode / 100 == 2) {
-                    log.info("Function successfully invoked: " + function.getName() + " -event: " + event +
-                            " -Username: " + username + " -Response code: " + responseStatusCode);
-                } else {
-                    log.error("Problem invoking function: " + function.getName() + " -event: " + event +
-                            " -Username: " + username + " -Response code: " + responseStatusCode);
+                    if (responseStatusCode / 100 == 2) {
+                        log.info("Function successfully invoked: " + function.getName() + " -event: " + event +
+                                " -Username: " + username + " -Response code: " + responseStatusCode);
+                    } else {
+                        log.error("Problem invoking function: " + function.getName() + " -event: " + event +
+                                " -Username: " + username + " -Response code: " + responseStatusCode);
+                    }
                 }
             }
         }

@@ -3,19 +3,18 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.core.models.ContentType;
 
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import java.util.Set;
+
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
 
 /**
  * Utility class which handles basics of a rest call.
@@ -27,7 +26,8 @@ public class RestCallUtil {
 
     }
 
-    public static Response loginRequest(URI uri, String userName, String password, ContentType requestContentType) {
+    public static HttpResponse loginRequest(URI uri, String userName, String password, ContentType
+            requestContentType) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -37,18 +37,34 @@ public class RestCallUtil {
         if (password == null) {
             throw new IllegalArgumentException("Password must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        JSONObject loginInfoJsonObj = new JSONObject();
-        loginInfoJsonObj.put("userName", userName);
-        loginInfoJsonObj.put("password", password);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        return invocationBuilder.post(Entity.json(loginInfoJsonObj.toJSONString()));
+
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("POST");
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            JSONObject loginInfoJsonObj = new JSONObject();
+            loginInfoJsonObj.put("userName", userName);
+            loginInfoJsonObj.put("password", password);
+
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(loginInfoJsonObj.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
+        }
     }
 
-    public static Response rsaSignedFetchUserRequest(URI uri, String userName, String userTenantDomain,
-                                                     String rsaSignedToken, ContentType requestContentType) {
+    public static HttpResponse rsaSignedFetchUserRequest(URI uri, String userName,
+                                                         String userTenantDomain, String rsaSignedToken,
+                                                         ContentType requestContentType) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -61,88 +77,179 @@ public class RestCallUtil {
         if (rsaSignedToken == null) {
             throw new IllegalArgumentException("RSA signed token must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        JSONObject loginInfoJsonObj = new JSONObject();
-        loginInfoJsonObj.put("userName", userName);
-        loginInfoJsonObj.put("userTenantDomain", userTenantDomain);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        return invocationBuilder.header("rsaSignedToken", rsaSignedToken).
-                post(Entity.json(loginInfoJsonObj.toJSONString()));
+
+        HttpURLConnection httpConnection = null;
+        try {
+            JSONObject loginInfoJsonObj = new JSONObject();
+            loginInfoJsonObj.put("userName", userName);
+            loginInfoJsonObj.put("userTenantDomain", userTenantDomain);
+
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("rsaSignedToken", rsaSignedToken);
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(loginInfoJsonObj.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
+        }
+
     }
 
-    public static List<Cookie> captureCookies(Response response) {
+    public static List<String> captureCookies(HttpResponse response) {
         if (response == null) {
             throw new IllegalArgumentException("The response must not be null");
         }
-        List<Cookie> cookies = new ArrayList<>();
-        Map<String, NewCookie> responseCookies = response.getCookies();
-        cookies.addAll(responseCookies.values());
+        List<String> cookies = null;
+        Map<String, List<String>> headerFields = response.getHeaderFields();
+        Set<String> headerFieldsSet = headerFields.keySet();
+        String headerFieldKey = headerFieldsSet.stream().filter("Set-Cookie"::equalsIgnoreCase).findAny().orElse(null);
+        if (headerFieldKey != null) {
+            cookies = headerFields.get(headerFieldKey);
+        }
         return cookies;
     }
 
-    public static Response getRequest(URI uri, ContentType requestContentType, List<Cookie> cookies) {
+    public static HttpResponse getRequest(URI uri, ContentType requestContentType, List<String> cookies)
+            throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        if (cookies != null && !cookies.isEmpty()) {
-            for (Cookie cookie : cookies) {
-                invocationBuilder = invocationBuilder.cookie(cookie);
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("GET");
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            if (cookies != null && !cookies.isEmpty()) {
+                for (String cookie : cookies) {
+                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                }
+            }
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
             }
         }
-        return invocationBuilder.get();
     }
 
-    public static Response postRequest(URI uri, ContentType requestContentType, List<Cookie> cookies, Entity entity) {
+    public static HttpResponse postRequest(URI uri, ContentType requestContentType, List<String> cookies,
+                                           Entity entity) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        if (cookies != null && !cookies.isEmpty()) {
-            for (Cookie cookie : cookies) {
-                invocationBuilder = invocationBuilder.cookie(cookie);
+
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("POST");
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            if (cookies != null && !cookies.isEmpty()) {
+                for (String cookie : cookies) {
+                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                }
+            }
+
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
             }
         }
-        return invocationBuilder.post(entity);
     }
 
-    public static Response putRequest(URI uri, ContentType requestContentType, List<Cookie> cookies, Entity entity) {
+    public static HttpResponse putRequest(URI uri, ContentType requestContentType, List<String> cookies,
+                                          Entity entity) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        if (cookies != null && !cookies.isEmpty()) {
-            for (Cookie cookie : cookies) {
-                invocationBuilder = invocationBuilder.cookie(cookie);
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("PUT");
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            if (cookies != null && !cookies.isEmpty()) {
+                for (String cookie : cookies) {
+                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                }
+            }
+
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
             }
         }
-        return invocationBuilder.put(entity);
     }
 
-    public static Response deleteRequest(URI uri, ContentType requestContentType, List<Cookie> cookies) {
+    public static HttpResponse deleteRequest(URI uri, ContentType requestContentType, List<String> cookies)
+            throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(uri);
-        Invocation.Builder invocationBuilder = requestContentType == null ? target.request() :
-                target.request(requestContentType.getMediaType());
-        if (cookies != null && !cookies.isEmpty()) {
-            for (Cookie cookie : cookies) {
-                invocationBuilder = invocationBuilder.cookie(cookie);
+
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod("DELETE");
+            if (requestContentType != null) {
+                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            }
+
+            if (cookies != null && !cookies.isEmpty()) {
+                for (String cookie : cookies) {
+                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                }
+            }
+
+            return getResponse(httpConnection);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
             }
         }
-        return invocationBuilder.delete();
+    }
+
+    private static HttpResponse getResponse(HttpURLConnection httpConnection) throws IOException {
+        HttpResponse response = new HttpResponse();
+        try (BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(httpConnection.getInputStream(),
+                StandardCharsets.UTF_8));) {
+            StringBuilder results = new StringBuilder();
+            String line;
+            while ((line = responseBuffer.readLine()) != null) {
+                results.append(line).append("\n");
+            }
+
+            response.setResponseCode(httpConnection.getResponseCode());
+            response.setResponseMessage(httpConnection.getResponseMessage());
+            response.setHeaderFields(httpConnection.getHeaderFields());
+            response.setResults(results.toString());
+        }
+        return response;
     }
 }
