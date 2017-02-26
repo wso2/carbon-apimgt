@@ -53,6 +53,7 @@ public class RestCallUtil {
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(loginInfoJsonObj.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+            outputStream.close();
 
             return getResponse(httpConnection);
         } finally {
@@ -94,6 +95,7 @@ public class RestCallUtil {
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(loginInfoJsonObj.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+            outputStream.close();
 
             return getResponse(httpConnection);
         } finally {
@@ -167,6 +169,7 @@ public class RestCallUtil {
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+            outputStream.close();
 
             return getResponse(httpConnection);
         } finally {
@@ -198,6 +201,7 @@ public class RestCallUtil {
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+            outputStream.close();
 
             return getResponse(httpConnection);
         } finally {
@@ -238,7 +242,7 @@ public class RestCallUtil {
     private static HttpResponse getResponse(HttpURLConnection httpConnection) throws IOException {
         HttpResponse response = new HttpResponse();
         try (BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(httpConnection.getInputStream(),
-                StandardCharsets.UTF_8));) {
+                StandardCharsets.UTF_8))) {
             StringBuilder results = new StringBuilder();
             String line;
             while ((line = responseBuffer.readLine()) != null) {
