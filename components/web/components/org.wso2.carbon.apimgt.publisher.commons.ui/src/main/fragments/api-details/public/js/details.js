@@ -4,7 +4,12 @@
  * @param {object} error_response object returned from Swagger-client library
  */
 function apiGetErrorHandler(error_response) {
-    var message = "Error[" + error_response.status + "]: " + error_response.data;
+    var message;
+    if (error_response.data) {
+        message = "Error[" + error_response.status + "]: " + error_response.data;
+    } else {
+        message = error_response;
+    }
     noty({
         text: message,
         type: 'error',
@@ -131,7 +136,7 @@ function lifecycleTabHandler(event) {
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
             policies: policies_data
         };
-        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
 
     var promised_api = api_client.get(api_id);
@@ -145,6 +150,46 @@ function lifecycleTabHandler(event) {
  */
 function mediationTabHandler(event) {
 
+}
+
+function endpointsTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var api = response.obj;
+            var data = {
+                name: api.name,
+                endpoints: {},
+            };
+            var promised_endpoints = [];
+            for (var endpoint_index in api.endpoint) {
+                if (api.endpoint.hasOwnProperty(endpoint_index)) {
+                    var id = api.endpoint[endpoint_index].id;
+                    promised_endpoints.push(api_client.getEndpoint(id));
+                    data.endpoints[id] = api.endpoint[endpoint_index];
+                }
+            }
+            var all_endpoints = Promise.all(promised_endpoints);
+            all_endpoints.then(
+                function (responses) {
+                    for (var endpoint_index in responses) {
+                        if (responses.hasOwnProperty(endpoint_index)) {
+                            var endpoint = responses[endpoint_index].obj;
+                            Object.assign(data.endpoints[endpoint.id], endpoint);
+                        }
+                    }
+                    var callbacks = {
+                        onSuccess: function (data) {
+                        }, onFailure: function (data) {
+                        }
+                    };
+                    var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoints", data, "endpoints-tab-content", mode, callbacks);
+                }
+            );
+        }
+    ).catch(apiGetErrorHandler);
 }
 
 /**
@@ -185,6 +230,38 @@ function updateLifecycleHandler(event) {
             lifecycleTabHandler(event);
         }
     );
+}
+
+function updateEndpointsHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var inputs = $(".endpoint-inputs");
+    var promised_updates = [];
+    for (var endpoint_input of inputs) {
+        var input = $(endpoint_input);
+        var id = input.data().uuid;
+        var url = input.val();
+        var data = {
+            endpointConfig: url,
+        };
+        promised_updates.push(api_client.updateEndpoint(id, data));
+    }
+    Promise.all(promised_updates).then(
+        function (responses) {
+            var message = "Endpoint configuration(s) updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }
+    ).catch(apiGetErrorHandler);
+    return false;
 }
 
 function updateTiersHandler(event) {
@@ -267,7 +344,12 @@ $(function () {
     });
     $('#tab-1').bind('show.bs.tab', {api_client: client, api_id: api_id}, overviewTabHandler);
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
+    $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    $(document).on('click', "#update-endpoints-configuration", {
+        api_client: client,
+        api_id: api_id
+    }, updateEndpointsHandler);
     loadFromHash();
 });
