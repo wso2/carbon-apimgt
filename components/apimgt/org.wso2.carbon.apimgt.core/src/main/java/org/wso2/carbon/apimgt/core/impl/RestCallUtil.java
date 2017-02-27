@@ -62,6 +62,7 @@ public class RestCallUtil {
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
             httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("Content-Type", ContentType.APPLICATION_JSON.getMediaType());
             httpConnection.setDoOutput(true);
             if (requestContentType != null) {
                 httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
@@ -108,6 +109,7 @@ public class RestCallUtil {
 
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
             httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("Content-Type", ContentType.APPLICATION_JSON.getMediaType());
             httpConnection.setDoOutput(true);
             httpConnection.setRequestProperty("rsaSignedToken", rsaSignedToken);
             if (requestContentType != null) {
@@ -170,7 +172,7 @@ public class RestCallUtil {
     }
 
     public static HttpResponse postRequest(URI uri, ContentType requestContentType, List<String> cookies,
-                                           Entity entity) throws IOException {
+                                           Entity entity, ContentType payloadContentType) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -179,6 +181,7 @@ public class RestCallUtil {
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
             httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("Content-Type", payloadContentType.getMediaType());
             httpConnection.setDoOutput(true);
             if (requestContentType != null) {
                 httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
@@ -204,7 +207,7 @@ public class RestCallUtil {
     }
 
     public static HttpResponse putRequest(URI uri, ContentType requestContentType, List<String> cookies,
-                                          Entity entity) throws IOException {
+                                          Entity entity, ContentType payloadContentType) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -212,6 +215,7 @@ public class RestCallUtil {
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
             httpConnection.setRequestMethod("PUT");
+            httpConnection.setRequestProperty("Content-Type", payloadContentType.getMediaType());
             httpConnection.setDoOutput(true);
             if (requestContentType != null) {
                 httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
