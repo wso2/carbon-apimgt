@@ -372,9 +372,10 @@ $(function () {
 
 
 function applicationSelectionChange() {
+    var apiId = $("#apiId").val();
     var selectedVal = $('#application-list option:selected').val();
     if(selectedVal == "createNewApp") {
-        location.href = contextPath + "/applications/add";
+        location.href = contextPath + "/applications/add?goBack=yes&apiId="+ apiId;
     }
 }
 
