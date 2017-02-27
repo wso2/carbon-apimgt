@@ -67,9 +67,11 @@ public class AuthenticatorAPI implements Microservice {
                             scopesList.split(" "), Long.parseLong(validityPeriod));
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1, part1 + "; path=" + appContext);
+            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
+                    part1 + "; path=" + appContext + "; " + AuthenticatorConstants.SECURE_COOKIE);
             NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
+                            + AuthenticatorConstants.SECURE_COOKIE);
             return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
                     .header(AuthenticatorConstants.
                                     REFERER_HEADER,
