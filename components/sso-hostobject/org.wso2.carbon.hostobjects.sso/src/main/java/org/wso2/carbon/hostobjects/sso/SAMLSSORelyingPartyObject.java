@@ -1610,8 +1610,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
             } catch (SignatureVerificationFailure e) {
                 //do nothing at this point since we want to verify signature using the tenant key-store as well.
-                log.error("Signature verification failed with Super-Tenant Key Store", e);
-                return false;
+                if (log.isDebugEnabled()) {
+                    log.debug("Signature verification failed with Super-Tenant Key Store", e);
+                }
             }//
             //If not success, try and validate the signature using tenant key store.
             if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
