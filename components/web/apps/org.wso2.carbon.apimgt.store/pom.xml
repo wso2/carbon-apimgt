@@ -38,28 +38,24 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.web.store.theme.default</artifactId>
-            <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-theme</classifier>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
             <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
-            <version>${carbon.uuf.common.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.auth.ui</artifactId>
-            <version>${carbon.apimgt.version}</version>
             <type>zip</type>
             <classifier>uuf-component</classifier>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator</artifactId>
-            <version>${carbon.apimgt.version}</version>
         </dependency>
 
     </dependencies>
