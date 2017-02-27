@@ -1,7 +1,7 @@
 <div class="add-margin-3x white-wrapper">
 
     <ul class="nav nav-tabs" role="tablist">
-        {{#each tabList}}
+        {{#each @params.tabList}}
 
             <li {{#if this.tabClass}} class="{{this.tabClass}}" {{else}} class="" {{/if}}id="{{@index}}">
                 <a data-toggle="tab" title="{{this.title}}" href="#{{this.id}}"
@@ -11,7 +11,7 @@
     </ul>
 
     <div class="tab-content">
-        {{#each tabList}}
+        {{#each @params.tabList}}
             <div class="tab-pane fade {{#if this.contentClass}} {{this.contentClass}}{{/if}}" id="{{this.id}}"></div>
         {{/each}}
     </div>

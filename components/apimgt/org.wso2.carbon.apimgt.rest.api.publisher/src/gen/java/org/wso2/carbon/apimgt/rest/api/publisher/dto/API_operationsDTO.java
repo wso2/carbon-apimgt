@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 /**
  * API_operationsDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-22T11:40:36.320+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
 public class API_operationsDTO   {
   @JsonProperty("id")
   private String id = null;

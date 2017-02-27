@@ -259,6 +259,8 @@ public class LogInKeyManagerImpl implements KeyManager {
                 oAuthApplicationInfo.setClientId(consumerKey);
                 oAuthApplicationInfo.setClientSecret(consumerSecret);
                 oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
+                oAuthApplicationInfo.addParameter(KeyManagerConstants
+                        .VALIDITY_PERIOD, "3600");
 
             } else { //If DCR call fails
                 throw new KeyManagementException("Error while getting oauth application info for key : " + consumerKey,
@@ -389,6 +391,7 @@ public class LogInKeyManagerImpl implements KeyManager {
             } else {
                 postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
             }
+            postParams += "&" + GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod());
 //            + "&" +
 //                    GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod()) + "&" +
 //                    KeyManagerConstants.OAUTH_CLIENT_ID + "=" + tokenRequest.getClientId() + "&" +

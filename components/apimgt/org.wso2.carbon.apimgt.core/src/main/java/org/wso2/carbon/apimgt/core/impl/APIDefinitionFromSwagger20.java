@@ -230,6 +230,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             API.APIBuilder apiBuilder = new API.APIBuilder(provider, apiName, apiVersion);
             apiBuilder.businessInformation(businessInformation);
             apiBuilder.description(apiDescription);
+            apiBuilder.context(swagger.getBasePath());
             List<APIResource> apiResourceList = parseSwaggerAPIResources(new StringBuilder(apiDefinition));
             Map<String, UriTemplate> uriTemplateMap = new HashMap();
             for (APIResource apiResource : apiResourceList) {

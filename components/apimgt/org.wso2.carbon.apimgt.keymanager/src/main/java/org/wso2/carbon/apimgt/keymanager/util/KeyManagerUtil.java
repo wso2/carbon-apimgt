@@ -21,9 +21,18 @@ package org.wso2.carbon.apimgt.keymanager.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.keymanager.OAuth2IntrospectionResponse;
+import org.wso2.carbon.apimgt.keymanager.OAuthApplication;
 import org.wso2.carbon.apimgt.keymanager.OAuthTokenResponse;
 import org.wso2.carbon.apimgt.keymanager.exception.KeyManagerException;
+import org.wso2.carbon.kernel.utils.Utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -76,9 +85,11 @@ public class KeyManagerUtil {
      *
      *
      */
-    public static boolean getLoginAccessToken(OAuthTokenResponse oAuthTokenResponse, String username, String password) {
+    public static boolean getLoginAccessToken(OAuthTokenResponse oAuthTokenResponse, String username, String password,
+            Long validityPeriod) {
         if (userMap.containsKey(username) && password.equals(userMap.get(username))) {
-            oAuthTokenResponse.setExpiresIn(getExpiresTime());
+            oAuthTokenResponse.setExpiresTimestamp(getExpiresTime(validityPeriod));
+            oAuthTokenResponse.setExpiresIn(validityPeriod);
             oAuthTokenResponse.setToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setScopes(userScopesMap.get(username));
@@ -90,7 +101,7 @@ public class KeyManagerUtil {
 
     public static boolean validateToken(String accessToken, OAuth2IntrospectionResponse oAuth2IntrospectionResponse) {
         if (tokenMap.containsKey(accessToken)) {
-            long expireTime = tokenMap.get(accessToken).getExpiresIn();
+            long expireTime = tokenMap.get(accessToken).getExpiresTimestamp();
             if (new Timestamp(System.currentTimeMillis()).getTime() <= expireTime) {
                 OAuthTokenResponse oAuthTokenResponse = tokenMap.get(accessToken);
                 oAuth2IntrospectionResponse.setActive(true);
@@ -122,9 +133,9 @@ public class KeyManagerUtil {
      *
      *
      */
-    public static long getExpiresTime() {
+    public static long getExpiresTime(Long validityPeriod) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        return (timestamp.getTime() + 3600000);
+        return (timestamp.getTime() + validityPeriod * 1000);
     }
 
     public static void addUsersAndScopes() {
@@ -147,5 +158,128 @@ public class KeyManagerUtil {
         userScopesMap.put("subscriber", subsciberScopes);
         userScopesMap.put("John", adminScopes);
         userScopesMap.put("Smith", adminScopes);
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DMI_NONSERIALIZABLE_OBJECT_WRITTEN")
+    public static void backUpOauthData(Map<String, OAuthApplication> applications, Map<String, OAuthApplication>
+            appsByClientId) {
+        String backUpPath = Utils.getCarbonHome() + File.separator + "database" + File.separator;
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+        try {
+            fos = new FileOutputStream(backUpPath + "applications.data");
+
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(applications);
+            oos.close();
+            fos = new FileOutputStream(backUpPath + "appsByClientId.data");
+
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(appsByClientId);
+        } catch (FileNotFoundException e) {
+            log.error("Error while backing up token data", e);
+        } catch (IOException e) {
+            log.error("Error while backing up token data", e);
+        } finally {
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the stream", e);
+                }
+            }
+
+        }
+
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DMI_NONSERIALIZABLE_OBJECT_WRITTEN")
+    public static void backUpTokenData() {
+        String backUpPath = Utils.getCarbonHome() + File.separator + "database" + File.separator;
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+        try {
+            fos = new FileOutputStream(backUpPath + "token.data");
+
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(tokenMap);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            log.error("Error while backing up token data", e);
+        } catch (IOException e) {
+            log.error("Error while backing up token data", e);
+        } finally {
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the stream", e);
+                }
+            }
+
+        }
+
+    }
+
+
+
+    public static Map<String, OAuthApplication> getBackedUpData(String fileName) {
+        String backUpPath = Utils.getCarbonHome() + File.separator + "database" + File.separator + fileName;
+        File file = new File(backUpPath);
+        if (!file.exists()) {
+            return new HashMap<>();
+        }
+        ObjectInputStream ois = null;
+        Map<String, OAuthApplication> applications = null;
+        try {
+            FileInputStream fis = new FileInputStream(backUpPath);
+            ois = new ObjectInputStream(fis);
+            applications = (Map) ois.readObject();
+        } catch (FileNotFoundException e) {
+            log.error("Error while getting backed up token data", e);
+        } catch (IOException e) {
+            log.error("Error while getting backed up token data", e);
+        } catch (ClassNotFoundException e) {
+            log.error("Error while getting backed up token data", e);
+        } finally {
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the stream", e);
+                }
+            }
+
+        }
+        return applications;
+    }
+
+    public static void getBackedUpTokenData(String fileName) {
+        String backUpPath = Utils.getCarbonHome() + File.separator + "database" + File.separator + fileName;
+        File file = new File(backUpPath);
+        if (!file.exists()) {
+            return;
+        }
+        ObjectInputStream ois = null;
+        try {
+            FileInputStream fis = new FileInputStream(backUpPath);
+            ois = new ObjectInputStream(fis);
+            tokenMap = (Map) ois.readObject();
+        } catch (FileNotFoundException e) {
+            log.error("Error while getting backed up token data", e);
+        } catch (IOException e) {
+            log.error("Error while getting backed up token data", e);
+        } catch (ClassNotFoundException e) {
+            log.error("Error while getting backed up token data", e);
+        } finally {
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the stream", e);
+                }
+            }
+
+        }
     }
 }
