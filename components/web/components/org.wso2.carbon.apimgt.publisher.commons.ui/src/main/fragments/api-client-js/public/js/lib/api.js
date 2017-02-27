@@ -352,7 +352,7 @@ class API {
      * @param body {Object} Endpoint to be added
      * @param callback {function} Callback function
      */
-    addEndpoint(body, callback) {
+    addEndpoint(body) {
         var promised_addEndpoint = this.client.then(
             (client) => {
                 let payload = {body: body, "Content-Type": "application/json"};
@@ -362,6 +362,42 @@ class API {
         ).catch(AuthClient.unauthorizedErrorHandler);
 
         return promised_addEndpoint;
+    }
+
+    getEndpoint(id) {
+        return this.client.then(
+            (client) => {
+                return client["Endpoint (individual)"].get_endpoints_endpointId(
+                    {
+                        endpointId: id,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+    }
+
+    updateEndpoint(id, data) {
+        return this.getEndpoint(id).then(
+            function (response) {
+                var endpoint = response.obj;
+                for (var attribute in data) {
+                    if (!endpoint.hasOwnProperty(attribute)) {
+                        throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
+                    }
+                }
+                var updated_endpoint = Object.assign(endpoint, data);
+                return this.client.then(
+                    (client) => {
+                        return client["Endpoint (individual)"].put_endpoints_endpointId(
+                            {
+                                endpointId: id,
+                                body: updated_endpoint,
+                                'Content-Type': 'application/json'
+                            }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    }
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }.bind(this)
+        ).catch(AuthClient.unauthorizedErrorHandler)
     }
 
 }
