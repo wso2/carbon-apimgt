@@ -24,7 +24,9 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.ballerinalang.composer.service.workspace.swagger.SwaggerConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
@@ -35,8 +37,10 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import javax.script.ScriptException;
 
 /**
  * Generate API config template
@@ -69,6 +73,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+            velocityengine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
             velocityengine.init();
             Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
             template.merge(context, writer);
@@ -86,14 +91,26 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     @Override
     public String getGatewayConfigFromSwagger(String gatewayConfig, String swagger) throws APITemplateException {
-        //TODO implement logic
-        return "to be implement";
+        System.setProperty("bal.composer.home", System.getProperty("carbon.home"));
+        try {
+            String jsonModel = SwaggerConverterUtils.generateBallerinaDataModel(swagger, gatewayConfig);
+            return SwaggerConverterUtils.getBallerinaFromJsonModel(jsonModel);
+        } catch (IOException | ScriptException e) {
+            log.error("Error while generating ballerina from swagger", e);
+            throw new APITemplateException("Error while generating ballerina from swagger",
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        }
     }
 
     @Override
     public String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException {
-        //TODO implement logic
-        return "to be implement";
+        try {
+            return SwaggerConverterUtils.generateSwaggerDataModel(gatewayConfig);
+        } catch (IOException e) {
+            log.error("Error while generating swagger from ballerina", e);
+            throw new APITemplateException("Error while generating swagger from ballerina",
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        }
     }
 
     @Override

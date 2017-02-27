@@ -357,7 +357,7 @@ public class SampleTestObjectCreator {
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.endpoint(getMockEndpointMap());
         uriTemplateBuilder.templateId("getApisApiIdGet");
-        uriTemplateBuilder.uriTemplate("/apis/{apiId}");
+        uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
         uriTemplateBuilder.policy("Unlimited");
         uriTemplateBuilder.httpVerb("GET");

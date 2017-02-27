@@ -346,6 +346,7 @@ public class MappingUtil {
     public static EndPointDTO toEndPointDTO(Endpoint endpoint) {
         EndPointDTO endPointDTO = new EndPointDTO();
         endPointDTO.setId(endpoint.getId());
+        endPointDTO.setName(endpoint.getName());
         endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
         endPointDTO.setEndpointSecurity(endpoint.getSecurity());
         EndPoint_maxTpsDTO endPointMaxTpsDTO = new EndPoint_maxTpsDTO();

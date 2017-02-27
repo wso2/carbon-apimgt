@@ -51,6 +51,8 @@ public class APIPublisherImplTestCase {
         File temp = Files.createTempDir();
         temp.deleteOnExit();
         System.setProperty("gwHome", temp.getAbsolutePath());
+        //Set the resource path, where contain composer test JS
+        System.setProperty("carbon.home", new File("src/test/resources").getAbsolutePath());
     }
 
     @Test(description = "Test add api")
@@ -174,6 +176,14 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus("CREATED").build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
+
+        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
+                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
+                + "    resource passthrough (message m) {\n"
+                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
+                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
+                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
+        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(bal);
         apiPublisher.updateAPI(api.lifeCycleStatus("CREATED").id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO,Mockito.times(0)).isAPIContextExists(api.getContext());
