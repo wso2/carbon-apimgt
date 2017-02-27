@@ -313,22 +313,23 @@ $(function () {
                             $("#subscribe-button").html('Subscribe');
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
-                            var message = "Subscription created successfully";
+                            var message = "You have successfully subscribed to the API.";
                             noty({
                                 text: message,
-                                type: 'success',
-                                dismissQueue: true,
-                                modal: true,
-                                progressBar: true,
-                                timeout: 1000,
-                                layout: 'top',
+                                layout: "top",
                                 theme: 'relax',
-                                maxVisible: 10,
-                                callback: {
-                                    afterClose: function () {
-                                        location.href = contextPath + "/apis/" + apiId;
+                                buttons: [
+                                    {addClass: 'btn btn-primary', text: 'View Subscriptions', onClick: function($noty) {
+                                        $noty.close();
+                                        location.href = contextPath + "/applications/" + applicationId + "#subscription";
+                                      }
                                     },
-                                }
+                                    {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                                        $noty.close();
+                                        location.href = contextPath + "/apis/" + apiId;
+                                      }
+                                    }
+                                  ]
                             });
 
                             //TODO : Embedding message model
