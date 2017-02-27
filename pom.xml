@@ -28,11 +28,11 @@
     </parent>
 
     <groupId>org.wso2.carbon.apimgt</groupId>
-    <artifactId>org.wso2.carbon.apimgt.parent</artifactId>
+    <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
     <version>7.0.0-SNAPSHOT</version>
 
-    <name>WSO2 Carbon - API Management Parent</name>
+    <name>WSO2 Carbon - API Management Aggregator POM</name>
 
     <scm>
         <url>https://github.com/wso2/carbon-apimgt.git</url>
