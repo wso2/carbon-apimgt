@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.ContentType;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.LambdaFunction;
 
@@ -78,7 +79,7 @@ public class LambdaFunctionTrigger implements EventObserver {
                 HttpResponse response = null;
                 try {
                     response = RestCallUtil.postRequest(function.getEndpointURI(), null, null,
-                            Entity.json(jsonPayload));
+                            Entity.json(jsonPayload), ContentType.APPLICATION_JSON);
                 } catch (IOException e) {
                     log.error("Error making connection", e);
                 }
