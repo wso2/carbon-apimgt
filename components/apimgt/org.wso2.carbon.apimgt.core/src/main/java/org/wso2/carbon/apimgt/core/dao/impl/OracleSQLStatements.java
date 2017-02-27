@@ -114,7 +114,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             searchQuery.append(entry.getKey());
             searchQuery.append(") LIKE ?");
             if (entries.hasNext()) {
-                searchQuery.append(" OR ");
+                searchQuery.append(" AND ");
             }
         }
 

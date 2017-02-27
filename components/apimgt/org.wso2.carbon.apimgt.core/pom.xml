@@ -22,10 +22,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <version>7.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -562,7 +564,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-mssql-server-linux</name>
+                                    <name>microsoft/mssql-server-linux</name>
                                     <alias>apim-mssql</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -581,7 +583,7 @@
                                     </run>
                                 </image>
                                 <image>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-mssql-client</name>
+                                    <name>tharindu1st/mssql-client</name>
                                     <alias>apim-mssql-client</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -769,7 +771,7 @@
                             <images>
                                 <image>
                                     <alias>apim-oracle</alias>
-                                    <name>dockerhub.private.wso2.com/tharindua-wso2-oracle-database:11.2.0.2-xe</name>
+                                    <name>tharindu1st/oracle-xe:11.2.0.2-xe</name>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
                                         <env>
@@ -827,6 +829,7 @@
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
             org.wso2.carbon.lcm.*,
+            org.wso2.carbon.lcm.sql.*,
             io.swagger.models.*,
             io.swagger.util.*,
             com.google.gson.*,

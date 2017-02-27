@@ -62,7 +62,7 @@ public class AuthUtil {
      *
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-            String[] scopes, String clientId, String clientSecret) {
+            Long validityPeriod, String[] scopes, String clientId, String clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -71,6 +71,7 @@ public class AuthUtil {
         tokenRequest.setResourceOwnerUsername(username);
         tokenRequest.setResourceOwnerPassword(password);
         tokenRequest.setScopes(scopes);
+        tokenRequest.setValidityPeriod(validityPeriod);
         return tokenRequest;
 
     }

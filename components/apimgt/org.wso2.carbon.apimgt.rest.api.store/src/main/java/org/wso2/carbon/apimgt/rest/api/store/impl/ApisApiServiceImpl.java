@@ -44,7 +44,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentInfo = documentationContent.getDocumentInfo();
             if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
                 String filename = documentInfo.getFileName();
-                return Response.ok(documentInfo)
+                return Response.ok(documentationContent.getFileContent())
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                         .build();

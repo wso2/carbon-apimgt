@@ -95,7 +95,7 @@ function createAPIHandler(event) {
 /**
  * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
  * and the send it over REST API.
- * @param input_type
+ * @param input_type {String} Input type either `swagger-url` or `swagger-file`
  */
 function createAPIFromSwagger(input_type) {
     if (input_type === "swagger-url") {
@@ -131,7 +131,6 @@ function createAPIFromSwagger(input_type) {
         /* TODO: Implement swagger file  upload support ~tmkb*/
     }
 }
-
 /**
  * Do create API with endpoint
  *
@@ -139,7 +138,7 @@ function createAPIFromSwagger(input_type) {
  */
 function createAPIUsingEndpoint(response) {
     var endpoint = [];
-    var responseObject = JSON.parse(response.data);
+    var responseObject = response.obj;
     var id = responseObject.id;
     endpoint.push({
         'id' : id,
@@ -179,14 +178,13 @@ function createAPIUsingEndpoint(response) {
                 console.debug(error_response);
             });
 }
-
 /**
  * Add endpoint when api is added by providing endpoint
  *
  * @param callBack function
  */
 function addEndpoint(callBack) {
-    var url = $('#wsdl-url').val();
+    var url = $('#endpoint-url').val();
     var name = $("#new-api-name").val();
     var context = $('#new-api-context').val();
     var version = $('#new-api-version').val();
@@ -200,8 +198,8 @@ function addEndpoint(callBack) {
 	};
 
     var new_api = new API('');
-    var promised_create = new_api.addEndpoint(body);
-    promised_create
+    var promised_endpoint = new_api.addEndpoint(body);
+    promised_endpoint
         .then(callBack)
         .catch(
             function (error_response) {

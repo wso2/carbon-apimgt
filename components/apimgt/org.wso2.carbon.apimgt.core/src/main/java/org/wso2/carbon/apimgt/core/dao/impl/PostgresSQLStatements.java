@@ -108,7 +108,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             searchQuery.append(entry.getKey());
             searchQuery.append(") LIKE ?");
             if (entries.hasNext()) {
-                searchQuery.append(" OR ");
+                searchQuery.append(" AND ");
             }
         }
 

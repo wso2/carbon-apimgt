@@ -20,12 +20,13 @@ package org.wso2.carbon.apimgt.keymanager;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * The token response class
  */
-public class OAuthTokenResponse {
+public class OAuthTokenResponse implements Serializable {
 
     @JsonProperty("access_token")
     private String token;
@@ -38,6 +39,19 @@ public class OAuthTokenResponse {
 
     @JsonProperty("scopes")
     private List<String> scopes;
+
+    @JsonProperty("expires_timestamp")
+    private long expiresTimestamp;
+
+    public long getExpiresTimestamp() {
+        return expiresTimestamp;
+    }
+
+    public void setExpiresTimestamp(long expiresTimestamp) {
+        this.expiresTimestamp = expiresTimestamp;
+    }
+
+    private static final long serialVersionUID = 2;
 
     public String getToken() {
         return token;

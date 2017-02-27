@@ -40,6 +40,7 @@ authManager.login = function () {
         username: $('#username').val(),
         password: $('#password').val(),
         grant_type: 'password',
+        validity_period: '3600',
         scopes: 'apim:api_view apim:api_create'
 
     };

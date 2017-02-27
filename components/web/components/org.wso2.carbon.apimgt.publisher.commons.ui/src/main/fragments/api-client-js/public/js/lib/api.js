@@ -101,7 +101,7 @@ class AuthClient {
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
         var error_data = JSON.parse(error_response.data);
-        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".<br/> You will be redirect to the login page ...";
+        var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         noty({
             text: message,
             type: 'error',
@@ -352,7 +352,7 @@ class API {
      * @param body {Object} Endpoint to be added
      * @param callback {function} Callback function
      */
-    addEndpoint(body, callback) {
+    addEndpoint(body) {
         var promised_addEndpoint = this.client.then(
             (client) => {
                 let payload = {body: body, "Content-Type": "application/json"};
@@ -362,6 +362,42 @@ class API {
         ).catch(AuthClient.unauthorizedErrorHandler);
 
         return promised_addEndpoint;
+    }
+
+    getEndpoint(id) {
+        return this.client.then(
+            (client) => {
+                return client["Endpoint (individual)"].get_endpoints_endpointId(
+                    {
+                        endpointId: id,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+    }
+
+    updateEndpoint(id, data) {
+        return this.getEndpoint(id).then(
+            function (response) {
+                var endpoint = response.obj;
+                for (var attribute in data) {
+                    if (!endpoint.hasOwnProperty(attribute)) {
+                        throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
+                    }
+                }
+                var updated_endpoint = Object.assign(endpoint, data);
+                return this.client.then(
+                    (client) => {
+                        return client["Endpoint (individual)"].put_endpoints_endpointId(
+                            {
+                                endpointId: id,
+                                body: updated_endpoint,
+                                'Content-Type': 'application/json'
+                            }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    }
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }.bind(this)
+        ).catch(AuthClient.unauthorizedErrorHandler)
     }
 
 }

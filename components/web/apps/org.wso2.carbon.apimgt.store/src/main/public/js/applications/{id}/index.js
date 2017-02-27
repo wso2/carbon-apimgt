@@ -30,7 +30,6 @@ $(function () {
             ({"applicationId": id},
                 function (data) {
                     renderAppDetails(data);
-                    renderApplicationKeys(data);
                     client["Subscription Collection"].get_subscriptions({
                         "apiId": "",
                         "applicationId": id,
@@ -181,7 +180,9 @@ $(function () {
     });
 
     var renderAppDetails = function (data) {
-        var callbacks = {onSuccess: function () {
+        var callbacks = {onSuccess: function (
+        ) {
+            renderApplicationKeys(data);
         },onFailure: function (message, e) {
             var message = "Error occurred while viewing application details";
             noty({
@@ -212,9 +213,9 @@ $(function () {
         //TODO : we need to use following code and we need to remove the Handlebars.compile(keyTemplateScript);
         //var keyTemplateScript = result;
         //AppkeyTemplate = Handlebars.compile(keyTemplateScript);
-        //var  context;
+        var  context;
 
-        /*if (typeof data.obj.keys[0] !== 'undefined') {
+        if (typeof data.obj.keys[0] !== 'undefined') {
 
             for (var i = 0; i < data.obj.keys.length; i++) {
                 var keyType = data.obj.keys[i].keyType;
@@ -230,8 +231,8 @@ $(function () {
                         grantTypes[j].disabled = false;
                     }
                 }
-
                 context = {
+                    "keyType": keyType,
                     "callbackUrl": data.obj.callbackUrl,
                     "grantTypes": grantTypes,
                     "name": data.obj.name,
@@ -241,7 +242,7 @@ $(function () {
                     "ConsumerSecret": data.obj.keys[i].consumerSecret,
                     "username": "Username",
                     "password": "Password",
-                    //"basickey": window.btoa(data.obj.keys[i].consumerKey + ":" + data.obj.keys[i].consumerSecret),
+                    "basickey": window.btoa(data.obj.keys[i].consumerKey + ":" + data.obj.keys[i].consumerSecret),
                     "ValidityTime": data.obj.keys[i].token.validityTime,
                     "Scopes": "",
                     "tokenScopes": data.obj.keys[i].token.tokenScopes,
@@ -252,15 +253,16 @@ $(function () {
                 };
                 UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
                     onSuccess: function (renderedData) {
-                        if (keyType.toLowerCase() == "production") {
+                        if (this.keyType.toLowerCase() == "production") {
                             $("#production").append(renderedData);
-
+                            registerClipBoardClients();
                             if (data.obj.keys.length == 1) {
                                 context = setDefaultContext(data);
                                 //compiledHtml = AppkeyTemplate(context);
                                 UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
                                     onSuccess: function (renderedData) {
                                         $("#sandbox").append(renderedData);
+                                        registerClipBoardClients();
                                     }, onFailure: function (message, e) {
                                         var message = "Error occurred while getting default application key details." + message;
                                         noty({
@@ -280,12 +282,13 @@ $(function () {
                         }
                         else {
                             $("#sandbox").append(renderedData);
-
+                            registerClipBoardClients();
                             if (data.obj.keys.length == 1) {
                                 context = setDefaultContext(data);
                                 UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
                                     onSuccess: function (renderedData) {
                                         $("#production").append(renderedData);
+                                        registerClipBoardClients();
                                     }, onFailure: function (message, e) {
                                         var message = "Error occurred while getting default application key details." + message;
                                         noty({
@@ -306,7 +309,7 @@ $(function () {
                         }
                         $('.selectpicker').selectpicker('refresh');
 
-                    }, onFailure: function (message, e) {
+                    }.bind(context), onFailure: function (message, e) {
                         var message = "Error occurred while getting subscription details subscription." + message;
                         noty({
                             text: message,
@@ -349,110 +352,24 @@ $(function () {
 
 
         }
-        var ClipboardClient = new ZeroClipboard($('.copy-button'));
 
-        ClipboardClient.on('ready', function (event) {
-            ClipboardClient.on('copy', function (event) {
-                event.clipboardData.setData('text/plain', event.target.value);
-            });
-        });
-
-        ClipboardClient.on('error', function (event) {
-            alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
-            ZeroClipboard.destroy();
-        });
-    }*/
-        $.ajax({
-            url: '/store/public/components/root/base/templates/applications/applicationKeys.hbs',
-            type: 'GET',
-            success: function (result) {
-                var keyTemplateScript = result;
-                AppkeyTemplate = Handlebars.compile(keyTemplateScript);
-                var compiledHtml, context;
-
-                if (typeof data.obj.keys[0] !== 'undefined') {
-
-                    for (var i = 0; i < data.obj.keys.length; i++) {
-                        var keyType = data.obj.keys[i].keyType;
-
-                        for (var j = 0; j < Object.keys(grantTypes).length; j++) {
-                            if ((data.obj.callbackUrl == undefined || data.obj.callbackUrl == "" ) &&
-                                (grantTypes[j].key == "authorization_code" || grantTypes[j].key == "implicit")) {
-                                grantTypes[j].selected = false;
-                                grantTypes[j].disabled = true;
-                            } else {
-                                //TODO check with supportedGrantTypes
-                                grantTypes[j].selected = true;
-                                grantTypes[j].disabled = false;
-                            }
-                        }
-
-                        context = {
-                            "callbackUrl": data.obj.callbackUrl,
-                            "grantTypes": grantTypes,
-                            "name": data.obj.name,
-                            "show_keys": false,
-                            "Key": data.obj.keys[i].token.accessToken,
-                            "ConsumerKey": data.obj.keys[i].consumerKey,
-                            "ConsumerSecret": data.obj.keys[i].consumerSecret,
-                            "username": "Username",
-                            "password": "Password",
-                            "basickey": window.btoa(data.obj.keys[i].consumerKey + ":" + data.obj.keys[i].consumerSecret),
-                            "ValidityTime": data.obj.keys[i].token.validityTime,
-                            "Scopes": "",
-                            "tokenScopes": data.obj.keys[i].token.tokenScopes,
-                            "provide_keys_form": false,
-                            "provide_keys": false,
-                            "gatewayurlendpoint": "(gatewayurl)/token"
-
-                        };
-                        compiledHtml = AppkeyTemplate(context);
-                        if (keyType.toLowerCase() == "production") {
-                            $("#production").append(compiledHtml);
-
-                            if (data.obj.keys.length == 1) {
-                                context = setDefaultContext(data);
-                                compiledHtml = AppkeyTemplate(context);
-                                $("#sandbox").append(compiledHtml);
-                            }
-                        }
-                        else {
-                            $("#sandbox").append(compiledHtml);
-
-                            if (data.obj.keys.length == 1) {
-                                context = setDefaultContext(data);
-                                compiledHtml = AppkeyTemplate(context);
-                                $("#production").append(compiledHtml);
-                            }
-                        }
-                        $('.selectpicker').selectpicker('refresh');
-                    }
-                } else {
-                    context = setDefaultContext(data);
-                    compiledHtml = AppkeyTemplate(context);
-                    $("#production").append(compiledHtml);
-                    $("#sandbox").append(compiledHtml);
-                    $('.selectpicker').selectpicker('refresh');
-                }
-                var ClipboardClient = new ZeroClipboard($('.copy-button'));
-
-                ClipboardClient.on('ready', function (event) {
-                    ClipboardClient.on('copy', function (event) {
-                        event.clipboardData.setData('text/plain', event.target.value);
-                    });
-                });
-
-                ClipboardClient.on('error', function (event) {
-                    alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
-                    ZeroClipboard.destroy();
-                });
-            },
-            error: function (e) {
-                alert("Error occurred viewing application details");
-            }
-        });
     };
 
+    var registerClipBoardClients = function () {
+        $('.copy-button').each(function(){
+            var ClipboardClient = new ZeroClipboard($(this));
+            ClipboardClient.on('ready', function (event) {
+                ClipboardClient.on('copy', function (event) {
+                    event.clipboardData.setData('text/plain', event.target.value);
+                });
+            });
+
+            ClipboardClient.on('error', function (event) {
+                alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
+                ZeroClipboard.destroy();
+            })
+        });
+    };
 
     var setDefaultContext = function (data) {
 
@@ -531,7 +448,7 @@ var generateKeys = function () {
             "applicationId": id,
             "Content-Type": "application/json",
             "body": {
-                "validityTime": document.getElementById("validitytime").value,
+                "validityTime": 3600,
                 "keyType": keyType,
                 "accessAllowDomains": ["ALL"],
                 "callbackUrl": document.getElementById("callbackUrl").value,
@@ -574,6 +491,7 @@ var renderGeneratedKeys = function (data, keyType) {
     }
     var jsonData = JSON.parse(data.data);
     context = {
+        "keyType": keyType,
         "callbackUrl": document.getElementById("callbackUrl").value,
         "grantTypes": grantTypes,
         "keyState": data.obj.keyState,
@@ -592,8 +510,16 @@ var renderGeneratedKeys = function (data, keyType) {
         "gatewayurlendpoint": "(gatewayurl)/token"
 
     };
-    compiledHtml = AppkeyTemplate(context);
-    document.getElementById(keyType.toLowerCase()).innerHTML = compiledHtml;
+    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
+        onSuccess: function (renderedData) {
+            if (context.keyType.toLowerCase() == "production") {
+                $("#production").html(renderedData);
+            } else {
+                $("#sandbox").html(renderedData);
+            }
+        }, onFailure: function (message, e) {
+        }
+    })
 };
 
 var show_Keys = function (obj) {
