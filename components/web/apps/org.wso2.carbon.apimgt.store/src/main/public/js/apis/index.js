@@ -84,6 +84,7 @@ $(function () {
 
     $('#searchApiLifecycleList li a').click(function(){
         $('#searchApiLifecycle').val($(this).attr('data-lifecycle'));
+        searchApis({query:generateQuery()});
     });
 
     searchApis();

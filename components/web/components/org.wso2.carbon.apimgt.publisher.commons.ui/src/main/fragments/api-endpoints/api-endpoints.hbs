@@ -1,0 +1,32 @@
+<div class="page-header">
+    <h4 class="lead">Endpoints Configuration</h4>
+</div>
+<div class="row">
+    <div class="col-md-6 col-sm-6">
+        <form class="form-horizontal">
+            <div class="form-group">
+                {{# each @params.endpoints}}
+                    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">
+                        {{ this.type }} Endpoint :<span class="requiredAstrix">*</span>
+                    </label>
+                    <div class=" col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control endpoint-inputs" data-uuid="{{this.id}}"
+                                   id="{{this.type}}-endpoint-input"
+                                   value="{{ this.endpointConfig }}"
+                                   placeholder="E.g.: http://appserver/resource">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="button">Test</button>
+                            </span>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button id="update-endpoints-configuration" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

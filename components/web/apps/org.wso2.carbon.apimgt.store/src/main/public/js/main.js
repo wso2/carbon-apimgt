@@ -79,7 +79,7 @@ var redirectToLogin = function (contextPath) {
         maxVisible: 10,
         callback: {
             afterClose: function () {
-                window.location = contextPath + "/auth/login";
+                window.location = loginPageUri;
             },
         }
     });

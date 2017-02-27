@@ -1,0 +1,66 @@
+
+<div class="row">
+    <div class="col-md-12 col-lg-9">
+        {{#each api.endpointURLs}}
+            <h4>{{this.environmentName}} Endpoints</h4>
+            <h5 class="add-margin-top-2x">{{this.environmentName}} URLs :</h5>
+                {{#each this.environmentURLs}}
+                    <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
+                        <a data-clipboard-text="{{this}}"
+                            class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i>
+                        </a>
+                        {{#each this}}
+                            {{this}} <br/>
+                        {{/each}}
+                    </div>
+                {{/each}}
+        {{/each}}
+    </div>
+</div>
+<h4 class="add-margin-top-5x">{{i18n "Share"}}</h4>
+<ul class="nav nav-pills">
+    <li role="presentation" class="active"><a href="#" ref="social" class="share_links" title="Social Sites">
+        {{i18n "Social Sites"}}</a></li>
+    <li role="presentation"><a href="#" ref="embed" class="share_links" title="Embed" >{{i18n "Embed"}}</a></li>
+    <li role="presentation"><a href="#" id="api_mailto" title="Email">{{i18n "Email"}}</a></li>
+</ul>
+<div class="share-container add-margin-top-2x">
+    <div id="share_div_embed" class="share_dives highlight" style="display:none">
+        <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
+    </div>
+
+    <div id="share_div_social" class="share_dives">
+        <!-- Facebook -->
+        <a class="social_links" id="facebook" href="#" target="_blank" title="facebook">
+            <img src="{{public "images/facebook.png"}}" alt="Facebook"/></a>
+        <!-- Twitter -->
+        <a class="social_links" id="twitter" href="#" target="_blank" title="twitter">
+            <img src="{{public "images/twitter.png"}}" alt="Twitter" /></a>
+        <!-- Google+ -->
+        <a class="social_links" id="googleplus" href="#" target="_blank" title="googleplus">
+            <img src="{{public "images/google.png"}}" alt="Google" /></a>
+        <!-- Digg -->
+        <a class="social_links" id="digg" href="#" target="_blank" title="digg">
+            <img src="{{ public "images/diggit.png"}}" alt="Digg" /></a>
+        <div class="clearfix">
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-lg-9">
+        <h4 class="add-margin-top-5x">{{i18n "Comments"}}</h4>
+        <div id="comment-add">
+            <div class="alert alert-error" id="commentAdd-error" style="display:none">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <strong>{{i18n "Comment exceeds character limit"}}</strong>
+            </div>
+            <textarea id="comment-text" class="form-control comment-box resize-vertical-only"></textarea>
+            <div class="add-margin-top-2x">
+                <button id="comment-add-button" class="btn btn-secondary btn-mobile"><i class="
+                icon-plus-sign"></i>{{i18n "Add"}}</button>
+            </div>
+        </div>
+    </div>
+</div>
