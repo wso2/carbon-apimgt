@@ -1743,18 +1743,13 @@ paths:
       tags:
         - Import Configuration
       responses:
-        201:
+        200:
           description: |
-            Created.
+            OK.
             Successful response with the updated object as entity in the body.
-            Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/APIList'
           headers:
-            Location:
-              description: |
-                Location of the newly created API(s).
-              type: string
             Content-Type:
               description: |
                 The content type of the body.

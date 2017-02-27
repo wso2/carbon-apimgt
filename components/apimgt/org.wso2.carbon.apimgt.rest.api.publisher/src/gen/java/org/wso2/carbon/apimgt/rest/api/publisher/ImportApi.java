@@ -25,7 +25,7 @@ import javax.ws.rs.*;
     @PUT @Path("/apis") @Consumes({ "multipart/form-data" }) @Produces({
             "application/json" }) @io.swagger.annotations.ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more existing APIs. ", response = APIListDTO.class, tags = {
             "Import Configuration", }) @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the updated object as entity in the body. Location header contains URL of newly created entity. ", response = APIListDTO.class),
+            @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the updated object as entity in the body.", response = APIListDTO.class),
 
             @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class),
 

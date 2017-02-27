@@ -49,10 +49,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     private static final String DOCUMENTATION_DEFINITION_FILE = "doc.json";
     private static final String SWAGGER_DEFINITION_FILE_NAME = "swagger.json";
     private static final String THUMBNAIL_FILE_NAME = "thumbnail";
-    // TODO
-    /*
     private static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-config.json";
-    */
     private static final String DOCUMENTS_ROOT_DIRECTORY = "Documents";
     private String path;
 
@@ -99,7 +96,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 exportApiDefinitionToFileSystem(apiDetails.getApi(), apiExportDirectory);
                 exportSwaggerDefinitionToFileSystem(apiDetails.getSwaggerDefinition(), apiDetails.getApi(),
                         apiExportDirectory);
-                //exportGatewayConfigToFileSystem(apiDetails.getGatewayConfiguration(), apiDetails.getApi(), apiExportDirectory);
+                exportGatewayConfigToFileSystem(apiDetails.getGatewayConfiguration(), apiDetails.getApi(),
+                        apiExportDirectory);
 
             } catch (APIMgtEntityImportExportException e) {
                 // no need to throw, log
@@ -198,49 +196,28 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
 
         for (String apiDefinitionDirectoryPath : apiDefinitionsRootDirectoryPaths) {
             File apiDefinitionFile = new File(apiDefinitionDirectoryPath + File.separator + API_DEFINITION_FILE_NAME);
-            if (!apiDefinitionFile.exists()) {
-                // API definition file not found, skip this API
-                log.error("Unable to locate API definition file at: " + apiDefinitionFile.getPath());
-                continue;
-            }
 
             APIDTO apiDto;
+            String swaggerDefinition, gatewayConfiguration;
+
             try {
                 apiDto = getApiDefinitionFromExtractedArchive(apiDefinitionFile.getPath());
+                swaggerDefinition = getSwaggerDefinitionFromExtractedArchive(apiDefinitionDirectoryPath +
+                        File.separator + SWAGGER_DEFINITION_FILE_NAME);
+                gatewayConfiguration = getGatewayConfigurationFromExtractedArchive(apiDefinitionDirectoryPath
+                        + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE);
+
             } catch (APIManagementException e) {
                 log.error(e.getMessage(), e);
                 // skip this API
                 continue;
             }
+
             if (newApiProvider != null && !newApiProvider.isEmpty()) {
                 // update the newApiProvider
                 apiDto.setProvider(newApiProvider);
             }
 
-            String swaggerDefinition;
-            try {
-                swaggerDefinition = getSwaggerDefinitionFromExtractedArchive(apiDefinitionDirectoryPath +
-                        File.separator + SWAGGER_DEFINITION_FILE_NAME);
-            } catch (APIManagementException e) {
-                log.error(e.getMessage(), e);
-                // skip this API
-                continue;
-            }
-
-            // TODO:
-            /*
-            String gatewayConfiguration;
-            try {
-                gatewayConfiguration = getGatewayConfigurationFromExtractedArchive(apiDefinitionDirectoryPath + File.separator +
-                        GATEWAY_CONFIGURATION_DEFINITION_FILE);
-            } catch (APIMgtEntityImportExportException e) {
-                log.error(e.getMessage(), e);
-                // skip this API
-                continue;
-            }
-            */
-
-            // TODO
             String documentsRootDirectory = apiDefinitionDirectoryPath + File.separator + DOCUMENTS_ROOT_DIRECTORY;
             Set<DocumentInfo> documentInfoSet = getDocumentInfoFromExtractedArchive(documentsRootDirectory,
                     apiDto.getName(), apiDto.getVersion());
@@ -257,12 +234,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                     THUMBNAIL_FILE_NAME);
 
             APIDetails apiDetails = new APIDetails(MappingUtil.toAPI(apiDto).build(), swaggerDefinition);
-            // TODO
-            /*
-            if (gatewayConfiguration != null) {
-                apiDetails.setGatewayConfiguration(gatewayConfiguration);
-            }
-            */
+            apiDetails.setGatewayConfiguration(gatewayConfiguration);
             if (!documentInfoSet.isEmpty()) {
                 apiDetails.addDocumentInformation(documentInfoSet);
             }
@@ -335,17 +307,22 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         }
     }
 
-    /*
+    /**
+     * Retrieves gateway configuration from extracted archive
+     *
+     * @param gatewayConfigFilePath  path to gateway config file
+     * @return gateway configuration
+     * @throws APIManagementException if an error occurs while reading the gateway configuration
+     */
     private String getGatewayConfigurationFromExtractedArchive (String gatewayConfigFilePath) throws APIManagementException {
 
         try {
-            return importExportUtils.readFileContentAsText(gatewayConfigFilePath);
+            return ImportExportUtils.readFileContentAsText(gatewayConfigFilePath);
         } catch (APIMgtEntityImportExportException e) {
             String errorMsg = "Error in reading Gateway configuration from file at: " + gatewayConfigFilePath;
             throw new APIManagementException(errorMsg, e);
         }
     }
-    */
 
     /**
      * Create {@link DocumentContent} instance from the file
@@ -456,9 +433,16 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         log.debug("Successfully exported API definition for api: " + api.getName() + ", version: " + api.getVersion());
     }
 
-    // TODO
-    /*
-    private void exportGatewayConfigToFileSystem(String gatewayConfig, API api, String exportLocation) throws APIManagementException {
+    /**
+     * Exports gateway configuration to the file system
+     *
+     * @param gatewayConfig gateway configuration
+     * @param api {@link API} instance
+     * @param exportLocation file system location to export
+     * @throws APIMgtEntityImportExportException if an error occurs while exporting the gateway configuration
+     */
+    private void exportGatewayConfigToFileSystem(String gatewayConfig, API api, String exportLocation)
+            throws APIMgtEntityImportExportException {
 
         if (gatewayConfig == null) {
             // not gateway config found, return
@@ -467,10 +451,9 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         }
 
         String gatewayConfigFileLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
-        importExportUtils.createFile(gatewayConfigFileLocation);
-        importExportUtils.writeToFile(gatewayConfigFileLocation, gatewayConfig);
+        ImportExportUtils.createFile(gatewayConfigFileLocation);
+        ImportExportUtils.writeToFile(gatewayConfigFileLocation, gatewayConfig);
     }
-    */
 
     /**
      * Writes the given List of {@link DocumentInfo} objects to the file system

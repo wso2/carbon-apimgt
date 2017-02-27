@@ -42,7 +42,7 @@ public class ApiImportExportManager {
 
     private static final Logger log = LoggerFactory.getLogger(ApiImportExportManager.class);
 
-    protected APIPublisher apiPublisher;
+    APIPublisher apiPublisher;
 
     public ApiImportExportManager(APIPublisher apiPublisher) {
         this.apiPublisher = apiPublisher;
@@ -87,18 +87,15 @@ public class ApiImportExportManager {
             }
 
             // get gateway configuration
-            // TODO
-            /*
-            String gatewayConfig = null;
+            String gatewayConfig;
             try {
-                gatewayConfig = getApiGatewayConfig(api.getId());
+                gatewayConfig = apiPublisher.getApiGatewayConfig(api.getId());
             } catch (APIManagementException e) {
                 log.error("Error in getting gateway configuration for api: " + api.getName() + ", version: " +
                         api.getVersion(), e);
                 // skip this API
                 continue;
             }
-            */
 
             // get doc information
             List<DocumentInfo> documentInfo = null;
@@ -134,12 +131,9 @@ public class ApiImportExportManager {
 
             // search operation returns a summary of APIs, need to get all details of APIs
             APIDetails apiDetails = new APIDetails(apiPublisher.getAPIbyUUID(api.getId()), swaggerDefinition);
-            // TODO
-            /*
             if (gatewayConfig != null) {
                 apiDetails.setGatewayConfiguration(gatewayConfig);
             }
-            */
             if (documentInfo != null && !documentInfo.isEmpty()) {
                 apiDetails.addDocumentInformation(documentInfo);
             }
@@ -174,7 +168,7 @@ public class ApiImportExportManager {
         try {
             Set<DocumentInfo> documentInfo = apiDetails.getAllDocumentInformation();
             for (DocumentInfo aDocInfo : documentInfo) {
-                apiPublisher.addDocumentationInfo(aDocInfo.getId(), aDocInfo);
+                apiPublisher.addDocumentationInfo(apiDetails.getApi().getId(), aDocInfo);
             }
             for (DocumentContent aDocContent : apiDetails.getDocumentContents()) {
                 // add documentation
@@ -209,7 +203,7 @@ public class ApiImportExportManager {
      * @param apiDetails {@link APIDetails} instance
      * @throws APIManagementException if an error occurs while updating API details
      */
-    public void updateAPIDetails(APIDetails apiDetails) throws APIManagementException {
+    void updateAPIDetails(APIDetails apiDetails) throws APIManagementException {
 
         // update everything
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
