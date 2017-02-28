@@ -70,7 +70,10 @@ public enum ExceptionCodes implements ErrorHandler {
     GATEWAY_EXCEPTION(900319, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
 
     JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error"),
-    INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password");
+    INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password"),
+
+    LOCATION_HEADER_INCORRECT(900322, "Error while obtaining URI for Location header", 500,
+            "Error occurred while obtaining URI for Location header");
 
     private final long errorCode;
     private final String errorMessage;
