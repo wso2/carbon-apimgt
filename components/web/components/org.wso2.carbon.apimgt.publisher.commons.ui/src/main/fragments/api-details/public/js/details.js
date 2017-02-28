@@ -97,6 +97,7 @@ function lifecycleTabHandler(event) {
     function renderLCTab(response) {
         var api = response[0];
         var policies = response[1];
+        var lcState = response[2];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
         var api_data = JSON.parse(api.data);
         var policies_data = JSON.parse(policies.data);
@@ -134,14 +135,15 @@ function lifecycleTabHandler(event) {
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
-            policies: policies_data
+            policies: policies_data,
+            lcState: lcState.obj
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
-
     var promised_api = api_client.get(api_id);
     var promised_tiers = api_client.policies('api');
-    Promise.all([promised_api, promised_tiers]).then(renderLCTab)
+    var promised_lcState = api_client.getLcState(api_id);
+    Promise.all([promised_api, promised_tiers, promised_lcState]).then(renderLCTab)
 }
 
 /**

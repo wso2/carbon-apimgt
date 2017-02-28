@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
@@ -22,7 +23,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T11:12:39.119+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
@@ -94,6 +95,12 @@ public abstract class ApisApiService {
  ,String minorVersion
  ) throws NotFoundException;
     public abstract Response apisApiIdGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisApiIdLifecycleGet(String apiId
  ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince

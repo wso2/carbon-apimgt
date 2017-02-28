@@ -25,16 +25,13 @@
             </div>
             <div class="form-actions">
                 <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+                    {{#each @params.lcState.availableTransitionBeanList}}
                     <div class="btn-group" role="group">
-                        <input type="button" {{#if @params.isPublished}}disabled=""{{/if}}
-                               class="btn btn-primary lc-state-btn" data-lcstate="Published" value="Publish">
+                        <input type="button"
+                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.targetState}}">
                     </div>
 
-                    <div class="btn-group" role="group">
-                        <input type="button"  {{#if @params.isPublished}}disabled=""{{/if}} data-lcstate="Prototyped"
-                               class="btn btn-secondary lc-state-btn"
-                               value="{{i18n "Deploy as a Prototype"}}">
-                    </div>
+                    {{/each}}
                 </div>
                 <div class="page-header">
                     <h4 class="lead">Lifecycle History</h4>
