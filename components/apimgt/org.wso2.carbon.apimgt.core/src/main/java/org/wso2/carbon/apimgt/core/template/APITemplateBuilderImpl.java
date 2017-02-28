@@ -40,7 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import javax.script.ScriptException;
+//import javax.script.ScriptException;
 
 /**
  * Generate API config template
@@ -92,14 +92,16 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     @Override
     public String getGatewayConfigFromSwagger(String gatewayConfig, String swagger) throws APITemplateException {
         System.setProperty("bal.composer.home", System.getProperty("carbon.home"));
-        try {
+        /*try {
             String jsonModel = SwaggerConverterUtils.generateBallerinaDataModel(swagger, gatewayConfig);
+            return jsonModel;
             return SwaggerConverterUtils.getBallerinaFromJsonModel(jsonModel);
         } catch (IOException | ScriptException e) {
             log.error("Error while generating ballerina from swagger", e);
             throw new APITemplateException("Error while generating ballerina from swagger",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
-        }
+        }*/
+        return "";
     }
 
     @Override

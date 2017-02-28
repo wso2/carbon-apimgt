@@ -23,29 +23,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_maxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -349,18 +329,14 @@ public class MappingUtil {
         endPointDTO.setName(endpoint.getName());
         endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
         endPointDTO.setEndpointSecurity(endpoint.getSecurity());
-        EndPoint_maxTpsDTO endPointMaxTpsDTO = new EndPoint_maxTpsDTO();
-        Endpoint.MaxTps maxTps = endpoint.getMaxTps();
-        if (maxTps != null) {
-            endPointMaxTpsDTO.setProduction(maxTps.getProduction());
-            endPointMaxTpsDTO.setSandbox(maxTps.getSandbox());
-        }
-        endPointDTO.setMaxTps(endPointMaxTpsDTO);
+        endPointDTO.setMaxTps(endpoint.getMaxTps());
+        endPointDTO.setType(endpoint.getType());
         return endPointDTO;
     }
 
     /**
      * Convert {@link EndPointDTO} to {@link Endpoint}
+     *
      * @param endPointDTO
      * @return
      */
@@ -368,11 +344,9 @@ public class MappingUtil {
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
         endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
         endPointBuilder.name(endPointDTO.getName());
-        EndPoint_maxTpsDTO maxTpsDTO = endPointDTO.getMaxTps();
-        if (maxTpsDTO != null) {
-            endPointBuilder.maxTps(new Endpoint.MaxTps(maxTpsDTO.getProduction(), maxTpsDTO.getSandbox()));
-        }
+        endPointBuilder.maxTps(endPointDTO.getMaxTps());
         endPointBuilder.security(endPointDTO.getEndpointSecurity());
+        endPointBuilder.type(endPointDTO.getType());
         return endPointBuilder.build();
     }
 }

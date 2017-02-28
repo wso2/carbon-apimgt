@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * TierPermissionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T11:12:39.119+05:30")
 public class TierPermissionDTO   {
   /**
    * Gets or Sets permissionType
@@ -45,10 +45,8 @@ public class TierPermissionDTO   {
     }
   }
 
-  @JsonProperty("permissionType")
   private PermissionTypeEnum permissionType = null;
 
-  @JsonProperty("roles")
   private List<String> roles = new ArrayList<String>();
 
   public TierPermissionDTO permissionType(PermissionTypeEnum permissionType) {
@@ -83,7 +81,7 @@ public class TierPermissionDTO   {
    * Get roles
    * @return roles
   **/
-  @ApiModelProperty(example = "[&quot;Internal/everyone&quot;]", required = true, value = "")
+  @ApiModelProperty(required = true, value = "")
   public List<String> getRoles() {
     return roles;
   }

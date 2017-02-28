@@ -9,27 +9,20 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIInfoDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T11:12:39.119+05:30")
 public class APIInfoDTO   {
-  @JsonProperty("id")
   private String id = null;
 
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("context")
   private String context = null;
 
-  @JsonProperty("version")
   private String version = null;
 
-  @JsonProperty("provider")
   private String provider = null;
 
-  @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
   public APIInfoDTO id(String id) {
@@ -167,14 +160,14 @@ public class APIInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIInfoDTO apIInfo = (APIInfoDTO) o;
-    return Objects.equals(this.id, apIInfo.id) &&
-        Objects.equals(this.name, apIInfo.name) &&
-        Objects.equals(this.description, apIInfo.description) &&
-        Objects.equals(this.context, apIInfo.context) &&
-        Objects.equals(this.version, apIInfo.version) &&
-        Objects.equals(this.provider, apIInfo.provider) &&
-        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus);
+    APIInfoDTO aPIInfo = (APIInfoDTO) o;
+    return Objects.equals(this.id, aPIInfo.id) &&
+        Objects.equals(this.name, aPIInfo.name) &&
+        Objects.equals(this.description, aPIInfo.description) &&
+        Objects.equals(this.context, aPIInfo.context) &&
+        Objects.equals(this.version, aPIInfo.version) &&
+        Objects.equals(this.provider, aPIInfo.provider) &&
+        Objects.equals(this.lifeCycleStatus, aPIInfo.lifeCycleStatus);
   }
 
   @Override

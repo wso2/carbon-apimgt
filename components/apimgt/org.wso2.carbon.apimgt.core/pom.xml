@@ -216,7 +216,7 @@
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-core</artifactId>
-            <version>0.8.0</version>
+            <version>0.8.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -250,7 +250,7 @@
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>workspace-service</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.8.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
