@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_maxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
@@ -346,20 +345,17 @@ public class MappingUtil {
     public static EndPointDTO toEndPointDTO(Endpoint endpoint) {
         EndPointDTO endPointDTO = new EndPointDTO();
         endPointDTO.setId(endpoint.getId());
+        endPointDTO.setName(endpoint.getName());
         endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
         endPointDTO.setEndpointSecurity(endpoint.getSecurity());
-        EndPoint_maxTpsDTO endPointMaxTpsDTO = new EndPoint_maxTpsDTO();
-        Endpoint.MaxTps maxTps = endpoint.getMaxTps();
-        if (maxTps != null) {
-            endPointMaxTpsDTO.setProduction(maxTps.getProduction());
-            endPointMaxTpsDTO.setSandbox(maxTps.getSandbox());
-        }
-        endPointDTO.setMaxTps(endPointMaxTpsDTO);
+        endPointDTO.setMaxTps(endpoint.getMaxTps());
+        endPointDTO.setType(endpoint.getType());
         return endPointDTO;
     }
 
     /**
      * Convert {@link EndPointDTO} to {@link Endpoint}
+     *
      * @param endPointDTO
      * @return
      */
@@ -367,11 +363,9 @@ public class MappingUtil {
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
         endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
         endPointBuilder.name(endPointDTO.getName());
-        EndPoint_maxTpsDTO maxTpsDTO = endPointDTO.getMaxTps();
-        if (maxTpsDTO != null) {
-            endPointBuilder.maxTps(new Endpoint.MaxTps(maxTpsDTO.getProduction(), maxTpsDTO.getSandbox()));
-        }
+        endPointBuilder.maxTps(endPointDTO.getMaxTps());
         endPointBuilder.security(endPointDTO.getEndpointSecurity());
+        endPointBuilder.type(endPointDTO.getType());
         return endPointBuilder.build();
     }
 }
