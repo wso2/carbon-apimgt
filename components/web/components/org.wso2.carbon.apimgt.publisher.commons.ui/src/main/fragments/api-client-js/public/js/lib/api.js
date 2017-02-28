@@ -223,7 +223,7 @@ class API {
     create(api_data, callback = null) {
         let payload;
         let promise_create;
-        if (api_data.constructor.name == "Blob") {
+        if (api_data.constructor.name === Blob.name || api_data.constructor.name === File.name) {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
@@ -383,6 +383,11 @@ class API {
         return promised_addEndpoint;
     }
 
+    /**
+     * Get endpoint object by its UUID.
+     * @param id {String} UUID of the endpoint
+     * @returns {Promise.<TResult>}
+     */
     getEndpoint(id) {
         return this.client.then(
             (client) => {
