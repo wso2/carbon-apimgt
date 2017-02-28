@@ -1126,6 +1126,71 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+######################################################
+#  The "API Lifecycle State Data"  resource API
+######################################################
+  /apis/{apiId}/lifecycle:
+
+#--------------------------------------------
+# Retrieve API LIfecycle state data
+#--------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" http://127.0.0.1:9090/api/am/publisher/v1/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle"
+
+      x-wso2-request: |
+            GET http://127.0.0.1:9090/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding:
+      chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Blocked\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Block\",\n         \"targetState\":\"Blocked\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}"
+      summary: Get Lifecycle state data of the API.
+      description: |
+            This operation can be used to retrieve Lifecycle state data of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state data returned successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+              $ref: '#/definitions/LifecycleState'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Import API from API Definition"  resource API
@@ -3450,3 +3515,110 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
+
+#-----------------------------------------------------
+# The Lifecycle resource
+#-----------------------------------------------------
+  LifecycleState:
+    title:  Lifecycle State
+    properties:
+      lcName:
+        type: string
+        example: "API Lifecycle"
+      state:
+        type: string
+        example: "Created"
+      lifecyelId:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      checkItemBeanList:
+        type: array
+        items:
+          properties:
+            permissionBeans:
+              type: array
+              items:
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      type: string
+                  forTarget:
+                    type: string
+            name:
+              type: string
+              example: "Deprecate old versions after publish the API"
+            validationBeans:
+              type: array
+              items:
+                properties:
+                  classObject:
+                    type: object
+                  targetName:
+                    type: string
+                    example: "Published"
+                  customMessage:
+                    type: string
+                    example: "Validation successful"
+            targets:
+              type: array
+              items:
+                  type: string
+            value:
+              type: boolean
+              example: false
+      inputBeanList:
+        type: array
+        items:
+          properties:
+            name:
+              type: string
+              example: "Gateways to be published"
+            isRequired:
+              type: boolean
+              example:  true
+            label:
+              type: string
+            placeHolder:
+              type: string
+            tooltip:
+              type: string
+            regex:
+              type: string
+            values:
+              type: string
+            forTarget:
+              type: string
+              example: "Created"
+      customCodeBeanList:
+        type: array
+        items:
+          properties:
+            classObject:
+              type: object
+            targetName:
+              type: string
+              example: "Published"
+            customMessage:
+              type: string
+              example: "Validation successful"
+      availableTransitionBeanList:
+        type: array
+        items:
+          properties:
+            event:
+              type: string
+              example: "Promote"
+            targetState:
+              type: string
+              example: "Created"
+      permissionBeanList:
+        type: array
+        items:
+          properties:
+            roles:
+              type: array
+              items:
+                type: string
+            forTarget:
+              type: string
