@@ -204,3 +204,48 @@ input.ep-field{
 .apim-pub-nested-method-selection {
     padding-left: 55px;
 }
+.impl-selection {
+    border-bottom: none;
+    padding-top: 2px;
+}
+.impl-selection {
+    border-right: 1px solid #444;
+    padding-left: 0;
+}
+.impl-selection>li {
+    float: none;
+    margin-bottom: 2px;
+    margin-right: -1px;
+    border-radius: 3px 0 0 3px;
+    display:block;
+    border-color: #444;
+    padding-left: 30px;
+}
+.impl-selection>li.active {
+    color: #555;
+    cursor: default;
+    background-color: #efefef;
+    border: 1px solid #ddd;
+}
+.impl-selection>li.active ,
+.impl-selection>li.active:hover,
+.impl-selection>li.active:focus {
+    border-bottom-color: #ddd;
+    border-right-color: transparent;
+}
+
+.impl-content {
+    background: #efefef;
+    min-height: 120px;
+    padding-top: 10px;
+    border-top: solid 1px #ddd;
+    margin-top:2px;
+}
+#implementation-option-form{
+    position: absolute;
+    width: 100%;
+}
+.toggleRadios{
+    margin-left: 0;
+    padding-left: 36px;
+}

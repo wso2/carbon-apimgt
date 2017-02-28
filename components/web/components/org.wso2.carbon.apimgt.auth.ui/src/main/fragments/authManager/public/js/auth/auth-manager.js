@@ -44,7 +44,7 @@ authManager.login = function () {
         scopes: 'apim:api_view apim:api_create'
 
     };
-    var referrer = document.referrer;
+    var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer:null;
     var url = contextPath + '/auth/apis/login/token';
     return $.ajax({
         type: 'POST',
