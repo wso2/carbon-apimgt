@@ -1506,8 +1506,8 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
-                "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE UUID = ?";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,"
+                + "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, endpointId);
@@ -1540,7 +1540,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpointByName(String name) throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION,"
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,"
                 + "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE name = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1573,8 +1573,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
-                "SECURITY_CONFIGURATION FROM AM_ENDPOINT";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,SECURITY_CONFIGURATION FROM AM_ENDPOINT";
         List<Endpoint> endpointList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query);

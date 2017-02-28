@@ -23,9 +23,28 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

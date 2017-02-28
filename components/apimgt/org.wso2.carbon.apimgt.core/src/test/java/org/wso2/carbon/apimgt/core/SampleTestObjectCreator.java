@@ -335,16 +335,18 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
     }
+
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
     }
+
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .maxTps(new Endpoint.MaxTps(1000L, 100L)).security("{'enabled':false}").build();
+                .maxTps(1000L).security("{'enabled':false}").build();
 
     }
     public static Map<String,String> getMockEndpointMap(){
