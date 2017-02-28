@@ -50,14 +50,14 @@
                                 <li class="">
                                     <label class="radio apim-pub-new-api no-border">
                                         <input type="radio" name="implementation-options" value="swagger-option"
-                                                data-tab="swaggerTab">
+                                               data-tab="swaggerTab">
                                         <span class="helper">Import Swagger</span>
                                     </label>
                                 </li>
                                 <li class="">
                                     <label class="radio apim-pub-new-api no-border">
                                         <input type="radio" name="implementation-options" value="mock-option"
-                                                data-tab="mockTab">
+                                               data-tab="mockTab">
                                         <span class="helper">Mock</span>
                                     </label>
                                 </li>
@@ -99,7 +99,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group toggleContainers">
-                                        <div class="controls col-sm-12" >
+                                        <div class="controls col-sm-12">
                                             <div>
                                                 <input name="swagger-url" id="swagger-url" class="form-control"
                                                        title="swagger url"
@@ -109,18 +109,13 @@
                                             </div>
                                         </div>
                                         <div class="controls col-sm-12">
-                                            <div class="input-group input-wrap file-upload-control">
-                                                <input type="text" class="form-control"
-                                                       placeholder="Click browse to add a file"
-                                                       readonly="">
-                                                <input id="swagger-file" name="swagger-file" type="file"
-                                                       title="swagger-file"
-                                                       class="form-control" multiple="">
+                                            <div class="input-group input-wrap file-upload-control hidden">
+                                                <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
+                                                <input name="swagger-file" id="swagger-file" type="file" class="form-control" multiple=""/>
                                                 <div class="input-group-btn">
-                                                    <button class="btn btn-primary browse" type="button"
-                                                            title="Browse File">
-                                                        <i class="fw fw-file-browse" aria-hidden="true"></i> <span
-                                                            class="hidden-xs">Browse</span>
+                                                    <button class="btn browse" type="button" title="Browse File">
+                                                        <i class="fw fw-file-browse" aria-hidden="true"></i>
+                                                        <span class="hidden-xs">Browse</span>
                                                     </button>
                                                 </div>
                                             </div>

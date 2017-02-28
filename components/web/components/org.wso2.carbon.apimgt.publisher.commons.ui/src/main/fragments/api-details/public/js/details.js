@@ -234,7 +234,12 @@ function updateLifecycleHandler(event) {
     );
 }
 
+/**
+ * Handles the update endpoint submit button event, Get all the endpoint  inputs and update endpoint by using the endpoint UUID in input element data attribute
+ * @param event {Event} DOM click event
+ */
 function updateEndpointsHandler(event) {
+    event.preventDefault();
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
     var inputs = $(".endpoint-inputs");
@@ -263,7 +268,6 @@ function updateEndpointsHandler(event) {
             });
         }
     ).catch(apiGetErrorHandler);
-    return false;
 }
 
 function updateTiersHandler(event) {
