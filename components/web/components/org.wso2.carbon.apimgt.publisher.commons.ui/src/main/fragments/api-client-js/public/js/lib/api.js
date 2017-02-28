@@ -331,6 +331,25 @@ class API {
     }
 
     /**
+     * Get the life cycle history data of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getLcHistory(id, callback = null) {
+        var promise_lc_history_get = this.client.then(
+                (client) => {
+                return client["API (Individual)"].get_apis_apiId_lifecycle_history(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+    }
+    );
+        if (callback) {
+            return promise_lc_history_get.then(callback);
+        } else {
+            return promise_lc_history_get;
+        }
+    }
+
+    /**
      * Update the life cycle state of an API given its id (UUID)
      * @param id {string} UUID of the api
      * @param state {string} Target state which need to be transferred
