@@ -35,8 +35,16 @@ function createAPICallback(response) {
  */
 function implementationOptionsHandler(event) {
     var selected_value = this.value;
-    $(".sub-implementation-option").hide();
-    $("#" + selected_value + "-form").fadeIn();
+
+    //Hide the other tab contents and show the active one
+    $('.tab-content > .tab-pane').removeClass('active');
+    $('#' + $(this).attr('data-tab')).addClass('active');
+
+    //Highlight the active radio button
+    $('.impl-selection > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    //$("#" + selected_value + "-form").fadeIn();
     if (selected_value == 'swagger-option') {
         $('.basic-inputs :input').prop("disabled", true);
     } else {
