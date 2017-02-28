@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * TierDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class TierDTO   {
   @JsonProperty("name")
   private String name = null;

@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-20T12:49:23.977+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
@@ -35,13 +35,13 @@ public class SubscriptionDTO   {
    */
   public enum LifeCycleStatusEnum {
     BLOCKED("BLOCKED"),
-
+    
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
-
+    
     ACTIVE("ACTIVE"),
-
+    
     ON_HOLD("ON_HOLD"),
-
+    
     REJECTED("REJECTED");
 
     private String value;
@@ -75,10 +75,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get subscriptionId
    * @return subscriptionId
-   **/
+  **/
   @ApiModelProperty(value = "")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -93,10 +93,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get applicationId
    * @return applicationId
-   **/
+  **/
   @ApiModelProperty(required = true, value = "")
   public String getApplicationId() {
     return applicationId;
@@ -111,10 +111,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get apiIdentifier
    * @return apiIdentifier
-   **/
+  **/
   @ApiModelProperty(required = true, value = "")
   public String getApiIdentifier() {
     return apiIdentifier;
@@ -129,10 +129,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get policy
    * @return policy
-   **/
+  **/
   @ApiModelProperty(required = true, value = "")
   public String getPolicy() {
     return policy;
@@ -147,10 +147,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get apiName
    * @return apiName
-   **/
+  **/
   @ApiModelProperty(required = true, value = "")
   public String getApiName() {
     return apiName;
@@ -165,10 +165,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get apiVersion
    * @return apiVersion
-   **/
+  **/
   @ApiModelProperty(required = true, value = "")
   public String getApiVersion() {
     return apiVersion;
@@ -183,10 +183,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get lifeCycleStatus
    * @return lifeCycleStatus
-   **/
+  **/
   @ApiModelProperty(value = "")
   public LifeCycleStatusEnum getLifeCycleStatus() {
     return lifeCycleStatus;
@@ -207,12 +207,12 @@ public class SubscriptionDTO   {
     }
     SubscriptionDTO subscription = (SubscriptionDTO) o;
     return Objects.equals(this.subscriptionId, subscription.subscriptionId) &&
-            Objects.equals(this.applicationId, subscription.applicationId) &&
-            Objects.equals(this.apiIdentifier, subscription.apiIdentifier) &&
-            Objects.equals(this.policy, subscription.policy) &&
-            Objects.equals(this.apiName, subscription.apiName) &&
-            Objects.equals(this.apiVersion, subscription.apiVersion) &&
-            Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus);
+        Objects.equals(this.applicationId, subscription.applicationId) &&
+        Objects.equals(this.apiIdentifier, subscription.apiIdentifier) &&
+        Objects.equals(this.policy, subscription.policy) &&
+        Objects.equals(this.apiName, subscription.apiName) &&
+        Objects.equals(this.apiVersion, subscription.apiVersion) &&
+        Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus);
   }
 
   @Override
@@ -224,7 +224,7 @@ public class SubscriptionDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
-
+    
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    apiIdentifier: ").append(toIndentedString(apiIdentifier)).append("\n");
