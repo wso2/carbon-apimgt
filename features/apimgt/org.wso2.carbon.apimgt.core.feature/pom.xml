@@ -234,6 +234,7 @@
                                     <includes>
                                         <include>dbscripts/**</include>
                                         <include>database/**</include>
+                                        <include>template/**</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
