@@ -86,6 +86,11 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.datasources</groupId>
                 <artifactId>org.wso2.carbon.datasource.core</artifactId>
                 <version>${carbon.datasources.version}</version>
