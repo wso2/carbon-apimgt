@@ -770,6 +770,7 @@
             com.google.common.*;
             io.swagger.parser.*,
             org.json.simple.*,
+            org.apache.axiom.*;
             org.apache.commons.lang3.*,
             org.apache.commons.io.*;
             org.apache.commons.*;

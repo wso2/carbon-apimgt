@@ -34,12 +34,14 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -49,19 +51,26 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowResponse;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+//import java.util.Observable;
+//import java.util.Observer;
 import java.util.UUID;
 
 /**
  * Implementation of API Store operations.
  */
-public class APIStoreImpl extends AbstractAPIManager implements APIStore {
+public class APIStoreImpl extends AbstractAPIManager implements APIStore { //, Observer {
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
@@ -342,18 +351,48 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
+
+            WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            ApplicationCreationWorkflow appWF = new ApplicationCreationWorkflow();
+
+            boolean wfEnabled = false;
+
+            if (wfEnabled) {
+                getApplicationDAO().addWorkflowEntry();
+            }
+
+            appWF.setApplication(application);
+            appWF.setWorkflowReference(appCreationWFExecutor.generateUUID());
+            appWF.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            appWF.setCallBack(appCreationWFExecutor.getCBURL());
+            appWF.setCreatedTime(LocalDateTime.now());
+            //appCreationWFExecutor.addObserver(this);
+            WorkflowResponse response = appCreationWFExecutor.execute(appWF);
+            log.info("response", response);
+
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
             applicationUuid = application.getId();
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while creating the application - " + application.getName();
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (WorkflowException e) {
+            log.error("Error occurred in workflow", e);
+        } catch (NoSuchMethodException e) {
+            log.error("No such method", e);
+        } catch (InvocationTargetException e) {
+            log.error("InvocationTargetException", e);
         }
         return applicationUuid;
-        //// TODO: 16/11/16 Workflow related implementation has to be done 
     }
 
     private TagDAO getTagDAO() {
         return tagDAO;
     }
+
+//    @Override public void update(Observable o, Object arg) {
+//        log.info("" + arg);
+//        //update wfentry and application
+//    }
 }

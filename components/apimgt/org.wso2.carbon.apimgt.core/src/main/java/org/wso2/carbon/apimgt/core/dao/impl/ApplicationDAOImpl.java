@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
@@ -197,13 +198,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(3, application.getTier());
                 ps.setString(4, application.getCallbackUrl());
                 ps.setString(5, application.getDescription());
-
-                if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
-                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
-                } else {
-                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-                }
-
+                ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
                 ps.setString(7, application.getGroupId());
                 ps.setString(8, application.getCreatedUser());
                 ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
@@ -364,5 +359,71 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     rs.getString("APPLICATION_POLICY_ID")).getPolicyName());
         }
         return application;
+    }
+
+    /**
+     * Persists WorkflowDTO to Database
+     *
+     * @param workflow
+     * @throws APIMgtDAOException
+     */
+    public void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException {
+
+        final String aDD_WORKFLOW_ENTRY_SQL =
+                " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,"
+                        + "WF_EXTERNAL_REFERENCE) VALUES (?,?,?,?,?)";
+
+        String query = aDD_WORKFLOW_ENTRY_SQL;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                prepStmt.setString(1, workflow.getWorkflowReference());
+                prepStmt.setString(2, workflow.getWorkflowType());
+                prepStmt.setString(3, workflow.getStatus().toString());
+                prepStmt.setTimestamp(4, Timestamp.valueOf(workflow.getCreatedTime()));
+                prepStmt.setString(5, workflow.getExternalWorkflowReference());
+
+                prepStmt.execute();
+                connection.commit();
+            }catch (SQLException ex) {
+                connection.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+    }
+
+    public void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException {
+
+        final String uPDATE_WORKFLOW_ENTRY_SQL = "UPDATE AM_WORKFLOWS SET WF_STATUS = ?, WF_STATUS_DESC = ?, "
+                + "WF_UPDATED_TIME = ? WHERE WF_EXTERNAL_REFERENCE = ?";
+
+        String query = uPDATE_WORKFLOW_ENTRY_SQL;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                prepStmt.setString(1, workflow.getStatus().toString());
+                prepStmt.setString(2, workflow.getWorkflowDescription());
+                prepStmt.setTimestamp(3, Timestamp.valueOf(workflow.getUpdatedTime()));
+                prepStmt.setString(4, workflow.getExternalWorkflowReference());
+
+                prepStmt.execute();
+                connection.commit();
+            } catch (SQLException ex) {
+                connection.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
     }
 }
