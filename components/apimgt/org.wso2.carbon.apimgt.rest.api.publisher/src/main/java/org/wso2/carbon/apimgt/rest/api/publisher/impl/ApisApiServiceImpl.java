@@ -744,8 +744,27 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
+
+            if (fileInputStream != null && url != null) {
+                String msg = "Only one of 'file' and 'url' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            String uuid = "";
+            if(fileInputStream != null) {
+                uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            } else if(url != null) {
+                uuid = apiPublisher.addApiFromDefinition(url);
+            } else {
+                String msg = "Either 'file' or 'inlineContent' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
             API returnAPI = apiPublisher.getAPIbyUUID(uuid);
             return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {

@@ -557,7 +557,7 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisImportDefinitionPost(contentType,fileInputStream, fileDetail,url,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.apisImportDefinitionPost(fileInputStream, fileDetail,url,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @POST
     

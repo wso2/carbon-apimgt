@@ -168,9 +168,9 @@ public abstract class ApisApiService {
  ,String ifNoneMatch
  ,String minorVersion
  ) throws NotFoundException;
-    public abstract Response apisImportDefinitionPost(String contentType
- ,InputStream fileInputStream, FileInfo fileDetail
+    public abstract Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
  ,String url
+ ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  ,String minorVersion
