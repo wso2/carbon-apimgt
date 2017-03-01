@@ -736,6 +736,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+            , String url
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
