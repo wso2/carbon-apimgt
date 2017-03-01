@@ -206,7 +206,7 @@
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-                                    <version>7.0.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <type>bundle</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/docs</outputDirectory>
