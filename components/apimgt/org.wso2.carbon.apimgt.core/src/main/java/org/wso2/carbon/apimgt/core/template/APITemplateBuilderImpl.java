@@ -63,7 +63,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     @Override
     public String getConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources) throws APITemplateException {
         StringWriter writer = new StringWriter();
-
+        String templatePath = "resources" + File.separator + "template" + File.separator + "template.xml";
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = new APIConfigContext(this.api, packageName);
@@ -75,16 +75,15 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             velocityengine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
             velocityengine.init();
-            Template template = velocityengine.getTemplate("resources" + File.separator + "template.xml");
+            Template template = velocityengine.getTemplate(templatePath);
             template.merge(context, writer);
         } catch (ResourceNotFoundException e) {
-            log.error("Template " + "resources" + File.separator + "template.xml not Found", e);
-            throw new APITemplateException("Template " + "resources" + File.separator + "template.xml not Found",
+            log.error("Template " + templatePath + " not Found", e);
+            throw new APITemplateException("Template " + templatePath + " not Found",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
         } catch (ParseErrorException e) {
-            log.error("Syntax error in " + "resources" + File.separator + "template.xml", e);
-            throw new APITemplateException("Syntax error in " + "resources" + File.separator + "template.xml",
-                    ExceptionCodes.TEMPLATE_EXCEPTION);
+            log.error("Syntax error in " + templatePath, e);
+            throw new APITemplateException("Syntax error in " + templatePath, ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
     }
@@ -118,7 +117,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     @Override
     public String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException {
         StringWriter writer = new StringWriter();
-
+        String templatePath = "resources" + File.separator + "template" + File.separator + "endpoint.xml";
         try {
             // build the context for template and apply the necessary decorators
             ConfigContext configcontext = new EndpointContext(endpoints, packageName);
@@ -127,16 +126,15 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             velocityengine.init();
-            Template template = velocityengine.getTemplate("resources" + File.separator + "endpoint.xml");
+            Template template = velocityengine.getTemplate(templatePath);
             template.merge(context, writer);
         } catch (ResourceNotFoundException e) {
-            log.error("Template " + "resources" + File.separator + "template.xml not Found", e);
-            throw new APITemplateException("Template " + "resources" + File.separator + "endpoint.xml not Found",
+            log.error("Template " + templatePath + " not Found", e);
+            throw new APITemplateException("Template " + templatePath + " not Found",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
         } catch (ParseErrorException e) {
-            log.error("Syntax error in " + "resources" + File.separator + "template.xml", e);
-            throw new APITemplateException("Syntax error in " + "resources" + File.separator + "endpoint.xml",
-                    ExceptionCodes.TEMPLATE_EXCEPTION);
+            log.error("Syntax error in " + templatePath, e);
+            throw new APITemplateException("Syntax error in " + templatePath, ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
     }
