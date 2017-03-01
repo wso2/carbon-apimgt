@@ -17,13 +17,11 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -141,9 +139,9 @@
                         <phase>install</phase>
                         <configuration>
                             <target>
-                                <delete dir="src/main/resources"/>
-                                <delete dir="src/main"/>
-                                <delete dir="src"/>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
                             </target>
                         </configuration>
                         <goals>
@@ -159,8 +157,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <delete file="resources/database/AM_DB.mv.db"/>
-                                <delete file="resources/database/AM_DB.trace.db"/>
+                                <delete file="resources/database/AM_DB.mv.db" />
+                                <delete file="resources/database/AM_DB.trace.db" />
                             </target>
                         </configuration>
                     </execution>
@@ -173,19 +171,17 @@
                         <configuration>
                             <target>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath"/>
+                                    <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Creating Carbon APIM Database ##############"/>
-                                <sql driver="org.h2.Driver"
-                                     url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon"
-                                     password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Creating Carbon APIM Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
 
                                     <classpath>
-                                        <path refid="h2.classpath"/>
+                                        <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/resources/dbscripts/h2.sql"/>
+                                    <fileset file="${basedir}/resources/dbscripts/h2.sql" />
                                 </sql>
-                                <echo message="##################### END ########################"/>
+                                <echo message="##################### END ########################" />
                             </target>
                         </configuration>
                     </execution>
