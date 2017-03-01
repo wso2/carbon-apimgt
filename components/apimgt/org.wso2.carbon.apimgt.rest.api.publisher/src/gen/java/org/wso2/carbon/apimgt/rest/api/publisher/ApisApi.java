@@ -4,14 +4,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
@@ -29,11 +29,11 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/apis")
+@Path("/api/am/publisher/v1/apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-01T12:21:28.213+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 

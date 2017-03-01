@@ -128,7 +128,7 @@ function createAPIFromSwagger(input_type) {
         data.url = url;
         data.type = 'swagger-url';
         var new_api = new API('');
-        new_api.create(url)
+        new_api.create(data)
             .then(createAPICallback)
             .catch(
                 function (error_response) {
