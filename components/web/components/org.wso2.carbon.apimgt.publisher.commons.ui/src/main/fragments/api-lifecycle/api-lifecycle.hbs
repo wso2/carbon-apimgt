@@ -1,4 +1,3 @@
-
 <div class="row">
     <div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
         <object type="image/svg+xml" data="{{public "images/API_LIFECYCLE.svg"}}">
@@ -25,16 +24,13 @@
             </div>
             <div class="form-actions">
                 <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+                    {{#each @params.lcState.availableTransitionBeanList}}
                     <div class="btn-group" role="group">
-                        <input type="button" {{#if @params.isPublished}}disabled=""{{/if}}
-                               class="btn btn-primary lc-state-btn" data-lcstate="Published" value="Publish">
+                        <input type="button"
+                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.targetState}}">
                     </div>
 
-                    <div class="btn-group" role="group">
-                        <input type="button"  {{#if @params.isPublished}}disabled=""{{/if}} data-lcstate="Prototyped"
-                               class="btn btn-secondary lc-state-btn"
-                               value="{{i18n "Deploy as a Prototype"}}">
-                    </div>
+                    {{/each}}
                 </div>
                 <div class="page-header">
                     <h4 class="lead">Lifecycle History</h4>
@@ -43,14 +39,30 @@
                     <thead>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull">N/A</span></b>
-                        </td>
-                        <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
-                                href="/publisher/apis?query=provider:admin" title="user">admin</a>
-                            created the API.
-                        </td>
-                    </tr>
+                        {{#each @params.lcHistory}}
+                            {{#if this.previousState}}
+                                <tr>
+                                    <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span
+                                            class="dateFull">{{this.updatedTime}}</span></b>
+                                    </td>
+                                    <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
+                                            href="/publisher/apis?query=provider:{{this.user}}" title="user">{{this.user}}</a>
+                                        {{i18n "changed the API status from "}} '{{i18n this.previousState}}'
+                                        {{i18n "to "}} '{{i18n this.postState}}'
+                                    </td>
+                                </tr>
+                            {{else}}
+                                <tr>
+                                    <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span
+                                            class="dateFull">{{this.updatedTime}}</span></b>
+                                    </td>
+                                    <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
+                                            href="/publisher/apis?query=provider:{{this.user}}" title="user">{{this.user}}</a>
+                                        {{i18n "created the API."}}
+                                    </td>
+                                </tr>
+                            {{/if}}
+                        {{/each}}
                     </tbody>
                 </table>
             </div>

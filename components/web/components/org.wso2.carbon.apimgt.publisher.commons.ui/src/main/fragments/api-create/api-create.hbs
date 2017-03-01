@@ -32,31 +32,42 @@
                         </div>
                     </div>
                 </div>
-                <!-- Implementation method section -->
+
+                <!-- Tab view for different api input methods -->
                 <div class="row add-padding-top-5x">
-                    <div class="col-sm-6 col-lg-6">
-                        <h4>Implementation Method</h4>
-                        <div class="col-sm-12 col-md-12">
-                            <div class="col-sm-12 col-md-12">
-                                <form class="form-horizontal" id="implementation-option-form">
-                                    <div class="form-group">
-                                        <label class="radio apim-pub-new-api">
-                                            <input type="radio" name="implementation-options" value="endpoint-option"
-                                                   checked="checked">
-                                            <span class="helper">Endpoint</span>
-                                        </label>
-                                        <label class="radio apim-pub-new-api no-border">
-                                            <input type="radio" name="implementation-options" value="swagger-option">
-                                            <span class="helper">Import Swagger</span>
-                                        </label>
-                                        <label class="radio apim-pub-new-api no-border">
-                                            <input type="radio" name="implementation-options" value="mock-option">
-                                            <span class="helper">Mock</span>
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="col-sm-12 col-md-12" style="margin-left: 10%;">
+                    <h4>Implementation Method</h4>
+                    <div class="col-xs-3"> <!-- required for floating -->
+                        <!-- Nav tabs -->
+                        <form class="form-horizontal" id="implementation-option-form">
+                            <ul class="impl-selection">
+                                <li class="active">
+                                    <label class="radio apim-pub-new-api">
+                                        <input type="radio" name="implementation-options" value="endpoint-option"
+                                               checked="checked" data-tab="endpointTab">
+                                        <span class="helper">Endpoint</span>
+                                    </label>
+                                </li>
+                                <li class="">
+                                    <label class="radio apim-pub-new-api no-border">
+                                        <input type="radio" name="implementation-options" value="swagger-option"
+                                               data-tab="swaggerTab">
+                                        <span class="helper">Import Swagger</span>
+                                    </label>
+                                </li>
+                                <li class="">
+                                    <label class="radio apim-pub-new-api no-border">
+                                        <input type="radio" name="implementation-options" value="mock-option"
+                                               data-tab="mockTab">
+                                        <span class="helper">Mock</span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="col-xs-9 impl-content">
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="endpointTab">
                                 <form class="form-horizontal sub-implementation-option" id="endpoint-option-form">
                                     <div class="form-group">
                                         <div class="col-sm-12">
@@ -65,8 +76,9 @@
                                         </div>
                                     </div>
                                 </form>
-                                <form class="form-horizontal sub-implementation-option" id="swagger-option-form"
-                                      style="display: none">
+                            </div>
+                            <div class="tab-pane" id="swaggerTab">
+                                <form class="form-horizontal sub-implementation-option" id="swagger-option-form">
                                     <div class="form-group">
                                         <div class="col-sm-12 toggleRadios">
                                             <label class="radio sub-labels urlSelect-label"> <input
@@ -87,7 +99,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group toggleContainers">
-                                        <div class="controls col-sm-12" style="display: block;">
+                                        <div class="controls col-sm-12">
                                             <div>
                                                 <input name="swagger-url" id="swagger-url" class="form-control"
                                                        title="swagger url"
@@ -96,19 +108,14 @@
                                                        placeholder="http://petstore.swagger.io/v2/swagger.json">
                                             </div>
                                         </div>
-                                        <div class="controls col-sm-12" style="display: none;">
-                                            <div class="input-group input-wrap file-upload-control">
-                                                <input type="text" class="form-control"
-                                                       placeholder="Click browse to add a file"
-                                                       readonly="">
-                                                <input id="swagger-file" name="swagger-file" type="file"
-                                                       title="swagger-file"
-                                                       class="form-control" multiple="">
+                                        <div class="controls col-sm-12">
+                                            <div class="input-group input-wrap file-upload-control hidden">
+                                                <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
+                                                <input name="swagger-file" id="swagger-file" type="file" class="form-control" multiple=""/>
                                                 <div class="input-group-btn">
-                                                    <button class="btn btn-primary browse" type="button"
-                                                            title="Browse File">
-                                                        <i class="fw fw-file-browse" aria-hidden="true"></i> <span
-                                                            class="hidden-xs">Browse</span>
+                                                    <button class="btn browse" type="button" title="Browse File">
+                                                        <i class="fw fw-file-browse" aria-hidden="true"></i>
+                                                        <span class="hidden-xs">Browse</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -116,8 +123,10 @@
                                     </div>
                                 </form>
                             </div>
+                            <div class="tab-pane" id="mockTab"></div>
                         </div>
                     </div>
+                    <div class="clearfix"></div>
                 </div>
                 <!-- Button -->
                 <hr/>

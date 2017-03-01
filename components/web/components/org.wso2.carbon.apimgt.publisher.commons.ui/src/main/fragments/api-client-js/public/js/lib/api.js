@@ -223,7 +223,7 @@ class API {
     create(api_data, callback = null) {
         let payload;
         let promise_create;
-        if (api_data.constructor.name == "Blob") {
+        if (api_data.constructor.name === Blob.name || api_data.constructor.name === File.name) {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
@@ -312,6 +312,44 @@ class API {
     }
 
     /**
+     * Get the life cycle state of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getLcState(id, callback = null) {
+        var promise_lc_get = this.client.then(
+                (client) => {
+                return client["API (Individual)"].get_apis_apiId_lifecycle(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+    }
+    );
+        if (callback) {
+            return promise_lc_get.then(callback);
+        } else {
+            return promise_lc_get;
+        }
+    }
+
+    /**
+     * Get the life cycle history data of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getLcHistory(id, callback = null) {
+        var promise_lc_history_get = this.client.then(
+                (client) => {
+                return client["API (Individual)"].get_apis_apiId_lifecycle_history(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+    }
+    );
+        if (callback) {
+            return promise_lc_history_get.then(callback);
+        } else {
+            return promise_lc_history_get;
+        }
+    }
+
+    /**
      * Update the life cycle state of an API given its id (UUID)
      * @param id {string} UUID of the api
      * @param state {string} Target state which need to be transferred
@@ -364,6 +402,11 @@ class API {
         return promised_addEndpoint;
     }
 
+    /**
+     * Get endpoint object by its UUID.
+     * @param id {String} UUID of the endpoint
+     * @returns {Promise.<TResult>}
+     */
     getEndpoint(id) {
         return this.client.then(
             (client) => {

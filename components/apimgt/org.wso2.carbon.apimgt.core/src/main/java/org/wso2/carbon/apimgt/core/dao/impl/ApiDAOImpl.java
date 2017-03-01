@@ -1410,8 +1410,8 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void addEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        final String query = "INSERT INTO AM_ENDPOINT (UUID,NAME,ENDPOINT_CONFIGURATION," +
-                "TPS_SANDBOX,TPS_PRODUCTION,SECURITY_CONFIGURATION) VALUES (?,?,?,?,?,?)";
+        final String query = "INSERT INTO AM_ENDPOINT (UUID,NAME,ENDPOINT_CONFIGURATION,"
+                + "TPS,TYPE,SECURITY_CONFIGURATION) VALUES (?,?,?,?,?,?)";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1419,8 +1419,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(2, endpoint.getName());
                 InputStream byteArrayInputStream = IOUtils.toInputStream(endpoint.getEndpointConfig());
                 statement.setBinaryStream(3, byteArrayInputStream);
-                statement.setLong(4, endpoint.getMaxTps().getSandbox());
-                statement.setLong(5, endpoint.getMaxTps().getProduction());
+                statement.setLong(4, endpoint.getMaxTps());
+                statement.setString(5, endpoint.getType());
                 statement.setBinaryStream(6, IOUtils.toInputStream(endpoint.getSecurity()));
                 statement.execute();
                 connection.commit();
@@ -1472,15 +1472,15 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        final String query = "UPDATE AM_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS_SANDBOX = ?,TPS_PRODUCTION = " +
+        final String query = "UPDATE AM_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS = ?,TYPE = " +
                 "?,SECURITY_CONFIGURATION =? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 InputStream byteArrayInputStream = IOUtils.toInputStream(endpoint.getEndpointConfig());
                 statement.setBinaryStream(1, byteArrayInputStream);
-                statement.setLong(2, endpoint.getMaxTps().getSandbox());
-                statement.setLong(3, endpoint.getMaxTps().getProduction());
+                statement.setLong(2, endpoint.getMaxTps());
+                statement.setString(3, endpoint.getType());
                 statement.setBinaryStream(4, IOUtils.toInputStream(endpoint.getSecurity()));
                 statement.setString(5, endpoint.getId());
                 statement.execute();
@@ -1506,8 +1506,8 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
-                "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE UUID = ?";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,"
+                + "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, endpointId);
@@ -1518,8 +1518,8 @@ public class ApiDAOImpl implements ApiDAO {
                     endpointBuilder.name(resultSet.getString("NAME"));
                     endpointBuilder.endpointConfig(IOUtils.toString(resultSet.getBinaryStream
                             ("ENDPOINT_CONFIGURATION")));
-                    endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"), resultSet.getLong
-                            ("TPS_SANDBOX")));
+                    endpointBuilder.maxTps(resultSet.getLong("TPS"));
+                    endpointBuilder.type(resultSet.getString("TYPE"));
                     endpointBuilder.security(IOUtils.toString(resultSet.getBinaryStream("SECURITY_CONFIGURATION")));
                     return endpointBuilder.build();
                 } else {
@@ -1540,7 +1540,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpointByName(String name) throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION,"
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,"
                 + "SECURITY_CONFIGURATION FROM AM_ENDPOINT WHERE name = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1552,8 +1552,8 @@ public class ApiDAOImpl implements ApiDAO {
                     endpointBuilder.name(resultSet.getString("NAME"));
                     endpointBuilder
                             .endpointConfig(IOUtils.toString(resultSet.getBinaryStream("ENDPOINT_CONFIGURATION")));
-                    endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"),
-                            resultSet.getLong("TPS_SANDBOX")));
+                    endpointBuilder.maxTps(resultSet.getLong("TPS"));
+                    endpointBuilder.type(resultSet.getString("TYPE"));
                     endpointBuilder.security(IOUtils.toString(resultSet.getBinaryStream("SECURITY_CONFIGURATION")));
                     return endpointBuilder.build();
                 } else {
@@ -1573,8 +1573,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
-        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS_SANDBOX,TPS_PRODUCTION," +
-                "SECURITY_CONFIGURATION FROM AM_ENDPOINT";
+        final String query = "SELECT UUID,NAME,ENDPOINT_CONFIGURATION,TPS,TYPE,SECURITY_CONFIGURATION FROM AM_ENDPOINT";
         List<Endpoint> endpointList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
@@ -1585,8 +1584,8 @@ public class ApiDAOImpl implements ApiDAO {
                 endpointBuilder.name(resultSet.getString("NAME"));
                 endpointBuilder.endpointConfig(IOUtils.toString(resultSet.getBinaryStream
                         ("ENDPOINT_CONFIGURATION")));
-                endpointBuilder.maxTps(new Endpoint.MaxTps(resultSet.getLong("TPS_PRODUCTION"), resultSet.getLong
-                        ("TPS_SANDBOX")));
+                endpointBuilder.maxTps(resultSet.getLong("TPS"));
+                endpointBuilder.type(resultSet.getString("TYPE"));
                 endpointBuilder.security(IOUtils.toString(resultSet.getBinaryStream("SECURITY_CONFIGURATION")));
                 endpointList.add(endpointBuilder.build());
             }

@@ -97,6 +97,8 @@ function lifecycleTabHandler(event) {
     function renderLCTab(response) {
         var api = response[0];
         var policies = response[1];
+        var lcState = response[2];
+        var lcHistory = response[3];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
         var api_data = JSON.parse(api.data);
         var policies_data = JSON.parse(policies.data);
@@ -134,14 +136,17 @@ function lifecycleTabHandler(event) {
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
-            policies: policies_data
+            policies: policies_data,
+            lcState: lcState.obj,
+            lcHistory: lcHistory.obj
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
-
     var promised_api = api_client.get(api_id);
     var promised_tiers = api_client.policies('api');
-    Promise.all([promised_api, promised_tiers]).then(renderLCTab)
+    var promised_lcState = api_client.getLcState(api_id);
+    var promised_lcHistory = api_client.getLcHistory(api_id);
+    Promise.all([promised_api, promised_tiers, promised_lcState,promised_lcHistory]).then(renderLCTab)
 }
 
 /**
@@ -232,7 +237,12 @@ function updateLifecycleHandler(event) {
     );
 }
 
+/**
+ * Handles the update endpoint submit button event, Get all the endpoint  inputs and update endpoint by using the endpoint UUID in input element data attribute
+ * @param event {Event} DOM click event
+ */
 function updateEndpointsHandler(event) {
+    event.preventDefault();
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
     var inputs = $(".endpoint-inputs");
@@ -261,7 +271,6 @@ function updateEndpointsHandler(event) {
             });
         }
     ).catch(apiGetErrorHandler);
-    return false;
 }
 
 function updateTiersHandler(event) {
