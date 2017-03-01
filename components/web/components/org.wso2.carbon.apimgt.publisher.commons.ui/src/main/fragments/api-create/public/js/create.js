@@ -247,9 +247,10 @@ function addEndpoint(callBack) {
     //todo: need to endpoint type after it is defined
     var body = {
         name: 'endpoint_' + name + '_' + version,
-        endpointConfig: url,
+        endpointConfig: "{'url':"+url+",'timeout':1000}",
         endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
-        maxTps: {"production": 10000, "sandbox": 132}
+        maxTps: 1000,
+        type:"http"
     };
 
     var new_api = new API('');
