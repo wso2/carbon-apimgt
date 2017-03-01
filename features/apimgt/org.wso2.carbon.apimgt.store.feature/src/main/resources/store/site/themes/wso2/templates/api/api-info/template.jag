@@ -94,7 +94,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 
     <ul class="breadcrumb">
         <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>" title="<%=i18n.localize("List APIs")%>"><%=i18n.localize("APIs groups")%></a> <span class="divider">/</span></li>
-        <li><a title="<%=i18n.localize("Tags")%>" href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
+        <li><a title="<%=i18n.localize("Tags")%>" href="<%=encode.forHtml(jagg.getAbsoluteUrl(groupPath))%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
         <li class="active"><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%></li>
     </ul>
     <%
