@@ -38,7 +38,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.authenticator.*;version="${carbon.apimgt.exp.pkg.version}"
+                            org.wso2.carbon.apimgt.authenticator.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             org.wso2.msf4j.*;version="${msf4j.package.import.version.range}",

@@ -459,11 +459,6 @@
                 <version>0.8.1</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.messaging</artifactId>
-                <version>${carbon.messaging.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>workspace-service</artifactId>
                 <version>0.8.2</version>
@@ -614,7 +609,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.1.0</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>${project.version}</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.0-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -685,7 +680,6 @@
 
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.osgi.import.version>[1.8.0, 2.0.0)</org.osgi.import.version>
-        <carbon.apimgt.exp.pkg.version>${project.version}</carbon.apimgt.exp.pkg.version>
         <carbon.apimgt.import.pkg.version>[7.0.0,8.0.0)</carbon.apimgt.import.pkg.version>
         <servlet-api-version>3.1.0</servlet-api-version>
         <datasources.core.package.import.version.range>[1.0.0, 2.0.0)</datasources.core.package.import.version.range>
