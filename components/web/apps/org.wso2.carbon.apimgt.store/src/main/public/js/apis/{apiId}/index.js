@@ -337,6 +337,8 @@ $(function () {
                                 text: message,
                                 layout: "top",
                                 theme: 'relax',
+                                dismissQueue: true,
+                                type: "alert",
                                 buttons: [
                                     {addClass: 'btn btn-primary', text: 'View Subscriptions', onClick: function($noty) {
                                         $noty.close();
