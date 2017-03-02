@@ -394,6 +394,14 @@ public interface APIPublisher extends APIManager {
      */
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
+    /**
+     * Create api from it's definition located in url
+     * @param swaggerResourceUrl url of the swagger resource
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
     List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
 
     Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
