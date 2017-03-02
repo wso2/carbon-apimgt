@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
@@ -392,7 +394,10 @@ public class APIImportExportTestCase {
         // export
         FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(apiPublisher, exportDir);
 
-        String exportedApiArchiveFilePath = importExportManager.exportAPIs(apiDetailsSet);
+        String exportedApiDirName = "exported-apis";
+        String exportedApiDirPath = importExportManager.exportAPIs(apiDetailsSet, exportedApiDirName);
+        String exportedApiArchiveFilePath = importExportManager.createArchiveFromExportedApiArtifacts(
+                exportedApiDirPath, exportDir, exportedApiDirName);
 
         // check if two APIs are written to the file system
         String unzipPath = importExportRootDirectory + File.separator + "unzipped-export-archive";

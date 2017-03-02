@@ -49,8 +49,9 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     private static final String DOCUMENTATION_DEFINITION_FILE = "doc.json";
     private static final String SWAGGER_DEFINITION_FILE_NAME = "swagger.json";
     private static final String THUMBNAIL_FILE_NAME = "thumbnail";
-    private static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-config.json";
+    private static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-configuration";
     private static final String DOCUMENTS_ROOT_DIRECTORY = "Documents";
+    private static final String IMPORTED_APIS_DIRECTORY_NAME = "imported-apis";
     private String path;
 
     public FileBasedApiImportExportManager(APIPublisher apiPublisher, String path) {
@@ -63,30 +64,29 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * The export root location is given by {@link FileBasedApiImportExportManager#path}/exported-apis.
      *
      * @param apiDetailSet Set of {@link APIDetails} objects to be exported
-     * @return Path to the zip archive with exported artifacts
+     * @return Path to the directory  with exported artifacts
      * @throws APIManagementException if an error occurred while exporting APIs to file system or
      * no APIs are exported successfully
      */
-    public String exportAPIs(Set<APIDetails> apiDetailSet) throws APIManagementException {
+    public String exportAPIs(Set<APIDetails> apiDetailSet, String exportDirectoryName) throws APIManagementException {
 
-        String exportDirectoryName = "exported-apis";
+        // String exportDirectoryName = "exported-apis";
         // this is the base directory for the archive. after export happens, this directory will
         // be archived to be sent as a application/zip response to the client
-        String archiveBaseDirectoryPath = path + File.separator + exportDirectoryName;
+        String apiArtifactsBaseDirectoryPath = path + File.separator + exportDirectoryName;
 
         try {
-            ImportExportUtils.createDirectory(archiveBaseDirectoryPath);
+            ImportExportUtils.createDirectory(apiArtifactsBaseDirectoryPath);
         } catch (APIMgtEntityImportExportException e) {
-            ImportExportUtils.deleteDirectory(archiveBaseDirectoryPath);
-            String errorMsg = "Error in creating base directory for API export archive: " + archiveBaseDirectoryPath;
-            log.error(errorMsg, e);
+            ImportExportUtils.deleteDirectory(apiArtifactsBaseDirectoryPath);
+            String errorMsg = "Error in creating base directory for API export archive: " + apiArtifactsBaseDirectoryPath;
             throw new APIManagementException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
         }
 
         for (APIDetails apiDetails : apiDetailSet) {
             // derive the folder structure
             // TODO: use util method to concat strings
-            String apiExportDirectory = archiveBaseDirectoryPath + File.separator +
+            String apiExportDirectory = apiArtifactsBaseDirectoryPath + File.separator +
                     apiDetails.getApi().getProvider() + "-" + apiDetails.getApi().getName() + "-" + apiDetails.
                     getApi().getVersion();
             // create per-api export directory
@@ -121,26 +121,83 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         }
 
         // if the directory is empty, no APIs have been exported!
-        if (ImportExportUtils.getDirectoryList(archiveBaseDirectoryPath).isEmpty()) {
+        if (ImportExportUtils.getDirectoryList(apiArtifactsBaseDirectoryPath).isEmpty()) {
             // cleanup the archive root directory
             ImportExportUtils.deleteDirectory(path);
             String errorMsg = "No APIs exported successfully";
-            log.error(errorMsg);
             throw new APIManagementException(errorMsg, ExceptionCodes.API_EXPORT_ERROR);
         }
 
-        // create zip archive
+//        // create zip archive
+//        try {
+//            ImportExportUtils.archiveDirectory(apiArtifactsBaseDirectoryPath, path, exportDirectoryName);
+//        } catch (APIMgtEntityImportExportException e) {
+//            // cleanup the archive root directory
+//            ImportExportUtils.deleteDirectory(path);
+//            String errorMsg = "Error while archiving directory " + apiArtifactsBaseDirectoryPath;
+//            throw new APIManagementException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
+//        }
+
+        return apiArtifactsBaseDirectoryPath;
+    }
+
+    public String createArchiveFromExportedApiArtifacts (String sourceDirectory, String archiveLocation,
+            String archiveName) throws APIManagementException {
+
         try {
-            ImportExportUtils.archiveDirectory(archiveBaseDirectoryPath, path, exportDirectoryName);
+            ImportExportUtils.archiveDirectory(sourceDirectory, archiveLocation, archiveName);
+
         } catch (APIMgtEntityImportExportException e) {
             // cleanup the archive root directory
             ImportExportUtils.deleteDirectory(path);
-            String errorMsg = "Error while archiving directory " + archiveBaseDirectoryPath;
-            log.error(errorMsg, e);
+            String errorMsg = "Error while archiving directory " + sourceDirectory;
             throw new APIManagementException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
         }
 
-        return archiveBaseDirectoryPath + ".zip";
+        return archiveLocation + File.separator + archiveName + ".zip";
+    }
+
+    /**
+     * Imports and creates a set of new APIs to API Manager by reading and decoding the {@param
+     * uploadedApiArchiveInputStream}. Will fail if the APIs already exists
+     *
+     * @param uploadedApiArchiveInputStream  InputStream to be read ana decoded to a set of APIs
+     * @param provider API provider, if needs to be updated
+     * @return {@link APIListDTO} object comprising of successfully imported APIs
+     * @throws APIManagementException if any error occurs while importing or no APIs are imported successfully
+     */
+    public APIListDTO importAndCreateAPIs(InputStream uploadedApiArchiveInputStream, String provider)
+            throws APIManagementException {
+
+        String apiArchiveLocation = path + File.separator + IMPORTED_APIS_DIRECTORY_NAME + ".zip";
+        String archiveExtractLocation = extractUploadedArchive(uploadedApiArchiveInputStream, IMPORTED_APIS_DIRECTORY_NAME,
+                apiArchiveLocation);
+
+        // List to contain newly created/updated APIs
+        Set<APIDetails> apiDetailsSet = decodeApisFromDirectoryStructure(archiveExtractLocation, provider);
+        List<API> apis = new ArrayList<>();
+        for (APIDetails apiDetails : apiDetailsSet) {
+            try {
+                apis.add(importAndCreateApi(apiDetails));
+            } catch (APIManagementException e) {
+                log.error("Error while importing API: " + apiDetails.getApi().getName() + ", version: " +
+                        apiDetails.getApi().getVersion());
+                // skip importing the API
+                continue;
+            }
+
+            log.info("Successfully imported API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi()
+                    .getVersion());
+        }
+
+        ImportExportUtils.deleteDirectory(path);
+        // if no APIs are corrected exported, throw an error
+        if (apis.isEmpty()) {
+            String errorMsg = "No APIs imported successfully";
+            throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
+        }
+
+        return MappingUtil.toAPIListDTO(apis);
     }
 
     /**
@@ -149,33 +206,36 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * @param uploadedApiArchiveInputStream  InputStream to be read ana decoded to a set of APIs
      * @param provider API provider, if needs to be updated
      * @return {@link APIListDTO} object comprising of successfully imported APIs
-     * @throws APIManagementException if any error occurs while importing or no APIs are imported
-     * successfully
+     * @throws APIManagementException if any error occurs while importing or no APIs are imported successfully
      */
     public APIListDTO importAPIs(InputStream uploadedApiArchiveInputStream, String provider)
             throws APIManagementException {
 
-        String importedDirectoryName = "imported-apis";
-        String apiArchiveLocation = path + File.separator + importedDirectoryName + ".zip";
-        String archiveExtractLocation = extractUploadedArchive(uploadedApiArchiveInputStream, importedDirectoryName,
+        String apiArchiveLocation = path + File.separator + IMPORTED_APIS_DIRECTORY_NAME + ".zip";
+        String archiveExtractLocation = extractUploadedArchive(uploadedApiArchiveInputStream, IMPORTED_APIS_DIRECTORY_NAME,
                 apiArchiveLocation);
 
-        Set<String> apiDefinitionsRootDirectoryPaths = ImportExportUtils.getDirectoryList(archiveExtractLocation);
-        if (apiDefinitionsRootDirectoryPaths.isEmpty()) {
-            ImportExportUtils.deleteDirectory(path);
-            String errorMsg = "Unable to find API definitions at: " + archiveExtractLocation;
-            log.error(errorMsg);
-            throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
-        }
-
         // List to contain newly created/updated APIs
-        List<API> apis = importApisFromExtractedArchive(apiDefinitionsRootDirectoryPaths, provider);
+        Set<APIDetails> apiDetailsSet = decodeApisFromDirectoryStructure(archiveExtractLocation, provider);
+        List<API> apis = new ArrayList<>();
+        for (APIDetails apiDetails : apiDetailsSet) {
+            try {
+                apis.add(importApi(apiDetails));
+            } catch (APIManagementException e) {
+                log.error("Error while importing API: " + apiDetails.getApi().getName() + ", version: " +
+                        apiDetails.getApi().getVersion());
+                // skip importing the API
+                continue;
+            }
+
+            log.info("Successfully imported API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi()
+                    .getVersion());
+        }
 
         ImportExportUtils.deleteDirectory(path);
         // if no APIs are corrected exported, throw an error
         if (apis.isEmpty()) {
             String errorMsg = "No APIs imported successfully";
-            log.error(errorMsg);
             throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
 
@@ -185,14 +245,22 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     /**
      * Reads and decodes APIs and relevant information from the given set of paths
      *
-     * @param apiDefinitionsRootDirectoryPaths path to the directory with API related artifacts
+     * @param apiArtifactsBasePath path to the directory with API related artifacts
      * @param newApiProvider API newApiProvider to be updated
-     * @return List of {@link API} objects
+     * @return Set of {@link APIDetails} objects
+     * @throws APIManagementException if any error occurs while decoding the APIs
      */
-    private List<API> importApisFromExtractedArchive(Set<String> apiDefinitionsRootDirectoryPaths,
-            String newApiProvider) {
+    public Set<APIDetails> decodeApisFromDirectoryStructure(String apiArtifactsBasePath, String newApiProvider)
+            throws APIManagementException {
 
-        List<API> apis = new ArrayList<>();
+        Set<String> apiDefinitionsRootDirectoryPaths = ImportExportUtils.getDirectoryList(apiArtifactsBasePath);
+        if (apiDefinitionsRootDirectoryPaths.isEmpty()) {
+            ImportExportUtils.deleteDirectory(path);
+            String errorMsg = "Unable to find API definitions at: " + apiArtifactsBasePath;
+            throw new APIManagementException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
+        }
+
+        Set<APIDetails> apiDetailsSet = new HashSet<>();
 
         for (String apiDefinitionDirectoryPath : apiDefinitionsRootDirectoryPaths) {
             File apiDefinitionFile = new File(apiDefinitionDirectoryPath + File.separator + API_DEFINITION_FILE_NAME);
@@ -245,19 +313,10 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 apiDetails.setThumbnailStream(thumbnailStream);
             }
 
-            try {
-                apis.add(importApi(apiDetails));
-            } catch (APIManagementException e) {
-                log.error("Error while importing API: " + apiDetails.getApi().getName() + ", version: " +
-                        apiDetails.getApi().getVersion());
-                // skip the API
-                continue;
-            }
-
-            log.info("Successfully imported API: " + apiDto.getName() + ", version: " + apiDto.getVersion());
+            apiDetailsSet.add(apiDetails);
         }
 
-        return apis;
+        return apiDetailsSet;
     }
 
     /**
@@ -408,7 +467,6 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         } catch (APIMgtEntityImportExportException e) {
             ImportExportUtils.deleteDirectory(path);
             String errorMsg = "Error in accessing uploaded API archive";
-            log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.API_IMPORT_ERROR);
         }
         return archiveExtractLocation;
@@ -430,7 +488,9 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         ImportExportUtils.createFile(exportLocation + File.separator + API_DEFINITION_FILE_NAME);
         ImportExportUtils.writeToFile(exportLocation + File.separator + API_DEFINITION_FILE_NAME, gson.toJson(apidto));
 
-        log.debug("Successfully exported API definition for api: " + api.getName() + ", version: " + api.getVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully exported API definition for api: " + api.getName() + ", version: " + api.getVersion());
+        }
     }
 
     /**
@@ -453,6 +513,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         String gatewayConfigFileLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
         ImportExportUtils.createFile(gatewayConfigFileLocation);
         ImportExportUtils.writeToFile(gatewayConfigFileLocation, gatewayConfig);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully exported gateway configuration for api: " + api.getName() + ", version: " + api
+                    .getVersion());
+        }
     }
 
     /**
@@ -526,8 +591,10 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             ImportExportUtils.deleteDirectory(documentsBaseDirectory);
         }
 
-        log.debug("Successfully exported documentation for api: " + apiDetails.getApi().getName() + ", version: " +
-                apiDetails.getApi().getVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully exported documentation for api: " + apiDetails.getApi().getName() + ", version: " +
+                    apiDetails.getApi().getVersion());
+        }
     }
 
     /**
@@ -550,8 +617,10 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         ImportExportUtils.createFile(swaggerFileLocation);
         ImportExportUtils.writeToFile(swaggerFileLocation, gson.toJson(json));
 
-        log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " + api
-                .getVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " +
+                    api.getVersion());
+        }
     }
 
     /**
@@ -581,11 +650,14 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             ImportExportUtils.deleteFile(thumbnailFileLocation);
         }
 
-        log.debug("Successfully exported Thumbnail for api: " + api.getName() + ", version: " + api.getVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully exported Thumbnail for api: " + api.getName() + ", version: " + api.getVersion());
+        }
     }
 
     /**
-     * Imports the given API instance to this API Manager
+     * Imports the given API instance to this API Manager - will create if not exists and update if the api is
+     * already there
      *
      * @param apiDetails {@link org.wso2.carbon.apimgt.core.models.APIDetails} instance to be imported
      * @return {@link API} instance that was imported
@@ -600,8 +672,28 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             addAPIDetails(apiDetails);
         }
 
-        log.debug("Successfully imported API definition for: " + apiDetails.getApi().getName() + ", version: " +
-                apiDetails.getApi().getVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully imported API definition for: " + apiDetails.getApi().getName() + ", version: " +
+                    apiDetails.getApi().getVersion());
+        }
+        return apiPublisher.getAPIbyUUID(apiDetails.getApi().getId());
+    }
+
+    /**
+     * Imports the given API instance to this API Manager. Operation will fail if the API already exists.
+     *
+     * @param apiDetails {@link org.wso2.carbon.apimgt.core.models.APIDetails} instance to be imported
+     * @return {@link API} instance that was imported
+     * @throws APIManagementException if an error occurs while importing the API
+     */
+    private API importAndCreateApi(APIDetails apiDetails) throws APIManagementException {
+
+        addAPIDetails(apiDetails);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully imported API definition for: " + apiDetails.getApi().getName() + ", version: " +
+                    apiDetails.getApi().getVersion());
+        }
         return apiPublisher.getAPIbyUUID(apiDetails.getApi().getId());
     }
 

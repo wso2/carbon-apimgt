@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -11,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
@@ -28,13 +30,15 @@ import java.util.UUID;
             throws NotFoundException {
 
         APIPublisher publisher = null;
-        String exportedFilePath = null;
+        String exportedFilePath, zippedFilePath = null;
         Set<APIDetails> apiDetails;
+        String exportedApiDirName = "exported-apis";
+        String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-api-archives-" +
+                UUID.randomUUID().toString();
         try {
             publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
             FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(publisher,
-                    System.getProperty("java.io.tmpdir") +
-                            File.separator + "exported-api-archives-" + UUID.randomUUID().toString());
+                    pathToExportDir);
             apiDetails = importExportManager.getAPIDetails(limit, offset, query);
             if (apiDetails.isEmpty()) {
                 // 404
@@ -46,15 +50,18 @@ import java.util.UUID;
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
 
-            exportedFilePath = importExportManager.exportAPIs(apiDetails);
+            exportedFilePath = importExportManager.exportAPIs(apiDetails, exportedApiDirName);
+            zippedFilePath = importExportManager.createArchiveFromExportedApiArtifacts(exportedFilePath,
+                    pathToExportDir, exportedApiDirName);
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while exporting APIs";
+            log.error(errorMessage, e);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        File exportedApiArchiveFile = new File(exportedFilePath);
+        File exportedApiArchiveFile = new File(zippedFilePath);
         Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK).entity(exportedApiArchiveFile);
         responseBuilder
                 .header("Content-Disposition", "attachment; filename=\"" + exportedApiArchiveFile.getName() + "\"");

@@ -23,6 +23,28 @@ import java.util.UUID;
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
+    @Override public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail,String contentType
+            ,String provider) throws NotFoundException {
+
+        APIPublisher publisher = null;
+
+        try {
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+
+            FileBasedApiImportExportManager importManager = new FileBasedApiImportExportManager(publisher,
+                    System.getProperty("java.io.tmpdir") + File.separator + "imported-api-archives-" +
+                            UUID.randomUUID().toString());
+            APIListDTO apiList = importManager.importAndCreateAPIs(fileInputStream, provider);
+            return Response.status(Response.Status.OK).entity(apiList).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while importing the APIs";
+            log.error(errorMessage, e);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
     @Override public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
             String provider) throws NotFoundException {
 
@@ -35,10 +57,11 @@ import java.util.UUID;
                     System.getProperty("java.io.tmpdir") + File.separator + "imported-api-archives-" +
                             UUID.randomUUID().toString());
             APIListDTO apiList = importManager.importAPIs(fileInputStream, provider);
-            return Response.status(Response.Status.CREATED).entity(apiList).build();
+            return Response.status(Response.Status.OK).entity(apiList).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing the APIs";
+            log.error(errorMessage, e);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
