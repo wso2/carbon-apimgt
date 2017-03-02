@@ -5,27 +5,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_maxTpsDTO;
 
 /**
  * EndPointDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
 public class EndPointDTO   {
-  @JsonProperty("id")
   private String id = null;
 
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("endpointConfig")
   private String endpointConfig = null;
 
-  @JsonProperty("endpointSecurity")
   private String endpointSecurity = null;
 
-  @JsonProperty("maxTps")
-  private EndPoint_maxTpsDTO maxTps = null;
+  private Long maxTps = null;
+
+  private String type = null;
 
   public EndPointDTO id(String id) {
     this.id = id;
@@ -72,7 +68,7 @@ public class EndPointDTO   {
    * Endpoint Configuration
    * @return endpointConfig
   **/
-  @ApiModelProperty(example = "http://localhost:8280", value = "Endpoint Configuration")
+  @ApiModelProperty(example = "{url: http://localhost:8280, timeout: 1000}", value = "Endpoint Configuration")
   public String getEndpointConfig() {
     return endpointConfig;
   }
@@ -99,22 +95,40 @@ public class EndPointDTO   {
     this.endpointSecurity = endpointSecurity;
   }
 
-  public EndPointDTO maxTps(EndPoint_maxTpsDTO maxTps) {
+  public EndPointDTO maxTps(Long maxTps) {
     this.maxTps = maxTps;
     return this;
   }
 
    /**
-   * Get maxTps
+   * Endpoint max tps
    * @return maxTps
   **/
-  @ApiModelProperty(value = "")
-  public EndPoint_maxTpsDTO getMaxTps() {
+  @ApiModelProperty(example = "1000", value = "Endpoint max tps")
+  public Long getMaxTps() {
     return maxTps;
   }
 
-  public void setMaxTps(EndPoint_maxTpsDTO maxTps) {
+  public void setMaxTps(Long maxTps) {
     this.maxTps = maxTps;
+  }
+
+  public EndPointDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Get type
+   * @return type
+  **/
+  @ApiModelProperty(example = "http", value = "")
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
 
@@ -131,12 +145,13 @@ public class EndPointDTO   {
         Objects.equals(this.name, endPoint.name) &&
         Objects.equals(this.endpointConfig, endPoint.endpointConfig) &&
         Objects.equals(this.endpointSecurity, endPoint.endpointSecurity) &&
-        Objects.equals(this.maxTps, endPoint.maxTps);
+        Objects.equals(this.maxTps, endPoint.maxTps) &&
+        Objects.equals(this.type, endPoint.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpointConfig, endpointSecurity, maxTps);
+    return Objects.hash(id, name, endpointConfig, endpointSecurity, maxTps, type);
   }
 
   @Override
@@ -149,6 +164,7 @@ public class EndPointDTO   {
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
   }

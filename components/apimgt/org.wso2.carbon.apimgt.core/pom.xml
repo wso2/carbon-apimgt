@@ -19,13 +19,13 @@
   ~ *
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.3-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -153,6 +153,10 @@
                     <groupId>log4j</groupId>
                     <artifactId>log4j</artifactId>
                 </exclusion>
+                <exclusion>
+                	<groupId>org.slf4j</groupId>
+                	<artifactId>slf4j-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -180,33 +184,79 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>docker-client</artifactId>
-            <version>3.5.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc6</artifactId>
-            <version>12.1.0.1-atlassian-hosted</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                	<groupId>org.slf4j</groupId>
+                	<artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.messaging</groupId>
+            <artifactId>org.wso2.carbon.messaging</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                	<groupId>org.slf4j</groupId>
+                	<artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                	<groupId>org.slf4j</groupId>
+                	<artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>workspace-service</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -441,7 +491,7 @@
                                             </tcp>
                                             <time>60000</time>
                                         </wait>
-                                        <cmd></cmd>
+                                        <cmd />
                                     </run>
                                 </image>
                             </images>
@@ -784,10 +834,55 @@
             javax.jms.*;
             org.wso2.securevault.*;
             org.apache.lucene.*;
+            org.ballerinalang.*,
+            org.ballerinalang.model.*,
+            org.ballerinalang.bre.*,
+            org.ballerinalang.natives.*,
+            org.ballerinalang.runtime.*,
+            org.ballerinalang.services.*,
+            org.ballerinalang.util.debugger.*,
+            org.ballerinalang.util.parser.*,
+            org.ballerinalang.util.exceptions.*,
+            org.ballerinalang.util.repository.*,
+            org.ballerinalang.util.program.*,
+            org.wso2.carbon.messaging.*,
+            org.ballerinalang.composer.service.workspace.*,
+            org.ballerinalang.composer.service.workspace.swagger.*,
+            org.ballerinalang.composer.service.workspace.rest.datamodel.*,
+            org.antlr.v4.runtime.*,
+            io.swagger.codegen.*,
+            org.apache.commons.cli.*,
+            com.samskivert.mustache.*,
+            org.codehaus.plexus.util.*,
+            org.ballerinalang.composer.service.workspace.swagger.generators.*,
+            com.fasterxml.jackson.core.*,
+            com.fasterxml.jackson.databind.*,
+
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
-            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.exp.pkg.version}"
+            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
+            org.ballerinalang.model.*,
+            org.ballerinalang.bre.*,
+            org.ballerinalang.natives.*,
+            org.ballerinalang.runtime.*,
+            org.ballerinalang.services.*,
+            org.ballerinalang.util.debugger.*,
+            org.ballerinalang.util.parser.*,
+            org.ballerinalang.util.exceptions.*,
+            org.ballerinalang.util.repository.*,
+            org.ballerinalang.util.program.*,
+            org.wso2.carbon.messaging.*; version="2.2.3"
+            org.ballerinalang.composer.service.workspace.*,
+            org.ballerinalang.composer.service.workspace.swagger.*,
+            org.ballerinalang.composer.service.workspace.rest.datamodel.*,
+            org.antlr.v4.runtime.*,
+            io.swagger.codegen.*,
+            org.apache.commons.cli.*,
+            com.samskivert.mustache.*,
+            org.codehaus.plexus.util.*,
+            org.ballerinalang.composer.service.workspace.swagger.generators.*,
+            <!--com.fasterxml.jackson.core.*,-->
         </export.package>
     </properties>
 

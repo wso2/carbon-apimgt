@@ -9,12 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * LabelDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-23T18:39:28.727+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
 public class LabelDTO   {
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("access_url")
   private String accessUrl = null;
 
   public LabelDTO name(String name) {

@@ -101,7 +101,7 @@ class AuthClient {
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
         var error_data = JSON.parse(error_response.data);
-        var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".<br/> You will be redirect to the login page ...";
+        var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         noty({
             text: message,
             type: 'error',
@@ -114,7 +114,7 @@ class AuthClient {
             maxVisible: 10,
             callback: {
                 afterClose: function () {
-                    window.location = contextPath + "/auth/login";
+                    window.location = loginPageUri;
                 },
             }
         });
@@ -223,7 +223,7 @@ class API {
     create(api_data, callback = null) {
         let payload;
         let promise_create;
-        if (api_data.constructor.name == "Blob") {
+        if (api_data.constructor.name === Blob.name || api_data.constructor.name === File.name) {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
@@ -312,6 +312,44 @@ class API {
     }
 
     /**
+     * Get the life cycle state of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getLcState(id, callback = null) {
+        var promise_lc_get = this.client.then(
+                (client) => {
+                return client["API (Individual)"].get_apis_apiId_lifecycle(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+    }
+    );
+        if (callback) {
+            return promise_lc_get.then(callback);
+        } else {
+            return promise_lc_get;
+        }
+    }
+
+    /**
+     * Get the life cycle history data of an API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    getLcHistory(id, callback = null) {
+        var promise_lc_history_get = this.client.then(
+                (client) => {
+                return client["API (Individual)"].get_apis_apiId_lifecycle_history(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+    }
+    );
+        if (callback) {
+            return promise_lc_history_get.then(callback);
+        } else {
+            return promise_lc_history_get;
+        }
+    }
+
+    /**
      * Update the life cycle state of an API given its id (UUID)
      * @param id {string} UUID of the api
      * @param state {string} Target state which need to be transferred
@@ -352,7 +390,7 @@ class API {
      * @param body {Object} Endpoint to be added
      * @param callback {function} Callback function
      */
-    addEndpoint(body, callback) {
+    addEndpoint(body) {
         var promised_addEndpoint = this.client.then(
             (client) => {
                 let payload = {body: body, "Content-Type": "application/json"};
@@ -362,6 +400,47 @@ class API {
         ).catch(AuthClient.unauthorizedErrorHandler);
 
         return promised_addEndpoint;
+    }
+
+    /**
+     * Get endpoint object by its UUID.
+     * @param id {String} UUID of the endpoint
+     * @returns {Promise.<TResult>}
+     */
+    getEndpoint(id) {
+        return this.client.then(
+            (client) => {
+                return client["Endpoint (individual)"].get_endpoints_endpointId(
+                    {
+                        endpointId: id,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+    }
+
+    updateEndpoint(id, data) {
+        return this.getEndpoint(id).then(
+            function (response) {
+                var endpoint = response.obj;
+                for (var attribute in data) {
+                    if (!endpoint.hasOwnProperty(attribute)) {
+                        throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
+                    }
+                }
+                var updated_endpoint = Object.assign(endpoint, data);
+                return this.client.then(
+                    (client) => {
+                        return client["Endpoint (individual)"].put_endpoints_endpointId(
+                            {
+                                endpointId: id,
+                                body: updated_endpoint,
+                                'Content-Type': 'application/json'
+                            }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    }
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }.bind(this)
+        ).catch(AuthClient.unauthorizedErrorHandler)
     }
 
 }

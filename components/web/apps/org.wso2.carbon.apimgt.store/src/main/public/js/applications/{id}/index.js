@@ -255,13 +255,14 @@ $(function () {
                     onSuccess: function (renderedData) {
                         if (this.keyType.toLowerCase() == "production") {
                             $("#production").append(renderedData);
-
+                            registerClipBoardClients();
                             if (data.obj.keys.length == 1) {
                                 context = setDefaultContext(data);
                                 //compiledHtml = AppkeyTemplate(context);
                                 UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
                                     onSuccess: function (renderedData) {
                                         $("#sandbox").append(renderedData);
+                                        registerClipBoardClients();
                                     }, onFailure: function (message, e) {
                                         var message = "Error occurred while getting default application key details." + message;
                                         noty({
@@ -281,12 +282,13 @@ $(function () {
                         }
                         else {
                             $("#sandbox").append(renderedData);
-
+                            registerClipBoardClients();
                             if (data.obj.keys.length == 1) {
                                 context = setDefaultContext(data);
                                 UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
                                     onSuccess: function (renderedData) {
                                         $("#production").append(renderedData);
+                                        registerClipBoardClients();
                                     }, onFailure: function (message, e) {
                                         var message = "Error occurred while getting default application key details." + message;
                                         noty({
@@ -350,17 +352,22 @@ $(function () {
 
 
         }
-        var ClipboardClient = new ZeroClipboard($('.copy-button'));
 
-        ClipboardClient.on('ready', function (event) {
-            ClipboardClient.on('copy', function (event) {
-                event.clipboardData.setData('text/plain', event.target.value);
+    };
+
+    var registerClipBoardClients = function () {
+        $('.copy-button').each(function(){
+            var ClipboardClient = new ZeroClipboard($(this));
+            ClipboardClient.on('ready', function (event) {
+                ClipboardClient.on('copy', function (event) {
+                    event.clipboardData.setData('text/plain', event.target.value);
+                });
             });
-        });
 
-        ClipboardClient.on('error', function (event) {
-            alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
-            ZeroClipboard.destroy();
+            ClipboardClient.on('error', function (event) {
+                alert('ZeroClipboard error of type "' + event.name + '": ' + event.message);
+                ZeroClipboard.destroy();
+            })
         });
     };
 

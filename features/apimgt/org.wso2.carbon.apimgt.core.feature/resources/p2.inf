@@ -18,3 +18,4 @@ instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../conf); \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.core_${feature.version}/dbscripts/,target:${installFolder}/../../../dbscripts/apimgt,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.core_${feature.version}/database/AM_DB.mv.db/,target:${installFolder}/../../../database/AM_DB.mv.db,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../../features/org.wso2.carbon.apimgt.core_${feature.version}/template/,target:${installFolder}/../../../resources/template,overwrite:true);\

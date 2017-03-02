@@ -55,7 +55,8 @@ public class AuthenticatorAPI implements Microservice {
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(
             @Context Request request, @FormDataParam ("username") String userName,
-            @FormDataParam ("password") String password, @FormDataParam ("scopes") String scopesList) {
+            @FormDataParam ("password") String password, @FormDataParam ("validity_period") String validityPeriod,
+            @FormDataParam ("scopes") String scopesList) {
         try {
             IntrospectService introspectService = new IntrospectService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
@@ -63,12 +64,14 @@ public class AuthenticatorAPI implements Microservice {
             String restAPIContext = "/api/am" + appContext;
             String accessToken = introspectService
                     .getAccessToken(authResponseBean, appContext.substring(1), userName, password,
-                            scopesList.split(" "));
+                            scopesList.split(" "), Long.parseLong(validityPeriod));
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1, part1 + "; path=" + appContext);
+            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
+                    part1 + "; path=" + appContext + "; " + AuthenticatorConstants.SECURE_COOKIE);
             NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE);
+                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
+                            + AuthenticatorConstants.SECURE_COOKIE);
             return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
                     .header(AuthenticatorConstants.
                                     REFERER_HEADER,

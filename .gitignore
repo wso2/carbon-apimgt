@@ -10,6 +10,7 @@ target
 *~
 .idea
 *.DS_Store
+*osgi-imports
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#calculator#*.war
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#pizzashack#*.war

@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
@@ -17,6 +18,7 @@ $(
     function () {
         $('#api-create-submit').on('click', createAPIHandler);
         $('input[type=radio][name=implementation-options]').on('change', implementationOptionsHandler);
+        $('input[type=radio][name=import-definition]').on('change', importDefinitionOptionsHandler);
     }
 );
 
@@ -35,12 +37,34 @@ function createAPICallback(response) {
  */
 function implementationOptionsHandler(event) {
     var selected_value = this.value;
-    $(".sub-implementation-option").hide();
-    $("#" + selected_value + "-form").fadeIn();
+
+    //Hide the other tab contents and show the active one
+    $('.tab-content > .tab-pane').removeClass('active');
+    $('#' + $(this).attr('data-tab')).addClass('active');
+
+    //Highlight the active radio button
+    $('.impl-selection > li').removeClass('active');
+    $(this).closest('li').addClass('active');
+
+    //$("#" + selected_value + "-form").fadeIn();
     if (selected_value == 'swagger-option') {
         $('.basic-inputs :input').prop("disabled", true);
     } else {
         $('.basic-inputs :input').prop("disabled", false);
+    }
+}
+/**
+ * Jquery event handler for options element for switch between swagger import types, Show and hide input fields on radio button selection.
+ * @param event
+ */
+function importDefinitionOptionsHandler(event) {
+    var selected_value = this.value;
+    if (selected_value === "swagger-file") {
+        $("#swagger-url").parent().addClass("hidden");
+        $("#swagger-file").parent().removeClass("hidden");
+    } else {
+        $("#swagger-url").parent().removeClass("hidden");
+        $("#swagger-file").parent().addClass("hidden");
     }
 }
 /**
@@ -95,7 +119,7 @@ function createAPIHandler(event) {
 /**
  * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
  * and the send it over REST API.
- * @param input_type
+ * @param input_type {String} Input type either `swagger-url` or `swagger-file`
  */
 function createAPIFromSwagger(input_type) {
     if (input_type === "swagger-url") {
@@ -128,10 +152,40 @@ function createAPIFromSwagger(input_type) {
                         });
             });
     } else if (input_type === "swagger-file") {
-        /* TODO: Implement swagger file  upload support ~tmkb*/
+        var file_input = $('#swagger-file');
+        var swagger = file_input[0].files[0];
+        var new_api = new API('');
+        new_api.create(swagger)
+            .then(createAPICallback)
+            .catch(
+                function (error_response) {
+                    var error_data;
+                    var message;
+                    if (error_response.obj) {
+                        error_data = error_response.obj;
+                        message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    } else {
+                        error_data = error_response.data;
+                        message = "Error: " + error_data + ".";
+
+                    }
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        closeWith: ['click', 'backdrop'],
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10
+                    });
+                    $('[data-toggle="loading"]').loading('hide');
+                    console.debug(error_response);
+                });
     }
 }
-
 /**
  * Do create API with endpoint
  *
@@ -139,15 +193,15 @@ function createAPIFromSwagger(input_type) {
  */
 function createAPIUsingEndpoint(response) {
     var endpoint = [];
-    var responseObject = JSON.parse(response.data);
+    var responseObject = response.obj;
     var id = responseObject.id;
     endpoint.push({
-        'id' : id,
-        'type' : 'production'
+        'id': id,
+        'type': 'production'
     });
     endpoint.push({
-        'id' : id,
-        'type' : 'sandbox'
+        'id': id,
+        'type': 'sandbox'
     });
     var api_data = {
         name: $("#new-api-name").val(),
@@ -179,29 +233,29 @@ function createAPIUsingEndpoint(response) {
                 console.debug(error_response);
             });
 }
-
 /**
  * Add endpoint when api is added by providing endpoint
  *
  * @param callBack function
  */
 function addEndpoint(callBack) {
-    var url = $('#wsdl-url').val();
+    var url = $('#endpoint-url').val();
     var name = $("#new-api-name").val();
     var context = $('#new-api-context').val();
     var version = $('#new-api-version').val();
 
     //todo: need to endpoint type after it is defined
-	var body = {
-		name: 'endpoint_' + name + '_' + version,
-		endpointConfig: url,
-		endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
-		maxTps: {"production":10000,"sandbox":132}
-	};
+    var body = {
+        name: 'endpoint_' + name + '_' + version,
+        endpointConfig: url,
+        endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
+        maxTps: 1000,
+        type:"http"
+    };
 
     var new_api = new API('');
-    var promised_create = new_api.addEndpoint(body);
-    promised_create
+    var promised_endpoint = new_api.addEndpoint(body);
+    promised_endpoint
         .then(callBack)
         .catch(
             function (error_response) {

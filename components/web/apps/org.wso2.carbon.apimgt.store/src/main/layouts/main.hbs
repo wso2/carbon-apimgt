@@ -12,7 +12,7 @@
     <script>
         var token = getCookie("WSO2_AM_TOKEN_1");
         if(!token) {
-            window.location =  "{{@contextPath}}/auth/login";
+            window.location =  "{{@config.loginPageUri}}";
         }
         function getCookie(name) {
             var value = "; " + document.cookie;

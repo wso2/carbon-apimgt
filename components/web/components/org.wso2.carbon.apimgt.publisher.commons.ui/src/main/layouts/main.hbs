@@ -12,7 +12,7 @@
         var token = getCookie("WSO2_AM_TOKEN_1");
         var request_path =  window.location.pathname.split('/');
         if(!request_path.includes('editor') && !token) {
-            window.location = "{{@contextPath}}/auth/login";
+            window.location = "{{@config.loginPageUri}}";
         }
         function getCookie(name) {
             var value = "; " + document.cookie;

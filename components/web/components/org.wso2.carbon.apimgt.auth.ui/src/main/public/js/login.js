@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 $(function(){
+    if (location.protocol != 'https:') {
+        window.location = loginPageUri;
+    }
     if(authManager.getAuthStatus()){
         route.routTo(loginRedirectUri);
     }
@@ -27,7 +30,7 @@ $(function(){
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
             $.cookie('userScope', data.scope, { path: '/' });*/
-            var redirectUri = (xhr.getResponseHeader("Referer") == '' || !xhr.getResponseHeader("Referer")) ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
+            var redirectUri = (xhr.getResponseHeader("Referer") == '' || !xhr.getResponseHeader("Referer") || xhr.getResponseHeader("Referer") == "null") ? contextPath + loginRedirectUri : xhr.getResponseHeader("Referer");
             window.location = redirectUri;
         });
         loginPromise.error(

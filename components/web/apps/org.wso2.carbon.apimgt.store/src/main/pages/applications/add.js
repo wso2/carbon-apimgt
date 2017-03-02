@@ -16,5 +16,7 @@
 
 function onGet(env) {
     sendToClient("swaggerURL", env.config.swaggerURL);
+    sendToClient("goBack", env.request.getQueryParams().get("goBack"));
+    sendToClient("apiId", env.request.getQueryParams().get("apiId"));
     sendToClient("contextPath", env.contextPath);
 }

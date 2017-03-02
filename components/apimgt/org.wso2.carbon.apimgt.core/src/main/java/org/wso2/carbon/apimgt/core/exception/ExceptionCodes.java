@@ -33,11 +33,11 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
     SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json"),
-    APPLICATION_NOT_FOUND(900307, "Application not found", 400, "Error while parsing swagger json"),
+    APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Error while parsing swagger json"),
     PARAMETER_NOT_PROVIDED(900308, "Parameter value missing", 400,
             "Some of the mandatory parameter values were missing"),
-    API_NOT_FOUND(900309, "API not found", 400, "API could not be found"),
-    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 400, "Couldn't retrieve Subscriptions for API"),
+    API_NOT_FOUND(900309, "API not found", 404, "API could not be found"),
+    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
             "done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
@@ -72,7 +72,10 @@ public enum ExceptionCodes implements ErrorHandler {
     GATEWAY_EXCEPTION(900319, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
 
     JSON_PARSE_ERROR(900320, "Json parse error", 500, "JSON parse error"),
-    INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password");
+    INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password"),
+
+    LOCATION_HEADER_INCORRECT(900322, "Error while obtaining URI for Location header", 500,
+            "Error occurred while obtaining URI for Location header");
 
     private final long errorCode;
     private final String errorMessage;

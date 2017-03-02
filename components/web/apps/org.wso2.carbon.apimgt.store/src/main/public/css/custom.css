@@ -550,3 +550,7 @@ a.remove_rating:hover{
     width: 600px;
     height: 80px;
 }
+.search-help-wrapper{
+    float: left;
+    padding-bottom: 5px;
+}
