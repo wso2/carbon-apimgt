@@ -14,13 +14,11 @@
 ~ See the License for the specific language governing permissions and
 ~ limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>apimgt-feature</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -69,7 +67,7 @@
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.gateway.extension</artifactId>
-                                    <version>7.0.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <type>bundle</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/docs</outputDirectory>
