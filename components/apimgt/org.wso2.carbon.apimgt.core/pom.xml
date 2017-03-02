@@ -861,8 +861,7 @@
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
-            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}"
-            org.ballerinalang.*,
+            org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
             org.ballerinalang.model.*,
             org.ballerinalang.bre.*,
             org.ballerinalang.natives.*,
