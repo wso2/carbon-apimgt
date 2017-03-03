@@ -203,6 +203,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
+        apiBuilder.updatedBy(getUsername());
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
@@ -325,6 +326,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
         apiBuilder.lastUpdatedTime(LocalDateTime.now());
         apiBuilder.provider(getUsername());
+        apiBuilder.updatedBy(getUsername());
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
