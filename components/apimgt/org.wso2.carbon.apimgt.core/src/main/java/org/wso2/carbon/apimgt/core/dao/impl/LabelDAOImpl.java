@@ -54,79 +54,73 @@ public class LabelDAOImpl implements LabelDAO {
 
         if (!labels.isEmpty()) {
 
-            List<String> labelNameList = new ArrayList<>();
+            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, ACCESS_URL) VALUES (?,?,?)";
 
-            for (Label label : labels) {
-                labelNameList.add(label.getName());
-            }
+            try (Connection connection = DAOUtil.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(query)) {
 
-            List<Label> existingLabels = getLabelsByName(labelNameList);
-
-            if (!existingLabels.isEmpty()) {
-                labels.removeAll(existingLabels);   // Remove already existing labels from list
-            }
-
-            if (!labels.isEmpty()) {                // Add labels that don't already exist
-                try {
-                    insertNewLabels(labels);
-                } catch (SQLException e) {
-                    throw new APIMgtDAOException(e);
+                for (Label label : labels) {
+                    String labelId = UUID.randomUUID().toString();
+                    statement.setString(1, labelId);
+                    statement.setString(2, label.getName());
+                    statement.setString(3, label.getAccessUrl());
+                    statement.addBatch();
                 }
+                statement.executeBatch();
+            } catch (SQLException e) {
+                throw new APIMgtDAOException(e);
             }
         }
     }
 
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     @Override
-    public List<Label> getLabelsByName(List<String> labels) throws APIMgtDAOException {
+    public Label getLabelByName(String labelName) throws APIMgtDAOException {
 
-        List<Label> matchingLabels = new ArrayList<>();
-
-        if (!labels.isEmpty()) {
-            final String query = "SELECT NAME,ACCESS_URL FROM AM_LABELS WHERE NAME IN (" +
-                    DAOUtil.getParameterString(labels.size()) + ")";
-
-            try (Connection connection = DAOUtil.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
-
-                for (int i = 0; i < labels.size(); ++i) {
-                    statement.setString(i + 1, labels.get(i));
-                }
-
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        Label label = new Label.Builder().
-                                name(rs.getString("NAME")).
-                                accessUrl(rs.getString("ACCESS_URL")).build();
-
-                        matchingLabels.add(label);
-                    }
-                }
-            } catch (SQLException e) {
-                throw new APIMgtDAOException(e);
-            }
-        }
-
-        return matchingLabels;
-    }
-
-
-    private static void insertNewLabels(List<Label> labels)
-            throws SQLException {
-        final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, ACCESS_URL) VALUES (?,?,?)";
+        final String query = "SELECT NAME,ACCESS_URL FROM AM_LABELS WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    Label label = new Label.Builder().
+                            name(rs.getString("NAME")).
+                            accessUrl(rs.getString("ACCESS_URL")).build();
 
-            for (Label label : labels) {
-                String labelId = UUID.randomUUID().toString();
-                statement.setString(1, labelId);
-                statement.setString(2, label.getName());
-                statement.setString(3, label.getAccessUrl());
-                statement.addBatch();
+                    return label;
+                } else {
+                    return null;
+                }
             }
-            statement.executeBatch();
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
+
+    }
+
+    @Override
+    public void deleteLabel(String labelName) throws APIMgtDAOException {
+
+        final String query = "DELETE FROM AM_LABELS WHERE NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, labelName);
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
     }
 
 }
