@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -52,8 +53,6 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilder;
-import org.wso2.carbon.apimgt.core.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -252,8 +251,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     resourceList.add(dto);
                 }
-                APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder.build());
-                String gatewayConfig = apiTemplateBuilder.getConfigStringFromTemplate(resourceList);
+                GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
                 }
@@ -342,8 +341,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
-                    APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(apiBuilder.build());
-                    String updatedGatewayConfig = apiTemplateBuilder
+                    GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                    String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
                     API api = apiBuilder.build();
@@ -927,9 +926,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
 
             api = apiBuilder.build();
-            APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+            GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
             String existingGatewayConfig = getApiGatewayConfig(apiId);
-            String updatedGatewayConfig = apiTemplateBuilder
+            String updatedGatewayConfig = gatewaySourceGenerator
                     .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
             getApiDAO().updateAPI(apiId, api);
             getApiDAO().updateSwaggerDefinition(apiId, jsonText);
@@ -1031,10 +1030,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
-        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+        GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
 
         try {
-            String swagger = apiTemplateBuilder.getSwaggerFromGatewayConfig(configString);
+            String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
             getApiDAO().updateSwaggerDefinition(apiId, swagger);
             getApiDAO().updateGatewayConfig(apiId, configString);
         } catch (APIMgtDAOException e) {
@@ -1257,7 +1256,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Publishing new endpoint configurations to the subscribers
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
-        APITemplateBuilder template = new APITemplateBuilderImpl();
+        GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
         APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
         boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);

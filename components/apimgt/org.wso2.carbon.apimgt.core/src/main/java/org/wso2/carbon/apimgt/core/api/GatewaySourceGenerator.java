@@ -16,9 +16,10 @@
 * under the License.
 *
 */
-package org.wso2.carbon.apimgt.core.template;
+package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
 /**
  * Used to provide abstract layer to generate API type template
  */
-public interface APITemplateBuilder {
+public interface GatewaySourceGenerator {
     /**
      * Generate initial service implementation for a API
      *
