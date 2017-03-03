@@ -44,6 +44,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -435,8 +436,8 @@ public class ApiDAOImpl implements ApiDAO {
         final String query = "UPDATE AM_API SET CONTEXT = ?, IS_DEFAULT_VERSION = ?, DESCRIPTION = ?, VISIBILITY = ?, "
                 + "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
-                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?" +
-                " WHERE UUID = ?";
+                "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?," +
+                "UPDATED_BY = ? WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -463,6 +464,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
                 statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
+                statement.setString(18, substituteAPI.getUpdatedBy());
                 statement.setString(17, apiID);
 
                 statement.execute();
@@ -671,13 +673,14 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void changeLifeCycleStatus(String apiID, String status) throws APIMgtDAOException {
-        final String query = "UPDATE AM_API SET CURRENT_LC_STATUS = ? WHERE UUID = ?";
+        final String query = "UPDATE AM_API SET CURRENT_LC_STATUS = ?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, status);
-                statement.setString(2, apiID);
+                statement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(3, apiID);
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {

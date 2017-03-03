@@ -479,6 +479,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                apiBuilder.lastUpdatedTime(LocalDateTime.now());
+                apiBuilder.updatedBy(getUsername());
                 apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
                         .getLifecycleInstanceId()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
@@ -592,8 +594,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            LocalDateTime localDateTime = LocalDateTime.now();
             DocumentInfo document = null;
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            docBuilder.createdBy(getUsername());
+            docBuilder.updatedBy(getUsername());
+            docBuilder.createdTime(localDateTime);
+            docBuilder.lastUpdatedTime(localDateTime);
             if (StringUtils.isEmpty(docBuilder.getId())) {
                 docBuilder = docBuilder.id(UUID.randomUUID().toString());
             }
@@ -732,8 +739,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String updateDocumentation(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
-            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            LocalDateTime localDateTime = LocalDateTime.now();
             DocumentInfo document = null;
+            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
+            docBuilder.updatedBy(getUsername());
+            docBuilder.lastUpdatedTime(localDateTime);
             if (StringUtils.isEmpty(docBuilder.getId())) {
                 docBuilder = docBuilder.id(UUID.randomUUID().toString());
             }
@@ -914,6 +924,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
         try {
+            LocalDateTime localDateTime = LocalDateTime.now();
             API api = getAPIbyUUID(apiId);
             Map<String, UriTemplate> oldUriTemplateMap = api.getUriTemplates();
             List<APIResource> apiResourceList = apiDefinitionFromSwagger20.parseSwaggerAPIResources(new StringBuilder
@@ -926,6 +937,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     updatedUriTemplateMap);
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
+            apiBuilder.updatedBy(getUsername());
+            apiBuilder.lastUpdatedTime(localDateTime);
 
             api = apiBuilder.build();
             GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
