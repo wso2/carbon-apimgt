@@ -126,6 +126,15 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#getLastUpdatedTimeOfAPI(java.lang.String)
+     */
+    @Override
+    @CheckForNull
+    public String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResource(AM_API_TABLE_NAME, apiId);
+    }
+
+    /**
      * Retrieves summary data of all available APIs.
      *
      * @return {@link List<API>} matching results

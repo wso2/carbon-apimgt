@@ -53,6 +53,16 @@ public interface ApiDAO {
     @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
 
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of API given its uuid
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
+
     /**
      * Retrieves summary data of all available APIs.
      * @return {@link List<API>} matching results

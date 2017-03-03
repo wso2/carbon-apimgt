@@ -56,6 +56,14 @@ public interface APIManager {
     API getAPIbyUUID(String uuid) throws APIManagementException;
 
     /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of API given its uuid
+     * @throws APIManagementException
+     */
+    String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
+
+    /**
      * Checks the Availability of given String
      *@api
      * @return true, if already exists. False, otherwise

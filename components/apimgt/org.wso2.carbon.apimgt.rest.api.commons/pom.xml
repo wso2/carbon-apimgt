@@ -132,7 +132,7 @@
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.version}",
         </export.package>
         <carbon.component>
-            osgi.service;objectClass="org.wso2.msf4j.Interceptor" ; serviceCount="1"
+            osgi.service;objectClass="org.wso2.msf4j.Interceptor" ; serviceCount="2"
         </carbon.component>
     </properties>
 

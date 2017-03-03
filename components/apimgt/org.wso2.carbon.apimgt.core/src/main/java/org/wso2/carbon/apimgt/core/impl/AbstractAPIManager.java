@@ -105,6 +105,23 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * @see APIManager#getLastUpdatedTimeOfAPI(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException {
+        String lastUpdatedTime = null;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving the last update time of API with id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        
+        return lastUpdatedTime;
+    }
+
+    /**
      * Checks the Availability of given String
      *
      * @param api
