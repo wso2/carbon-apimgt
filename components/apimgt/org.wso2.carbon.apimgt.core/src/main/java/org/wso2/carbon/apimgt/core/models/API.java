@@ -63,6 +63,7 @@ public final class API {
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
         createdBy = builder.createdBy;
+        updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
         lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
@@ -172,6 +173,10 @@ public final class API {
         return createdBy;
     }
 
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
     public LocalDateTime getLastUpdatedTime() {
         return lastUpdatedTime;
     }
@@ -222,6 +227,7 @@ public final class API {
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
                 APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
                 Objects.equals(createdBy, api.createdBy) &&
+                Objects.equals(updatedBy, api.updatedBy) &&
                 APIUtils.isTimeStampsEquals(lastUpdatedTime, api.lastUpdatedTime) &&
                 Objects.equals(lifecycleState, api.lifecycleState) &&
                 Objects.equals(uriTemplates, api.uriTemplates) &&
@@ -234,7 +240,7 @@ public final class API {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime
-                , createdBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                , createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
 
 
@@ -268,6 +274,7 @@ public final class API {
     private final CorsConfiguration corsConfiguration;
     private final LocalDateTime createdTime;
     private final String createdBy;
+    private final String updatedBy;
     private final LocalDateTime lastUpdatedTime;
     private final LifecycleState lifecycleState;
     private final Map<String, UriTemplate> uriTemplates;
@@ -393,6 +400,7 @@ public final class API {
         private CorsConfiguration corsConfiguration;
         private LocalDateTime createdTime;
         private String createdBy;
+        private String updatedBy;
         private LocalDateTime lastUpdatedTime;
         private LifecycleState lifecycleState;
         private Map<String, UriTemplate> uriTemplates = Collections.EMPTY_MAP;
@@ -761,6 +769,18 @@ public final class API {
          */
         public APIBuilder createdBy(String createdBy) {
             this.createdBy = createdBy;
+            return this;
+        }
+
+        /**
+         * Sets the {@code updatedBy} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param updatedBy the {@code updatedBy} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder updatedBy(String updatedBy) {
+            this.updatedBy = updatedBy;
             return this;
         }
 
