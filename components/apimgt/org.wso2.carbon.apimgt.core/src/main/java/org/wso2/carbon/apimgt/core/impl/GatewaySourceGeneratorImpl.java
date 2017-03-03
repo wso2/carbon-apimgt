@@ -16,7 +16,7 @@
 * under the License.
 *
 */
-package org.wso2.carbon.apimgt.core.template;
+package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -30,10 +30,16 @@ import org.ballerinalang.composer.service.workspace.swagger.SwaggerConverterUtil
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.APIConfigContext;
+import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.ConfigContext;
+import org.wso2.carbon.apimgt.core.template.EndpointContext;
+import org.wso2.carbon.apimgt.core.template.ResourceConfigContext;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
@@ -45,17 +51,17 @@ import java.util.List;
 /**
  * Generate API config template
  */
-public class APITemplateBuilderImpl implements APITemplateBuilder {
-    private static final Logger log = LoggerFactory.getLogger(APITemplateBuilderImpl.class);
+public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
+    private static final Logger log = LoggerFactory.getLogger(GatewaySourceGeneratorImpl.class);
     private API api;
     private String packageName;
 
-    public APITemplateBuilderImpl(API api) {
+    public GatewaySourceGeneratorImpl(API api) {
         this();
         this.api = api;
     }
 
-    public APITemplateBuilderImpl() {
+    public GatewaySourceGeneratorImpl() {
         APIMConfigurations config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         packageName = config.getGatewayPackageName();
     }
