@@ -86,7 +86,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    private List<EventObserver> observerList = new ArrayList<>();
+    // Map to store observers which observe APIPublisher
+    private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager) {
@@ -275,14 +276,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 publishToGateway(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
+                // 'API_M Functions' related code
+                //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
-                eventPayload.put("API_Id", createdAPI.getId());
-                eventPayload.put("API_Name", createdAPI.getName());
-                eventPayload.put("API_Version", createdAPI.getVersion());
-                eventPayload.put("API_Description", createdAPI.getDescription());
-                eventPayload.put("API_Context", createdAPI.getContext());
-                eventPayload.put("API_LCStatus", createdAPI.getLifeCycleStatus());
-                eventPayload.put("API_Permission", createdAPI.getApiPermission());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, createdAPI.getId());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, createdAPI.getName());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, createdAPI.getVersion());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, createdAPI.getDescription());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, createdAPI.getContext());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, createdAPI.getLifeCycleStatus());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_PERMISSION, createdAPI.getApiPermission());
+                // This will notify all the event observers(Asynchronous)
                 ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_CREATION, getUsername(),
                         ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                 ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -374,13 +378,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                        // 'API_M Functions' related code
+                        //Create a payload with event specific details
                         Map<String, String> eventPayload = new HashMap<>();
-                        eventPayload.put("API_Id", api.getId());
-                        eventPayload.put("API_Name", api.getName());
-                        eventPayload.put("API_Version", api.getVersion());
-                        eventPayload.put("API_Description", api.getDescription());
-                        eventPayload.put("API_Context", api.getContext());
-                        eventPayload.put("API_LCStatus", api.getLifeCycleStatus());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, api.getContext());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, api.getLifeCycleStatus());
+                        // This will notify all the event observers(Asynchronous)
                         ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_UPDATE, getUsername(),
                                 ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                         ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -846,12 +853,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                    // 'API_M Functions' related code
+                    //Create a payload with event specific details
                     Map<String, String> eventPayload = new HashMap<>();
-                    eventPayload.put("API_Id", api.getId());
-                    eventPayload.put("API_Name", api.getName());
-                    eventPayload.put("API_Version", api.getVersion());
-                    eventPayload.put("API_Provider", api.getProvider());
-                    eventPayload.put("API_Description", api.getDescription());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_PROVIDER, api.getProvider());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
+                    // This will notify all the event observers(Asynchronous)
                     ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
                             ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                     ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -1232,25 +1242,28 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public void registerObserver(EventObserver observer) {
-        if (observer != null && !observerList.contains(observer)) {
-            observerList.add(observer);
+        if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
+            eventObservers.put(observer.getClass().getName(), observer);
         }
     }
 
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
-                                Map<String, String> extraInformation) {
-        observerList.forEach(eventObserver -> eventObserver.captureEvent(event, username, eventTime, extraInformation));
+                                Map<String, String> metaData) {
+
+        Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
+        eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
+                username, eventTime, metaData));
     }
 
     @Override
     public void removeObserver(EventObserver observer) {
         if (observer != null) {
-            observerList.remove(observer);
+            eventObservers.remove(observer.getClass().getName());
         }
     }
 
-    public List<EventObserver> getObserverList() {
-        return observerList;
+    public Map<String, EventObserver> getEventObservers() {
+        return eventObservers;
     }
 }

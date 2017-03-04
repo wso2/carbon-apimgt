@@ -35,23 +35,21 @@ public class EventLogger implements EventObserver {
 
     private static final Logger log = LoggerFactory.getLogger(EventObserver.class);
 
-    private EventLogger() {
+    public EventLogger() {
 
-    }
-
-    private static class SingletonHelper {
-        private static final EventLogger instance = new EventLogger();
-    }
-
-    public static EventLogger getInstance() {
-        return SingletonHelper.instance;
     }
 
     @Override
     public void captureEvent(Event event, String username, ZonedDateTime eventTime,
-                             Map<String, String> extraInformation) {
+                             Map<String, String> metadata) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event must not be null");
+        }
+        if (username == null) {
+            throw new IllegalArgumentException("Username must not be null");
+        }
         // the following statement is used to log any events
         log.info("New event occurred: -Event: " + event.getEventAsString() + " -Component Name: " +
-                event.getComponent() + " -Username: " + username + "\n");
+                event.getComponent() + " -Username: " + username + " \n");
     }
 }

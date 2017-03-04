@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) ${date}, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.models.Event;
 
@@ -31,25 +33,28 @@ import java.util.Map;
  */
 public class ObserverNotifier implements Runnable {
 
+    private static final Logger log = LoggerFactory.getLogger(ObserverNotifier.class);
+
     private Event event;
     private String username;
     private APIMObservable observable;
     private ZonedDateTime eventTime;
-    private Map<String, String> extraInformation;
+    private Map<String, String> metadata;
 
-    public ObserverNotifier(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation,
+    public ObserverNotifier(Event event, String username, ZonedDateTime eventTime, Map<String, String> metadata,
                             APIMObservable observable) {
         this.event = event;
         this.username = username;
         this.observable = observable;
         this.eventTime = eventTime;
-        this.extraInformation = extraInformation;
+        this.metadata = metadata;
     }
 
     @Override
     public void run() {
-        if (observable != null) {
-            observable.notifyObservers(event, username, eventTime, extraInformation);
+        if (observable == null) {
+            throw new IllegalArgumentException("APIMObservable must not be null");
         }
+        observable.notifyObservers(event, username, eventTime, metadata);
     }
 }

@@ -88,8 +88,9 @@ public class APIManagerFactory {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
-            userAwareAPIPublisher.registerObserver(EventLogger.getInstance());
-            userAwareAPIPublisher.registerObserver(LambdaFunctionTrigger.getInstance());
+            userAwareAPIPublisher.registerObserver(new EventLogger());
+            userAwareAPIPublisher.registerObserver(new LambdaFunctionTrigger(DAOFactory.getLambdaFunctionDAO(),
+                    new RestCallUtilImpl()));
 
             return userAwareAPIPublisher;
         } catch (APIMgtDAOException e) {
@@ -120,8 +121,9 @@ public class APIManagerFactory {
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
-            userAwareAPIStore.registerObserver(EventLogger.getInstance());
-            userAwareAPIStore.registerObserver(LambdaFunctionTrigger.getInstance());
+            userAwareAPIStore.registerObserver(new EventLogger());
+            userAwareAPIStore.registerObserver(new LambdaFunctionTrigger(DAOFactory.getLambdaFunctionDAO(),
+                    new RestCallUtilImpl()));
 
             return userAwareAPIStore;
         } catch (APIMgtDAOException e) {

@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -71,7 +72,7 @@ import java.util.UUID;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
-    private List<EventObserver> observerList = new ArrayList<EventObserver>();
+    private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
@@ -439,25 +440,28 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public void registerObserver(EventObserver observer) {
-        if (observer != null && !observerList.contains(observer)) {
-            observerList.add(observer);
+        if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
+            eventObservers.put(observer.getClass().getName(), observer);
         }
     }
 
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
-                                Map<String, String> extraInformation) {
-        observerList.forEach(x -> x.captureEvent(event, username, eventTime, extraInformation));
+                                Map<String, String> metaData) {
+
+        Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
+        eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
+                username, eventTime, metaData));
     }
 
     @Override
     public void removeObserver(EventObserver observer) {
         if (observer != null) {
-            observerList.remove(observer);
+            eventObservers.remove(observer.getClass().getName());
         }
     }
 
-    public List<EventObserver> getObserverList() {
-        return observerList;
+    public Map<String, EventObserver> getEventObservers() {
+        return eventObservers;
     }
 }

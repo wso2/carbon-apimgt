@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -29,7 +29,8 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.wso2.carbon.apimgt.core.exception.NoSuchKeyException;
+import org.wso2.carbon.apimgt.core.api.JWTWithRSASignature;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,15 +52,11 @@ import java.text.ParseException;
  * RSA signatures require a public and private RSA key pair. Get the private key from keyStore to sign and
  * get the public key from trustStore to verify the validity of the signature.
  */
-public class JWTWithRSASignature {
-
-    private JWTWithRSASignature() {
-
-    }
+public class JWTWithRSASignatureImpl implements JWTWithRSASignature {
 
     // To get private key from key store
-    public static PrivateKey getPrivateKey(String keyStoreFilePath, String keyStorePassword, String alias,
-                                           String aliasPassword) throws NoSuchKeyException {
+    public PrivateKey getPrivateKey(String keyStoreFilePath, String keyStorePassword, String alias,
+                                    String aliasPassword) throws APIManagementException {
         if (keyStoreFilePath == null) {
             throw new IllegalArgumentException("Path to key store file must not be null");
         }
@@ -79,17 +76,17 @@ public class JWTWithRSASignature {
             key = keyStore.getKey(alias, aliasPassword.toCharArray());
         } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | CertificateException |
                 IOException e) {
-            throw new NoSuchKeyException("Private key not found", e);
+            throw new APIManagementException("Error getting requested key: Private key not found ", e);
         }
         if (!(key instanceof PrivateKey)) {
-            throw new NoSuchKeyException("Private key not found");
+            throw new APIManagementException("Error getting requested key: Private key not found ");
         }
         return (PrivateKey) key;
     }
 
     // To sign the JWT using RSA and serialize
-    public static String rsaSignAndSerialize(RSAPrivateKey rsaPrivateKey, JWTClaimsSet claimsSet) throws
-            JOSEException {
+    public String rsaSignAndSerialize(RSAPrivateKey rsaPrivateKey, JWTClaimsSet claimsSet)
+            throws APIManagementException {
         if (rsaPrivateKey == null) {
             throw new IllegalArgumentException("The private key must not be null");
         }
@@ -98,13 +95,17 @@ public class JWTWithRSASignature {
         }
         JWSSigner signer = new RSASSASigner(rsaPrivateKey);
         SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
-        jwt.sign(signer);
+        try {
+            jwt.sign(signer);
+        } catch (JOSEException e) {
+            throw new APIManagementException("Error signing JWT ", e);
+        }
         return jwt.serialize();
     }
 
     // To get public key from trustStore and verify the validity of the signature
-    public static PublicKey getPublicKey(String keyStoreFilePath, String keyStorePassword, String alias) throws
-            NoSuchKeyException {
+    public PublicKey getPublicKey(String keyStoreFilePath, String keyStorePassword, String alias)
+            throws APIManagementException {
         if (keyStoreFilePath == null) {
             throw new IllegalArgumentException("Path to key store file must not be null");
         }
@@ -121,22 +122,29 @@ public class JWTWithRSASignature {
             keyStore.load(inputStream, keyStorePassword.toCharArray());
             cert = keyStore.getCertificate(alias);
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e) {
-            throw new NoSuchKeyException("Public key not found", e);
+            throw new APIManagementException("Error getting requested key: Public key not found ", e);
         }
         return cert.getPublicKey();
     }
 
     // To verify the signature
-    public static boolean verifyRSASignature(String token, RSAPublicKey rsaPublicKey) throws ParseException,
-            JOSEException {
+    public boolean verifyRSASignature(String token, RSAPublicKey rsaPublicKey) throws APIManagementException {
         if (token == null) {
             throw new IllegalArgumentException("The SignedJWT must not be null");
         }
         if (rsaPublicKey == null) {
             throw new IllegalArgumentException("The public key must not be null");
         }
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        JWSVerifier verifier = new RSASSAVerifier(rsaPublicKey);
-        return signedJWT.verify(verifier);
+        boolean isSignatureVerified;
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWSVerifier verifier = new RSASSAVerifier(rsaPublicKey);
+            isSignatureVerified = signedJWT.verify(verifier);
+        } catch (ParseException e) {
+            throw new APIManagementException("Error parsing signed JWT string ", e);
+        } catch (JOSEException e) {
+            throw new APIManagementException("Failed to verify signature ", e);
+        }
+        return isSignatureVerified;
     }
 }

@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -21,7 +21,9 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.core.models.ContentType;
+import org.wso2.carbon.apimgt.core.api.RestCallUtil;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,26 +35,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Utility class which handles basics of a rest call.
  * Specifically used in this project to enable inter-cloud rest communication.
  */
-public class RestCallUtil {
+public class RestCallUtilImpl implements RestCallUtil {
 
-    private RestCallUtil() {
-
-    }
-
-    public static HttpResponse loginRequest(URI uri, String userName, String password, ContentType
-            requestContentType) throws IOException {
+    public HttpResponse loginRequest(URI uri, String username, String password, MediaType acceptContentType)
+            throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        if (userName == null) {
-            throw new IllegalArgumentException("UserName must not be null");
+        if (username == null) {
+            throw new IllegalArgumentException("Username must not be null");
         }
         if (password == null) {
             throw new IllegalArgumentException("Password must not be null");
@@ -61,16 +59,18 @@ public class RestCallUtil {
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setRequestProperty("Content-Type", ContentType.APPLICATION_JSON.getMediaType());
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.POST);
+            httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.CONTENT_TYPE,
+                    MediaType.APPLICATION_JSON);
             httpConnection.setDoOutput(true);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
             }
 
             JSONObject loginInfoJsonObj = new JSONObject();
-            loginInfoJsonObj.put("userName", userName);
-            loginInfoJsonObj.put("password", password);
+            loginInfoJsonObj.put(APIMgtConstants.FunctionsConstants.USERNAME, username);
+            loginInfoJsonObj.put(APIMgtConstants.FunctionsConstants.PASSWORD, password);
 
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(loginInfoJsonObj.toString().getBytes(StandardCharsets.UTF_8));
@@ -78,6 +78,8 @@ public class RestCallUtil {
             outputStream.close();
 
             return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
@@ -85,13 +87,13 @@ public class RestCallUtil {
         }
     }
 
-    public static HttpResponse rsaSignedFetchUserRequest(URI uri, String userName,
-                                                         String userTenantDomain, String rsaSignedToken,
-                                                         ContentType requestContentType) throws IOException {
+    public HttpResponse rsaSignedFetchUserRequest(URI uri, String username,
+                                                  String userTenantDomain, String rsaSignedToken,
+                                                  MediaType acceptContentType) throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-        if (userName == null) {
+        if (username == null) {
             throw new IllegalArgumentException("UserName must not be null");
         }
         if (userTenantDomain == null) {
@@ -104,16 +106,18 @@ public class RestCallUtil {
         HttpURLConnection httpConnection = null;
         try {
             JSONObject loginInfoJsonObj = new JSONObject();
-            loginInfoJsonObj.put("userName", userName);
-            loginInfoJsonObj.put("userTenantDomain", userTenantDomain);
+            loginInfoJsonObj.put(APIMgtConstants.FunctionsConstants.USERNAME, username);
+            loginInfoJsonObj.put(APIMgtConstants.FunctionsConstants.USER_TENANT_DOMAIN, userTenantDomain);
 
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setRequestProperty("Content-Type", ContentType.APPLICATION_JSON.getMediaType());
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.POST);
+            httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.CONTENT_TYPE,
+                    MediaType.APPLICATION_JSON);
             httpConnection.setDoOutput(true);
-            httpConnection.setRequestProperty("rsaSignedToken", rsaSignedToken);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.RSA_SIGNED_TOKEN, rsaSignedToken);
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
             }
 
             OutputStream outputStream = httpConnection.getOutputStream();
@@ -122,6 +126,8 @@ public class RestCallUtil {
             outputStream.close();
 
             return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
@@ -130,40 +136,45 @@ public class RestCallUtil {
 
     }
 
-    public static List<String> captureCookies(HttpResponse response) {
+    public List<String> captureCookies(HttpResponse response) {
         if (response == null) {
             throw new IllegalArgumentException("The response must not be null");
         }
         List<String> cookies = null;
         Map<String, List<String>> headerFields = response.getHeaderFields();
         Set<String> headerFieldsSet = headerFields.keySet();
-        String headerFieldKey = headerFieldsSet.stream().filter("Set-Cookie"::equalsIgnoreCase).findAny().orElse(null);
+        String headerFieldKey = headerFieldsSet.stream().filter(
+                APIMgtConstants.FunctionsConstants.SET_COOKIE::equalsIgnoreCase).findAny().orElse(null);
         if (headerFieldKey != null) {
             cookies = headerFields.get(headerFieldKey);
         }
         return cookies;
     }
 
-    public static HttpResponse getRequest(URI uri, ContentType requestContentType, List<String> cookies)
-            throws IOException {
+    public HttpResponse getRequest(URI uri, MediaType acceptContentType, List<String> cookies)
+            throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("GET");
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.GET);
             httpConnection.setDoOutput(true);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
             }
 
             if (cookies != null && !cookies.isEmpty()) {
                 for (String cookie : cookies) {
-                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                    httpConnection.addRequestProperty(APIMgtConstants.FunctionsConstants.COOKIE,
+                            cookie.split(";", 2)[0]);
                 }
             }
             return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
@@ -171,59 +182,33 @@ public class RestCallUtil {
         }
     }
 
-    public static HttpResponse postRequest(URI uri, ContentType requestContentType, List<String> cookies,
-                                           Entity entity, ContentType payloadContentType) throws IOException {
+    public HttpResponse postRequest(URI uri, MediaType acceptContentType, List<String> cookies,
+                                    Entity entity, MediaType payloadContentType) throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
-
-        HttpURLConnection httpConnection = null;
-        try {
-            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setRequestProperty("Content-Type", payloadContentType.getMediaType());
-            httpConnection.setDoOutput(true);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
-            }
-
-            if (cookies != null && !cookies.isEmpty()) {
-                for (String cookie : cookies) {
-                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
-                }
-            }
-
-            OutputStream outputStream = httpConnection.getOutputStream();
-            outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-            outputStream.close();
-
-            return getResponse(httpConnection);
-        } finally {
-            if (httpConnection != null) {
-                httpConnection.disconnect();
-            }
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity must not be null");
         }
-    }
-
-    public static HttpResponse putRequest(URI uri, ContentType requestContentType, List<String> cookies,
-                                          Entity entity, ContentType payloadContentType) throws IOException {
-        if (uri == null) {
-            throw new IllegalArgumentException("The URI must not be null");
+        if (payloadContentType == null) {
+            throw new IllegalArgumentException("Payload content type must not be null");
         }
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("PUT");
-            httpConnection.setRequestProperty("Content-Type", payloadContentType.getMediaType());
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.POST);
+            httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.CONTENT_TYPE,
+                    payloadContentType.toString());
             httpConnection.setDoOutput(true);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
             }
 
             if (cookies != null && !cookies.isEmpty()) {
                 for (String cookie : cookies) {
-                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                    httpConnection.addRequestProperty(APIMgtConstants.FunctionsConstants.COOKIE,
+                            cookie.split(";", 2)[0]);
                 }
             }
 
@@ -233,6 +218,8 @@ public class RestCallUtil {
             outputStream.close();
 
             return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
@@ -240,8 +227,53 @@ public class RestCallUtil {
         }
     }
 
-    public static HttpResponse deleteRequest(URI uri, ContentType requestContentType, List<String> cookies)
-            throws IOException {
+    public HttpResponse putRequest(URI uri, MediaType acceptContentType, List<String> cookies,
+                                   Entity entity, MediaType payloadContentType) throws APIManagementException {
+        if (uri == null) {
+            throw new IllegalArgumentException("The URI must not be null");
+        }
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity must not be null");
+        }
+        if (payloadContentType == null) {
+            throw new IllegalArgumentException("Payload content type must not be null");
+        }
+        HttpURLConnection httpConnection = null;
+        try {
+            httpConnection = (HttpURLConnection) uri.toURL().openConnection();
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.PUT);
+            httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.CONTENT_TYPE,
+                    payloadContentType.toString());
+            httpConnection.setDoOutput(true);
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
+            }
+
+            if (cookies != null && !cookies.isEmpty()) {
+                for (String cookie : cookies) {
+                    httpConnection.addRequestProperty(APIMgtConstants.FunctionsConstants.COOKIE,
+                            cookie.split(";", 2)[0]);
+                }
+            }
+
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            outputStream.close();
+
+            return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
+        } finally {
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
+        }
+    }
+
+    public HttpResponse deleteRequest(URI uri, MediaType acceptContentType, List<String> cookies)
+            throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -249,19 +281,23 @@ public class RestCallUtil {
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection) uri.toURL().openConnection();
-            httpConnection.setRequestMethod("DELETE");
+            httpConnection.setRequestMethod(APIMgtConstants.FunctionsConstants.DELETE);
             httpConnection.setDoOutput(true);
-            if (requestContentType != null) {
-                httpConnection.setRequestProperty("Accept", requestContentType.getMediaType());
+            if (acceptContentType != null) {
+                httpConnection.setRequestProperty(APIMgtConstants.FunctionsConstants.ACCEPT,
+                        acceptContentType.toString());
             }
 
             if (cookies != null && !cookies.isEmpty()) {
                 for (String cookie : cookies) {
-                    httpConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+                    httpConnection.addRequestProperty(APIMgtConstants.FunctionsConstants.COOKIE,
+                            cookie.split(";", 2)[0]);
                 }
             }
 
             return getResponse(httpConnection);
+        } catch (IOException e) {
+            throw new APIManagementException("Connection not established properly ", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
@@ -269,7 +305,7 @@ public class RestCallUtil {
         }
     }
 
-    private static HttpResponse getResponse(HttpURLConnection httpConnection) throws IOException {
+    private HttpResponse getResponse(HttpURLConnection httpConnection) throws IOException {
         HttpResponse response = new HttpResponse();
         response.setResponseCode(httpConnection.getResponseCode());
         response.setResponseMessage(httpConnection.getResponseMessage());

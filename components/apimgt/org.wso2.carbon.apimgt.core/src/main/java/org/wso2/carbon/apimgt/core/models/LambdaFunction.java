@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -31,6 +31,12 @@ public class LambdaFunction {
     private URI endpointURI;
 
     public LambdaFunction(String name, URI endpointURI) {
+        if (name == null) {
+            throw new IllegalArgumentException("Function name must not be null");
+        }
+        if (endpointURI == null) {
+            throw new IllegalArgumentException("Function endpoint URI must not be null");
+        }
         this.name = name;
         this.endpointURI = endpointURI;
     }
@@ -43,22 +49,5 @@ public class LambdaFunction {
         return endpointURI;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        LambdaFunction function = (LambdaFunction) o;
-        return name.equals(function.name) && endpointURI.equals(function.endpointURI);
-    }
 
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + endpointURI.hashCode();
-        return result;
-    }
 }

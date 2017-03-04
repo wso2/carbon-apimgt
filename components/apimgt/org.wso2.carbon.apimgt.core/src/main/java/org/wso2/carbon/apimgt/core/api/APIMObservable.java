@@ -32,7 +32,7 @@ public interface APIMObservable {
 
     void registerObserver(EventObserver observer);
 
-    void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> extraInformation);
+    void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> metadata);
 
     void removeObserver(EventObserver observer);
 
