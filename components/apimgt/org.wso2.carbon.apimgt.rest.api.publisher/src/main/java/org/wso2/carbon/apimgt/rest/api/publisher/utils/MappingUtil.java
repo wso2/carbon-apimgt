@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -43,6 +44,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 
@@ -128,7 +131,7 @@ public class MappingUtil {
     public static API.APIBuilder toAPI(APIDTO apidto) {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
-        if(apiBusinessInformationDTO != null) {
+        if (apiBusinessInformationDTO != null) {
             businessInformation.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
             businessInformation.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
             businessInformation.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
@@ -137,7 +140,7 @@ public class MappingUtil {
 
         API_corsConfigurationDTO apiCorsConfigurationDTO = apidto.getCorsConfiguration();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        if(apiCorsConfigurationDTO != null) {
+        if (apiCorsConfigurationDTO != null) {
             corsConfiguration.setAllowCredentials(apiCorsConfigurationDTO.getAccessControlAllowCredentials());
             corsConfiguration.setAllowHeaders(apiCorsConfigurationDTO.getAccessControlAllowHeaders());
             corsConfiguration.setAllowMethods(apiCorsConfigurationDTO.getAccessControlAllowMethods());
@@ -145,8 +148,8 @@ public class MappingUtil {
             corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
         }
         List<API_operationsDTO> operationList = apidto.getOperations();
-        Map<String,UriTemplate> uriTemplateList = new HashMap();
-        for (API_operationsDTO operationsDTO : operationList){
+        Map<String, UriTemplate> uriTemplateList = new HashMap();
+        for (API_operationsDTO operationsDTO : operationList) {
             UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
             uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
             uriTemplateBuilder.authType(operationsDTO.getAuthType());
@@ -157,9 +160,9 @@ public class MappingUtil {
             } else {
                 uriTemplateBuilder.endpoint(fromEndpointListToMap(apidto.getEndpoint()));
             }
-            if (operationsDTO.getId() != null){
+            if (operationsDTO.getId() != null) {
                 uriTemplateBuilder.templateId(operationsDTO.getId());
-            }else{
+            } else {
                 uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(operationsDTO.getUritemplate(),
                         operationsDTO.getHttpVerb()));
             }
@@ -240,6 +243,7 @@ public class MappingUtil {
 
     /**
      * this  method convert Model object into Dto
+     *
      * @param documentInfo
      * @return
      */
@@ -258,10 +262,11 @@ public class MappingUtil {
 
     /**
      * This mrthod convert the Dto object into Model
+     *
      * @param documentDTO
      * @return
      */
-    public  static DocumentInfo toDocumentInfo(DocumentDTO documentDTO){
+    public static DocumentInfo toDocumentInfo(DocumentDTO documentDTO) {
         return new DocumentInfo.Builder().
                 id(documentDTO.getDocumentId()).
                 summary(documentDTO.getSummary()).
@@ -277,24 +282,24 @@ public class MappingUtil {
 
     /**
      * This method converts documentInfoResults to documentListDTO
+     *
      * @param documentInfoResults
      * @return
      */
-    public static DocumentListDTO toDocumentListDTO(List<DocumentInfo> documentInfoResults){
+    public static DocumentListDTO toDocumentListDTO(List<DocumentInfo> documentInfoResults) {
         DocumentListDTO documentListDTO = new DocumentListDTO();
-        for (DocumentInfo documentInfo : documentInfoResults){
+        for (DocumentInfo documentInfo : documentInfoResults) {
             documentListDTO.addListItem(toDocumentDTO(documentInfo));
         }
         return documentListDTO;
     }
 
 
-
     /**
      * This method convert {@link org.wso2.carbon.apimgt.core.models.Application} to {@link ApplicationDTO}
      * return
      */
-    public static ApplicationDTO toApplicationDto(Application application){
+    public static ApplicationDTO toApplicationDto(Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setDescription(application.getDescription());
@@ -307,8 +312,9 @@ public class MappingUtil {
 
     /**
      * Converts List<{@link Subscription}> into {@link SubscriptionListDTO}</>
+     *
      * @param subscriptionList list of {@link Subscription}
-     * @param limit no of items to return
+     * @param limit            no of items to return
      * @param offset
      * @return
      */
@@ -323,6 +329,7 @@ public class MappingUtil {
 
     /**
      * Converts {@link Subscription} to {@link SubscriptionDTO}
+     *
      * @param subscription
      * @return
      */
@@ -339,6 +346,7 @@ public class MappingUtil {
 
     /**
      * Convert {@link Endpoint} to {@link EndPointDTO}
+     *
      * @param endpoint
      * @return
      */
@@ -367,5 +375,35 @@ public class MappingUtil {
         endPointBuilder.security(endPointDTO.getEndpointSecurity());
         endPointBuilder.type(endPointDTO.getType());
         return endPointBuilder.build();
+    }
+
+    /**
+     * Convert {@link List<Label>} to {@link LabelListDTO}
+     *
+     * @param labels
+     * @return
+     */
+    public static LabelListDTO toLabelListDTO(List<Label> labels) {
+        LabelListDTO labelListDTO = new LabelListDTO();
+        labelListDTO.setCount(labels.size());
+        labelListDTO.setList(toLabelDTO(labels));
+        return labelListDTO;
+    }
+
+    /**
+     * Converts {@link Label} List to an {@link LabelListDTO} List.
+     *
+     * @param labels
+     * @return
+     */
+    private static List<LabelDTO> toLabelDTO(List<Label> labels) {
+        List<LabelDTO> labelDTOs = new ArrayList<>();
+        for (Label label : labels) {
+            LabelDTO labelDTO = new LabelDTO();
+            labelDTO.setName(label.getName());
+            labelDTO.setAccessUrl(label.getAccessUrl());
+            labelDTOs.add(labelDTO);
+        }
+        return labelDTOs;
     }
 }

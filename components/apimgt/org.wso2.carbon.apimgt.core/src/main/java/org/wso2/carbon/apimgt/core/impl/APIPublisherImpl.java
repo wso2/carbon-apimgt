@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -87,8 +89,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager);
+            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO);
     }
 
     /**
@@ -168,9 +170,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
-       long subscriptionCount = 0;
+        long subscriptionCount = 0;
         try {
-            subscriptionCount =  getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
+            subscriptionCount = getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
             log.error("Couldn't retrieve Subscriptions for API " + id, e, log);
             throw new APIManagementException("Couldn't retrieve Subscriptions for API " + id, e, ExceptionCodes
@@ -431,6 +433,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method will return map with role names and its permission values.
+     *
      * @param permissionJsonString
      * @return
      * @throws ParseException
@@ -451,7 +454,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
                 } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
-                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.DELETE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
@@ -503,9 +506,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
                                     (previousAPI.getLifecycleInstanceId()));
-                            getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), APIStatus
-                                    .DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(), getUsername(),
-                                    previousAPI.build());
+                            getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(),
+                                    APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
+                                    getUsername(), previousAPI.build());
                         }
                     }
                 }
@@ -544,7 +547,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param apiId        The API to be copied
+     * @param apiId      The API to be copied
      * @param newVersion The version of the new API
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
@@ -635,8 +638,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add a document (of source type FILE) with a file
      *
-     * @param resourceId         UUID of API
-     * @param content       content of the file as an Input Stream
+     * @param resourceId UUID of API
+     * @param content    content of the file as an Input Stream
      * @param fileName
      * @throws APIManagementException if failed to add the file
      */
@@ -732,7 +735,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Updates a given documentation
      *
-     * @param apiId         String
+     * @param apiId        String
      * @param documentInfo Documentation
      * @throws APIManagementException if failed to update docs
      */
@@ -1009,13 +1012,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * Save the thumbnail icon for api
-     * @param apiId apiId of api
+     *
+     * @param apiId       apiId of api
      * @param inputStream inputStream of image
      * @throws APIManagementException
      */
     @Override
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
-                                                                            throws APIManagementException {
+            throws APIManagementException {
         try {
             getApiDAO().updateImage(apiId, inputStream, dataType);
         } catch (APIMgtDAOException e) {
@@ -1247,6 +1251,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Error while retrieving the lifecycle history of the API ";
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Label> getAllLabels() throws APIManagementException {
+
+        try {
+            return getLabelDAO().getLabels();
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

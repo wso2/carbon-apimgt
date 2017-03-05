@@ -86,7 +86,7 @@ public class APIManagerFactory {
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
             return new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getLabelDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Provider", e);
             throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -112,7 +112,8 @@ public class APIManagerFactory {
         // }
         try {
             return new UserAwareAPIStore(username, DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(),
-                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
+                    DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(),
+                    DAOFactory.getLabelDAO());
 
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Consumer", e);
