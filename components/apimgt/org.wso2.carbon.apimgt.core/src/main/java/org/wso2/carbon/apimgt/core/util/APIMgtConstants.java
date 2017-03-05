@@ -236,6 +236,9 @@ public class APIMgtConstants {
 
     }
 
+    /**
+     * Functions related constants
+     */
     public static class FunctionsConstants {
         public static final String API_ID = "apiId";
         public static final String API_NAME = "apiName";

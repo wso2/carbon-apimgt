@@ -29,16 +29,33 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
- * An Observer which is used to observe possible APIMObservables and logs any event occurrence.
+ * An {@link org.wso2.carbon.apimgt.core.api.EventObserver} which is used to observe
+ * {@link org.wso2.carbon.apimgt.core.api.APIMObservable} objects and log any event occurrence.
  */
 public class EventLogger implements EventObserver {
 
     private static final Logger log = LoggerFactory.getLogger(EventObserver.class);
 
+    /**
+     * Constructor.
+     */
     public EventLogger() {
 
     }
 
+    /**
+     * Used to log all the {@link org.wso2.carbon.apimgt.core.models.Event} occurrences
+     * in an {@link org.wso2.carbon.apimgt.core.api.APIMObservable} object.
+     * <p>
+     * This is a specific implementation for
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)} method,
+     * provided by {@link org.wso2.carbon.apimgt.core.impl.EventLogger} which implements
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver} interface.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see org.wso2.carbon.apimgt.core.impl.FunctionTrigger#captureEvent(Event, String, ZonedDateTime, Map)
+     */
     @Override
     public void captureEvent(Event event, String username, ZonedDateTime eventTime,
                              Map<String, String> metadata) {
@@ -48,7 +65,7 @@ public class EventLogger implements EventObserver {
         if (username == null) {
             throw new IllegalArgumentException("Username must not be null");
         }
-        // the following statement is used to log any events
+        // Following statement is used to log any events
         log.info("New event occurred: -Event: " + event.getEventAsString() + " -Component Name: " +
                 event.getComponent() + " -Username: " + username + " \n");
     }

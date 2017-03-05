@@ -21,17 +21,29 @@
 package org.wso2.carbon.apimgt.core.models;
 
 /**
- * Enum for selecting Component options
+ * Enum for selecting Component options. Each component can have several events associated with it.
+ *
+ * @see org.wso2.carbon.apimgt.core.models.Event
  */
 public enum Component {
     API_PUBLISHER("API_PUBLISHER"), API_STORE("API_STORE");
 
     private String component;
 
+    /**
+     * Constructor.
+     *
+     * @param component Component name
+     */
     Component(String component) {
         this.component = component;
     }
 
+    /**
+     * To get String value of Component.
+     *
+     * @return String value of Component
+     */
     public String getComponentAsString() {
         return component;
     }

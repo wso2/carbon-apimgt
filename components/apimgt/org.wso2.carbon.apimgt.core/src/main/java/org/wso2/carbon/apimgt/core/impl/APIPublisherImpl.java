@@ -86,7 +86,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
 
-    // Map to store observers which observe APIPublisher
+    // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
@@ -286,7 +286,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, createdAPI.getContext());
                 eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, createdAPI.getLifeCycleStatus());
                 eventPayload.put(APIMgtConstants.FunctionsConstants.API_PERMISSION, createdAPI.getApiPermission());
-                // This will notify all the event observers(Asynchronous)
+                // This will notify all the EventObservers(Asynchronous)
                 ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_CREATION, getUsername(),
                         ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                 ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -387,7 +387,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
                         eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, api.getContext());
                         eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, api.getLifeCycleStatus());
-                        // This will notify all the event observers(Asynchronous)
+                        // This will notify all the EventObservers(Asynchronous)
                         ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_UPDATE, getUsername(),
                                 ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                         ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -861,7 +861,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
                     eventPayload.put(APIMgtConstants.FunctionsConstants.API_PROVIDER, api.getProvider());
                     eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
-                    // This will notify all the event observers(Asynchronous)
+                    // This will notify all the EventObservers(Asynchronous)
                     ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
                             ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
                     ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
@@ -1240,6 +1240,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
+     * Key should be class name of the observer. This is to prevent registering same observer twice to an
+     * observable.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void registerObserver(EventObserver observer) {
         if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
@@ -1247,6 +1254,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * Notify each registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * This calls
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)}
+     * method of that {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
                                 Map<String, String> metaData) {
@@ -1256,6 +1271,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 username, eventTime, metaData));
     }
 
+    /**
+     * Remove {@link org.wso2.carbon.apimgt.core.api.EventObserver} from the Map, which stores observers to be
+     * notified.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void removeObserver(EventObserver observer) {
         if (observer != null) {
@@ -1263,6 +1284,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * To get the Map of all observers, which registered to {@link org.wso2.carbon.apimgt.core.api.APIPublisher}.
+     *
+     * @return Map of observers.
+     */
     public Map<String, EventObserver> getEventObservers() {
         return eventObservers;
     }

@@ -25,8 +25,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Thread pool implementation which accepts ObserverNotifier objects(Runnable) and run them in seperate threads
- * using a pool of threads.
+ * Thread pool implementation which accepts ObserverNotifier(Runnable) objects and execute them using separate threads
+ * available in a pool of threads.
+ * Singleton: Bill Pugh implementation has been used.
  */
 public class ObserverNotifierThreadPool {
 
@@ -36,7 +37,9 @@ public class ObserverNotifierThreadPool {
     private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
     private ThreadPoolExecutor executor;
 
-    // Private constructor to make the class singleton
+    /**
+     * Private constructor to make the class singleton.
+     */
     private ObserverNotifierThreadPool() {
         BlockingQueue<Runnable> threadPool = new LinkedBlockingQueue<>();
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_ALIVE_TIME, TIME_UNIT,
@@ -44,14 +47,28 @@ public class ObserverNotifierThreadPool {
         executor.prestartAllCoreThreads();
     }
 
+    /**
+     * A static class which holds the instance of class ObserverNotifierThreadPool.
+     */
     private static class SingletonHelper {
         private static final ObserverNotifierThreadPool instance = new ObserverNotifierThreadPool();
     }
 
+    /**
+     * To get the instance of class ObserverNotifierThreadPool.
+     *
+     * @return Object of class ObserverNotifierThreadPool
+     */
     public static ObserverNotifierThreadPool getInstance() {
         return SingletonHelper.instance;
     }
 
+    /**
+     * To execute a Runnable task provided.
+     * This will handover the Runnable job to a separate thread available in thread pool.
+     *
+     * @param observerNotifier ObserverNotifier(Runnable) object
+     */
     public void executeTask(ObserverNotifier observerNotifier) {
         executor.execute(observerNotifier);
     }

@@ -26,22 +26,21 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
- * Observer interface which is used to observe the events occur in API manager.
- * Each observer can have different actions for event occurrences.
+ * Interface for observer which is used to observe any possible {@link org.wso2.carbon.apimgt.core.models.Event}
+ * occur in an {@link org.wso2.carbon.apimgt.core.api.APIMObservable}.
+ * Each {@link org.wso2.carbon.apimgt.core.api.EventObserver} can have different actions for event occurrences.
  */
 @FunctionalInterface
 public interface EventObserver {
     /**
      * Captures API Manager events and event related details.
-     * Each observer can have different actions for event occurrences by providing different implementation to this
-     * method.
+     * Each {@link org.wso2.carbon.apimgt.core.api.EventObserver} can have different actions for event occurrences
+     * by providing different implementation to this method.
      *
      * @param event     Event occurred
      * @param username  Logged in user's username
      * @param eventTime Time at which event occurred
      * @param metadata  Event specific metadata
-     * @see org.wso2.carbon.apimgt.core.impl.EventLogger#captureEvent(Event, String, ZonedDateTime, Map)
-     * @see org.wso2.carbon.apimgt.core.impl.LambdaFunctionTrigger#captureEvent(Event, String, ZonedDateTime, Map)
      */
     void captureEvent(Event event, String username, ZonedDateTime eventTime, Map<String, String> metadata);
 }

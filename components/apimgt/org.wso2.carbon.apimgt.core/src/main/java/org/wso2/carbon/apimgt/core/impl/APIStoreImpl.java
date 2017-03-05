@@ -72,6 +72,7 @@ import java.util.UUID;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
+    // Map to store observers, which observe APIStore events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
@@ -438,6 +439,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return tagDAO;
     }
 
+    /**
+     * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
+     * Key should be class name of the observer. This is to prevent registering same observer twice to an
+     * observable.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void registerObserver(EventObserver observer) {
         if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
@@ -445,6 +453,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    /**
+     * Notify each registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * This calls
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)}
+     * method of that {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
                                 Map<String, String> metaData) {
@@ -454,6 +470,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 username, eventTime, metaData));
     }
 
+    /**
+     * Remove {@link org.wso2.carbon.apimgt.core.api.EventObserver} from the Map, which stores observers to be
+     * notified.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public void removeObserver(EventObserver observer) {
         if (observer != null) {
@@ -461,6 +483,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    /**
+     * To get the Map of all observers, which registered to {@link org.wso2.carbon.apimgt.core.api.APIPublisher}.
+     *
+     * @return Map of observers.
+     */
     public Map<String, EventObserver> getEventObservers() {
         return eventObservers;
     }

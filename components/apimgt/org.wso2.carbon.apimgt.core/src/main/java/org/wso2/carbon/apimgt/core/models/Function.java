@@ -23,14 +23,20 @@ package org.wso2.carbon.apimgt.core.models;
 import java.net.URI;
 
 /**
- * Object mapper for Lambda function.
+ * Object mapper for Function.
  */
-public class LambdaFunction {
+public class Function {
 
     private String name;
     private URI endpointURI;
 
-    public LambdaFunction(String name, URI endpointURI) {
+    /**
+     * Constructor.
+     *
+     * @param name        Name of the function
+     * @param endpointURI Endpoint URI of the function
+     */
+    public Function(String name, URI endpointURI) {
         if (name == null) {
             throw new IllegalArgumentException("Function name must not be null");
         }
@@ -41,10 +47,20 @@ public class LambdaFunction {
         this.endpointURI = endpointURI;
     }
 
+    /**
+     * To get the function name.
+     *
+     * @return Name of the function
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * To get the endpoint URI of the function.
+     *
+     * @return Endpoint URI of the function
+     */
     public URI getEndpointURI() {
         return endpointURI;
     }

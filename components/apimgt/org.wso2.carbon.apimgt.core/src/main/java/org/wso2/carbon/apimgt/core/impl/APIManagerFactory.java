@@ -88,8 +88,9 @@ public class APIManagerFactory {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO());
 
+            // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
-            userAwareAPIPublisher.registerObserver(new LambdaFunctionTrigger(DAOFactory.getLambdaFunctionDAO(),
+            userAwareAPIPublisher.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
                     new RestCallUtilImpl()));
 
             return userAwareAPIPublisher;
@@ -121,8 +122,9 @@ public class APIManagerFactory {
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO());
 
+            // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());
-            userAwareAPIStore.registerObserver(new LambdaFunctionTrigger(DAOFactory.getLambdaFunctionDAO(),
+            userAwareAPIStore.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
                     new RestCallUtilImpl()));
 
             return userAwareAPIStore;

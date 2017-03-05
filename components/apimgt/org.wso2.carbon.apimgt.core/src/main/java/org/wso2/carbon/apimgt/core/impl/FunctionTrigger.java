@@ -25,12 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.RestCallUtil;
-import org.wso2.carbon.apimgt.core.dao.LambdaFunctionDAO;
+import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Event;
-import org.wso2.carbon.apimgt.core.models.LambdaFunction;
+import org.wso2.carbon.apimgt.core.models.Function;
+import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.time.ZonedDateTime;
@@ -40,31 +41,52 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Implementation which observes to the API Manager events and trigger corresponding lambda function that belongs to
- * the user and particular event occurred.
+ * Implementation which observes any {@link org.wso2.carbon.apimgt.core.models.Event} in
+ * {@link org.wso2.carbon.apimgt.core.api.APIMObservable} and trigger corresponding function that is mapped
+ * to the particular {@link org.wso2.carbon.apimgt.core.models.Event} occurred.
  */
-public class LambdaFunctionTrigger implements EventObserver {
+public class FunctionTrigger implements EventObserver {
 
-    private LambdaFunctionDAO lambdaFunctionDAO;
+    private FunctionDAO functionDAO;
     private RestCallUtil restCallUtil;
 
-    private static final Logger log = LoggerFactory.getLogger(LambdaFunctionTrigger.class);
+    private static final Logger log = LoggerFactory.getLogger(FunctionTrigger.class);
 
-    public LambdaFunctionTrigger(LambdaFunctionDAO lambdaFunctionDAO, RestCallUtil restCallUtil) {
-        if (lambdaFunctionDAO == null) {
-            throw new IllegalArgumentException("LambdaFunctionDAO param must not be null");
+    /**
+     * Constructor.
+     *
+     * @param functionDAO  To call {@link org.wso2.carbon.apimgt.core.dao.FunctionDAO} methods
+     * @param restCallUtil To call {@link org.wso2.carbon.apimgt.core.api.RestCallUtil} methods
+     */
+    public FunctionTrigger(FunctionDAO functionDAO, RestCallUtil restCallUtil) {
+        if (functionDAO == null) {
+            throw new IllegalArgumentException("FunctionDAO param must not be null");
         }
         if (restCallUtil == null) {
             throw new IllegalArgumentException("RestCallUtil param must not be null");
         }
-        this.lambdaFunctionDAO = lambdaFunctionDAO;
+        this.functionDAO = functionDAO;
         this.restCallUtil = restCallUtil;
     }
 
+    /**
+     * Used to observe all the {@link org.wso2.carbon.apimgt.core.models.Event} occurrences
+     * in an {@link org.wso2.carbon.apimgt.core.api.APIMObservable} object and trigger corresponding function that is
+     * mapped to the particular {@link org.wso2.carbon.apimgt.core.models.Event} occurred.
+     * <p>
+     * This is a specific implementation for
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)} method,
+     * provided by {@link org.wso2.carbon.apimgt.core.impl.FunctionTrigger} which implements
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver} interface.
+     * <p>
+     * {@inheritDoc}
+     *
+     * @see org.wso2.carbon.apimgt.core.impl.EventLogger#captureEvent(Event, String, ZonedDateTime, Map)
+     */
     @Override
     public void captureEvent(Event event, String username, ZonedDateTime eventTime,
                              Map<String, String> metadata) {
-        List<LambdaFunction> functions = null;
+        List<Function> functions = null;
         String jsonPayload = null;
 
         if (event == null) {
@@ -79,23 +101,23 @@ public class LambdaFunctionTrigger implements EventObserver {
         if (metadata == null) {
             throw new IllegalArgumentException("Payload must not be null");
         }
-
+        // Add general attributes to payload
         metadata.put(APIMgtConstants.FunctionsConstants.EVENT, event.getEventAsString());
         metadata.put(APIMgtConstants.FunctionsConstants.COMPONENT, event.getComponent().getComponentAsString());
         metadata.put(APIMgtConstants.FunctionsConstants.USERNAME, username);
         metadata.put(APIMgtConstants.FunctionsConstants.EVENT_TIME, eventTime.toString());
 
         try {
-            functions = lambdaFunctionDAO.getUserFunctionsForEvent(username, event);
+            functions = functionDAO.getUserFunctionsForEvent(username, event);
             jsonPayload = new Gson().toJson(metadata);
         } catch (APIMgtDAOException e) {
             String message = "Error loading functions for event from DB: -event: " + event + " -Username: " + username;
             log.error(message, new APIManagementException("Problem invoking 'getUserFunctionsForEvent' method in " +
-                    "'LambdaFunctionDAO' ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION));
+                    "'FunctionDAO' ", e, ExceptionCodes.APIMGT_DAO_EXCEPTION));
         }
 
         if (functions != null && !functions.isEmpty()) {
-            for (LambdaFunction function : functions) {
+            for (Function function : functions) {
                 HttpResponse response = null;
                 try {
                     response = restCallUtil.postRequest(function.getEndpointURI(), null, null,
@@ -108,6 +130,8 @@ public class LambdaFunctionTrigger implements EventObserver {
                 if (response != null) {
                     int responseStatusCode = response.getResponseCode();
 
+                    // Successful function invocation. Possible response codes: 200-299
+                    // Benefit of integer division used to ensure all possible success response codes covered
                     if (responseStatusCode / 100 == 2) {
                         log.info("Function successfully invoked: " + function.getName() + " -event: " + event +
                                 " -Username: " + username + " -Response code: " + responseStatusCode);

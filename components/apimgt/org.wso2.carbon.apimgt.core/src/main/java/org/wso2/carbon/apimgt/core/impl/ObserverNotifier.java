@@ -29,11 +29,10 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
- * Thread used to notify the observers whenever an event occurs in an Observable
+ * Thread used to notify the observers asynchronously, whenever an {@link org.wso2.carbon.apimgt.core.models.Event}
+ * occurs in an {@link org.wso2.carbon.apimgt.core.api.APIMObservable}.
  */
 public class ObserverNotifier implements Runnable {
-
-    private static final Logger log = LoggerFactory.getLogger(ObserverNotifier.class);
 
     private Event event;
     private String username;
@@ -41,6 +40,15 @@ public class ObserverNotifier implements Runnable {
     private ZonedDateTime eventTime;
     private Map<String, String> metadata;
 
+    /**
+     * Constructor.
+     *
+     * @param event      Event which occurred
+     * @param username   Logged in user's username
+     * @param eventTime  Time at which event occurred
+     * @param metadata   Event specific metadata
+     * @param observable APIMObservable object in which the Event occurred
+     */
     public ObserverNotifier(Event event, String username, ZonedDateTime eventTime, Map<String, String> metadata,
                             APIMObservable observable) {
         this.event = event;
@@ -50,6 +58,11 @@ public class ObserverNotifier implements Runnable {
         this.metadata = metadata;
     }
 
+    /**
+     * Run method which calls the
+     * {@link org.wso2.carbon.apimgt.core.api.APIMObservable#notifyObservers(Event, String, ZonedDateTime, Map)} method
+     * to notify each registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     */
     @Override
     public void run() {
         if (observable == null) {

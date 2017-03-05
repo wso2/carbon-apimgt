@@ -20,10 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.dao.LambdaFunctionDAO;
+import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Event;
-import org.wso2.carbon.apimgt.core.models.LambdaFunction;
+import org.wso2.carbon.apimgt.core.models.Function;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,16 +36,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * DAO implementation for Lambda functions
+ * DAO implementation for Functions. This provides method implementations to deal with DAO operations needed.
  */
-public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
+public class FunctionDAOImpl implements FunctionDAO {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<LambdaFunction> getUserDeployedFunctions(String userName) throws APIMgtDAOException {
+    public List<Function> getUserDeployedFunctions(String userName) throws APIMgtDAOException {
         if (userName == null) {
             throw new IllegalArgumentException("Username must not be null");
         }
-        List<LambdaFunction> functions = new ArrayList<>();
+        List<Function> functions = new ArrayList<>();
         final String sqlQuery = "SELECT FUNCTION_NAME, FUNCTION_URI " +
                 "FROM AM_LAMBDA_FUNCTION " +
                 "WHERE USER_NAME = ?";
@@ -57,7 +60,7 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
                 while (resultSet.next()) {
                     String functionName = resultSet.getString("FUNCTION_NAME");
                     URI endpointURI = new URI(resultSet.getString("FUNCTION_URI"));
-                    functions.add(new LambdaFunction(functionName, endpointURI));
+                    functions.add(new Function(functionName, endpointURI));
                 }
             } catch (URISyntaxException e) {
                 throw new APIMgtDAOException("Not a URI", e);
@@ -68,15 +71,18 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         return functions;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<LambdaFunction> getUserFunctionsForEvent(String userName, Event event) throws APIMgtDAOException {
+    public List<Function> getUserFunctionsForEvent(String userName, Event event) throws APIMgtDAOException {
         if (userName == null) {
             throw new IllegalArgumentException("Username must not be null");
         }
         if (event == null) {
             throw new IllegalArgumentException("Event must not be null");
         }
-        List<LambdaFunction> functions = new ArrayList<>();
+        List<Function> functions = new ArrayList<>();
         final String sqlQuery = "SELECT FUNCTION_NAME, FUNCTION_URI " +
                 "FROM AM_LAMBDA_FUNCTION JOIN AM_EVENT_FUNCTION_MAPPING " +
                 "ON AM_LAMBDA_FUNCTION.FUNCTION_ID = AM_EVENT_FUNCTION_MAPPING.FUNCTION_ID " +
@@ -90,7 +96,7 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
                 while (resultSet.next()) {
                     String functionName = resultSet.getString("FUNCTION_NAME");
                     URI endpointURI = new URI(resultSet.getString("FUNCTION_URI"));
-                    functions.add(new LambdaFunction(functionName, endpointURI));
+                    functions.add(new Function(functionName, endpointURI));
                 }
             } catch (URISyntaxException e) {
                 throw new APIMgtDAOException("Not a URI", e);
@@ -101,6 +107,9 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         return functions;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Event> getTriggersForUserFunction(String userName, String functionName) throws APIMgtDAOException {
         if (userName == null) {
@@ -131,6 +140,9 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         return events;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addEventFunctionMapping(String userName, Event event, String functionName) throws APIMgtDAOException {
         if (userName == null) {
@@ -158,6 +170,9 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteEventFunctionMapping(String userName, Event event, String functionName) throws
             APIMgtDAOException {
@@ -188,8 +203,11 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void updateUserDeployedFunctions(String userName, List<LambdaFunction> functions) throws
+    public void updateUserDeployedFunctions(String userName, List<Function> functions) throws
             APIMgtDAOException {
         if (userName == null) {
             throw new IllegalArgumentException("Username must not be null");
@@ -198,11 +216,11 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
             throw new IllegalArgumentException("Functions(List) must not be null");
         }
         try {
-            List<LambdaFunction> userFunctionsInDB = getUserDeployedFunctions(userName);
-            for (LambdaFunction function : functions) {
+            List<Function> userFunctionsInDB = getUserDeployedFunctions(userName);
+            for (Function function : functions) {
                 boolean isFunctionExist = false;
-                for (Iterator<LambdaFunction> iterator = userFunctionsInDB.iterator(); iterator.hasNext(); ) {
-                    LambdaFunction localStoredFunction = iterator.next();
+                for (Iterator<Function> iterator = userFunctionsInDB.iterator(); iterator.hasNext(); ) {
+                    Function localStoredFunction = iterator.next();
                     if (function.equals(localStoredFunction)) {
                         isFunctionExist = true;
                         iterator.remove();
@@ -213,7 +231,7 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
                     addNewFunction(userName, function);
                 }
             }
-            for (LambdaFunction missingFunction : userFunctionsInDB) {
+            for (Function missingFunction : userFunctionsInDB) {
                 deleteFunction(userName, missingFunction.getName());
             }
         } catch (SQLException e) {
@@ -221,7 +239,14 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         }
     }
 
-    private void addNewFunction(String userName, LambdaFunction function) throws SQLException {
+    /**
+     * To add a new Function to the 'AM_LAMBDA_FUNCTION' table.
+     *
+     * @param userName Logged in user's username
+     * @param function Function to be added
+     * @throws SQLException In case of any failures, when trying to add a new Function
+     */
+    private void addNewFunction(String userName, Function function) throws SQLException {
         final String sqlQuery = "INSERT INTO AM_LAMBDA_FUNCTION (FUNCTION_NAME, FUNCTION_URI, USER_NAME) " +
                 "VALUES(?, ?, ?)";
 
@@ -234,6 +259,13 @@ public class LambdaFunctionDAOImpl implements LambdaFunctionDAO {
         }
     }
 
+    /**
+     * To delete a Function from 'AM_LAMBDA_FUNCTION' table and its mappings from 'AM_EVENT_FUNCTION_MAPPING' table.
+     *
+     * @param userName     Logged in user's username
+     * @param functionName Name of the function to be deleted
+     * @throws SQLException In case of any failures, when trying to delete a Function
+     */
     private void deleteFunction(String userName, String functionName) throws SQLException {
         final String sqlQuery = "DELETE FROM AM_LAMBDA_FUNCTION " +
                 "WHERE USER_NAME = ? AND FUNCTION_NAME = ?";

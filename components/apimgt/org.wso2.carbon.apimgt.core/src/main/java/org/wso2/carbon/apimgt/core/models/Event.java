@@ -23,7 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Enum for selecting Event options
+ * Enum for selecting Event options. These are the possible events which could occur in WSO2 API Manager.
+ * Each event belongs to a specific {@link org.wso2.carbon.apimgt.core.models.Component}.
  */
 public enum Event {
     API_CREATION("API_CREATION", Component.API_PUBLISHER), API_DELETION("API_DELETION", Component.API_PUBLISHER),
@@ -37,19 +38,41 @@ public enum Event {
     private String event;
     private Component component;
 
+    /**
+     * Constructor.
+     *
+     * @param event     Event name
+     * @param component Component type
+     */
     Event(String event, Component component) {
         this.event = event;
         this.component = component;
     }
 
+    /**
+     * To get String value of Event.
+     *
+     * @return event String value of event
+     */
     public String getEventAsString() {
         return event;
     }
 
+    /**
+     * To get the component to which an Event belongs.
+     *
+     * @return Component to which this Event belongs
+     */
     public Component getComponent() {
         return component;
     }
 
+    /**
+     * To get all the events which belong to a given Component.
+     *
+     * @param component Component to which we need to get all the events
+     * @return List of events which belong to the Component given
+     */
     public List<Event> getEventsForComponent(Component component) {
         List<Event> componentSpecificEvents = new ArrayList<>();
 

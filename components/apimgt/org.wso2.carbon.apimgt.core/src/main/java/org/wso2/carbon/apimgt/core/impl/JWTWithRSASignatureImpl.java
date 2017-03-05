@@ -54,7 +54,10 @@ import java.text.ParseException;
  */
 public class JWTWithRSASignatureImpl implements JWTWithRSASignature {
 
-    // To get private key from key store
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public PrivateKey getPrivateKey(String keyStoreFilePath, String keyStorePassword, String alias,
                                     String aliasPassword) throws APIManagementException {
         if (keyStoreFilePath == null) {
@@ -84,7 +87,10 @@ public class JWTWithRSASignatureImpl implements JWTWithRSASignature {
         return (PrivateKey) key;
     }
 
-    // To sign the JWT using RSA and serialize
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String rsaSignAndSerialize(RSAPrivateKey rsaPrivateKey, JWTClaimsSet claimsSet)
             throws APIManagementException {
         if (rsaPrivateKey == null) {
@@ -103,7 +109,10 @@ public class JWTWithRSASignatureImpl implements JWTWithRSASignature {
         return jwt.serialize();
     }
 
-    // To get public key from trustStore and verify the validity of the signature
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public PublicKey getPublicKey(String keyStoreFilePath, String keyStorePassword, String alias)
             throws APIManagementException {
         if (keyStoreFilePath == null) {
@@ -127,7 +136,10 @@ public class JWTWithRSASignatureImpl implements JWTWithRSASignature {
         return cert.getPublicKey();
     }
 
-    // To verify the signature
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean verifyRSASignature(String token, RSAPublicKey rsaPublicKey) throws APIManagementException {
         if (token == null) {
             throw new IllegalArgumentException("The SignedJWT must not be null");

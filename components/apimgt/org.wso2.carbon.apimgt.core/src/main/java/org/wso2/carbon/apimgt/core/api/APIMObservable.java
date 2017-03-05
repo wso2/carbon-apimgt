@@ -26,14 +26,38 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
- * Observable interface which can be observed by Observers whenever an event occurs in API manager.
+ * Interface for observable which can be observed by {@link org.wso2.carbon.apimgt.core.api.EventObserver}
+ * whenever an {@link org.wso2.carbon.apimgt.core.models.Event} occurs.
  */
 public interface APIMObservable {
 
+    /**
+     * To register an observer to {@link org.wso2.carbon.apimgt.core.api.APIMObservable}.
+     * Registered {@link org.wso2.carbon.apimgt.core.api.EventObserver} can then observe any
+     * {@link org.wso2.carbon.apimgt.core.models.Event} occurs in
+     * {@link org.wso2.carbon.apimgt.core.api.APIMObservable} and take its action.
+     *
+     * @param observer Observer which needs to be registered
+     */
     void registerObserver(EventObserver observer);
 
+    /**
+     * To notify all the registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}, whenever an
+     * {@link org.wso2.carbon.apimgt.core.models.Event} occurs.
+     *
+     * @param event     Event which occurred
+     * @param username  Logged in user's username
+     * @param eventTime Time at which event occurred
+     * @param metadata  Event specific metadata
+     */
     void notifyObservers(Event event, String username, ZonedDateTime eventTime, Map<String, String> metadata);
 
+    /**
+     * To remove a registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}. Once removed, it won't get anymore
+     * notifications whenever an {@link org.wso2.carbon.apimgt.core.models.Event} occurs.
+     *
+     * @param observer Observer which needs to be removed
+     */
     void removeObserver(EventObserver observer);
 
 }

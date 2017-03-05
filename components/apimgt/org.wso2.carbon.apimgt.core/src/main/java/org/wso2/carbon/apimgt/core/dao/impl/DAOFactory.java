@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
-import org.wso2.carbon.apimgt.core.dao.LambdaFunctionDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -217,24 +217,30 @@ public class DAOFactory {
         return labelDAO;
     }
 
-    public static LambdaFunctionDAO getLambdaFunctionDAO() throws APIMgtDAOException {
-        LambdaFunctionDAO lambdaFunctionDAO = null;
+    /**
+     * To get the FunctionDAO object. Depends on different vendors.
+     *
+     * @return FunctionDAO object
+     * @throws APIMgtDAOException In case of unhandled DB type or SQLException
+     */
+    public static FunctionDAO getFunctionDAO() throws APIMgtDAOException {
+        FunctionDAO functionDAO = null;
 
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
             if (driverName.contains("MySQL") || driverName.contains("H2")) {
-                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+                functionDAO = new FunctionDAOImpl();
             } else if (driverName.contains("DB2")) {
 
             } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+                functionDAO = new FunctionDAOImpl();
 
             } else if (driverName.contains("PostgreSQL")) {
-                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+                functionDAO = new FunctionDAOImpl();
 
             } else if (driverName.contains("Oracle")) {
-                lambdaFunctionDAO = new LambdaFunctionDAOImpl();
+                functionDAO = new FunctionDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }
@@ -244,7 +250,7 @@ public class DAOFactory {
 
         setup();
 
-        return lambdaFunctionDAO;
+        return functionDAO;
     }
 
     private static void setup() throws APIMgtDAOException {

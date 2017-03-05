@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.core.api.RestCallUtil;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.BufferedReader;
@@ -39,11 +40,16 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Utility class which handles basics of a rest call.
- * Specifically used in this project to enable inter-cloud rest communication.
+ * Utility class which provides basic methods needed to make a RESTful call to a service.
+ * Acts as a REST client.
+ * Specifically used in this project to enable inter-cloud REST communication.
  */
 public class RestCallUtilImpl implements RestCallUtil {
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse loginRequest(URI uri, String username, String password, MediaType acceptContentType)
             throws APIManagementException {
         if (uri == null) {
@@ -87,6 +93,10 @@ public class RestCallUtilImpl implements RestCallUtil {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse rsaSignedFetchUserRequest(URI uri, String username,
                                                   String userTenantDomain, String rsaSignedToken,
                                                   MediaType acceptContentType) throws APIManagementException {
@@ -136,6 +146,10 @@ public class RestCallUtilImpl implements RestCallUtil {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<String> captureCookies(HttpResponse response) {
         if (response == null) {
             throw new IllegalArgumentException("The response must not be null");
@@ -151,6 +165,10 @@ public class RestCallUtilImpl implements RestCallUtil {
         return cookies;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse getRequest(URI uri, MediaType acceptContentType, List<String> cookies)
             throws APIManagementException {
         if (uri == null) {
@@ -182,6 +200,10 @@ public class RestCallUtilImpl implements RestCallUtil {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse postRequest(URI uri, MediaType acceptContentType, List<String> cookies,
                                     Entity entity, MediaType payloadContentType) throws APIManagementException {
         if (uri == null) {
@@ -227,6 +249,10 @@ public class RestCallUtilImpl implements RestCallUtil {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse putRequest(URI uri, MediaType acceptContentType, List<String> cookies,
                                    Entity entity, MediaType payloadContentType) throws APIManagementException {
         if (uri == null) {
@@ -272,6 +298,10 @@ public class RestCallUtilImpl implements RestCallUtil {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public HttpResponse deleteRequest(URI uri, MediaType acceptContentType, List<String> cookies)
             throws APIManagementException {
         if (uri == null) {
@@ -305,6 +335,13 @@ public class RestCallUtilImpl implements RestCallUtil {
         }
     }
 
+    /**
+     * To get a response from service.
+     *
+     * @param httpConnection Connection used to make the request
+     * @return HttpResponse from service
+     * @throws IOException In case of any failures, when trying to get the response from service
+     */
     private HttpResponse getResponse(HttpURLConnection httpConnection) throws IOException {
         HttpResponse response = new HttpResponse();
         response.setResponseCode(httpConnection.getResponseCode());
