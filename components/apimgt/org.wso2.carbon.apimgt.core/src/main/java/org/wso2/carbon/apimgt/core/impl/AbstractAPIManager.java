@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -54,15 +55,17 @@ public abstract class AbstractAPIManager implements APIManager {
     private PolicyDAO policyDAO;
     private String username;
     private APILifecycleManager apiLifecycleManager;
+    private LabelDAO labelDAO;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager)  {
+            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO)  {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
+        this.labelDAO = labelDAO;
     }
 
     /**
@@ -332,6 +335,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected PolicyDAO getPolicyDAO() {
         return policyDAO;
+    }
+
+    protected LabelDAO getLabelDAO() {
+        return labelDAO;
     }
 
     protected String getUsername() {
