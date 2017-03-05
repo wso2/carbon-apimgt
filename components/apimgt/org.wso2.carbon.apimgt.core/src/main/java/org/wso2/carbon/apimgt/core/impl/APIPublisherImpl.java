@@ -170,7 +170,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public long getAPISubscriptionCountByAPI(String id) throws APIManagementException {
-        long subscriptionCount = 0;
+        long subscriptionCount;
         try {
             subscriptionCount = getApiSubscriptionDAO().getSubscriptionCountByAPI(id);
         } catch (APIMgtDAOException e) {
@@ -286,11 +286,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        } catch (LifecycleException e) {
-            String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
-            log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
-        } catch (ParseException e) {
+        } catch (LifecycleException | ParseException e) {
             String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
@@ -444,17 +440,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         JSONParser jsonParser = new JSONParser();
 
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
-        for (int i = 0; i < baseJsonArray.size(); i++) {
-            JSONObject jsonObject = (JSONObject) baseJsonArray.get(i);
+        for (Object aBaseJsonArray : baseJsonArray) {
+            JSONObject jsonObject = (JSONObject) aBaseJsonArray;
             String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
             JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
             int totalPermissionValue = 0;
-            for (int j = 0; j < subJsonArray.size(); j++) {
-                if (APIMgtConstants.Permission.READ.equals(subJsonArray.get(j).toString().trim())) {
+            for (Object aSubJsonArray : subJsonArray) {
+                if (APIMgtConstants.Permission.READ.equals(aSubJsonArray.toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
-                } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.UPDATE.equals(aSubJsonArray.toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
-                } else if (APIMgtConstants.Permission.DELETE.equals(subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.DELETE.equals(aSubJsonArray.toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
@@ -554,8 +550,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
-        String newVersionedId = null;
-        LifecycleState lifecycleState = null;
+        String newVersionedId;
+        LifecycleState lifecycleState;
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
@@ -598,7 +594,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
             LocalDateTime localDateTime = LocalDateTime.now();
-            DocumentInfo document = null;
+            DocumentInfo document;
             DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
             docBuilder.createdBy(getUsername());
             docBuilder.updatedBy(getUsername());
@@ -681,14 +677,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-        boolean status = false;
+        boolean status;
         try {
-            if (getApiDAO().getAPISummary(apiId) == null) {
-                status = false;
-            } else {
-                status = true;
-            }
-
+            status = getApiDAO().getAPISummary(apiId) != null;
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't get APISummary for " + apiId;
             log.error(errorMsg, e);
@@ -743,7 +734,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String updateDocumentation(String apiId, DocumentInfo documentInfo) throws APIManagementException {
         try {
             LocalDateTime localDateTime = LocalDateTime.now();
-            DocumentInfo document = null;
+            DocumentInfo document;
             DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentInfo);
             docBuilder.updatedBy(getUsername());
             docBuilder.lastUpdatedTime(localDateTime);
@@ -864,7 +855,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
-        List<API> apiResults = null;
+        List<API> apiResults;
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
@@ -1184,7 +1175,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException {
         URL url;
-        HttpURLConnection urlConn = null;
+        HttpURLConnection urlConn;
         try {
             url = new URL(swaggerResourceUrl);
             urlConn = (HttpURLConnection) url.openConnection();

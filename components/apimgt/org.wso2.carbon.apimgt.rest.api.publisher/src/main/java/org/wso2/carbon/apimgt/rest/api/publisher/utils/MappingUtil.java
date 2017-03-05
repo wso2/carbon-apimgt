@@ -148,7 +148,7 @@ public class MappingUtil {
             corsConfiguration.setEnabled(apiCorsConfigurationDTO.getCorsConfigurationEnabled());
         }
         List<API_operationsDTO> operationList = apidto.getOperations();
-        Map<String, UriTemplate> uriTemplateList = new HashMap();
+        Map<String, UriTemplate> uriTemplateList = new HashMap<>();
         for (API_operationsDTO operationsDTO : operationList) {
             UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
             uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
