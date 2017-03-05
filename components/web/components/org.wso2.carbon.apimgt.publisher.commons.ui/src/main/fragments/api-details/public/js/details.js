@@ -4,7 +4,12 @@
  * @param {object} error_response object returned from Swagger-client library
  */
 function apiGetErrorHandler(error_response) {
-    var message = "Error[" + error_response.status + "]: " + error_response.data;
+    var message;
+    if (error_response.data) {
+        message = "Error[" + error_response.status + "]: " + error_response.data;
+    } else {
+        message = error_response;
+    }
     noty({
         text: message,
         type: 'error',
@@ -23,21 +28,37 @@ function apiGetErrorHandler(error_response) {
     });
 }
 
-function loadOverview(jsonData) {
-    //Manipulating data for the UI
-    var context = jsonData.obj;
-    if (context.endpointConfig) {
-        var endpointConfig = $.parseJSON(context.endpointConfig);
-        context.productionEndpoint = endpointConfig.production_endpoints.url;
-    }
-    // Grab the template script TODO: Replace with UUF client
-    $.get('/editor/public/components/root/base/templates/api/{id}Overview.hbs', function (templateData) {
-        var template = Handlebars.compile(templateData);
-        // Pass our data to the template
-        var theCompiledHtml = template(context);
-        // Add the compiled html to the page
-        $('#overview-content').html(theCompiledHtml);
-    }, 'html');
+function overviewTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var context = response.obj;
+            if (context.endpointConfig) {
+                var endpointConfig = $.parseJSON(context.endpointConfig);
+                context.productionEndpoint = endpointConfig.production_endpoints.url;
+            }
+            var callbacks = {
+                onSuccess: function (renderedHTML) {
+                    $('#overview-content').html(renderedHTML);
+                }, onFailure: function (data) {
+                }
+            };
+            var data = {
+                name: context.name,
+                version: context.version,
+                context: context.context,
+                isDefaultVersion: context.isDefaultVersion,
+                visibility: context.visibility,
+                lastUpdatedTime: context.lastUpdatedTime,
+                provider: context.provider,
+                id: context.id,
+                lifeCycleStatus: context.lifeCycleStatus,
+                policies: context.policies.join(', ')
+            };
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-overview", data, callbacks);
+        }
+    ).catch(apiGetErrorHandler);
 }
 
 /**
@@ -50,13 +71,16 @@ function addHashToURL(event) {
 }
 
 /**
- * Javascript to enable link to tab. Change hash for page-reload
+ * Javascript to enable link to tab. Change hash for page-reload, If hashed page name is available load that page
+ * If no hash value is present load the default page which is overview-tab
  */
 function loadFromHash() {
     var hash = document.location.hash;
     if (hash) {
         $('a[href="#' + hash.substr(1) + '"]').tab('show');
         window.scrollTo(0, 0);
+    } else {
+        showTab('overview-tab');
     }
     // Register tab click event to append hashed page name to current URL
     $('a[role="tab"]').on('shown.bs.tab', addHashToURL);
@@ -73,12 +97,33 @@ function lifecycleTabHandler(event) {
     function renderLCTab(response) {
         var api = response[0];
         var policies = response[1];
+        var lcState = response[2];
+        var lcHistory = response[3];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
         var api_data = JSON.parse(api.data);
         var policies_data = JSON.parse(policies.data);
         var callbacks = {
             onSuccess: function (data) {
-                $('#policies-list-dropdown').multiselect();
+                $('#policies-list-dropdown').multiselect(
+                    {
+                        onChange: function (option, checked, select) {
+                            if (!checked && !option.parent().val()) {
+                                var message = "Please select at least one subscription tier.";
+                                noty({
+                                    text: message,
+                                    type: 'warning',
+                                    dismissQueue: true,
+                                    progressBar: true,
+                                    timeout: 5000,
+                                    layout: 'topCenter',
+                                    theme: 'relax',
+                                    maxVisible: 10,
+                                });
+                                return false;
+                            }
+                        }
+                    }
+                );
             }, onFailure: function (data) {
             }
         };
@@ -91,18 +136,65 @@ function lifecycleTabHandler(event) {
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
-            policies: policies_data
+            policies: policies_data,
+            lcState: lcState.obj,
+            lcHistory: lcHistory.obj
         };
-        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "api-tab-lc-content", mode, callbacks);
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
-
     var promised_api = api_client.get(api_id);
     var promised_tiers = api_client.policies('api');
-    Promise.all([promised_api, promised_tiers]).then(renderLCTab)
+    var promised_lcState = api_client.getLcState(api_id);
+    var promised_lcHistory = api_client.getLcHistory(api_id);
+    Promise.all([promised_api, promised_tiers, promised_lcState,promised_lcHistory]).then(renderLCTab)
 }
 
+/**
+ * Load ballerina composer from here
+ * @param event {object} Click event
+ */
 function mediationTabHandler(event) {
 
+}
+
+function endpointsTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var api = response.obj;
+            var data = {
+                name: api.name,
+                endpoints: {},
+            };
+            var promised_endpoints = [];
+            for (var endpoint_index in api.endpoint) {
+                if (api.endpoint.hasOwnProperty(endpoint_index)) {
+                    var id = api.endpoint[endpoint_index].id;
+                    promised_endpoints.push(api_client.getEndpoint(id));
+                    data.endpoints[id] = api.endpoint[endpoint_index];
+                }
+            }
+            var all_endpoints = Promise.all(promised_endpoints);
+            all_endpoints.then(
+                function (responses) {
+                    for (var endpoint_index in responses) {
+                        if (responses.hasOwnProperty(endpoint_index)) {
+                            var endpoint = responses[endpoint_index].obj;
+                            Object.assign(data.endpoints[endpoint.id], endpoint);
+                        }
+                    }
+                    var callbacks = {
+                        onSuccess: function (data) {
+                        }, onFailure: function (data) {
+                        }
+                    };
+                    var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoints", data, "endpoints-tab-content", mode, callbacks);
+                }
+            );
+        }
+    ).catch(apiGetErrorHandler);
 }
 
 /**
@@ -122,9 +214,17 @@ function updateLifecycleHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-            let message_element = $("#general-alerts").find(".alert-success");
-            message_element.find(".alert-message").html("Life cycle state updated successfully!");
-            message_element.fadeIn("slow");
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
             lifecycleTabHandler(event);
         }
     ).catch(
@@ -137,6 +237,42 @@ function updateLifecycleHandler(event) {
     );
 }
 
+/**
+ * Handles the update endpoint submit button event, Get all the endpoint  inputs and update endpoint by using the endpoint UUID in input element data attribute
+ * @param event {Event} DOM click event
+ */
+function updateEndpointsHandler(event) {
+    event.preventDefault();
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var inputs = $(".endpoint-inputs");
+    var promised_updates = [];
+    for (var endpoint_input of inputs) {
+        var input = $(endpoint_input);
+        var id = input.data().uuid;
+        var url = input.val();
+        var data = {
+            endpointConfig: url,
+        };
+        promised_updates.push(api_client.updateEndpoint(id, data));
+    }
+    Promise.all(promised_updates).then(
+        function (responses) {
+            var message = "Endpoint configuration(s) updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }
+    ).catch(apiGetErrorHandler);
+}
+
 function updateTiersHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
@@ -145,6 +281,20 @@ function updateTiersHandler(event) {
         api_id: api_id
     };
     var selected_policy_uuids = $('#policies-list-dropdown').val();
+    if (!selected_policy_uuids) {
+        var message = "Please select at least one subscription tier.";
+        noty({
+            text: message,
+            type: 'warning',
+            dismissQueue: true,
+            progressBar: true,
+            timeout: 5000,
+            layout: 'topCenter',
+            theme: 'relax',
+            maxVisible: 10,
+        });
+        return false;
+    }
     api_client.get(api_id).then(
         function (response) {
             var api_data = JSON.parse(response.data);
@@ -184,19 +334,31 @@ function updateTiersHandler(event) {
         }.bind(data));
 }
 
+function showTab(tab_name) {
+    $('.nav a[href="#' + tab_name + '"]').tab('show');
+}
+
+/**
+ * Execute once the page load is done.
+ */
 $(function () {
     var client = new API();
+    /* Re-use same api client in all the tab show events */
     var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over all the tabs since parsing as event data to event handlers
-    client.get(api_id).then(loadOverview).catch(apiGetErrorHandler);
     $('#bodyWrapper').on('click', 'button', function (e) {
         var elementName = $(this).attr('data-name');
         if (elementName == "editApiButton") {
             $('#apiOverviewForm').toggleClass('edit').toggleClass('view');
         }
     });
-    $('#tab-7').bind('show.bs.tab', mediationTabHandler);
+    $('#tab-1').bind('show.bs.tab', {api_client: client, api_id: api_id}, overviewTabHandler);
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
+    $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    $(document).on('click', "#update-endpoints-configuration", {
+        api_client: client,
+        api_id: api_id
+    }, updateEndpointsHandler);
     loadFromHash();
 });

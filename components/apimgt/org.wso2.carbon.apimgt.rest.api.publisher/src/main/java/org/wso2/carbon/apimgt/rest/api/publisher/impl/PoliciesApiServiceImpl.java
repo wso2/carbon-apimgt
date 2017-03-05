@@ -20,7 +20,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
-                                         String ifNoneMatch) throws NotFoundException {
+                                         String ifNoneMatch, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
 
         log.info("Received Policy GET request for tierLevel " + tierLevel);
@@ -40,7 +40,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince) throws NotFoundException {
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
 
         log.info("Received Policy request for " + tierName);
@@ -57,11 +57,4 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
-    @Override
-    public Response policiesUpdatePermissionPost(String tierName, String tierLevel, String ifMatch,
-                                                 String ifUnmodifiedSince, TierPermissionDTO permissions)
-            throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "Permission magic!")).build();
-    }
 }

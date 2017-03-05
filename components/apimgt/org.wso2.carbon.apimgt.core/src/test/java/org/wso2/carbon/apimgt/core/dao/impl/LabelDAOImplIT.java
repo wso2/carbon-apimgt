@@ -24,29 +24,78 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Label;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LabelDAOImplIT extends DAOIntegrationTestBase{
+public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
-    public void testAddGetLabel() throws Exception
-    {
+    public void testAddGetLabels() throws Exception {
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label = SampleTestObjectCreator.createLabel("public","https://localhost:8243");
+        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label2 = SampleTestObjectCreator.createLabel("private", "https://test.private");
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelList.add(label2);
+        labelDAO.addLabels(labelList);
+
+        List<Label> labelsFromDb = labelDAO.getLabels();
+        Assert.assertNotNull(labelsFromDb);
+        Assert.assertEquals(labelsFromDb.size(), 2);
+    }
+
+    @Test
+    public void testAddDuplicateLabelName() throws Exception {
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelDAO.addLabels(labelList);
+
+        Label label2 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        labelList.add(label2);
+
+        try {
+            labelDAO.addLabels(labelList);
+            Assert.fail("Exception not thrown for adding duplicate Label");
+        } catch (APIMgtDAOException e) {
+            // Just catch the exception so that we can continue execution
+        }
+
+        List<Label> labelsFromDb = labelDAO.getLabels();
+        Assert.assertNotNull(labelsFromDb);
+        Assert.assertEquals(labelsFromDb.size(), 1);
+    }
+
+    @Test
+    public void testGetLabelByName() throws Exception {
+
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label = SampleTestObjectCreator.createLabel("public", "https://test.public");
         List<Label> labelList = new ArrayList<>();
         labelList.add(label);
         labelDAO.addLabels(labelList);
 
-        List<String> labelNames = new ArrayList<>();
-        labelNames.add(label.getName());
-        List<Label> labelsFromDb = labelDAO.getLabelsByName(labelNames);
-
-        Assert.assertNotNull(labelsFromDb);
-        Assert.assertEquals(labelsFromDb.size(), 1);
-        Assert.assertEquals(labelsFromDb, labelList);
-
+        Label labelFromDb = labelDAO.getLabelByName(label.getName());
+        Assert.assertNotNull(labelFromDb);
+        Assert.assertEquals(labelFromDb, label);
     }
+
+    @Test
+    public void testDeleteLabel() throws Exception {
+
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label);
+        labelDAO.addLabels(labelList);
+
+        labelDAO.deleteLabel(label.getName());
+        Label labelFromDb = labelDAO.getLabelByName(label.getName());
+        Assert.assertNull(labelFromDb);
+    }
+
 }

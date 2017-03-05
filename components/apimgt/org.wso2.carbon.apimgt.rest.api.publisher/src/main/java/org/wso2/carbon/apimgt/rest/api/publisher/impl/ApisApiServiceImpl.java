@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -15,14 +16,16 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
@@ -71,7 +77,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentInfo = documentationContent.getDocumentInfo();
             if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
                 String filename = documentInfo.getFileName();
-                return Response.ok(documentInfo)
+                return Response.ok(documentationContent.getFileContent())
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                         .build();
@@ -420,6 +426,56 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
+    public Response apisApiIdLifecycleGet(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            LifecycleState lifecycleState = RestAPIPublisherUtil.getApiPublisher(username).getAPILifeCycleData(apiId);
+            return Response.ok().entity(lifecycleState).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving Lifecycle state data for API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
+    }
+
+    @Override
+    public Response apisApiIdLifecycleHistoryGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+                String lifecycleInstanceId =
+                        RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId).getLifecycleInstanceId();
+                if(lifecycleInstanceId != null) {
+                    List lifecyclestatechangehistory =
+                            RestAPIPublisherUtil.getApiPublisher(username)
+                                    .getLifeCycleHistoryFromUUID(lifecycleInstanceId);
+                    return Response.ok().entity(lifecyclestatechangehistory).build();
+                } else {
+                    throw new APIManagementException("Could not find lifecycle information for the requested API"
+                            + apiId, ExceptionCodes. APIMGT_LIFECYCLE_EXCEPTION);
+                }
+           } else {
+                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
+        return null;
+    }
+
+    @Override
     public Response apisApiIdPut(String apiId
             , APIDTO body
             , String contentType
@@ -680,6 +736,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+            , String url
             , String contentType
             , String ifMatch
             , String ifUnmodifiedSince
@@ -687,8 +744,27 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
+
+            if (fileInputStream != null && url != null) {
+                String msg = "Only one of 'file' and 'url' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            String uuid = "";
+            if(fileInputStream != null) {
+                uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+            } else if(url != null) {
+                uuid = apiPublisher.addApiFromDefinition(url);
+            } else {
+                String msg = "Either 'file' or 'inlineContent' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
             API returnAPI = apiPublisher.getAPIbyUUID(uuid);
             return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
         } catch (APIManagementException e) {

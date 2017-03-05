@@ -45,6 +45,7 @@ var _renderApplicationAddPage = function(){
             //TODO:Replace this once the tierList retrieval api is implemented
             var tier = {};
             tier.name = "50PerMin";
+            tier.description = "Allows 50000 requests per minute";
             var list = [];
             list.push(tier);
             //TODO:Replace this once the tierList retrieval api is implemented
@@ -68,7 +69,6 @@ var addApplication = function () {
 
             var applicationName = $("#application-name").val();
             var tier = $("#appTier").val();
-            var goBack = $("#goBack").val();
             var description = $("#description").val();
 
             var application = {
@@ -82,7 +82,29 @@ var addApplication = function () {
                     "Content-Type": "application/json"
                 },
                 function (data) {
-                    window.location = "/store/applications/" + data.obj.applicationId;
+                    if(goBack == "yes") {
+                        noty({
+                            text : "Return back to API detail page",
+                            type : "alert",
+                            dismissQueue: true,
+                            layout : "topCenter",
+                            theme : 'relax',
+                            buttons : [
+                                {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                    $noty.close();
+                                    window.location = "/store/apis/" + apiId; //apiId from sentToClient
+                                }
+                                },
+                                {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                    $noty.close();
+                                    window.location = "/store/applications/" + data.obj.applicationId;
+                                }
+                                }
+                            ]
+                        });
+                    } else {
+                        window.location = "/store/applications/" + data.obj.applicationId;
+                    }
                 },
                 function (error) {
                     if(error.status==401){

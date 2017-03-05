@@ -44,7 +44,7 @@ public class ResourceConfigContext extends ConfigContext {
     }
 
     @Override
-    public void validate() throws Exception {
+    public void validate() throws APITemplateException {
     }
 
     @Override

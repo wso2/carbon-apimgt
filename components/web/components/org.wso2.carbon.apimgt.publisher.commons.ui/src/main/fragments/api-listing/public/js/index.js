@@ -1,4 +1,6 @@
 $(function () {
+    $('[data-toggle="loading"]').loading('show');
+    /* TODO: need to render page with loading animation embed , doing this create a flick in showing loading animation and page loading ~tmkb*/
     var api = new API();
     api.getAll(getAPIsCallback);
     $(document).on('click', ".api-listing-delete", {api_instance: api}, deleteAPIHandler); // Event-type, Selector, data, method
@@ -9,7 +11,13 @@ $(function () {
  * @param response {object} Raw response object returned from swagger client
  */
 function getAPIsCallback(response) {
+    $('[data-toggle="loading"]').loading('hide');
     var dt_data = apiResponseToData(response);
+    if (dt_data.data.length === 0) {
+        $('#api-listing-welcome-message').removeClass('hidden');
+        return false;
+    }
+    $('#api-listing-container').removeClass('hidden');
     initDataTable(dt_data);
 }
 
@@ -19,20 +27,41 @@ function getAPIsCallback(response) {
  * @param event {object} Click event
  */
 function deleteAPIHandler(event) {
-    let data_table = $('#apim-publisher-listing').DataTable();
-    let current_row = data_table.row($(this).closest('tr'));
-    let api_id = current_row.data().id;
-    let api = event.data.api_instance;
-    let promised_delete = api.deleteAPI(api_id);
-    promised_delete.then(
-        function (response) {
-            if (!response) {
-                return;
+    var data_table = $('#apim-publisher-listing').DataTable();
+    var current_row = data_table.row($(this).parents('tr'));
+    var api_id = current_row.data().id;
+    var api_name = current_row.data().name;
+    var api = event.data.api_instance;
+    noty({
+        text: 'Do you want to delete <span class="text-info">' + api_name + '</span> ?',
+        type: 'alert',
+        dismissQueue: true,
+        layout: "topCenter",
+        modal: true,
+        theme: 'relax',
+        buttons: [
+            {
+                addClass: 'btn btn-danger', text: 'Ok', onClick: function ($noty) {
+                $noty.close();
+                let promised_delete = api.deleteAPI(api_id);
+                promised_delete.then(
+                    function (response) {
+                        if (!response) {
+                            return;
+                        }
+                        current_row.remove();
+                        data_table.draw();
+                    }
+                );
             }
-            current_row.remove();
-            data_table.draw();
-        }
-    );
+            },
+            {
+                addClass: 'btn btn-info', text: 'Cancel', onClick: function ($noty) {
+                $noty.close();
+            }
+            }
+        ]
+    });
 }
 
 function initDataTable(raw_data) {

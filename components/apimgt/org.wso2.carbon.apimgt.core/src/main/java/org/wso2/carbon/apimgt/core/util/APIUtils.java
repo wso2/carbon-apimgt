@@ -172,11 +172,12 @@ public class APIUtils {
         while (stringTokenizer.hasMoreElements()) {
             String part1 = stringTokenizer.nextToken();
             if (part1.contains("{")) {
-                String pathParam = part1.replace("{", "").replace("}", "");
 /*
                 stringBuilder.append("By" + pathParam);
 */
-            }  else {
+            } else if (part1.contains("*")) {
+                stringBuilder.append(part1.replaceAll("\\*", "_star_"));
+            } else {
                 stringBuilder.append(part1);
             }
         }

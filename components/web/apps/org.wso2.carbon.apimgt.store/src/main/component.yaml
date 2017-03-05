@@ -18,4 +18,5 @@ config:
   appName : API Store
   title : "API Store Listing"
   loginRedirectUri: "/apis"
-  swaggerURL : "http://localhost:9090/api/am/store/v1/apis/swagger.json"
+  swaggerURL : "/api/am/store/v1/apis/swagger.json"
+  loginPageUri : "https://localhost:9292/store/auth/login"

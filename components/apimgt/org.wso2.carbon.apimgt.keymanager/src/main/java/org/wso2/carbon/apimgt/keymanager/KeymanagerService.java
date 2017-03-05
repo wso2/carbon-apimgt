@@ -46,6 +46,7 @@ public class KeymanagerService implements Microservice {
     protected void activate(BundleContext bundleContext) {
         // Nothing to do
         KeyManagerUtil.addUsersAndScopes();
+        getData();
         OAuthApplication pubApp = new OAuthApplication();
         pubApp.setClientId("publisher");
         pubApp.setClientSecret("1234-5678-9101");
@@ -58,7 +59,8 @@ public class KeymanagerService implements Microservice {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        // Nothing to do
+        KeyManagerUtil.backUpOauthData(applications, appsByClientId);
+        KeyManagerUtil.backUpTokenData();
     }
 
     @POST
@@ -66,7 +68,8 @@ public class KeymanagerService implements Microservice {
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     @Produces({ "application/json" })
     public Response getNewAccessToken(@FormDataParam("username") String username, @FormDataParam("password") String
-            password , @FormDataParam("grant_type") String grantType, @HeaderParam("Authorization")
+            password , @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period")
+            String validityPeriod, @HeaderParam("Authorization")
             String authzHeader)
             throws KeyManagerException {
 
@@ -88,6 +91,7 @@ public class KeymanagerService implements Microservice {
         decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
         String clientId = decoded[0];
         String clientSecret = decoded[1];
+        Long validPeriod = Long.parseLong(validityPeriod);
 
         if (!appsByClientId.containsKey(clientId) ||
                 !appsByClientId.get(clientId).getClientSecret().equals(clientSecret)) {
@@ -98,17 +102,28 @@ public class KeymanagerService implements Microservice {
 
         OAuthTokenResponse oAuthTokenResponse = new OAuthTokenResponse();
         if ("password".equals(grantType)) {
-            if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password)) {
+            if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password, validPeriod)) {
                 return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
         }
 
+        OAuthApplication oAuthApplication = appsByClientId.get(clientId);
         OAuthTokenResponse tokenResponse = new OAuthTokenResponse();
-        tokenResponse.setToken(UUID.randomUUID().toString());
-        tokenResponse.setRefreshToken(UUID.randomUUID().toString());
-        tokenResponse.setExpiresIn(KeyManagerUtil.getExpiresTime());
+        String accessToken = UUID.randomUUID().toString();
+        String refreshToken = UUID.randomUUID().toString();
+        if (oAuthApplication.getAccessToken() != null) {
+            accessToken = oAuthApplication.getAccessToken();
+            refreshToken = oAuthApplication.getRefreshToken();
+        }
+        tokenResponse.setToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setExpiresTimestamp(KeyManagerUtil.getExpiresTime(validPeriod));
+        tokenResponse.setExpiresIn(validPeriod);
+        oAuthApplication.setAccessToken(accessToken);
+        oAuthApplication.setRefreshToken(refreshToken);
+        appsByClientId.put(clientId, oAuthApplication);
         return Response.status(Response.Status.OK).entity(tokenResponse).build();
     }
 
@@ -125,11 +140,10 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
         }
         if (applications.containsKey(body.getClientName())) {
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setCode("900409");
-            errorDTO.setMessage("Client already exists with name " + body.getClientName());
-            return Response.status(Response.Status.CONFLICT).entity(errorDTO).
-                    build();
+            OAuthApplication oAuthApplication = applications.get(body.getClientName());
+            body.setClientId(oAuthApplication.getClientId());
+            body.setClientSecret(oAuthApplication.getClientSecret());
+            return Response.status(Response.Status.CREATED).entity(body).build();
         }
 
         String[] decoded;
@@ -185,5 +199,11 @@ public class KeymanagerService implements Microservice {
             return Response.status(Response.Status.OK).entity(oAuth2IntrospectionResponse).build();
         }
         return Response.status(Response.Status.OK).entity("{\"active\":false}").build();
+    }
+
+    private static void getData() {
+        applications = KeyManagerUtil.getBackedUpData("applications.data");
+        appsByClientId = KeyManagerUtil.getBackedUpData("appsByClientId.data");
+        KeyManagerUtil.getBackedUpTokenData("token.data");
     }
 }

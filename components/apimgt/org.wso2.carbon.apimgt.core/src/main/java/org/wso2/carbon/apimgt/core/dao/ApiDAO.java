@@ -340,6 +340,14 @@ public interface ApiDAO {
      */
     Endpoint getEndpoint(String endpointId) throws APIMgtDAOException;
 
+    /**
+     * Get an Endpoint
+     *
+     * @param name name of endpoint
+     * @return
+     * @throws APIMgtDAOException
+     */
+    Endpoint getEndpointByName(String name) throws APIMgtDAOException;
 
     /**
      * get all Endpoints

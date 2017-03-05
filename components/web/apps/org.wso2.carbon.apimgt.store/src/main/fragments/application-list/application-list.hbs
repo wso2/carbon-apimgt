@@ -1,9 +1,7 @@
 <div class="form-group" id="applications-list">
     <label for="application-list">Applications</label>
-    <select id="application-list" class="form-control">
-        {{#unless @params.isSubscribedToDefault}}
-            <option value="-">Select Application...</option>
-        {{/unless}}
+    <select id="application-list" class="form-control" onchange="applicationSelectionChange()">
+        <option value="-">Select Application...</option>
         <option value="createNewApp">New Application...</option>
         {{#if @params.applications}}
             <optgroup label="My Applications">

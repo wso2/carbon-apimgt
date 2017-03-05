@@ -31,4 +31,5 @@ public class AuthenticatorConstants {
     public static final String REFERER_HEADER = "Referer";
     public static final String X_ALT_REFERER_HEADER = "X-Alt-Referer";
     public static final String HTTP_ONLY_COOKIE = "HttpOnly";
+    public static final String SECURE_COOKIE = "Secure";
 }

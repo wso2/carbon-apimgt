@@ -13,12 +13,10 @@ import java.util.Map;
 /**
  * TierDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T15:30:25.255+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
 public class TierDTO   {
-  @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("description")
   private String description = null;
 
   /**
@@ -54,19 +52,14 @@ public class TierDTO   {
     }
   }
 
-  @JsonProperty("tierLevel")
   private TierLevelEnum tierLevel = null;
 
-  @JsonProperty("attributes")
   private Map<String, String> attributes = new HashMap<String, String>();
 
-  @JsonProperty("requestCount")
   private Long requestCount = null;
 
-  @JsonProperty("unitTime")
   private Long unitTime = null;
 
-  @JsonProperty("timeUnit")
   private String timeUnit = null;
 
   /**
@@ -100,10 +93,8 @@ public class TierDTO   {
     }
   }
 
-  @JsonProperty("tierPlan")
   private TierPlanEnum tierPlan = null;
 
-  @JsonProperty("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = null;
 
   public TierDTO name(String name) {
@@ -174,7 +165,7 @@ public class TierDTO   {
    * Custom attributes added to the policy policy 
    * @return attributes
   **/
-  @ApiModelProperty(example = "{}", value = "Custom attributes added to the policy policy ")
+  @ApiModelProperty(value = "Custom attributes added to the policy policy ")
   public Map<String, String> getAttributes() {
     return attributes;
   }

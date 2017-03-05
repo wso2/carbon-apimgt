@@ -35,7 +35,7 @@ public class EndpointContext extends ConfigContext {
     }
 
     @Override
-    public void validate() throws Exception {
+    public void validate() throws APITemplateException {
 
     }
 

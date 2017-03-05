@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
     <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
     <name>API Store Micro Service</name>
     <packaging>bundle</packaging>
@@ -46,10 +47,10 @@
             <artifactId>jackson-datatype-joda</artifactId>
             <scope>provided</scope>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.core</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
@@ -154,7 +155,7 @@
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.store.internal,
-            org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.exp.pkg.version}"
+            org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
             osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"

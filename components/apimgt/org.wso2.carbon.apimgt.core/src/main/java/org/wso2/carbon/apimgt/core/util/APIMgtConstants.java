@@ -63,6 +63,7 @@ public class APIMgtConstants {
     public static final String EMPTY_STRING_VALUE = " ";
     public static final String SUPPORTED_HTTP_VERBS = "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS";
 
+    public static final String HTTP_GET = "GET";
     /**
      * Application statuses.
      */
@@ -216,6 +217,7 @@ public class APIMgtConstants {
         public static final String DOC_ID = "DOC_ID";
         public static final String TIER_LEVEL = "TIER_LEVEL";
         public static final String ENDPOINT_ID = "ENDPOINT_ID";
+        public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
     }
 
     /**
