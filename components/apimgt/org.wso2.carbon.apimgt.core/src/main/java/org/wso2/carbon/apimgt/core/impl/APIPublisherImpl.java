@@ -1191,7 +1191,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 addAPI(apiBuilder);
                 return apiBuilder.getId();
             } else {
-                throw new APIManagementException("Error while getting swagger resource from url : " + url);
+                throw new APIManagementException("Error while getting swagger resource from url : " + url,
+                        ExceptionCodes.API_DEFINITION_MALFORMED);
             }
         } catch (UnsupportedEncodingException e) {
             String msg = "Unsupported encoding exception while getting the swagger resource from url";
