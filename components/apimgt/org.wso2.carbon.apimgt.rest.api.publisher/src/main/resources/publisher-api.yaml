@@ -1213,7 +1213,12 @@ paths:
            name: file
            description: Document to upload
            type: file
-           required: true
+           required: false
+         - in: formData
+           name: url
+           description: Swagger definition from url
+           type: string
+           required: false
          - $ref: '#/parameters/Content-Type'
          - $ref: '#/parameters/If-Match'
          - $ref: '#/parameters/If-Unmodified-Since'

@@ -231,6 +231,14 @@ class API {
                         payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
+        } else if (api_data.type == 'swagger-url') {
+            payload = {url: api_data.url, 'Content-Type': "multipart/form-data"};
+            promise_create = this.client.then(
+                    (client) => {
+                    return client["API (Collection)"].post_apis_import_definition(
+                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                    }
+            );
         } else {
             payload = {body: this._updateTemplate(api_data), "Content-Type": "application/json"};
             promise_create = this.client.then(

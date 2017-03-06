@@ -2,7 +2,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.2-SNAPSHOT</version>
+        <version>7.0.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -163,7 +163,7 @@
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range-->
         <export.package>
             <!--!org.wso2.carbon.apimgt.gateway.internal,-->
-            org.wso2.carbon.apimgt.gateway.*; version="${carbon.apimgt.version}"
+            org.wso2.carbon.apimgt.gateway.*; version="${carbon.apimgt.version}",
             !com.google.common.base.internal,
             <!--com.google.common.*-->
         </export.package>

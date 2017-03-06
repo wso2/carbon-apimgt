@@ -97,6 +97,7 @@ public class SampleTestObjectCreator {
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
                 createdBy("admin").
+                updatedBy("admin").
                 lastUpdatedTime(LocalDateTime.now()).
                 permission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
