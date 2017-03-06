@@ -22,6 +22,16 @@
                 </div>
 
             </div>
+            {{#each @params.lcState.checkItemBeanList}}
+            <div class="form-actions">
+                <label class="control-label col-sm-2"></label>
+                <label class="checkbox col-sm-4" id="checkListItem">
+                    <input type="checkbox" id="checkItem" name="checkItem" value="{{this.name}}" {{#if this.value}}checked{{/if}}>
+                    <span class="helper">{{this.name}}</span>
+                </label>
+            </div>
+            {{/each}}
+
             <div class="form-actions">
                 <div class="btn-group btn-group-justified" role="group" aria-label="btn">
                     {{#each @params.lcState.availableTransitionBeanList}}
