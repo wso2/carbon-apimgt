@@ -48,14 +48,14 @@ public class ObserverNotifierThreadPool {
     }
 
     /**
-     * A static class which holds the instance of class ObserverNotifierThreadPool.
+     * A static class which holds the instance of ObserverNotifierThreadPool class.
      */
     private static class SingletonHelper {
         private static final ObserverNotifierThreadPool instance = new ObserverNotifierThreadPool();
     }
 
     /**
-     * To get the instance of class ObserverNotifierThreadPool.
+     * To get the instance of ObserverNotifierThreadPool class.
      *
      * @return Object of class ObserverNotifierThreadPool
      */
