@@ -208,64 +208,8 @@ $(function () {
                             }
 
                             if (tab.id == "api-documentation") {
-                                setAuthHeader(swaggerClient);
-                                swaggerClient["API (individual)"].get_apis_apiId_documents({"apiId": apiId}, {"responseContentType": 'application/json'},
-                                    function (jsonData) {
-
-                                        var documentationList = jsonData.obj.list, length, documentations = {}, doc, obj;
-
-                                        if (documentationList != null) {
-                                            length = documentationList.length;
-                                        }
-                                        for (i = 0; i < length; i++) {
-                                            doc = documentationList[i];
-                                            //TODO: Remove this once comparison helper is implemented
-                                            if (doc.sourceType == "INLINE") {
-                                                doc.isInLine = true;
-                                            } else if (doc.sourceType == "FILE") {
-                                                doc.isFile = true;
-                                            } else if (doc.sourceType == "URL") {
-                                                doc.isURL = true;
-                                            }
-                                            obj = documentations[doc.type] || (documentations[doc.type] = []);
-                                            obj.push(doc);
-                                        }
-
-                                        for (var type in documentations) {
-                                            if (documentations.hasOwnProperty(type)) {
-                                                var docs = documentations[type], icon = null, typeName = null;
-                                                if (type.toUpperCase() == "HOWTO") {
-                                                    icon = "fw-info";
-                                                    typeName = "HOW TO";
-                                                } else if (type.toUpperCase() == "PUBLIC_FORUM") {
-                                                    icon = "fw-forum";
-                                                    typeName = "PUBLIC FORUM";
-                                                } else if (type.toUpperCase() == "SUPPORT_FORUM") {
-                                                    icon = "fw-forum";
-                                                    typeName = "SUPPORT FORUM";
-                                                } else if (type.toUpperCase() == "SAMPLES") {
-                                                    icon = "fw-api";
-                                                    typeName = "SAMPLES";
-                                                } else {
-                                                    icon = "fw-text";
-                                                    typeName = "OTHER";
-                                                }
-                                                documentations[type].icon = icon;
-                                                documentations[type].typeName = typeName;
-                                            }
-                                        }
-                                        $.get('/store/public/components/root/base/templates/apis/{apiId}/api-documentations.hbs', function (templateData) {
-                                            context.documentations = documentations;
-                                            var apiOverviewTemplate = Handlebars.compile(templateData);
-                                            // Inject template data
-                                            var compiledTemplate = apiOverviewTemplate(context);
-
-                                            // Append compiled template into page
-                                            $("#api-documentation").append(compiledTemplate);
-
-                                        }, 'html');
-                                    });
-
+                                var doc_instance = new DOC();
+                                var docs = doc_instance.getAll(getDOCsCallback,apiId);
                             }
 
                         }
@@ -373,6 +317,78 @@ $(function () {
     });
 });
 
+
+/**
+ * Callback method to handle apis data after receiving them via the REST API
+ * @param response {object} Raw response object returned from swagger client
+ */
+function getDOCsCallback(jsonData) {
+    debugger;
+    var documentationList = jsonData.obj.list, length, documentations = {}, doc, obj,docsObj=[];
+
+    if (documentationList != null) {
+        length = documentationList.length;
+    }
+
+    var docsObj = {};
+    for (var i = 0; i < length; i++) {
+        doc = documentationList[i];
+        if (doc.sourceType == "INLINE") {
+            doc.isInLine = true;
+        } else if (doc.sourceType == "FILE") {
+            doc.isFile = true;
+        } else if (doc.sourceType == "URL") {
+            doc.isURL = true;
+        }
+        var groupName = doc.type;
+        if (!docsObj[groupName]) {
+            docsObj[groupName] = [];
+        }
+        docsObj[groupName].push(doc);
+    }
+    var docsArray = [];
+    for (var type in docsObj) {
+        var icon = null, typeName = null;
+        if (type.toUpperCase() == "HOWTO") {
+            icon = "fw-info";
+            typeName = "HOW TO";
+        } else if (type.toUpperCase() == "PUBLIC_FORUM") {
+            icon = "fw-forum";
+            typeName = "PUBLIC FORUM";
+        } else if (type.toUpperCase() == "SUPPORT_FORUM") {
+            icon = "fw-forum";
+            typeName = "SUPPORT FORUM";
+        } else if (type.toUpperCase() == "SAMPLES") {
+            icon = "fw-api";
+            typeName = "SAMPLES";
+        } else {
+            icon = "fw-text";
+            typeName = "OTHER";
+        }
+        docsArray.push({type: groupName, icon:icon, typeName:typeName, docs: docsObj[groupName]});
+    }
+    var docs ={};
+    docs.documentations = docsArray;
+    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-documentations",docs, {
+        onSuccess: function (renderedData) {
+            $("#api-documentation").append(renderedData);
+
+        }, onFailure: function (message, e) {
+            var message = "Error occurred while getting api documentation details." + message;
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 2000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+        }
+    });
+}
 
 function applicationSelectionChange() {
     var apiId = $("#apiId").val();

@@ -1,8 +1,9 @@
+{{log this}}
 <div class="api-documentation panel-group accordion" role="tablist">
-    {{#each documentations}}
+    {{#each @params.documentations}}
         <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="heading{{@index}}" data-toggle="collapse" data-parent=".accordion"
-                 href="#accordion1-collapse{{@index}}" aria-expanded="true"
+            <div class="panel-heading" role="tab" id="heading{{@index}}" data-toggle="collapse" data-parent="
+            .accordion" href="#accordion1-collapse{{@index}}" aria-expanded="true"
                  aria-controls="accordion1-collapse{{@index}}">
                 <h4 class="panel-title">
                     <label class="radio">
@@ -32,7 +33,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{#each this}}
+                        {{#each this.docs}}
                             <tr>
                                 <td>{{this.name}}</td>
                                 <td>{{this.summary}}</td>

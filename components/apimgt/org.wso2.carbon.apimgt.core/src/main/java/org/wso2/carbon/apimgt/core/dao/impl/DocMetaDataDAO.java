@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,7 +143,8 @@ class DocMetaDataDAO {
 
     static void addDocumentInfo(Connection connection, DocumentInfo documentInfo) throws SQLException {
         final String query = "INSERT INTO AM_API_DOC_META_DATA (UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
-                "SOURCE_URL, SOURCE_TYPE, VISIBILITY) VALUES (?,?,?,?,?,?,?,?)";
+                "SOURCE_URL, SOURCE_TYPE, VISIBILITY, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) " 
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, documentInfo.getId());
@@ -153,7 +155,10 @@ class DocMetaDataDAO {
             statement.setString(6, documentInfo.getSourceURL());
             statement.setString(7, documentInfo.getSourceType().toString());
             statement.setString(8, documentInfo.getVisibility().toString());
-
+            statement.setString(9, documentInfo.getCreatedBy());
+            statement.setTimestamp(10, Timestamp.valueOf(documentInfo.getCreatedTime()));
+            statement.setString(11, documentInfo.getUpdatedBy());
+            statement.setTimestamp(12, Timestamp.valueOf(documentInfo.getLastUpdatedTime()));
             statement.execute();
             addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         }

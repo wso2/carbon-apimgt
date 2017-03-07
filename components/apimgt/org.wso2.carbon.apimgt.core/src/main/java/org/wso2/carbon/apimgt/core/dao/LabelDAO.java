@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import java.util.List;
 
 /**
- * Provides read access to the Label data layer
+ * Provides access to the Label data layer
  */
 public interface LabelDAO {
 
@@ -47,12 +47,20 @@ public interface LabelDAO {
     void addLabels(List<Label> labels) throws APIMgtDAOException;
 
     /**
-     * Returns matched labels
+     * Returns matched label
      *
-     * @param labels The {@link List<String>}List of labels
-     * @return {@link List<Label>} List of labels
+     * @param labelName The {@link String} Name of the label
+     * @return {@link Label>} Label
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<Label> getLabelsByName(List<String> labels) throws APIMgtDAOException;
+    Label getLabelByName(String labelName) throws APIMgtDAOException;
+
+    /**
+     * Remove label
+     *
+     * @param labelName The {@link String} Name of the label
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void deleteLabel(String labelName) throws APIMgtDAOException;
 
 }

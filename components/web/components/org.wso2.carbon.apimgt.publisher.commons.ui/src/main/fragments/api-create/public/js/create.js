@@ -124,33 +124,31 @@ function createAPIHandler(event) {
 function createAPIFromSwagger(input_type) {
     if (input_type === "swagger-url") {
         var url = $('#swagger-url').val();
-        var fetch_data = $.get(url);
-        fetch_data.then(
-            (swagger_json) => {
-                let data = new Blob([JSON.stringify(swagger_json)], {type: 'application/json'});
-                var new_api = new API('');
-                new_api.create(data)
-                    .then(createAPICallback)
-                    .catch(
-                        function (error_response) {
-                            var error_data = JSON.parse(error_response.data);
-                            var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                            noty({
-                                text: message,
-                                type: 'error',
-                                dismissQueue: true,
-                                modal: true,
-                                closeWith: ['click', 'backdrop'],
-                                progressBar: true,
-                                timeout: 5000,
-                                layout: 'top',
-                                theme: 'relax',
-                                maxVisible: 10
-                            });
-                            $('[data-toggle="loading"]').loading('hide');
-                            console.debug(error_response);
-                        });
-            });
+        var data = {};
+        data.url = url;
+        data.type = 'swagger-url';
+        var new_api = new API('');
+        new_api.create(data)
+            .then(createAPICallback)
+            .catch(
+                function (error_response) {
+                    var error_data = JSON.parse(error_response.data);
+                    var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        closeWith: ['click', 'backdrop'],
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10
+                    });
+                    $('[data-toggle="loading"]').loading('hide');
+                    console.debug(error_response);
+                });
     } else if (input_type === "swagger-file") {
         var file_input = $('#swagger-file');
         var swagger = file_input[0].files[0];
@@ -247,7 +245,7 @@ function addEndpoint(callBack) {
     //todo: need to endpoint type after it is defined
     var body = {
         name: 'endpoint_' + name + '_' + version,
-        endpointConfig: "{'url':"+url+",'timeout':1000}",
+        endpointConfig: url,
         endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
         maxTps: 1000,
         type:"http"
