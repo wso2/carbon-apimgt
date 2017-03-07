@@ -1,7 +1,9 @@
 package org.wso2.carbon.apimgt.impl.clients;
 
 /**
- * Created by mushthaq on 11/1/16.
+ * Client for UserInformationRecoveryService.
+ *
+ * @author mushthaq
  */
 import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.api.APIManagementException;

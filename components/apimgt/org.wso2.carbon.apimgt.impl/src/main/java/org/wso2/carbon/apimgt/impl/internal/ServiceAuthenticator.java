@@ -6,9 +6,9 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.wso2.carbon.apimgt.impl.AuthenticationException;
 
 /**
- * Setting the trasnport authenticator for carbon.
+ * Setting the transport authenticator for carbon.
  *
- * @author chamath
+ * @author mushthaq
  */
 public class ServiceAuthenticator {
 

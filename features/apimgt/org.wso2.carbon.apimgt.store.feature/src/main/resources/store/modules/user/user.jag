@@ -61,7 +61,6 @@ var updatePasswordWithUserInput = function (userName, newPassword, confirmationK
         var verifyResult = UserInfoRecoveryClient.resetPassword(userName, confirmationKey, newPassword);
         var error = verifyResult.getError();
         if (verifyResult.getVerified()) {
-            //jagg.module("util").changeOTUserPass(email, newPassword);
             log.info("Password reset is successful for the user [ " + userName + " ]");
             return {
                 error: false,
