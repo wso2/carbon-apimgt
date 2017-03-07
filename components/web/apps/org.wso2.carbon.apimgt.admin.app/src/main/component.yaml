@@ -1,0 +1,22 @@
+apis: []
+
+bindings:
+  - zoneName: footer
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.admin.feature.footer
+  - zoneName: topbar
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.admin.feature.globalNavigation
+  - zoneName: sidebar
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.admin.feature.sidebar
+
+config:
+  appName : Admin Portal
+  title : "Tasks"
+  loginRedirectUri: "/apis"
+  swaggerURL : "/api/am/admin/v1/apis/swagger.json"
+  loginPageUri : "https://localhost:9292/admin/auth/login"

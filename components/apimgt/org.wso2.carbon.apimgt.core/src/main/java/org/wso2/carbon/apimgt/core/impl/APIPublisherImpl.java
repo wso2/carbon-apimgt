@@ -521,9 +521,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         deprecateOlderVersion = checkListItem.getValue();
                     } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkListItem.getKey())) {
                         requireReSubscriptions = checkListItem.getValue();
-                    } else {
-                        apiBuilder.lifecycleState(getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
-                                (), status, checkListItem.getKey(), checkListItem.getValue()));
                     }
                 }
                 API originalAPI = apiBuilder.build();
@@ -568,6 +565,38 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        }
+    }
+
+    /**
+     * This method used to Update the lifecycle checklist of API
+     *
+     * @param apiId
+     * @param status
+     * @param checkListItemMap
+     * @throws APIManagementException
+     */
+    @Override
+    public void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
+            throws APIManagementException {
+        API api = getApiDAO().getAPI(apiId);
+        try {
+            if (api != null) {
+                API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                apiBuilder.lastUpdatedTime(LocalDateTime.now());
+                apiBuilder.updatedBy(getUsername());
+                apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(
+                        apiBuilder.getLifecycleInstanceId()));
+                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
+                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                                    (), api.getLifeCycleStatus(),
+                            checkListItem.getKey(), checkListItem.getValue());
+                }
+            }
+        } catch (LifecycleException e) {
+            String errorMsg = "Couldn't get the lifecycle status of api ID " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
@@ -1237,7 +1266,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 addAPI(apiBuilder);
                 return apiBuilder.getId();
             } else {
-                throw new APIManagementException("Error while getting swagger resource from url : " + url);
+                throw new APIManagementException("Error while getting swagger resource from url : " + url,
+                        ExceptionCodes.API_DEFINITION_MALFORMED);
             }
         } catch (UnsupportedEncodingException e) {
             String msg = "Unsupported encoding exception while getting the swagger resource from url";

@@ -25,8 +25,9 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class APIMgtConstants {
 
-    public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate older versions";
-    public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require Re-Subscriptions";
+    public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
+    public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
+    public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
 
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";

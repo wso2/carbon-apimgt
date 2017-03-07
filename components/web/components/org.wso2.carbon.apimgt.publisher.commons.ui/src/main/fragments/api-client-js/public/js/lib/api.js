@@ -363,8 +363,8 @@ class API {
      * @param state {string} Target state which need to be transferred
      * @param callback {function} Callback function which needs to be executed in the success call
      */
-    updateLcState(id, state, callback = null) {
-        var payload = {action: state, apiId: id, "Content-Type": "application/json"};
+    updateLcState(id, state, checkedItems, callback = null) {
+        var payload = {action: state, apiId: id, lifecycleChecklist: checkedItems,"Content-Type": "application/json"};
         var promise_lc_update = this.client.then(
             (client) => {
                 return client["API (Individual)"].post_apis_change_lifecycle(
