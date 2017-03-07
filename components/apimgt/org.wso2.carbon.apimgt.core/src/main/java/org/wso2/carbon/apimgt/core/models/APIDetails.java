@@ -30,15 +30,18 @@ import java.util.Set;
 /**
  * Context class for holding all necessary API related object references -
  *      1. API {@link org.wso2.carbon.apimgt.core.models.API}
- *      2. Document Info {@link org.wso2.carbon.apimgt.core.models.DocumentInfo}
- *      3. Document Content {@link org.wso2.carbon.apimgt.core.models.DocumentContent}
- *      4. Swagger Definition
- *      5. Gateway Definition
- *      6. Thumbnail content
+ *      2  Endpoint {@link org.wso2.carbon.apimgt.core.models.Endpoint}
+ *      3. Document Info {@link org.wso2.carbon.apimgt.core.models.DocumentInfo}
+ *      4. Document Content {@link org.wso2.carbon.apimgt.core.models.DocumentContent}
+ *      5. Swagger Definition
+ *      6. Gateway Definition
+ *      7. Thumbnail content
  */
 public class APIDetails {
 
     private API api;
+
+    private Set<Endpoint> endpoints;
 
     @Override
     public boolean equals(Object o) {
@@ -74,12 +77,25 @@ public class APIDetails {
     public APIDetails (API api, String swaggerDefinition) {
         this.api = api;
         this.swaggerDefinition = swaggerDefinition;
+        endpoints = new HashSet<>();
         documentInformation = new HashSet<>();
         documentContentMap = new HashMap();
     }
 
     public API getApi() {
         return api;
+    }
+
+    public void addEndpoint (Endpoint endpoint) {
+        endpoints.add(endpoint);
+    }
+
+    public void setEndpoints (Set<Endpoint> endpoints) {
+        this.endpoints = endpoints;
+    }
+
+    public Set<Endpoint> getEndpoints () {
+        return endpoints;
     }
 
     public String getSwaggerDefinition() {

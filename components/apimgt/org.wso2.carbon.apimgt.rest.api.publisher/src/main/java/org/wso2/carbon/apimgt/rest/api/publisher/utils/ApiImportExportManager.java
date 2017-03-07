@@ -24,16 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIDetails;
-import org.wso2.carbon.apimgt.core.models.DocumentContent;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.*;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Manager class for generic API Import and Export handling
@@ -75,6 +69,25 @@ public class ApiImportExportManager {
 
         // iterate and collect all information
         for (API api : apis) {
+            api = apiPublisher.getAPIbyUUID(api.getId());
+            // get endpoints
+            Map<String, String> endpoints = api.getEndpoint();
+            if (endpoints.isEmpty()) {
+                log.error("No Endpoints found for api: " + api.getName() + ", version: " + api.getVersion());
+                // skip this API
+                continue;
+            }
+            Set<Endpoint> endpointSet = new HashSet<>();
+            try {
+                for (Map.Entry<String, String> endpointEntry : endpoints.entrySet()) {
+                    endpointSet.add(apiPublisher.getEndpoint(endpointEntry.getValue()));
+                }
+            } catch (APIManagementException e) {
+                log.error("Error in getting endpoints for api: " + api.getName() + ", version: " + api.getVersion(), e);
+                // skip this API
+                continue;
+            }
+
             // get swagger definition
             String swaggerDefinition;
             try {
@@ -131,9 +144,9 @@ public class ApiImportExportManager {
 
             // search operation returns a summary of APIs, need to get all details of APIs
             APIDetails apiDetails = new APIDetails(apiPublisher.getAPIbyUUID(api.getId()), swaggerDefinition);
-            if (gatewayConfig != null) {
-                apiDetails.setGatewayConfiguration(gatewayConfig);
-            }
+            apiDetails.setGatewayConfiguration(gatewayConfig);
+            apiDetails.setEndpoints(endpointSet);
+
             if (documentInfo != null && !documentInfo.isEmpty()) {
                 apiDetails.addDocumentInformation(documentInfo);
             }
@@ -160,9 +173,34 @@ public class ApiImportExportManager {
         // update everything
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
         String gatewayConfig = apiDetails.getGatewayConfiguration();
+        Map<String, String> endpointTypeToIdMap = new HashMap<>();
+
+        // endpoints
+        for (Endpoint endpoint : apiDetails.getEndpoints()) {
+            try {
+                Endpoint existingEndpoint = apiPublisher.getEndpointByName(endpoint.getName());
+                if (existingEndpoint == null) {
+                    // no endpoint by that name, add it
+                    endpointTypeToIdMap.put(endpoint.getType(), apiPublisher.addEndpoint(endpoint));
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Endpoint with id " + endpoint.getId() + " already exists, not adding again");
+                    }
+                    // endpoint with same name exists, add to endpointTypeToIdMap
+                    endpointTypeToIdMap.put(endpoint.getType(), existingEndpoint.getId());
+                }
+
+            } catch (APIManagementException e) {
+                // skip adding this API; log and continue
+                log.error("Error while adding the endpoint with id: " + endpoint.getId() + ", type: " + endpoint
+                        .getType() + " for API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi
+                        ().getVersion());
+            }
+        }
 
         API.APIBuilder apiBuilder = new API.APIBuilder(apiDetails.getApi());
-        apiPublisher.addAPI(apiBuilder.apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig));
+        apiPublisher.addAPI(apiBuilder.apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig).
+                endpoint(endpointTypeToIdMap));
 
         // docs
         try {
@@ -208,9 +246,26 @@ public class ApiImportExportManager {
         // update everything
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
         String gatewayConfig = apiDetails.getGatewayConfiguration();
+        Map<String, String> endpointTypeToIdMap = new HashMap<>();
+
+        // endpoints
+        for (Endpoint endpoint : apiDetails.getEndpoints()) {
+            try {
+                apiPublisher.updateEndpoint(endpoint);
+                endpointTypeToIdMap.put(endpoint.getType(), endpoint.getId());
+
+            } catch (APIManagementException e) {
+                // skip updating this API, log and continue
+                log.error("Error while updating the endpoint with id: " + endpoint.getId() + ", type: " + endpoint
+                        .getType() + " for API: " + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi
+                        ().getVersion());
+            }
+        }
+
 
         API.APIBuilder apiBuilder = new API.APIBuilder(apiDetails.getApi());
-        apiPublisher.updateAPI(apiBuilder.apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig));
+        apiPublisher.updateAPI(apiBuilder.apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig).
+                endpoint(endpointTypeToIdMap));
 
         // docs
         try {
