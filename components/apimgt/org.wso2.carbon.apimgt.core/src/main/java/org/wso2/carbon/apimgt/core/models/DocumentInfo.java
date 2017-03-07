@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -40,6 +41,10 @@ public final class DocumentInfo {
         fileName = builder.fileName;
         permission = builder.permission;
         permissionMap = builder.permissionMap;
+        createdTime = builder.createdTime;
+        lastUpdatedTime = builder.lastUpdatedTime;
+        createdBy = builder.createdBy;
+        updatedBy = builder.updatedBy;
     }
 
     @Override
@@ -105,6 +110,22 @@ public final class DocumentInfo {
     public HashMap getPermissionMap() {
         return permissionMap;
 
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public LocalDateTime getLastUpdatedTime() {
+        return lastUpdatedTime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
     }
 
     /**
@@ -187,6 +208,10 @@ public final class DocumentInfo {
     private final Visibility visibility;
     private final String fileName;
     private final HashMap permissionMap;
+    private final LocalDateTime createdTime;
+    private final LocalDateTime lastUpdatedTime;
+    private final String createdBy;
+    private final String updatedBy;
 
     /**
      * {@code DocumentInfo} builder static inner class.
@@ -203,6 +228,10 @@ public final class DocumentInfo {
         private Visibility visibility;
         private String permission;
         private  String fileName;
+        private LocalDateTime createdTime;
+        private LocalDateTime lastUpdatedTime;
+        private String createdBy;
+        private String updatedBy;
 
         public SourceType getSourceType() {
             return sourceType;
@@ -383,6 +412,54 @@ public final class DocumentInfo {
          */
         public Builder fileName(String fileName) {
             this.fileName = fileName;
+            return this;
+        }
+
+        /**
+         * Sets the {@code createdTime} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param createdTime the {@code createdTime} to set
+         * @return a reference to this Builder
+         */
+        public Builder createdTime(LocalDateTime createdTime) {
+            this.createdTime = createdTime;
+            return this;
+        }
+
+        /**
+         * Sets the {@code lastUpdatedTime} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param lastUpdatedTime the {@code lastUpdatedTime} to set
+         * @return a reference to this Builder
+         */
+        public Builder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+            this.lastUpdatedTime = lastUpdatedTime;
+            return this;
+        }
+
+        /**
+         * Sets the {@code createdBy} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param createdBy the {@code createdBy} to set
+         * @return a reference to this Builder
+         */
+        public Builder createdBy(String createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        /**
+         * Sets the {@code updatedBy} and returns a reference to this Builder
+         * so that the methods can be chained together.
+         *
+         * @param updatedBy the {@code updatedBy} to set
+         * @return a reference to this Builder
+         */
+        public Builder updatedBy(String updatedBy) {
+            this.updatedBy = updatedBy;
             return this;
         }
 

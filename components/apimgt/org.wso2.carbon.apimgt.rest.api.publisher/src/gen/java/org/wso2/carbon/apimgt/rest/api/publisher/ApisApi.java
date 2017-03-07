@@ -545,16 +545,17 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = APIDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = APIDTO.class) })
-    public Response apisImportDefinitionPost(
+    public Response apisImportDefinitionPost(@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
+,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Swagger definition from url")@FormDataParam("url")  String url
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 ,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.apisImportDefinitionPost(fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.apisImportDefinitionPost(fileInputStream, fileDetail,url,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @POST
     

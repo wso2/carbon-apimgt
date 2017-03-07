@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -403,6 +404,14 @@ public interface APIPublisher extends APIManager {
      */
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
+    /**
+     * Create api from it's definition located in url
+     * @param swaggerResourceUrl url of the swagger resource
+     * @return
+     * @throws APIManagementException
+     */
+    String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
     List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
 
     Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
@@ -414,6 +423,14 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     List<LifecycleHistoryBean> getLifeCycleHistoryFromUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Returns the list of Labels.
+     *
+     * @return List of labels
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabels() throws APIManagementException;
 
 
 }
