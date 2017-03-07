@@ -137,6 +137,16 @@ public interface APIPublisher extends APIManager {
 
 
     /**
+     *
+     * @param apiId
+     * @param status
+     * @param checkListItemMap
+     * @throws APIManagementException
+     */
+    void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
+            throws APIManagementException;
+
+    /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
      * @param apiId        The API to be copied
