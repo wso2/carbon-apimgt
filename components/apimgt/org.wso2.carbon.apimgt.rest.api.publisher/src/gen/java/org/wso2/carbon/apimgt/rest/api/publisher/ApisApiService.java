@@ -1,27 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-
-import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
 import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-01T12:21:28.213+05:30")
 public abstract class ApisApiService {

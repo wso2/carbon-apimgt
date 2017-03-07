@@ -62,6 +62,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "access token."),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
+    API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
+    API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     ENDPOINT_NOT_FOUND(900316, "Endpoint Not Found", 404, "Endpoint Not Found"),
     ENDPOINT_ALREADY_EXISTS(900322, "Endpoint Already EXISTS", 400, "Endpoint Not Found"),
     ENDPOINT_ADD_FAILED(900323, "Endpoint adding failed", 400, "Endpoint adding failed"),

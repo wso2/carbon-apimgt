@@ -644,7 +644,7 @@ public class ApiDAOImpl implements ApiDAO {
                 try {
                     connection.setAutoCommit(false);
                     if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
-                            ResourceCategory.WSDL_URI)) {
+                            ResourceCategory.IMAGE)) {
                         ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
                                 ResourceCategory.IMAGE, dataType, image);
                     } else {

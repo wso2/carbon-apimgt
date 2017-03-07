@@ -29,6 +29,27 @@ public final class DocumentContent {
     private final String inlineContent;
     private final InputStream fileContent;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)  {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DocumentContent content = (DocumentContent) o;
+
+        return getDocumentInfo() != null ? getDocumentInfo().equals(content.getDocumentInfo()) :
+                content.getDocumentInfo() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getDocumentInfo() != null ? getDocumentInfo().hashCode() : 0;
+    }
+
     private DocumentContent(Builder builder) {
         this.documentInfo = builder.documentInfo;
         this.inlineContent = builder.inlineContent;

@@ -1732,6 +1732,118 @@ paths:
               $ref: '#/definitions/Error'
 
 ######################################################
+# Export Resource API
+######################################################
+  /export/apis:
+
+    get:
+      produces:
+        - application/zip
+      summary: Export information related to an API.
+      description: |
+        This operation can be used to export information related to a particular API.
+      parameters:
+        - name: query
+          in: query
+          description: |
+            API search query
+          required: true
+          type: string
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Export Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Export Configuration returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Import Resource API
+######################################################
+  /import/apis:
+
+    put:
+      consumes:
+        - multipart/form-data
+      summary: Imports API(s).
+      description: |
+        This operation can be used to import one or more existing APIs.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting on exported api configuration
+          required: true
+          type: file
+        - name: provider
+          in: query
+          description: |
+            If defined, updates the existing provider of each API with the specified provider.
+            This is to cater scenarios where the current API provider does not exist in the environment
+            that the API is imported to.
+          required: false
+          type: string
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Import Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/APIList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The "Individual Application" resource APIs
 ######################################################
   '/applications/{applicationId}':
@@ -2589,6 +2701,25 @@ parameters:
     required: true
     type: string
 
+# API name
+# Specified as part of the query string
+  name:
+    name: name
+    in: path
+    description: |
+      Name of the API
+    required: true
+    type: string
+
+# API version
+# Specified as part of the query string
+  version:
+    name: version
+    in: path
+    description: |
+      Version of the API
+    required: true
+    type: string
 
 # Document Identifier
 # Specified as part of the path expression

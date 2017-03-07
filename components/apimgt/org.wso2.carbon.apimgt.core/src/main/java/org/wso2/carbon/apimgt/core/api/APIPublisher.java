@@ -377,6 +377,15 @@ public interface APIPublisher extends APIManager {
     Endpoint getEndpoint(String endpointId) throws APIManagementException;
 
     /**
+     * Retrieves the {@link Endpoint} object for given endpoint name
+     *
+     * @param endpointName name of the Endpoint
+     * @return {@link Endpoint} instance
+     * @throws APIManagementException if an error occurs while retrieving the information
+     */
+    Endpoint getEndpointByName (String endpointName) throws APIManagementException;
+
+    /**
      * Add an endpoint
      * @param endpoint
      * @throws APIManagementException
