@@ -1,25 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
 import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.ApisApi",
@@ -30,7 +21,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -162,7 +153,7 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class) })
     public Response apisGet(@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"attribute:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider, tag **]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
+,@ApiParam(value = "**Search condition**. You can search in attributes by using an **\"attribute:\"** modifier. Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\". Additionally you can use wildcards. Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\". Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider, tag **] If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion

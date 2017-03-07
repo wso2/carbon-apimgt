@@ -1,25 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi",
@@ -30,7 +21,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the applications API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();
 
@@ -52,6 +43,29 @@ public class ApplicationsApi implements Microservice  {
 )
     throws NotFoundException {
         return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince,minorVersion);
+    }
+    @POST
+    @Path("/{applicationId}/generate-keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application ", response = ApplicationKeyDTO.class, tags={ "Generate Keys", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are generated. ", response = ApplicationKeyDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationKeyDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationKeyDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeyDTO.class) })
+    public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
+,@ApiParam(value = "Application object the keys of which are to be generated " ,required=true) ApplicationKeyGenerateRequestDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
+)
+    throws NotFoundException {
+        return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
     @Path("/{applicationId}")
@@ -98,29 +112,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
     }
-    @POST
-    @Path("/generate-keys")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application ", response = ApplicationKeyDTO.class, tags={ "Generate Keys", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are generated. ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeyDTO.class) })
-    public Response applicationsGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @QueryParam("applicationId") String applicationId
-,@ApiParam(value = "Application object the keys of which are to be generated " ,required=true) ApplicationKeyGenerateRequestDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
-,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
-    throws NotFoundException {
-        return delegate.applicationsGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
-    }
     @GET
     
     @Consumes({ "application/json" })
@@ -134,7 +125,7 @@ public class ApplicationsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ApplicationListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ApplicationListDTO.class) })
-    public Response applicationsGet(@ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ") @QueryParam("query") String query
+    public Response applicationsGet(@ApiParam(value = "**Search condition**. You can search for an application by specifying the name as \"query\" attribute. Eg. \"app1\" will match an application if the name is exactly \"app1\". Currently this does not support wildcards. Given name must exactly match the application name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept

@@ -29,13 +29,13 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl
@@ -144,7 +144,7 @@ public class ApplicationsApiServiceImpl
     }
 
     @Override
-    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
+    public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
                                                  String minorVersion) throws NotFoundException {
         ApplicationKeyDTO applicationKeyDTO = null;
@@ -159,7 +159,7 @@ public class ApplicationsApiServiceImpl
                 Map<String, Object> keyDetails = apiConsumer
                         .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType().toString(),
                                 body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
-                                application.getGroupId());
+                                application.getGroupId(), body.getApplicationKeyAdditionalParams());
                 applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             } else {

@@ -20,9 +20,16 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public abstract class ApplicationsApiService {
     public abstract Response applicationsApplicationIdDelete(String applicationId
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response applicationsApplicationIdGenerateKeysPost(String applicationId
+ ,ApplicationKeyGenerateRequestDTO body
+ ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  ,String minorVersion
@@ -35,13 +42,6 @@ public abstract class ApplicationsApiService {
  ) throws NotFoundException;
     public abstract Response applicationsApplicationIdPut(String applicationId
  ,ApplicationDTO body
- ,String contentType
- ,String ifMatch
- ,String ifUnmodifiedSince
- ,String minorVersion
- ) throws NotFoundException;
-    public abstract Response applicationsGenerateKeysPost(String applicationId
- ,ApplicationKeyGenerateRequestDTO body
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince

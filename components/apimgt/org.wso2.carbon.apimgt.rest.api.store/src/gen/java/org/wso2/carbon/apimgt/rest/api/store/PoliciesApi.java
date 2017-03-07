@@ -1,23 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.factories.PoliciesApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
-
+import org.wso2.carbon.apimgt.rest.api.store.factories.PoliciesApiServiceFactory;
 import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.PoliciesApi",
@@ -28,7 +19,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the policies API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 

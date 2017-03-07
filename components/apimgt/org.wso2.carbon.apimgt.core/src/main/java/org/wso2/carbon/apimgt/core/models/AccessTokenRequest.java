@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Representation of a Token Generation Request.
@@ -36,7 +37,7 @@ public class AccessTokenRequest {
     private String tokenToRevoke;
 
     // This map can be used to store additional properties not captured by above list of fields.
-    private HashMap<String, Object> requestParameters = new HashMap<String, Object>();
+    private Map<String, Object> requestParameters = new HashMap<String, Object>();
 
 
     public String getTokenToRevoke() {
@@ -131,6 +132,9 @@ public class AccessTokenRequest {
         return requestParameters.get(key);
     }
 
+    public void setRequestParameters(Map<String, Object> requestParameters) {
+        this.requestParameters = requestParameters;
+    }
 
 }
 

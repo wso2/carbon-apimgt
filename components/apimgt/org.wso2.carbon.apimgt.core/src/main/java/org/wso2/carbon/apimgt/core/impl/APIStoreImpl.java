@@ -140,7 +140,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     @Override
     public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
-            String groupingId) throws APIManagementException {
+            String groupingId, Map<String, Object> additionalParams) throws APIManagementException {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, userId, callbackUrl, null); //for now tokenSope = null
@@ -162,6 +162,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                 throw new KeyManagementException("Error occurred while creating OAuth application");
             }
             accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
+            accessTokenRequest.setRequestParameters(additionalParams);
             AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
             // adding access token information with key details
             if (accessTokenInfo != null) {

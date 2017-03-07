@@ -122,7 +122,7 @@ public interface APIStore extends APIManager {
      */
     Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
             String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId) throws APIManagementException;
+            String tokenScope, String groupingId, Map<String, Object> additionalParams) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.

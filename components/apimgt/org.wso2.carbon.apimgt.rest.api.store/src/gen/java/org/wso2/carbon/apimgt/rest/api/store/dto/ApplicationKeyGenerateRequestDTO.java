@@ -7,12 +7,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ApplicationKeyGenerateRequestDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T14:58:05.886+05:30")
 public class ApplicationKeyGenerateRequestDTO   {
   /**
    * Gets or Sets keyType
@@ -59,6 +61,9 @@ public class ApplicationKeyGenerateRequestDTO   {
 
   @JsonProperty("scopes")
   private List<String> scopes = new ArrayList<String>();
+
+  @JsonProperty("ApplicationKeyAdditionalParams")
+  private Map<String, Object> applicationKeyAdditionalParams = new HashMap<String, Object>();
 
   public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
@@ -160,6 +165,29 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.scopes = scopes;
   }
 
+  public ApplicationKeyGenerateRequestDTO applicationKeyAdditionalParams(Map<String, Object> applicationKeyAdditionalParams) {
+    this.applicationKeyAdditionalParams = applicationKeyAdditionalParams;
+    return this;
+  }
+
+  public ApplicationKeyGenerateRequestDTO putApplicationKeyAdditionalParamsItem(String key, Object applicationKeyAdditionalParamsItem) {
+    this.applicationKeyAdditionalParams.put(key, applicationKeyAdditionalParamsItem);
+    return this;
+  }
+
+   /**
+   * This map can be used to store additional properties not captured by above list of fields.
+   * @return applicationKeyAdditionalParams
+  **/
+  @ApiModelProperty(value = "This map can be used to store additional properties not captured by above list of fields.")
+  public Map<String, Object> getApplicationKeyAdditionalParams() {
+    return applicationKeyAdditionalParams;
+  }
+
+  public void setApplicationKeyAdditionalParams(Map<String, Object> applicationKeyAdditionalParams) {
+    this.applicationKeyAdditionalParams = applicationKeyAdditionalParams;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -174,12 +202,13 @@ public class ApplicationKeyGenerateRequestDTO   {
         Objects.equals(this.validityTime, applicationKeyGenerateRequest.validityTime) &&
         Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
         Objects.equals(this.accessAllowDomains, applicationKeyGenerateRequest.accessAllowDomains) &&
-        Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes);
+        Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes) &&
+        Objects.equals(this.applicationKeyAdditionalParams, applicationKeyGenerateRequest.applicationKeyAdditionalParams);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, validityTime, callbackUrl, accessAllowDomains, scopes);
+    return Objects.hash(keyType, validityTime, callbackUrl, accessAllowDomains, scopes, applicationKeyAdditionalParams);
   }
 
   @Override
@@ -192,6 +221,7 @@ public class ApplicationKeyGenerateRequestDTO   {
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    accessAllowDomains: ").append(toIndentedString(accessAllowDomains)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    applicationKeyAdditionalParams: ").append(toIndentedString(applicationKeyAdditionalParams)).append("\n");
     sb.append("}");
     return sb.toString();
   }
