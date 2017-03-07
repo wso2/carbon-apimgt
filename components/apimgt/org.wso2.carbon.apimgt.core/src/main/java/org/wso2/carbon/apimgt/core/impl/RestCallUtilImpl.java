@@ -143,7 +143,6 @@ public class RestCallUtilImpl implements RestCallUtil {
                 httpConnection.disconnect();
             }
         }
-
     }
 
     /**
