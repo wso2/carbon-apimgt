@@ -1,0 +1,100 @@
+<%
+jagg.module("util", {
+    getTenantDisplayName: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getTenantDisplayName.apply(this, arguments);
+    },
+    escapeSpecialChars: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").escapeSpecialChars.apply(this, arguments);
+    },
+    escapeSpecialCharsXML: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").escapeSpecialCharsXML.apply(this, arguments);
+    },
+    validateEmail: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").validateEmail.apply(this, arguments);
+    },
+    validatePassword: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").validatePassword.apply(this, arguments);
+    },
+    validateUserRoles: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").validateUserRoles.apply(this, arguments);
+    },
+    validateNameString: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").validateNameString.apply(this, arguments);
+    },
+     addUserToOT: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").addUserToOT.apply(this, arguments);
+    },
+    changeOTUserPass: function () {
+            return jagg.require(jagg.getModulesDir() + "util/util.jag").changeOTUserPass.apply(this, arguments);
+    },
+    generateUUId: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").generateUUId.apply(this, arguments);
+    },
+    getJsonFromFile: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getJsonFromFile.apply(this, arguments);
+    },
+    getObjFromFile: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getObjFromFile.apply(this, arguments);
+    },
+    getInviteeDirectUrl: function () {
+            return jagg.require(jagg.getModulesDir() + "util/util.jag").getInviteeDirectUrl.apply(this, arguments);
+    },
+    getLoadBalanceDataPublisher: function () {
+                return jagg.require(jagg.getModulesDir() + "util/util.jag").getLoadBalanceDataPublisher.apply(this, arguments);
+    },
+    getUserActivityStreamId: function () {
+                return jagg.require(jagg.getModulesDir() + "util/util.jag").getUserActivityStreamId.apply(this, arguments);
+    },
+    sendBillingTrialExtendedMailToUser: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingTrialExtendedMailToUser.apply(this, arguments);
+    },
+    sendBillingAccountCreationEmail: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingAccountCreationEmail.apply(this, arguments);
+    },
+    sendBillingPlanChangedEmail: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingPlanChangedEmail.apply(this, arguments);
+    },
+    sendBillingTrialExtendedNotification: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingTrialExtendedNotification.apply(this, arguments);
+    },
+    sendSubscriptionCancellationEmail: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendSubscriptionCancellationEmail.apply(this, arguments);
+    },
+    getEmailEffectiveDate: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getEmailEffectiveDate.apply(this, arguments);
+    },
+    dateTimeFormatter: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").dateTimeFormatter.apply(this, arguments);
+    },
+    sendBillingPlanChangedNotification: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingPlanChangedNotification.apply(this, arguments);
+    },
+    sendBillingSubscriptionCancelledNotification: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingSubscriptionCancelledNotification.apply(this, arguments);
+    },
+    sendBillingAccountCreationNotification: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendBillingAccountCreationNotification.apply(this, arguments);
+    },
+    isUserInAdminRole: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").isUserInAdminRole.apply(this, arguments);
+    },
+    getUserRoleDisplayName: function(){
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getUserRoleDisplayName.apply(this, arguments);
+    },
+    getRoleForGivenDisplayName: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getRoleForGivenDisplayName.apply(this, arguments);
+    },
+    sendEmail: function() {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").sendEmail.apply(this, arguments);
+    },
+    isSessionAuthenticated: function() {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").isSessionAuthenticated.apply(this, arguments);
+    },
+    getLeadSourceToken: function() {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getLeadSourceToken.apply(this, arguments);
+    },
+    getDistinctStringsInArray: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getDistinctStringsInArray.apply(this, arguments);
+    }
+});
+%>

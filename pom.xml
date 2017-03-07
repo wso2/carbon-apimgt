@@ -221,6 +221,18 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.mgt.stub</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
+                <version>${carbon.identity-captcha.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.nimbusds.wso2</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${com.nimbusds.wso2.version}</version>
@@ -1074,6 +1086,7 @@
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.7.5</carbon.identity.version>
+        <carbon.identity-captcha.version>4.5.2</carbon.identity-captcha.version>
         <carbon.identity-inbound-auth-oauth.version>5.3.4</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.4</carbon.identity-user-ws.version>
         <carbon.identity-inbound-auth-saml2.version>5.2.0</carbon.identity-inbound-auth-saml2.version>
