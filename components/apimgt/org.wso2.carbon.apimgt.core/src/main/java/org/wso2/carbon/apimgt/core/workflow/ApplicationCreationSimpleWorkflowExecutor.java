@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 /**
  * This is a simple work flow extension to have Application creation process
  */
-public class ApplicationCreationSimpleWorkflowExecutor { //extends Observable {
+public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor { //extends Observable {
     private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
 
     /**

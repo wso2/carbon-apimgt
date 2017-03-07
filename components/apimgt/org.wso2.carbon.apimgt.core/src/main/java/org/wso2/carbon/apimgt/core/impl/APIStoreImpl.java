@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -81,8 +82,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
     private TagDAO tagDAO;
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO);
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
+            WorkflowDAO workflowDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
+                workflowDAO);
         this.tagDAO = tagDAO;
     }
 
@@ -393,14 +396,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
             boolean wfEnabled = false;
 
-            if (wfEnabled) {
-                getApplicationDAO().addWorkflowEntry();
-            }
+           /* if (wfEnabled) {
+                getApplicationDAO().addWorkflowEntry(appWF); ///???
+            }*/
 
             appWF.setApplication(application);
             appWF.setWorkflowReference(appCreationWFExecutor.generateUUID());
             appWF.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            appWF.setCallBack(appCreationWFExecutor.getCBURL());
+            appWF.setCallBack(appCreationWFExecutor.getCallbackEndPoint());
             appWF.setCreatedTime(LocalDateTime.now());
             //appCreationWFExecutor.addObserver(this);
             WorkflowResponse response = appCreationWFExecutor.execute(appWF);

@@ -29,7 +29,7 @@ import java.util.UUID;
  */
 public abstract class WorkflowExecutor extends Observable {
 
-    protected String callbackURL;
+    protected String callbackEndPoint;
 
     /**
      * Implements the workflow execution logic.
@@ -59,12 +59,11 @@ public abstract class WorkflowExecutor extends Observable {
         return UUID.randomUUID().toString();
     }
 
-    public String getCBURL() {
-        return callbackURL;
+    public String getCallbackEndPoint() {
+        return callbackEndPoint;
     }
 
-    public void setCBURL(String callbackURL) {
-        this.callbackURL = callbackURL;
+    public void setCallbackEndPoint(String callbackEndPoint) {
+        this.callbackEndPoint = callbackEndPoint;
     }
-
 }

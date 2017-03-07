@@ -15,23 +15,35 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-
-package org.wso2.carbon.apimgt.core.exception;
+package org.wso2.carbon.apimgt.core.models;
 
 /**
- * Exception class for key workflow failures.
+ * WorkflowConfigProperties is used to map the properties related to a specific workflow executor configuration
  */
-public class WorkflowException extends APIManagementException {
+public class WorkflowConfigProperties {
 
-    public WorkflowException(String message) {
-        super(message);
+    private String name;
+    private String value;
+
+    public String getName() {
+        return name;
     }
 
-    public WorkflowException(String message, Throwable e) {
-        super(message, e);
+    public void setName(String name) {
+        this.name = name;
     }
-    
-    public WorkflowException(String message, ExceptionCodes code) {
-        super(message, code);
+
+    public String getValue() {
+        return value;
     }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "Properties [name=" + name + ", value=" + value + "]";
+    }
+
 }

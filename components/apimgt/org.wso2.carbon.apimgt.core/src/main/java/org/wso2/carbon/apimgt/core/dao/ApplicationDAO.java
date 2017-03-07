@@ -24,8 +24,6 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.core.models.Workflow;
-
 import java.util.List;
 import javax.annotation.CheckForNull;
 
@@ -152,17 +150,4 @@ public interface ApplicationDAO {
      */
     void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
 
-    /**
-     * Add workflow entry
-     * @param workflow
-     * @throws APIMgtDAOException
-     */
-    void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException;
-
-    /**
-     * Update workflow entry with the given status
-     * @param workflow
-     * @throws APIMgtDAOException
-     */
-    void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException;
 }
