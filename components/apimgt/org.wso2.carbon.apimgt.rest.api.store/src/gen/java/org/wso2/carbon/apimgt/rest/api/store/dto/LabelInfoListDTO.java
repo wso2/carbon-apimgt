@@ -5,52 +5,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * TagDTO
+ * LabelInfoListDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
-public class TagDTO   {
-  @JsonProperty("name")
-  private String name = null;
+public class LabelInfoListDTO   {
+  @JsonProperty("labels")
+  private List<String> labels = new ArrayList<String>();
 
-  @JsonProperty("weight")
-  private Integer weight = null;
+  public LabelInfoListDTO labels(List<String> labels) {
+    this.labels = labels;
+    return this;
+  }
 
-  public TagDTO name(String name) {
-    this.name = name;
+  public LabelInfoListDTO addLabelsItem(String labelsItem) {
+    this.labels.add(labelsItem);
     return this;
   }
 
    /**
-   * Get name
-   * @return name
+   * Get labels
+   * @return labels
   **/
   @ApiModelProperty(required = true, value = "")
-  public String getName() {
-    return name;
+  public List<String> getLabels() {
+    return labels;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public TagDTO weight(Integer weight) {
-    this.weight = weight;
-    return this;
-  }
-
-   /**
-   * Get weight
-   * @return weight
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public Integer getWeight() {
-    return weight;
-  }
-
-  public void setWeight(Integer weight) {
-    this.weight = weight;
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
   }
 
 
@@ -62,23 +48,21 @@ public class TagDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TagDTO tag = (TagDTO) o;
-    return Objects.equals(this.name, tag.name) &&
-        Objects.equals(this.weight, tag.weight);
+    LabelInfoListDTO labelInfoList = (LabelInfoListDTO) o;
+    return Objects.equals(this.labels, labelInfoList.labels);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, weight);
+    return Objects.hash(labels);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TagDTO {\n");
+    sb.append("class LabelInfoListDTO {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    weight: ").append(toIndentedString(weight)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("}");
     return sb.toString();
   }
