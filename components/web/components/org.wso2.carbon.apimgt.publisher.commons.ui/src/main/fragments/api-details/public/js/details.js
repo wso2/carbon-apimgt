@@ -124,6 +124,21 @@ function lifecycleTabHandler(event) {
                         }
                     }
                 );
+
+                //Handle svg object
+                var svg_object = document.getElementById("lifecycle-svg");
+                // Add an load event listener to the object,
+                // as it will load asynchronously
+                svg_object.addEventListener("load",function(){
+                    // get the inner DOM of lifecycleSVG.svg
+                    var svg_doc = svg_object.contentDocument;
+                    var api_state = api_data.lifeCycleStatus;
+                    // get the inner element by id
+                    var state_rectangle = svg_doc.getElementById(api_state.toString());
+                    // change style
+                    state_rectangle.style.fill= "green";
+                }, false);
+
             }, onFailure: function (data) {
             }
         };
@@ -221,27 +236,26 @@ function updateLifecycleHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-        var message = "Life cycle state updated successfully!";
-    noty({
-        text: message,
-        type: 'success',
-        dismissQueue: true,
-        progressBar: true,
-        timeout: 5000,
-        layout: 'topCenter',
-        theme: 'relax',
-        maxVisible: 10,
-    });
-    lifecycleTabHandler(event);
-}
-).catch(
-        (response, event = event_data) => {
-        let message_element = $("#general-alerts").find(".alert-danger");
-    message_element.find(".alert-message").html(response.statusText);
-    message_element.fadeIn("slow");
-    lifecycleTabHandler(event);
-}
-);
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
 }
 
 /**
@@ -267,27 +281,26 @@ function updateLifecycleCheckListHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-        var message = "Life cycle state updated successfully!";
-    noty({
-        text: message,
-        type: 'success',
-        dismissQueue: true,
-        progressBar: true,
-        timeout: 5000,
-        layout: 'topCenter',
-        theme: 'relax',
-        maxVisible: 10,
-    });
-    lifecycleTabHandler(event);
-}
-).catch(
-        (response, event = event_data) => {
-        let message_element = $("#general-alerts").find(".alert-danger");
-    message_element.find(".alert-message").html(response.statusText);
-    message_element.fadeIn("slow");
-    lifecycleTabHandler(event);
-}
-);
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
 }
 
 function getCheckListItems() {
