@@ -631,7 +631,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                     lifecycleChecklistMap.put(attributeName, attributeValue);
                 }
             }
-            RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
+            if (action.trim().equals(APIMgtConstants.CHECK_LIST_ITEM_CHANGE_EVENT)) {
+                RestAPIPublisherUtil.getApiPublisher(username).updateCheckListItem(apiId, action, lifecycleChecklistMap);
+            } else {
+                RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
+            }
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;

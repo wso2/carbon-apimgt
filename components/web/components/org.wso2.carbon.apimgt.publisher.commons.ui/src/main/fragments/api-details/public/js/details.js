@@ -142,11 +142,12 @@ function lifecycleTabHandler(event) {
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
+
     var promised_api = api_client.get(api_id);
     var promised_tiers = api_client.policies('api');
     var promised_lcState = api_client.getLcState(api_id);
     var promised_lcHistory = api_client.getLcHistory(api_id);
-    Promise.all([promised_api, promised_tiers, promised_lcState,promised_lcHistory]).then(renderLCTab)
+    Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory]).then(renderLCTab)
 }
 
 /**
@@ -205,36 +206,96 @@ function updateLifecycleHandler(event) {
     var api_client = event.data.api_client;
     var new_state = $(this).data("lcstate");
     var api_id = event.data.api_id;
-    var promised_update = api_client.updateLcState(api_id, new_state);
+    var checked_items = getCheckListItems();
+    if (checked_items != '') {
+        var promised_update = api_client.updateLcState(api_id, new_state, checked_items);
+    } else {
+        var promised_update = api_client.updateLcState(api_id, new_state);
+    }
     var event_data = {
         data: {
             api_client: api_client,
-            api_id: api_id
+            api_id: api_id,
+            checkedItems: checked_items,
         }
     };
     promised_update.then(
         (response, event = event_data) => {
-            var message = "Life cycle state updated successfully!";
-            noty({
-                text: message,
-                type: 'success',
-                dismissQueue: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'topCenter',
-                theme: 'relax',
-                maxVisible: 10,
-            });
-            lifecycleTabHandler(event);
-        }
-    ).catch(
+        var message = "Life cycle state updated successfully!";
+    noty({
+        text: message,
+        type: 'success',
+        dismissQueue: true,
+        progressBar: true,
+        timeout: 5000,
+        layout: 'topCenter',
+        theme: 'relax',
+        maxVisible: 10,
+    });
+    lifecycleTabHandler(event);
+}
+).catch(
         (response, event = event_data) => {
-            let message_element = $("#general-alerts").find(".alert-danger");
-            message_element.find(".alert-message").html(response.statusText);
-            message_element.fadeIn("slow");
-            lifecycleTabHandler(event);
+        let message_element = $("#general-alerts").find(".alert-danger");
+    message_element.find(".alert-message").html(response.statusText);
+    message_element.fadeIn("slow");
+    lifecycleTabHandler(event);
+}
+);
+}
+
+/**
+ * Do the life cycle checklist update when user clicks on the relevant life cycle checkbox.
+ * @param event {object} click event of the lc state button
+ */
+function updateLifecycleCheckListHandler(event) {
+    var api_client = event.data.api_client;
+    var new_state = 'CheckListItemChange';
+    var api_id = event.data.api_id;
+    var checked_items = getCheckListItems();
+    if (checked_items != '') {
+        var promised_update = api_client.updateLcState(api_id, new_state, checked_items);
+    } else {
+        var promised_update = api_client.updateLcState(api_id, new_state);
+    }
+    var event_data = {
+        data: {
+            api_client: api_client,
+            api_id: api_id,
+            checkedItems: checked_items,
         }
-    );
+    };
+    promised_update.then(
+        (response, event = event_data) => {
+        var message = "Life cycle state updated successfully!";
+    noty({
+        text: message,
+        type: 'success',
+        dismissQueue: true,
+        progressBar: true,
+        timeout: 5000,
+        layout: 'topCenter',
+        theme: 'relax',
+        maxVisible: 10,
+    });
+    lifecycleTabHandler(event);
+}
+).catch(
+        (response, event = event_data) => {
+        let message_element = $("#general-alerts").find(".alert-danger");
+    message_element.find(".alert-message").html(response.statusText);
+    message_element.fadeIn("slow");
+    lifecycleTabHandler(event);
+}
+);
+}
+
+function getCheckListItems() {
+    var itemList = "";
+    $('#checkItem[type=checkbox]').each(function () {
+        itemList += $(this).val() + (this.checked ? ":true" : ":false") + ",";
+    });
+    return itemList;
 }
 
 /**
@@ -355,6 +416,7 @@ $(function () {
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
     $(document).on('click', "#update-endpoints-configuration", {
         api_client: client,
