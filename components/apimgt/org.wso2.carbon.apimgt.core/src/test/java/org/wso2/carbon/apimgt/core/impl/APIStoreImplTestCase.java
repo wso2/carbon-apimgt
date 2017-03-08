@@ -24,10 +24,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
-import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.dao.*;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -124,6 +121,18 @@ public class APIStoreImplTestCase {
         Assert.assertNotNull(application);
         verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME);
     }
+
+    @Test(description = "Retrieve an application by uuid")
+    public void testGetApplicationByUUID() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
+        when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
+        Application application = apiStore.getApplicationByUuid(UUID);
+        Assert.assertNotNull(application);
+        verify(applicationDAO, times(1)).getApplication(UUID);
+    }
+
 
     @Test(description = "Add an application")
     public void testAddApplication() throws  APIManagementException {
@@ -239,6 +248,14 @@ public class APIStoreImplTestCase {
         Application application = new Application(APP_NAME, USER_NAME);
         apiStore.updateApplication(UUID, application);
         verify(applicationDAO, times(1)).updateApplication(UUID, application);
+    }
+
+    @Test(description = "Retrieve applications")
+    public void testGetApplications() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null,applicationDAO,null,null,null, null);
+        apiStore.getApplications(USER_ID,GROUP_ID);
+        verify(applicationDAO, times(1)).getApplications(USER_ID);
     }
 
     @Test(description = "Retrieve all tags")
