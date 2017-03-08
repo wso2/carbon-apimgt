@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -132,11 +133,83 @@ public class APIStoreImplTestCase {
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
+        application.setPermissionString("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
         when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
         String applicationUuid = apiStore.addApplication(application);
         Assert.assertNotNull(applicationUuid);
         verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add an application with null permission String")
+    public void testAddApplicationPermissionStringNull() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setPermissionString(null);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+        String applicationUuid = apiStore.addApplication(application);
+        Assert.assertNotNull(applicationUuid);
+        verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add an application with empty permission String")
+    public void testAddApplicationPermissionStringEmpty() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setPermissionString("");
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+        String applicationUuid = apiStore.addApplication(application);
+        Assert.assertNotNull(applicationUuid);
+        verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add an application with invalid permission String")
+    public void testAddApplicationPermissionStringInvalid() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setPermissionString("[{\"groupId\": \"testGroup\",\"permission\":[\"TESTREAD\",\"TESTUPDATE\"]}]");
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+        String applicationUuid = apiStore.addApplication(application);
+        Assert.assertNotNull(applicationUuid);
+        verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add an application with null tier", expectedExceptions = APIManagementException.class)
+    public void testAddApplicationNullTier() throws Exception {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(null);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        apiStore.addApplication(application);
+    }
+
+    @Test(description = "Add an application with null policy", expectedExceptions = APIManagementException.class)
+    public void testAddApplicationNullPolicy() throws Exception {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(null);
+        apiStore.addApplication(application);
     }
 
     @Test(description = "Add application with duplicate name",

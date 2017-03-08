@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import static org.mockito.Mockito.times;
@@ -32,6 +33,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 public class UserAwareAPIStoreTestCase {
 
     private static final String USER_NAME = "username";
+    private static final String ANONYMOUS_USER = "anonymous";
     private static final String APP_NAME = "appname";
     public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
@@ -46,6 +48,23 @@ public class UserAwareAPIStoreTestCase {
         verify(applicationDAO, times(1)).deleteApplication(UUID);
     }
 
+    @Test(description = "Try delete null application", expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testDeleteApplicationNull() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        apiStore.deleteApplication(UUID);
+    }
+
+    @Test(description = "Try delete application by anonymous or different user", expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testDeleteApplicationAnonymousUser() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        Application applicationFromDAO = new Application(APP_NAME, null);
+        applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
+        when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
+        apiStore.deleteApplication(UUID);
+    }
+
     @Test
     public void testUpdateApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
@@ -57,4 +76,23 @@ public class UserAwareAPIStoreTestCase {
         apiStore.updateApplication(UUID,newApplication);
         verify(applicationDAO, times(1)).updateApplication(UUID,newApplication);
     }
+
+    @Test(description = "Try update null application", expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testUpdateApplicationNull() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        apiStore.updateApplication(UUID,null);
+    }
+
+    @Test(description = "Try update application by anonymous or different user", expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testUpdateApplicationAnonymousUser() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        Application applicationFromDAO = new Application(APP_NAME, null);
+        applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
+        Application newApplication = new Application("NEW_APP", null);
+        when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
+        apiStore.updateApplication(UUID,newApplication);
+    }
+
 }
