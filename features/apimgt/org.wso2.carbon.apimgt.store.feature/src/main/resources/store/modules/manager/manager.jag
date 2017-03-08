@@ -1,4 +1,20 @@
 <%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+
+var cloudConfig = jagg.module("util").getJsonFromFile(CLOUD_MGT_CONFIG_FILE);
+/**
+ * Returns boolean value of isEmailUserNameEnabled
+ * @return boolean isEmailUserNameEnabled
+ */
+var isEmailUserNameEnabled = function () {
+    if (application.get("isEmailUserNameEnabled") != null) {
+        return Boolean(application.get("isEmailUserNameEnabled"));
+    }
+    application.put("isEmailUserNameEnabled", cloudConfig.isEmailUserNameEnabled);
+    return Boolean(application.get("isEmailUserNameEnabled"));
+};
+
 var getAuthServerURL = function() {
     return getAPIStoreObj().getAuthServerURL();
 };
@@ -178,6 +194,19 @@ var getAPIProviderObj = function() {
     } else {
         store = require('apipublisher');
         return new store.APIProvider(user.username);
+    }
+};
+
+/**
+ * Returns the userName from the given email
+ * @param email
+ * @return String userName
+ */
+var getUserNameFromEmail = function (email) {
+    if (isEmailUserNameEnabled()) {
+        return email;
+    } else {
+        return email.replace(/@/g, ".");
     }
 };
 

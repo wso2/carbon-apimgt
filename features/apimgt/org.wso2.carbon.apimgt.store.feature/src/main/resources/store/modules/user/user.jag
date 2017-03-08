@@ -51,5 +51,39 @@ var checkIfUserExsits = function (username) {
             return true;
         }
 
-}
+};
+
+var updatePasswordWithUserInput = function (userName, newPassword, confirmationKey) {
+    log.info("Resetting the password of user [ " + userName + " ]");
+    var UserInfoRecoveryClient = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil.getUserInformationRecoveryClient();
+
+    try {
+        var verifyResult = UserInfoRecoveryClient.resetPassword(userName, confirmationKey, newPassword);
+        var error = verifyResult.getError();
+        if (verifyResult.getVerified()) {
+            log.info("Password reset is successful for the user [ " + userName + " ]");
+            return {
+                error: false,
+                status: 200,
+                message: "Password reset successful"
+            };
+        } else {
+            log.error(error);
+            return {
+                error: true,
+                status: 404,
+                message: "Password reset unsuccessful"
+            };
+        }
+    } catch (e) {
+        var errorMsg = "Error while updating password while resetting password \n";
+        log.error(errorMsg);
+        log.error(e);
+        return {
+            error: true,
+            status: 404,
+            message: errorMsg
+        };
+    }
+};
 %>

@@ -1,0 +1,14 @@
+<%
+jagg.block("password-reset/verifier", {
+    initialize: function (data) {
+    },
+
+    getOutputs: function (inputs) {
+        //log.info("Block inputs: " + stringify(inputs));
+        return {
+            confirmationKey: inputs.middle[0].inputs.confirmationKey,
+            username: inputs.middle[0].inputs.username
+        };
+    }
+});
+%>

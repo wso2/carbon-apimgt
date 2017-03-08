@@ -1,0 +1,64 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+
+var log = new Log("modules.user.reset.reset.jag");
+var UserInfoRecoveryClient = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil.getUserInformationRecoveryClient();
+var modManager = jagg.module("manager");
+var carbon = require('carbon');
+var server = carbon.server;
+var multitenancy = carbon.multitenancy;
+var cloudConfig = jagg.module("util").getJsonFromFile(CLOUD_MGT_CONFIG_FILE);
+var IS_URL = cloudConfig.ServerUrls.identity.toString();
+
+var verifyPasswordResetConfirmationCode = function (confirm, id) {
+    log.info("Verifying password reset confirmation code of the user [ " + id + " ]");
+
+    try {
+        var verifiedObj = UserInfoRecoveryClient.verifyConfirmationCode(id, confirm, null);
+        var error = verifiedObj.getError();
+        var data = {};
+        if (verifiedObj.getVerified()) {
+            log.info("Confirmation code of the user [ " + id + " ] verified successfully");
+            data.verified = true;
+            data.confirmationKey = verifiedObj.getKey();
+            data.userName = id;
+            session.put('intermediate-data', stringify(data));
+            return {
+                error: false,
+                status: 200,
+                message: "verified",
+                data: data
+            };
+        } else {
+            var errorObj = {
+                error: true
+            };
+            if (error.indexOf("18001") != -1) {
+                errorObj.message = "Invalid code";
+                errorObj.status = 403;
+                log.warn("Invalid code provided to validate by user : " + id);
+            } else if (error.indexOf("18002") != -1) {
+                errorObj.message = "Expired code";
+                errorObj.status = 403;
+                log.warn("Expired code provided to validate by user : " + id);
+            } else {
+                errorObj.message = error;
+                errorObj.status = 404;
+                log.warn(error);
+            }
+            return errorObj;
+        }
+    } catch (e) {
+        var errorMsg = "Error while verifying confirmation code for user [ " + id + " ]\n";
+        log.error(errorMsg);
+        log.error(e);
+        return {
+            error: true,
+            message: errorMsg,
+            status: 404
+        };
+    }
+};
+
+%>

@@ -97,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
+import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -1298,6 +1299,16 @@ public final class APIUtil {
             return new OAuthAdminClient();
         } catch (Exception e) {
             handleException("Error while initializing the OAuth admin client", e);
+            return null;
+        }
+    }
+
+    public static UserInformationRecoveryClient getUserInformationRecoveryClient() throws APIManagementException {
+
+        try {
+            return new UserInformationRecoveryClient();
+        } catch (Exception e) {
+            handleException("Error while initializing the User information recovery client", e);
             return null;
         }
     }
