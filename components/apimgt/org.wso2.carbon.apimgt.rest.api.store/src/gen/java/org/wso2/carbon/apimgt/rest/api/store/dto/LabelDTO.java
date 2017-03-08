@@ -7,17 +7,17 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * TagDTO
+ * LabelDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
-public class TagDTO   {
+public class LabelDTO   {
   @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("weight")
-  private Integer weight = null;
+  @JsonProperty("access_url")
+  private String accessUrl = null;
 
-  public TagDTO name(String name) {
+  public LabelDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -35,22 +35,22 @@ public class TagDTO   {
     this.name = name;
   }
 
-  public TagDTO weight(Integer weight) {
-    this.weight = weight;
+  public LabelDTO accessUrl(String accessUrl) {
+    this.accessUrl = accessUrl;
     return this;
   }
 
    /**
-   * Get weight
-   * @return weight
+   * Get accessUrl
+   * @return accessUrl
   **/
   @ApiModelProperty(required = true, value = "")
-  public Integer getWeight() {
-    return weight;
+  public String getAccessUrl() {
+    return accessUrl;
   }
 
-  public void setWeight(Integer weight) {
-    this.weight = weight;
+  public void setAccessUrl(String accessUrl) {
+    this.accessUrl = accessUrl;
   }
 
 
@@ -62,23 +62,23 @@ public class TagDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TagDTO tag = (TagDTO) o;
-    return Objects.equals(this.name, tag.name) &&
-        Objects.equals(this.weight, tag.weight);
+    LabelDTO label = (LabelDTO) o;
+    return Objects.equals(this.name, label.name) &&
+        Objects.equals(this.accessUrl, label.accessUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, weight);
+    return Objects.hash(name, accessUrl);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TagDTO {\n");
+    sb.append("class LabelDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    weight: ").append(toIndentedString(weight)).append("\n");
+    sb.append("    accessUrl: ").append(toIndentedString(accessUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

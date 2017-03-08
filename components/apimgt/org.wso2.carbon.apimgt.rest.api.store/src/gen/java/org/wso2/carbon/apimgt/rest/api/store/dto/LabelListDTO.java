@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.LabelDTO;
 
 /**
- * APIListDTO
+ * LabelListDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
-public class APIListDTO   {
+public class LabelListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
@@ -24,18 +24,18 @@ public class APIListDTO   {
   private String previous = null;
 
   @JsonProperty("list")
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
+  private List<LabelDTO> list = new ArrayList<LabelDTO>();
 
-  public APIListDTO count(Integer count) {
+  public LabelListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of APIs returned. 
+   * Number of Labels returned. 
    * @return count
   **/
-  @ApiModelProperty(value = "Number of APIs returned. ")
+  @ApiModelProperty(value = "Number of Labels returned. ")
   public Integer getCount() {
     return count;
   }
@@ -44,7 +44,7 @@ public class APIListDTO   {
     this.count = count;
   }
 
-  public APIListDTO next(String next) {
+  public LabelListDTO next(String next) {
     this.next = next;
     return this;
   }
@@ -62,7 +62,7 @@ public class APIListDTO   {
     this.next = next;
   }
 
-  public APIListDTO previous(String previous) {
+  public LabelListDTO previous(String previous) {
     this.previous = previous;
     return this;
   }
@@ -80,12 +80,12 @@ public class APIListDTO   {
     this.previous = previous;
   }
 
-  public APIListDTO list(List<APIInfoDTO> list) {
+  public LabelListDTO list(List<LabelDTO> list) {
     this.list = list;
     return this;
   }
 
-  public APIListDTO addListItem(APIInfoDTO listItem) {
+  public LabelListDTO addListItem(LabelDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -95,11 +95,11 @@ public class APIListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<APIInfoDTO> getList() {
+  public List<LabelDTO> getList() {
     return list;
   }
 
-  public void setList(List<APIInfoDTO> list) {
+  public void setList(List<LabelDTO> list) {
     this.list = list;
   }
 
@@ -112,11 +112,11 @@ public class APIListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIListDTO apIList = (APIListDTO) o;
-    return Objects.equals(this.count, apIList.count) &&
-        Objects.equals(this.next, apIList.next) &&
-        Objects.equals(this.previous, apIList.previous) &&
-        Objects.equals(this.list, apIList.list);
+    LabelListDTO labelList = (LabelListDTO) o;
+    return Objects.equals(this.count, labelList.count) &&
+        Objects.equals(this.next, labelList.next) &&
+        Objects.equals(this.previous, labelList.previous) &&
+        Objects.equals(this.list, labelList.list);
   }
 
   @Override
@@ -127,7 +127,7 @@ public class APIListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIListDTO {\n");
+    sb.append("class LabelListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    next: ").append(toIndentedString(next)).append("\n");
