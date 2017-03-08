@@ -1167,6 +1167,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return getApiDAO().getEndpoint(endpointId);
     }
 
+    @Override
+    public Endpoint getEndpointByName (String endpointName) throws APIManagementException {
+        return getApiDAO().getEndpointByName(endpointName);
+    }
+
     /**
      * Add an endpoint
      *

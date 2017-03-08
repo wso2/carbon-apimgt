@@ -86,7 +86,7 @@ public class ApiDAOImpl implements ApiDAO {
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API FROM AM_API WHERE UUID = ?";
+                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -464,8 +464,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
                 statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
-                statement.setString(18, substituteAPI.getUpdatedBy());
-                statement.setString(17, apiID);
+                statement.setString(17, substituteAPI.getUpdatedBy());
+                statement.setString(18, apiID);
 
                 statement.execute();
 
@@ -644,7 +644,7 @@ public class ApiDAOImpl implements ApiDAO {
                 try {
                     connection.setAutoCommit(false);
                     if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
-                            ResourceCategory.WSDL_URI)) {
+                            ResourceCategory.IMAGE)) {
                         ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
                                 ResourceCategory.IMAGE, dataType, image);
                     } else {
@@ -962,6 +962,7 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         corsConfiguration(corsConfiguration).
                         createdBy(rs.getString("CREATED_BY")).
+                        updatedBy(rs.getString("UPDATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).

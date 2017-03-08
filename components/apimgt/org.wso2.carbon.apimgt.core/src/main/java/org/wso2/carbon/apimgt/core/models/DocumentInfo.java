@@ -47,6 +47,26 @@ public final class DocumentInfo {
         updatedBy = builder.updatedBy;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DocumentInfo that = (DocumentInfo) o;
+
+        return getId().equals(that.getId());
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
     public SourceType getSourceType() {
         return sourceType;
     }

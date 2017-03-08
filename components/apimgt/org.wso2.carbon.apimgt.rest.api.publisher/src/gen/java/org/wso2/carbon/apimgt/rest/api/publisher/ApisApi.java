@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;

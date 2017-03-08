@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -242,7 +243,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return subscriptionId;
     }
 
-    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
+    @Override
+    public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         try {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
@@ -289,6 +291,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policy;
+    }
+
+    @Override
+    public List<Label> getLabelInfo(List<String> labels) throws APIManagementException {
+
+        List<Label> labelList;
+        try {
+            labelList = getLabelDAO().getLabelsByName(labels);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving label information";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return labelList;
     }
 
     @Override
@@ -353,14 +369,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
-                String message =  "An application already exists with a duplicate name - " + application.getName();
+                String message = "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             //Tier validation
             String tierName = application.getTier();
             if (tierName == null) {
-                String message =  "Tier name cannot be null - " + application.getName();
+                String message = "Tier name cannot be null - " + application.getName();
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
@@ -403,6 +419,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     /**
      * This method will return map with role names and its permission values.
+     *
      * @param permissionJsonString
      * @return
      * @throws org.json.simple.parser.ParseException
@@ -423,9 +440,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
                 } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
-                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.DELETE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
-                } else if (APIMgtConstants.Permission.SUBSCRIPTION.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.SUBSCRIPTION.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.SUBSCRIBE_PERMISSION;
                 }
             }

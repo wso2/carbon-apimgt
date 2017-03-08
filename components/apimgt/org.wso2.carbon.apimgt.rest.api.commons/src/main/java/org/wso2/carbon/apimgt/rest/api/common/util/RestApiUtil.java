@@ -196,6 +196,30 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new InternalServerErrorException
+     *
+     * @param errorMessage error message
+     * @return InternalServerErrorException object
+     */
+    public static InternalServerErrorException buildInternalServerErrorException(String errorMessage) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
+                errorMessage);
+        return new InternalServerErrorException(errorDTO);
+    }
+
+    /**
+     * Returns a new NotFoundException
+     *
+     * @param errorMessage error message
+     * @return NotFoundException object
+     */
+    public static NotFoundException buildNotFoundErrorException(String errorMessage) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L,
+                errorMessage);
+        return new NotFoundException(errorDTO);
+    }
+
+    /**
      * Logs the error, builds a BadRequestException with specified details and throws it
      *
      * @param msg error message

@@ -84,11 +84,9 @@ public class LabelDAOImpl implements LabelDAO {
             statement.setString(1, labelName);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    Label label = new Label.Builder().
+                    return new Label.Builder().
                             name(rs.getString("NAME")).
                             accessUrl(rs.getString("ACCESS_URL")).build();
-
-                    return label;
                 } else {
                     return null;
                 }
@@ -97,6 +95,40 @@ public class LabelDAOImpl implements LabelDAO {
             throw new APIMgtDAOException(e);
         }
 
+    }
+
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    @Override
+    public List<Label> getLabelsByName(List<String> labelNames) throws APIMgtDAOException {
+
+        List<Label> matchingLabels = new ArrayList<>();
+
+        if (!labelNames.isEmpty()) {
+            final String query = "SELECT NAME,ACCESS_URL FROM AM_LABELS WHERE NAME IN (" +
+                    DAOUtil.getParameterString(labelNames.size()) + ")";
+
+            try (Connection connection = DAOUtil.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(query)) {
+
+                for (int i = 0; i < labelNames.size(); ++i) {
+                    statement.setString(i + 1, labelNames.get(i));
+                }
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        Label label = new Label.Builder().
+                                name(rs.getString("NAME")).
+                                accessUrl(rs.getString("ACCESS_URL")).build();
+
+                        matchingLabels.add(label);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new APIMgtDAOException(e);
+            }
+        }
+
+        return matchingLabels;
     }
 
     @Override
