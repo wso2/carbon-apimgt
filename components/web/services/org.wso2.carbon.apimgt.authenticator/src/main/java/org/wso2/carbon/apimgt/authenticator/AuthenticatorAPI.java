@@ -55,16 +55,29 @@ public class AuthenticatorAPI implements Microservice {
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     public Response authenticate(
             @Context Request request, @FormDataParam ("username") String userName,
-            @FormDataParam ("password") String password, @FormDataParam ("validity_period") String validityPeriod,
+            @FormDataParam ("password") String password, @FormDataParam ("grant_type") String grantType,
+            @FormDataParam ("validity_period") String validityPeriod,
             @FormDataParam ("scopes") String scopesList) {
         try {
-            IntrospectService introspectService = new IntrospectService();
+
+            LoginTokenService loginTokenService = new LoginTokenService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthUtil.getAppContext(request);
             String restAPIContext = "/api/am" + appContext;
-            String accessToken = introspectService
-                    .getAccessToken(authResponseBean, appContext.substring(1), userName, password,
-                            scopesList.split(" "), Long.parseLong(validityPeriod));
+            String refToken = null;
+            String cookies = request.getHeader(AuthenticatorConstants.COOKIE_HEADER);
+            if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
+                refToken = AuthUtil.extractPartialAccessTokenFromCookie(cookies);
+            }
+            String tokens = loginTokenService
+                    .getTokens(authResponseBean, appContext.substring(1), userName, password, grantType, refToken,
+                            scopesList.split("" + " "), Long.parseLong(validityPeriod));
+            String accessToken = tokens.split(":")[0];
+            String refreshToken = null;
+            if (tokens.split(":").length > 1) {
+                refreshToken = tokens.split(":")[1];
+            }
+
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
@@ -72,16 +85,35 @@ public class AuthenticatorAPI implements Microservice {
             NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
                     part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
                             + AuthenticatorConstants.SECURE_COOKIE);
-            return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
-                    .header(AuthenticatorConstants.
-                                    REFERER_HEADER,
-                            (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
-                                    .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
-                                    .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
-                                    "" :
-                                    request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
-                                            request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
-                                            "").build();
+            NewCookie refreshTokenCookie = null;
+            if (refreshToken != null) {
+                refreshTokenCookie = new NewCookie(AuthenticatorConstants.REFRESH_TOKEN,
+                        refreshToken + "; path=" + appContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
+                                + AuthenticatorConstants.SECURE_COOKIE);
+            }
+            if (refreshTokenCookie != null) {
+                return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
+                        .cookie(cookie, cookie2, refreshTokenCookie).header(AuthenticatorConstants.
+                                        REFERER_HEADER,
+                                (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                        .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                        .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                        "" :
+                                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                                request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                                "").build();
+            } else {
+                return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                        .header(AuthenticatorConstants.
+                                        REFERER_HEADER,
+                                (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
+                                        .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
+                                        .equals(request.getHeader(AuthenticatorConstants.REFERER_HEADER))) ?
+                                        "" :
+                                        request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
+                                                request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
+                                                "").build();
+            }
         } catch (APIManagementException e) {
 
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
@@ -93,13 +125,14 @@ public class AuthenticatorAPI implements Microservice {
 
     @POST
     @Produces (MediaType.APPLICATION_JSON)
-    @Path ("/remove")
+    @Path ("/revoke")
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String restAPIContext = "/api/am" + appContext;
         return Response.ok().header("Set-Cookie",
                 AuthenticatorConstants.TOKEN_2 + "=;Path=" + restAPIContext + ";Expires=Thu, 01-Jan-1970 00:00:01 GMT")
                 .build();
+        //TODO : Need to call revoke endpoint.
     }
 
 }

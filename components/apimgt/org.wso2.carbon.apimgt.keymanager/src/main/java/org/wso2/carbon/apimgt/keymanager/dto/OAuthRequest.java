@@ -16,22 +16,22 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.keymanager;
+package org.wso2.carbon.apimgt.keymanager.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * The OAuth request class
  */
 public class OAuthRequest {
 
-    @JsonProperty("grantType")
+    @SerializedName ("grant_type")
     private String grantType;
 
-    @JsonProperty("username")
+    @SerializedName("username")
     private String username;
 
-    @JsonProperty("password")
+    @SerializedName("password")
     private String password;
 
     public String getGrantType() {

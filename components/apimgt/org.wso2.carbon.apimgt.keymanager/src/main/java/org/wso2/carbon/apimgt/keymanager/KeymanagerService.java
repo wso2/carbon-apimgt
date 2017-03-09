@@ -6,6 +6,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.keymanager.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuth2IntrospectionResponse;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuthApplication;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuthTokenResponse;
 import org.wso2.carbon.apimgt.keymanager.exception.KeyManagerException;
 import org.wso2.carbon.apimgt.keymanager.util.KeyManagerUtil;
 import org.wso2.msf4j.Microservice;
@@ -64,16 +68,17 @@ public class KeymanagerService implements Microservice {
     }
 
     @POST
-    @Path ("/token")
+    @Path ("/oauth2/token")
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     @Produces({ "application/json" })
-    public Response getNewAccessToken(@FormDataParam("username") String username, @FormDataParam("password") String
-            password , @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period")
-            String validityPeriod, @HeaderParam("Authorization")
-            String authzHeader)
+    public Response getNewAccessToken(@FormDataParam ("username") String username,
+            @FormDataParam ("password") String password, @FormDataParam ("grant_type") String grantType,
+            @FormDataParam ("refresh_token") String refreshToken,
+            @FormDataParam ("validity_period") String validityPeriod, @HeaderParam ("Authorization") String authzHeader)
             throws KeyManagerException {
 
-        if (!"client_credentials".equals(grantType) && !"password".equals(grantType)) {
+        if (!"client_credentials".equals(grantType) && !"password".equals(grantType) && !"refresh_token"
+                .equals(grantType)) {
             ErrorDTO errorDTO = new ErrorDTO();
             errorDTO.setCode("900501");
             errorDTO.setMessage("Unsupported Grant Type");
@@ -107,28 +112,34 @@ public class KeymanagerService implements Microservice {
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
+        } else if ("refresh_token".equals(grantType)) {
+            if (KeyManagerUtil.getRefreshedAccessToken(oAuthTokenResponse, refreshToken, validPeriod)) {
+                return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).build();
+            }
         }
 
         OAuthApplication oAuthApplication = appsByClientId.get(clientId);
         OAuthTokenResponse tokenResponse = new OAuthTokenResponse();
         String accessToken = UUID.randomUUID().toString();
-        String refreshToken = UUID.randomUUID().toString();
+        String refToken = UUID.randomUUID().toString();
         if (oAuthApplication.getAccessToken() != null) {
             accessToken = oAuthApplication.getAccessToken();
-            refreshToken = oAuthApplication.getRefreshToken();
+            refToken = oAuthApplication.getRefreshToken();
         }
         tokenResponse.setToken(accessToken);
-        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setRefreshToken(refToken);
         tokenResponse.setExpiresTimestamp(KeyManagerUtil.getExpiresTime(validPeriod));
         tokenResponse.setExpiresIn(validPeriod);
         oAuthApplication.setAccessToken(accessToken);
-        oAuthApplication.setRefreshToken(refreshToken);
+        oAuthApplication.setRefreshToken(refToken);
         appsByClientId.put(clientId, oAuthApplication);
         return Response.status(Response.Status.OK).entity(tokenResponse).build();
     }
 
     @POST
-    @Path("/register")
+    @Path("/identity/connect/register")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     public Response registerClient(OAuthApplication body, @HeaderParam("Authorization")
@@ -169,7 +180,7 @@ public class KeymanagerService implements Microservice {
     }
 
     @GET
-    @Path("/register/{clientId}")
+    @Path("/identity/connect/register/{clientId}")
     @Produces({ "application/json" })
     public Response clientRead(@PathParam("clientId") String clientId) {
         if (appsByClientId.containsKey(clientId)) {
@@ -183,7 +194,7 @@ public class KeymanagerService implements Microservice {
     }
 
     @POST
-    @Path("/introspect")
+    @Path("/oauth2/introspect")
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
     @Produces({ "application/json" })
     public Response introspect(@FormParam ("token") String token, @FormParam("token_type_hint") String tokenTypeHint) {
@@ -205,5 +216,6 @@ public class KeymanagerService implements Microservice {
         applications = KeyManagerUtil.getBackedUpData("applications.data");
         appsByClientId = KeyManagerUtil.getBackedUpData("appsByClientId.data");
         KeyManagerUtil.getBackedUpTokenData("token.data");
+        KeyManagerUtil.getBackedUpTokenData("refresh.data");
     }
 }

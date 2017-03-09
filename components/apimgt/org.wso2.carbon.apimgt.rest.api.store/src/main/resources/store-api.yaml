@@ -1796,7 +1796,7 @@ definitions:
   Token :
     title: Token details for invoking APIs
     properties:
-      accessToken:
+      access_token:
         type: string
         description: Access token
       tokenScopes:
