@@ -125,18 +125,44 @@ function lifecycleTabHandler(event) {
                     }
                 );
 
-                //Handle svg object
+                // Handle svg object
                 var svg_object = document.getElementById("lifecycle-svg");
-                // Add an load event listener to the object,
-                // as it will load asynchronously
-                svg_object.addEventListener("load",function(){
+                var state_array = {
+                    'Created': 'Prototyped,Published',
+                    'Published': 'Published,Created,Blocked,Deprecated',
+                    'Prototyped': 'Published,Created,Prototyped',
+                    'Blocked': 'Published,Deprecated',
+                    'Deprecated': 'Retired,',
+                    'Retired': ','
+                };
+                // Add an load event listener to the object, as it will load asynchronously
+                svg_object.addEventListener("load", function () {
                     // get the inner DOM of lifecycleSVG.svg
                     var svg_doc = svg_object.contentDocument;
                     var api_state = api_data.lifeCycleStatus;
-                    // get the inner element by id
+
+                    // Highlight next transition paths
+                    var next_states = state_array[api_state].split(',')
+                    for (var val in next_states) {
+                        var transition_path = svg_doc.getElementById("_force_id_1-transition/_transition/"
+                            + api_state + "/" + next_states[val] + "/1");
+                        if (transition_path != null) {
+                            transition_path.style.stroke = "#d9534f";
+                            transition_path.setAttribute("stroke-width", "2");
+                        }
+                    }
+
+                    // Change fill and set animation for current lifecycle state
                     var state_rectangle = svg_doc.getElementById(api_state.toString());
-                    // change style
-                    state_rectangle.style.fill= "green";
+                    state_rectangle.style.fill = "#37474F";
+                    // Create and append the animation element to the shape element.
+                    var animateElement = document.createElementNS('http://www.w3.org/2000/svg', "animate");
+                    animateElement.setAttribute("attributeType", "XML");
+                    animateElement.setAttribute("attributeName", "fill");
+                    animateElement.setAttribute("values", "##37474F;#c3cfd5;##37474F;##37474F");
+                    animateElement.setAttribute("dur", "0.8s");
+                    animateElement.setAttribute("repeatCount", "indefinite");
+                    state_rectangle.appendChild(animateElement);
                 }, false);
 
             }, onFailure: function (data) {
