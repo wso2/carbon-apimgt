@@ -124,6 +124,47 @@ function lifecycleTabHandler(event) {
                         }
                     }
                 );
+
+                // Handle svg object
+                var svg_object = document.getElementById("lifecycle-svg");
+                var state_array = {
+                    'Created': 'Prototyped,Published',
+                    'Published': 'Published,Created,Blocked,Deprecated',
+                    'Prototyped': 'Published,Created,Prototyped',
+                    'Blocked': 'Published,Deprecated',
+                    'Deprecated': 'Retired,',
+                    'Retired': ','
+                };
+                // Add an load event listener to the object, as it will load asynchronously
+                svg_object.addEventListener("load", function () {
+                    // get the inner DOM of lifecycleSVG.svg
+                    var svg_doc = svg_object.contentDocument;
+                    var api_state = api_data.lifeCycleStatus;
+
+                    // Highlight next transition paths
+                    var next_states = state_array[api_state].split(',')
+                    for (var val in next_states) {
+                        var transition_path = svg_doc.getElementById("_force_id_1-transition/_transition/"
+                            + api_state + "/" + next_states[val] + "/1");
+                        if (transition_path != null) {
+                            transition_path.style.stroke = "#d9534f";
+                            transition_path.setAttribute("stroke-width", "2");
+                        }
+                    }
+
+                    // Change fill and set animation for current lifecycle state
+                    var state_rectangle = svg_doc.getElementById(api_state.toString());
+                    state_rectangle.style.fill = "#37474F";
+                    // Create and append the animation element to the shape element.
+                    var animateElement = document.createElementNS('http://www.w3.org/2000/svg', "animate");
+                    animateElement.setAttribute("attributeType", "XML");
+                    animateElement.setAttribute("attributeName", "fill");
+                    animateElement.setAttribute("values", "##37474F;#c3cfd5;##37474F;##37474F");
+                    animateElement.setAttribute("dur", "0.8s");
+                    animateElement.setAttribute("repeatCount", "indefinite");
+                    state_rectangle.appendChild(animateElement);
+                }, false);
+
             }, onFailure: function (data) {
             }
         };
@@ -221,27 +262,26 @@ function updateLifecycleHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-        var message = "Life cycle state updated successfully!";
-    noty({
-        text: message,
-        type: 'success',
-        dismissQueue: true,
-        progressBar: true,
-        timeout: 5000,
-        layout: 'topCenter',
-        theme: 'relax',
-        maxVisible: 10,
-    });
-    lifecycleTabHandler(event);
-}
-).catch(
-        (response, event = event_data) => {
-        let message_element = $("#general-alerts").find(".alert-danger");
-    message_element.find(".alert-message").html(response.statusText);
-    message_element.fadeIn("slow");
-    lifecycleTabHandler(event);
-}
-);
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
 }
 
 /**
@@ -267,27 +307,26 @@ function updateLifecycleCheckListHandler(event) {
     };
     promised_update.then(
         (response, event = event_data) => {
-        var message = "Life cycle state updated successfully!";
-    noty({
-        text: message,
-        type: 'success',
-        dismissQueue: true,
-        progressBar: true,
-        timeout: 5000,
-        layout: 'topCenter',
-        theme: 'relax',
-        maxVisible: 10,
-    });
-    lifecycleTabHandler(event);
-}
-).catch(
-        (response, event = event_data) => {
-        let message_element = $("#general-alerts").find(".alert-danger");
-    message_element.find(".alert-message").html(response.statusText);
-    message_element.fadeIn("slow");
-    lifecycleTabHandler(event);
-}
-);
+            var message = "Life cycle state updated successfully!";
+            noty({
+                text: message,
+                type: 'success',
+                dismissQueue: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'topCenter',
+                theme: 'relax',
+                maxVisible: 10,
+            });
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
 }
 
 function getCheckListItems() {

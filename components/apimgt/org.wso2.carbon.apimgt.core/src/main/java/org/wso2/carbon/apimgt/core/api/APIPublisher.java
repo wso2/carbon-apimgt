@@ -128,9 +128,9 @@ public interface APIPublisher extends APIManager {
     /**
      * This method used to Update the status of API
      *
-     * @param api
-     * @param status
-     * @throws APIManagementException
+     * @param api     API UUID
+     * @param status  New lifecycle status
+     * @throws APIManagementException If failed to update API lifecycle status
      */
     void updateAPIStatus(String api, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException;
@@ -138,10 +138,10 @@ public interface APIPublisher extends APIManager {
 
     /**
      *
-     * @param apiId
-     * @param status
-     * @param checkListItemMap
-     * @throws APIManagementException
+     * @param apiId             API UUID
+     * @param status            New lifecycle status
+     * @param checkListItemMap  Check List Items map
+     * @throws APIManagementException If failed update check list item status.
      */
     void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException;
@@ -375,6 +375,15 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException
      */
     Endpoint getEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Retrieves the {@link Endpoint} object for given endpoint name
+     *
+     * @param endpointName name of the Endpoint
+     * @return {@link Endpoint} instance
+     * @throws APIManagementException if an error occurs while retrieving the information
+     */
+    Endpoint getEndpointByName (String endpointName) throws APIManagementException;
 
     /**
      * Add an endpoint

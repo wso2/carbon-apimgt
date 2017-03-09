@@ -26,7 +26,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -45,6 +47,8 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -56,17 +60,22 @@ import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Implementation of API Store operations.
  */
-public class APIStoreImpl extends AbstractAPIManager implements APIStore {
+public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
+
+    // Map to store observers, which observe APIStore events
+    private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
@@ -234,7 +243,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         return subscriptionId;
     }
 
-    @Override public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
+    @Override
+    public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
         try {
             getApiSubscriptionDAO().deleteAPISubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
@@ -281,6 +291,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return policy;
+    }
+
+    @Override
+    public List<Label> getLabelInfo(List<String> labels) throws APIManagementException {
+
+        List<Label> labelList;
+        try {
+            labelList = getLabelDAO().getLabelsByName(labels);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving label information";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return labelList;
     }
 
     @Override
@@ -345,14 +369,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
-                String message =  "An application already exists with a duplicate name - " + application.getName();
+                String message = "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             //Tier validation
             String tierName = application.getTier();
             if (tierName == null) {
-                String message =  "Tier name cannot be null - " + application.getName();
+                String message = "Tier name cannot be null - " + application.getName();
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
@@ -395,6 +419,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     /**
      * This method will return map with role names and its permission values.
+     *
      * @param permissionJsonString
      * @return
      * @throws org.json.simple.parser.ParseException
@@ -415,9 +440,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
                     totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
                 } else if (APIMgtConstants.Permission.UPDATE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
-                } else if (APIMgtConstants.Permission.DELETE.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.DELETE.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
-                } else if (APIMgtConstants.Permission.SUBSCRIPTION.equals (subJsonArray.get(j).toString().trim())) {
+                } else if (APIMgtConstants.Permission.SUBSCRIPTION.equals(subJsonArray.get(j).toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.SUBSCRIBE_PERMISSION;
                 }
             }
@@ -430,5 +455,58 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
 
     private TagDAO getTagDAO() {
         return tagDAO;
+    }
+
+    /**
+     * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
+     * Key should be class name of the observer. This is to prevent registering same observer twice to an
+     * observable.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerObserver(EventObserver observer) {
+        if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
+            eventObservers.put(observer.getClass().getName(), observer);
+        }
+    }
+
+    /**
+     * Notify each registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * This calls
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)}
+     * method of that {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
+                                Map<String, String> metaData) {
+
+        Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
+        eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
+                username, eventTime, metaData));
+    }
+
+    /**
+     * Remove {@link org.wso2.carbon.apimgt.core.api.EventObserver} from the Map, which stores observers to be
+     * notified.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeObserver(EventObserver observer) {
+        if (observer != null) {
+            eventObservers.remove(observer.getClass().getName());
+        }
+    }
+
+    /**
+     * To get the Map of all observers, which registered to {@link org.wso2.carbon.apimgt.core.api.APIPublisher}.
+     *
+     * @return Map of observers.
+     */
+    public Map<String, EventObserver> getEventObservers() {
+        return eventObservers;
     }
 }

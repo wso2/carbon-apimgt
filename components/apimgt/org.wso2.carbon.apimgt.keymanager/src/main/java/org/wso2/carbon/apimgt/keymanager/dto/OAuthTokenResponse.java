@@ -16,31 +16,31 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.keymanager;
+package org.wso2.carbon.apimgt.keymanager.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * The token response class
+ * The access_token response class
  */
 public class OAuthTokenResponse implements Serializable {
 
-    @JsonProperty("access_token")
-    private String token;
+    @SerializedName ("access_token")
+    private String access_token;
 
-    @JsonProperty("refresh_token")
-    private String refreshToken;
+    @SerializedName("refresh_token")
+    private String refresh_token;
 
-    @JsonProperty("expires_in")
-    private long expiresIn;
+    @SerializedName("expires_in")
+    private long expires_in;
 
-    @JsonProperty("scopes")
+    @SerializedName("scopes")
     private List<String> scopes;
 
-    @JsonProperty("expires_timestamp")
+    @SerializedName("expires_timestamp")
     private long expiresTimestamp;
 
     public long getExpiresTimestamp() {
@@ -54,27 +54,27 @@ public class OAuthTokenResponse implements Serializable {
     private static final long serialVersionUID = 2;
 
     public String getToken() {
-        return token;
+        return access_token;
     }
 
     public void setToken(String token) {
-        this.token = token;
+        this.access_token = token;
     }
 
     public String getRefreshToken() {
-        return refreshToken;
+        return refresh_token;
     }
 
     public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+        this.refresh_token = refreshToken;
     }
 
     public long getExpiresIn() {
-        return expiresIn;
+        return expires_in;
     }
 
-    public void setExpiresIn(long expiresIn) {
-        this.expiresIn = expiresIn;
+    public void setExpiresIn(long expires_in) {
+        this.expires_in = expires_in;
     }
 
     public List<String> getScopes() {

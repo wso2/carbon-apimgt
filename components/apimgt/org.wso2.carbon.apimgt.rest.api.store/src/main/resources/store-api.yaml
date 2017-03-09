@@ -1130,6 +1130,61 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Label Collection" resource API
+######################################################
+  /label-info:
+
+#-----------------------------------------------------
+# Retrieve the label information
+#-----------------------------------------------------
+    get:
+      summary: Get label information based on the label name
+      description: |
+        This operation can be used to retrieve the information of the labels
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Label names to get information.
+          required: true
+          schema:
+            $ref: '#/definitions/LabelInfoList'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - Label (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Label list is returned.
+          schema:
+             $ref: '#/definitions/LabelList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1686,12 +1741,18 @@ definitions:
       - applicationId
       - apiIdentifier
       - policy
+      - apiName
+      - apiVersion
     properties:
       subscriptionId:
         type: string
       applicationId:
         type: string
       apiIdentifier:
+        type: string
+      apiName:
+        type: string
+      apiVersion:
         type: string
       policy:
         type: string
@@ -1796,7 +1857,7 @@ definitions:
   Token :
     title: Token details for invoking APIs
     properties:
-      accessToken:
+      access_token:
         type: string
         description: Access token
       tokenScopes:
@@ -1868,6 +1929,58 @@ definitions:
         items: 
           type: string
         description: Allowed scopes for the access token
+
+#-----------------------------------------------------
+# The Label resource
+#-----------------------------------------------------
+  Label:
+    title: Label
+    required:
+      - name
+      - access_url
+    properties:
+      name:
+        type: string
+      access_url:
+        type: string
+
+#-----------------------------------------------------
+# The Label Info List resource
+#-----------------------------------------------------
+  LabelInfoList:
+    title: Label Info List
+    required:
+      - labels
+    properties:
+      labels:
+        type: array
+        items:
+          type: string
+
+#-----------------------------------------------------
+# The Label List resource
+#-----------------------------------------------------
+  LabelList:
+    title: Label List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Labels returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Label'
 
 #-----------------------------------------------------
 # END-OF-FILE

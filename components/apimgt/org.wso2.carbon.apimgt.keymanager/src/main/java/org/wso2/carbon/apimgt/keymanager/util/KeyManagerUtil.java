@@ -20,9 +20,9 @@ package org.wso2.carbon.apimgt.keymanager.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.keymanager.OAuth2IntrospectionResponse;
-import org.wso2.carbon.apimgt.keymanager.OAuthApplication;
-import org.wso2.carbon.apimgt.keymanager.OAuthTokenResponse;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuth2IntrospectionResponse;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuthApplication;
+import org.wso2.carbon.apimgt.keymanager.dto.OAuthTokenResponse;
 import org.wso2.carbon.apimgt.keymanager.exception.KeyManagerException;
 import org.wso2.carbon.kernel.utils.Utils;
 
@@ -53,6 +53,7 @@ public class KeyManagerUtil {
     private static Map<String, String> userMap = new HashMap();
     private static Map<String , List<String>> userScopesMap = new HashMap<>();
     private static Map<String, OAuthTokenResponse> tokenMap = new HashMap<>();
+    private static Map<String, OAuthTokenResponse> refreshTokenMap = new HashMap<>();
 
     /**
      * Extracts the clientId and secret info from the HTTP Authorization Header
@@ -94,10 +95,27 @@ public class KeyManagerUtil {
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setScopes(userScopesMap.get(username));
             tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
+            refreshTokenMap.put(oAuthTokenResponse.getRefreshToken(), oAuthTokenResponse);
             return true;
         }
         return false;
     }
+
+    public static boolean getRefreshedAccessToken (OAuthTokenResponse oAuthTokenResponse, String refreshToken, long
+            validityPeriod) {
+        if (refreshTokenMap.containsKey(refreshToken)) {
+            oAuthTokenResponse.setExpiresTimestamp(getExpiresTime(validityPeriod));
+            oAuthTokenResponse.setExpiresIn(validityPeriod);
+            oAuthTokenResponse.setToken(UUID.randomUUID().toString());
+            oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
+            oAuthTokenResponse.setScopes(refreshTokenMap.get(refreshToken).getScopes());
+            tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
+            refreshTokenMap.put(oAuthTokenResponse.getRefreshToken(), oAuthTokenResponse);
+            return true;
+        }
+        return false;
+    }
+
 
     public static boolean validateToken(String accessToken, OAuth2IntrospectionResponse oAuth2IntrospectionResponse) {
         if (tokenMap.containsKey(accessToken)) {
@@ -203,6 +221,11 @@ public class KeyManagerUtil {
 
             oos = new ObjectOutputStream(fos);
             oos.writeObject(tokenMap);
+            oos.close();
+            fos = new FileOutputStream(backUpPath + "refresh.data");
+
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(refreshTokenMap);
             oos.close();
         } catch (FileNotFoundException e) {
             log.error("Error while backing up token data", e);

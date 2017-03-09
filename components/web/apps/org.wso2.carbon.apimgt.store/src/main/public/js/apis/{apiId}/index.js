@@ -323,7 +323,6 @@ $(function () {
  * @param response {object} Raw response object returned from swagger client
  */
 function getDOCsCallback(jsonData) {
-    debugger;
     var documentationList = jsonData.obj.list, length, documentations = {}, doc, obj,docsObj=[];
 
     if (documentationList != null) {

@@ -26,6 +26,8 @@ $(function(){
             authManager.setAuthStatus(true);
             authManager.setUserName(data.authUser);//data.user.username;
             authManager.setUserScope(data.scope);//data.user.role;
+            var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+            window.localStorage.setItem("expiresIn", expiresIn);
             window.localStorage.setItem("user", data.authUser);
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });

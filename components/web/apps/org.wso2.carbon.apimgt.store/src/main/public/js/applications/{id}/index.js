@@ -442,7 +442,7 @@ var generateKeys = function () {
     }
 
     var id = document.getElementById("appid").value;
-
+    setAuthHeader(client);
     client["Generate Keys"].post_applications_generate_keys(
         {
             "applicationId": id,
