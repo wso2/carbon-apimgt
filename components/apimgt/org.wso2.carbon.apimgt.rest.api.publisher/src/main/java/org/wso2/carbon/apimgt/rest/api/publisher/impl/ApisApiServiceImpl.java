@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -406,13 +407,19 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
-                APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID
-                        (apiId));
-                return Response.ok().entity(apidto).build();
-            } else {
+            if (!RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
                 RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             }
+
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
+            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -422,7 +429,19 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
         }
-        return null;
+    }
+
+    public String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving last updated time for API " + apiId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 
     @Override
@@ -486,10 +505,19 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
+            
+            if (!StringUtils.isEmpty(ifMatch) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             API.APIBuilder api = MappingUtil.toAPI(body).id(apiId);
             apiPublisher.updateAPI(api);
+
+            String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
-            return Response.ok().entity(apidto).build();
+            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
