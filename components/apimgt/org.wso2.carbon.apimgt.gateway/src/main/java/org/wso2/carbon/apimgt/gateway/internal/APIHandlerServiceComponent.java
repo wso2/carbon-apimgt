@@ -64,8 +64,7 @@ public class APIHandlerServiceComponent {
         clientPool = APIKeyValidatorClientPool.getInstance();
         thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
 
-        String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                File.separator + "conf" + File.separator + "api-manager.xml";
+        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
 		try {
 			configuration.load(filePath);
 
