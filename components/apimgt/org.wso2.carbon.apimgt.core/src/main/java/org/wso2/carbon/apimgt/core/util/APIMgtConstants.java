@@ -238,4 +238,33 @@ public class APIMgtConstants {
         public static final String SUBSCRIPTION = "SUBSCRIPTION";
 
     }
+
+    /**
+     * Functions related constants
+     */
+    public static class FunctionsConstants {
+        public static final String API_ID = "apiId";
+        public static final String API_NAME = "apiName";
+        public static final String API_VERSION = "apiVersion";
+        public static final String API_DESCRIPTION = "apiDescription";
+        public static final String API_CONTEXT = "apiContext";
+        public static final String API_LC_STATUS = "apiStatus";
+        public static final String API_PERMISSION = "apiPermission";
+        public static final String API_PROVIDER = "apiProvider";
+        public static final String EVENT = "event";
+        public static final String COMPONENT = "component";
+        public static final String EVENT_TIME = "eventTime";
+        public static final String GET = "GET";
+        public static final String POST = "POST";
+        public static final String PUT = "PUT";
+        public static final String DELETE = "DELETE";
+        public static final String CONTENT_TYPE = "Content-Type";
+        public static final String ACCEPT = "Accept";
+        public static final String USERNAME = "username";
+        public static final String PASSWORD = "password";
+        public static final String USER_TENANT_DOMAIN = "userTenantDomain";
+        public static final String RSA_SIGNED_TOKEN = "rsaSignedToken";
+        public static final String SET_COOKIE = "Set-Cookie";
+        public static final String COOKIE = "Cookie";
+    }
 }

@@ -284,6 +284,10 @@
                                     <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                                 <bundle>
+                                    <symbolicName>nimbus-jose-jwt</symbolicName>
+                                    <version>2.26.1.wso2v2</version>
+                                </bundle>
+                                <bundle>
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
                                     <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>

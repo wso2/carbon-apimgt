@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
@@ -72,6 +75,8 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,11 +87,14 @@ import java.util.UUID;
 /**
  * Implementation of API Publisher operations
  */
-public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher {
+public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher, APIMObservable {
 
     APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
+
+    // Map to store observers, which observe APIPublisher events
+    private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO) {
@@ -159,7 +167,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public Set<String> getSubscribersOfAPI(API identifier) throws APIManagementException {
         return null;
     }
-
 
     /**
      * this method returns the Set<APISubscriptionCount> for given provider and api
@@ -277,6 +284,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 publishToGateway(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
+                // 'API_M Functions' related code
+                //Create a payload with event specific details
+                Map<String, String> eventPayload = new HashMap<>();
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, createdAPI.getId());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, createdAPI.getName());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, createdAPI.getVersion());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, createdAPI.getDescription());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, createdAPI.getContext());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, createdAPI.getLifeCycleStatus());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_PERMISSION, createdAPI.getApiPermission());
+                // This will notify all the EventObservers(Asynchronous)
+                ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_CREATION, getUsername(),
+                        ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
             } else {
                 String message = "Duplicate API already Exist with name/Context " + apiBuilder.getName();
                 log.error(message);
@@ -362,6 +383,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                        // 'API_M Functions' related code
+                        //Create a payload with event specific details
+                        Map<String, String> eventPayload = new HashMap<>();
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_CONTEXT, api.getContext());
+                        eventPayload.put(APIMgtConstants.FunctionsConstants.API_LC_STATUS, api.getLifeCycleStatus());
+                        // This will notify all the EventObservers(Asynchronous)
+                        ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_UPDATE, getUsername(),
+                                ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                        ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
                     }
                 } else if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
                     String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
@@ -859,6 +893,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                    // 'API_M Functions' related code
+                    //Create a payload with event specific details
+                    Map<String, String> eventPayload = new HashMap<>();
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_PROVIDER, api.getProvider());
+                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
+                    // This will notify all the EventObservers(Asynchronous)
+                    ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
+                            ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                    ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
                 }
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
@@ -1322,5 +1368,58 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } else {
             log.error("Error in endpoint configuration publishing");
         }
+    }
+
+    /**
+     * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
+     * Key should be class name of the observer. This is to prevent registering same observer twice to an
+     * observable.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerObserver(EventObserver observer) {
+        if (observer != null && !eventObservers.containsKey(observer.getClass().getName())) {
+            eventObservers.put(observer.getClass().getName(), observer);
+        }
+    }
+
+    /**
+     * Notify each registered {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * This calls
+     * {@link org.wso2.carbon.apimgt.core.api.EventObserver#captureEvent(Event, String, ZonedDateTime, Map)}
+     * method of that {@link org.wso2.carbon.apimgt.core.api.EventObserver}.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
+                                Map<String, String> metaData) {
+
+        Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
+        eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
+                username, eventTime, metaData));
+    }
+
+    /**
+     * Remove {@link org.wso2.carbon.apimgt.core.api.EventObserver} from the Map, which stores observers to be
+     * notified.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeObserver(EventObserver observer) {
+        if (observer != null) {
+            eventObservers.remove(observer.getClass().getName());
+        }
+    }
+
+    /**
+     * To get the Map of all observers, which registered to {@link org.wso2.carbon.apimgt.core.api.APIPublisher}.
+     *
+     * @return Map of observers.
+     */
+    public Map<String, EventObserver> getEventObservers() {
+        return eventObservers;
     }
 }

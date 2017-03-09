@@ -64,7 +64,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -205,6 +204,11 @@
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc6</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds.wso2</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>2.26.1.wso2v2</version>
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
@@ -824,6 +828,7 @@
             io.swagger.util.*,
             com.google.gson.*,
             com.google.common.*;
+            com.nimbusds.*;
             io.swagger.parser.*,
             org.json.simple.*,
             org.apache.commons.lang3.*,
@@ -832,6 +837,7 @@
             org.apache.velocity.*;
             org.wso2.andes.*;
             javax.jms.*;
+            javax.ws.rs.*;
             org.wso2.securevault.*;
             org.apache.lucene.*;
             org.ballerinalang.*,
