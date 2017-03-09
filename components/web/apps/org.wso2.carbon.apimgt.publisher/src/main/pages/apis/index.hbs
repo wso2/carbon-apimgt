@@ -1,0 +1,13 @@
+{{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Listing | " @config.appName}}
+{{css "css/custom.css"}}
+{{#fillZone "actionMenu"}}
+    {{fragment "action-menu-api-listing"}}
+{{/fillZone}}
+{{#fillZone "menubar"}}
+    {{fragment "org.wso2.carbon.uuf.common.foundation.ui.menubar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-listing"}}
+{{/fillZone}}

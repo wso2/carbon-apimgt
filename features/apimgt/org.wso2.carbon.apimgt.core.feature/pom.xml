@@ -1,134 +1,214 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
- ~ Copyright (c) 2010-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- ~
- ~ Licensed under the Apache License, Version 2.0 (the "License");
- ~ you may not use this file except in compliance with the License.
- ~ You may obtain a copy of the License at
- ~
- ~      http://www.apache.org/licenses/LICENSE-2.0
- ~
- ~ Unless required by applicable law or agreed to in writing, software
- ~ distributed under the License is distributed on an "AS IS" BASIS,
- ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ~ See the License for the specific language governing permissions and
- ~ limitations under the License.
--->
+  ~ Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+  ~ <p>
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ <p>
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ <p>
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.9.9-SNAPSHOT</version>
+        <version>7.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.core.feature</artifactId>
-    <packaging>pom</packaging>
-    <name>WSO2 Carbon - Api management Core Feature</name>
-    <url>http://wso2.org</url>
-
-    <description>
-        This feature contains the core bundles required for getting light weight API Management functionalities.
-    </description>
+    <packaging>carbon-feature</packaging>
+    <name>WSO2 API Manager Core Feature</name>
     <dependencies>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.h2database.wso2</groupId>
+                    <artifactId>h2-database-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.velocity</groupId>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.securevault</groupId>
+            <artifactId>org.wso2.securevault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.lucene</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.1</version>
                 <executions>
                     <execution>
-                        <id>clean-APIM-h2-database</id>
-                        <phase>prepare-package</phase>
+                        <id>clean_target</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>clean-apim-h2-database</id>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db" />
-                            </tasks>
+                            <target>
+                                <delete file="resources/database/AM_DB.mv.db" />
+                                <delete file="resources/database/AM_DB.trace.db" />
+                            </target>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>create-API-manager-database</id>
-                        <phase>package</phase>
+                        <id>create-carbon-apim-database</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <path id="h2.classpath">
                                     <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Creating API Manager Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Creating Carbon APIM Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql" />
+                                    <fileset file="${basedir}/resources/dbscripts/h2.sql" />
                                 </sql>
                                 <echo message="##################### END ########################" />
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
                 <executions>
                     <execution>
-                        <id>copy</id>
+                        <id>unpack</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.httpcomponents</groupId>
-                                    <artifactId>httpmime</artifactId>
-                                    <version>4.2.5</version>
-                                    <type>jar</type>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>bundle</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>httpmime-4.2.5.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.owasp.encoder</groupId>
-                                    <artifactId>encoder</artifactId>
-                                    <version>1.1</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>encoder-1.1.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>net.sf.saxon</groupId>
-                                    <artifactId>Saxon-HE</artifactId>
-                                    <version>9.4</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>Saxon-HE-9.4.jar</destFileName>
+                                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                                    <includes>config-docs/**</includes>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -137,9 +217,8 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-resources</id>
-                        <!--phase>generate-resources</phase-->
-                        <phase>package</phase>
+                        <id>prefilter-resources</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -149,22 +228,11 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>conf/api-manager.xml</include>
-                                        <include>conf/master-datasources.xml</include>
-                                        <include>conf/WSO2AM_DB.h2.db</include>
-                                        <include>**/*.sql</include>
+                                        <include>dbscripts/**</include>
+                                        <include>database/**</include>
+                                        <include>template/**</include>
                                         <include>p2.inf</include>
-                                        <include>build.properties</include>
                                     </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources</directory>
-                                    <includes>
-                                        <include>tenant/tenant-conf.json</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.build.directory}/external/</directory>
                                 </resource>
                             </resources>
                         </configuration>
@@ -172,30 +240,116 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.wso2.maven</groupId>
-                <artifactId>carbon-p2-plugin</artifactId>
-                <!--<version>${carbon.p2.plugin.version}</version>-->
+                <groupId>org.wso2.carbon.maven</groupId>
+                <artifactId>carbon-feature-plugin</artifactId>
+                <version>${carbon.feature.plugin.version}</version>
+                <extensions>true</extensions>
                 <executions>
                     <execution>
-                        <id>4-p2-feature-generation</id>
-                        <phase>package</phase>
+                        <id>1-p2-feature-generation</id>
                         <goals>
-                            <goal>p2-feature-gen</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.apimgt.core</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
-                            <adviceFile>
-                                <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
-                                    </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
-                                    </propertyDef>
-                                </properties>
-                            </adviceFile>
+                            <propertyFile>../../etc/feature.properties</propertyFile>
+                            <adviceFileContents>
+                                <advice>
+                                    <name>org.wso2.carbon.p2.category.type</name>
+                                    <value>server</value>
+                                </advice>
+                                <advice>
+                                    <name>org.eclipse.equinox.p2.type.group</name>
+                                    <value>false</value>
+                                </advice>
+                            </adviceFileContents>
                             <bundles>
-                                <bundleDef>org.apache.velocity:velocity:${velocity.version}</bundleDef>
+                                <bundle>
+                                    <symbolicName>org.wso2.carbon.apimgt.core</symbolicName>
+                                    <version>${carbon.apimgt.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-annotations</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-core</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.core.jackson-databind</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>nimbus-jose-jwt</symbolicName>
+                                    <version>2.26.1.wso2v2</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>json-simple</symbolicName>
+                                    <version>${json-simple.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-io</symbolicName>
+                                    <version>${commons-io.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>io.swagger.core</symbolicName>
+                                    <version>${io.swagger.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>swagger-parser</symbolicName>
+                                    <version>${swagger.parser.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.gson</symbolicName>
+                                    <version>${google.code.gson.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.commons.lang3</symbolicName>
+                                    <version>${apache.commons.lang3.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>velocity</symbolicName>
+                                    <version>${velocity.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-lang</symbolicName>
+                                    <version>${commons-lang.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>commons-collections</symbolicName>
+                                    <version>${version.commons-collections}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>geronimo-jms_1.1_spec</symbolicName>
+                                    <version>1.1.0.wso2v1</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>andes-client</symbolicName>
+                                    <version>${andes.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.wso2.securevault</symbolicName>
+                                    <version>${securevault.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.servicemix.bundles.lucene</symbolicName>
+                                    <version>${lucene.bundle.version}</version>
+                                </bundle>
                             </bundles>
+                            <importFeatures>
+                                <feature>
+                                    <id>org.wso2.carbon.lcm.core.feature</id>
+                                    <version>${carbon.lcm.version}</version>
+                                </feature>
+                            </importFeatures>
                         </configuration>
                     </execution>
                 </executions>

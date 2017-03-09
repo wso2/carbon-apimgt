@@ -1,136 +1,174 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorListItemDTO;
 
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class ErrorDTO  {
-  
-  
-  @NotNull
+/**
+ * ErrorDTO
+ */
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+public class ErrorDTO   {
+  @JsonProperty("code")
   private Long code = null;
-  
-  @NotNull
+
+  @JsonProperty("message")
   private String message = null;
-  
-  
+
+  @JsonProperty("description")
   private String description = null;
-  
-  
+
+  @JsonProperty("moreInfo")
   private String moreInfo = null;
-  
-  
+
+  @JsonProperty("error")
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
+  public ErrorDTO code(Long code) {
+    this.code = code;
+    return this;
+  }
 
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-
-  /**
-  * gets and sets the lastUpdatedTime for ErrorDTO
+   /**
+   * Get code
+   * @return code
   **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
-
-  /**
-  * gets and sets the createdTime for a ErrorDTO
-  **/
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  /**
-   **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("code")
   public Long getCode() {
     return code;
   }
+
   public void setCode(Long code) {
     this.code = code;
   }
 
-    /**
+  public ErrorDTO message(String message) {
+    this.message = message;
+    return this;
+  }
+
+   /**
    * Error message.
-   **/
+   * @return message
+  **/
   @ApiModelProperty(required = true, value = "Error message.")
-  @JsonProperty("message")
   public String getMessage() {
     return message;
   }
+
   public void setMessage(String message) {
     this.message = message;
   }
 
-    /**
-   * A detail description about the error message.\n
-   **/
-  @ApiModelProperty(value = "A detail description about the error message.\n")
-  @JsonProperty("description")
+  public ErrorDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+   /**
+   * A detail description about the error message. 
+   * @return description
+  **/
+  @ApiModelProperty(value = "A detail description about the error message. ")
   public String getDescription() {
     return description;
   }
+
   public void setDescription(String description) {
     this.description = description;
   }
 
-    /**
-   * Preferably an url with more details about the error.\n
-   **/
-  @ApiModelProperty(value = "Preferably an url with more details about the error.\n")
-  @JsonProperty("moreInfo")
+  public ErrorDTO moreInfo(String moreInfo) {
+    this.moreInfo = moreInfo;
+    return this;
+  }
+
+   /**
+   * Preferably an url with more details about the error. 
+   * @return moreInfo
+  **/
+  @ApiModelProperty(value = "Preferably an url with more details about the error. ")
   public String getMoreInfo() {
     return moreInfo;
   }
+
   public void setMoreInfo(String moreInfo) {
     this.moreInfo = moreInfo;
   }
 
-    /**
-   * If there are more than one error list them out.\nFor example, list out validation errors by each field.\n
-   **/
-  @ApiModelProperty(value = "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n")
-  @JsonProperty("error")
+  public ErrorDTO error(List<ErrorListItemDTO> error) {
+    this.error = error;
+    return this;
+  }
+
+  public ErrorDTO addErrorItem(ErrorListItemDTO errorItem) {
+    this.error.add(errorItem);
+    return this;
+  }
+
+   /**
+   * If there are more than one error list them out. For example, list out validation errors by each field. 
+   * @return error
+  **/
+  @ApiModelProperty(value = "If there are more than one error list them out. For example, list out validation errors by each field. ")
   public List<ErrorListItemDTO> getError() {
     return error;
   }
+
   public void setError(List<ErrorListItemDTO> error) {
     this.error = error;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ErrorDTO error = (ErrorDTO) o;
+    return Objects.equals(this.code, error.code) &&
+        Objects.equals(this.message, error.message) &&
+        Objects.equals(this.description, error.description) &&
+        Objects.equals(this.moreInfo, error.moreInfo) &&
+        Objects.equals(this.error, error.error);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(code, message, description, moreInfo, error);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ErrorDTO {\n");
     
-    sb.append("  code: ").append(code).append("\n");
-    sb.append("  message: ").append(message).append("\n");
-    sb.append("  description: ").append(description).append("\n");
-    sb.append("  moreInfo: ").append(moreInfo).append("\n");
-    sb.append("  error: ").append(error).append("\n");
-    sb.append("}\n");
+    sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    moreInfo: ").append(toIndentedString(moreInfo)).append("\n");
+    sb.append("    error: ").append(toIndentedString(error)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

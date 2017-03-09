@@ -1,0 +1,298 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="force-layout" viewBox="-631.328857421875 -121 1262.65771484375 256">
+  <defs>
+    <marker id="_force_id_1-arrow" refX="7" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" class="arrow"/>
+    </marker>
+    <style>.force-layout .cell .border,
+      .force-layout .cell .border-inset {
+      fill: white;
+      fill-opacity: 0.5;
+      stroke: steelblue;
+      stroke-width: 2px;
+      transition: stroke 400ms;
+      }
+      .force-layout .cell .border-inset {
+      fill: none;
+      }
+      .force-layout .cell.highlight .border,
+      .force-layout .cell.highlight .border-inset {
+      stroke: red;
+      }
+      .force-layout .cell.parallel-child .border,
+      .force-layout .cell.parallel-child .border-inset {
+      stroke-dasharray: 10,5;
+      }
+      .force-layout .cell-isInitial .border,
+      .force-layout .cell-isInitial .border-inset {
+      stroke-width: 0;
+      fill: black;
+      fill-opacity: 1;
+      }
+      .force-layout .cell-history .border {
+      stroke: #888;
+      fill: #888;
+      fill-opacity: 1;
+      rx: 100 !important;
+      ry: 100 !important;
+      }
+      .force-layout .transition .transitionMask {
+      stroke: #fff;
+      stroke-width: 5;
+      stroke-opacity: .6;
+      fill: none;
+      }
+      .force-layout .transition .transitionLine {
+      stroke: #555;
+      stroke-opacity: .6;
+      fill: none;
+      }
+      .force-layout .transition.highlight .transitionLine {
+      stroke: red;
+      stroke-opacity: 1;
+      transition: stroke 400ms;
+      }
+      .force-layout .transition:hover .transitionLine {
+      stroke: black;
+      stroke-opacity: 1;
+      }
+      .force-layout .arrow {
+      stroke-width: 1px;
+      fill: #555;
+      }
+      .force-layout text {
+      text-anchor: middle;
+      cursor: default;
+      }
+      .force-layout .gravity {
+      stroke: green;
+      }
+      .force-layout .collision {
+      stroke: red;
+      }
+      .force-layout .transition-label &gt; g &gt; rect {
+      stroke: none;
+      fill: none;
+      pointer-events: all;
+      }
+      .force-layout .action rect {
+      fill: #99f;
+      fill-opacity: 0.5;
+      }
+      .force-layout .force {
+      pointer-events: none;
+      }
+      .force-layout .zoomRect {
+      fill: none;
+      stroke-width: 1px;
+      pointer-events: all;
+      }
+      .force-layout .loadingOverlay rect {
+      fill: white;
+      opacity: 80%;
+      }
+      .force-layout .loadingOverlay text {
+      text-anchor: middle;
+      }
+    </style>
+  </defs>
+  <g>
+    <g class="cell cell-state " transform="translate(-427.60986328125,-58.66666793823242)">
+      <rect class="border" rx="5" ry="5" height="26" width="71.75" y="-13" x="-35.875" id="Created"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Created</text>
+        <g transform="translate(-30.875,0)"/>
+        <g transform="translate(30.875,0)"/></g>
+    </g>
+    <g class="cell cell-state " transform="translate(126.67214965820312,-72.5)">
+      <rect class="border" rx="5" ry="5" height="26" width="92.2188" y="-13" x="-46.1094" id="Prototyped"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Prototyped</text>
+        <g transform="translate(-41.1094,0)"/>
+        <g transform="translate(41.1094,0)"/></g>
+    </g>
+    <g class="cell cell-state " transform="translate(-194.75108337402344,-13.666666984558105)">
+      <rect class="border" rx="5" ry="5" height="26" width="85.1094" y="-13" x="-42.5547" id="Published"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Published</text>
+        <g transform="translate(-37.5547,0)"/>
+        <g transform="translate(37.5547,0)"/></g>
+    </g>
+    <g class="cell cell-state " transform="translate(129.4898681640625,62.33333206176758)">
+      <rect class="border" rx="5" ry="5" height="26" width="75.3125" y="-13" x="-37.65625" id="Blocked"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Blocked</text>
+        <g transform="translate(-32.65625,0)"/>
+        <g transform="translate(32.65625,0)"/></g>
+    </g>
+    <g class="cell cell-state " transform="translate(428.83660888671875,62.33333206176758)">
+      <rect class="border" rx="5" ry="5" height="26" width="94.8281" y="-13" x="-47.41405" id="Deprecated"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Deprecated</text>
+        <g transform="translate(-42.41405,0)"/>
+        <g transform="translate(42.41405,0)"/></g>
+    </g>
+    <g class="cell cell-state " transform="translate(596.7819213867188,62.33333206176758)">
+      <rect class="border" rx="5" ry="5" height="26" width="69.0938" y="-13" x="-34.5469" id="Retired"/>
+      <g class="cell-header" transform="translate(0,-8)">
+        <text y="12" x="0">Retired</text>
+        <g transform="translate(-29.5469,0)"/>
+        <g transform="translate(29.5469,0)"/></g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-391.73485,-54.33333333333333L-381.73485,-54.33333333333333L-381.73485,-11.066666666666663L-371.73485,-11.066666666666663L-316.71925,-11.066666666666663L-237.30578333333335,-11.066666666666663"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Created/Published/1" d="M-391.73485,-54.33333333333333L-381.73485,-54.33333333333333L-381.73485,-11.066666666666663L-371.73485,-11.066666666666663L-316.71925,-11.066666666666663L-237.30578333333335,-11.066666666666663"/>
+      <g class="transition-label" transform="translate(-344.22705078125,-17.566667556762695)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-27.5078" width="55.0156" height="25"/>
+          <text y="16">
+            <tspan>Publish</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-391.73485,-63L-286.71925,-63L-138.07825000000003,-63L60.56274999999994,-63L60.56274999999994,-72.5L80.56274999999994,-72.5"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Created/Prototyped/1" d="M-391.73485,-63L-286.71925,-63L-138.07825000000003,-63L60.56274999999994,-63L60.56274999999994,-72.5L80.56274999999994,-72.5"/>
+      <g class="transition-label" transform="translate(-212.39874267578125,-70)">
+        <g class="transition-label-offset" transform="translate(0,-13)">
+          <rect x="-74.3205" width="148.641" height="26"/>
+          <text y="16">
+            <tspan>Deploy as a Prototype</tspan>
+          </text>
+          <g transform="translate(0,22)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M172.78154999999992,-72.5L192.78154999999992,-72.5L192.78154999999992,-34L202.78154999999992,-34L257.7971499999999,-34L361.4225499999999,-34L361.4225499999999,-110L-306.71925,-110L-306.71925,-16.266666666666666L-237.30578333333335,-16.266666666666666"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Prototyped/Published/1" d="M172.78154999999992,-72.5L192.78154999999992,-72.5L192.78154999999992,-34L202.78154999999992,-34L257.7971499999999,-34L361.4225499999999,-34L361.4225499999999,-110L-306.71925,-110L-306.71925,-16.266666666666666L-237.30578333333335,-16.266666666666666"/>
+      <g class="transition-label" transform="translate(230.2893524169922,-40.5)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-27.5078" width="55.0156" height="25"/>
+          <text y="16">
+            <tspan>Publish</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M172.78154999999992,-79L202.78154999999992,-79L330.62554999999986,-79L371.4225499999999,-79L371.4225499999999,-121L-473.48485,-121L-473.48485,-63L-463.48485,-63"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Prototyped/Created/1" d="M172.78154999999992,-79L202.78154999999992,-79L330.62554999999986,-79L371.4225499999999,-79L371.4225499999999,-121L-473.48485,-121L-473.48485,-63L-463.48485,-63"/>
+      <g class="transition-label" transform="translate(266.70355224609375,-85.5)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-63.922" width="127.844" height="25"/>
+          <text y="16">
+            <tspan>Demote to Created</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M172.78154999999992,-66L182.78154999999992,-66L182.78154999999992,12L202.78154999999992,12L351.4225499999999,12L361.4225499999999,12L361.4225499999999,28L70.56274999999994,28L70.56274999999994,-66L80.56274999999994,-66"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Prototyped/Prototyped/1" d="M172.78154999999992,-66L182.78154999999992,-66L182.78154999999992,12L202.78154999999992,12L351.4225499999999,12L361.4225499999999,12L361.4225499999999,28L70.56274999999994,28L70.56274999999994,-66L80.56274999999994,-66"/>
+      <g class="transition-label" transform="translate(277.10205078125,5)">
+        <g class="transition-label-offset" transform="translate(0,-13)">
+          <rect x="-74.3205" width="148.641" height="26"/>
+          <text y="16">
+            <tspan>Deploy as a Prototype</tspan>
+          </text>
+          <g transform="translate(0,22)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-152.19638333333336,-13.666666666666671L-108.07825000000003,-13.666666666666671L-108.07825000000003,62.33333333333334L-46.36715000000004,62.33333333333334L-1.1483500000000504,62.33333333333334L91.83361666666656,62.33333333333334"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Blocked/1" d="M-152.19638333333336,-13.666666666666671L-108.07825000000003,-13.666666666666671L-108.07825000000003,62.33333333333334L-46.36715000000004,62.33333333333334L-1.1483500000000504,62.33333333333334L91.83361666666656,62.33333333333334"/>
+      <g class="transition-label" transform="translate(-23.757749557495117,55.83333206176758)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-22.6094" width="45.2188" height="25"/>
+          <text y="16">
+            <tspan>Block</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-152.19638333333336,-22.333333333333343L-128.07825000000003,-22.333333333333343L-128.07825000000003,-79L-98.07825000000003,-79L50.56274999999994,-79L80.56274999999994,-79"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Prototyped/1" d="M-152.19638333333336,-22.333333333333343L-128.07825000000003,-22.333333333333343L-128.07825000000003,-79L-98.07825000000003,-79L50.56274999999994,-79L80.56274999999994,-79"/>
+      <g class="transition-label" transform="translate(-23.757749557495117,-86)">
+        <g class="transition-label-offset" transform="translate(0,-13)">
+          <rect x="-74.3205" width="148.641" height="26"/>
+          <text y="16">
+            <tspan>Deploy as a Prototype</tspan>
+          </text>
+          <g transform="translate(0,22)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-152.19638333333336,-5L-128.07825000000003,-5L-128.07825000000003,9.333333333333314L-631.32885,9.333333333333314L-631.32885,-54.33333333333333L-611.32885,-54.33333333333333L-483.48485,-54.33333333333333L-463.48485,-54.33333333333333"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Created/1" d="M-152.19638333333336,-5L-128.07825000000003,-5L-128.07825000000003,9.333333333333314L-631.32885,9.333333333333314L-631.32885,-54.33333333333333L-611.32885,-54.33333333333333L-483.48485,-54.33333333333333L-463.48485,-54.33333333333333"/>
+      <g class="transition-label" transform="translate(-547.4068603515625,-60.83333206176758)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-63.922" width="127.844" height="25"/>
+          <text y="16">
+            <tspan>Demote to Created</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-152.19638333333336,-9.333333333333343L-118.07825000000003,-9.333333333333343L-118.07825000000003,119L90.80494999999996,119L162.5393499999999,119L371.4225499999999,119L371.4225499999999,66.66666666666669L381.4225499999999,66.66666666666669"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Deprecated/1" d="M-152.19638333333336,-9.333333333333343L-118.07825000000003,-9.333333333333343L-118.07825000000003,119L90.80494999999996,119L162.5393499999999,119L371.4225499999999,119L371.4225499999999,66.66666666666669L381.4225499999999,66.66666666666669"/>
+      <g class="transition-label" transform="translate(126.67214965820312,112)">
+        <g class="transition-label-offset" transform="translate(0,-13)">
+          <rect x="-35.8672" width="71.7344" height="26"/>
+          <text y="16">
+            <tspan>Deprecate</tspan>
+          </text>
+          <g transform="translate(0,22)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M-152.19638333333336,-18L-98.07825000000003,-18L-43.062650000000076,-18L60.56274999999994,-18L60.56274999999994,-47L-296.71925,-47L-296.71925,-21.46666666666667L-237.30578333333335,-21.46666666666667"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Published/1" d="M-152.19638333333336,-18L-98.07825000000003,-18L-43.062650000000076,-18L60.56274999999994,-18L60.56274999999994,-47L-296.71925,-47L-296.71925,-21.46666666666667L-237.30578333333335,-21.46666666666667"/>
+      <g class="transition-label" transform="translate(-70.57044982910156,-24.5)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-27.5078" width="55.0156" height="25"/>
+          <text y="16">
+            <tspan>Publish</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M167.14611666666656,58L241.23484999999994,58L312.96925,58L381.4225499999999,58"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Blocked/Deprecated/1" d="M167.14611666666656,58L241.23484999999994,58L312.96925,58L381.4225499999999,58"/>
+      <g class="transition-label" transform="translate(277.10205078125,51)">
+        <g class="transition-label-offset" transform="translate(0,-13)">
+          <rect x="-35.8672" width="71.7344" height="26"/>
+          <text y="16">
+            <tspan>Deprecate</tspan>
+          </text>
+          <g transform="translate(0,22)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M167.14611666666656,66.66666666666669L182.78154999999992,66.66666666666669L182.78154999999992,103L202.78154999999992,103L280.89094999999986,103L361.4225499999999,103L361.4225499999999,135L-296.71925,135L-296.71925,-5.866666666666674L-237.30578333333335,-5.866666666666674"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Blocked/Published/1" d="M167.14611666666656,66.66666666666669L182.78154999999992,66.66666666666669L182.78154999999992,103L202.78154999999992,103L280.89094999999986,103L361.4225499999999,103L361.4225499999999,135L-296.71925,135L-296.71925,-5.866666666666674L-237.30578333333335,-5.866666666666674"/>
+      <g class="transition-label" transform="translate(241.83624267578125,96.5)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-39.0547" width="78.1094" height="25"/>
+          <text y="16">
+            <tspan>Re-Publish</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+    <g class="transition">
+      <path class="transitionMask" d="M476.25064999999984,62.33333333333334L496.25064999999984,62.33333333333334L542.2350499999999,62.33333333333334L562.2350499999999,62.33333333333334"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Deprecated/Retired/1" d="M476.25064999999984,62.33333333333334L496.25064999999984,62.33333333333334L542.2350499999999,62.33333333333334L562.2350499999999,62.33333333333334"/>
+      <g class="transition-label" transform="translate(519.2428588867188,55.83333206176758)">
+        <g class="transition-label-offset" transform="translate(0,-12.5)">
+          <rect x="-22.9922" width="45.9844" height="25"/>
+          <text y="16">
+            <tspan>Retire</tspan>
+          </text>
+          <g transform="translate(0,21)"/></g>
+      </g>
+    </g>
+  </g>
+</svg>

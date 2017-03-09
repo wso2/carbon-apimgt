@@ -1,137 +1,210 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class ApplicationKeyGenerateRequestDTO  {
-  
-  
+/**
+ * ApplicationKeyGenerateRequestDTO
+ */
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+public class ApplicationKeyGenerateRequestDTO   {
+  /**
+   * Gets or Sets keyType
+   */
   public enum KeyTypeEnum {
-     PRODUCTION,  SANDBOX, 
-  };
-  @NotNull
+    PRODUCTION("PRODUCTION"),
+    
+    SANDBOX("SANDBOX");
+
+    private String value;
+
+    KeyTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static KeyTypeEnum fromValue(String text) {
+      for (KeyTypeEnum b : KeyTypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
-  
-  @NotNull
+
+  @JsonProperty("validityTime")
   private String validityTime = null;
-  
-  
+
+  @JsonProperty("callbackUrl")
   private String callbackUrl = null;
-  
-  @NotNull
+
+  @JsonProperty("accessAllowDomains")
   private List<String> accessAllowDomains = new ArrayList<String>();
-  
-  
+
+  @JsonProperty("scopes")
   private List<String> scopes = new ArrayList<String>();
 
+  public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
+    return this;
+  }
 
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-
-  /**
-  * gets and sets the lastUpdatedTime for ApplicationKeyGenerateRequestDTO
+   /**
+   * Get keyType
+   * @return keyType
   **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
-
-  /**
-  * gets and sets the createdTime for a ApplicationKeyGenerateRequestDTO
-  **/
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  /**
-   **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("keyType")
   public KeyTypeEnum getKeyType() {
     return keyType;
   }
+
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
   }
 
-    /**
-   **/
+  public ApplicationKeyGenerateRequestDTO validityTime(String validityTime) {
+    this.validityTime = validityTime;
+    return this;
+  }
+
+   /**
+   * Get validityTime
+   * @return validityTime
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("validityTime")
   public String getValidityTime() {
     return validityTime;
   }
+
   public void setValidityTime(String validityTime) {
     this.validityTime = validityTime;
   }
 
-    /**
+  public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+    return this;
+  }
+
+   /**
    * Callback URL
-   **/
+   * @return callbackUrl
+  **/
   @ApiModelProperty(value = "Callback URL")
-  @JsonProperty("callbackUrl")
   public String getCallbackUrl() {
     return callbackUrl;
   }
+
   public void setCallbackUrl(String callbackUrl) {
     this.callbackUrl = callbackUrl;
   }
 
-    /**
+  public ApplicationKeyGenerateRequestDTO accessAllowDomains(List<String> accessAllowDomains) {
+    this.accessAllowDomains = accessAllowDomains;
+    return this;
+  }
+
+  public ApplicationKeyGenerateRequestDTO addAccessAllowDomainsItem(String accessAllowDomainsItem) {
+    this.accessAllowDomains.add(accessAllowDomainsItem);
+    return this;
+  }
+
+   /**
    * Allowed domains for the access token
-   **/
+   * @return accessAllowDomains
+  **/
   @ApiModelProperty(required = true, value = "Allowed domains for the access token")
-  @JsonProperty("accessAllowDomains")
   public List<String> getAccessAllowDomains() {
     return accessAllowDomains;
   }
+
   public void setAccessAllowDomains(List<String> accessAllowDomains) {
     this.accessAllowDomains = accessAllowDomains;
   }
 
-    /**
+  public ApplicationKeyGenerateRequestDTO scopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public ApplicationKeyGenerateRequestDTO addScopesItem(String scopesItem) {
+    this.scopes.add(scopesItem);
+    return this;
+  }
+
+   /**
    * Allowed scopes for the access token
-   **/
+   * @return scopes
+  **/
   @ApiModelProperty(value = "Allowed scopes for the access token")
-  @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
   }
+
   public void setScopes(List<String> scopes) {
     this.scopes = scopes;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = (ApplicationKeyGenerateRequestDTO) o;
+    return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
+        Objects.equals(this.validityTime, applicationKeyGenerateRequest.validityTime) &&
+        Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
+        Objects.equals(this.accessAllowDomains, applicationKeyGenerateRequest.accessAllowDomains) &&
+        Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(keyType, validityTime, callbackUrl, accessAllowDomains, scopes);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
-    sb.append("  keyType: ").append(keyType).append("\n");
-    sb.append("  validityTime: ").append(validityTime).append("\n");
-    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
-    sb.append("  accessAllowDomains: ").append(accessAllowDomains).append("\n");
-    sb.append("  scopes: ").append(scopes).append("\n");
-    sb.append("}\n");
+    sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
+    sb.append("    accessAllowDomains: ").append(toIndentedString(accessAllowDomains)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

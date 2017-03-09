@@ -1,0 +1,126 @@
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+body {
+    background: #eee;
+}
+
+#ds-assets-portal .ds-asset {
+    height: 230px;
+    background-color: #272C30;
+    padding: 0;
+    color: #fff;
+    position: relative;
+}
+
+#ds-assets-portal .ds-asset.shared {
+    border-top: 5px solid #4aa624;
+}
+
+#ds-assets-portal .ds-asset.ues-dashboard {
+    height: 180px;
+}
+
+#ds-assets-portal .ds-asset .ds-asset-icon {
+    font-size: 80px;
+}
+
+#ds-assets-portal .ds-asset .ds-asset-shared {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+
+#ds-assets-portal .ds-asset .ds-asset-sharedAcrossTenants {
+    margin-right: 30px !important;
+}
+
+#ds-assets-portal .ds-asset > .ds-asset-img {
+    height: 150px;
+    margin: 20px auto;
+}
+
+#ds-assets-portal .ds-asset > .title {
+    padding: 10px;
+    margin: 0;
+}
+
+#ds-assets-portal .ds-asset > .ds-asset-handles {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+}
+.glyphicon-pencil{
+    top: 0px;
+    right: 0px;
+}
+
+#ds-assets-portal .ds-asset > .ds-asset-handles > .ds-asset-handle {
+    display: inline-block;
+    background: #3d464f;
+    color: #d6dde5;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+#ds-assets-portal .ds-asset > .ds-asset-handles > .ds-asset-handle:hover {
+    background: #e6e6e6;
+    color: #333;
+}
+
+.ds-asset-trash-cancel {
+    border-color: #000;
+}
+
+.ds-trash-actions {
+    right: 15px;
+    bottom: 15px;
+    position: absolute;
+}
+
+.ds-edit-actions {
+    right: 15px;
+    bottom: 15px;
+    position: absolute;
+}
+
+#ds-assets-portal .ds-asset h1 {
+    font-size: 18px;
+}
+
+#ds-assets-portal .ds-asset h2 {
+    font-size: 14px;
+}
+
+#ds-assets-portal .ds-asset h3 {
+    font-size: 16px;
+    text-align: justify;
+}
+
+#delete-error {
+    height: 100%;
+}
+
+#storeSelector {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

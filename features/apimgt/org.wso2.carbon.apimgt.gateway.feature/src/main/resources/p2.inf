@@ -1,6 +1,0 @@
-instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/);\
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.gateway_${feature.version}/am#sample#calculator#v1.war,target:${installFolder}/../../deployment/server/webapps/am#sample#calculator#v1.war,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.gateway_${feature.version}/am#sample#pizzashack#v1.war,target:${installFolder}/../../deployment/server/webapps/am#sample#pizzashack#v1.war,overwrite:true);\

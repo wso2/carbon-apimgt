@@ -1,0 +1,20 @@
+{{layout "main"}}
+{{title @config.appName " Listing"}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/apis/index.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header">
+        <h1>{{i18n "APIs"}}</h1>
+    </div>
+    <div class="page-content">
+   {{defineZone "api-listing"}}
+    </div>
+{{/fillZone}}

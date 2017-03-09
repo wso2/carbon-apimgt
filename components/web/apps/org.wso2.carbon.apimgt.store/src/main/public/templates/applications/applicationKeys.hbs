@@ -1,0 +1,188 @@
+{{#*inline "callback_url" }}
+    <div class="form-group">
+        <label class="" for="ConsumerKey">Callback URL</label>
+        <input id="callbackUrl" type="text" class="form-control callback_url">
+    </div>
+{{/inline}}
+
+{{#*inline "grants" }}
+    <div class="row add-margin-top-5x">
+        <div class="col-md-12">
+            <h4>Grant Types</h4>
+            <p>Application can use the following grant types to generate Access Tokens. Based on the application requirement, you can enable or disable grant types for this application.</p>
+            <div class="row add-padding-left-2x add-padding-bottom-2x">
+                {{#each grantTypes}}
+                    <div class="col-xs-6 col-sm-3 add-padding-1x">
+                        <label class="checkbox">
+                            <input type="checkbox" class="grants" {{#if disabled }}disabled="disabled"{{/if}} {{#if selected }}checked="checked"{{/if}} value="{{ grantType }}" />
+                            <span class="helper" title="{{ key }}">{{ grantType }}</span>
+                        </label>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+{{/inline}}
+
+{{#if ConsumerKey }}
+    <div class="row" id="keys">
+        <div class="col-md-12 col-lg-9">
+            <div class="add-margin-bottom-4x">
+                <button id="show_keys" type="button" class="btn btn-secondary show_keys" onclick="show_Keys(this)">{{#
+                if show_keys }}Hide Keys{{else}}Show Keys{{/if}}</button>
+            </div>
+            <div class="form-group" id="cons">
+                <label class="" for="ConsumerKey">Consumer Key></label>
+                <div class="input-group">
+                    <input type="{{# if show_keys }}text{{else}}password{{/if}}" readonly="readonly" class="form-control" id="ConsumerKey" title="Consumer Key" placeholder="Consumer Key" value="{{ConsumerKey}}">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerKey}}"  type="button" title="Copy">
+                            <i class="fw fw-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="" for="ConsumerSecret">Consumer Secret></label>
+                <div class="input-group">
+                    <input type="{{# if show_keys }}text{{else}}password{{/if}}" readonly="readonly" class="form-control" title="Consumer Secret" id="ConsumerSecret" placeholder="Consumer Secret" value="{{ConsumerSecret}}">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"  type="button" title="Copy">
+                            <i class="fw fw-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{> grants this}}
+            {{> callback_url this}}
+            <button class=" btn btn-primary update_grants" onclick="updateClick()">Update</button>
+            <div class="row add-margin-top-5x">
+                <div class="col-md-12">
+                    <h4>Generating Access Tokens</h4>
+                    <p>The following cURL command shows how to generate an access token using the password grant type.</p>
+                    <div class="highlight"><pre>
+		                <button value='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" {{gatewayurlendpoint }}' class="pull-right btn btn-default copy-button"  title="Copy"><i class="fw fw-copy"></i></button><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
+	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
+                        {{gatewayurlendpoint }}</textarea></pre>
+                    </div>
+                    <p>In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.</p>
+                    <div class="highlight"><pre>
+			            <button value='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" {{ gatewayurlendpoint }} ' class="pull-right btn btn-default copy-button"  title="Copy"><i class="fw fw-copy"></i></button><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
+	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
+                        {{ gatewayurlendpoint }}</textarea></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group add-margin-top-5x">
+                <h4>Generate a Test Access Token</h4>
+                <label class="" for="ConsumerKey">Access Token</label>
+                <div class="input-group">
+                    <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="Access Token" class="form-control access_token" id="Key" placeholder="Access Token" value="{{Key}}">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default copy-button" value="{{Key}}"  type="button" title="Copy">
+                            <i class="fw fw-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p>
+                Above token has a validity period of <strong>{{ ValidityTime }}</strong> seconds.
+                {{#if tokenScopes}}
+                    And the token has ( <strong>{{tokenScopes}}</strong> ) scopes.
+                {{/if}}
+            </p>
+            <form class="add-margin-top-5x well">
+                <div class="form-group">
+                    <label for="" class="control-label">Scopes</label>
+                    <select class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
+                        {{#each Scopes}}
+                            <option title="{{this}}" data-content="<strong>{{this}}</strong> : <span>{{this}}.</span>">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="" class="control-label">Validity period</label>
+                    <div class="input-group col-sm-6">
+                        <input id="validitytime" type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time">
+                        <div class="input-group-addon">Seconds.</div>
+                    </div>
+                </div>
+                <button class=" btn btn-primary regenerate" data-load-text="Generating" disabled>Re-generate</button>
+            </form>
+        </div>
+    </div>
+    <br />
+{{else if keyState}}
+    {{#if ifCreatedKeystate}}
+        <div class="message message-info">
+            <h4><i class="icon fw fw-info"></i>Info</h4>
+            <p>A request to register this application has been sent.</p>
+        </div>
+    {{else if ifRejectedKeystate}}
+        <div class="message message-warning">
+            <h4><i class="icon fw fw-warning"></i>No Keys Found</h4>
+            <p>This application has been rejected from generating keys.</p>
+        </div>
+    {{else if ifCompletedKeystate}}
+        Error! You have partially created keys. Please click the Clean Up button and try again.
+        <button title="Error! You have partially created keys. Please click the Clean Up button and try again."  class="btn btn-primary btn-providekeys generateAgainBtn"
+                data-keyType="PRODUCTION"
+                data-applicationName={{name}}>
+            Clean up
+        </button>
+    {{/if}}
+
+{{else}}
+    <div class="message message-info remove-margin">
+        <h4><i class="icon fw fw-info"></i>No Keys Found</h4>
+        <p>No keys are generated for this type in this application.</p>
+    </div>
+    {{#unless provide_keys_form }}
+        <div class="row">
+            <div class="col-md-12 col-lg-9">
+                {{> grants this}}
+                {{> callback_url this}}
+                <form class="add-margin-top-5x well">
+                    <div class="form-group">
+                        <label>Access token validity period</label>
+                        <div class="input-group col-sm-6">
+                            <input id="validitytime" type="text" size="10" title="validity_time" value='3600' class="form-control form-control-md validity_time">
+                            <div class="input-group-addon">Seconds.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" data-load-text="Generating" onclick="generateKeys(); return false;">Generate keys</button>
+                </form>
+            </div>
+        </div>
+    {{/unless}}
+    {{#if provide_keys }}
+        {{#if provide_keys_form }}
+            <h4>Provide Keys</h4>
+            <div class="row">
+                <div class="col-md-12 col-lg-6">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="" for="ConsumerKey">Consumer Key</label>
+                            <input type="text" class="form-control" title="ConsumerKey" id="ConsumerKey" placeholder="Consumer Key" />
+                        </div>
+                        <div class="form-group">
+                            <label class="" for="ConsumerSecret">Consumer Secret</label>
+                            <input type="text" class="form-control" title="ConsumerSecret" id="ConsumerSecret" placeholder="Consumer Secret" />
+                        </div>
+                        <div class="form-group">
+                            <button  class="btn btn-primary provide_keys_save">Save</button>
+                            <button  class="btn btn-secondory provide_keys_cancel">Cancel</button>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        {{else}}
+            <h4>Map Existing OAuth Keys</h4>
+            <p>If you already have an OAuth application registered with the IdP, you can use those keys without generating one.</p>
+            <div class="form-group">
+                <button  class="btn btn-secondory provide_keys">Provide Keys</button>
+            </div>
+        {{/if}}
+    {{/if}}
+{{/if}}

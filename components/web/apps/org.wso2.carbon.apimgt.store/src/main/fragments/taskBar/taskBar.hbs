@@ -1,0 +1,61 @@
+{{#if showNavigation}}
+    <!-- navbar -->
+    <div class="navbar-wrapper">
+        <nav class="navbar navbar-default affix-top" data-spy="affix" data-offset-top="80" data-offset-bottom="40">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                            aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">{{i18n "toggle.navigation"}}</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-menu-toggle" data-toggle="collapse" data-target="#navbar2" aria-expanded="true"
+                       aria-controls="navbar2">
+                            <span class="icon fw-stack">
+                                <i class="fw fw-down fw-stack-1x"></i>
+                            </span>
+                    </a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 0px;">
+                    <ul class="nav navbar-nav collapse-nav-sub">
+                        {{#if isNoMobileDevice}}
+                            {{#if isallowed}}
+                                <li>
+                                    <a href="<%=tenantedUrlPrefix%>create-dashboard">
+                                        <span class="fw-stack">
+                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                            <i class="fw fw-add fw-stack-1x"></i>
+                                        </span>
+                                        {{i18n "create.dashboard"}}
+                                    </a>
+                                </li>
+                            {{/if}}
+                        {{/if}}
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+            <div id="navbar2" class="navbar-collapse dropdown tiles collapse" aria-expanded="true"><!-- nav-collapse -->
+                <ul class="nav navbar-nav collapse-nav-sub">
+                    <li data-absolute-position="15" style="left: 15px; position: absolute; display: block;"
+                        aria-expanded="false">
+                        <a href="#"><i class="fw fw-dashboard"></i>{{i18n "dashboards.label"}}</a>
+                    </li>
+                    <li data-absolute-position="145" style="left: 145px; position: absolute; display: block;"
+                        aria-expanded="false">
+                        <a href="<%=tenantedUrlPrefix%>gadget/">
+                            <i class="fw fw-gadget"></i>{{i18n "gadgets"}}
+                        </a>
+                    </li>
+                    <li data-absolute-position="275" style="left: 275px; position: absolute; display: block;"
+                        aria-expanded="false">
+                        <a href="<%=tenantedUrlPrefix%>layout/"><i class="fw fw-layout"></i>{{i18n "layouts"}}</a>
+                    </li>
+                </ul>
+            </div>
+            <!--/ .nav-collapse -->
+        </nav>
+    </div>
+{{/if}}

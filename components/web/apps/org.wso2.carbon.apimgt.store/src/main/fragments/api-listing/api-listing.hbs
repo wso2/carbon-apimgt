@@ -1,0 +1,34 @@
+{{#each @params.list}}
+    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+        <div class="white-wrapper add-margin-bottom-4x">
+            <div class="thumbnail icon">
+                <div class="square-element setbgcolor">
+                    <div class="api-name-icon" onclick="location.href='{{@contextPath}}/apis/{{id}}'"></div>
+                    <div style="display: none">
+                        <a href="{{@contextPath}}/apis/{{id}}" class="api-name" title="{{name}}">{{name}}</a>
+                    </div>
+                </div>
+                <a href="{{@contextPath}}/apis/{{id}}" title="{{i18n "Browse APIs"}}">
+                    <div class="after">
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>
+                    </div>
+                </a>
+            </div>
+            <div class="add-padding-2x app-data ">
+                <h4 class="truncate"><a href="{{@contextPath}}/apis/{{id}}" title="API Name: {{name}}">{{name}}</a></h4>
+                <h5><a href="{{@contextPath}}/apis/{{id}}" title="Version">{{version}}</a></h5>
+
+                <p class="truncate">{{provider}}</p>
+                <input type="hidden" class="rating" disabled="disabled" value="ss"/>
+
+            </div>
+        </div>
+    </div>
+{{else}}
+    <div class="message message-warning">
+        <h4><i class="icon fw fw-warning"></i>Sorry, no results were found.</h4>
+    </div>
+{{/each}}

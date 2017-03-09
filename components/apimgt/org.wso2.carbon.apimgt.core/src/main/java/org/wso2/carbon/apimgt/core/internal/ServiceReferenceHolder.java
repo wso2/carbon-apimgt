@@ -1,31 +1,37 @@
+package org.wso2.carbon.apimgt.core.internal;
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-package org.wso2.carbon.apimgt.core.internal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.APIMConfigurations;
+//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-
+/**
+ * Class used to hold the APIM configuration
+ * TODO refactor class when kernal is updated to 5.2.0
+ */
 public class ServiceReferenceHolder {
-
-    private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-
-    private APIManagerConfigurationService amConfigurationService;
-    private boolean isGatewayAPIKeyValidationEnabled;
+    private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
+    private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
+    private ConfigProvider configProvider;
+    private APIMConfigurations config = null;
 
     private ServiceReferenceHolder() {
 
@@ -35,26 +41,27 @@ public class ServiceReferenceHolder {
         return instance;
     }
 
-    public APIManagerConfigurationService getAPIManagerConfigurationService() {
-        return amConfigurationService;
+    public void setConfigProvider(ConfigProvider configProvider) {
+        this.configProvider = configProvider;
     }
 
-    public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
-        this.amConfigurationService = amConfigurationService;
-        setAPIGatewayKeyCacheStatus(amConfigurationService.getAPIManagerConfiguration());
+    public ConfigProvider getConfigProvider() {
+        return configProvider;
     }
 
-    public void  setAPIGatewayKeyCacheStatus(APIManagerConfiguration config) {
-        try {
-                String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-                isGatewayAPIKeyValidationEnabled = Boolean.parseBoolean(serviceURL);
-            } catch (Exception e) {
-                isGatewayAPIKeyValidationEnabled = false;
-            }
-       }
+    public APIMConfigurations getAPIMConfiguration() {
+        /*try {
+            config = ServiceReferenceHolder.getInstance().getConfigProvider()
+                    .getConfigurationObject(APIMConfigurations.class);
+        } catch (CarbonConfigurationException e) {
+            log.error("error getting config", e);
+        }*/
 
-    public boolean isGatewayAPIKeyValidationEnabled(){
-        return isGatewayAPIKeyValidationEnabled;
+        if (config == null) {
+            config = new APIMConfigurations();
+            log.info("Setting default configurations");
+        }
+
+        return config;
     }
-
 }

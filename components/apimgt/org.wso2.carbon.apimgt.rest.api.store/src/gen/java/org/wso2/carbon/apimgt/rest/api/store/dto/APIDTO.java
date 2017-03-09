@@ -1,302 +1,368 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
 
-
-
-
-
-@ApiModel(description = "")
-public class APIDTO  {
-  
-  
-  
-  private String id = null;
-  
-  @NotNull
-  private String name = null;
-  
-  
-  private String description = null;
-  
-  @NotNull
-  private String context = null;
-  
-  @NotNull
-  private String version = null;
-  
-  @NotNull
-  private String provider = null;
-  
-  @NotNull
-  private String apiDefinition = null;
-  
-  
-  private String wsdlUri = null;
-  
-  @NotNull
-  private String status = null;
-  
-  
-  private Boolean isDefaultVersion = null;
-  
-  
-  private List<String> transport = new ArrayList<String>();
-  
-  
-  private List<String> tags = new ArrayList<String>();
-  
-  
-  private List<String> tiers = new ArrayList<String>();
-  
-  
-  private String thumbnailUrl = null;
-  
-  
-  private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
-  
-  
-  private APIBusinessInformationDTO businessInformation = null;
-
-
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-
-  /**
-  * gets and sets the lastUpdatedTime for APIDTO
-  **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
-
-  /**
-  * gets and sets the createdTime for a APIDTO
-  **/
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  /**
-   * UUID of the api registry artifact\n
-   **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+/**
+ * APIDTO
+ */
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+public class APIDTO   {
   @JsonProperty("id")
+  private String id = null;
+
+  @JsonProperty("name")
+  private String name = null;
+
+  @JsonProperty("description")
+  private String description = null;
+
+  @JsonProperty("context")
+  private String context = null;
+
+  @JsonProperty("version")
+  private String version = null;
+
+  @JsonProperty("provider")
+  private String provider = null;
+
+  @JsonProperty("apiDefinition")
+  private String apiDefinition = null;
+
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
+
+  @JsonProperty("isDefaultVersion")
+  private Boolean isDefaultVersion = null;
+
+  @JsonProperty("transport")
+  private List<String> transport = new ArrayList<String>();
+
+  @JsonProperty("tags")
+  private List<String> tags = new ArrayList<String>();
+
+  @JsonProperty("policies")
+  private List<String> policies = new ArrayList<String>();
+
+  @JsonProperty("businessInformation")
+  private API_businessInformationDTO businessInformation = null;
+
+  public APIDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+   /**
+   * UUID of the api registry artifact 
+   * @return id
+  **/
+  @ApiModelProperty(value = "UUID of the api registry artifact ")
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
 
-    /**
-   **/
+  public APIDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+   /**
+   * Get name
+   * @return name
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("name")
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
 
-    /**
-   **/
+  public APIDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+   /**
+   * Get description
+   * @return description
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("description")
   public String getDescription() {
     return description;
   }
+
   public void setDescription(String description) {
     this.description = description;
   }
 
-    /**
-   **/
+  public APIDTO context(String context) {
+    this.context = context;
+    return this;
+  }
+
+   /**
+   * Get context
+   * @return context
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("context")
   public String getContext() {
     return context;
   }
+
   public void setContext(String context) {
     this.context = context;
   }
 
-    /**
-   **/
+  public APIDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+   /**
+   * Get version
+   * @return version
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("version")
   public String getVersion() {
     return version;
   }
+
   public void setVersion(String version) {
     this.version = version;
   }
 
-    /**
-   * If the provider value is not given user invoking the api will be used as the provider.\n
-   **/
-  @ApiModelProperty(required = true, value = "If the provider value is not given user invoking the api will be used as the provider.\n")
-  @JsonProperty("provider")
+  public APIDTO provider(String provider) {
+    this.provider = provider;
+    return this;
+  }
+
+   /**
+   * If the provider value is not given user invoking the api will be used as the provider. 
+   * @return provider
+  **/
+  @ApiModelProperty(required = true, value = "If the provider value is not given user invoking the api will be used as the provider. ")
   public String getProvider() {
     return provider;
   }
+
   public void setProvider(String provider) {
     this.provider = provider;
   }
 
-    /**
-   * Swagger definition of the API which contains details about URI templates and scopes\n
-   **/
-  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes\n")
-  @JsonProperty("apiDefinition")
+  public APIDTO apiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
+    return this;
+  }
+
+   /**
+   * Swagger definition of the API which contains details about URI templates and scopes 
+   * @return apiDefinition
+  **/
+  @ApiModelProperty(value = "Swagger definition of the API which contains details about URI templates and scopes ")
   public String getApiDefinition() {
     return apiDefinition;
   }
+
   public void setApiDefinition(String apiDefinition) {
     this.apiDefinition = apiDefinition;
   }
 
-    /**
-   * WSDL URL if the API is based on a WSDL endpoint\n
-   **/
-  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
-  @JsonProperty("wsdlUri")
-  public String getWsdlUri() {
-    return wsdlUri;
-  }
-  public void setWsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
+  public APIDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+    return this;
   }
 
-    /**
-   **/
+   /**
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("status")
-  public String getStatus() {
-    return status;
-  }
-  public void setStatus(String status) {
-    this.status = status;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
-    /**
-   **/
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+  }
+
+  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
+    return this;
+  }
+
+   /**
+   * Get isDefaultVersion
+   * @return isDefaultVersion
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
   }
+
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-    /**
-   **/
+  public APIDTO transport(List<String> transport) {
+    this.transport = transport;
+    return this;
+  }
+
+  public APIDTO addTransportItem(String transportItem) {
+    this.transport.add(transportItem);
+    return this;
+  }
+
+   /**
+   * Get transport
+   * @return transport
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
   }
+
   public void setTransport(List<String> transport) {
     this.transport = transport;
   }
 
-    /**
-   **/
+  public APIDTO tags(List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public APIDTO addTagsItem(String tagsItem) {
+    this.tags.add(tagsItem);
+    return this;
+  }
+
+   /**
+   * Get tags
+   * @return tags
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
   }
+
   public void setTags(List<String> tags) {
     this.tags = tags;
   }
 
-    /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("tiers")
-  public List<String> getTiers() {
-    return tiers;
-  }
-  public void setTiers(List<String> tiers) {
-    this.tiers = tiers;
+  public APIDTO policies(List<String> policies) {
+    this.policies = policies;
+    return this;
   }
 
-    /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("thumbnailUrl")
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
-  }
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public APIDTO addPoliciesItem(String policiesItem) {
+    this.policies.add(policiesItem);
+    return this;
   }
 
-    /**
-   **/
+   /**
+   * Get policies
+   * @return policies
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("endpointURLs")
-  public List<APIEndpointURLsDTO> getEndpointURLs() {
-    return endpointURLs;
-  }
-  public void setEndpointURLs(List<APIEndpointURLsDTO> endpointURLs) {
-    this.endpointURLs = endpointURLs;
+  public List<String> getPolicies() {
+    return policies;
   }
 
-    /**
-   **/
+  public void setPolicies(List<String> policies) {
+    this.policies = policies;
+  }
+
+  public APIDTO businessInformation(API_businessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+    return this;
+  }
+
+   /**
+   * Get businessInformation
+   * @return businessInformation
+  **/
   @ApiModelProperty(value = "")
-  @JsonProperty("businessInformation")
-  public APIBusinessInformationDTO getBusinessInformation() {
+  public API_businessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+
+  public void setBusinessInformation(API_businessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIDTO API = (APIDTO) o;
+    return Objects.equals(this.id, API.id) &&
+        Objects.equals(this.name, API.name) &&
+        Objects.equals(this.description, API.description) &&
+        Objects.equals(this.context, API.context) &&
+        Objects.equals(this.version, API.version) &&
+        Objects.equals(this.provider, API.provider) &&
+        Objects.equals(this.apiDefinition, API.apiDefinition) &&
+        Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
+        Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(this.transport, API.transport) &&
+        Objects.equals(this.tags, API.tags) &&
+        Objects.equals(this.policies, API.policies) &&
+        Objects.equals(this.businessInformation, API.businessInformation);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, lifeCycleStatus, isDefaultVersion, transport, tags, policies, businessInformation);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
-    sb.append("  id: ").append(id).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  description: ").append(description).append("\n");
-    sb.append("  context: ").append(context).append("\n");
-    sb.append("  version: ").append(version).append("\n");
-    sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
-    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
-    sb.append("  status: ").append(status).append("\n");
-    sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
-    sb.append("  transport: ").append(transport).append("\n");
-    sb.append("  tags: ").append(tags).append("\n");
-    sb.append("  tiers: ").append(tiers).append("\n");
-    sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
-    sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
-    sb.append("  businessInformation: ").append(businessInformation).append("\n");
-    sb.append("}\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

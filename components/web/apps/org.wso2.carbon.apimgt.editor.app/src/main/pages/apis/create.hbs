@@ -1,0 +1,11 @@
+<!-- TODO: needs to change the page structure, with the implementation of this feature (https://github.com/wso2/carbon-uuf-maven-tools/issues/52) ~tmkb -->
+{{layout "org.wso2.carbon.apimgt.publisher.commons.ui.main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Create | " @config.appName}}
+{{css "css/custom.css"}}
+{{#fillZone "actionMenu"}}
+    {{fragment "action-menu-api-new"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-create"}}
+{{/fillZone}}

@@ -1,0 +1,13 @@
+{{layout "main"}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Applications | " @config.appName}}
+{{js "js/applications/index.js"}}
+{{js "js/main.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{defineZone "top-navbar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    {{defineZone "applications-list"}}
+{{/fillZone}}

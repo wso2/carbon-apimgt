@@ -1,24 +1,27 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.*;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.MediationDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierPermissionDTO;
 import javax.ws.rs.core.Response;
 
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-08T15:53:45.426+05:30")
 public abstract class PoliciesApiService {
-    public abstract Response policiesMediationGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch);
-    public abstract Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response policiesMediationMediationPolicyIdGet(String mediationPolicyId,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response policiesMediationMediationPolicyIdPut(String mediationPolicyId,MediationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response policiesMediationPost(MediationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
-}
+    public abstract Response policiesTierLevelDelete(String tierName, String tierLevel, String ifMatch,
+                                                     String ifUnmodifiedSince, String minorVersion)
+            throws NotFoundException;
 
+    public abstract Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
+                                                  String ifNoneMatch, String minorVersion) throws NotFoundException;
+
+    public abstract Response policiesTierLevelPost(TierDTO body, String tierLevel, String contentType,
+                                                   String minorVersion) throws NotFoundException;
+
+    public abstract Response policiesTierLevelPut(String tierName, TierDTO body, String tierLevel, String contentType,
+                                                  String ifMatch, String ifUnmodifiedSince, String minorVersion)
+            throws NotFoundException;
+
+    public abstract Response policiesUpdatePermissionPost(String tierName, String tierLevel, String ifMatch,
+                                                          String ifUnmodifiedSince, String minorVersion,
+                                                          TierPermissionDTO permissions) throws NotFoundException;
+}

@@ -1,50 +1,60 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-03T20:31:12.997+05:30")
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
-    private static final Log log = LogFactory.getLog(PoliciesApiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PoliciesApiService.class);
 
-    /**
-     * Returns list of global Mediation policies
-     *
-     * @param limit       maximum number of mediation returns
-     * @param offset      starting index
-     * @param query       search condition
-     * @param accept      accept header value
-     * @param ifNoneMatch If-None-Match header value
-     * @return Matched global mediation policies for given search condition
-     */
     @Override
-    public Response policiesMediationGet(Integer limit, Integer offset, String query,
-                                         String accept, String ifNoneMatch) {
-        //pre-processing
-        //setting default limit and offset values if they are not set
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+    public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
+                                         String ifNoneMatch, String minorVersion) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+
+        log.info("Received Policy GET request for tierLevel " + tierLevel);
+
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            List<Mediation> mediationList = apiProvider.getAllGlobalMediationPolicies();
-            MediationListDTO mediationListDTO =
-                    MediationMappingUtil.fromMediationListToDTO(mediationList, offset, limit);
-            return Response.ok().entity(mediationListDTO).build();
+            List<Policy> policies = RestAPIPublisherUtil.getApiPublisher(username).getAllPoliciesByLevel(tierLevel);
+            return Response.ok().entity(policies).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving global mediation policies";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            return null;
+            String msg = "Error occurred while retrieving Policies";
+            RestApiUtil.handleInternalServerError(msg, e, log);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(msg, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+
+    }
+
+    @Override
+    public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+
+        log.info("Received Policy request for " + tierName);
+
+        try {
+            Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName(tierLevel, tierName);
+            return Response.ok().entity(policy).build();
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while retrieving Policy";
+            RestApiUtil.handleInternalServerError(msg, e, log);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(msg, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
 }

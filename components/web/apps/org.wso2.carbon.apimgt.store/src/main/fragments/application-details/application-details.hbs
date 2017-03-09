@@ -1,0 +1,47 @@
+{{js "js/tabs.js"}}
+<div class="page-header" id="Message">
+    <h2 id="application_name">{{@params.name}}</h2>
+</div>
+<!-- Nav tabs -->
+<div class="white-wrapper">
+    <ul class="nav nav-tabs" role="tablist" id="tabs">
+        <li role="presentation" id="details-tab" class="active"><a title="Details" href="#appdetails" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>
+        <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
+        <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>
+        <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="tabcontent">
+        <div role="tabpanel" class="tab-pane fade in active" id="appdetails">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{i18n "Status"}}</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static"><strong>{{#if ifNotApprovedStatus}}{{#if ifNotRejectedStatus}}INACTIVE{{/if}}{{else}}{{@params.status}}{{/if}}</strong></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{i18n "Per Token Quota"}}</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static"><strong>{{@params.tier}}</strong></p>
+                        <p>This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{i18n "Description"}}</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static">{{#if @params.description}}{{@params.description}}{{else}}Not
+                            Given{{/if}}</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div role="tabpanel" class="tab-pane fade production-keys" id="production">
+        </div>
+        <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="subscription">
+        </div>
+    </div>
+</div>

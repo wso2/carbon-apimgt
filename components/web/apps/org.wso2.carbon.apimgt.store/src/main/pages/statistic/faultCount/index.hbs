@@ -1,0 +1,22 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Statistics - API Fault Count | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/statistics/faultCount/statistics.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <div class="page-header">
+        <h1>{{i18n "Faulty Invocations"}}</h1>
+    </div>
+    <div class="page-content">
+        <div class="message message-info">
+           <h4><i class="icon fw fw-info"></i>This feature is not supported yet.</h4>
+        </div>
+    </div>
+{{/fillZone}}

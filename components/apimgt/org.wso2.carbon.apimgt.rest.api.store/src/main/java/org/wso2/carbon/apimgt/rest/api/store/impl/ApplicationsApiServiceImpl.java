@@ -1,384 +1,260 @@
-/*
- *
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
-/**
- * This is the service implementation class for Store application related operations
- */
-public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
+public class ApplicationsApiServiceImpl
+        extends ApplicationsApiService {
 
-    private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
-    /**
-     * Retrieves all the applications that the user has access to
-     *
-     * @param groupId     group Id
-     * @param query       search condition
-     * @param limit       max number of objects returns
-     * @param offset      starting index
-     * @param accept      accepted media type of the client
-     * @param ifNoneMatch If-None-Match header value
-     * @return Response object containing resulted applications
-     */
     @Override
-    public Response applicationsGet(String groupId, String query, Integer limit, Integer offset, String accept,
-                                    String ifNoneMatch) {
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
+                                                    String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer.deleteApplication(applicationId);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting application: " + applicationId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().build();
+    }
 
-        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
-        // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestApiUtil.getLoggedInUserGroupId();
+    @Override
+    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+        ApplicationDTO applicationDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            Application application = apiConsumer.getApplication(applicationId, username, null);
+            if (application != null) {
+                if (application.getKeys() != null) {
+                    //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
+                    // available to get oauth app details by providing consumer
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                    for (APIKey apiKey : application.getKeys()) {
+                        try {
+                            OAuthApplicationInfo oAuthApplicationInfo = keyManager
+                                    .retrieveApplication(apiKey.getConsumerKey());
+                            apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                            AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(
+                                    ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo));
+                            apiKey.setAccessToken(accessTokenInfo.getAccessToken());
+                            apiKey.setValidityPeriod(accessTokenInfo.getValidityPeriod());
+                            //TODO : When showing keys in the application view page , we need to get the access token
+                            // as well
+                        } catch (KeyManagementException e) {
+                            // This is exception is not thrown intentionally because key manager mock servie does not
+                            // have keys once the server is started. We need to re write this properly once the key
+                            // manager is available.
+                            log.error("Error while getting keys fo application : " + applicationId, e);
+                        }
+                    }
+
+                }
+                applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+
+            } else {
+                String errorMessage = "Application not found: " + applicationId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving application: " + applicationId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().entity(applicationDTO).build();
+    }
+
+    @Override
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
+                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                 String minorVersion) throws NotFoundException {
+        ApplicationDTO updatedApplicationDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
+            apiConsumer.updateApplication(applicationId, application);
+
+            //retrieves the updated application and send as the response
+            Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
+            updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating application: " + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().entity(updatedApplicationDTO).build();
+    }
+
+    @Override
+    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
+                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                 String minorVersion) throws NotFoundException {
+        ApplicationKeyDTO applicationKeyDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            Application application = apiConsumer.getApplication(applicationId, username, null);
+            if (application != null) {
+                String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+                String tokenScopes = StringUtils.join(body.getScopes(), " ");
+
+                Map<String, Object> keyDetails = apiConsumer
+                        .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType().toString(),
+                                body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
+                                application.getGroupId());
+                applicationKeyDTO = ApplicationKeyMappingUtil
+                        .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+            } else {
+                String errorMessage = "Application not found for key geneation: " + applicationId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while generating keys for application";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().entity(applicationKeyDTO).build();
+    }
+
+    @Override
+    public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
+                                    String ifNoneMatch, String minorVersion) throws NotFoundException {
+
+        ApplicationListDTO applicationListDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        String groupId = RestApiUtil.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-        ApplicationListDTO applicationListDTO;
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] allMatchedApps = new Application[0];
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            List<Application> allMatchedApps = new ArrayList<>();
             if (StringUtils.isBlank(query)) {
-                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+                allMatchedApps = apiConsumer.getApplications(username, groupId);
             } else {
-                Application application = apiConsumer.getApplicationsByName(username, query, groupId);
+                Application application = apiConsumer.getApplicationByName(username, query, groupId);
                 if (application != null) {
-                    allMatchedApps = new Application[1];
-                    allMatchedApps[0] = application;
+                    allMatchedApps = new ArrayList<>();
+                    allMatchedApps.add(application);
                 }
             }
 
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
-            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
-                    allMatchedApps.length);
-
-            return Response.ok().entity(applicationListDTO).build();
+            ApplicationMappingUtil
+                    .setPaginationParams(applicationListDTO, groupId, limit, offset, allMatchedApps.size());
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);
+            String errorMessage = "Error while retrieving applications";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, query);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
+        return Response.ok().entity(applicationListDTO).build();
     }
 
-    /**
-     * Creates a new application
-     *
-     * @param body        request body containing application details
-     * @param contentType Content-Type header value
-     * @return 201 response if successful
-     */
     @Override
-    public Response applicationsPost(ApplicationDTO body, String contentType) {
+    public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
+        URI location = null;
+        ApplicationDTO createdApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
-            //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
-            if (tierName != null) {
-                Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-                if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
-                    RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
-                }
-            } else {
-                RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-            }
-
-            //subscriber field of the body is not honored. It is taken from the context
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-
-            //setting the proper groupId. This is not honored for now.
-            // Later we can honor it by checking admin privileges of the user.
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            int applicationId = apiConsumer.addApplication(application, username);
+            String applicationUUID = apiConsumer.addApplication(application);
 
-            //retrieves the created application and send as the response
-            Application createdApplication = apiConsumer.getApplicationById(applicationId);
-            ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
+            createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
-            //to be set as the Location header
-            URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
-                    createdApplicationDTO.getApplicationId());
+            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
+                                createdApplicationDTO.getApplicationId());
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new application : " + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for application : " + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
             return Response.created(location).entity(createdApplicationDTO).build();
-        } catch (APIManagementException | URISyntaxException e) {
-            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "An application already exists with name " + body.getName(), e,
-                        log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
-                        e, log);
-            }
-        }
-        return null;
     }
-
-    /**
-     * Generate keys for a application
-     *
-     * @param applicationId     application identifier
-     * @param body              request body
-     * @param contentType       Content-Type header value
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return A response object containing application keys
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
-                                                 String contentType, String ifMatch, String ifUnmodifiedSince) {
-
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-                    JSONObject jsonParamObj = new JSONObject();
-                    jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-                    String jsonParams = jsonParamObj.toString();
-                    String tokenScopes = StringUtils.join(body.getScopes(), " ");
-
-                    Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                            username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
-                            accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams);
-                    ApplicationKeyDTO applicationKeyDTO =
-                            ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
-
-                    return Response.ok().entity(applicationKeyDTO).build();
-                } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                }
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
-                RestApiUtil
-                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
-                                e,
-                                log);
-            } else {
-                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
-                        log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get an application by Id
-     *
-     * @param applicationId   application identifier
-     * @param accept          accepted media type of the client
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
-     * @return response containing the required application object
-     */
-    @Override
-    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince) {
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                    return Response.ok().entity(applicationDTO).build();
-                } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                }
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
-        }
-        return null;
-    }
-
-    /**
-     * Update an application by Id
-     *
-     * @param applicationId     application identifier
-     * @param body              request body containing application details
-     * @param contentType       Content-Type header value
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return response containing the updated application object
-     */
-    @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType,
-                                                 String ifMatch, String ifUnmodifiedSince) {
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
-            if (oldApplication != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(oldApplication)) {
-                    //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
-                    Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-                    //groupId of the request body is not honored for now.
-                    // Later we can improve by checking admin privileges of the user.
-                    application.setGroupId(oldApplication.getGroupId());
-                    //we do not honor the application id which is sent via the request body
-                    application.setUUID(oldApplication.getUUID());
-
-                    apiConsumer.updateApplication(application);
-
-                    //retrieves the updated application and send as the response
-                    Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
-                    ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil
-                            .fromApplicationtoDTO(updatedApplication);
-                    return Response.ok().entity(updatedApplicationDTO).build();
-                } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                }
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
-        }
-        return null;
-    }
-
-    /**
-     * Deletes an application by id
-     *
-     * @param applicationId     application identifier
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return 200 Response if successfully deleted the application
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
-                                                    String ifUnmodifiedSince) {
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    apiConsumer.removeApplication(application);
-                    return Response.ok().build();
-                } else {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-                }
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
-        }
-        return null;
-    }
-
-    /**
-     * get the lastUpdatedTime for an application DELETE
-     *
-     * @param applicationId
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @return
-     */
-    @Override
-    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
-    }
-
-    /**
-     * get the lastUpdatedTime for an application
-     *
-     * @param applicationId
-     * @param accept
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @return
-     */
-    @Override
-    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
-    }
-
-    /**
-     * get the lastUpdatedTime for an application PUT
-     *
-     * @param applicationId
-     * @param body
-     * @param contentType
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @return
-     */
-    @Override
-    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
-    }
-
-    @Override
-    public String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId, ApplicationKeyGenerateRequestDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
-        return null;
-    }
-
-    @Override
-    public String applicationsGetGetLastUpdatedTime(String groupId, String query, Integer limit, Integer offset, String accept, String ifNoneMatch) {
-        return null;
-    }
-
-    @Override
-    public String applicationsPostGetLastUpdatedTime(ApplicationDTO body, String contentType) {
-        return null;
-    }
-
 }

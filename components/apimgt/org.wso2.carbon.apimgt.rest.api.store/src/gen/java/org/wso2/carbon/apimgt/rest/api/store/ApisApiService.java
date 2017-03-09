@@ -1,24 +1,65 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
+import org.wso2.carbon.apimgt.rest.api.store.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.wso2.msf4j.formparam.FileInfo;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
+
+import java.io.InputStream;
+
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
 public abstract class ApisApiService {
-    public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch);
-    public abstract Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
-    public abstract Response apisApiIdSwaggerGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
-    public abstract Response apisApiIdThumbnailGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisGenerateSdkPost(String apiId,String language,String xWSO2Tenant);
-    public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String accept,String ifNoneMatch);
-
-    public abstract String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract String apisApiIdDocumentsGetGetLastUpdatedTime(String apiId,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch);
-    public abstract String apisApiIdGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
-    public abstract String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant);
-    public abstract String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract String apisGenerateSdkPostGetLastUpdatedTime(String apiId,String language,String xWSO2Tenant);
-    public abstract String apisGetGetLastUpdatedTime(Integer limit,Integer offset,String xWSO2Tenant,String query,String accept,String ifNoneMatch);
+    public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId
+ ,String documentId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId
+ ,String documentId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisApiIdDocumentsGet(String apiId
+ ,Integer limit
+ ,Integer offset
+ ,String accept
+ ,String ifNoneMatch
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisApiIdGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisApiIdSwaggerGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ ,String minorVersion
+ ) throws NotFoundException;
+    public abstract Response apisGet(Integer limit
+ ,Integer offset
+ ,String query
+ ,String accept
+ ,String ifNoneMatch
+ ,String minorVersion
+ ) throws NotFoundException;
 }
-

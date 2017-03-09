@@ -1,0 +1,19 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{title "Listing | " @config.appName}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/apis/{docId}.js"}}
+{{css "css/custom.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "searchBar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <input type="hidden" id="apiId" value="{{apiId}}"/>
+    <input type="hidden" id="docId" value="{{docId}}"/>
+
+    <div class="page-content document-content">
+    </div>
+{{/fillZone}}

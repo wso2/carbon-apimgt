@@ -1,0 +1,29 @@
+css:
+ - lib/bootstrap_3.3.5/css/bootstrap.min.css
+ - lib/theme-wso2_1.0/css/theme-wso2.css
+ - lib/font-wso2-1.0.2/css/font-wso2.min.css
+ - lib/font-awesome/css/font-awesome.min.css
+ - lib/bootstrap-select/css/bootstrap-select.min.css
+ - lib/bootstrap-rating/bootstrap-rating.css
+ - lib/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css
+ - lib/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css
+headJs:
+ - lib/jquery-v2.2.3/jquery.min.js
+ - lib/bootstrap_3.3.5/js/bootstrap.min.js
+ - lib/i18n/i18next-1.5.9.js
+# - lib/jquery-csrf/jquery-csrf.js
+ - lib/handlebars-v4.0.5.js
+ - lib/bootstrap-rating/bootstrap-rating.js
+ - lib/swagger/swagger-client.min.js
+js:
+ - lib/theme-wso2_1.0/js/theme-wso2.js
+ - lib/bootstrap-select/js/bootstrap-select.min.js
+ - lib/jquery-validate/jquery.validate.min.js
+ - lib/jquery-validate-password/jquery.validate.password.js
+ - lib/jquery-cookie/jquery.cookie.js
+ - lib/data-tables_1.10.7/media/js/jquery.dataTables.min.js
+ - lib/data-tables_1.10.7/extensions/Bootstrap/js/dataTables.bootstrap.js
+ - lib/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js
+ - lib/zeroclipboard/ZeroClipboard.min.js
+ - lib/jquery.buttonLoader.js
+ - lib/jquery.tagcloud.js

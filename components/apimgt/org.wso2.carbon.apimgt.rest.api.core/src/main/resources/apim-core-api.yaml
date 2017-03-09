@@ -1,0 +1,361 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "0.11.0"
+  title: "WSO2 API Manager - Core"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager - Core Services**.
+
+    It is written with [swagger 2](http://swagger.io/).
+
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license: 
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes: 
+  - https
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/core/v0.11
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes: 
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request. 
+# The actual media type returned will be specfied in the Content-Type header field 
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces: 
+  - application/json
+
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: "admin"
+        roles: admin
+        name: apim:admin
+        key: apim:admin
+
+######################################################
+# The "Subscription Collection" resource APIs
+######################################################
+paths:
+  /subscriptions:
+
+#-----------------------------------------------------
+# Retrieve all subscriptions of a certain API
+#-----------------------------------------------------
+    get:
+      summary: |
+        Return the list of subscriptions of an API
+      description: |
+        Return the list of subscriptions of an API, by proving API context and version. Response consist of API Context,
+        API version, Consumer Key and Subscription Policy
+      parameters:
+        - $ref : '#/parameters/apiContext'
+        - $ref : '#/parameters/apiVersion'
+        - $ref : '#/parameters/limit'
+      tags:
+        - Subscriptions of API
+      responses:
+        200:
+          description: |
+            OK.
+            The list of Subscriptions.
+          schema:
+            $ref: '#/definitions/SubscriptionList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+#  Retrieve API Infomation Summary
+#-----------------------------------------------------
+
+  /apis-summary:
+    get:
+      summary: Summary of all available apis
+      description: Request summary of all available apis.
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription Validation Information.
+          schema:
+            $ref: '#/definitions/APISummaryList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+parameters:
+
+# API Context
+  apiContext:
+    name: apiContext
+    in: query
+    description: |
+      Context of the API.
+    required: false
+    type: string
+
+# API Version
+  apiVersion:
+    name: apiVersion
+    in: query
+    description: |
+      Version of the API.
+    required: false
+    type: string
+
+# Subscription Limit
+  limit:
+    name: limit
+    in: query
+    description: |
+      Number of entities that should be retrieved.
+    required: false
+    type: integer
+    format: int32
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+definitions:
+
+#-----------------------------------------------------
+# The Subscription List resource
+#-----------------------------------------------------
+  SubscriptionList:
+    title: Subscription List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Subscription'
+
+#-----------------------------------------------------
+# The Subscription resource
+#-----------------------------------------------------
+  Subscription:
+    title: Subscription
+    required:
+      - apiName
+      - apiContext
+      - apiVersion
+      - apiProvider
+      - consumerKey
+      - subscriptionPolicy
+      - applicationName
+      - applicationOwner
+      - keyEnvType
+    properties:
+      apiName:
+        type: string
+        description: |
+          Name of API.
+      apiContext:
+        type: string
+        description: |
+          Context of API.
+      apiVersion:
+        type: string
+        description: |
+          Version of API.
+      apiProvider:
+        type: string
+        description: |
+          Provider of API.
+      consumerKey:
+        type: string
+        description: |
+          Consumer Key of Application.
+      subscriptionPolicy:
+        type: string
+        description: |
+          Name of Subscription Policy.
+      applicationName:
+        type: string
+        description: |
+          Application Name.
+      applicationOwner:
+        type: string
+        description: |
+          Application Owner.
+      keyEnvType:
+        type: string
+        description: |
+          Key type (Production or Sandbox).
+
+#-----------------------------------------------------
+# API Summary Info resource
+#-----------------------------------------------------
+  UriTemplate:
+    title: Uri template Information
+    properties:
+      uriTemplate:
+        type: string
+        description: |
+          uri template of api.
+      httpVerb:
+        type: string
+        description: |
+          http verb of the uri template.
+      authType:
+        type: string
+        description: |
+          auth type of uri tamplate.
+      policy:
+        type: string
+        description: |
+          policy of uri template.
+  APISummary:
+    title: APIs Summary Information
+    properties:
+      id:
+        type: string
+        description: |
+          uuid of the api.
+      name:
+        type: string
+        description: |
+          api name.
+      context:
+        type: string
+        description: |
+          api context.
+      version:
+        type: string
+        description: |
+          api version.
+      uriTemplates:
+        type: array
+        "items":
+          "$ref": "#/definitions/UriTemplate"
+        description: |
+          List of uriTemplates.
+  APISummaryList:
+    title: Response of  a object list
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APISummary'
+        description: |
+          List of apis summery.
+
+#-----------------------------------------------------
+# The Error resource
+#-----------------------------------------------------
+  Error:
+    title: Error object returned with 4XX HTTP lifeCycleStatus
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+        description: Error message.
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
+      moreInfo:
+        type: string
+        description: |
+          Preferably an url with more details about the error.
+      error:
+        type: array
+        description: |
+          If there are more than one error list them out.
+          For example, list out validation errors by each field.
+        items:
+          $ref: '#/definitions/ErrorListItem'
+
+#-----------------------------------------------------
+# The Error List Item resource
+#-----------------------------------------------------
+  ErrorListItem:
+    title: Description of individual errors that may have occurred during a request.
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+        description: |
+          Description about individual errors occurred
+
+
+#-----------------------------------------------------
+# END-OF-FILE
+#-----------------------------------------------------

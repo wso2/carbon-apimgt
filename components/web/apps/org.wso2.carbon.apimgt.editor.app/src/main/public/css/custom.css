@@ -1,0 +1,216 @@
+.api-wrapper {
+	background-color: #EFEFEF;
+	position: relative;
+}
+.center-wrapper{
+    margin:0 auto;
+    margin-left:auto;
+    margin-right:auto;
+    align:center;
+    text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+input.ep-field{
+    min-width: 50%;
+}
+._jsonform-array-ul label{
+    width:118px;
+    margin-left: 0px;
+}
+._jsonform-array-ul label .help_popup{
+    display: none;
+}
+#description {
+    resize: vertical;
+}
+.modal-content{
+    background: #FFF;
+    color:#000;
+ }
+ .modal-header h3{
+    padding: 0px;
+ }
+ .modal-header{
+    background: #f1f1f1;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+ }
+ .modal-header .close{
+    color:#222;
+    margin-top: 6px;
+    font-size: 16px;
+ }
+.navbar-menu-toggle,.navbar-menu-toggle:hover, .navbar-menu-toggle:focus, .navbar-menu-toggle:active{
+    /* TODO: Prevent overriding original colors from theme*/
+    /*background:#222;*/
+}
+.navbar-menu-toggle[aria-expanded=true]{
+    /*background:#242932;*/
+}
+.form-group label>.requiredAstrix {
+    color: #E74C3C;
+    font-weight: 400;
+    margin-left:2px;
+}
+.api-search .input-group-btn button{
+    line-height:31px;
+}
+#resource_details .editableform .control-group{
+    margin:0px;
+}
+#resource_details .editable-buttons .editable-cancel{
+    margin-left:2px;
+}
+.sub-form-group label{
+    color: #777;
+}
+.tier_checkbox_label{
+    display: block;
+}
+.checkbox p {
+    padding: 0 0 0 23px;
+    position: relative;
+    margin: 0;
+}
+#resource_policy_modal.modal .modal-body {
+    max-height: 600px !important;
+    overflow-y: auto !important;
+}
+#resource_policy_modal select{
+    margin: -6px;
+}
+.panel-group .panel .form-horizontal,
+.wiz-content .form-horizontal,
+.modal-body .form-horizontal,
+.tab-pane .form-horizontal,
+.login-form-wrapper .form-horizontal{
+    max-width:100%;
+}
+.form-group .label{
+    display:inline-block;
+    margin-top:2px;
+    padding:2px 10px;
+    line-height: 13px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+.input-group {
+    margin-top: 3px;
+}
+
+.list-group-item-success .noty_text,
+.list-group-item-info .noty_text,
+.list-group-item-warning .noty_text,
+.list-group-item-danger .noty_text{
+    color:#fff;
+}
+
+.lifecycle-state .btn-group > .btn{
+    border-right:1px solid #999;
+    height:40px;
+}
+
+#swaggerEditer {
+    overflow: hidden;
+    padding-top: 40px !important;
+}
+
+.swagger_editer_header{
+    padding:0px !important;
+}
+.swagger_editer_header .btn{
+    height: 100% !important;
+}
+.swagger_editer_header .fw-stack{
+    margin: 1px 7px 0px 0px;
+}
+
+.main-header {
+    padding-left: 5px !important;
+}
+
+.scopes-list{
+    margin:0px;
+    padding:0px;
+    list-style:none;
+}
+.scopes-list li{
+    margin-bottom:4px;
+    padding:10px;
+    background:#f2f2f2;
+}
+.scopes-list li div{
+    padding-bottom:8px;
+    margin-bottom:4px;
+    border-bottom:1px solid #e2e2e2;
+}
+.scopes-list li p{
+    margin:0px;
+}
+.btn-group.bootstrap-select .btn-default,.btn-group.bootstrap-select a.btn-default{
+    color: #333;
+    background-color: #fff;
+    border:1px solid;
+    border-color: #ccc;
+}
+.btn-sequenceUpload{
+    min-width:155px;
+}
+/* wso2 theme overrides */
+.btn-default, a.btn-default{
+    background-color: #ccc;
+    border: medium none;
+    color: #000;
+}
+.btn-default, a.btn-default:hover{
+    background-color: #ccc;
+    border: medium none;
+    color: #000;
+}
+.tab-content{
+    border:none;
+    padding-left:5px;
+}
+.form-horizontal.api-custom-forms .control-label{
+    padding-top:0;
+    text-align: left;
+}
+.form-horizontal.api-custom-forms .form-group{
+    border-bottom: solid 1px #efefef;
+    padding-bottom:5px;
+}
+.form-horizontal.api-custom-forms.edit div.view{
+    display: none;
+}
+.form-horizontal.api-custom-forms.view div.edit{
+    display: none;
+}
+.apim-pub-new-api {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    /*border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    border-right-color: white;
+    border-collapse: collapse;
+    margin-right: 0px;
+    padding-right: 0px !*TODO: tmkb optimize padding *!*/
+}
+.apim-pub-nested-method-selection {
+    padding-left: 55px;
+}
+/* TODO: remove custom notification styles with addition of http://ned.im/noty/ to uuf-foundation-fragment ~tmkb*/
+#general-alerts {
+    position: fixed;
+    top: 5%;
+    width: 80%;
+    left: 10%;
+}
+#general-alerts .alert {
+    display: none;
+}
