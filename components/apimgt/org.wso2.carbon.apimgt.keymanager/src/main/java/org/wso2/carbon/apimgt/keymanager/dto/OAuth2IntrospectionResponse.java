@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.keymanager;
+package org.wso2.carbon.apimgt.keymanager.dto;
 
 /**
  * The introspect response class

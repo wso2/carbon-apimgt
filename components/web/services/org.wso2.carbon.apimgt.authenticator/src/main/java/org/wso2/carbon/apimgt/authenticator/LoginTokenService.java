@@ -39,9 +39,9 @@ import java.util.Map;
  * This method authenticate the user.
  *
  */
-public class IntrospectService {
+public class LoginTokenService {
 
-    private static final Logger log = LoggerFactory.getLogger(IntrospectService.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginTokenService.class);
 
     /**
      * This method authenticate the user.
@@ -61,33 +61,19 @@ public class IntrospectService {
      * This method authenticate the user.
      *
      */
-    public String getAccessToken(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String[] scopes, Long validityPeriod) throws KeyManagementException {
+    public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
+            String grantType, String refreshToken, String[] scopes, Long validityPeriod) throws KeyManagementException {
         //TODO - call method which provides client id and secret.
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
-                .createAccessTokenRequest(userName, password, "password", validityPeriod, scopes,
+                .createAccessTokenRequest(userName, password, grantType, refreshToken, validityPeriod, scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
         AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
         authResponseBean.setAuthUser(userName);
-        return accessTokenInfo.getAccessToken();
+        return accessTokenInfo.getAccessToken() + ":" + accessTokenInfo.getRefreshToken();
     }
-
-    /*private String generateAccessToken(String userName, String password, String[] scopes) {
-        Map<String, String> keys = getConsumerKeySecret("publisher");
-        Map.Entry entry = keys.entrySet().iterator().next();
-        String key = (String) entry.getKey();
-        String secret = (String) entry.getValue();
-        return kmTokenEndpoint(key, secret, userName, password, scopes);
-    }*/
-
-    /**
-     * This method will return map of consumer key and secret
-     * @return Consumer key and secret.
-     */
-
 
     private Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {
 
@@ -98,7 +84,7 @@ public class IntrospectService {
             OAuthAppRequest oauthAppRequest = null;
 
                 oauthAppRequest = AuthUtil
-                        .createOauthAppRequest(appName, "ADMIN", null,
+                        .createOauthAppRequest(appName, "admin", null,
                                 null);
             //for now tokenSope = null
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
@@ -114,24 +100,8 @@ public class IntrospectService {
         } else {
             return AuthUtil.getConsumerKeySecretMap().get(appName);
         }
-
-
-//        Map<String, Map<String, String>> appKeys = new HashMap<>();
-//        Map<String, String> keys = new HashMap<>();
-//        keys.put("publisher", "ewewer-4324-fwefwe");
-//        appKeys.put("publisher", keys);
-//        return appKeys.get(appName);
     }
 
-//    private String kmTokenEndpoint(String key, String secret, String username, String password, String[] scopes) {
-//        String accessToken = key + secret + username + password;
-//        StringBuilder salt = new StringBuilder();
-//        Random rnd = new Random();
-//        while (salt.length() < 18) {
-//            int index = (int) (rnd.nextFloat() * accessToken.length());
-//            salt.append(accessToken.charAt(index));
-//        }
-//        String saltStr = salt.toString();
-//        return saltStr;
-//    }
+
+
 }

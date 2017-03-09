@@ -26,10 +26,14 @@ public class AuthenticatorConstants {
 
     public static final String TOKEN_1 = "WSO2_AM_TOKEN_1";
     public static final String TOKEN_2 = "WSO2_AM_TOKEN_2";
+    public static final String REFRESH_TOKEN = "WSO2_AM_REFRESH_TOKEN";
     public static final String MSF4J_TOKEN_1 = "msf4j_1";
     public static final String MSF4J_TOKEN_2 = "msf4j_2";
     public static final String REFERER_HEADER = "Referer";
     public static final String X_ALT_REFERER_HEADER = "X-Alt-Referer";
     public static final String HTTP_ONLY_COOKIE = "HttpOnly";
     public static final String SECURE_COOKIE = "Secure";
+    public static final String PASSWORD_GRANT = "password";
+    public static final String REFRESH_GRANT = "refresh_token";
+    public static final String COOKIE_HEADER = "Cookie";
 }

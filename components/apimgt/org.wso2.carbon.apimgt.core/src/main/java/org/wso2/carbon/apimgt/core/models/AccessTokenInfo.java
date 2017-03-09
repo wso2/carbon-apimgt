@@ -42,6 +42,8 @@ public class AccessTokenInfo {
 
     private String accessToken;
 
+    private String refreshToken;
+
     private long issuedTime;
 
     private long validityPeriod;
@@ -177,5 +179,13 @@ public class AccessTokenInfo {
 
     public void setEndUserName(String endUserName) {
         this.endUserName = endUserName;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

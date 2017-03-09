@@ -58,11 +58,16 @@ import javax.net.ssl.X509TrustManager;
 public class LogInKeyManagerImpl implements KeyManager {
     private static final Logger log = LoggerFactory.getLogger(LogInKeyManagerImpl.class);
 
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "token";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expiresIn";
+    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
+    private static final String OAUTH_RESPONSE_REFRESH_TOKEN = "refresh_token";
+    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
     private static final String PASSWORD_GRANT_TYPE = "password";
+    private static final String REFRESH_GRANT_TYPE = "refresh_token";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+    private static final String EXTERNEL_KEYMANAGER_ENDPOINT = "https://localhost:9443";
+    private static final String INTERNAL_KEYMANAGER_ENDPOINT = "https://localhost:9292/keyserver";
+    private static boolean isExternalKeyManager = false;
 
     /**
      * Create the oauth2 application with calling DCR endpoint of WSO2 IS
@@ -88,7 +93,11 @@ public class LogInKeyManagerImpl implements KeyManager {
         //Create json payload for DCR endpoint
         JsonObject json = new JsonObject();
         JsonArray callbackArray = new JsonArray();
-        callbackArray.add(oAuthApplicationInfo.getCallbackUrl());
+        if (oAuthApplicationInfo.getCallbackUrl() != null) {
+            callbackArray.add(oAuthApplicationInfo.getCallbackUrl());
+        } else {
+            callbackArray.add("");
+        }
         json.add(KeyManagerConstants.OAUTH_REDIRECT_URIS, callbackArray);
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_NAME, applicationName);
         json.addProperty(KeyManagerConstants.OAUTH_CLIENT_OWNER, oAuthApplicationInfo.getAppOwner());
@@ -98,15 +107,19 @@ public class LogInKeyManagerImpl implements KeyManager {
                 grantArray.add(grantType);
             }
             json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
+        } else { // Temp if condition because generate keys in store application does not send any of the grant types
+            grantArray.add(GRANT_TYPE_VALUE);
+            json.add(KeyManagerConstants.OAUTH_CLIENT_GRANTS, grantArray);
         }
 
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            //createSSLConnection();
+            createSSLConnection();
             // Calling DCR endpoint of IS
-            String dcrEndpoint = System.getProperty("dcrEndpoint",
-                    "http://localhost:9090/keyserver/register");
+            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register");
+                    /*System.getProperty("dcrEndpoint",
+                    "https://localhost:9443/identity/connect/register");*/
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -127,7 +140,7 @@ public class LogInKeyManagerImpl implements KeyManager {
                 String clientName = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_NAME).getAsString();
                 String grantTypes = "";
                 if (jObj.has(KeyManagerConstants.OAUTH_CLIENT_GRANTS)) {
-                    grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).getAsString();
+                    grantTypes = jObj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_GRANTS).toString();
                 }
 
                 oAuthApplicationInfo.setClientName(clientName);
@@ -136,7 +149,8 @@ public class LogInKeyManagerImpl implements KeyManager {
                 oAuthApplicationInfo.setGrantTypes(Arrays.asList(grantTypes.split(",")));
 
             } else { //If DCR call fails
-                throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName);
+                throw new KeyManagementException("OAuth app does not contains required data  : " + applicationName,
+                        ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             }
         } catch (IOException e) {
             String errorMsg = "Can not create OAuth application  : " + applicationName;
@@ -147,11 +161,11 @@ public class LogInKeyManagerImpl implements KeyManager {
                     " OAuth application : " + applicationName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
                     " OAuth application : " + applicationName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);*/
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -191,9 +205,9 @@ public class LogInKeyManagerImpl implements KeyManager {
         try {
             // Calling DCR endpoint of IS
             createSSLConnection();
-            String dcrEndpoint =
-                    System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/") +
-                            consumerKey;
+            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register/") + consumerKey;
+                    /*System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/") +
+                            consumerKey;*/
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -230,10 +244,11 @@ public class LogInKeyManagerImpl implements KeyManager {
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            //createSSLConnection();
+            createSSLConnection();
             // Calling DCR endpoint of IS using consumer key
-            String dcrEndpoint = System
-                    .getProperty("dcrEndpoint", "http://localhost:9090/keyserver/register/" + consumerKey);
+            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register/") + consumerKey;
+                   /* System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/" +
+                    consumerKey);*/
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -275,11 +290,11 @@ public class LogInKeyManagerImpl implements KeyManager {
                     " OAuth application : " + consumerKey;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
             throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
-            String errorMsg = "Error while connecting to the DCR endpoint.Can not create" +
-                    " OAuth application : " + applicationName;
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+            String errorMsg = "Error while connecting to the DCR endpoint.Can not retrieve the" +
+                    " OAuth application.";
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);*/
+            throw new KeyManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -300,7 +315,7 @@ public class LogInKeyManagerImpl implements KeyManager {
      */
     @Override public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest)
             throws KeyManagementException {
-        String newAccessToken;
+        String newAccessToken, refreshToken = null;
         long validityPeriod;
         AccessTokenInfo tokenInfo = null;
 
@@ -310,9 +325,11 @@ public class LogInKeyManagerImpl implements KeyManager {
         }
 
         //TO-DO -ADD A CONFIG FOR TOKEN ENDPOINT
-        String tokenEndpoint = System.getProperty("TokenEndpoint", "http://localhost:9090/keyserver/token");
+        String tokenEndpoint = getKeyManagerEndPoint("/oauth2/token");
+                //System.getProperty("TokenEndpoint", "https://localhost:9443/oauth2/token");
         //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
-        String revokeEndpoint = System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
+        String revokeEndpoint = getKeyManagerEndPoint("/oauth2/revoke");
+                //System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
         ;
 
         // Call the /revoke only if there's a token to be revoked.
@@ -368,7 +385,7 @@ public class LogInKeyManagerImpl implements KeyManager {
 
         //Generate New Access Token by client credentials grant type with calling Token API
         try {
-            //createSSLConnection();
+            createSSLConnection();
             url = new URL(tokenEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -388,8 +405,14 @@ public class LogInKeyManagerImpl implements KeyManager {
                 postParams =
                         KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + PASSWORD_GRANT_TYPE + "&username=" + tokenRequest
                                 .getResourceOwnerUsername() + "&password=" + tokenRequest.getResourceOwnerPassword();
+            } else if (REFRESH_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + REFRESH_GRANT_TYPE + "&"
+                        + OAUTH_RESPONSE_REFRESH_TOKEN + "=" + tokenRequest.getRefreshToken();
             } else {
                 postParams = KeyManagerConstants.OAUTH_CLIENT_GRANT + "=" + GRANT_TYPE_VALUE;
+            }
+            if (tokenRequest.getScopes().length > 0) {
+                postParams += "&" + KeyManagerConstants.OAUTH_CLIENT_SCOPE + "=" + builder.toString();
             }
             postParams += "&" + GRANT_TYPE_PARAM_VALIDITY + "=" + Long.toString(tokenRequest.getValidityPeriod());
 //            + "&" +
@@ -414,17 +437,21 @@ public class LogInKeyManagerImpl implements KeyManager {
                 JsonParser parser = new JsonParser();
                 JsonObject obj = parser.parse(responseStr).getAsJsonObject();
                 newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).getAsString();
+                if (obj.has(OAUTH_RESPONSE_REFRESH_TOKEN)) {
+                    refreshToken = obj.get(OAUTH_RESPONSE_REFRESH_TOKEN).getAsString();
+                }
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.has("scopes")) {
-                    tokenInfo.setScopes(
-                            (obj.getAsJsonArray("scopes").toString().replaceAll("\\[", "").replaceAll("\\]", "")
-                                    .replaceAll("\"", "").split(",")));
+                if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
+                    tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
+                            split(" "));
                 }
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
+                tokenInfo.setRefreshToken(refreshToken);
             } else {
                 throw new KeyManagementException(
-                        "Error occurred while getting token for user : " + responseCode);
+                        "Error occurred while getting token for user : " + tokenRequest.getResourceOwnerUsername(),
+                        ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED);
             }
         } catch (IOException e) {
             String msg = "Error while creating the new token for token regeneration.";
@@ -436,11 +463,11 @@ public class LogInKeyManagerImpl implements KeyManager {
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
                     APPLICATION_TOKEN_GENERATION_FAILED);
-        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String msg = "Error while connecting to the token generation endpoint.";
             log.error(msg, e);
             throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
-                    APPLICATION_TOKEN_GENERATION_FAILED);*/
+                    APPLICATION_TOKEN_GENERATION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -455,13 +482,18 @@ public class LogInKeyManagerImpl implements KeyManager {
         URL url;
         HttpURLConnection urlConn = null;
         try {
-            //createSSLConnection();
-            String introspectEndpoint = System
-                    .getProperty("introspectEndpoint", "http://localhost:9090/keyserver/introspect");
+            createSSLConnection();
+            String introspectEndpoint = getKeyManagerEndPoint("/oauth2/introspect");
+                    //System.getProperty("introspectEndpoint", "https://localhost:9443/oauth2/introspect");
             url = new URL(introspectEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");
+            urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
+                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
+                    .getBytes(StandardCharsets.UTF_8));
+            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
             urlConn.getOutputStream().write(("token=" + accessToken).getBytes("UTF-8"));
             String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
             JsonParser parser = new JsonParser();
@@ -508,10 +540,10 @@ public class LogInKeyManagerImpl implements KeyManager {
             String msg = "Error while processing the response returned from token introspect endpoint.";
             log.error("Error while processing the response returned from token introspect endpoint.", e);
             throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-        /*} catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
             String msg = "Error while connecting to the token introspect endpoint.";
             log.error("Error while connecting to the token introspect endpoint.", e);
-            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);*/
+            throw new KeyManagementException(msg, e, ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         } finally {
             if (urlConn != null) {
                 urlConn.disconnect();
@@ -608,6 +640,15 @@ public class LogInKeyManagerImpl implements KeyManager {
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, trustAllCerts, new java.security.SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+    /*
+    This is a temp method to test with external IS 5.3.0
+     */
+    private static String getKeyManagerEndPoint(String context) {
+        if (isExternalKeyManager) {
+            return EXTERNEL_KEYMANAGER_ENDPOINT + context;
+        }
+        return INTERNAL_KEYMANAGER_ENDPOINT + context;
     }
 
 }

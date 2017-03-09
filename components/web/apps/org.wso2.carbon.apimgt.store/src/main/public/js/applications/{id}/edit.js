@@ -80,7 +80,7 @@ $(function () {
         application.throttlingTier = $("#appTier").val();
         application.description = $("#description").val();
         application.lifeCycleStatus = $("#status").val();
-
+        setAuthHeader(applicationClient);
         applicationClient["Application (individual)"].put_applications_applicationId
             ({
                 "applicationId": applicationId,
