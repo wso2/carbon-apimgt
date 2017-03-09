@@ -14,13 +14,30 @@
 * limitations under the License.
 */
 
-package org.wso2.carbon.apimgt.core.workflow;
+package org.wso2.carbon.apimgt.core.api;
+
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
  * Interface of workflow response
  */
 public interface WorkflowResponse {
+    /**
+     * Get the workflow status 
+     * @return WorkflowStatus
+     */
+    WorkflowStatus getWorkflowStatus();
 
-        String getJSONPayload();
+    /**
+     * set the workflow status
+     * @param workflowStatus
+     */
+    void setWorkflowStatus(WorkflowStatus workflowStatus);
+    
+    /**
+     * Generate aditional parameters as a json string
+     * @return String 
+     */
+    String getJSONPayload();
 
 }

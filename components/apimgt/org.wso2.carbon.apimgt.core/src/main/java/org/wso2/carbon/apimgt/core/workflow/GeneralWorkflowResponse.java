@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.core.workflow;
  *  The GeneralWorkflowResponse is the general implementation of the WorkflowResponse. Unless a specific implementation
  *  of the WorkflowResponse is requred, this class can be used.
  */
-public class GeneralWorkflowResponse implements WorkflowResponse {
+public class GeneralWorkflowResponse extends AbstractWorkflowResponse {
 
     /**
      * Gets the JSON Payload.

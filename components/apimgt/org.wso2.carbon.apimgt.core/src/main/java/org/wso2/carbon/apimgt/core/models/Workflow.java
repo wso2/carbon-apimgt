@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import org.wso2.carbon.apimgt.core.workflow.WorkflowStatus;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;

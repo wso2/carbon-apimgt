@@ -20,9 +20,11 @@ package org.wso2.carbon.apimgt.core.workflow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 //import java.util.Observable;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
  * This is a simple work flow extension to have Application creation process
@@ -41,9 +43,12 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
         if (log.isDebugEnabled()) {
             log.info("Executing Application creation Workflow..");
         }
-        workFlow.setStatus(WorkflowStatus.APPROVED);
-        complete(workFlow);
-        return new GeneralWorkflowResponse();
+        //workFlow.setStatus(WorkflowStatus.APPROVED);
+        //complete(workFlow);
+        
+        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+        return workflowResponse;
     }
 
     /**

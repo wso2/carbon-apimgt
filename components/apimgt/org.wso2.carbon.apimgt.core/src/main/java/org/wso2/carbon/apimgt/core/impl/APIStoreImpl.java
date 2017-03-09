@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -52,6 +53,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -60,7 +62,6 @@ import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.core.workflow.WorkflowResponse;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
@@ -407,7 +408,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore {
             appWF.setCreatedTime(LocalDateTime.now());
             //appCreationWFExecutor.addObserver(this);
             WorkflowResponse response = appCreationWFExecutor.execute(appWF);
-            log.info("response", response);
+            if(WorkflowStatus.APPROVED == response.getWorkflowStatus()){
+                appWF.setStatus(response.getWorkflowStatus());
+                appCreationWFExecutor.complete(appWF);
+            }
+      
 
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
             applicationUuid = application.getId();

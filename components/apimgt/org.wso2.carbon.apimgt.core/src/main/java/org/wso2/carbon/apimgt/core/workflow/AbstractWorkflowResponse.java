@@ -18,9 +18,23 @@
 
 package org.wso2.carbon.apimgt.core.workflow;
 
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+
 /**
- * This class will hold the constants related for workflow status.
+ * This class contains the implementation of the common methods for workflow response
  */
-public enum WorkflowStatus {
-    CREATED, APPROVED, REJECTED, REGISTERED
+public abstract class AbstractWorkflowResponse implements WorkflowResponse {
+    
+    private WorkflowStatus workflowStatus = WorkflowStatus.CREATED;
+
+    public WorkflowStatus getWorkflowStatus() {
+        return workflowStatus;
+    }
+
+    public void setWorkflowStatus(WorkflowStatus workflowStatus) {
+        this.workflowStatus = workflowStatus;
+    }
+   
+
 }
