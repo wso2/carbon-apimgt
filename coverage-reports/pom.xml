@@ -81,19 +81,14 @@
                                         <fileset dir="${build.directory.module.apimgt.core}/coverage-reports">
                                             <include name="aggregate.exec" />
                                         </fileset>
-                                        <!--<fileset dir="${build.directory.module.apimgt.gateway.extension}/coverage-reports">
-                                            <include name="aggregate.exec" />
-                                        </fileset>-->
                                     </executiondata>
                                     <structure name="carbon-apimgt code coverage">
                                         <group name="carbon-apimgt-coverage">
                                             <classfiles>
                                                 <fileset dir="${classes.directory.module.apimgt.core}" />
-                                                <!--<fileset dir="${classes.directory.module.apimgt.gateway.extension}" />-->
                                             </classfiles>
                                             <sourcefiles encoding="UTF-8">
                                                 <fileset dir="${sources.directory.module.apimgt.core}" />
-                                                <!--<fileset dir="${sources.directory.module.apimgt.gateway.extension}"/>-->
                                             </sourcefiles>
                                         </group>
                                     </structure>
@@ -148,8 +143,6 @@
         <sources.directory.module.apimgt.api.store>../components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/java</sources.directory.module.apimgt.api.store>
         <sources.directory.module.web.services.authenticatior>../components/web/services/org.wso2.carbon.apimgt.authenticator/src/main/java</sources.directory.module.web.services.authenticatior>
 
-        <!--<generated-sources.directory.projecta>../module1/target/generated-sources/annotations</generated-sources.directory.projecta>
-        <generated-sources.directory.projectb>../module2/target/generated-sources/annotations</generated-sources.directory.projectb>-->
     </properties>
 
 </project>
