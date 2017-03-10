@@ -345,7 +345,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String commonUpperCaseSearchString = "CASE";
         final String symbolSearchString = "##symbol";
         final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
-        final String spaceIncludedSearchString = "s p ace";
+        final String spaceIncludedSearchString = " S p ace";
 
         // Create test data
         Map<String, API> apis = new HashMap<>();

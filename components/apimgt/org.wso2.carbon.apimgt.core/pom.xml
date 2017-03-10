@@ -746,14 +746,14 @@
                         <version>0.18.1</version>
                         <executions>
                             <execution>
-                                <id>start-docker-for-postgres</id>
+                                <id>start-docker-for-oracle</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>start</goal>
                                 </goals>
                             </execution>
                             <execution>
-                                <id>stop-docker-for-postgres</id>
+                                <id>stop-docker-for-oracle</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>stop</goal>
