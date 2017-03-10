@@ -370,16 +370,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
                             getApiDAO().updateAPI(api.getId(), api);
-                            getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
-                            getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
+                            getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                            getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
                         } else {
                             throw new APIManagementException("Context already Exist", ExceptionCodes
                                     .API_ALREADY_EXISTS);
                         }
                     } else {
                         getApiDAO().updateAPI(api.getId(), api);
-                        getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger);
-                        getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig);
+                        getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                        getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
@@ -706,7 +706,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws
             APIManagementException {
         try {
-            getApiDAO().addDocumentFileContent(resourceId, content, fileName);
+            getApiDAO().addDocumentFileContent(resourceId, content, fileName, getUsername());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation with file";
             log.error(errorMsg, e);
@@ -783,7 +783,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void addDocumentationContent(String docId, String text) throws APIManagementException {
-        getApiDAO().addDocumentInlineContent(docId, text);
+        getApiDAO().addDocumentInlineContent(docId, text, getUsername());
     }
 
     /**
@@ -1015,8 +1015,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String updatedGatewayConfig = gatewaySourceGenerator
                     .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
             getApiDAO().updateAPI(apiId, api);
-            getApiDAO().updateSwaggerDefinition(apiId, jsonText);
-            getApiDAO().updateGatewayConfig(apiId, updatedGatewayConfig);
+            getApiDAO().updateSwaggerDefinition(apiId, jsonText, getUsername());
+            getApiDAO().updateGatewayConfig(apiId, updatedGatewayConfig, getUsername());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't update the Swagger Definition";
             log.error(errorMsg, e);
@@ -1087,7 +1087,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
             throws APIManagementException {
         try {
-            getApiDAO().updateImage(apiId, inputStream, dataType);
+            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername(), LocalDateTime.now());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't save the thumbnail image";
             log.error(errorMsg, e);
@@ -1119,8 +1119,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         try {
             String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
-            getApiDAO().updateSwaggerDefinition(apiId, swagger);
-            getApiDAO().updateGatewayConfig(apiId, configString);
+            getApiDAO().updateSwaggerDefinition(apiId, swagger, getUsername());
+            getApiDAO().updateGatewayConfig(apiId, configString, getUsername());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't update configuration for apiId " + apiId, e);
             throw new APIMgtDAOException("Couldn't update configuration for apiId " + apiId,
