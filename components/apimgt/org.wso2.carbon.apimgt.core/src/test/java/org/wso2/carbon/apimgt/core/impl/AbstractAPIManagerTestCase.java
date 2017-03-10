@@ -29,11 +29,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class AbstractAPIManagerTestCase {
 
@@ -44,7 +40,8 @@ public class AbstractAPIManagerTestCase {
     private static final String APP_NAME = "app_name";
     public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
 
-    @Test public void testSearchAPIByUUID() throws APIManagementException {
+    @Test
+    public void testSearchAPIByUUID() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
@@ -86,4 +83,41 @@ public class AbstractAPIManagerTestCase {
         Assert.assertNotNull(documentInfoList);
         verify(apiDAO, times(1)).getDocumentsInfoList(UUID);
     }
+
+    /**
+     * Test cases for exceptions
+     */
+
+    @Test(description = "Exception when retrieving an application by uuid", expectedExceptions = APIMgtDAOException.class)
+    public void testGetApplicationByUuidException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO).getApplication(UUID);
+        apiStore.getApplication(UUID, USER_NAME, null);
+    }
+
+    @Test(description = "Exception when retrieving documentation summary given the id", expectedExceptions = APIMgtDAOException.class)
+    public void testGetDocumentationSummaryException() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        when(apiDAO.getDocumentInfo(UUID)).thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
+        apiStore.getDocumentationSummary(UUID);
+    }
+
+    @Test(description = "Exception when retrieving list of documentations", expectedExceptions = APIMgtDAOException.class)
+    public void testAllDocumentationException() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        when(apiDAO.getDocumentsInfoList(UUID)).thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
+        apiStore.getAllDocumentation(UUID, 1, 10);
+    }
+
+    @Test(description = "Exception when getting API by UUID", expectedExceptions = APIMgtDAOException.class)
+    public void testSearchAPIByUUIDException() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        when(apiDAO.getAPI(UUID)).thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID));
+        apiStore.getAPIbyUUID(UUID);
+    }
+
 }

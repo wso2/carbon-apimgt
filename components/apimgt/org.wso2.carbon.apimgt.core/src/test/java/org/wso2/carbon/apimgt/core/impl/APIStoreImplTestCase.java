@@ -40,12 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for APIStore
@@ -56,6 +51,7 @@ public class APIStoreImplTestCase {
     private static final String USER_NAME = "username";
     private static final String APP_NAME = "appname";
     private static final String USER_ID = "userid";
+    private static final String API_ID = "apiid";
     private static final String GROUP_ID = "groupdid";
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
@@ -116,10 +112,10 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null ,null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
-        when(applicationDAO.getApplicationByName(USER_ID, APP_NAME)).thenReturn(applicationFromDAO);
-        Application application = apiStore.getApplicationByName(USER_ID, APP_NAME, GROUP_ID);
+        when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenReturn(applicationFromDAO);
+        Application application = apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
         Assert.assertNotNull(application);
-        verify(applicationDAO, times(1)).getApplicationByName(USER_ID, APP_NAME);
+        verify(applicationDAO, times(1)).getApplicationByName(APP_NAME, USER_ID);
     }
 
     @Test(description = "Retrieve an application by uuid")
@@ -196,6 +192,37 @@ public class APIStoreImplTestCase {
         String applicationUuid = apiStore.addApplication(application);
         Assert.assertNotNull(applicationUuid);
         verify(applicationDAO, times(1)).addApplication(application);
+    }
+
+    @Test(description = "Add subscription to an application")
+    public void testAddSubscription() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        String subscriptionId = apiStore.addApiSubscription(API_ID, UUID, TIER);
+        Assert.assertNotNull(subscriptionId);
+        verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId,API_ID, UUID, TIER,APIMgtConstants.SubscriptionStatus.ACTIVE);
+    }
+
+    @Test(description = "Delete subscription")
+    public void testDeleteSubscription() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        apiStore.deleteAPISubscription(UUID);
+        verify(apiSubscriptionDAO, times(1)).deleteAPISubscription(UUID);
+    }
+
+    @Test(description = "Get API subscriptions by application")
+    public void testGetAPISubscriptionsByApplication() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setId(UUID);
+        apiStore.getAPISubscriptionsByApplication(application);
+        verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsByApplication(UUID);
     }
 
     @Test(description = "Add an application with null tier", expectedExceptions = APIManagementException.class)
@@ -282,4 +309,155 @@ public class APIStoreImplTestCase {
         verify(policyDAO, times(1)).getPolicy(APPLICATION_POLICY_LEVEL,POLICY_NAME);
     }
 
+    /**
+     * Tests to catch exceptions in methods
+     */
+
+    //Cannot be caught because the subscriptionID is randomly generated inside the method
+   /* @Test(description = "Exception when adding subscription to an application", expectedExceptions = APIMgtDAOException.class)
+    public void testAddSubscriptionException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        doThrow(new APIMgtDAOException("Error occurred while adding api subscription for api - " + API_ID))
+                .when(apiSubscriptionDAO).addAPISubscription(UUID, API_ID, UUID, TIER, APIMgtConstants.SubscriptionStatus.ACTIVE);
+        apiStore.addApiSubscription(API_ID, UUID, TIER);
+    }
+*/
+    @Test(description = "Exception when deleting subscription", expectedExceptions = APIMgtDAOException.class)
+    public void testDeleteSubscriptionException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        doThrow(new APIMgtDAOException("Error occurred while deleting api subscription " + UUID))
+                .when(apiSubscriptionDAO).deleteAPISubscription(UUID);
+        apiStore.deleteAPISubscription(UUID);
+    }
+
+    @Test(description = "Exception when retrieving all tags", expectedExceptions = APIMgtDAOException.class)
+    public void testGetAllTagsException() throws APIManagementException {
+        TagDAO tagDAO = mock(TagDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, tagDAO, null);
+        when(tagDAO.getTags()).thenThrow(new APIMgtDAOException("Error occurred while retrieving tags"));
+        apiStore.getAllTags();
+    }
+
+    @Test(description = "Exception when getting all policies of a specific policy level", expectedExceptions = APIMgtDAOException.class)
+    public void testGetPoliciesException() throws APIManagementException {
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null);
+        when(policyDAO.getPolicies(APPLICATION_POLICY_LEVEL)).thenThrow(new APIMgtDAOException(
+                "Error occurred while retrieving policies for policy level - " + APPLICATION_POLICY_LEVEL));
+        apiStore.getPolicies(APPLICATION_POLICY_LEVEL);
+    }
+
+    @Test(description = "Exception when getting policy given policy name and policy level", expectedExceptions = APIMgtDAOException.class)
+    public void testGetPolicyException() throws APIManagementException {
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null);
+        when(policyDAO.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME))
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving policy - " + POLICY_NAME));
+        apiStore.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME);
+    }
+
+    @Test(description = "Exception when deleting an application", expectedExceptions = APIMgtDAOException.class)
+    public void testDeleteApplicationException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setId(UUID);
+        doThrow(new APIMgtDAOException("Error occurred while deleting the application - " + UUID)).when(applicationDAO)
+                .deleteApplication(UUID);
+        apiStore.deleteApplication(UUID);
+        verify(applicationDAO, times(1)).deleteApplication(UUID);
+    }
+
+    @Test(description = "Exception when retrieving an application by uuid", expectedExceptions = APIMgtDAOException.class)
+    public void testGetApplicationByUUIDException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        when(applicationDAO.getApplication(UUID))
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving application - " + UUID));
+        apiStore.getApplicationByUuid(UUID);
+    }
+
+    @Test(description = "Exception when getting API subscriptions by application", expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPISubscriptionsByApplicationException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setId(UUID);
+        when(apiSubscriptionDAO.getAPISubscriptionsByApplication(application.getId())).thenThrow(new APIMgtDAOException(
+                "Error occurred while retrieving subscriptions for application - " + application.getName()));
+        apiStore.getAPISubscriptionsByApplication(application);
+    }
+
+    @Test(description = "Exception when retrieving APIs by status", expectedExceptions = APIMgtDAOException.class)
+    public void getAPIsByStatusException() throws APIManagementException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        String[] statuses = { STATUS_CREATED, STATUS_PUBLISHED };
+        when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenThrow(new APIMgtDAOException(
+                "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses)));
+        apiStore.getAllAPIsByStatus(1, 2, statuses);
+    }
+
+    @Test(description = "Exception when retrieving an application by name", expectedExceptions = APIMgtDAOException.class)
+    public void testGetApplicationByNameException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenThrow(new APIMgtDAOException(
+                "Error occurred while fetching application for the given applicationName - " + APP_NAME
+                        + " with groupId - " + GROUP_ID));
+        apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
+    }
+
+    @Test(description = "Exception when retrieving applications", expectedExceptions = APIMgtDAOException.class)
+    public void testGetApplicationsException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        when(applicationDAO.getApplications(USER_ID)).thenThrow(new APIMgtDAOException(
+                "Error occurred while fetching applications for the given subscriber - " + USER_ID + " with groupId - "
+                        + GROUP_ID));
+        apiStore.getApplications(USER_ID, GROUP_ID);
+    }
+
+    @Test(description = "Exception when updating an application", expectedExceptions = APIMgtDAOException.class)
+    public void testUpdateApplicationException() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        doThrow(new APIMgtDAOException("Error occurred while updating the application - " + UUID)).when(applicationDAO).updateApplication(UUID, application);
+        apiStore.updateApplication(UUID, application);
+    }
+
+    @Test(description = "Exception when adding an application", expectedExceptions = APIMgtDAOException.class)
+    public void testAddApplicationCreationException() throws  APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+        doThrow(new APIMgtDAOException("Error occurred while creating the application - " + application.getName())).when(applicationDAO).addApplication(application);
+        apiStore.addApplication(application);
+    }
+
+    @Test(description = "Parse exception when adding an application", expectedExceptions = APIManagementException.class)
+    public void testAddApplicationParsingException() throws  Exception {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setPermissionString("data");
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+        apiStore.addApplication(application);
+    }
 }
