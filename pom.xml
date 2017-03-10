@@ -615,7 +615,7 @@
                                 <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
                             </configuration>
                         </execution>
-                        <execution>
+                        <!--<execution>
                             <id>default-check</id>
                             <goals>
                                 <goal>check</goal>
@@ -635,7 +635,7 @@
                                     </rule>
                                 </rules>
                             </configuration>
-                        </execution>
+                        </execution>-->
                     </executions>
                 </plugin>
                 <plugin>
@@ -646,14 +646,6 @@
                         <systemPropertyVariables>
                             <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec</jacoco-agent.destfile>
                         </systemPropertyVariables>
-                        <includes>
-                            <include>**/*TestCase.java</include>
-                            <include>**/*Test.java</include>
-                            <include>**/*IT.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/ApiDAOImplIT.java</exclude>
-                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>
