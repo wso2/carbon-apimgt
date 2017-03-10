@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * APISummaryListDTO

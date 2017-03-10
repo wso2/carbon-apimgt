@@ -41,7 +41,8 @@ authManager.login = function () {
         password: $('#password').val(),
         grant_type: 'password',
         validity_period: '3600',
-        scopes: 'apim:api_view apim:api_create'
+        scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
+        ' apim:subscription_view apim:subscription_block apim:subscribe'
 
     };
     var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer:null;
@@ -60,8 +61,33 @@ authManager.login = function () {
         }
     });
 };
+
+authManager.refresh = function () {
+    var params = {
+        grant_type: 'refresh_token',
+        validity_period: '3600',
+        scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
+        ' apim:subscription_view apim:subscription_block apim:subscribe'
+    };
+    var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer:null;
+    var url = contextPath + '/auth/apis/login/token';
+    return $.ajax({
+        type: 'POST',
+        url: url,
+        async: false,
+        data: params,
+        traditional:true,
+        headers: {
+            'Authorization': 'Basic deidwe',
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Alt-Referer': referrer
+        }
+    });
+
+};
 authManager.logout = function () {
-    var url = contextPath + '/auth/apis/login/remove';
+    var url = contextPath + '/auth/apis/login/revoke';
     return $.ajax({
         type: 'POST',
         url: url,

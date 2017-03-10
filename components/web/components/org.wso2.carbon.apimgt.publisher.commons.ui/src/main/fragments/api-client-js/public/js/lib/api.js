@@ -90,6 +90,37 @@ class KeyManager {
 
 class AuthClient {
 
+    static refreshTokenOnExpire(){
+        var currentTimestamp =  Math.floor(Date.now() / 1000);
+        var tokenTimestamp = window.localStorage.getItem("expiresIn");
+        if(tokenTimestamp - currentTimestamp < 100) {
+            var loginPromise = authManager.refresh();
+            loginPromise.then(function(data,status,xhr){
+                authManager.setAuthStatus(true);
+                var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+                window.localStorage.setItem("expiresIn", expiresIn);
+            });
+            loginPromise.error(
+                function (error) {
+                    var error_data = JSON.parse(error.responseText);
+                    var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message ;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+
+                }
+            );
+        }
+    }
+
     /**
      * Static method to handle unauthorized user action error catch, It will look for response status code and skip !401 errors
      * @param {object} error_response
@@ -100,7 +131,6 @@ class AuthClient {
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
-        var error_data = JSON.parse(error_response.data);
         var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         noty({
             text: message,
@@ -182,6 +212,7 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
+        AuthClient.refreshTokenOnExpire();
         let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
@@ -313,9 +344,9 @@ class API {
         var promised_delete = this.client.then(
             (client) => {
                 return client["API (Individual)"].delete_apis_apiId(
-                    {apiId: id}, this._requestMetaData());
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
+        );
         return promised_delete;
     }
 

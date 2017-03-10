@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.authenticator.utils;
 
+import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
@@ -25,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.msf4j.Request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +64,13 @@ public class AuthUtil {
      *
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-            Long validityPeriod, String[] scopes, String clientId, String clientSecret) {
+            String refreshToken, Long validityPeriod, String[] scopes, String clientId, String clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
         tokenRequest.setClientSecret(clientSecret);
         tokenRequest.setGrantType(grantType);
+        tokenRequest.setRefreshToken(refreshToken);
         tokenRequest.setResourceOwnerUsername(username);
         tokenRequest.setResourceOwnerPassword(password);
         tokenRequest.setScopes(scopes);
@@ -95,7 +98,7 @@ public class AuthUtil {
         //authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
         authApplicationInfo.setClientId(clientId);
         authApplicationInfo.setAppOwner(clientId);
-
+        authApplicationInfo.setGrantTypes(Arrays.asList("password", "refresh_token"));
         //set applicationInfo object
         appRequest.setOAuthApplicationInfo(authApplicationInfo);
         return appRequest;
@@ -122,6 +125,21 @@ public class AuthUtil {
         errorDTO.setMessage(errorHandler.getErrorMessage());
         errorDTO.setDescription(errorHandler.getErrorDescription());
         return errorDTO;
+    }
+
+    /**
+     * @param cookie Cookies  header which contains the access token
+     * @return partial access token present in the cookie.
+     */
+    public static String extractPartialAccessTokenFromCookie(String cookie) {
+        cookie = cookie.trim();
+        String[] cookies = cookie.split(";");
+        String token = Arrays.stream(cookies).filter(name -> name.contains(AuthenticatorConstants.REFRESH_TOKEN))
+                .findFirst().get();
+        if (token.split("=").length == 2) {
+            return token.split("=")[1];
+        }
+        return null;
     }
 
 

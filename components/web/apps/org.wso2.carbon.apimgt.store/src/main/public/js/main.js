@@ -59,11 +59,43 @@ var getCookie = function(name) {
 };
 
 var setAuthHeader = function(swaggerClient) {
+    refreshTokenOnExpire();
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     swaggerClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
     swaggerClient.setHost(location.host);
 
 };
+
+var refreshTokenOnExpire = function(){
+    var currentTimestamp =  Math.floor(Date.now() / 1000);
+    var tokenTimestamp = window.localStorage.getItem("expiresIn");
+    if(tokenTimestamp - currentTimestamp < 100) {
+        var loginPromise = authManager.refresh();
+        loginPromise.then(function(data,status,xhr){
+            authManager.setAuthStatus(true);
+            var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+            window.localStorage.setItem("expiresIn", expiresIn);
+        });
+        loginPromise.error(
+            function (error) {
+                var error_data = JSON.parse(error.responseText);
+                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message ;
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+
+            }
+        );
+    }
+}
 
 var redirectToLogin = function (contextPath) {
     var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";

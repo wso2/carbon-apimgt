@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -184,4 +185,13 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException
      */
     Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
+
+    /**
+     * Retrieve Label information based on the label name
+     *
+     * @param labels List of label names
+     * @return List<Label> List of Labels
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getLabelInfo(List<String> labels) throws APIManagementException;
 }

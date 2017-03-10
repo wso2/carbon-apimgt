@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.core.util;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 
 import java.io.Serializable;
-import java.lang.Override;
 import java.util.Comparator;
 
 /**
