@@ -227,7 +227,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
-     * This method will save permission in to AM_APPLICATION_GROUP_PERMISSION table.
+     * This method will save permission in to AM_APPS_GROUP_PERMISSION table.
      *
      * @param connection Database connection
      * @param permissionMap Permission Data
@@ -236,7 +236,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     private void addApplicationPermission(Connection connection, HashMap permissionMap, String applicationId)
             throws SQLException {
-        final String query = "INSERT INTO AM_APPLICATION_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
+        final String query = "INSERT INTO AM_APPS_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
                 "VALUES (?, ?, ?)";
         Map<String, Integer> map = permissionMap;
         if (permissionMap != null) {
@@ -269,7 +269,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     private void updateApplicationPermission(Connection connection, HashMap permissionMap, String applicationId)
             throws SQLException {
-        final String query = "INSERT INTO AM_APPLICATION_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
+        final String query = "INSERT INTO AM_APPS_GROUP_PERMISSION (APPLICATION_ID, GROUP_ID, PERMISSION) " +
                 "VALUES (?, ?, ?)";
         Map<String, Integer> map = permissionMap;
         if (permissionMap != null) {
