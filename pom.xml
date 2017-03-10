@@ -610,7 +610,7 @@
                                 <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
                             </configuration>
                         </execution>
-                        <!--<execution>
+                        <execution>
                             <id>default-check</id>
                             <goals>
                                 <goal>check</goal>
@@ -630,7 +630,7 @@
                                     </rule>
                                 </rules>
                             </configuration>
-                        </execution>-->
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>
@@ -641,12 +641,20 @@
                         <systemPropertyVariables>
                             <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec</jacoco-agent.destfile>
                         </systemPropertyVariables>
+                        <includes>
+                            <include>**/*TestCase.java</include>
+                            <include>**/*Test.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/ApiDAOImplIT.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.18.1</version>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.18.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
