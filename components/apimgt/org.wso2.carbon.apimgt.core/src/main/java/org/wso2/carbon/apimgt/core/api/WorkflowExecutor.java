@@ -16,55 +16,39 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.core.workflow;
+package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
-
-import java.util.Observable;
-import java.util.UUID;
 
 /**
  * This is the workflow interface.
  */
-public abstract class WorkflowExecutor extends Observable {
-
-    protected String callbackEndPoint;
+public interface WorkflowExecutor {    
 
     /**
      * Implements the workflow execution logic.
      *
      * @param workflow - The Workflow model which contains workflow contextual information related to the workflow.
+     * @return WorkflowResponse
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
-    public WorkflowResponse execute(Workflow workflow) throws WorkflowException {
-        return new GeneralWorkflowResponse();
-    }
+    public abstract WorkflowResponse execute(Workflow workflow) throws WorkflowException;
 
     /**
      * Implements the workflow completion logic.
      *
      * @param workflow - The Workflow model which contains workflow contextual information related to the workflow.
+     * @return WorkflowResponse
      * @throws WorkflowException - Thrown when the workflow completion was not fully performed.
      */
-    public void complete(Workflow workflow) throws WorkflowException {
-    }
+    public abstract WorkflowResponse complete(Workflow workflow) throws WorkflowException;
 
     /**
-     * Method generates and returns UUID
+     * Clean up pending task with workflowExtRef from workflow server
      *
-     * @return UUID
+     * @param workflowExtRef workflow external reference to match with workflow server process
+     * @throws WorkflowException
      */
-    public String generateUUID() {
-        return UUID.randomUUID().toString();
-    }
-
-    public String getCallbackEndPoint() {
-        return callbackEndPoint;
-    }
-
-    public void setCallbackEndPoint(String callbackEndPoint) {
-        this.callbackEndPoint = callbackEndPoint;
-    }
+    public abstract void cleanUpPendingTask(String workflowExtRef) throws WorkflowException;
 }

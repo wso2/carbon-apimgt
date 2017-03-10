@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsExceptio
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -134,8 +135,8 @@ public class APIStoreImplTestCase {
         application.setTier(TIER);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
         when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
-        String applicationUuid = apiStore.addApplication(application);
-        Assert.assertNotNull(applicationUuid);
+        ApplicationCreationResponse response = apiStore.addApplication(application);
+        Assert.assertNotNull(response.getApplicationUUID());
         verify(applicationDAO, times(1)).addApplication(application);
     }
 

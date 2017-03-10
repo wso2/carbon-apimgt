@@ -456,4 +456,25 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
         return application;
     }
+
+    @Override
+    public void updateApplicationState(String appID, String state) throws APIMgtDAOException {
+        final String updateAppQuery = "UPDATE AM_APPLICATION SET APPLICATION_STATUS=? WHERE UUID = ?";
+        try (Connection conn = DAOUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
+                ps.setString(1, state);
+                ps.setString(2, appID);               
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new APIMgtDAOException(ex);
+            } finally {
+                conn.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        
+    }
 }

@@ -18,13 +18,19 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
+
 /**
  * Application creation model class for workflow
  */
 
 public class ApplicationCreationWorkflow extends Workflow {
+    
     private Application application;
-    //private String userName;
+    
+    public ApplicationCreationWorkflow() {
+       setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+    }    
 
     public Application getApplication() {
         return application;

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -57,6 +59,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -64,7 +67,6 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -376,7 +378,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public String addApplication(Application application) throws APIManagementException {
+    public ApplicationCreationResponse addApplication(Application application) throws APIManagementException {
+        ApplicationCreationResponse applicationResponse = null;
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
@@ -415,29 +418,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            ApplicationCreationWorkflow appWF = new ApplicationCreationWorkflow();
+            
+            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
 
-            boolean wfEnabled = false;
-
-           /* if (wfEnabled) {
-                getApplicationDAO().addWorkflowEntry(appWF); ///???
-            }*/
-
-            appWF.setApplication(application);
-            appWF.setWorkflowReference(appCreationWFExecutor.generateUUID());
-            appWF.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            appWF.setCallBack(appCreationWFExecutor.getCallbackEndPoint());
-            appWF.setCreatedTime(LocalDateTime.now());
-            //appCreationWFExecutor.addObserver(this);
-            WorkflowResponse response = appCreationWFExecutor.execute(appWF);
+            workflow.setApplication(application);
+            workflow.setWorkflowReference(application.getId());
+            workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
+            workflow.setCreatedTime(LocalDateTime.now());
+            
+            WorkflowResponse response = appCreationWFExecutor.execute(workflow);
+            //TODO implement wf table entry and stats publish. Do a similar impl to completeWorkflow()
+            addWorkflowEntries();
+            
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                appWF.setStatus(response.getWorkflowStatus());
-                appCreationWFExecutor.complete(appWF);
-            }
-      
+                workflow.setStatus(response.getWorkflowStatus());
+                completeWorkflow(appCreationWFExecutor, workflow);
+            }      
 
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
-            applicationUuid = application.getId();
+            
+            applicationResponse = new ApplicationCreationResponse(application.getId(), response);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while creating the application - " + application.getName();
             log.error(errorMsg, e);
@@ -449,12 +449,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(errorMsg, e, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         } catch (WorkflowException e) {
             log.error("Error occurred in workflow", e);
+            //TODO throw ??
         } catch (NoSuchMethodException e) {
             log.error("No such method", e);
         } catch (InvocationTargetException e) {
             log.error("InvocationTargetException", e);
         }
-        return applicationUuid;
+        return applicationResponse;
     }
 
     /**
@@ -548,5 +549,65 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     public Map<String, EventObserver> getEventObservers() {
         return eventObservers;
+    }
+    
+    public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
+        
+        // TODO move this to observer
+        if (workflow instanceof ApplicationCreationWorkflow) {
+            if (workflow.getWorkflowReference() == null) {
+                String message = "Error while changing the application state. Missing application UUID";
+                log.error(message);
+                //TODO add custom code to the exception
+                throw new WorkflowException(message);
+            } 
+            // TODO catch wf exception and log??
+            WorkflowResponse response = workflowExecutor.execute(workflow);
+
+            String applicationState = "";
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                // TODO do whatever needed here
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Approved");
+                }
+                // TODO check the application state is same as wf state
+                applicationState = response.getWorkflowStatus().toString();
+                getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
+                addWorkflowEntries();
+
+            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Rejected");
+                }
+                applicationState = response.getWorkflowStatus().toString();
+                getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
+                addWorkflowEntries();
+            }
+            
+
+        } else {
+            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            log.error(message);
+            //TODO add custom code to the exception
+            throw new WorkflowException(message);
+        }
+        /*
+        Map<String, String> eventPayload = new HashMap<>();
+
+        // This will notify all the EventObservers(Asynchronous)
+        ObserverNotifier observerNotifier = new ObserverNotifier(Event.WORKFLOW, getUsername(),
+                ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+        ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
+        */
+        
+        
+    }
+    
+    //TODO
+    private void addWorkflowEntries() {
+        //add entry to workflow table
+        //add data publishing to das
+        
+        //or notify observers
     }
 }
