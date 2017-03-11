@@ -156,8 +156,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     /**
      * generate the swagger from uri templates.
      *
-     * @param api
-     * @return
+     * @param api API Object
+     * @return  Generated swagger resources as string.
      */
     @Override
     public String generateSwaggerFromResources(API.APIBuilder api)  {
@@ -205,9 +205,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     /**
      * return API Object
      *
-     * @param apiDefinition
-     * @return
-     * @throws APIManagementException
+     * @param provider  Provider of the API.
+     * @param apiDefinition API definition as string
+     * @return  API object.
+     * @throws APIManagementException   If failed to generate API from swagger.
      */
     @Override
     public API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws

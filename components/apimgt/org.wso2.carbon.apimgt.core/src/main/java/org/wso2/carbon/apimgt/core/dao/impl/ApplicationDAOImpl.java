@@ -55,7 +55,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param appId The UUID that uniquely identifies an Application
      * @return valid {@link Application} object or null
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to retrieve application.
      */
     @Override
     public Application getApplication(String appId) throws APIMgtDAOException {
@@ -80,7 +80,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param appName Name of the Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to retrieve application.
      */
     @Override
     public Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException {
@@ -104,7 +104,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param ownerId Username of user
      * @return A list of {@link Application}
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to retrieve applications.
      */
     @Override
     public List<Application> getApplications(String ownerId) throws APIMgtDAOException {
@@ -127,8 +127,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param offset   The number of results from the beginning that is to be ignored
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIMgtDAOException
+     * @return {@code Application[]} matching results
+     * @throws APIMgtDAOException   If failed to retrieve applications.
      */
     @Override
     public Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException {
@@ -142,8 +142,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param offset  The number of results from the beginning that is to be ignored
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIMgtDAOException
+     * @return {@code Application[]} matching results
+     * @throws APIMgtDAOException   If failed to retrieve applications.
      */
     @Override
     public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException {
@@ -156,7 +156,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param searchString The search string provided
      * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to retrieve applications.
      */
     @Override
     public Application[] searchApplicationsForUser(String searchString, String userId)
@@ -172,7 +172,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param searchString The search string provided
      * @param groupID      The Group ID to filter results by
      * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to retrieve applications.
      */
     @Override
     public Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException {
@@ -184,7 +184,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to add application.
      */
     @Override
     public void addApplication(Application application) throws APIMgtDAOException {
@@ -232,7 +232,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * @param connection Database connection
      * @param permissionMap Permission Data
      * @param applicationId Application Id
-     * @throws SQLException
+     * @throws SQLException If failed to add application.
      */
     private void addApplicationPermission(Connection connection, HashMap permissionMap, String applicationId)
             throws SQLException {
@@ -297,7 +297,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      *
      * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to update applications.
      */
     @Override
     public void updateApplication(String appID, Application updatedApp)
@@ -335,7 +335,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      * Remove an existing Application
      *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to delete application.
      */
     @Override
     public void deleteApplication(String appID) throws APIMgtDAOException {

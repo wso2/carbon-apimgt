@@ -158,6 +158,7 @@ public class AccessTokenInfo {
 
     /**
      * Sending additional properties as a JSON String.
+     * @return  Json object as string.
      */
     public String getJSONString() {
 
