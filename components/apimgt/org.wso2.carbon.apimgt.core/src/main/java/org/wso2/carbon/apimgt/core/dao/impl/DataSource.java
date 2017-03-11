@@ -34,6 +34,7 @@ public interface DataSource {
     /**
      * Get a {@link Connection} object
      * @return {@link Connection} from given DataSource
+     * @throws SQLException     If failed to retrieve database connection.
      */
     Connection getConnection() throws SQLException;
 
@@ -41,6 +42,7 @@ public interface DataSource {
      * Return Hikari Datasource
      *
      * @return {@link HikariDataSource} object
+     * @throws SQLException     If failed to get data source.
      */
     HikariDataSource getDatasource() throws SQLException;
 }

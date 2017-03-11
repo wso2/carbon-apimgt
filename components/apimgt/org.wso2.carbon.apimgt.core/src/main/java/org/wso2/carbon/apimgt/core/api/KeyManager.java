@@ -45,6 +45,7 @@ public interface KeyManager {
      *
      * @param oauthAppRequest - this object contains values of oAuth app properties.
      * @return OAuthApplicationInfo object with oAuthApplication properties.
+     * @throws KeyManagementException   Error while creating application.
      */
     OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException;
 
@@ -54,6 +55,7 @@ public interface KeyManager {
      *
      * @param appInfoDTO accept an appinfoDTO object
      * @return OAuthApplicationInfo this object will  contain all the properties of updated oAuth application
+     * @throws KeyManagementException   Error while updating application.
      */
     OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws KeyManagementException;
 
@@ -61,6 +63,7 @@ public interface KeyManager {
      * Delete auth application
      *
      * @param consumerKey - will take consumer key as parameter
+     * @throws KeyManagementException   Error while deleting application.
      */
     void deleteApplication(String consumerKey) throws KeyManagementException;
 
@@ -69,6 +72,7 @@ public interface KeyManager {
      *
      * @param consumerKey will take consumer key as parameter
      * @return json string
+     * @throws KeyManagementException   Error while retrieving application.
      */
     OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException;
 
@@ -78,15 +82,16 @@ public interface KeyManager {
      *
      * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
      * @return Details of the Generated Token. AccessToken and Validity period are a must.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   Error while generating new acess token
      */
     AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException;
 
     /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained
      * must be returned.
-     *
+     * @param accessToken   Access token which needs to be check.
      * @return {@code AccessTokenInfo}
+     * @throws KeyManagementException   Error while retrieving token meta data.
      */
     AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException;
 
@@ -94,6 +99,7 @@ public interface KeyManager {
      * Key manager implementation should be read from hardcoded json file
      *
      * @return {@code KeyManagerConfiguration}
+     * @throws KeyManagementException error while getting key manager configuration.
      */
     KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException;
 
@@ -101,14 +107,18 @@ public interface KeyManager {
      * This method will be used if you want to create a oAuth application in semi-manual mode
      * where you must input minimum consumer key and consumer secret.
      *
-     * @param appInfoRequest
+     * @param appInfoRequest    Oauth app request object.
      * @return OAuthApplicationInfo with oAuth application properties.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   If fails to map oauth application.
      */
     OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException;
 
-    
 
+    /**
+     * Load the key manager configuration
+     * @param configuration   configuration object.
+     * @throws KeyManagementException   Error while loading configs.
+     */
     void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException;
 
     /**
@@ -117,7 +127,7 @@ public interface KeyManager {
      * @param api                this is a API object which contains all details about a API.
      * @param resourceAttributes this param will contains additional details if required.
      * @return true if sucessfully registered. false if there is a error while registering a new resource.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   Error while registering new resource.
      */
 
     boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException;
@@ -127,7 +137,7 @@ public interface KeyManager {
      *
      * @param apiId APIM api id.
      * @return It will return a Map with registered resource details.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   Error while retrieving resource by ID.
      */
     Map getResourceByApiId(String apiId) throws KeyManagementException;
 
@@ -137,7 +147,7 @@ public interface KeyManager {
      * @param api                this is a API object which contains all details about a API.
      * @param resourceAttributes this param will contains additional details if required.
      * @return TRUE|FALSE. if it is successfully updated it will return TRUE or else FALSE.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   Error while updating resource.
      */
     boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException;
 
@@ -145,15 +155,15 @@ public interface KeyManager {
      * This method will accept API id  as a parameter  and will delete the registered resource.
      *
      * @param apiID API id.
-     * @throws KeyManagementException
+     * @throws KeyManagementException   Error while deleting resource.
      */
     void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException;
 
     /**
      * This method will be used to delete mapping records of oAuth applications.
      *
-     * @param consumerKey
-     * @throws KeyManagementException
+     * @param consumerKey   Key of the application
+     * @throws KeyManagementException  Error while deleting mapped application.
      */
     void deleteMappedApplication(String consumerKey) throws KeyManagementException;
 

@@ -44,7 +44,7 @@ public interface APIPublisher extends APIManager {
     /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *
-     * @return Set<Provider>
+     * @return {@code Set<Provider>}
      * @throws APIManagementException if failed to get Providers
      */
     Set<Provider> getAllProviders() throws APIManagementException;
@@ -64,7 +64,7 @@ public interface APIPublisher extends APIManager {
      * Get a list of all the consumers for all APIs
      *
      * @param providerId if of the provider
-     * @return Set<Subscriber>
+     * @return {@code Set<Subscriber>}
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
     Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException;
@@ -82,16 +82,16 @@ public interface APIPublisher extends APIManager {
      * Returns full list of Subscribers of an API
      *
      * @param identifier String
-     * @return Set<Subscriber>
+     * @return {@code Set<Subscriber>}
      * @throws APIManagementException if failed to get Subscribers
      */
     Set<String> getSubscribersOfAPI(API identifier) throws APIManagementException;
 
     /**
-     * this method returns the Set<APISubscriptionCount> for given provider and api
+     * this method returns the {@code Set<APISubscriptionCount>} for given provider and api
      *
      * @param id apiuuid
-     * @return Set<APISubscriptionCount>
+     * @return {@code Set<APISubscriptionCount>}
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     long getAPISubscriptionCountByAPI(String id) throws APIManagementException;
@@ -102,14 +102,15 @@ public interface APIPublisher extends APIManager {
      * Adds a new API to the Store
      *
      * @param apiBuilder API
+     * @return Details of the added API.
      * @throws APIManagementException if failed to add API
      */
     String addAPI(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
-     * @param api
-     * @return
-     * @throws APIManagementException
+     * @param api   API Object
+     * @return      Validity of the API update.
+     * @throws APIManagementException   If failed to check validity of API update.
      */
     public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
@@ -118,7 +119,7 @@ public interface APIPublisher extends APIManager {
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder}
+     * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update API
      */
     void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException;
@@ -130,6 +131,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param api     API UUID
      * @param status  New lifecycle status
+     * @param checkListItemMap  Map containing values of check list items.
      * @throws APIManagementException If failed to update API lifecycle status
      */
     void updateAPIStatus(String api, String status, Map<String, Boolean> checkListItemMap)
@@ -151,6 +153,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId        The API to be copied
      * @param newVersion The version of the new API
+     * @return  Details of the newly created version of the API.
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
@@ -161,6 +164,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId         UUID of API
      * @param documentInfo      Document Summary
+     * @return              Details of the added document.
      * @throws APIManagementException if failed to add documentation
      */
     String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
@@ -170,7 +174,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param resourceId         UUID of API
      * @param content       content of the file as an Input Stream
-     * @param fileName
+     * @param fileName      Name for the document file.
      * @throws APIManagementException if failed to add the file
      */
     void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws APIManagementException;
@@ -186,27 +190,27 @@ public interface APIPublisher extends APIManager {
     /**
      * Checks if a given API exists in the registry
      *
-     * @param apiId
+     * @param apiId UUID of the API
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check ia API exist.
      */
     boolean checkIfAPIExists(String apiId) throws APIManagementException;
 
     /**
      * Checks if a given API name exists in the registry
      *
-     * @param name
+     * @param name  Name of the API.
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check ia API exist.
      */
     boolean checkIfAPINameExists(String name) throws APIManagementException;
 
     /**
      * Checks if a given API context exists in the registry
      *
-     * @param context
+     * @param context   Context of the API.
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check ia API exist.
      */
     boolean checkIfAPIContextExists(String context) throws APIManagementException;
 
@@ -222,8 +226,9 @@ public interface APIPublisher extends APIManager {
     /**
      * Updates a given documentation
      *
-     * @param apiId         String
+     * @param apiId         UUID of the API.
      * @param documentation Documentation
+     * @return              Details of the updated document.
      * @throws APIManagementException if failed to update docs
      */
     String updateDocumentation(String apiId, DocumentInfo documentation) throws APIManagementException;
@@ -256,11 +261,11 @@ public interface APIPublisher extends APIManager {
 
     /**
      *
-     * @param limit
-     * @param offset
-     * @param query
-     * @return
-     * @throws APIManagementException
+     * @param limit     Number of search results returned
+     * @param offset    Starting index of the search results
+     * @param query     Search query
+     * @return          List of APIs
+     * @throws APIManagementException   If failed to search for apis with given query.
      */
     List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException;
 
@@ -289,7 +294,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId    id of the String
      * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to save swagger definition.
      */
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
@@ -300,7 +305,8 @@ public interface APIPublisher extends APIManager {
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId String
-     * @return Map<String,Object> a map with lifecycle data
+     * @return {@code Map<String,Object>} a map with lifecycle data
+     * @throws APIManagementException   If failed to get life cycle state data.
      */
     LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException;
 
@@ -312,7 +318,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiIdentifier Api identifier
      * @return Current lifecycle status
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get life cycle state.
      */
     String getAPILifeCycleStatus(String apiIdentifier) throws APIManagementException;
 
@@ -330,7 +336,8 @@ public interface APIPublisher extends APIManager {
      * Save the thumbnail icon for api
      * @param apiId apiId of api
      * @param inputStream inputStream of image
-     * @throws APIManagementException
+     * @param dataType  Data Type of image
+     * @throws APIManagementException   If failed to save the thumbnail.
      */
    void saveThumbnailImage(String apiId, InputStream inputStream, String dataType) throws APIManagementException;
 
@@ -338,7 +345,8 @@ public interface APIPublisher extends APIManager {
     /**
      * Get the thumbnail icon for api
      * @param apiId apiId of api
-     * @throws APIManagementException
+     * @return thumbnail as a stream
+     * @throws APIManagementException   If failed to retrieve the thumbnail.
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
@@ -347,7 +355,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId        id of the String
      * @param configString text to be saved in the registry
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to update gateway config.
      */
     void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
 
@@ -356,14 +364,14 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId id of the String
      * @return API gateway config as a string
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get gateway config of the API.
      */
     String getApiGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      * Return list of endpoints
-     * @return
-     * @throws APIManagementException
+     * @return  {@code List<Endpoint>}
+     * @throws APIManagementException   If failed to get list of endpoints.
      */
     List<Endpoint> getAllEndpoints() throws APIManagementException;
 
@@ -372,7 +380,7 @@ public interface APIPublisher extends APIManager {
      * Get endpoint details according to the endpointId
      * @param endpointId uuid of endpoint
      * @return details of endpoint
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get endpoint data.
      */
     Endpoint getEndpoint(String endpointId) throws APIManagementException;
 
@@ -387,50 +395,64 @@ public interface APIPublisher extends APIManager {
 
     /**
      * Add an endpoint
-     * @param endpoint
-     * @throws APIManagementException
+     * @param endpoint  Endpoint object to be added.
+     * @return Details of the added API.
+     * @throws APIManagementException   If failed to add endpoint.
      */
     String addEndpoint(Endpoint endpoint) throws APIManagementException;
 
     /**
      * Update and endpoint
-     * @param endpoint
-     * @throws APIManagementException
+     * @param endpoint  Endpoint object to be updated.
+     * @throws APIManagementException   If failed to update endpoint.
      */
     void updateEndpoint(Endpoint endpoint) throws APIManagementException;
 
     /**
      * Delete an endpoint
-     * @param endpointId
-     * @throws APIManagementException
+     * @param endpointId    Id of the endpoint to be deleted.
+     * @throws APIManagementException   If failed to delete endpoint.
      */
     void deleteEndpoint(String endpointId) throws APIManagementException;
 
     /**
      * Create api from Definition
-     * @param apiDefinition
-     * @return
-     * @throws APIManagementException
+     * @param apiDefinition content of the API.
+     * @return  Details of the added API.
+     * @throws APIManagementException   If failed to add endpoint.
      */
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
     /**
      * Create api from it's definition located in url
      * @param swaggerResourceUrl url of the swagger resource
-     * @return
-     * @throws APIManagementException
+     * @return  details of the added API.
+     * @throws APIManagementException   If failed to add the API.
      */
     String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
 
+    /**
+     * Get list of policies of an particular tier level.
+     * @param tierLevel Tier level.
+     * @return  List of policy objects.
+     * @throws APIManagementException   If failed to retrieve policies..
+     */
     List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
 
+    /**
+     * Get the policy when name is provided.
+     * @param tierLevel Tier level.
+     * @param tierName Name of the policy.
+     * @return  List of policy objects.
+     * @throws APIManagementException   If failed to retrieve policies..
+     */
     Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Get LifeCycle State Chanage History of API
      * @param uuid of lifecycle
-     * @return
-     * @throws APIManagementException
+     * @return {@code List<LifecycleHistoryBean>} Life cycle history details
+     * @throws APIManagementException   If failed to get lifecycle history details.
      */
     List<LifecycleHistoryBean> getLifeCycleHistoryFromUUID(String uuid) throws APIManagementException;
 

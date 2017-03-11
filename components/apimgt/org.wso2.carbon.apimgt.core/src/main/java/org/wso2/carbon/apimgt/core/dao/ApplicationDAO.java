@@ -38,7 +38,7 @@ public interface ApplicationDAO {
      *
      * @param appId   The UUID that uniquely identifies an Application
      * @return valid {@link Application} object or null
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get application.
      */
     @CheckForNull
     Application getApplication(String appId) throws APIMgtDAOException;
@@ -49,7 +49,7 @@ public interface ApplicationDAO {
      * @param appName Name of the Application
      * @param ownerId ID of the application owner.
      * @return valid {@link Application} object or null
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get application.
      */
     @CheckForNull
     Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException;
@@ -59,7 +59,7 @@ public interface ApplicationDAO {
      *
      * @param ownerId Username of user
      * @return A list of {@link Application}
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get applications.
      */
     List<Application> getApplications(String ownerId) throws APIMgtDAOException;
 
@@ -70,8 +70,8 @@ public interface ApplicationDAO {
      * @param offset   The number of results from the beginning that is to be ignored
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIMgtDAOException
+     * @return {@code Application[]} matching results
+     * @throws APIMgtDAOException   If failed to get applications.
      */
     Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException;
 
@@ -82,8 +82,8 @@ public interface ApplicationDAO {
      * @param offset  The number of results from the beginning that is to be ignored
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
-     * @return {@link ApplicationSummaryResults} matching results
-     * @throws APIMgtDAOException
+     * @return {@code Application[]} matching results
+     * @throws APIMgtDAOException   If failed to get applications.
      */
     Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException;
 
@@ -92,8 +92,9 @@ public interface ApplicationDAO {
      * result pagination and ensuring results returned are for Apps belonging to the specified username
      *
      * @param searchString The search string provided
+     * @param userId    Id of the user.
      * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get applications.
      */
     Application[] searchApplicationsForUser(String searchString, String userId) throws APIMgtDAOException;
 
@@ -104,7 +105,7 @@ public interface ApplicationDAO {
      * @param searchString The search string provided
      * @param groupID      The Group ID to filter results by
      * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get applications.
      */
     Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException;
 
@@ -112,7 +113,7 @@ public interface ApplicationDAO {
      * Add a new instance of an Application
      *
      * @param application The {@link Application} object to be added
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to add application.
      */
     void addApplication(Application application) throws APIMgtDAOException;
 
@@ -121,7 +122,7 @@ public interface ApplicationDAO {
      *
      * @param appID      The UUID of the Application that needs to be updated
      * @param updatedApp Substitute {@link Application} object that will replace the existing Application
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to update application.
      */
     void updateApplication(String appID, Application updatedApp) throws APIMgtDAOException;
 
@@ -129,7 +130,7 @@ public interface ApplicationDAO {
      * Remove an existing Application
      *
      * @param appID The UUID of the Application that needs to be deleted
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException If failed to delete application.
      */
     void deleteApplication(String appID) throws APIMgtDAOException;
 
@@ -145,9 +146,9 @@ public interface ApplicationDAO {
     /**
      * Add application key related information
      *
-     * @param appId
-     * @param oAuthAppDetails
-     * @throws APIMgtDAOException
+     * @param appId     UUID of the application
+     * @param oAuthAppDetails   Oauth application detail object.
+     * @throws APIMgtDAOException   If failed to add application keys.
      */
     void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
 
