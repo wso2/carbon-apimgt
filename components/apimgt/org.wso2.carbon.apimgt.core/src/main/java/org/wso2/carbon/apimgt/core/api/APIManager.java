@@ -64,6 +64,14 @@ public interface APIManager {
     String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
 
     /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of swagger definition of the API given its uuid
+     * @throws APIManagementException
+     */
+    String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException;
+
+    /**
      * Checks the Availability of given String
      *@api
      * @return true, if already exists. False, otherwise

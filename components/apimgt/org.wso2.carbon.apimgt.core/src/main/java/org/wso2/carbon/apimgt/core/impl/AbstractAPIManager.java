@@ -109,7 +109,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException {
-        String lastUpdatedTime = null;
+        String lastUpdatedTime;
         try {
             lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPI(apiId);
         } catch (APIMgtDAOException e) {
@@ -118,6 +118,26 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         
+        return lastUpdatedTime;
+    }
+
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfSwaggerDefinition(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSwaggerDefinition(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the swagger definition of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
         return lastUpdatedTime;
     }
 

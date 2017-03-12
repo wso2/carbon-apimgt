@@ -157,6 +157,14 @@ public interface APIPublisher extends APIManager {
     String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
 
     /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration of the API given its uuid
+     * @throws APIManagementException
+     */
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
      * Attach Documentation (without content) to an API
      *
      * @param apiId         UUID of API

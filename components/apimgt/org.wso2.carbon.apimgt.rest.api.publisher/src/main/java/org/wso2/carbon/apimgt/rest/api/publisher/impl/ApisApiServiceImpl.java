@@ -438,6 +438,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
             return ETagGenerator.getETag(lastUpdatedTime);
         } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time for API " + apiId;
             log.error(errorMessage, e);
             return null;
@@ -539,8 +540,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
             String swagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().entity(swagger).build();
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -550,6 +557,20 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
+    }
+
+    public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of Swagger definition of API :" + apiId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 
     @Override
@@ -563,9 +584,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().entity(apiSwagger).build();
+            String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
+            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();

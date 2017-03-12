@@ -645,6 +645,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return newVersionedId;
     }
 
+
+    /**
+     * @see APIPublisher#getLastUpdatedTimeOfSwaggerDefinition(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfGatewayConfig(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the gateway configuration of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
+    }
+
     /**
      * Attach Documentation (without content) to an API
      *

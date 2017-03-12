@@ -218,6 +218,24 @@ class ApiResourceDAO {
         }
     }
 
+    static String getAPIUniqueResourceLastUpdatedTime(Connection connection, String apiID, ResourceCategory category)
+            throws SQLException {
+        final String query = "SELECT LAST_UPDATED_TIME FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
+                "RESOURCE_CATEGORY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LAST_UPDATED_TIME");
+                }
+            }
+        }
+        return null;
+    }
+
     static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue, String
             fileName, String updatedBy) throws SQLException {
         final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ?, UPDATED_BY = ?, " 

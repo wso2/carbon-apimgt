@@ -136,6 +136,33 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#getLastUpdatedTimeOfSwaggerDefinition(String)
+     */
+    @Override
+    @CheckForNull
+    public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO.getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.SWAGGER);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#getLastUpdatedTimeOfGatewayConfig(String)
+     */
+    @Override
+    @CheckForNull
+    public String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO
+                    .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.GATEWAY_CONFIG);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Retrieves summary data of all available APIs.
      *
      * @return {@link List<API>} matching results

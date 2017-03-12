@@ -65,6 +65,24 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of Swagger definition given the uuid of API
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull
+    String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration given the uuid of API
+     * @throws APIMgtDAOException
+     */
+    @CheckForNull 
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException;
+
+    /**
      * Retrieves summary data of all available APIs.
      * @return {@link List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
