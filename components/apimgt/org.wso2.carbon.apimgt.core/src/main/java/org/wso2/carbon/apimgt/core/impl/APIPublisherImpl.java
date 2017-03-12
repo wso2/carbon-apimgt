@@ -834,7 +834,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             document = docBuilder.build();
 
             if (!getApiDAO().isDocumentExist(apiId, document)) {
-                getApiDAO().updateDocumentInfo(apiId, document);
+                getApiDAO().updateDocumentInfo(apiId, document, getUsername());
                 return document.getId();
             } else {
                 String msg = "Document already exist for the api " + apiId;

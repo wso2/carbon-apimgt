@@ -643,6 +643,11 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    @Override
+    public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
+        return DocMetaDataDAO.getLastUpdatedTimeOfDocument(documentId);
+    }
+
     /**
      * Get image of a given API
      *
@@ -813,14 +818,16 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param apiId        UUID of API
      * @param documentInfo {@link DocumentInfo}
+     * @param updatedBy user who performs the action
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
+    public void updateDocumentInfo(String apiId, DocumentInfo documentInfo, String updatedBy)
+            throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                DocMetaDataDAO.updateDocInfo(connection, documentInfo);
+                DocMetaDataDAO.updateDocInfo(connection, documentInfo, updatedBy);
 
                 connection.commit();
             } catch (SQLException e) {

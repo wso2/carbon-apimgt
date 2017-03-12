@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -56,7 +57,8 @@ public interface APIManager {
     API getAPIbyUUID(String uuid) throws APIManagementException;
 
     /**
-     *
+     * Retrieves the last updated time of an API
+     * 
      * @param apiId UUID of API
      * @return Last updated time of API given its uuid
      * @throws APIManagementException
@@ -64,7 +66,8 @@ public interface APIManager {
     String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
 
     /**
-     *
+     * Retrieves the last updated time of the swagger definition of an API
+     * 
      * @param apiId UUID of API
      * @return Last updated time of swagger definition of the API given its uuid
      * @throws APIManagementException
@@ -173,4 +176,12 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of a document of an API
+     *
+     * @param documentId UUID of document
+     * @return Last updated time of document given its uuid
+     */
+    String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
 }

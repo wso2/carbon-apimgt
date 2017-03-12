@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.Map;
  * Provides data access to Doc Meta data related tables
  */
 class DocMetaDataDAO {
+    private static final String AM_API_DOC_META_DATA_TABLE_NAME = "AM_API_DOC_META_DATA";
 
     static List<DocumentInfo> getDocumentInfoList(Connection connection, String apiID) throws SQLException {
         final String query = "SELECT meta.UUID, meta.NAME, meta.SUMMARY, meta.TYPE, meta.OTHER_TYPE_NAME, " +
@@ -71,17 +73,46 @@ class DocMetaDataDAO {
 
     /**
      * Update doc info
-     * @param connection DB connection
+     *
+     * @param connection   DB connection
      * @param documentInfo document info
+     * @param updatedBy    user who performs the action
      * @throws SQLException
      * @throws APIMgtDAOException
      */
-    static void updateDocInfo(Connection connection, DocumentInfo documentInfo) throws SQLException,
+    static void updateDocInfo(Connection connection, DocumentInfo documentInfo, String updatedBy) throws SQLException,
             APIMgtDAOException {
 
-        deleteDOCPermission(connection,  documentInfo.getId());
+        deleteDOCPermission(connection, documentInfo.getId());
         addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
+        final String query = "UPDATE AM_API_DOC_META_DATA SET NAME = ?, SUMMARY = ?, TYPE = ?, "
+                + "OTHER_TYPE_NAME = ?, SOURCE_URL = ?, SOURCE_TYPE = ?, VISIBILITY = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
 
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, documentInfo.getName());
+                statement.setString(2, documentInfo.getSummary());
+                statement.setString(3, documentInfo.getType().toString());
+                statement.setString(4, documentInfo.getOtherType());
+                statement.setString(5, documentInfo.getSourceURL());
+                statement.setString(6, documentInfo.getSourceType().toString());
+                statement.setString(7, documentInfo.getVisibility().toString());
+                statement.setString(8, updatedBy);
+                statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(10, documentInfo.getId());
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     static DocumentInfo getDocumentInfo(Connection connection, String docID) throws SQLException {
@@ -163,6 +194,10 @@ class DocMetaDataDAO {
             addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         }
 
+    }
+
+    static String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResource(AM_API_DOC_META_DATA_TABLE_NAME, documentId);
     }
 
     private static void deleteDOCPermission(Connection connection, String docID) throws SQLException {

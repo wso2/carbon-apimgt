@@ -278,9 +278,10 @@ public interface ApiDAO {
      *
      * @param apiId    UUID of API
      * @param documentInfo {@link DocumentInfo}
+     * @param updatedBy user who performs the action 
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+    void updateDocumentInfo(String apiId, DocumentInfo documentInfo, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Add Document File content
@@ -411,4 +412,12 @@ public interface ApiDAO {
      * @throws APIMgtDAOException throws if any error occurred
      */
     void updateGatewayConfig(String apiID, String gatewayConfig, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of a document of an API
+     *
+     * @param documentId UUID of document
+     * @return Last updated time of document given its uuid
+     */
+    String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
 }
