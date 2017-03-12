@@ -729,10 +729,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             InputStream imageInputStream = apiPublisher.getThumbnailImage(apiId);
             if (imageInputStream != null) {
-                return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header
-                        (HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"icon\"").build();
+                return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"icon\"")
+                        .header("Etag", "\"" + existingFingerprint + "\"").build();
             } else {
                 return Response.noContent().build();
             }
@@ -743,6 +751,21 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    public String apisApiIdThumbnailGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfAPIThumbnailImage(apiId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of thumbnail of API " + apiId;
+            log.error(errorMessage, e);
+            return null;
         }
     }
 
@@ -757,6 +780,12 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
+            String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiPublisher.saveThumbnailImage(apiId, fileInputStream, fileDetail.getFileName());
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
                     .replace(RestApiConstants.APIID_PARAM, apiId);
@@ -767,7 +796,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 /*
             return Response.created(uri).entity(infoDTO).build();
 */
-            return Response.status(Response.Status.CREATED).entity(infoDTO).build();
+            String newFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, minorVersion);
+            return Response.status(Response.Status.CREATED).entity(infoDTO)
+                    .header("Etag", "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while uploading image" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();

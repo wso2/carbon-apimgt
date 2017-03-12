@@ -665,6 +665,19 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#getLastUpdatedTimeOfAPIThumbnailImage(String) 
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO
+                    .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.IMAGE);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Get image of a given API
      *
      * @param apiID The UUID of the respective API

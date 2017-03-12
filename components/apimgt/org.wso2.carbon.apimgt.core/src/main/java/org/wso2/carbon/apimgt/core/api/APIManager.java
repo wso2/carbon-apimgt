@@ -193,4 +193,12 @@ public interface APIManager {
      * @return  Last updated time of document's content
      */
     String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the thumbnail image of an API
+     *
+     * @param apiId UUID of API
+     * @return  Last updated time of document's content
+     */
+    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException;
 }

@@ -374,6 +374,23 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * @see APIManager#getLastUpdatedTimeOfAPIThumbnailImage(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the thumbnail image of the API " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
      * Returns the subscriptions for api
      *
      * @param apiId

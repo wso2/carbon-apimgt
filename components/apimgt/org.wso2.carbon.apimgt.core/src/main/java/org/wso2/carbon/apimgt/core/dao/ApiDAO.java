@@ -61,7 +61,6 @@ public interface ApiDAO {
      * @return Last updated time of API given its uuid
      * @throws APIMgtDAOException
      */
-    @CheckForNull
     String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
@@ -70,7 +69,6 @@ public interface ApiDAO {
      * @return Last updated time of Swagger definition given the uuid of API
      * @throws APIMgtDAOException
      */
-    @CheckForNull
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
 
     /**
@@ -78,8 +76,7 @@ public interface ApiDAO {
      * @param apiId UUID of API
      * @return Last updated time of gateway configuration given the uuid of API
      * @throws APIMgtDAOException
-     */
-    @CheckForNull 
+     */ 
     String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException;
 
     /**
@@ -418,6 +415,7 @@ public interface ApiDAO {
      *
      * @param documentId UUID of document
      * @return Last updated time of document given its uuid
+     * @throws APIMgtDAOException throws if any DB level error occurred
      */
     String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
 
@@ -427,6 +425,16 @@ public interface ApiDAO {
      * @param apiId UUID of API
      * @param documentId UUID of document
      * @return  Last updated time of document's content
+     * @throws APIMgtDAOException throws if any DB level error occurred
      */
     String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the thumbnail image of an API
+     *
+     * @param apiId UUID of API
+     * @return  Last updated time of document's content
+     * @throws APIMgtDAOException throws if any db level error occurred
+     */
+    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException;
 }
