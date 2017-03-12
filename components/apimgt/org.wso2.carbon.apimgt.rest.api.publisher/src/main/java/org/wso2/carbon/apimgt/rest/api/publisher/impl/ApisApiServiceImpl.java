@@ -195,6 +195,12 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
             apiPublisher.removeDocumentation(documentId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -219,9 +225,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, accept,
+                    ifNoneMatch, ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
             if (documentInfo != null) {
-                return Response.ok().entity(MappingUtil.toDocumentDTO(documentInfo)).build();
+                return Response.ok().header("Etag", "\"" + existingFingerprint + "\"")
+                        .entity(MappingUtil.toDocumentDTO(documentInfo)).build();
             } else {
                 String msg = "Documntation not found " + documentId;
                 log.error(msg);
@@ -240,6 +255,22 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfDocument(documentId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage =
+                    "Error while retrieving last updated time of document " + documentId + " of API " + apiId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId
             , String documentId
@@ -252,6 +283,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
@@ -290,7 +329,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
-            return Response.ok().entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
+            String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
+                    minorVersion);
+            return Response.ok().header("Etag", "\"" + newFingerprint + "\"")
+                    .entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
             log.error(errorMessage, e);
