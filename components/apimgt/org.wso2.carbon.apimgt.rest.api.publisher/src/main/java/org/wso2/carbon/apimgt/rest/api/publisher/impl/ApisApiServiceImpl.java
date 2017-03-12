@@ -82,6 +82,13 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, accept,
+                    ifNoneMatch, ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             DocumentContent documentationContent = apiPublisher.getDocumentationContent(documentId);
             DocumentInfo documentInfo = documentationContent.getDocumentInfo();
             if (DocumentInfo.SourceType.FILE.equals(documentInfo.getSourceType())) {
@@ -89,14 +96,19 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok(documentationContent.getFileContent())
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .header("Etag", "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
                 String content = documentationContent.getInlineContent();
                 return Response.ok(content)
-                        .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN).build();
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .build();
             } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
                 String sourceUrl = documentInfo.getSourceURL();
-                return Response.seeOther(new URI(sourceUrl)).build();
+                return Response.seeOther(new URI(sourceUrl))
+                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .build();
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
@@ -114,6 +126,23 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage =
+                    "Error while retrieving last updated time of content of document " + documentId + " of API "
+                            + apiId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId
             , String documentId
@@ -127,6 +156,12 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
+                    null, null, minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
 
             if (fileInputStream != null && inlineContent != null) {
                 String msg = "Only one of 'file' and 'inlineContent' should be specified";
@@ -172,8 +207,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.updateDocumentation(apiId, docBuilder.build());
             //retrieving the updated doc and the URI
             DocumentInfo updatedDoc = apiProvider.getDocumentationSummary(documentId);
+            String newFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
+                    null, null, minorVersion);
             DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
-            return Response.status(Response.Status.CREATED).entity(documentDTO).build();
+            return Response.status(Response.Status.CREATED)
+                    .header("Etag", "\"" + newFingerprint + "\"").entity(documentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding content to document" + documentId;
             HashMap<String, String> paramList = new HashMap<String, String>();

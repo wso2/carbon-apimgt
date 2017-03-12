@@ -184,4 +184,13 @@ public interface APIManager {
      * @return Last updated time of document given its uuid
      */
     String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the content of a document of an API
+     * 
+     * @param apiId UUID of API
+     * @param documentId UUID of document
+     * @return  Last updated time of document's content
+     */
+    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
 }

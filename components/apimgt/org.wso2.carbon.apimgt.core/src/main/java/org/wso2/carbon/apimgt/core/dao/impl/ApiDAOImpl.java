@@ -643,9 +643,25 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#getLastUpdatedTimeOfDocument(String)
+     */
     @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
         return DocMetaDataDAO.getLastUpdatedTimeOfDocument(documentId);
+    }
+    
+    /**
+     * @see ApiDAO#getLastUpdatedTimeOfDocumentContent(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO
+                    .getResourceLastUpdatedTime(connection, apiId, documentId, ResourceCategory.DOC);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     /**

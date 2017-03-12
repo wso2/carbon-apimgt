@@ -349,11 +349,27 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocument(documentId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving the last update time of document " + documentId;
+            String errorMsg = "Error occurred while retrieving the last updated time of document " + documentId;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+        return lastUpdatedTime;
+    }
 
+    /**
+     * @see APIManager#getLastUpdatedTimeOfDocumentContent(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocumentContent(apiId, documentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the document's content " + documentId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
         return lastUpdatedTime;
     }
 
