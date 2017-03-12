@@ -51,7 +51,15 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            RestAPIPublisherUtil.getApiPublisher(username).deleteAPI(apiId);
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
+            apiPublisher.deleteAPI(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting  API : " + apiId;
