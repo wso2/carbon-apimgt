@@ -356,13 +356,20 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)
+    public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String minorVersion)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
             String gatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().entity(gatewayConfig).build();
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(gatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -376,15 +383,37 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    public String apisApiIdGatewayConfigGetFingerprint(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfGatewayConfig(
+                    apiId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of gateway config of API " + apiId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
+
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
                                               String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().entity(apiGatewayConfig).build();
+            String newFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, minorVersion);
+            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apiGatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -413,7 +442,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             String existingFingerprint = apisApiIdGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     minorVersion);
-            if (!StringUtils.isEmpty(ifNoneMatch) && ifNoneMatch
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
@@ -439,7 +468,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return ETagGenerator.getETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
-            String errorMessage = "Error while retrieving last updated time for API " + apiId;
+            String errorMessage = "Error while retrieving last updated time of API " + apiId;
             log.error(errorMessage, e);
             return null;
         }
@@ -507,8 +536,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
-            
-            if (!StringUtils.isEmpty(ifMatch) && !ifMatch
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
@@ -542,7 +570,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     minorVersion);
-            if (!StringUtils.isEmpty(ifNoneMatch) && ifNoneMatch
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
@@ -585,7 +613,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
-            if (!StringUtils.isEmpty(ifMatch) && !ifMatch
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }

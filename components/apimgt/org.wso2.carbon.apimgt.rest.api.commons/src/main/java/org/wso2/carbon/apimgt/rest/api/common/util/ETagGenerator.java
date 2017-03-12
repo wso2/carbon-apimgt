@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.rest.api.common.util;
 * under the License.
 */
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.rest.api.common.exception.ETagGenerationException;
@@ -75,7 +76,7 @@ public class ETagGenerator {
      */
     public static String getETag(String updatedTime) throws ETagGenerationException {
         try {
-            return getHash(updatedTime, "MD5");
+            return StringUtils.isBlank(updatedTime) ? null : getHash(updatedTime, "MD5");
         } catch (NoSuchAlgorithmException e) {
             String errorMessage = "Error while generating md5 hash for the timestamp :" + updatedTime;
             log.error(errorMessage, e);
