@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -56,9 +57,11 @@ public abstract class AbstractAPIManager implements APIManager {
     private String username;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
+    private WorkflowDAO workflowDAO;
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO)  {
+    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
+            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -66,6 +69,7 @@ public abstract class AbstractAPIManager implements APIManager {
         this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
+        this.workflowDAO = workflowDAO;
     }
 
     /**
@@ -338,6 +342,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected LabelDAO getLabelDAO() {
         return labelDAO;
+    }
+    
+    protected WorkflowDAO getWorkflowDAO() {
+        return workflowDAO;
     }
 
     protected String getUsername() {
