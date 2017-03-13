@@ -293,7 +293,7 @@ public class ImportExportUtils {
      * Queries the list of directories available under a root directory path
      *
      * @param path full path of the root directory
-     * @return Set of directory path under the root directory given by {@parameter path}
+     * @return Set of directory path under the root directory given by path
      * @throws APIMgtEntityImportExportException if an error occurs while listing directories
      */
     public static Set<String> getDirectoryList(String path) throws APIMgtEntityImportExportException {
