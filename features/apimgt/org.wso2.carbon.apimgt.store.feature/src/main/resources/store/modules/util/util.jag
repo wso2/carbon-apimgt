@@ -75,5 +75,9 @@ var getJsonFromFile = function(pathTofile) {
    	return  cloudConfig;
 };
 
+var getUsernameWithTenantDomain = function(username, tenantDomain) {
+    return  username + "@" + tenantDomain;
+};
+
 %>
 
