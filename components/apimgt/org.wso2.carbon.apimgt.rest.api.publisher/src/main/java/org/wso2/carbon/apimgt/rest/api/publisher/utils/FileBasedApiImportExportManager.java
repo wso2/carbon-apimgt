@@ -62,6 +62,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      * The export root location is given by {@link FileBasedApiImportExportManager#path}/exported-apis.
      *
      * @param apiDetailSet Set of {@link APIDetails} objects to be exported
+     * @param exportDirectoryName  Name of the directory to do the export
      * @return Path to the directory  with exported artifacts
      * @throws APIManagementException if an error occurred while exporting APIs to file system or
      * no APIs are exported successfully
@@ -147,8 +148,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     }
 
     /**
-     * Imports and creates a set of new APIs to API Manager by reading and decoding the {@param
-     * uploadedApiArchiveInputStream}. Will fail if the APIs already exists
+     * Imports and creates a set of new APIs to API Manager by reading and decoding the
+     * input stream. Will fail if the APIs already exists
      *
      * @param uploadedApiArchiveInputStream  InputStream to be read ana decoded to a set of APIs
      * @param provider API provider, if needs to be updated
@@ -190,7 +191,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     }
 
     /**
-     * Imports a set of APIs to API Manager by reading and decoding the {@param uploadedApiArchiveInputStream}
+     * Imports a set of APIs to API Manager by reading and decoding the input stream
      *
      * @param uploadedApiArchiveInputStream  InputStream to be read ana decoded to a set of APIs
      * @param provider API provider, if needs to be updated
