@@ -63,6 +63,7 @@ public class DAOUtil {
      * Get is auto commit enabled
      *
      * @return true if auto commit is enabled, false otherwise
+     * @throws SQLException Error while getting if auto commit is enabled
      */
     public static boolean isAutoCommit() throws SQLException {
         return dataSource.getDatasource().isAutoCommit();

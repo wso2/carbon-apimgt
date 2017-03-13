@@ -41,7 +41,7 @@ public class KeyManagerHolder {
     /**
      * Set the keymanager implementation class
      *
-     * @throws org.wso2.carbon.apimgt.core.exception.KeyManagementException
+     * @throws KeyManagementException If failed to initialize.
      */
     public static void initializeKeyManager()
             throws KeyManagementException {
@@ -52,7 +52,7 @@ public class KeyManagerHolder {
     /**
      * Set the keymanager implementation class
      *
-     * @throws org.wso2.carbon.apimgt.core.exception.KeyManagementException
+     * @throws KeyManagementException If failed to initialize login key manager.
      */
     public static void initializeAMLoginKeyManager()
             throws KeyManagementException {

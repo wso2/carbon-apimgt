@@ -45,7 +45,7 @@ public interface PolicyDAO {
      *
      * @param policyId  Subscription policy ID
      * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscription policy.
      */
     SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException;
 
@@ -54,7 +54,7 @@ public interface PolicyDAO {
      *
      * @param policyId  Application policy ID
      * @return {@link ApplicationPolicy} of given UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get application policy.
      */
     ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException;
 

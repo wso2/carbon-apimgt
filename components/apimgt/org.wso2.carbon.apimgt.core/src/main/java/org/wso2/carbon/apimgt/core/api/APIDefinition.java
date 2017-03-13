@@ -36,7 +36,9 @@ public interface APIDefinition {
     /**
      * This method extracts the API resource related data which includes URI templates from the Swagger API definition
      *
+     * @param resourceConfigsJSON resource json
      * @return SwaggerAPIResourceData
+     * @throws APIManagementException   If error occurs while parsing swagger resources.
      */
     List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON) throws APIManagementException;
 
@@ -44,31 +46,31 @@ public interface APIDefinition {
      * This method extracts the scopes from the API definition
      *
      * @param resourceConfigsJSON resource json
-     * @return scopes
+     * @return scopes   Map of the scopes.
+     * @throws APIManagementException   If error occurs while parsing swagger resources.
      */
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * generate the swagger from uri templates.
-     * @param api
-     * @return
-     * @throws APIManagementException
+     * @param api   API object
+     * @return      generated swagger as a string.
      */
     String generateSwaggerFromResources(API.APIBuilder api);
 
     /**
      * return API Object
      *
-     * @param apiDefinition
-     * @param provider
-     * @return
-     * @throws APIManagementException
+     * @param apiDefinition     API definition as a string
+     * @param provider          Provider of the API
+     * @return                  API object.
+     * @throws APIManagementException   If error occurs while generate swagger from resources.
      */
     API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 
     /**
      * Set the default swagger and uri templates
-     * @param apiBuilder
+     * @param apiBuilder    API object.
      */
     void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder);
 }
