@@ -32,7 +32,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Get all subscriptions.
-     * <p/>
+     * {@code <p/>}
      * If apiId is specified this will return the subscribed applications of that api
      * If application id is specified this will return the api subscriptions of that application
      *

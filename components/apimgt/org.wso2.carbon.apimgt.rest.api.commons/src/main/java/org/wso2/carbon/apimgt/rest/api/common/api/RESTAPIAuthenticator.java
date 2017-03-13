@@ -28,10 +28,11 @@ import org.wso2.msf4j.ServiceMethodInfo;
 public interface RESTAPIAuthenticator {
 /**
 * Authentication logic is executed here
-* @pqram Request
-* @param responder
-* @param serviceMethodInfo
-* @return authentication status. true if authentication is successful; else false
+* @param request    MSF4J Request
+* @param responder  MSF4J Response
+* @param serviceMethodInfo  Contains details about the HTTP method
+* @return authentication status. true if authentication is successful; else false.
+* @throws APIMgtSecurityException   If failed to authenticate the request.
 * */
     boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException;

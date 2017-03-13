@@ -34,6 +34,7 @@ public interface APILifecycleManager {
     /**
      * This method need to call for each and event life cycle state changes.
      *
+     * @param currentState                      {@code String} Current state of API.
      * @param targetState                       {@code String} Required target state.
      * @param uuid                              {@code String} Lifecycle id that maps with the asset.
      * @param resource                          {@code Object} The current object to which lifecycle is attached to.
@@ -53,6 +54,7 @@ public interface APILifecycleManager {
      * @param checkListItemName                 Name of the check list item as specified in the lc config.
      * @param value                             Value of the check list item. Either selected or not.
      *
+     * @return                                  {@code LifecycleState} object of updated life cycle state.
      * @throws LifecycleException               If exception occurred while execute life cycle update.
      */
     LifecycleState checkListItemEvent(String uuid, String currentState, String checkListItemName,
@@ -79,17 +81,19 @@ public interface APILifecycleManager {
 
     /**
      * Get current life cycle state object.
+     * @param uuid                      Lifecycle id that maps with the asset.
      *
-     * @return {@code LifecycleState} object represent current life cycle.
+     * @return                          {@code LifecycleState} object represent current life cycle.
+     * @throws LifecycleException       If failed to get life cycle state data.
      */
     LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException;
 
     /**
      * Get Current Lifecycle History for uuid
      *
-     * @param uuid uuid of lifecycle instance
-     * @return
-     * @throws LifecycleException
+     * @param uuid                  uuid of lifecycle instance
+     * @return                      {@code LifecycleHistoryBean} object represent life cycle history.
+     * @throws LifecycleException   If failed to get life cycle history data
      */
     List<LifecycleHistoryBean> getLifecycleHistory(String uuid) throws LifecycleException;
 }

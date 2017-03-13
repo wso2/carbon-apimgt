@@ -36,7 +36,7 @@ public interface APIMgtAdminService {
      *
      * @param limit Subscription Limit
      * @return all subscriptions
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get list of subscriptions.
      */
     List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException;
 
@@ -46,7 +46,7 @@ public interface APIMgtAdminService {
      * @param apiContext Context of API
      * @param apiVersion Version of API
      * @return all subscriptions
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get list of subscriptions.
      */
     List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException;
@@ -55,31 +55,32 @@ public interface APIMgtAdminService {
      * Load api info from db
      *
      * @return Subscription Validation Information
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get lAPI summary data
      */
     public List<APISummary> getAPIInfo() throws APIManagementException;
 
     /**
      * Adds new @{@link Policy} to the system
      *
-     * @param policy
-     * @throws APIManagementException
+     * @param policyLevel   Tier level of the policy.
+     * @param policy    Policy object to be added.
+     * @throws APIManagementException   If failed to add the policy.
      */
     void addPolicy(String policyLevel, Policy policy) throws APIManagementException;
 
     /**
      * Updates existing @{@link Policy} to the system
      *
-     * @param policy
-     * @throws APIManagementException
+     * @param policy    Policy object to be updated.
+     * @throws APIManagementException   If failed to update the policy.
      */
     void updatePolicy(Policy policy) throws APIManagementException;
 
     /**
      * Delete existing @{@link Policy} in the system
      *
-     * @param policy
-     * @throws APIManagementException
+     * @param policy    Policy object to be deleted.
+     * @throws APIManagementException   If failed to delete the policy.
      */
     void deletePolicy(Policy policy) throws APIManagementException;
 
@@ -87,11 +88,19 @@ public interface APIMgtAdminService {
     /**
      * Get a @{@link Policy} by policy name
      *
-     * @param policyName
-     * @return
-     * @throws APIManagementException
+     * @param policyLevel   Tier level of the policy.
+     * @param policyName    Name of the policy
+     * @return  Policy object.
+     * @throws APIManagementException   If failed to get policy.
      */
     Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
 
+    /**
+     * Get a List of policies of a particular level
+     *
+     * @param policyLevel   Tier level of the policy.
+     * @return  List of Policy objects of the given level.
+     * @throws APIManagementException   If failed to get policies.
+     */
     List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException;
 }

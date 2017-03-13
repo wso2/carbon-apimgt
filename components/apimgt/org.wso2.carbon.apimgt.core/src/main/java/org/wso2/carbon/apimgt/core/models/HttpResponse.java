@@ -77,7 +77,7 @@ public class HttpResponse {
     }
 
     /**
-     * To get all the header fields as a Map<String, List<String>>.
+     * To get all the header fields as a {@code Map<String, List<String>>}.
      *
      * @return Map of header fields
      */

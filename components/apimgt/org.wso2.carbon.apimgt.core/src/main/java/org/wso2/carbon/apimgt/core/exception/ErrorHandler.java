@@ -32,14 +32,14 @@ public interface ErrorHandler {
 
     /**
      * Get error message that defined in the enum
-     * @return
+     * @return  error message
      */
     String getErrorMessage();
 
     /**
      * Get error description that defined in the enum
      *
-     * @return
+     * @return  error description.
      */
     default String getErrorDescription() {
         return null;
@@ -48,7 +48,7 @@ public interface ErrorHandler {
     /**
      * Get Http status code that defined in the enum
      *
-     * @return
+     * @return  error code.
      */
     default int getHttpStatusCode() {
         return 500;

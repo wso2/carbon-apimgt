@@ -31,6 +31,7 @@ public interface GatewaySourceGenerator {
     /**
      * Generate initial service implementation for a API
      *
+     * @param apiResources List of api resources.
      * @return service impl as Text
      * @throws APITemplateException throws if an error occurred
      */
@@ -38,7 +39,7 @@ public interface GatewaySourceGenerator {
 
     /**
      * Generate initial endpoint config
-     *
+     * @param endpoints List of endpoints.
      * @return endpoint source as Text
      * @throws APITemplateException throws if an error occurred
      */

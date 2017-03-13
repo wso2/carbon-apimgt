@@ -545,7 +545,7 @@ public final class API {
         /**
          * Sets the lifecycleState and return a reference to this APIBuilder
          *
-         * @param lifecycleState
+         * @param lifecycleState    Lifecycle state object.
          * @return a reference to APIBuilder
          */
         public APIBuilder lifecycleState(LifecycleState lifecycleState) {

@@ -102,9 +102,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.core.models.Provider} available on the system.
+     * Returns a list of all #{@code org.wso2.carbon.apimgt.core.models.Provider} available on the system.
      *
-     * @return Set<Provider>
+     * @return {@code Set<Provider>}
      * @throws APIManagementException if failed to get Providers
      */
     @Override
@@ -136,7 +136,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Get a list of all the consumers for all APIs
      *
      * @param providerId if of the provider
-     * @return Set<String>
+     * @return {@code Set<String>}
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
     @Override
@@ -160,7 +160,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Returns full list of Subscribers of an API
      *
      * @param identifier String
-     * @return Set<String>
+     * @return {@code Set<String>}
      * @throws APIManagementException if failed to get Subscribers
      */
     @Override
@@ -169,10 +169,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * this method returns the Set<APISubscriptionCount> for given provider and api
+     * this method returns the {@code Set<APISubscriptionCount>} for given provider and api
      *
      * @param id String
-     * @return Set<APISubscriptionCount>
+     * @return {@code Set<APISubscriptionCount>}
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     @Override
@@ -197,6 +197,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Adds a new API to the system
      *
      * @param apiBuilder API model object
+     * @return UUID of the added API.
      * @throws APIManagementException if failed to add API
      */
     @Override
@@ -324,9 +325,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * @param api
-     * @return
-     * @throws APIManagementException
+     * @param api   API Object
+     * @return  If api definition is valid or not.
+     * @throws APIManagementException   If failed to validate the API.
      */
     @Override
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
@@ -338,7 +339,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
-     * @param apiBuilder {@link org.wso2.carbon.apimgt.core.models.API.APIBuilder} model object
+     * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder} model object
      * @throws APIManagementException if failed to update API
      */
     @Override
@@ -464,9 +465,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method will return map with role names and its permission values.
      *
-     * @param permissionJsonString
-     * @return
-     * @throws ParseException
+     * @param permissionJsonString Permission json object a string
+     * @return  Map of permission values.
+     * @throws ParseException   If failed to parse the json string.
      */
     private HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
 
@@ -498,10 +499,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to Update the status of API
      *
-     * @param apiId
-     * @param status
-     * @return
-     * @throws APIManagementException
+     * @param apiId UUID of the API.
+     * @param status    Target life cycle status.
+     * @param checkListItemMap Map of check list items.
+     * @throws APIManagementException   If failed to update API lifecycle status..
      */
     @Override
     public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
@@ -573,10 +574,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to Update the lifecycle checklist of API
      *
-     * @param apiId
-     * @param status
-     * @param checkListItemMap
-     * @throws APIManagementException
+     * @param apiId UUID of the API
+     * @param status    Current API lifecycle status.
+     * @param checkListItemMap  Check list item values.
+     * @throws APIManagementException   If failed to update checklist item values.
      */
     @Override
     public void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
@@ -608,6 +609,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId      The API to be copied
      * @param newVersion The version of the new API
+     * @return           UUID of the newly created version.
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
@@ -699,7 +701,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param resourceId UUID of API
      * @param content    content of the file as an Input Stream
-     * @param fileName
+     * @param fileName   Name of the file.
      * @throws APIManagementException if failed to add the file
      */
     @Override
@@ -734,9 +736,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Checks if a given API exists in the registry
      *
-     * @param apiId
+     * @param apiId UUID of the API.
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPIExists(String apiId) throws APIManagementException {
@@ -754,9 +756,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Checks if a given API Context exists in the registry
      *
-     * @param context
+     * @param context   Context of the API.
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPIContextExists(String context) throws APIManagementException {
@@ -766,9 +768,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Checks if a given API name exists in the registry
      *
-     * @param name
+     * @param name Name of the API.
      * @return boolean result
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPINameExists(String name) throws APIManagementException {
@@ -778,8 +780,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to save the documentation content
      *
-     * @param docId
-     * @param text  @throws APIManagementException if failed to add the document as a resource to registry
+     * @param docId UUID of the Doc
+     * @param text  Plain text content of the doc.
+     * @throws APIManagementException if failed to add the document as a resource to registry
      */
     @Override
     public void addDocumentationContent(String docId, String text) throws APIManagementException {
@@ -789,8 +792,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Updates a given documentation
      *
-     * @param apiId        String
+     * @param apiId        UUID of the API.
      * @param documentInfo Documentation
+     * @return              UUID of the updated document.
      * @throws APIManagementException if failed to update docs
      */
     @Override
@@ -880,7 +884,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Delete an API
      *
-     * @param identifier String
+     * @param identifier UUID of the API.
      * @throws APIManagementException if failed to remove the API
      */
     @Override
@@ -921,11 +925,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * @param limit
-     * @param offset
-     * @param query
-     * @return
-     * @throws APIManagementException
+     * @param limit Limit
+     * @param offset    Offset
+     * @param query Search query
+     * @return  List of APIS.
+     * @throws APIManagementException   If failed to search APIs.
      */
     @Override
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
@@ -954,7 +958,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param subId     Subscription ID
      * @param subStatus Subscription Status
-     * @return int value with subscription id
      * @throws APIManagementException If failed to update subscription status
      */
     @Override
@@ -988,7 +991,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId    id of the String
      * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to save swagger definition.
      */
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
@@ -1029,7 +1032,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId String
-     * @return Map<String,Object> a map with lifecycle data
+     * @return {@code Map<String,Object>} a map with lifecycle data
+     * @throws APIManagementException   If failed to get Lifecycle data.
      */
     @Override
     public LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException {
@@ -1056,7 +1060,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param string Api identifier
      * @return Current lifecycle status
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get lifecycle status.
      */
     @Override
     public String getAPILifeCycleStatus(String string) throws APIManagementException {
@@ -1081,7 +1085,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId       apiId of api
      * @param inputStream inputStream of image
-     * @throws APIManagementException
+     * @param dataType    Data type of the image.
+     * @throws APIManagementException   If failed save thumbnail.
      */
     @Override
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
@@ -1099,7 +1104,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Get the thumbnail icon for api
      *
      * @param apiId apiId of api
-     * @throws APIManagementException
+     * @return thumbnail image as a stream object.
+     * @throws APIManagementException   If failed to get thumbnail.
      */
     @Override
     public InputStream getThumbnailImage(String apiId) throws APIManagementException {
@@ -1147,8 +1153,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Return list of endpoints
      *
-     * @return
-     * @throws APIManagementException
+     * @return  List of Endpoints..
+     * @throws APIManagementException   If filed to get endpoints.
      */
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
@@ -1160,7 +1166,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param endpointId uuid of endpoint
      * @return details of endpoint
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get endpoint.
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIManagementException {
@@ -1175,8 +1181,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Add an endpoint
      *
-     * @param endpoint
-     * @throws APIManagementException
+     * @param endpoint Endpoint object.
+     * @return  UUID of the added endpoint.
+     * @throws APIManagementException   If failed to add endpoint.
      */
     @Override
     public String addEndpoint(Endpoint endpoint) throws APIManagementException {
@@ -1203,8 +1210,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Update and endpoint
      *
-     * @param endpoint
-     * @throws APIManagementException
+     * @param endpoint  Endpoint object.
+     * @throws APIManagementException   If failed to update endpoint.
      */
     @Override
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
@@ -1216,8 +1223,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Delete an endpoint
      *
-     * @param endpointId
-     * @throws APIManagementException
+     * @param endpointId    UUID of the endpoint.
+     * @throws APIManagementException   If failed to delete the endpoint.
      */
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
@@ -1229,9 +1236,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Create api from Definition
      *
-     * @param apiDefinition
-     * @return
-     * @throws APIManagementException
+     * @param apiDefinition API definition stream.
+     * @return  UUID of the added API.
+     * @throws APIManagementException   If failed to add the API.
      */
     @Override
     public String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
@@ -1296,9 +1303,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Retrieve all policies based on tier Level
      *
-     * @param tierLevel
-     * @return
-     * @throws APIManagementException
+     * @param tierLevel Tier Level.
+     * @return  List of policies of the given level.
+     * @throws APIManagementException   If failed to get policies.
      */
 
     @Override
@@ -1342,6 +1349,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Publishing new API configurations to the subscribers
      *
      * @param api API object
+     * @throws GatewayException If failed to publish to gateways.
      */
     private void publishToGateway(API api) throws GatewayException {
         APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
@@ -1357,6 +1365,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * Publishing new endpoint configurations to the subscribers
+     * @throws APIManagementException   If failed to publish endpoint to gateway.
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
         GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();
@@ -1371,7 +1380,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
+     * Add {@code org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
      * Key should be class name of the observer. This is to prevent registering same observer twice to an
      * observable.
      * <p>

@@ -38,7 +38,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      *
      * @param limit Subscription Limit
      * @return all subscriptions
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to retrieve subscription list.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
@@ -51,7 +51,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @param apiContext Context of API
      * @param apiVersion Version of API
      * @return all subscriptions
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to retrieve subscription list.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
@@ -63,7 +63,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * Load api info from db
      *
      * @return List summery of al the available apis
-     * @throws APIManagementException
+     * @throws APIManagementException If failed to get API information.
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {

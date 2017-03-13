@@ -213,7 +213,6 @@ public class Endpoint {
      * @return {@code true} if this object is the same as the obj
      * argument; {@code false} otherwise.
      * @see #hashCode()
-     * @see
      */
     @Override
     public boolean equals(Object obj) {
