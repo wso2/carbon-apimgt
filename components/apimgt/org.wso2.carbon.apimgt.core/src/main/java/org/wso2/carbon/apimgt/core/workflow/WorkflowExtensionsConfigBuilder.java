@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,17 +44,22 @@ import java.util.stream.Stream;
 public class WorkflowExtensionsConfigBuilder {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowExtensionsConfigBuilder.class);
     public static final String WORKFLOW_CONFIG_YML = "workflow-extensions.yml";
+    
+    //TODO move to Constant file
+    public static final String WF_DEFAULT_APPCREATION_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
+    
     private static WorkflowConfig workflowConfig;
 
     public static WorkflowConfig getWorkflowConfig() {
         
         if (workflowConfig == null) {                    
-            build(WorkflowConfig::new);  //TODO remove 
+            build(generateDefaultConfigurations()); 
         }
         return workflowConfig;
     }
 
-    public static void build(Supplier<WorkflowConfig> defaultConfig) {
+    public static void build(WorkflowConfig defaultConfig) {
         Optional<String> workflowConfigFileContent = readFile(WORKFLOW_CONFIG_YML);
 
         if (workflowConfigFileContent.isPresent()) {
@@ -76,7 +80,8 @@ public class WorkflowExtensionsConfigBuilder {
             }
 
         } else {
-            workflowConfig = defaultConfig.get();
+            logger.warn("Could not find the workflow-extensions.yml in conf location. Using default configurations");
+            workflowConfig = defaultConfig;
         }
     }
 
@@ -123,5 +128,15 @@ public class WorkflowExtensionsConfigBuilder {
         } else {
             return Optional.empty();
         }
+    }
+    
+    private static WorkflowConfig generateDefaultConfigurations() {
+        WorkflowConfig defaultConfig = new WorkflowConfig();
+        WorkflowExecutorInfo applicationCreation = new WorkflowExecutorInfo();
+        applicationCreation.setExecutor(WF_DEFAULT_APPCREATION_EXEC);
+        defaultConfig.setApplicationCreation(applicationCreation);
+        //TODO add other executors
+        
+        return defaultConfig;
     }
 }
