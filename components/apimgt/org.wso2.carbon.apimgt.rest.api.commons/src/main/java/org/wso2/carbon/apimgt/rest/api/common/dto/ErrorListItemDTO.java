@@ -37,6 +37,8 @@ public class ErrorListItemDTO {
 
 
     /**
+     * Gets the error code.
+     * @return Error code . for ex :900404
      **/
     @ApiModelProperty(required = true, value = "")
     @JsonProperty("code")
@@ -50,6 +52,7 @@ public class ErrorListItemDTO {
 
     /**
      * Description about individual errors occurred
+     * @return error message.
      **/
     @ApiModelProperty(required = true, value = "Description about individual errors occurred")
     @JsonProperty("message")

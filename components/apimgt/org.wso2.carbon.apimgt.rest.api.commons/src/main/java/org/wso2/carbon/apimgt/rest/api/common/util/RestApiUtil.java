@@ -70,6 +70,7 @@ public class RestApiUtil {
 
     /**
      * Get the current logged in user's username
+     * @return The current logged in user.
      */
     public static String getLoggedInUsername() {
 //        CarbonContext carbonContext = CarbonContext.getCurrentContext();
@@ -111,7 +112,7 @@ public class RestApiUtil {
      * @param resource requested resource
      * @param id       id of resource
      * @param log      Log instance
-     * @throws ForbiddenException
+     * @throws ForbiddenException   If failed to handle authorization
      */
     public static void handleAuthorizationFailure(String resource, String id, Logger log) throws ForbiddenException {
         ForbiddenException forbiddenException = buildForbiddenException(resource, id);
@@ -143,7 +144,7 @@ public class RestApiUtil {
      * @param resource requested resource
      * @param id       id of resource
      * @param log      Log instance
-     * @throws NotFoundException
+     * @throws NotFoundException    If failed to found the resource.
      */
     public static void handleResourceNotFoundError(String resource, String id, Logger log) throws NotFoundException {
         NotFoundException notFoundException = buildNotFoundException(resource, id);
@@ -175,7 +176,7 @@ public class RestApiUtil {
      * @param msg error message
      * @param t   Throwable instance
      * @param log Log instance
-     * @throws InternalServerErrorException
+     * @throws InternalServerErrorException     If exception occurs in the server.
      */
     public static void handleInternalServerError(String msg, Throwable t, Logger log)
             throws InternalServerErrorException {
@@ -224,7 +225,7 @@ public class RestApiUtil {
      *
      * @param msg error message
      * @param log Log instance
-     * @throws BadRequestException
+     * @throws BadRequestException  If 400 bad request comes.
      */
     public static void handleBadRequest(String msg, Logger log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
@@ -249,7 +250,7 @@ public class RestApiUtil {
      * @param description description of the error
      * @param t           Throwable instance
      * @param log         Log instance
-     * @throws ConflictException
+     * @throws ConflictException    If resource already exists.
      */
     public static void handleResourceAlreadyExistsError(String description, Throwable t, Logger log)
             throws ConflictException {
@@ -327,6 +328,7 @@ public class RestApiUtil {
      * Returns a generic errorDTO
      *
      * @param errorHandler The error handler object.
+     * @param paramList map of parameters specific to the error.
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
@@ -378,6 +380,8 @@ public class RestApiUtil {
      * Returns a generic errorDTO
      *
      * @param message specifies the error message
+     * @param code  error code.
+     * @param description   error description.
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(String message, Long code, String description) {
@@ -391,9 +395,9 @@ public class RestApiUtil {
     /**
      * Returns an APIStore.
      *
-     * @param subscriberName
-     * @return
-     * @throws APIManagementException
+     * @param subscriberName    Name of the subscriber.
+     * @return  {@code APIStore}
+     * @throws APIManagementException   if failed to get the consumers.
      */
     public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
@@ -403,7 +407,7 @@ public class RestApiUtil {
      * Returns an APIMgtAdminService.
      *
      * @return API Management Admin Service
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to retrieve admin service.
      */
     public static APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIMgtAdminService();
@@ -506,7 +510,7 @@ public class RestApiUtil {
      * @param id       id of resource
      * @param t        Throwable instance
      * @param log      Log instance
-     * @throws NotFoundException
+     * @throws NotFoundException    If resource not found.
      */
     public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
             throws NotFoundException {
@@ -543,6 +547,7 @@ public class RestApiUtil {
      * during runtime.
      *
      * @return String associated with API Manager publisher REST API
+     * @throws APIManagementException   if failed to get publisher api resource.
      */
     public static String getPublisherRestAPIResource() throws APIManagementException {
 
@@ -568,6 +573,7 @@ public class RestApiUtil {
      * during runtime.
      *
      * @return String associated with API Manager store REST API
+     * @throws  APIManagementException   if failed to get store api resource
      */
     public static String getStoreRestAPIResource() throws APIManagementException {
 
@@ -590,8 +596,8 @@ public class RestApiUtil {
     /**
      * This method return API swagger definition of Admin REST API
      *
-     * @return
-     * @throws APIManagementException
+     * @return  String associated with API Manager admin REST API
+     * @throws APIManagementException   if failed to get admin api resource
      */
     public static String getAdminRestAPIResource() throws APIManagementException {
 
@@ -614,7 +620,7 @@ public class RestApiUtil {
      * used to convert yaml to json
      *
      * @param yamlString yaml String
-     * @return
+     * @return  Json string
      */
     public static String convertYmlToJson(String yamlString) {
         Yaml yaml = new Yaml();
