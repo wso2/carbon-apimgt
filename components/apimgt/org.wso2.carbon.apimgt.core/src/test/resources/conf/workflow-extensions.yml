@@ -1,0 +1,21 @@
+applicationCreation: 
+ executor: org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor
+productionApplicationRegistration: 
+ executor: org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor
+sandboxApplicationRegistration: 
+ executor: org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor
+subscriptionCreation: 
+ executor: org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor
+userSignUp: 
+ executor: org.wso2.carbon.apimgt.core.workflow.UserSignUpSimpleWorkflowExecutor
+subscriptionDeletion: 
+ executor: org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor
+applicationDeletion: 
+ executor: org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor
+apiStateChange: 
+ property: 
+  - name: processDefinitionKey
+    value: APIStateChangeApprovalProcess
+  - name: stateList
+    value: Created:Publish,Published:Block
+ executor: org.wso2.carbon.apimgt.core.workflow.APIStateChangeWSWorkflowExecutor

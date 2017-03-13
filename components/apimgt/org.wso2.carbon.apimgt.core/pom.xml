@@ -308,6 +308,18 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>                
+                <configuration>
+                    <systemProperties>                        
+                        <property>
+                            <name>carbon.home</name>
+                            <value>${basedir}/src/test/resources/</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+			</plugin>
         </plugins>
         <resources>
             <resource>
