@@ -8,11 +8,15 @@ var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 var encoder = Packages.org.wso2.carbon.ui.util.CharacterEncoder;
+var utils = jagg.module("util");
 
 (function () {
     var inputsObj = {};
     inputsObj.confirm = encoder.getSafeText(request.getParameter("confirmation"));
-    inputsObj.id = encoder.getSafeText(request.getParameter("id"));
+    var userId = encoder.getSafeText(request.getParameter("id"));
+    var tenantDomain = encoder.getSafeText(request.getParameter("tenantdomain"));
+
+    inputsObj.id = utils.getUsernameWithTenantDomain(userId, tenantDomain);
 
     jagg.render({
         "name": "page/base",

@@ -8,6 +8,9 @@ jagg.module("util", {
     },
     isSessionAuthenticated: function() {
         return jagg.require(jagg.getModulesDir() + "util/util.jag").isSessionAuthenticated.apply(this, arguments);
+    },
+    getUsernameWithTenantDomain: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getUsernameWithTenantDomain.apply(this, arguments);
     }
 });
 %>
