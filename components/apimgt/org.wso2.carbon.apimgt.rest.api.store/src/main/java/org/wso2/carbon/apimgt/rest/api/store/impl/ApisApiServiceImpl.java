@@ -122,7 +122,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion    Minor-Version header value
      * @return API of the given ID
-     * @throws NotFoundException
+     * @throws NotFoundException If fail to get the API
      */
     @Override
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)

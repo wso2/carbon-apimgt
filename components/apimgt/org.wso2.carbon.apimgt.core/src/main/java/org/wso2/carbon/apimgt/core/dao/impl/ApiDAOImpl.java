@@ -404,6 +404,7 @@ public class ApiDAOImpl implements ApiDAO {
                             ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri);
                 }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
+                addLabelMapping(connection, apiPrimaryKey, api.getLabels());
                 addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
                 addTransports(connection, apiPrimaryKey, api.getTransport());
                 addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
@@ -495,6 +496,8 @@ public class ApiDAOImpl implements ApiDAO {
 
                 deleteTagsMapping(connection, apiID); // Delete current tag mappings if they exist
                 addTagsMapping(connection, apiID, substituteAPI.getTags());
+                deleteLabelsMapping(connection, apiID);
+                addLabelMapping(connection, apiID, substituteAPI.getLabels());
                 deleteSubscriptionPolicies(connection, apiID);
                 addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiID);
                 deleteUrlMappings(connection, apiID);
@@ -951,6 +954,7 @@ public class ApiDAOImpl implements ApiDAO {
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
+                        labels(getLabelNames(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_URI)).
@@ -1670,4 +1674,69 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
     }
+
+    private void addLabelMapping(Connection connection, String apiID, List<String> labels) throws SQLException {
+
+        if (!labels.isEmpty()) {
+            final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (String label : labels) {
+                    statement.setString(1, apiID);
+                    statement.setString(2, getLabelID(connection, label));
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+        }
+    }
+
+    private String getLabelID(Connection connection, String labelName) throws SQLException {
+        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LABEL_ID");
+                }
+            }
+        }
+        throw new SQLException("Label " + labelName + ", does not exist");
+    }
+
+    private void deleteLabelsMapping(Connection connection, String apiID) throws SQLException {
+        final String query = "DELETE FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+        }
+    }
+
+    private List<String> getLabelNames(Connection connection, String apiID) throws SQLException {
+        List<String> labelNames = new ArrayList<>();
+
+        final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                List<String> labelIDs = new ArrayList<>();
+
+                while (rs.next()) {
+                    labelIDs.add(rs.getString("LABEL_ID"));
+                }
+
+                if (!labelIDs.isEmpty()) {
+                    labelNames = LabelDAOImpl.getLabelNamesByIDs(labelIDs);
+                }
+            }
+        }
+
+        return labelNames;
+    }
+
 }

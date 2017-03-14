@@ -32,9 +32,9 @@ public class APIMappingUtil {
 
     /**
      * Converts {@code List<API>} to {@link APIListDTO} DTO.
-     * 
-     * @param apisResult
-     * @return
+     *
+     * @param apisResult List of APIs
+     * @return APIListDTO
      */
     public static APIListDTO toAPIListDTO(List<API> apisResult) {
         APIListDTO apiListDTO = new APIListDTO();
@@ -47,9 +47,9 @@ public class APIMappingUtil {
 
     /**
      * Converts {@link API} List to an {@link APIInfoDTO} List.
-     * 
-     * @param apiSummaryList
-     * @return
+     *
+     * @param apiSummaryList List of APIs
+     * @return List of APIInfoDTO
      */
     private static List<APIInfoDTO> toAPIInfo(List<API> apiSummaryList) {
         List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
@@ -69,8 +69,8 @@ public class APIMappingUtil {
 
     /**
      * Converts {@link APIDTO} to a {@link API}.
-     * 
-     * @param api
+     *
+     * @param api API
      * @return API DTO
      */
     public static APIDTO toAPIDTO(API api) {
