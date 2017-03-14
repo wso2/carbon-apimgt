@@ -327,7 +327,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(apiList.isEmpty());
     }
 
-    /*@Test
+    @Test
     public void testSearchAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
@@ -409,7 +409,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(spaceDelimitingString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
-    }*/
+    }
+
     @Test
     public void testIsAPINameExists() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
