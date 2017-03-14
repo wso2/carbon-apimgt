@@ -1,0 +1,28 @@
+<div id="listing">
+    <div class="page-header">
+        <h2>{{i18n "Advanced Throttling Policies"}}</h2>
+    </div>
+    {{#if @params.list}}
+        <div class="content-section shadow-up">
+            <div class="content-data">
+                <table class="table table-striped table-hover table-bordered display data-table" id="api-policy" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th class="">{{i18n "Name"}}</th>
+                        <th class="">{{i18n "Quota Policy"}}</th>
+                        <th class="">{{i18n "Quota"}}</th>
+                        <th class="">{{i18n "Unit Time"}}</th>
+                        <th class=""></th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    {{else}}
+        <div  id="application-table-nodata" class=" message message-info">
+            <h4><i class="icon fw fw-info"></i> {{i18n "No Applications"}}</h4>
+            <p>{{i18n "No applications yet. Click Add Applications in the action bar to add an application."}}</p>
+        </div>
+    {{/if}}
+</div>
+
