@@ -56,7 +56,8 @@ public class UserAwareAPIStoreTestCase {
         apiStore.deleteApplication(UUID);
     }
 
-    @Test(description = "Try delete application by anonymous or different user", expectedExceptions = APIMgtResourceNotFoundException.class)
+    @Test(description = "Try delete application by anonymous or different user",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteApplicationAnonymousUser() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -74,18 +75,19 @@ public class UserAwareAPIStoreTestCase {
         Application newApplication = new Application("NEW_APP", null);
         applicationFromDAO.setCreatedUser(USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-        apiStore.updateApplication(UUID,newApplication);
-        verify(applicationDAO, times(1)).updateApplication(UUID,newApplication);
+        apiStore.updateApplication(UUID, newApplication);
+        verify(applicationDAO, times(1)).updateApplication(UUID, newApplication);
     }
 
     @Test(description = "Try update null application", expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationNull() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
-        apiStore.updateApplication(UUID,null);
+        apiStore.updateApplication(UUID, null);
     }
 
-    @Test(description = "Try update application by anonymous or different user", expectedExceptions = APIMgtResourceNotFoundException.class)
+    @Test(description = "Try update application by anonymous or different user",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationAnonymousUser() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -93,11 +95,11 @@ public class UserAwareAPIStoreTestCase {
         applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
         Application newApplication = new Application("NEW_APP", null);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-        apiStore.updateApplication(UUID,newApplication);
+        apiStore.updateApplication(UUID, newApplication);
     }
 
     /**
-     *Tests for exceptions
+     * Tests for exceptions
      */
 
     @Test(description = "Exception when deleting application", expectedExceptions = APIMgtDAOException.class)
@@ -106,7 +108,8 @@ public class UserAwareAPIStoreTestCase {
         APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(USER_NAME);
-        when(applicationDAO.getApplication(UUID)).thenThrow(new APIMgtDAOException("Error occurred while deleting application - " + UUID));
+        when(applicationDAO.getApplication(UUID))
+                .thenThrow(new APIMgtDAOException("Error occurred while deleting application - " + UUID));
         apiStore.deleteApplication(UUID);
     }
 
@@ -117,8 +120,9 @@ public class UserAwareAPIStoreTestCase {
         Application applicationFromDAO = new Application(APP_NAME, null);
         Application newApplication = new Application("NEW_APP", null);
         applicationFromDAO.setCreatedUser(USER_NAME);
-        when(applicationDAO.getApplication(UUID)).thenThrow(new APIMgtDAOException("Error occurred while updating application - " + UUID));
-        apiStore.updateApplication(UUID,newApplication);
+        when(applicationDAO.getApplication(UUID))
+                .thenThrow(new APIMgtDAOException("Error occurred while updating application - " + UUID));
+        apiStore.updateApplication(UUID, newApplication);
     }
 
 }
