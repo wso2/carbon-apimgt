@@ -75,7 +75,7 @@ public interface APIManager {
 
     /**
      * Checks the Availability of given String
-     *@api
+     * @param api   API object.
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
      */
@@ -114,7 +114,7 @@ public interface APIManager {
      *
      * @param api id of the String
      * @return swagger string
-     * @throws APIManagementException
+     * @throws APIManagementException If failed to get swagger v2.0 definition
      */
     String getSwagger20Definition(String api) throws APIManagementException;
 
@@ -124,7 +124,7 @@ public interface APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link List<DocumentInfo>} Document meta data list
+     * @return {@code List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
     List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit)
@@ -134,7 +134,7 @@ public interface APIManager {
      * Get a summary of documentation by doc Id
      *
      * @param docId Document ID
-     * @return {@link DocumentInfo} Documentation meta data
+     * @return {@code DocumentInfo} Documentation meta data
      * @throws APIManagementException if it failed to fetch Documentation
      */
     DocumentInfo getDocumentationSummary(String docId) throws APIManagementException;
@@ -143,7 +143,7 @@ public interface APIManager {
      * This method used to get the content of a documentation
      *
      * @param docId Document ID
-     * @return {@link DocumentContent} Input stream for document content
+     * @return {@code DocumentContent} Input stream for document content
      * @throws APIManagementException if the requested documentation content is not available
      */
     DocumentContent getDocumentationContent(String docId) throws APIManagementException;
@@ -155,7 +155,7 @@ public interface APIManager {
      * @param userId  Name of the User.
      * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to get application.
      */
     Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
@@ -170,18 +170,18 @@ public interface APIManager {
 
     /**
      * Returns the subscriptions for api
-     * @param apiId
-     * @return
-     * @throws APIManagementException
+     * @param apiId     UUID of the api
+     * @return          List of subscription for the API.
+     * @throws APIManagementException   If failed to retrieve subscriptions.
      */
     List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException;
 
     /**
-     * Return {@link Subscription} of subscription id
+     * Return {@code Subscription} of subscription id
      *
-     * @param subId
-     * @return
-     * @throws APIManagementException
+     * @param subId     Subscription ID
+     * @return          Returns the subscription object
+     * @throws APIManagementException   If failed to get subscription from UUID.
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 

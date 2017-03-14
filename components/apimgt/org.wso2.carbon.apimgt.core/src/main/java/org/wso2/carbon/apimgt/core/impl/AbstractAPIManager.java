@@ -144,10 +144,9 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Checks the Availability of given String
      *
-     * @param api
+     * @param api   PAI object
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
-     * @api
      */
     @Override
     public boolean isAPIAvailable(API api) throws APIManagementException {
@@ -212,7 +211,7 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param api id of the String
      * @return swagger string
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to retrieve swagger definition.
      */
     @Override public String getSwagger20Definition(String api) throws APIManagementException {
         try {
@@ -232,7 +231,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param apiId UUID of API
      * @param offset The number of results from the beginning that is to be ignored
      * @param limit The maximum number of results to be returned after the offset
-     * @return {@link List<DocumentInfo>} Document meta data list
+     * @return {@code List<DocumentInfo>} Document meta data list
      * @throws APIManagementException if it failed to fetch Documentations
      */
     public List<DocumentInfo> getAllDocumentation(String apiId, int offset, int limit) throws APIManagementException {
@@ -309,7 +308,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param userId  Name of the User.
      * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
+     * @throws APIManagementException   If failed to retrieve application.
      */
     public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
         Application application = null;
@@ -326,9 +325,9 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Return {@link Subscription} of subscription id
      *
-     * @param subId
-     * @return
-     * @throws APIManagementException
+     * @param subId UUID of the subscription.
+     * @return  Subscription object.
+     * @throws APIManagementException   If failed to retrieve subscription.
      */
     public Subscription getSubscriptionByUUID(String subId) throws APIManagementException {
         try {
@@ -427,9 +426,9 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns the subscriptions for api
      *
-     * @param apiId
-     * @return
-     * @throws APIManagementException
+     * @param apiId UUID of the API.
+     * @return List of the subscriptions.
+     * @throws APIManagementException   If failed to get list of subscriptions.
      */
     @Override
     public List<Subscription> getSubscriptionsByAPI(String apiId) throws APIManagementException {

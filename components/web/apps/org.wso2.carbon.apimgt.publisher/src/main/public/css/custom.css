@@ -2,6 +2,11 @@
 	background-color: #EFEFEF;
 	position: relative;
 }
+
+.api-listing-delete{
+    padding-left: 1em;
+}
+
 .center-wrapper{
     margin:0 auto;
     margin-left:auto;

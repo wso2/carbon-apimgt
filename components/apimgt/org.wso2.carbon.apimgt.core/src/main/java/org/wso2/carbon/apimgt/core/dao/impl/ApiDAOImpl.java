@@ -168,8 +168,8 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Retrieves summary data of all available APIs.
      *
-     * @return {@link List<API>} matching results
-     * @throws SQLException if error occurs while accessing data layer
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
@@ -187,7 +187,7 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieves summary data of all available APIs of a given provider.
      *
      * @param providerName A given API Provider
-     * @return {@link List<API>} matching results
+     * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -209,7 +209,7 @@ public class ApiDAOImpl implements ApiDAO {
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      *
      * @param statuses A list of matching life cycle statuses
-     * @return {@link List<API>} matching results
+     * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -238,7 +238,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param searchString The search string provided
      * @param offset       The starting point of the search results.
      * @param limit        Number of search results that will be returned.
-     * @return {@link List<API>} matching results
+     * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -260,7 +260,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @param attributeMap Map containing the attributes and search queries for those attributes
      * @param offset       The starting point of the search results.
      * @param limit        Number of search results that will be returned.
-     * @return {@link List<API>} matching results
+     * @return {@code` List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -298,7 +298,7 @@ public class ApiDAOImpl implements ApiDAO {
      *
      * @param searchString The search string provided
      * @param statuses     A list of matching life cycle statuses
-     * @return {@link List < API >} matching results
+     * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -382,7 +382,6 @@ public class ApiDAOImpl implements ApiDAO {
      * Add a new instance of an API
      *
      * @param api The {@link API} object to be added
-     * @return true if addition is successful else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -445,6 +444,7 @@ public class ApiDAOImpl implements ApiDAO {
                             ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
                 }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
+                addLabelMapping(connection, apiPrimaryKey, api.getLabels());
                 addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
                 addTransports(connection, apiPrimaryKey, api.getTransport());
                 addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
@@ -536,6 +536,8 @@ public class ApiDAOImpl implements ApiDAO {
 
                 deleteTagsMapping(connection, apiID); // Delete current tag mappings if they exist
                 addTagsMapping(connection, apiID, substituteAPI.getTags());
+                deleteLabelsMapping(connection, apiID);
+                addLabelMapping(connection, apiID, substituteAPI.getLabels());
                 deleteSubscriptionPolicies(connection, apiID);
                 addSubscriptionPolicies(connection, substituteAPI.getPolicies(), apiID);
                 deleteUrlMappings(connection, apiID);
@@ -972,7 +974,7 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Used to deprecate older versions of the api
      *
-     * @param identifier
+     * @param identifier    UUID of the API.
      */
     @Override
     public void deprecateOlderVersions(String identifier) {
@@ -1033,6 +1035,7 @@ public class ApiDAOImpl implements ApiDAO {
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
+                        labels(getLabelNames(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.
                                 getTextValueForCategory(connection, apiPrimaryKey,
                                         ResourceCategory.WSDL_URI)).
@@ -1494,9 +1497,8 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Add an Endpoint
      *
-     * @param endpoint
-     * @return
-     * @throws APIMgtDAOException
+     * @param endpoint  Endpoint object.
+     * @throws APIMgtDAOException   If failed to add endpoint.
      */
     @Override
     public void addEndpoint(Endpoint endpoint) throws APIMgtDAOException {
@@ -1528,9 +1530,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Delete an Endpoint
      *
-     * @param endpointId
-     * @return
-     * @throws APIMgtDAOException
+     * @param endpointId    UUID of the endpoint.
+     * @return  Suucess of the delete operation.
+     * @throws APIMgtDAOException   If failed to delete endpoint.
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
@@ -1556,9 +1558,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Update an Endpoint
      *
-     * @param endpoint
-     * @return
-     * @throws APIMgtDAOException
+     * @param endpoint  Endpoint Object.
+     * @return  Success of the update operation.
+     * @throws APIMgtDAOException   If failed to update endpoint.
      */
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
@@ -1592,8 +1594,8 @@ public class ApiDAOImpl implements ApiDAO {
      * Get an Endpoint
      *
      * @param endpointId uuid of endpoint
-     * @return
-     * @throws APIMgtDAOException
+     * @return  Endpoint object.
+     * @throws APIMgtDAOException   If failed to retrieve endpoint.
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
@@ -1626,8 +1628,8 @@ public class ApiDAOImpl implements ApiDAO {
      * Get an Endpoint
      *
      * @param name name of endpoint
-     * @return
-     * @throws APIMgtDAOException
+     * @return  Endpoint object.
+     * @throws APIMgtDAOException   If failed to retrieve endpoint.
      */
     @Override
     public Endpoint getEndpointByName(String name) throws APIMgtDAOException {
@@ -1659,8 +1661,8 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * get all Endpoints
      *
-     * @return
-     * @throws APIMgtDAOException
+     * @return  List of endpoints.
+     * @throws APIMgtDAOException   If failed to retrieve endpoints.
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
@@ -1758,4 +1760,69 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
     }
+
+    private void addLabelMapping(Connection connection, String apiID, List<String> labels) throws SQLException {
+
+        if (!labels.isEmpty()) {
+            final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
+
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (String label : labels) {
+                    statement.setString(1, apiID);
+                    statement.setString(2, getLabelID(connection, label));
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+        }
+    }
+
+    private String getLabelID(Connection connection, String labelName) throws SQLException {
+        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LABEL_ID");
+                }
+            }
+        }
+        throw new SQLException("Label " + labelName + ", does not exist");
+    }
+
+    private void deleteLabelsMapping(Connection connection, String apiID) throws SQLException {
+        final String query = "DELETE FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+        }
+    }
+
+    private List<String> getLabelNames(Connection connection, String apiID) throws SQLException {
+        List<String> labelNames = new ArrayList<>();
+
+        final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                List<String> labelIDs = new ArrayList<>();
+
+                while (rs.next()) {
+                    labelIDs.add(rs.getString("LABEL_ID"));
+                }
+
+                if (!labelIDs.isEmpty()) {
+                    labelNames = LabelDAOImpl.getLabelNamesByIDs(labelIDs);
+                }
+            }
+        }
+
+        return labelNames;
+    }
+
 }

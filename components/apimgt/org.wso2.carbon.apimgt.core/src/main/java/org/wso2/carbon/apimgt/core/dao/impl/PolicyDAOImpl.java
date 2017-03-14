@@ -454,7 +454,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      *
      * @param policyId  Subscription policy ID
      * @return Tier name of given Subscription policy ID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscription.
      */
     public String getSubscriptionTierName(String policyId) throws APIMgtDAOException {
 
@@ -495,7 +495,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      *
      * @param policyId Subscription policy ID
      * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscription policy.
      */
     @Override
     public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException {
@@ -528,7 +528,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      *
      * @param policyId Application policy ID
      * @return {@link ApplicationPolicy} of given UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get application policy.
      */
     @Override
     public ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException {

@@ -31,8 +31,8 @@ import java.util.List;
 public interface TagDAO {
     /**
      * Returns all available tags
-     * @return {@link List<Tag>} List of tags
-     * @throws APIMgtDAOException
+     * @return {@code List<Tag>} List of tags
+     * @throws APIMgtDAOException   If failed to get list of tags.
      */
     List<Tag> getTags() throws APIMgtDAOException;
 }

@@ -1,0 +1,31 @@
+{{js "js/index.js"}}
+<input type="hidden" id="apiId" value="{{this.@pathParams.apiId}}"/>
+<div class="page-header">
+    <h1 id="api-name" class="text-primary"></h1>
+    <h3 id="api-version" class="text-primary"></h3>
+</div>
+<div><h4>Create New Version</h4>
+</div>
+<div class="row">
+    <div class="col-md-6 col-sm-6">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                    New Version :<span class="requiredAstrix">*</span>
+                </label>
+                <div class=" col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control new-versoin" id="new-version"
+                               placeholder="E.g.: v1.0.1">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button  type="button" id="btn-add-new-version" class="btn btn-primary">Done</button>
+                    <a href="{{env.contextPath}}/apis/{{this.@pathParams.apiId}}/"  id="btn-cancel" class="btn btn-primary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

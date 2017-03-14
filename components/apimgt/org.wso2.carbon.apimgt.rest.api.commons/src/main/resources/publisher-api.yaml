@@ -3033,6 +3033,11 @@ definitions:
         items:
           type: string
         example: ["substract","add"]
+      labels:
+        type: array
+        items:
+          type: string
+        example: ["public","private"]
       policies:
         type: array
         items:

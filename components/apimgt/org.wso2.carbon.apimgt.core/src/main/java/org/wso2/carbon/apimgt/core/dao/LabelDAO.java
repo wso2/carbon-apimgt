@@ -33,7 +33,7 @@ public interface LabelDAO {
     /**
      * Returns all the available labels
      *
-     * @return {@link List<Label>} List of labels
+     * @return {@code List<Label>} List of labels
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     List<Label> getLabels() throws APIMgtDAOException;
@@ -41,7 +41,7 @@ public interface LabelDAO {
     /**
      * Add labels if not exist
      *
-     * @param labels The {@link List<Label>}List of labels
+     * @param labels The {@code List<Label>}List of labels
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     void addLabels(List<Label> labels) throws APIMgtDAOException;
@@ -58,8 +58,8 @@ public interface LabelDAO {
     /**
      * Returns matched labels
      *
-     * @param labelNames The {@link List<String>} Label names
-     * @return {@link List<Label>} List of labels
+     * @param labelNames The {@code List<String>} Label names
+     * @return {@code List<Label>} List of labels
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     List<Label> getLabelsByName(List<String> labelNames) throws APIMgtDAOException;

@@ -50,7 +50,7 @@ public final class OAuthApplicationInfo {
     /**
      * set client Id
      *
-     * @param clientId
+     * @param clientId  Key of the client.
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
@@ -67,7 +67,7 @@ public final class OAuthApplicationInfo {
     /**
      * Set client Name of OAuthApplication.
      *
-     * @param clientName
+     * @param clientName    Name of the application.
      */
     public void setClientName(String clientName) {
         this.clientName = clientName;
@@ -76,7 +76,7 @@ public final class OAuthApplicationInfo {
     /**
      * Set callback URL of OAuthapplication.
      *
-     * @param callBackURL
+     * @param callBackURL   call back uris of the application.
      */
     public void setCallbackUrl(String callBackURL) {
         this.callBackURL = callBackURL;

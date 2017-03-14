@@ -20,16 +20,23 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class DBScriptRunnerUtil {
+    private static final Logger log = LoggerFactory.getLogger(DBScriptRunnerUtil.class);
 
     public static void executeSQLScript(String dbscriptPath, Connection connection) throws Exception {
         StringBuffer sql = new StringBuffer();
@@ -73,22 +80,50 @@ public class DBScriptRunnerUtil {
         }
     }
 
-
     private static void executeSQL(String sql, Connection connection) throws Exception {
         // Check and ignore empty statements
         String delimiter = ";";
-        if (connection.getMetaData().getDriverName().contains("Oracle")) {
+        String dbType = connection.getMetaData().getDriverName();
+        if (dbType.contains("Oracle")) {
             delimiter = "/";
         }
         sql = sql.trim();
+        List<String> oraclePLSQL = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
             for (String query : sql.split(delimiter)) {
                 if ("".equals(query)) {
                     return;
+                } else if (dbType.contains("Oracle") && query.contains("API_DATASTORE")) { // execute PL/SQL separately
+                    oraclePLSQL.add(query);
+                    continue;
                 }
                 statement.addBatch(query);
             }
             statement.executeBatch();
+        }
+
+        // Special logic to execute oracle PL/SQL command
+        if (dbType.contains("Oracle")) {
+            for (String query : oraclePLSQL) {
+                try {
+                    Statement statement = connection.createStatement();
+                    statement.execute(query);
+                } catch (SQLException e) {
+                    log.error("Error while executing oracle PL/SQL commands.", e);
+                }
+
+            }
+
+            String q = "select index_name,index_type,status,domidx_status,domidx_opstatus from user_indexes "
+                    + "where index_type like '%DOMAIN%' and (domidx_status <> 'VALID' or domidx_opstatus <> 'VALID')";
+            try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(q);) {
+                while (rs.next()) {
+                    if(rs.getString("index_name").equals("API_INDEX")) { // re build index if it has failed.
+                        String rebuild = "alter index API_INDEX rebuild";
+                        statement.execute(rebuild);
+                    }
+                }
+            }
         }
     }
 }

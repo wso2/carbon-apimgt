@@ -50,7 +50,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subscriptionId The UUID that uniquely identifies a Subscription
      * @return valid {@link Subscription} object or null
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscription.
      */
     @Override
     public Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException {
@@ -78,7 +78,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiId The UUID of API
      * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
@@ -105,7 +105,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param applicationId The UUID of Application
      * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
@@ -132,7 +132,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param limit Subscription Limit
      * @return A list of {@link SubscriptionValidationData} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(int limit) throws APIMgtDAOException {
@@ -161,10 +161,10 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Retrieve the list of subscriptions of an API for validation
      *
-     * @param apiContext
-     * @param apiVersion
+     * @param apiContext    Context of the API
+     * @param apiVersion    Version of the API.
      * @return A list of {@link SubscriptionValidationData} objects
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String apiVersion)
@@ -198,7 +198,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit    The maximum number of results to be returned after the offset
      * @param userName The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName)
@@ -216,7 +216,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults getAPISubscriptionsForGroup(int offset, int limit, String groupID)
@@ -234,7 +234,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param userName        The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
@@ -252,7 +252,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param groupID         The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
@@ -268,7 +268,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param appId  Application ID
      * @param tier   Subscription tier
      * @param status {@link  org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus} Subscription state
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to add subscription.
      */
     @Override
     public void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants
@@ -293,7 +293,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Remove an existing API Subscription
      *
      * @param subscriptionId The UUID of the API Subscription that needs to be deleted
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to delete subscription.
      */
     @Override
     public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
@@ -321,7 +321,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiId UUID of the API
      * @return Subscription Count
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get subscription count.
      */
     @Override
     public long getSubscriptionCountByAPI(String apiId) throws APIMgtDAOException {
@@ -344,7 +344,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Copy existing subscriptions on one of the API versions into latest version
      *
      * @param subscriptionList uuid of newly created version
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to get copy subscriptions.
      */
     @Override
     public void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException {
@@ -372,7 +372,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subId     ID of the Subscription
      * @param subStatus New Subscription Status
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to update subscriptions.
      */
     @Override
     public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus)
@@ -401,7 +401,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subId  ID of the Subscription
      * @param policy New Subscription Policy
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException   If failed to update subscriptions.
      */
     @Override
     public void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException {
@@ -432,7 +432,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param apiVersion  Version of the API
      * @param clientId    Client id of the application
      * @return Subscription Validation Information
-     * @throws APIManagementException
+     * @throws APIMgtDAOException   If failed to get subscription validation results.
      */
     public SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String clientId)
             throws APIMgtDAOException {

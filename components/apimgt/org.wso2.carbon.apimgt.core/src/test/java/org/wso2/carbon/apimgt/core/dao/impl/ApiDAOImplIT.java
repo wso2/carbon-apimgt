@@ -28,11 +28,13 @@ import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -345,7 +347,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String commonUpperCaseSearchString = "CASE";
         final String symbolSearchString = "##symbol";
         final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
-        final String spaceIncludedSearchString = "s p ace";
+        final String spaceIncludedSearchString = " S p ace";
 
         // Create test data
         Map<String, API> apis = new HashMap<>();
@@ -536,5 +538,53 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         endpointListAdd.add(endpoint2);
         List<Endpoint> endpointList = apiDAO.getEndpoints();
         APIUtils.isListsEqualIgnoreOrder(endpointListAdd, endpointList, new EndPointComparator());
+    }
+
+    @Test
+    public void testAddGetAPIWithLabels() throws Exception {
+
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label2 = SampleTestObjectCreator.createLabel("private", "https://test.private");
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelList.add(label2);
+        labelDAO.addLabels(labelList);
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(label1.getName());
+        labelNames.add(label2.getName());
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.labels(labelNames).build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertEquals(apiFromDB.getLabels().size(),2);
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api,apiFromDB));
+    }
+
+    @Test
+    public void testAddAPIWithoutAddingLabels() throws Exception {
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add("public");
+        labelNames.add("private");
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.labels(labelNames).build();
+        testAddGetEndpoint();
+
+        try {
+            apiDAO.addAPI(api);
+            Assert.fail("Exception not thrown when adding an API without adding the labels");
+        } catch (APIMgtDAOException e) {
+            // Just catch the exception so that we can continue execution
+        }
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+        Assert.assertNull(apiFromDB);
     }
 }

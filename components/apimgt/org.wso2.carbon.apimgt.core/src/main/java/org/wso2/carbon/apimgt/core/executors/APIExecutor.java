@@ -43,6 +43,7 @@ public class APIExecutor implements Executor {
      *
      * @param parameterMap Static parameter map given by the user. These are the parameters that have been given in the
      *                     lifecycle configuration as the parameters of the executor.
+     *                     {@code
      *                     <p>
      *                     Eg:- <execution forEvent="Promote"
      *                     class="org.wso2.carbon.governance.registry.extensions.executors.ServiceVersionExecutor">
@@ -51,6 +52,7 @@ public class APIExecutor implements Executor {
      *                     <parameter name="service.mediatype" value="application/vnd.wso2-service+xml"/>
      *                     </execution>
      *                     <p>
+     *                         }
      *                     The parameters defined here are passed to the executor using this method.
      */
     @Override
