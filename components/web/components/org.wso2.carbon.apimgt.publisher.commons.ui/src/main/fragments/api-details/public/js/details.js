@@ -329,6 +329,11 @@ function updateLifecycleCheckListHandler(event) {
     );
 }
 
+/**
+ * Create a string with selected checklist items.
+ * @returns {string} Checklist items in following format.
+ * 'Deprecate old versions after publish the API:true,Require re-subscription when publish the API:false'
+ */
 function getCheckListItems() {
     var itemList = "";
     $('#checkItem[type=checkbox]').each(function () {
