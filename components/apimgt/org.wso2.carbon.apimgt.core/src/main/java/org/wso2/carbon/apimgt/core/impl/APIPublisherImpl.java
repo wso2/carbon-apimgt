@@ -1377,6 +1377,23 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * @see APIPublisher#getLastUpdatedTimeOfThrottlingPolicy(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
+            throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getPolicyDAO().getLastUpdatedTimeOfThrottlingPolicy(policyLevel, policyName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
      * Publishing new API configurations to the subscribers
      *
      * @param api API object

@@ -458,4 +458,14 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of a throttling policy given its policy level and policy name
+     *
+     * @param policyLevel level of throttling policy
+     * @param policyName name of throttling policy
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
 }

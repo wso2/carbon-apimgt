@@ -14,15 +14,15 @@ import java.sql.SQLException;
 class EntityDAO {
 
     /**
-     * Returns the last access time of the given entity identified by the UUID.
+     * Returns the last access time of the given entity identified by the UUID field.
      * 
      * @param resourceTableName Table name of the entity
-     * @param uuid UUID of the entity
+     * @param uuid value of the UUID field of the entity
      * @return Last access time of the requested resource
      * @throws APIMgtDAOException
      */
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static String getLastUpdatedTimeOfResource(String resourceTableName, String uuid)
+    static String getLastUpdatedTimeOfResourceByUUID(String resourceTableName, String uuid)
             throws APIMgtDAOException {
         final String query = "SELECT LAST_UPDATED_TIME FROM " + resourceTableName + " WHERE UUID = ?";
         String lastUpdatedTime = null;
@@ -38,6 +38,35 @@ class EntityDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(
                     "Error while retrieving last access time from table : " + resourceTableName + " and entity " + uuid,
+                    e);
+        }
+    }
+
+    /**
+     * Returns the last access time of the given entity identified by the NAME field.
+     *
+     * @param resourceTableName Table name of the entity
+     * @param name value in the NAME field of the entity
+     * @return Last access time of the requested resource
+     * @throws APIMgtDAOException
+     */
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    static String getLastUpdatedTimeOfResourceByName(String resourceTableName, String name)
+            throws APIMgtDAOException {
+        final String query = "SELECT LAST_UPDATED_TIME FROM " + resourceTableName + " WHERE NAME = ?";
+        String lastUpdatedTime = null;
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, name);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    lastUpdatedTime = rs.getString("LAST_UPDATED_TIME");
+                }
+            }
+            return lastUpdatedTime;
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(
+                    "Error while retrieving last access time from table : " + resourceTableName + " and entity " + name,
                     e);
         }
     }

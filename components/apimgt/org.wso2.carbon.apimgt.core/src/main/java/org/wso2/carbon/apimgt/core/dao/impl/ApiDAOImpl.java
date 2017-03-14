@@ -133,7 +133,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @CheckForNull
     public String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResource(AM_API_TABLE_NAME, apiId);
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_TABLE_NAME, apiId);
     }
 
     /**
@@ -680,7 +680,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResource(AM_ENDPOINT_TABLE_NAME, endpointId);
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_ENDPOINT_TABLE_NAME, endpointId);
     }
 
     /**

@@ -1,9 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
@@ -42,12 +44,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
-
-        log.info("Received Policy request for " + tierName);
+        String existingFingerprint = policiesTierLevelTierNameGetFingerprint(tierName, tierLevel, accept,
+                ifNoneMatch, ifModifiedSince, minorVersion);
+        if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                .contains(existingFingerprint)) {
+            return Response.notModified().build();
+        }
 
         try {
             Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName(tierLevel, tierName);
-            return Response.ok().entity(policy).build();
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(policy).build();
         } catch (APIManagementException e) {
             String msg = "Error occurred while retrieving Policy";
             RestApiUtil.handleInternalServerError(msg, e, log);
@@ -57,4 +63,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
+    public String policiesTierLevelTierNameGetFingerprint(String tierName, String tierLevel, String accept,
+            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfThrottlingPolicy(tierLevel, tierName);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of policy :" + tierLevel + "/" + tierName;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
 }

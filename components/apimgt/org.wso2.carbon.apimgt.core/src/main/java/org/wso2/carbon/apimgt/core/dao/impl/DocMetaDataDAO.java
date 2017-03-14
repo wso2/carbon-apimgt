@@ -197,7 +197,7 @@ class DocMetaDataDAO {
     }
 
     static String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResource(AM_API_DOC_META_DATA_TABLE_NAME, documentId);
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_DOC_META_DATA_TABLE_NAME, documentId);
     }
 
     private static void deleteDOCPermission(Connection connection, String docID) throws SQLException {
