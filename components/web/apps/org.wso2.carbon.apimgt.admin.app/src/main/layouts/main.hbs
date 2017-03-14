@@ -25,11 +25,8 @@
         <link rel="shortcut icon" href="{{public "images/default-favicon.png"}}" type="image/png"/>
     {{/placeholder}}
     {{fragment "swaggerjs"}} <!-- TODO: request to maintain swaggerjs library from common.foundation component ~tmkb-->
-    {{fragment "handlebarsjs"}}
-    <!-- TODO: request to maintain handlebarsjs library from common.foundation component ~tmkb-->
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.noty"}}
-    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
     {{fragment "org.wso2.carbon.uuf.common.foundation.ui.select2" }}
     {{placeholder "css"}}
     {{placeholder "headJs"}}
@@ -50,9 +47,6 @@ Remove handlebarjs lib
         <li>
             <a href="{{@contextPath}}/" title="Home" ><i
                     class="icon fw fw-home"></i> <span class="hidden-xs">Home</span></a>
-        </li>
-        <li class="active">
-            <a href="{{@contextPath}}/apis" title="API List">APIs</a>
         </li>
     </ol>
 </div>
@@ -99,48 +93,6 @@ Remove handlebarjs lib
     <!-- page content -->
     <div class="container-fluid">
         <div class="body-wrapper" id="bodyWrapper">
-            <!-- TODO: remove custom notification styles with addition of http://ned.im/noty/ to uuf-foundation-fragment ~tmkb-->
-            <div id="general-alerts">
-                <div class="alert alert-success" role="alert">
-                    <div class="alert-message">
-                    </div>
-                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
-                    <span aria-hidden="true">
-                        <i class="fw fw-cancel"></i>
-                    </span>
-                    </button>
-                </div>
-
-                <div class="alert alert-info" role="alert">
-                    <div class="alert-message">
-                    </div>
-                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
-                    <span aria-hidden="true">
-                        <i class="fw fw-cancel"></i>
-                    </span>
-                    </button>
-                </div>
-
-                <div class="alert alert-warning" role="alert">
-                    <div class="alert-message">
-                    </div>
-                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
-                    <span aria-hidden="true">
-                        <i class="fw fw-cancel"></i>
-                    </span>
-                    </button>
-                </div>
-
-                <div class="alert alert-danger" role="alert">
-                    <div class="alert-message">
-                    </div>
-                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
-                    <span aria-hidden="true">
-                        <i class="fw fw-cancel"></i>
-                    </span>
-                    </button>
-                </div>
-            </div>
             {{defineZone "content"}}
         </div>
     </div>
