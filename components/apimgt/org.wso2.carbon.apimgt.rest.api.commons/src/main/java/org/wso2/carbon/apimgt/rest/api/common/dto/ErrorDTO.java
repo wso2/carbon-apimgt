@@ -42,6 +42,8 @@ public class ErrorDTO {
     private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
     /**
+     * Method to get the error code
+     * @return  error code.
      **/
     @ApiModelProperty(required = true, value = "") @JsonProperty("code") public Long getCode() {
         return code;
@@ -52,7 +54,8 @@ public class ErrorDTO {
     }
 
     /**
-     * Error message.
+     * Method th get the error message.
+     * @return error message.
      */
     @ApiModelProperty(required = true, value = "Error message.") @JsonProperty("message")
     public String getMessage() {
@@ -65,6 +68,7 @@ public class ErrorDTO {
 
     /**
      * A detail description about the error message.
+     * @return error description.
      */
     @ApiModelProperty(value = "A detail description about the error message.") @JsonProperty("description")
     public String getDescription() {
@@ -77,6 +81,7 @@ public class ErrorDTO {
 
     /**
      * Preferably an url with more details about the error.
+     * @return  map of parameters specific to the error.
      */
     @ApiModelProperty(value = "Preferably an url with more details about the error.") @JsonProperty("moreInfo")
     public HashMap<String, String> getMoreInfo() {
@@ -89,6 +94,7 @@ public class ErrorDTO {
 
     /**
      * If there are more than one error list them out. Ex. list out validation errors by each field.
+     * @return {@code List<ErrorListItemDTO>}   List of error objects.
      */
     @ApiModelProperty(value = "If there are more than one error list them out. Ex. list out validation errors "
             + "by each field.")

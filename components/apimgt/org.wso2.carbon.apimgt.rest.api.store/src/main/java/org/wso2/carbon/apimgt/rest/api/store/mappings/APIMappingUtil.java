@@ -31,7 +31,7 @@ import java.util.List;
 public class APIMappingUtil {
 
     /**
-     * Converts {@link List<API>} to {@link APIListDTO} DTO.
+     * Converts {@code List<API>} to {@link APIListDTO} DTO.
      * 
      * @param apisResult
      * @return
