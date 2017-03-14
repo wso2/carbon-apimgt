@@ -25,10 +25,11 @@ import java.util.List;
 
 public class LabelMappingUtil {
 
-    /** Converts a LabelInfoListDTO to a List<String> of label names
+    /**
+     * Converts a LabelInfoListDTO to a List of label names
      *
      * @param labelInfoListDTO LabelInfoList which contains label names
-     * @return List<String> List of label names
+     * @return List of label names
      */
     public static List<String> fromLabelInfoListDTO(LabelInfoListDTO labelInfoListDTO) {
         List<String> labelNames = new ArrayList<>();
@@ -41,7 +42,7 @@ public class LabelMappingUtil {
     }
 
     /**
-     * Convert {@link List<Label>} to {@link LabelListDTO}
+     * Convert List of labels to LabelListDTO
      *
      * @param labels List of Labels
      * @return LabelListDTO
@@ -54,7 +55,7 @@ public class LabelMappingUtil {
     }
 
     /**
-     * Converts {@link Label} List to an {@link LabelListDTO} List.
+     * Converts labels to list of LabelDTO
      *
      * @param labels List of Labels
      * @return List of LabelDTOs

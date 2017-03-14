@@ -78,6 +78,7 @@ public class MappingUtil {
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setTags(api.getTags());
+        apidto.setLabels(api.getLabels());
         apidto.setTransport(api.getTransport());
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
@@ -178,6 +179,7 @@ public class MappingUtil {
                 policies(apidto.getPolicies()).
                 permission(apidto.getPermission()).
                 tags(apidto.getTags()).
+                labels(apidto.getLabels()).
                 transport(apidto.getTransport()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getPolicies()).
