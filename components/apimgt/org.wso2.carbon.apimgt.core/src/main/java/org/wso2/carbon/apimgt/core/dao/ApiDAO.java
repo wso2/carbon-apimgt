@@ -445,4 +445,22 @@ public interface ApiDAO {
      * @return last updated time 
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

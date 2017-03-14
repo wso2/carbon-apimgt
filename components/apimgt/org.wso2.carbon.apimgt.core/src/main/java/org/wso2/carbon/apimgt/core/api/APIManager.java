@@ -160,6 +160,15 @@ public interface APIManager {
     Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
     /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException;
+
+    /**
      * Returns the subscriptions for api
      * @param apiId
      * @return
@@ -203,4 +212,13 @@ public interface APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException;
 }
