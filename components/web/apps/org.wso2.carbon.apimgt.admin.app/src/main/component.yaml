@@ -16,7 +16,7 @@ bindings:
 
 config:
   appName : Admin Portal
-  title : "Tasks"
-  loginRedirectUri: "/apis"
+  title : "Advanced Throttling Policies"
+  loginRedirectUri: "/"
   swaggerURL : "/api/am/admin/v1/apis/swagger.json"
   loginPageUri : "https://localhost:9292/admin/auth/login"
