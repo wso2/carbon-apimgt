@@ -68,6 +68,7 @@ public class ApiDAOImpl implements ApiDAO {
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
+    private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
         this.sqlStatements = sqlStatements;
@@ -675,6 +676,11 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
+    }
+
+    @Override
+    public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResource(AM_ENDPOINT_TABLE_NAME, endpointId);
     }
 
     /**
@@ -1536,7 +1542,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
         final String query = "UPDATE AM_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS = ?,TYPE = " +
-                "?,SECURITY_CONFIGURATION =? WHERE UUID = ?";
+                "?,SECURITY_CONFIGURATION =?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1545,7 +1551,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setLong(2, endpoint.getMaxTps());
                 statement.setString(3, endpoint.getType());
                 statement.setBinaryStream(4, IOUtils.toInputStream(endpoint.getSecurity()));
-                statement.setString(5, endpoint.getId());
+                statement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(6, endpoint.getId());
                 statement.execute();
                 connection.commit();
                 return true;

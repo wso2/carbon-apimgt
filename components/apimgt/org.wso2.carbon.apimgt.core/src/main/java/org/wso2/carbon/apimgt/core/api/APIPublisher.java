@@ -450,5 +450,12 @@ public interface APIPublisher extends APIManager {
      */
     List<Label> getAllLabels() throws APIManagementException;
 
-
+    /**
+     * Retrieves the last updated time of the endpoint given its endpointId
+     * 
+     * @param endpointId Id of the endpoint
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
 }

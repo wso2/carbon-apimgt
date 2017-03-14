@@ -437,4 +437,12 @@ public interface ApiDAO {
      * @throws APIMgtDAOException throws if any db level error occurred
      */
     String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the endpoint given its endpointId
+     *
+     * @param endpointId Id of the endpoint
+     * @return last updated time 
+     */
+    String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
 }

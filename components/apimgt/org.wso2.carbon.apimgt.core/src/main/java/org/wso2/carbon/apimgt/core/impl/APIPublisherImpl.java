@@ -1359,6 +1359,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * @see APIPublisher#getLastUpdatedTimeOfEndpoint(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfEndpoint(endpointId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the endpoint with id " + endpointId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
+    }
+
+    /**
      * Publishing new API configurations to the subscribers
      *
      * @param api API object

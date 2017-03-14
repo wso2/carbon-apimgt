@@ -20,7 +20,6 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -70,7 +69,7 @@ public interface APIManager {
      * 
      * @param apiId UUID of API
      * @return Last updated time of swagger definition of the API given its uuid
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException;
 
@@ -182,8 +181,9 @@ public interface APIManager {
      *
      * @param documentId UUID of document
      * @return Last updated time of document given its uuid
+     * @throws APIManagementException if API Manager core level exception occurred
      */
-    String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
+    String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of the content of a document of an API
@@ -191,14 +191,16 @@ public interface APIManager {
      * @param apiId UUID of API
      * @param documentId UUID of document
      * @return  Last updated time of document's content
+     * @throws APIManagementException if API Manager core level exception occurred
      */
-    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
+    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of the thumbnail image of an API
      *
      * @param apiId UUID of API
      * @return  Last updated time of document's content
+     * @throws APIManagementException if API Manager core level exception occurred
      */
-    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException;
+    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException;
 }
