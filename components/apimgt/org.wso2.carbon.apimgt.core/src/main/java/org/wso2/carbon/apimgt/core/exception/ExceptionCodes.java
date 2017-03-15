@@ -75,7 +75,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_CREDENTIALS(900321, "Invalid Credentials", 401, " Invalid username or password"),
 
     LOCATION_HEADER_INCORRECT(900322, "Error while obtaining URI for Location header", 500,
-            "Error occurred while obtaining URI for Location header");
+            "Error occurred while obtaining URI for Location header"),
+    LAST_UPDATED_TIME_RETRIEVAL_ERROR(900323, "Error while retrieving last access time for the resource", 500,
+            "Error while retrieving last access time for the resource");
 
     private final long errorCode;
     private final String errorMessage;

@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -20,6 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -72,6 +74,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    public String apisApiIdDocumentsDocumentIdContentGetLastUpdatedTime(String apiId, String documentId,
+            String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+        return null;
+    }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
@@ -91,6 +97,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(documentDTO).build();
     }
 
+    public String apisApiIdDocumentsDocumentIdGetLastUpdatedTime(String apiId, String documentId,
+            String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+        return null;
+    }
 
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
@@ -111,6 +121,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
 
         return Response.ok().entity(documentListDTO).build();
+    }
+    
+    public String apisApiIdDocumentsGetLastUpdatedTime(String apiId, Integer limit, Integer offset,
+            String accept, String ifNoneMatch, String minorVersion) {
+        return null;
     }
 
     /**
@@ -145,6 +160,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
+    public String apisApiIdGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            return apiStore.getLastUpdatedTimeOfAPI(apiId);
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException("Error while getting last update time", e);
+        }
+    }
 
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
@@ -162,6 +187,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+    
+    public String apisApiIdSwaggerGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        return "apisApiIdSwaggerGetLastUpdatedTime";
     }
 
     /**
@@ -195,5 +225,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.ok().entity(apiListDTO).build();
+    }
+
+    public String apisGetLastUpdatedTime(Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch, String minorVersion) {
+        return null;
     }
 }

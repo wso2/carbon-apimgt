@@ -31,6 +31,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 class ApiResourceDAO {
 
@@ -67,9 +69,11 @@ class ApiResourceDAO {
     }
 
     static void addTextResource(Connection connection, String apiID, String resourceID,
-                                ResourceCategory category, String dataType, String textValue) throws SQLException {
+            ResourceCategory category, String dataType, String textValue, String createdBy)
+            throws SQLException {
         final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
-                "DATA_TYPE, RESOURCE_TEXT_VALUE) VALUES (?,?,?,?,?)";
+                "DATA_TYPE, RESOURCE_TEXT_VALUE, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) " 
+                + "VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
@@ -77,16 +81,19 @@ class ApiResourceDAO {
             statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
             statement.setString(4, dataType);
             statement.setString(5, textValue);
-
+            statement.setString(6, createdBy);
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(8, createdBy);
+            statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
             statement.execute();
         }
     }
 
-    static void addBinaryResource(Connection connection, String apiID, String resourceID,
-                                ResourceCategory category, String dataType, InputStream binaryValue)
-                                                                                                throws SQLException {
+    static void addBinaryResource(Connection connection, String apiID, String resourceID, ResourceCategory category,
+            String dataType, InputStream binaryValue, String createdBy) throws SQLException {
         final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
-                "DATA_TYPE, RESOURCE_BINARY_VALUE) VALUES (?,?,?,?,?)";
+                "DATA_TYPE, RESOURCE_BINARY_VALUE, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) " 
+                + "VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
@@ -94,7 +101,10 @@ class ApiResourceDAO {
             statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
             statement.setString(4, dataType);
             statement.setBinaryStream(5, binaryValue);
-
+            statement.setString(6, createdBy);
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(8, createdBy);
+            statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
             statement.execute();
         }
     }
@@ -121,13 +131,15 @@ class ApiResourceDAO {
 
     static void updateTextValueForCategory(Connection connection, String apiID,
                                            ResourceCategory category,
-                                           String resourceValue) throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ? WHERE " +
-                "API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+                                           String resourceValue, String updatedBy) throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ?, UPDATED_BY = ?, " 
+                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceValue);
-            statement.setString(2, apiID);
-            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.setString(2, updatedBy);
+            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(4, apiID);
+            statement.setInt(5, ResourceCategoryDAO.getResourceCategoryID(connection, category));
 
             statement.execute();
         }
@@ -192,35 +204,80 @@ class ApiResourceDAO {
     }
 
     static void updateBinaryResourceForCategory(Connection connection, String apiID, ResourceCategory category,
-                                                InputStream resourceValue) throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ? WHERE " +
-                "API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+            InputStream resourceValue, String updatedBy) throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, " 
+                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, resourceValue);
-            statement.setString(2, apiID);
-            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.setString(2, updatedBy);
+            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(4, apiID);
+            statement.setInt(5, ResourceCategoryDAO.getResourceCategoryID(connection, category));
 
             statement.execute();
         }
     }
 
+    static String getResourceLastUpdatedTime(Connection connection, String apiId, String resourceID,
+            ResourceCategory category) throws SQLException {
+        final String query = "SELECT LAST_UPDATED_TIME FROM AM_API_RESOURCES WHERE API_ID = ? AND UUID = ? AND " +
+                "RESOURCE_CATEGORY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiId);
+            statement.setString(2, resourceID);
+            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LAST_UPDATED_TIME");
+                }
+            }
+        }
+        return null;
+    }
+
+    static String getAPIUniqueResourceLastUpdatedTime(Connection connection, String apiID, ResourceCategory category)
+            throws SQLException {
+        final String query = "SELECT LAST_UPDATED_TIME FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
+                "RESOURCE_CATEGORY_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LAST_UPDATED_TIME");
+                }
+            }
+        }
+        return null;
+    }
+
     static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue, String
-            fileName) throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ? WHERE UUID = ?";
+            fileName, String updatedBy) throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ?, UPDATED_BY = ?, " 
+                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBlob(1, resourceValue);
             statement.setString(2, fileName);
-            statement.setString(3, resourceID);
+            statement.setString(3, updatedBy);
+            statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(5, resourceID);
             return statement.executeUpdate();
         }
     }
 
-    static int updateTextResource(Connection connection, String resourceID, String resourceValue)
+    static int updateTextResource(Connection connection, String resourceID, String resourceValue, String updatedBy)
             throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ? WHERE UUID = ?";
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ?, UPDATED_BY = ?, " 
+                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceValue);
-            statement.setString(2, resourceID);
+            statement.setString(2, updatedBy);
+            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(4, resourceID);
 
             return statement.executeUpdate();
         }
