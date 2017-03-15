@@ -22,9 +22,12 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
@@ -102,4 +105,46 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             throw new APIMgtDAOException(ex);
         }
     }
+    
+
+    /**
+     * Returns a workflow object for a given external workflow reference.
+     *
+     * @param workflowReference
+     * @return
+     * @throws APIManagementException
+     */
+    public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException {
+        
+        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
+        Workflow workflow;
+        try (Connection conn = DAOUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+            ps.setString(1, workflowReference);
+            try (ResultSet rs = ps.executeQuery()) {
+                workflow = this.createWorkflowFromResultSet(rs);
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        return workflow;  
+    }
+
+    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException {
+        Workflow workflow = null;
+
+        if (rs.next()) {
+            workflow = WorkflowExecutorFactory.getInstance().createWorkflow(rs.getString("WF_TYPE"));
+            workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+            workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
+            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+
+        }
+        return workflow;
+    }
+
 }

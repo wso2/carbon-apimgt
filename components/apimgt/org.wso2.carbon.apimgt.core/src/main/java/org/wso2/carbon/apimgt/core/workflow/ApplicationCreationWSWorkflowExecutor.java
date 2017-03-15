@@ -27,10 +27,12 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
- * This is a simple work flow extension to have Application creation process
+ * This workflow connects to external bpmn process engine
  */
-public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
+public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(ApplicationCreationWSWorkflowExecutor.class);
+    
+    private String processDefinitionKey;
 
     /**
      * Execute the workflow executor
@@ -46,7 +48,13 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
     
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         //set the state to approved
-        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+        workflowResponse.setWorkflowStatus(WorkflowStatus.CREATED);
+        
+        //TODO add BPMN rest calls
+        log.info("======= Defined Property: processDefinitionKey - " + getProcessDefinitionKey());
+        log.info("======= WF external ref: " + workFlow.getExternalWorkflowReference());
+        
+        
         return workflowResponse;
     }
 
@@ -61,7 +69,9 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
         if (log.isDebugEnabled()) {
             log.info("Complete  Application creation Workflow..");
         }
-
+        
+        log.info("======= WF Complete() =====" + workFlow.toString()); 
+        
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(workFlow.getStatus());
         return workflowResponse;
@@ -70,5 +80,13 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
         
+    }
+
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 }

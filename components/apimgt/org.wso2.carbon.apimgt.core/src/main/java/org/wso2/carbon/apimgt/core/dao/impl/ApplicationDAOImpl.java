@@ -464,7 +464,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
                 ps.setString(1, state);
-                ps.setString(2, appID);               
+                ps.setString(2, appID);   
+                ps.executeUpdate();
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();

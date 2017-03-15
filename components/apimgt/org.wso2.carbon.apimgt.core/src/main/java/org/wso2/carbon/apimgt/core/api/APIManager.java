@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.util.List;
 import java.util.Set;
@@ -157,4 +158,20 @@ public interface APIManager {
      * @throws APIManagementException   If failed to get subscription from UUID.
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
+    
+    /**
+     * Retrieve workflow for the given workflow reference ID
+     * @param workflowRefId External workflow reference Id
+     * @return Workflow workflow entry
+     * @throws APIManagementException
+     */
+    Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException;
+    
+    /**
+     * Complete workflow task 
+     * @param workflowExecutor executor related to the workflow task
+     * @param workflow workflow object
+     * @throws APIManagementException
+     */
+    void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException;
 }

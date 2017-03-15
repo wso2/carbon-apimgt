@@ -39,5 +39,14 @@ public interface WorkflowDAO {
      * @param workflow
      * @throws APIMgtDAOException
      */
-    void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException;
+    void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException;    
+    
+    /**
+     * Returns a workflow object for a given external workflow reference.
+     *
+     * @param workflowReference
+     * @return
+     * @throws APIManagementException
+     */
+    public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
 }

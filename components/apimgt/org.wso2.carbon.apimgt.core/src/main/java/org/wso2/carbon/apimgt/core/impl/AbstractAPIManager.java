@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.io.InputStream;
 import java.util.List;
@@ -96,7 +97,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from String
      */
-    @Override public API getAPIbyUUID(String uuid) throws APIManagementException {
+    @Override
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
@@ -364,4 +366,11 @@ public abstract class AbstractAPIManager implements APIManager {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
+    
+    @Override
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {        
+        return workflowDAO.retrieveWorkflow(workflowRefId);
+    }
+    
+   
 }

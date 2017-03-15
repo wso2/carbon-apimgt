@@ -27,21 +27,6 @@ import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
-import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-
-//
-//import org.wso2.carbon.apimgt.impl.APIConstants;
-//import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-//import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-//import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-//import org.wso2.carbon.apimgt.core.models.Workflow;
-//import org.wso2.carbon.context.PrivilegedCarbonContext;
-//import org.wso2.carbon.registry.core.exceptions.RegistryException;
-
-//import javax.cache.Cache;
-//import javax.cache.Caching;
-
 /**
  * Creates workflow with a given workflow type.
  */
@@ -58,29 +43,18 @@ public class WorkflowExecutorFactory {
         return instance;
     }
 
-    //    private static void handleException(String msg) throws WorkflowException {
-    //        log.error(msg);
-    //        throw new WorkflowException(msg);
-    //    }
-    //
-    //    private static void handleException(String msg, Exception e) throws WorkflowException {
-    //        log.error(msg, e);
-    //        throw new WorkflowException(msg, e);
-    //    }
-    //
-        public WorkflowExecutor getWorkflowExecutor(String workflowExecutorType)
-                throws WorkflowException, NoSuchMethodException, InvocationTargetException {
-            WorkflowConfigHolder holder = null;
-            try {
-                holder = this.getWorkflowConfigurations();
-                return holder.getWorkflowExecutor(workflowExecutorType);
-            } catch (WorkflowException e) {
-                handleException("Error while creating WorkFlowDTO for " + workflowExecutorType, e);
-            } catch (FileNotFoundException e) {
-                log.error("File not found.", e);
-            }
-            return null;
-        }
+
+    public WorkflowExecutor getWorkflowExecutor(String workflowExecutorType)
+            throws WorkflowException {
+        WorkflowConfigHolder holder = null;
+        try {
+            holder = this.getWorkflowConfigurations();
+            return holder.getWorkflowExecutor(workflowExecutorType);
+        } catch (WorkflowException e) {
+            handleException("Error while creating WorkFlowDTO for " + workflowExecutorType, e);
+        } 
+        return null;
+    }
 
     /**
      * Create a DTO object related to a given workflow type.
@@ -89,59 +63,44 @@ public class WorkflowExecutorFactory {
      */
     public Workflow createWorkflow(String wfType) {
         Workflow workflow = null;
-        if (wfType.equals("AM_APPLICATION_CREATION")) {
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType)) {
             workflow = new ApplicationCreationWorkflow();
             workflow.setWorkflowType(wfType);
-        }
-        //        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)){
-        //            workflowDTO = new ApplicationRegistrationWorkflowDTO();
-        //            ((ApplicationRegistrationWorkflow)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-        //            workflowDTO.setWorkflowType(wfType);
-        //        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)){
-        //            workflowDTO = new ApplicationRegistrationWorkflowDTO();
-        //            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
-        //            workflowDTO.setWorkflowType(wfType);
-        //        }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
-        //            workflowDTO = new SubscriptionWorkflowDTO();
-        //            workflowDTO.setWorkflowType(wfType);
-        //        }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
-        //            workflowDTO = new WorkflowDTO();
-        //            workflowDTO.setWorkflowType(wfType);
-        //        }else if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType)){
-        //            workflowDTO = new APIStateWorkflowDTO();
-        //            workflowDTO.setWorkflowType(wfType);
-        //        }
-
+        }/*else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)){
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            workflowDTO.setWorkflowType(wfType);
+        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)){
+            workflowDTO = new ApplicationRegistrationWorkflowDTO();
+            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            workflowDTO.setWorkflowType(wfType);
+        }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
+            workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
+            workflowDTO = new WorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        }else if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType)){
+            workflowDTO = new APIStateWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
+        }*/
+        
         return workflow;
     }
 
-    public WorkflowConfigHolder getWorkflowConfigurations()
-            throws WorkflowException, FileNotFoundException, NoSuchMethodException, InvocationTargetException {
+    public WorkflowConfigHolder getWorkflowConfigurations() throws WorkflowException {
 
+        // TODO stop loading every time and move it to a static variable and do a check
         WorkflowConfigHolder workflowConfig = new WorkflowConfigHolder();
+        workflowConfig.load();
+        return workflowConfig;
 
-        try {
-            workflowConfig.load();
-            return workflowConfig;
-        } catch (WorkflowException e) {
-            handleException("Error occurred while creating workflow configurations", e);
-        }
-        return null;
     }
 
     private static void handleException(String msg, Exception e) throws WorkflowException {
         log.error(msg, e);
         throw new WorkflowException(msg, e);
     }
-    
-    public static void executeWorkflow(){
-        //call the executors
-        //call the notify 
-    }
-    
-    public static void completeWorkflow(){
-        //call the executors
-        //call the notify 
-    }
+
 
 }

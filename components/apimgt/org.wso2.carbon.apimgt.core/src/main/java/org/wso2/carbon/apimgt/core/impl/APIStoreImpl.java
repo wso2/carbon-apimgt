@@ -69,7 +69,6 @@ import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -421,14 +420,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             
             ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
 
-            workflow.setApplication(application);
+            workflow.setApplication(application);           
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
-            workflow.setCreatedTime(LocalDateTime.now());
-            
+            workflow.setCreatedTime(LocalDateTime.now());            
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
-            //TODO implement wf table entry and stats publish. Do a similar impl to completeWorkflow()
-            addWorkflowEntries();
+            workflow.setStatus(response.getWorkflowStatus());
+            addWorkflowEntries(workflow);
             
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 workflow.setStatus(response.getWorkflowStatus());
@@ -448,13 +446,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         } catch (WorkflowException e) {
-            log.error("Error occurred in workflow", e);
-            //TODO throw ??
-        } catch (NoSuchMethodException e) {
-            log.error("No such method", e);
-        } catch (InvocationTargetException e) {
-            log.error("InvocationTargetException", e);
-        }
+            String errorMsg = "Error occurred in workflow";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.WORKFLOW_EXCEPTION);
+        } 
         return applicationResponse;
     }
 
@@ -552,62 +547,58 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
     
     public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
-        
-        // TODO move this to observer
+
         if (workflow instanceof ApplicationCreationWorkflow) {
             if (workflow.getWorkflowReference() == null) {
                 String message = "Error while changing the application state. Missing application UUID";
                 log.error(message);
-                //TODO add custom code to the exception
                 throw new WorkflowException(message);
-            } 
-            // TODO catch wf exception and log??
-            WorkflowResponse response = workflowExecutor.execute(workflow);
+            }
 
+            WorkflowResponse response = workflowExecutor.complete(workflow);
+
+            // setting the workflow status from the one getting from the executor. this gives the executor developer
+            // to change the state as well.
+            workflow.setStatus(response.getWorkflowStatus());
+            updateWorkflowEntries(workflow);
             String applicationState = "";
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 // TODO do whatever needed here
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Approved");
                 }
-                // TODO check the application state is same as wf state
+                // TODO check the application state is same as wf state.
                 applicationState = response.getWorkflowStatus().toString();
-                getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
-                addWorkflowEntries();
 
             } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Rejected");
                 }
                 applicationState = response.getWorkflowStatus().toString();
-                getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
-                addWorkflowEntries();
             }
-            
+            getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
 
         } else {
             String message = "Invalid workflow type:  " + workflow.getWorkflowType();
             log.error(message);
-            //TODO add custom code to the exception
             throw new WorkflowException(message);
         }
-        /*
-        Map<String, String> eventPayload = new HashMap<>();
 
-        // This will notify all the EventObservers(Asynchronous)
-        ObserverNotifier observerNotifier = new ObserverNotifier(Event.WORKFLOW, getUsername(),
-                ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
-        ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
-        */
-        
-        
     }
     
-    //TODO
-    private void addWorkflowEntries() {
-        //add entry to workflow table
-        //add data publishing to das
+    private void updateWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
+        workflow.setUpdatedTime(LocalDateTime.now());
+        getWorkflowDAO().updateWorkflowStatus(workflow);
+        //TODO stats stuff
+    }
+
+
+    private void addWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
         
-        //or notify observers
+        //TODO if needed to stop adding entries to simple workflow, then do a validation here for state (Completed) and
+        // prevent it from adding it to the db
+        getWorkflowDAO().addWorkflowEntry(workflow);
+        
+
     }
 }

@@ -219,6 +219,7 @@ public class APIMgtConstants {
         public static final String TIER_LEVEL = "TIER_LEVEL";
         public static final String ENDPOINT_ID = "ENDPOINT_ID";
         public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
+        public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
     }
 
     /**
@@ -266,5 +267,21 @@ public class APIMgtConstants {
         public static final String RSA_SIGNED_TOKEN = "rsaSignedToken";
         public static final String SET_COOKIE = "Set-Cookie";
         public static final String COOKIE = "Cookie";
+    }
+    
+    /**
+     * Workflow related constants
+     */
+    public static class WorkflowConstants {
+        public static final String WF_TYPE_AM_USER_SIGNUP = "AM_USER_SIGNUP";
+        public static final String WF_TYPE_AM_SUBSCRIPTION_CREATION = "AM_SUBSCRIPTION_CREATION";
+        public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
+        public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
+        public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
+        public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
+        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
+                "AM_APPLICATION_REGISTRATION_PRODUCTION";
+        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
+
     }
 }
