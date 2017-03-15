@@ -718,16 +718,6 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
-        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, null, "jpeg", user, LocalDateTime.now());
-    }
-
-    @Test(description = "Exception when saving thumbnail image for API", expectedExceptions = APIMgtDAOException.class)
-    void saveThumbnailImageException() throws APIManagementException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
-        Mockito.doThrow(new APIMgtDAOException("Couldn't save the thumbnail image")).when(apiDAO)
-                .updateImage(API_ID, null, "jpeg", user, LocalDateTime.now());
-        apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
     }
 
     @Test(description = "Get thumbnail image for API")
