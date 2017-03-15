@@ -39,6 +39,7 @@
         <module>apps/org.wso2.carbon.apimgt.store</module>
         <module>apps/org.wso2.carbon.apimgt.publisher</module>
         <module>apps/org.wso2.carbon.apimgt.editor.app</module>
+        <module>apps/org.wso2.carbon.apimgt.admin.app</module>
         <module>services/org.wso2.carbon.apimgt.authenticator</module>
     </modules>
 

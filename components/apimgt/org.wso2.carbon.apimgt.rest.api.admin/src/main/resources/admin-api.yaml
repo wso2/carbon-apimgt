@@ -112,7 +112,8 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/Minor-Version'
       tags:
-        - Throttling Tier (Collection)
+        - Throttling Tier Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -167,7 +168,8 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/Minor-Version'
       tags:
-        - Throttling Tier (Collection)
+        - Throttling Tier (individual)
+        - Create
       responses:
         201:
           description: |
@@ -231,6 +233,7 @@ paths:
         - $ref: '#/parameters/Minor-Version'
       tags:
         - Throttling Tier (Individual)
+        - Update
       responses:
         200:
           description: |

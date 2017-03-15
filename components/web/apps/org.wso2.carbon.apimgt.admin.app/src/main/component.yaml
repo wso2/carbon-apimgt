@@ -9,14 +9,14 @@ bindings:
     mode: prepend
     fragments:
       - org.wso2.carbon.apimgt.web.admin.feature.globalNavigation
-  - zoneName: sidebar
+  - zoneName: secondaryMenu
     mode: prepend
     fragments:
-      - org.wso2.carbon.apimgt.web.admin.feature.sidebar
+      - secondaryMenu
 
 config:
   appName : Admin Portal
-  title : "Tasks"
-  loginRedirectUri: "/apis"
+  title : "Advanced Throttling Policies"
+  loginRedirectUri: "/"
   swaggerURL : "/api/am/admin/v1/apis/swagger.json"
   loginPageUri : "https://localhost:9292/admin/auth/login"
