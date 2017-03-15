@@ -615,7 +615,7 @@
                                 <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
                             </configuration>
                         </execution>
-                        <!--<execution>
+                        <execution>
                             <id>default-check</id>
                             <goals>
                                 <goal>check</goal>
@@ -635,7 +635,7 @@
                                     </rule>
                                 </rules>
                             </configuration>
-                        </execution>-->
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>

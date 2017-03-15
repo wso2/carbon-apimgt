@@ -36,10 +36,12 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
+import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -52,6 +54,8 @@ import java.util.ArrayList;
 public class APIPublisherImplTestCase {
     private static final String user = "admin";
     private static final String TIER = "Gold";
+    private static final String API_ID = "apiId";
+    private static final String DOC_ID = "docId";
 
     @BeforeClass
     void init() {
@@ -153,6 +157,42 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
         Mockito.verify(apiDAO, Mockito.times(1)).deleteAPI(uuid);
+    }
+
+    @Test(description = "Error occurred while deleting API with zero subscriptions",
+            expectedExceptions = APIMgtDAOException.class)
+    void deleteApiWithZeroSubscriptionsException() throws APIManagementException, LifecycleException, SQLException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null,
+                apiLifecycleManager, null);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting the API with id" + uuid)).when(apiDAO)
+                .deleteAPI(uuid);
+        apiPublisher.deleteAPI(uuid);
+    }
+
+    @Test(description = "Error occurred while disassociating the API with Lifecycle when deleting the API",
+            expectedExceptions = APIMgtDAOException.class)
+    void deleteApiWithZeroSubscriptionsLifeCycleException()
+            throws APIManagementException, LifecycleException, SQLException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null,
+                apiLifecycleManager, null);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.doThrow(new LifecycleException("Error occurred while Disassociating the API with Lifecycle id " + uuid))
+                .when(apiLifecycleManager).removeLifecycle(lifecycleId);
+        apiPublisher.deleteAPI(uuid);
     }
 
     @Test(description = "Delete API with Subscriptions", expectedExceptions = ApiDeleteFailureException.class)
@@ -394,13 +434,107 @@ public class APIPublisherImplTestCase {
         apiPublisher.checkIfAPIExists("bbbbb");
     }
 
-    @Test(description = "AddDocumentationInfo",
-            expectedExceptions = { APIMgtDAOException.class, APIManagementException.class })
+    @Test(description = "Add Documentation Info")
     void addDocumentationInfo() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
+                .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
-        Mockito.when(apiDAO.getAPISummary("bbbbb")).thenThrow(new APIMgtDAOException(""));
-        apiPublisher.checkIfAPIExists("bbbbb");
+        apiPublisher.addDocumentationInfo(API_ID, documentInfo);
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInfo(API_ID, documentInfo);
+    }
+
+    @Test(description = "Unable to add documentation info", expectedExceptions = APIMgtDAOException.class)
+    void unableToAddDocumentationException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
+                .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.doThrow(new APIMgtDAOException("Unable to add documentation")).when(apiDAO)
+                .addDocumentInfo(API_ID, documentInfo);
+        apiPublisher.addDocumentationInfo(API_ID, documentInfo);
+    }
+
+    @Test(description = "Parse exception when adding documentation info", expectedExceptions = APIMgtDAOException.class)
+    void addDocumentationInfoJsonParseException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
+                .permission("data").build();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.addDocumentationInfo(API_ID, documentInfo);
+    }
+
+    @Test(description = "Remove Documentation Info")
+    void removeDocumentationInfo() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.removeDocumentation(DOC_ID);
+        Mockito.verify(apiDAO, Mockito.times(1)).deleteDocument(DOC_ID);
+    }
+
+    @Test(description = "Exception when removing Documentation Info", expectedExceptions = APIMgtDAOException.class)
+    void removeDocumentationInfoException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
+                .deleteDocument(DOC_ID);
+        apiPublisher.removeDocumentation(DOC_ID);
+    }
+
+    @Test(description = "Upload Documentation File")
+    void uploadDocumentationFile() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "testDoc");
+    }
+
+    @Test(description = "Exception when uploading Documentation File", expectedExceptions = APIManagementException.class)
+    void uploadDocumentationFileException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
+                .addDocumentFileContent(DOC_ID, null, "testDoc");
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
+    }
+
+    @Test(description = "Add documentation inline content")
+    void addDocumentationContent() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.addDocumentationContent(DOC_ID, "Inline document content");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInlineContent(DOC_ID, "Inline document content");
+    }
+
+    @Test(description = "Update Documentation Info")
+    void updateDocumentation() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
+                .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.updateDocumentation(API_ID, documentInfo);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo);
+    }
+
+    @Test(description = "Unable to update documentation info", expectedExceptions = APIMgtDAOException.class)
+    void unableToUpdateDocumentationException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
+                .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.doThrow(new APIMgtDAOException("Unable to add documentation")).when(apiDAO)
+                .updateDocumentInfo(API_ID, documentInfo);
+        apiPublisher.updateDocumentation(API_ID, documentInfo);
+    }
+
+    @Test(description = "Parse exception when updating documentation info",
+            expectedExceptions = APIMgtDAOException.class)
+    void updateDocumentationInfoJsonParseException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
+                .permission("data").build();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
 
     @Test(description = "Exception when updating api status", expectedExceptions = APIManagementException.class)
@@ -432,5 +566,49 @@ public class APIPublisherImplTestCase {
         Map<String, Boolean> checklist = new HashMap<>();
         checklist.put("Deprecate old versions after publish the API", true);
         apiPublisher.updateCheckListItem(uuid, "CREATED", checklist);
+    }
+
+    @Test(description = "Get lifecycle events list of an API")
+    void getLifeCycleEvents() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        List<LifecycleHistoryBean> lifecycleHistoryBeanList = new ArrayList<>();
+        LifecycleHistoryBean bean = new LifecycleHistoryBean();
+        bean.setPreviousState("CREATED");
+        bean.setPostState("PUBLISH");
+        bean.setUser(user);
+        lifecycleHistoryBeanList.add(bean);
+        Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
+        Mockito.doReturn(lifecycleHistoryBeanList).when(apiLifecycleManager).getLifecycleHistory(lifecycleId);
+        apiPublisher.getLifeCycleEvents(uuid);
+    }
+
+    @Test(description = "Exception finding APISummary Resource when getting lifecycle events list of an API",
+            expectedExceptions = APIMgtDAOException.class)
+    void getLifeCycleEventsExceptionFindingApiSummaryResource() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        Mockito.when(apiDAO.getAPISummary(API_ID))
+                .thenThrow(new APIMgtDAOException("Couldn't find APISummary Resource for ID " + API_ID));
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.getLifeCycleEvents(API_ID);
+    }
+
+    @Test(description = "Exception finding API LifeCycle History when getting lifecycle events list of an API",
+            expectedExceptions = APIMgtDAOException.class)
+    void getLifeCycleEventsExceptionFindingAPILifeCycleHistory() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
+        Mockito.doThrow(new LifecycleException("Couldn't find APILifecycle History for ID " + uuid))
+                .when(apiLifecycleManager).getLifecycleHistory(lifecycleId);
+        apiPublisher.getLifeCycleEvents(uuid);
     }
 }
