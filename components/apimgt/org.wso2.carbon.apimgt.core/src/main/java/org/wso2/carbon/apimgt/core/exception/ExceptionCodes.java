@@ -26,12 +26,13 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public enum ExceptionCodes implements ErrorHandler {
 
-    API_ALREADY_EXISTS(900300, "The API already exists.", 400, " This is error description"),
-    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 400, " This is error description"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " This is error description"),
-    APIMGT_LIFECYCLE_EXCEPTION(900303, "Life cycle exception occurred", 500, " This is error description"),
-    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " This is error description"),
-    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " This is error description"),
+    API_ALREADY_EXISTS(900300, "The API already exists.", 400, " The API already exists"),
+    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 400, " The application already exists"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting data"),
+    APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
+            "lifecycle state"),
+    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
+    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
     SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 500, "Error while parsing swagger json"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Error while parsing swagger json"),
     PARAMETER_NOT_PROVIDED(900308, "Parameter value missing", 400,
@@ -40,7 +41,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
             "done"),
-    DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document Already Exists"),
+    DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 400, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
             + "update the API"),
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
@@ -65,7 +66,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     ENDPOINT_NOT_FOUND(900316, "Endpoint Not Found", 404, "Endpoint Not Found"),
-    ENDPOINT_ALREADY_EXISTS(900322, "Endpoint Already EXISTS", 400, "Endpoint Not Found"),
+    ENDPOINT_ALREADY_EXISTS(900322, "Endpoint already exists", 400, "Endpoint already exists"),
     ENDPOINT_ADD_FAILED(900323, "Endpoint adding failed", 400, "Endpoint adding failed"),
     API_DEFINITION_MALFORMED(900317, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
     TEMPLATE_EXCEPTION(900318, "Service configuration Error", 500, " Error generate service config"),
