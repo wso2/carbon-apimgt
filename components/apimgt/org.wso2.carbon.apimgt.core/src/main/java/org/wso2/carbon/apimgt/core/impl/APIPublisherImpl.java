@@ -325,9 +325,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * @param api   API Object
-     * @return  If api definition is valid or not.
-     * @throws APIManagementException   If failed to validate the API.
+     * @param api API Object
+     * @return If api definition is valid or not.
+     * @throws APIManagementException If failed to validate the API.
      */
     @Override
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
@@ -466,8 +466,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * This method will return map with role names and its permission values.
      *
      * @param permissionJsonString Permission json object a string
-     * @return  Map of permission values.
-     * @throws ParseException   If failed to parse the json string.
+     * @return Map of permission values.
+     * @throws ParseException If failed to parse the json string.
      */
     private HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
 
@@ -499,10 +499,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to Update the status of API
      *
-     * @param apiId UUID of the API.
-     * @param status    Target life cycle status.
+     * @param apiId            UUID of the API.
+     * @param status           Target life cycle status.
      * @param checkListItemMap Map of check list items.
-     * @throws APIManagementException   If failed to update API lifecycle status..
+     * @throws APIManagementException If failed to update API lifecycle status..
      */
     @Override
     public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
@@ -574,10 +574,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * This method used to Update the lifecycle checklist of API
      *
-     * @param apiId UUID of the API
-     * @param status    Current API lifecycle status.
-     * @param checkListItemMap  Check list item values.
-     * @throws APIManagementException   If failed to update checklist item values.
+     * @param apiId            UUID of the API
+     * @param status           Current API lifecycle status.
+     * @param checkListItemMap Check list item values.
+     * @throws APIManagementException If failed to update checklist item values.
      */
     @Override
     public void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
@@ -609,7 +609,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId      The API to be copied
      * @param newVersion The version of the new API
-     * @return           UUID of the newly created version.
+     * @return UUID of the newly created version.
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
@@ -758,7 +758,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId UUID of the API.
      * @return boolean result
-     * @throws APIManagementException   If failed to check if API exist.
+     * @throws APIManagementException If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPIExists(String apiId) throws APIManagementException {
@@ -776,9 +776,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Checks if a given API Context exists in the registry
      *
-     * @param context   Context of the API.
+     * @param context Context of the API.
      * @return boolean result
-     * @throws APIManagementException   If failed to check if API exist.
+     * @throws APIManagementException If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPIContextExists(String context) throws APIManagementException {
@@ -790,7 +790,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param name Name of the API.
      * @return boolean result
-     * @throws APIManagementException   If failed to check if API exist.
+     * @throws APIManagementException If failed to check if API exist.
      */
     @Override
     public boolean checkIfAPINameExists(String name) throws APIManagementException {
@@ -814,7 +814,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId        UUID of the API.
      * @param documentInfo Documentation
-     * @return              UUID of the updated document.
+     * @return UUID of the updated document.
      * @throws APIManagementException if failed to update docs
      */
     @Override
@@ -945,11 +945,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * @param limit Limit
-     * @param offset    Offset
-     * @param query Search query
-     * @return  List of APIS.
-     * @throws APIManagementException   If failed to search APIs.
+     * @param limit  Limit
+     * @param offset Offset
+     * @param query  Search query
+     * @return List of APIS.
+     * @throws APIManagementException If failed to search APIs.
      */
     @Override
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
@@ -1011,7 +1011,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId    id of the String
      * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException   If failed to save swagger definition.
+     * @throws APIManagementException If failed to save swagger definition.
      */
     @Override
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
@@ -1053,7 +1053,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId String
      * @return {@code Map<String,Object>} a map with lifecycle data
-     * @throws APIManagementException   If failed to get Lifecycle data.
+     * @throws APIManagementException If failed to get Lifecycle data.
      */
     @Override
     public LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException {
@@ -1080,7 +1080,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param string Api identifier
      * @return Current lifecycle status
-     * @throws APIManagementException   If failed to get lifecycle status.
+     * @throws APIManagementException If failed to get lifecycle status.
      */
     @Override
     public String getAPILifeCycleStatus(String string) throws APIManagementException {
@@ -1106,7 +1106,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param apiId       apiId of api
      * @param inputStream inputStream of image
      * @param dataType    Data type of the image.
-     * @throws APIManagementException   If failed save thumbnail.
+     * @throws APIManagementException If failed save thumbnail.
      */
     @Override
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
@@ -1125,7 +1125,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param apiId apiId of api
      * @return thumbnail image as a stream object.
-     * @throws APIManagementException   If failed to get thumbnail.
+     * @throws APIManagementException If failed to get thumbnail.
      */
     @Override
     public InputStream getThumbnailImage(String apiId) throws APIManagementException {
@@ -1173,8 +1173,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Return list of endpoints
      *
-     * @return  List of Endpoints..
-     * @throws APIManagementException   If filed to get endpoints.
+     * @return List of Endpoints..
+     * @throws APIManagementException If filed to get endpoints.
      */
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
@@ -1186,7 +1186,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param endpointId uuid of endpoint
      * @return details of endpoint
-     * @throws APIManagementException   If failed to get endpoint.
+     * @throws APIManagementException If failed to get endpoint.
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIManagementException {
@@ -1194,7 +1194,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public Endpoint getEndpointByName (String endpointName) throws APIManagementException {
+    public Endpoint getEndpointByName(String endpointName) throws APIManagementException {
         return getApiDAO().getEndpointByName(endpointName);
     }
 
@@ -1202,8 +1202,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Add an endpoint
      *
      * @param endpoint Endpoint object.
-     * @return  UUID of the added endpoint.
-     * @throws APIManagementException   If failed to add endpoint.
+     * @return UUID of the added endpoint.
+     * @throws APIManagementException If failed to add endpoint.
      */
     @Override
     public String addEndpoint(Endpoint endpoint) throws APIManagementException {
@@ -1230,8 +1230,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Update and endpoint
      *
-     * @param endpoint  Endpoint object.
-     * @throws APIManagementException   If failed to update endpoint.
+     * @param endpoint Endpoint object.
+     * @throws APIManagementException If failed to update endpoint.
      */
     @Override
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
@@ -1243,8 +1243,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Delete an endpoint
      *
-     * @param endpointId    UUID of the endpoint.
-     * @throws APIManagementException   If failed to delete the endpoint.
+     * @param endpointId UUID of the endpoint.
+     * @throws APIManagementException If failed to delete the endpoint.
      */
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
@@ -1257,8 +1257,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Create api from Definition
      *
      * @param apiDefinition API definition stream.
-     * @return  UUID of the added API.
-     * @throws APIManagementException   If failed to add the API.
+     * @return UUID of the added API.
+     * @throws APIManagementException If failed to add the API.
      */
     @Override
     public String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
@@ -1324,8 +1324,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Retrieve all policies based on tier Level
      *
      * @param tierLevel Tier Level.
-     * @return  List of policies of the given level.
-     * @throws APIManagementException   If failed to get policies.
+     * @return List of policies of the given level.
+     * @throws APIManagementException If failed to get policies.
      */
 
     @Override
@@ -1364,6 +1364,36 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
+
+    @Override
+    public void registerGatewayLabels(List<Label> labels) throws APIManagementException {
+
+        String overwriteLabels = System.getProperty(APIMgtConstants.OVERWRITE_LABELS, "false");
+        List<String> labelNames = new ArrayList<>();
+        for (Label label : labels) {
+            labelNames.add(label.getName());
+        }
+
+        try {
+            List<Label> existingLabels = getLabelDAO().getLabelsByName(labelNames);
+            if (!existingLabels.isEmpty()) {
+                labels.removeAll(existingLabels); // Remove already existing labels from the list
+            }
+
+            if (Boolean.parseBoolean(overwriteLabels)) {
+                for (Label label : existingLabels) {
+                    getLabelDAO().updateLabel(label);
+                }
+            }
+            getLabelDAO().addLabels(labels);
+
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding label information";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
 
     /**
      * @see APIPublisher#getLastUpdatedTimeOfEndpoint(String)
@@ -1420,7 +1450,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * Publishing new endpoint configurations to the subscribers
-     * @throws APIManagementException   If failed to publish endpoint to gateway.
+     *
+     * @throws APIManagementException If failed to publish endpoint to gateway.
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
         GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();

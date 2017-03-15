@@ -215,7 +215,6 @@ public class KeymanagerService implements Microservice {
     private static void getData() {
         applications = KeyManagerUtil.getBackedUpData("applications.data");
         appsByClientId = KeyManagerUtil.getBackedUpData("appsByClientId.data");
-        KeyManagerUtil.getBackedUpTokenData("token.data");
-        KeyManagerUtil.getBackedUpTokenData("refresh.data");
+        KeyManagerUtil.getBackedUpTokenData();
     }
 }

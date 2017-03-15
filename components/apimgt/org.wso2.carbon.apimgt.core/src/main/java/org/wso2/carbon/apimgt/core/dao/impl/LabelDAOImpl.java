@@ -156,6 +156,24 @@ public class LabelDAOImpl implements LabelDAO {
         return labelNames;
     }
 
+    static String getLabelID(String labelName) throws SQLException {
+
+        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LABEL_ID");
+                }
+            }
+        }
+        throw new SQLException("Label " + labelName + ", does not exist");
+    }
+
     @Override
     public void deleteLabel(String labelName) throws APIMgtDAOException {
 
@@ -174,6 +192,25 @@ public class LabelDAOImpl implements LabelDAO {
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    @Override
+    public void updateLabel(Label updatedLabel) throws APIMgtDAOException {
+
+        final String query = "UPDATE AM_LABELS SET ACCESS_URL = ? WHERE LABEL_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            String labelName = updatedLabel.getName();
+            statement.setString(1, labelName);
+            statement.setString(2, getLabelID(labelName));
+            statement.execute();
+
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }

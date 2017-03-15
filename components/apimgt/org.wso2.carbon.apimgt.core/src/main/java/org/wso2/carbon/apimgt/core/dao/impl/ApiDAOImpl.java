@@ -1769,28 +1769,12 @@ public class ApiDAOImpl implements ApiDAO {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (String label : labels) {
                     statement.setString(1, apiID);
-                    statement.setString(2, getLabelID(connection, label));
+                    statement.setString(2, LabelDAOImpl.getLabelID(label));
                     statement.addBatch();
                 }
                 statement.executeBatch();
             }
         }
-    }
-
-    private String getLabelID(Connection connection, String labelName) throws SQLException {
-        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, labelName);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("LABEL_ID");
-                }
-            }
-        }
-        throw new SQLException("Label " + labelName + ", does not exist");
     }
 
     private void deleteLabelsMapping(Connection connection, String apiID) throws SQLException {
