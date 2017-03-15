@@ -32,18 +32,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Get all subscriptions.
-     * <p/>
+     * {@code <p/>}
      * If apiId is specified this will return the subscribed applications of that api
      * If application id is specified this will return the api subscriptions of that application
      *
-     * @param apiId
-     * @param applicationId
-     * @param offset
-     * @param limit
-     * @param accept
-     * @param ifNoneMatch
-     * @return
-     * @throws NotFoundException
+     * @param apiId         ID of the API
+     * @param applicationId ID of the Application
+     * @param offset        offset value
+     * @param limit         limit value
+     * @param accept        accept header value
+     * @param ifNoneMatch   If-None-Match header value
+     * @return Subscription List
+     * @throws NotFoundException If failed to get the subscription
      */
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,

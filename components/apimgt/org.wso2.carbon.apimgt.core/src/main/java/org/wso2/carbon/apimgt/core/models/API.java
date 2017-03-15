@@ -56,6 +56,7 @@ public final class API {
         isDefaultVersion = builder.isDefaultVersion;
         transport = builder.transport;
         tags = builder.tags;
+        labels = builder.labels;
         policies = builder.policies;
         visibility = builder.visibility;
         visibleRoles = builder.visibleRoles;
@@ -145,6 +146,10 @@ public final class API {
         return tags;
     }
 
+    public List<String> getLabels() {
+        return labels;
+    }
+
     public List<String> getPolicies() {
         return policies;
     }
@@ -220,6 +225,7 @@ public final class API {
                 Objects.equals(wsdlUri, api.wsdlUri) &&
                 APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
                 APIUtils.isListsEqualIgnoreOrder(tags, api.tags) &&
+                APIUtils.isListsEqualIgnoreOrder(labels, api.labels) &&
                 APIUtils.isListsEqualIgnoreOrder(policies, api.policies) &&
                 visibility == api.visibility &&
                 APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles) &&
@@ -239,8 +245,8 @@ public final class API {
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
-                transport, tags, policies, visibility, visibleRoles, businessInformation, corsConfiguration, createdTime
-                , createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                transport, tags, labels, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
+                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
     }
 
 
@@ -267,6 +273,7 @@ public final class API {
     private final boolean isDefaultVersion;
     private final List<String> transport;
     private final List<String> tags;
+    private final List<String> labels;
     private final List<String> policies;
     private final Visibility visibility;
     private final List<String> visibleRoles;
@@ -361,6 +368,10 @@ public final class API {
             return tags;
         }
 
+        public List<String> getLabels() {
+            return labels;
+        }
+
         public List<String> getPolicies() {
             return policies;
         }
@@ -393,6 +404,7 @@ public final class API {
         private String apiPolicy;
         private List<String> transport = Collections.emptyList();
         private List<String> tags = Collections.emptyList();
+        private List<String> labels = Collections.emptyList();
         private List<String> policies = Collections.EMPTY_LIST;
         private Visibility visibility = Visibility.PUBLIC;
         private List<String> visibleRoles = Collections.emptyList();
@@ -428,6 +440,7 @@ public final class API {
             this.isDefaultVersion = copy.isDefaultVersion;
             this.transport = copy.transport;
             this.tags = copy.tags;
+            this.labels = copy.labels;
             this.policies = copy.policies;
             this.visibility = copy.visibility;
             this.visibleRoles = copy.visibleRoles;
@@ -662,6 +675,18 @@ public final class API {
          */
         public APIBuilder tags(List<String> tags) {
             this.tags = tags;
+            return this;
+        }
+
+        /**
+         * Sets the {@code labels} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param labels the {@code labels} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder labels(List<String> labels) {
+            this.labels = labels;
             return this;
         }
 

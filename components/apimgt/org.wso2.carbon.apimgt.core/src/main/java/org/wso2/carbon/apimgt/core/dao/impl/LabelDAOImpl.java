@@ -131,6 +131,49 @@ public class LabelDAOImpl implements LabelDAO {
         return matchingLabels;
     }
 
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    static List<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
+        List<String> labelNames = new ArrayList<>();
+
+        if (!labelIDs.isEmpty()) {
+            final String query = "SELECT NAME FROM AM_LABELS WHERE LABEL_ID IN (" +
+                    DAOUtil.getParameterString(labelIDs.size()) + ")";
+
+            try (Connection connection = DAOUtil.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(query)) {
+
+                for (int i = 0; i < labelIDs.size(); ++i) {
+                    statement.setString(i + 1, labelIDs.get(i));
+                }
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        labelNames.add(rs.getString("NAME"));
+                    }
+                }
+            }
+        }
+        return labelNames;
+    }
+
+    static String getLabelID(String labelName) throws SQLException {
+
+        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("LABEL_ID");
+                }
+            }
+        }
+        throw new SQLException("Label " + labelName + ", does not exist");
+    }
+
     @Override
     public void deleteLabel(String labelName) throws APIMgtDAOException {
 
@@ -149,6 +192,25 @@ public class LabelDAOImpl implements LabelDAO {
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    @Override
+    public void updateLabel(Label updatedLabel) throws APIMgtDAOException {
+
+        final String query = "UPDATE AM_LABELS SET ACCESS_URL = ? WHERE LABEL_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            String labelName = updatedLabel.getName();
+            statement.setString(1, labelName);
+            statement.setString(2, getLabelID(labelName));
+            statement.execute();
+
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }

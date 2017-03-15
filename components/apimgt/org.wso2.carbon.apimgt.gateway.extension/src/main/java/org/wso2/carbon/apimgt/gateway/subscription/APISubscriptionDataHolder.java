@@ -50,7 +50,6 @@ public class APISubscriptionDataHolder {
      * @param apiVersion  API Version
      * @param consumerKey Consumer Key of Application
      * @return Subscription data map if a subscription is available, otherwise null
-     * @throws APIManagementException
      */
     public Map<String, String> getApiSubscriptionPolicyIfAvailable(String apiContext, String apiVersion,
                                                                    String consumerKey) {
@@ -68,7 +67,6 @@ public class APISubscriptionDataHolder {
      * @param apiVersion       API Version
      * @param consumerKey      Consumer Key of Application
      * @param subscriptionData Subscription Data Map
-     * @throws APIManagementException
      */
     public void addApiSubscriptionToMap(String apiContext, String apiVersion, String consumerKey,
                                         Map<String, String> subscriptionData) {
@@ -97,7 +95,6 @@ public class APISubscriptionDataHolder {
      * @param apiContext  API Context
      * @param apiVersion  API Version
      * @param consumerKey Consumer Key of Application
-     * @throws APIManagementException
      */
     public void removeApiSubscriptionFromMap(String apiContext, String apiVersion, String consumerKey) {
         String apiKey = apiContext + DELIMITER + apiVersion;

@@ -72,4 +72,12 @@ public interface LabelDAO {
      */
     void deleteLabel(String labelName) throws APIMgtDAOException;
 
+    /**
+     * Update the label
+     *
+     * @param updatedLabel Updated Label
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateLabel(Label updatedLabel) throws APIMgtDAOException;
+
 }
