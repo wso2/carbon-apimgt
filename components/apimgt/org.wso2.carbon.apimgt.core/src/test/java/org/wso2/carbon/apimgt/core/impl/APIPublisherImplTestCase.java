@@ -35,17 +35,23 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
-import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
 
