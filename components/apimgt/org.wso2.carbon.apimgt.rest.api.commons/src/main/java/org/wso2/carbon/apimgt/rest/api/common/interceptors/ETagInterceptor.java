@@ -20,7 +20,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.interceptors;
 
-import org.osgi.service.component.annotations.Component;
+//import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
@@ -35,17 +35,17 @@ import org.wso2.msf4j.internal.router.HandlerException;
 //
 //import java.lang.reflect.InvocationTargetException;
 //import java.lang.reflect.Method;
-import java.util.Locale;
+//import java.util.Locale;
 
 /**
  * Security Interceptor that does basic authentication for REST ApI requests.
  *
  */
-@Component(
-        name = "org.wso2.carbon.apimgt.rest.api.common.interceptors.ETagInterceptor",
-        service = Interceptor.class,
-        immediate = true
-)
+//@Component(
+//        name = "org.wso2.carbon.apimgt.rest.api.common.interceptors.ETagInterceptor",
+//        service = Interceptor.class,
+//        immediate = true
+//)
 public class ETagInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(ETagInterceptor.class);
 
@@ -64,11 +64,15 @@ public class ETagInterceptor implements Interceptor {
     @Override
     public boolean preCall(Request request, Response response, ServiceMethodInfo serviceMethodInfo) throws
             APIMgtSecurityException, HandlerException {
-
-        String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
-        if (!requestURI.contains("/api/am/store")) {
-            return true;
-        }
+        return true;
+        
+        
+// todo NOTE: This class implementation is commented due to missing feature from MSF4J. 
+//
+//        String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
+//        if (!requestURI.contains("/api/am/store")) {
+//            return true;
+//        }
 
 //        Method serviceMethod = serviceMethodInfo.getMethod();
 //        HttpResourceModel resourceModel = serviceMethodInfo.getHttpResourceModel();
@@ -92,8 +96,8 @@ public class ETagInterceptor implements Interceptor {
 //        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
 //            log.error("Error while obtaining last updated time", e);
 //        }
-
-        return true;
+//
+//        return true;
     }
 
     /**
