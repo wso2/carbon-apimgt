@@ -4917,7 +4917,7 @@ public final class APIUtil {
                         Entry thisEntry = (Entry) o;
                         String key = (String) thisEntry.getKey();
                         //Instead strictly comparing customUrl, checking whether name is starting with customUrl
-                        //to letting capabilities add multiple URLs if needed
+                        //to allow users to add multiple URLs if needed
                         if(!StringUtils.isEmpty(key) && key.startsWith(APIConstants.CUSTOM_URL)) {
                             String value = (String) thisEntry.getValue();
                             domains.put(key, value);
