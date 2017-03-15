@@ -105,6 +105,43 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * @see APIManager#getLastUpdatedTimeOfAPI(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving the last update time of API with id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        
+        return lastUpdatedTime;
+    }
+
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfSwaggerDefinition(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSwaggerDefinition(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the swagger definition of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
+    }
+
+    /**
      * Checks the Availability of given String
      *
      * @param api   PAI object
@@ -300,6 +337,90 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg + subId);
         }
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfDocument(String) 
+     */
+    @Override 
+    public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocument(documentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving the last updated time of document " + documentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfDocumentContent(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocumentContent(apiId, documentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the document's content " + documentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfAPIThumbnailImage(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the thumbnail image of the API " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfApplication(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfApplication(applicationId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the application " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfSubscription(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the subscription " + subscriptionId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
     }
 
     /**

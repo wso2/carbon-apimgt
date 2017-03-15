@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -7,6 +8,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -82,18 +84,39 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            if (subscription != null) {
-                SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
-                return Response.ok().entity(subscriptionDTO).build();
-            } else {
+            if (subscription == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
+            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             String msg = "Error while getting the subscription " + subscriptionId;
             RestApiUtil.handleInternalServerError(msg, e, log);
         }
         return null;
+    }
+
+    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfSubscription(subscriptionId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of subscription " + subscriptionId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 
     @Override

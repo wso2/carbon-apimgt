@@ -158,6 +158,14 @@ public interface APIPublisher extends APIManager {
     String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
 
     /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration of the API given its uuid
+     * @throws APIManagementException
+     */
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
      * Attach Documentation (without content) to an API
      *
      * @param apiId        UUID of API
@@ -476,4 +484,22 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If failed to register labels.
      */
     void registerGatewayLabels(List<Label> labels) throws APIManagementException;
+    /**
+     * Retrieves the last updated time of the endpoint given its endpointId
+     * 
+     * @param endpointId Id of the endpoint
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of a throttling policy given its policy level and policy name
+     *
+     * @param policyLevel level of throttling policy
+     * @param policyName name of throttling policy
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
 }

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
@@ -52,6 +53,31 @@ public interface ApiDAO {
      */
     @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
+
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of API given its uuid
+     * @throws APIMgtDAOException
+     */
+    String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of Swagger definition given the uuid of API
+     * @throws APIMgtDAOException
+     */
+    String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration given the uuid of API
+     * @throws APIMgtDAOException
+     */ 
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs.
@@ -173,15 +199,6 @@ public interface ApiDAO {
     String getSwaggerDefinition(String apiID) throws APIMgtDAOException;
 
     /**
-     * Update swagger definition of a given API
-     * @param apiID The UUID of the respective API
-     * @param swaggerDefinition Swagger definition String
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     *
-     */
-    void updateSwaggerDefinition(String apiID, String swaggerDefinition) throws APIMgtDAOException;
-
-    /**
      * Get image of a given API
      * @param apiID The UUID of the respective API
      * @return Image stream
@@ -191,14 +208,17 @@ public interface ApiDAO {
     InputStream getImage(String apiID) throws APIMgtDAOException;
 
     /**
-     * Update swagger definition of a given API
-     * @param apiID The UUID of the respective API
-     * @param image Image stream
-     * @param dataType Data Type of image
-     * @throws APIMgtDAOException if error occurs while accessing data layer
+     * Update image of a given API
      *
+     * @param apiID    The UUID of the respective API
+     * @param image    Image stream
+     * @param dataType Data Type of image
+     * @param updatedBy user who adds/updates the API
+     * @param updatedTime the time of adding/updating the API
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateImage(String apiID, InputStream image, String dataType) throws APIMgtDAOException;
+    void updateImage(String apiID, InputStream image, String dataType, String updatedBy,
+            LocalDateTime updatedTime) throws APIMgtDAOException;
 
     /**
      * Change the lifecycle status of a given API
@@ -260,28 +280,32 @@ public interface ApiDAO {
      *
      * @param apiId    UUID of API
      * @param documentInfo {@link DocumentInfo}
+     * @param updatedBy user who performs the action 
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
+    void updateDocumentInfo(String apiId, DocumentInfo documentInfo, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Add Document File content
      *
-     * @param resourceID         UUID of resource
-     * @param content            File content as an InputStream
-     * @param fileName           Name of the file.
+     * @param resourceID UUID of resource
+     * @param content    File content as an InputStream
+     * @param fileName
+     * @param updatedBy user who performs the action
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentFileContent(String resourceID, InputStream content, String fileName) throws APIMgtDAOException;
+    void addDocumentFileContent(String resourceID, InputStream content, String fileName, String updatedBy) throws
+            APIMgtDAOException;
 
     /**
-     * Add Document File content
+     * Add Document Inline content
      *
-     * @param resourceID         UUID of resource
-     * @param content            Inline content as a String
+     * @param resourceID UUID of resource
+     * @param content    Inline content as a String
+     * @param updatedBy user who updates the resource
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentInlineContent(String resourceID, String content) throws APIMgtDAOException;
+    void addDocumentInlineContent(String resourceID, String content, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Delete a document
@@ -361,6 +385,17 @@ public interface ApiDAO {
     List<Endpoint> getEndpoints() throws APIMgtDAOException;
 
     /**
+     * Update swagger definition of a given API
+     *
+     * @param apiID             The UUID of the respective API
+     * @param swaggerDefinition Swagger definition String
+     * @param updatedBy user who performs the update
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateSwaggerDefinition(String apiID, String swaggerDefinition, String updatedBy)
+            throws APIMgtDAOException;
+
+    /**
      * Get gateway configuration of a given API
      * @param apiID The UUID of the respective API
      * @return gateway configuration String
@@ -374,7 +409,62 @@ public interface ApiDAO {
      *
      * @param apiID         api uuid
      * @param gatewayConfig config text
+     * @param updatedBy user who performs the action
      * @throws APIMgtDAOException throws if any error occurred
      */
-    void updateGatewayConfig(String apiID, String gatewayConfig) throws APIMgtDAOException;
+    void updateGatewayConfig(String apiID, String gatewayConfig, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of a document of an API
+     *
+     * @param documentId UUID of document
+     * @return Last updated time of document given its uuid
+     * @throws APIMgtDAOException throws if any DB level error occurred
+     */
+    String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the content of a document of an API
+     *
+     * @param apiId UUID of API
+     * @param documentId UUID of document
+     * @return  Last updated time of document's content
+     * @throws APIMgtDAOException throws if any DB level error occurred
+     */
+    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the thumbnail image of an API
+     *
+     * @param apiId UUID of API
+     * @return  Last updated time of document's content
+     * @throws APIMgtDAOException throws if any db level error occurred
+     */
+    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the endpoint given its endpointId
+     *
+     * @param endpointId Id of the endpoint
+     * @return last updated time 
+     */
+    String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

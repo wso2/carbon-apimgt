@@ -1756,6 +1756,10 @@ definitions:
         type: string
       policy:
         type: string
+      apiName:
+        type: string
+      apiVersion:
+        type: string
       lifeCycleStatus:
         type: string
         enum:
