@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
@@ -196,4 +197,16 @@ public class APIUtils {
         }
         return uriTemplateMap;
     }
+
+    /**
+     * Validate lifecycle state transition is valid from one state to other
+     * @param lifecycleState Lifecycle state object
+     * @param nextState target lifecycle state
+     * @return true if target state is valid
+     */
+    public static boolean validateTargetState(LifecycleState lifecycleState, String nextState) {
+        return lifecycleState.getAvailableTransitionBeanList().stream().anyMatch(availableTransitionBean ->
+                availableTransitionBean.getTargetState().equals(nextState));
+    }
+
 }
