@@ -481,12 +481,14 @@ var jagg = jagg || (function () {
     // following function will generate a url with the currently activated tenant
     var urlTenanted = function(path, parameters){
         //if tenented add tenant url
-        if(getTenantDomain() != null && !(/(\?tenant\=|\&tenant\=)/i.test(path))){
-            if(!parameters){
-                parameters = {};
+        if( site.reverseProxy.tenantHeader == null || request.getHeader(site.reverseProxy.tenantHeader) == null) {
+            if(getTenantDomain() != null && !(/(\?tenant\=|\&tenant\=)/i.test(path))) {
+                if(!parameters) {
+                    parameters = {};
+                }
+                parameters.tenant = getTenantDomain();
             }
-            parameters.tenant = getTenantDomain();
-        }
+	    }
         if(isReverseProxyEnabled()){
             return getHttpsUrl(path, parameters)
         }
