@@ -65,6 +65,7 @@ public class APIMgtConstants {
     public static final String SUPPORTED_HTTP_VERBS = "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS";
 
     public static final String HTTP_GET = "GET";
+    public static final String OVERWRITE_LABELS = "overwrite_labels";
     /**
      * Application statuses.
      */
