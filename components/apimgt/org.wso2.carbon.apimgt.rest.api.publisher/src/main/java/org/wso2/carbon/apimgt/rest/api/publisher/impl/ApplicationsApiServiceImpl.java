@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -29,6 +31,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             Application application = apiPublisher.getApplication(applicationId, username, null);
 
             if (application == null) {
@@ -36,11 +45,26 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
 
             ApplicationDTO applicationDTO = MappingUtil.toApplicationDto(application);
-            return Response.ok().entity(applicationDTO).build();
+            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(applicationDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
             return null;
         }
 
+    }
+
+    public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
+                    .getLastUpdatedTimeOfApplication(applicationId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of application " + applicationId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 }

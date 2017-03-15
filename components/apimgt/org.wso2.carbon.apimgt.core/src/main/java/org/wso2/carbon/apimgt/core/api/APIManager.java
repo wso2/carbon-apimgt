@@ -56,6 +56,24 @@ public interface APIManager {
     API getAPIbyUUID(String uuid) throws APIManagementException;
 
     /**
+     * Retrieves the last updated time of an API
+     * 
+     * @param apiId UUID of API
+     * @return Last updated time of API given its uuid
+     * @throws APIManagementException
+     */
+    String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the swagger definition of an API
+     * 
+     * @param apiId UUID of API
+     * @return Last updated time of swagger definition of the API given its uuid
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException;
+
+    /**
      * Checks the Availability of given String
      * @param api   API object.
      * @return true, if already exists. False, otherwise
@@ -142,6 +160,15 @@ public interface APIManager {
     Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
 
     /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException;
+
+    /**
      * Returns the subscriptions for api
      * @param apiId     UUID of the api
      * @return          List of subscription for the API.
@@ -157,4 +184,41 @@ public interface APIManager {
      * @throws APIManagementException   If failed to get subscription from UUID.
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of a document of an API
+     *
+     * @param documentId UUID of document
+     * @return Last updated time of document given its uuid
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the content of a document of an API
+     * 
+     * @param apiId UUID of API
+     * @param documentId UUID of document
+     * @return  Last updated time of document's content
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the thumbnail image of an API
+     *
+     * @param apiId UUID of API
+     * @return  Last updated time of document's content
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException;
 }
