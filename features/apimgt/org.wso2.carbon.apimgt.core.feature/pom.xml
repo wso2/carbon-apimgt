@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.3-SNAPSHOT</version>
+        <version>7.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -344,6 +344,12 @@
                                     <version>${lucene.bundle.version}</version>
                                 </bundle>
                             </bundles>
+                            <importFeatures>
+                                <feature>
+                                    <id>org.wso2.carbon.lcm.core.feature</id>
+                                    <version>${carbon.lcm.version}</version>
+                                </feature>
+                            </importFeatures>
                         </configuration>
                     </execution>
                 </executions>

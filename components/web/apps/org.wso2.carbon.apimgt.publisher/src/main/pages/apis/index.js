@@ -20,7 +20,6 @@ function onGet(env) {
     if (apiCreated) {
         vars = env.request.queryParams;
     }
-    print("Step 1");
     vars['contextPath'] = env.contextPath;
     return vars;
 }
