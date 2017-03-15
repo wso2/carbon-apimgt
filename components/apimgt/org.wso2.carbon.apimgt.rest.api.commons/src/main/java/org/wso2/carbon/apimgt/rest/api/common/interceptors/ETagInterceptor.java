@@ -28,7 +28,7 @@ import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-import org.wso2.msf4j.internal.router.HandlerException;
+//import org.wso2.msf4j.internal.router.HandlerException;
 //import org.wso2.msf4j.internal.router.HttpMethodInfo;
 //import org.wso2.msf4j.internal.router.HttpMethodInfoBuilder;
 //import org.wso2.msf4j.internal.router.HttpResourceModel;
@@ -63,7 +63,7 @@ public class ETagInterceptor implements Interceptor {
      */
     @Override
     public boolean preCall(Request request, Response response, ServiceMethodInfo serviceMethodInfo) throws
-            APIMgtSecurityException, HandlerException {
+            APIMgtSecurityException {
         return true;
         
         
