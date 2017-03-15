@@ -579,7 +579,7 @@ public class APIPublisherImplTestCase {
         List<LifecycleHistoryBean> lifecycleHistoryBeanList = new ArrayList<>();
         LifecycleHistoryBean bean = new LifecycleHistoryBean();
         bean.setPreviousState("CREATED");
-        bean.setPostState("PUBLISH");
+        bean.setPostState("DEPRECATED");
         bean.setUser(user);
         lifecycleHistoryBeanList.add(bean);
         Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
@@ -610,5 +610,70 @@ public class APIPublisherImplTestCase {
         Mockito.doThrow(new LifecycleException("Couldn't find APILifecycle History for ID " + uuid))
                 .when(apiLifecycleManager).getLifecycleHistory(lifecycleId);
         apiPublisher.getLifeCycleEvents(uuid);
+    }
+
+    @Test(description = "Get api lifecycle data")
+    void getAPILifeCycleData() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        LifecycleState bean = new LifecycleState();
+        bean.setState("CREATED");
+        Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
+        Mockito.doReturn(bean).when(apiLifecycleManager).getCurrentLifecycleState(lifecycleId);
+        apiPublisher.getAPILifeCycleData(uuid);
+    }
+
+    @Test(description = "Get api lifecycle data for a null api",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
+    void getAPILifeCycleDataForNullAPI() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.when(apiDAO.getAPISummary(API_ID)).thenReturn(null);
+        apiPublisher.getAPILifeCycleData(API_ID);
+    }
+
+    @Test(description = "Could not retrieve api summary when Getting api lifecycle data",
+            expectedExceptions = APIMgtDAOException.class)
+    void getAPILifeCycleDataExceptionWhenRetrievingAPISummary() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.when(apiDAO.getAPISummary(API_ID))
+                .thenThrow(new APIMgtDAOException("Couldn't retrieve API Summary for " + API_ID));
+        apiPublisher.getAPILifeCycleData(API_ID);
+    }
+
+    @Test(description = "Could not retrieve api lifecycle when Getting api lifecycle data",
+            expectedExceptions = APIMgtDAOException.class)
+    void getAPILifeCycleDataExceptionWhenRetrievingAPILifeCycle() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
+        Mockito.doThrow(new LifecycleException("Couldn't retrieve API Lifecycle for " + uuid)).when(apiLifecycleManager)
+                .getCurrentLifecycleState(lifecycleId);
+        apiPublisher.getAPILifeCycleData(uuid);
+    }
+
+    @Test(description = "Save thumbnail image for API")
+    void saveThumbnailImage() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
+        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, null, "jpeg");
+    }
+
+    @Test(description = "Exception when saving thumbnail image for API", expectedExceptions = APIMgtDAOException.class)
+    void saveThumbnailImageException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.doThrow(new APIMgtDAOException("Couldn't save the thumbnail image")).when(apiDAO).updateImage(API_ID, null, "jpeg");
+        apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
     }
 }
