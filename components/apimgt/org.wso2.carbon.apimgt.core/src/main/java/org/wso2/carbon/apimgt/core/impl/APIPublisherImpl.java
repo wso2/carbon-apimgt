@@ -534,9 +534,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
                                     (previousAPI.getLifecycleInstanceId()));
-                            getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(),
-                                    APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
-                                    getUsername(), previousAPI.build());
+                            if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
+                                    APIStatus.DEPRECATED.getStatus())) {
+                                getApiLifecycleManager().executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
+                                        APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
+                                        getUsername(), previousAPI.build());
+                            }
                         }
                     }
                 }
