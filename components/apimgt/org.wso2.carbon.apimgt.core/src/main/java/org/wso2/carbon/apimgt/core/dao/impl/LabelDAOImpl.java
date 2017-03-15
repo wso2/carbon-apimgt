@@ -131,6 +131,31 @@ public class LabelDAOImpl implements LabelDAO {
         return matchingLabels;
     }
 
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    static List<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
+        List<String> labelNames = new ArrayList<>();
+
+        if (!labelIDs.isEmpty()) {
+            final String query = "SELECT NAME FROM AM_LABELS WHERE LABEL_ID IN (" +
+                    DAOUtil.getParameterString(labelIDs.size()) + ")";
+
+            try (Connection connection = DAOUtil.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(query)) {
+
+                for (int i = 0; i < labelIDs.size(); ++i) {
+                    statement.setString(i + 1, labelIDs.get(i));
+                }
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        labelNames.add(rs.getString("NAME"));
+                    }
+                }
+            }
+        }
+        return labelNames;
+    }
+
     @Override
     public void deleteLabel(String labelName) throws APIMgtDAOException {
 

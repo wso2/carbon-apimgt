@@ -305,6 +305,12 @@ class API {
         }
     }
 
+    /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
     get(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
@@ -316,6 +322,29 @@ class API {
             return promise_get.then(callback);
         } else {
             return promise_get;
+        }
+    }
+
+    /**
+     * Create a new version of a given API
+     * @param id {string} UUID of the API.
+     * @param version {string} new API version.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    createNewAPIVersion(id,version,callback = null) {
+        console.log("CopyAPI"+id+" "+version);
+        var promise_copy_api = this.client.then(
+            (client) => {
+                return client["API (Individual)"].post_apis_copy_api(
+                    {apiId: id, newVersion: version},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        if (callback) {
+            return promise_copy_api.then(callback);
+        } else {
+            return promise_copy_api;
         }
     }
 
