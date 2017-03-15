@@ -44,11 +44,8 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 
@@ -540,15 +537,16 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
-        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "testDoc");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "testDoc", user);
     }
 
-    @Test(description = "Exception when uploading Documentation File", expectedExceptions = APIManagementException.class)
+    @Test(description = "Exception when uploading Documentation File",
+            expectedExceptions = APIManagementException.class)
     void uploadDocumentationFileException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
-                .addDocumentFileContent(DOC_ID, null, "testDoc");
+                .addDocumentFileContent(DOC_ID, null, "testDoc", user);
         apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
     }
 
@@ -557,7 +555,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         apiPublisher.addDocumentationContent(DOC_ID, "Inline document content");
-        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInlineContent(DOC_ID, "Inline document content");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentInlineContent(DOC_ID, "Inline document content", user);
     }
 
     @Test(description = "Update Documentation Info")
@@ -567,7 +565,7 @@ public class APIPublisherImplTestCase {
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo, user);
     }
 
     @Test(description = "Unable to update documentation info", expectedExceptions = APIMgtDAOException.class)
@@ -577,7 +575,7 @@ public class APIPublisherImplTestCase {
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation")).when(apiDAO)
-                .updateDocumentInfo(API_ID, documentInfo);
+                .updateDocumentInfo(API_ID, documentInfo, user);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
 
@@ -720,7 +718,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
-        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, null, "jpeg");
+        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, null, "jpeg", user, LocalDateTime.now());
     }
 
     @Test(description = "Exception when saving thumbnail image for API", expectedExceptions = APIMgtDAOException.class)
@@ -728,7 +726,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
         Mockito.doThrow(new APIMgtDAOException("Couldn't save the thumbnail image")).when(apiDAO)
-                .updateImage(API_ID, null, "jpeg");
+                .updateImage(API_ID, null, "jpeg", user, LocalDateTime.now());
         apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
     }
 
