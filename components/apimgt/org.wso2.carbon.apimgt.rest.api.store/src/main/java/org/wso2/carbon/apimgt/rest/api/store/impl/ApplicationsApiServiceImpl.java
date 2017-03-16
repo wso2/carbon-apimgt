@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -68,6 +69,13 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 if (application.getKeys() != null) {
@@ -95,7 +103,7 @@ public class ApplicationsApiServiceImpl
 
                 }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-
+                return Response.ok().entity(applicationDTO).header("Etag", "\"" + existingFingerprint + "\"").build();
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
@@ -114,7 +122,30 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(applicationDTO).build();
+    }
+
+    /**
+     * Retrieves the fingerprint of a application given its UUID
+     * 
+     * @param applicationId application Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return Retrieves the fingerprint of a application
+     */
+    public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfApplication(applicationId);
+            return ETagGenerator.getETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of application " + applicationId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 
     @Override
@@ -255,6 +286,6 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
-            return Response.created(location).entity(createdApplicationDTO).build();
+        return Response.created(location).entity(createdApplicationDTO).build();
     }
 }
