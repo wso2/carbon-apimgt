@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.io.InputStream;
 import java.util.List;
@@ -56,9 +58,11 @@ public abstract class AbstractAPIManager implements APIManager {
     private String username;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
+    private WorkflowDAO workflowDAO;
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO)  {
+    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
+            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -66,6 +70,7 @@ public abstract class AbstractAPIManager implements APIManager {
         this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
+        this.workflowDAO = workflowDAO;
     }
 
     /**
@@ -92,7 +97,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from String
      */
-    @Override public API getAPIbyUUID(String uuid) throws APIManagementException {
+    @Override
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
@@ -460,6 +466,10 @@ public abstract class AbstractAPIManager implements APIManager {
     protected LabelDAO getLabelDAO() {
         return labelDAO;
     }
+    
+    protected WorkflowDAO getWorkflowDAO() {
+        return workflowDAO;
+    }
 
     protected String getUsername() {
         return username;
@@ -477,4 +487,11 @@ public abstract class AbstractAPIManager implements APIManager {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
+    
+    @Override
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {        
+        return workflowDAO.retrieveWorkflow(workflowRefId);
+    }
+    
+   
 }

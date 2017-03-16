@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 import java.sql.Connection;
@@ -215,6 +216,34 @@ public class DAOFactory {
         setup();
 
         return labelDAO;
+    }
+    
+    public static WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
+        WorkflowDAO workflowDAO = null;
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+                workflowDAO = new WorkflowDAOImpl();
+            } else if (driverName.contains("DB2")) {
+
+            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+                workflowDAO = new WorkflowDAOImpl();
+            } else if (driverName.contains("PostgreSQL")) {
+                workflowDAO = new WorkflowDAOImpl();
+            } else if (driverName.contains("Oracle")) {
+                workflowDAO = new WorkflowDAOImpl();
+            } else {
+                throw new APIMgtDAOException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+        setup();
+
+        return workflowDAO;
     }
 
     /**

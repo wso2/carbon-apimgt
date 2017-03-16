@@ -30,34 +30,47 @@ import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
+import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -81,8 +94,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private TagDAO tagDAO;
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO);
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
+            WorkflowDAO workflowDAO) {
+        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
+                workflowDAO);
         this.tagDAO = tagDAO;
     }
 
@@ -228,19 +243,61 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public String addApiSubscription(String apiId, String applicationId, String tier)
+    public SubscriptionResponse addApiSubscription(String apiId, String applicationId, String tier)
             throws APIManagementException {
+        
+        SubscriptionResponse subScriptionResponse;
         // Generate UUID for application
         String subscriptionId = UUID.randomUUID().toString();
         try {
             getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
-                    APIMgtConstants.SubscriptionStatus.ACTIVE);
+                    APIMgtConstants.SubscriptionStatus.BLOCKED);
+            
+            
+            WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+
+            SubscriptionWorkflow workflow = new SubscriptionWorkflow();
+            
+            workflow.setCreatedTime(LocalDateTime.now());      
+            workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
+            workflow.setWorkflowReference(subscriptionId);
+            workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            
+            
+            API api = getAPIbyUUID(apiId);
+            workflow.setApiName(api.getName());
+            workflow.setApiContext(api.getContext());
+            workflow.setApiVersion(api.getVersion());
+            workflow.setApiProvider(api.getProvider());
+            workflow.setApiId(apiId);
+            
+            workflow.setTierName(tier);
+            
+            Application application = getApplicationByUuid(applicationId);
+            workflow.setApplicationName(application.getName());
+            workflow.setApplicationId(applicationId);
+            //workflow.setSubscriber(userId); //TODO check
+            WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
+            
+            addWorkflowEntries(workflow);          
+
+            
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                completeWorkflow(addSubscriptionWFExecutor, workflow);
+            }      
+
+            subScriptionResponse = new SubscriptionResponse(subscriptionId, response);
+            
+            
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while adding api subscription for api - " + apiId;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return subscriptionId;
+ 
+        return subScriptionResponse;
     }
 
     @Override
@@ -365,7 +422,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public String addApplication(Application application) throws APIManagementException {
+    public ApplicationCreationResponse addApplication(Application application) throws APIManagementException {
+        ApplicationCreationResponse applicationResponse = null;
         String applicationUuid = null;
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
@@ -401,8 +459,27 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
+
+            WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            
+            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
+
+            workflow.setApplication(application);           
+            workflow.setWorkflowReference(application.getId());
+            workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
+            workflow.setCreatedTime(LocalDateTime.now());            
+            WorkflowResponse response = appCreationWFExecutor.execute(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
+            addWorkflowEntries(workflow);
+            
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                completeWorkflow(appCreationWFExecutor, workflow);
+            }      
+
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
-            applicationUuid = application.getId();
+            
+            applicationResponse = new ApplicationCreationResponse(application.getId(), response);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while creating the application - " + application.getName();
             log.error(errorMsg, e);
@@ -412,9 +489,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     application.getName();
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
-        }
-        return applicationUuid;
-        //// TODO: 16/11/16 Workflow related implementation has to be done 
+        } catch (WorkflowException e) {
+            String errorMsg = "Error occurred in workflow";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.WORKFLOW_EXCEPTION);
+        } 
+        return applicationResponse;
     }
 
     /**
@@ -508,5 +588,86 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     public Map<String, EventObserver> getEventObservers() {
         return eventObservers;
+    }
+    
+    public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
+
+        if (workflow instanceof ApplicationCreationWorkflow) {
+            if (workflow.getWorkflowReference() == null) {
+                String message = "Error while changing the application state. Missing application UUID";
+                log.error(message);
+                throw new WorkflowException(message);
+            }
+
+            WorkflowResponse response = workflowExecutor.complete(workflow);
+
+            // setting the workflow status from the one getting from the executor. this gives the executor developer
+            // to change the state as well.
+            workflow.setStatus(response.getWorkflowStatus());
+            updateWorkflowEntries(workflow);
+            String applicationState = "";
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                // TODO do whatever needed here
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Approved");
+                }
+                // TODO check the application state is same as wf state.
+                applicationState = response.getWorkflowStatus().toString();
+
+            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Rejected");
+                }
+                applicationState = response.getWorkflowStatus().toString();
+            }
+            getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
+
+        } else if (workflow instanceof SubscriptionWorkflow) {
+            if (workflow.getWorkflowReference() == null) {
+                String message = "Error while changing the Subscription state. Missing application UUID";
+                log.error(message);
+                throw new WorkflowException(message);
+            }
+
+            WorkflowResponse response = workflowExecutor.complete(workflow);
+            SubscriptionStatus subscriptionState = null;
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                // TODO do whatever needed here
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Approved");
+                }
+
+                subscriptionState = APIMgtConstants.SubscriptionStatus.ACTIVE;
+
+            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Rejected");
+                }
+                subscriptionState = APIMgtConstants.SubscriptionStatus.REJECTED;
+            }
+
+            getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
+        } else {
+            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new WorkflowException(message);
+        }
+
+    }
+    
+    private void updateWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
+        workflow.setUpdatedTime(LocalDateTime.now());
+        getWorkflowDAO().updateWorkflowStatus(workflow);
+        //TODO stats stuff
+    }
+
+
+    private void addWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
+        
+        //TODO if needed to stop adding entries to simple workflow, then do a validation here for state (Completed) and
+        // prevent it from adding it to the db
+        getWorkflowDAO().addWorkflowEntry(workflow);
+        
+
     }
 }

@@ -47,7 +47,7 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testSearchAPIByUUID() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
         API api = apiStore.getAPIbyUUID(UUID);
@@ -58,7 +58,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplication(UUID, USER_NAME, null);
@@ -69,7 +69,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve documentation summary given the id")
     public void testGetDocumentationSummary() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         DocumentInfo documentInfoMock = SampleTestObjectCreator.getMockDocumentInfoObject(UUID);
         when(apiDAO.getDocumentInfo(UUID)).thenReturn(documentInfoMock);
         DocumentInfo documentInfo = apiStore.getDocumentationSummary(UUID);
@@ -80,7 +80,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve list of documentations")
     public void testAllDocumentation() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         List<DocumentInfo> documentInfoMockList = SampleTestObjectCreator.getMockDocumentInfoObjectsList();
         when(apiDAO.getDocumentsInfoList(UUID)).thenReturn(documentInfoMockList);
         List<DocumentInfo> documentInfoList = apiStore.getAllDocumentation(UUID, 1, 10);
