@@ -35,8 +35,12 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddGetLabels() throws Exception {
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
-        Label label2 = SampleTestObjectCreator.createLabel("private", "https://test.private");
+        List<String> accessUrls1 = new ArrayList<>();
+        accessUrls1.add("https://test.public");
+        accessUrls1.add("http://test.public");
+        Label label1 = SampleTestObjectCreator.createLabel("public").accessUrls(accessUrls1).build();
+
+        Label label2 = SampleTestObjectCreator.createLabel("private").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label1);
         labelList.add(label2);
@@ -50,21 +54,15 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testAddDuplicateLabelName() throws Exception {
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label1 = SampleTestObjectCreator.createLabel("public").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label1);
         labelDAO.addLabels(labelList);
 
-        Label label2 = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label2 = SampleTestObjectCreator.createLabel("public").build();
         labelList.add(label2);
 
-        try {
-            labelDAO.addLabels(labelList);
-            Assert.fail("Exception not thrown for adding duplicate Label");
-        } catch (APIMgtDAOException e) {
-            // Just catch the exception so that we can continue execution
-        }
-
+        labelDAO.addLabels(labelList);
         List<Label> labelsFromDb = labelDAO.getLabels();
         Assert.assertNotNull(labelsFromDb);
         Assert.assertEquals(labelsFromDb.size(), 1);
@@ -74,7 +72,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     public void testGetLabelByName() throws Exception {
 
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label = SampleTestObjectCreator.createLabel("public").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label);
         labelDAO.addLabels(labelList);
@@ -88,8 +86,8 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     public void testGetLabelsByName() throws Exception {
 
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
-        Label label2 = SampleTestObjectCreator.createLabel("private", "https://test.private");
+        Label label1 = SampleTestObjectCreator.createLabel("public").build();
+        Label label2 = SampleTestObjectCreator.createLabel("private").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label1);
         labelList.add(label2);
@@ -108,7 +106,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
     public void testDeleteLabel() throws Exception {
 
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label = SampleTestObjectCreator.createLabel("public", "https://test.public");
+        Label label = SampleTestObjectCreator.createLabel("public").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label);
         labelDAO.addLabels(labelList);

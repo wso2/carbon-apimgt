@@ -3625,12 +3625,14 @@ definitions:
     title: Label
     required:
       - name
-      - access_url
+      - access_urls
     properties:
       name:
         type: string
-      access_url:
-        type: string
+      access_urls:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Label List resource
