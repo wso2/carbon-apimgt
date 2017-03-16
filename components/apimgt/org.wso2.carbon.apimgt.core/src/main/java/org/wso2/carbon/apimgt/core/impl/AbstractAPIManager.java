@@ -424,6 +424,23 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * @see APIManager#getLastUpdatedTimeOfThrottlingPolicy(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
+            throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getPolicyDAO().getLastUpdatedTimeOfThrottlingPolicy(policyLevel, policyName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
      * Returns the subscriptions for api
      *
      * @param apiId UUID of the API.
