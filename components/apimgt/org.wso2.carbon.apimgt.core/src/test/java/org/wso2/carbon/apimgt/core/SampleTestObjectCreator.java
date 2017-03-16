@@ -30,7 +30,10 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -48,6 +51,7 @@ public class SampleTestObjectCreator {
     public static String apiDefinition;
     public static InputStream inputStream;
     static String endpointId = UUID.randomUUID().toString();
+    
     static {
         try {
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
@@ -376,5 +380,15 @@ public class SampleTestObjectCreator {
                 name(name).
                 accessUrls(accessUrls1);
         return label;
+    }
+
+    public static Workflow createWorkflow(String workflowReferenceID) {
+        Workflow workflow = new Workflow();      
+        workflow.setExternalWorkflowReference(workflowReferenceID);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflow.setCreatedTime(LocalDateTime.now());
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow.setWorkflowReference(UUID.randomUUID().toString());        
+        return workflow;
     }
 }
