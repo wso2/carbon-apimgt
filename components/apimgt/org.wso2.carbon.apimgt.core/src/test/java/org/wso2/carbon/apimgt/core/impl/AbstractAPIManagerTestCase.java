@@ -96,7 +96,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIMgtDAOException.class)
     public void testGetApplicationByUuidException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
         doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO)
                 .getApplication(UUID);
         apiStore.getApplication(UUID, USER_NAME, null);
@@ -106,7 +106,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIMgtDAOException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getDocumentInfo(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getDocumentationSummary(UUID);
@@ -116,7 +116,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIMgtDAOException.class)
     public void testAllDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getDocumentsInfoList(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getAllDocumentation(UUID, 1, 10);
@@ -125,7 +125,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting API by UUID", expectedExceptions = APIMgtDAOException.class)
     public void testSearchAPIByUUIDException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getAPI(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID));
         apiStore.getAPIbyUUID(UUID);

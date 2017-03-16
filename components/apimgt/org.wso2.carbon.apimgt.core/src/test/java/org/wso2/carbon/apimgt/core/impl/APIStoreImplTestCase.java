@@ -163,7 +163,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         application.setPermissionString(null);
@@ -180,7 +181,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         application.setPermissionString("");
@@ -197,7 +199,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         application.setPermissionString("[{\"groupId\": \"testGroup\",\"permission\":[\"TESTREAD\",\"TESTUPDATE\"]}]");
@@ -213,8 +216,10 @@ public class APIStoreImplTestCase {
     public void testAddSubscription() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                null);
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
         SubscriptionResponse subscriptionResponse = apiStore.addApiSubscription(API_ID, UUID, TIER);
         String subscriptionId = subscriptionResponse.getSubscriptionUUID();
         Assert.assertNotNull(subscriptionId);
@@ -249,7 +254,8 @@ public class APIStoreImplTestCase {
     public void testAddApplicationNullTier() throws Exception {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(null);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
@@ -260,7 +266,8 @@ public class APIStoreImplTestCase {
     public void testAddApplicationNullPolicy() throws Exception {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);

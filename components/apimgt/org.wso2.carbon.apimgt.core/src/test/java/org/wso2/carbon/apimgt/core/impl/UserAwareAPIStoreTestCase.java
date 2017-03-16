@@ -52,7 +52,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Try delete null application", expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteApplicationNull() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         apiStore.deleteApplication(UUID);
     }
 
@@ -60,7 +60,7 @@ public class UserAwareAPIStoreTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteApplicationAnonymousUser() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
@@ -82,7 +82,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Try update null application", expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationNull() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         apiStore.updateApplication(UUID, null);
     }
 
@@ -90,7 +90,7 @@ public class UserAwareAPIStoreTestCase {
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationAnonymousUser() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
         Application newApplication = new Application("NEW_APP", null);
@@ -105,7 +105,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Exception when deleting application", expectedExceptions = APIMgtDAOException.class)
     public void testDeleteApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(USER_NAME);
         when(applicationDAO.getApplication(UUID))
@@ -116,7 +116,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Exception when updating application", expectedExceptions = APIMgtDAOException.class)
     public void testUpdateApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         Application newApplication = new Application("NEW_APP", null);
         applicationFromDAO.setCreatedUser(USER_NAME);
