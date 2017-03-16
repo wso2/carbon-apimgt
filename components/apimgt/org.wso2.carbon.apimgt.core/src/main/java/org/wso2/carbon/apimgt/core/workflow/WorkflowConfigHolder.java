@@ -57,15 +57,94 @@ public class WorkflowConfigHolder {
             WorkflowConfig config = WorkflowExtensionsConfigBuilder.getWorkflowConfig();
 
             // Load application creation workflow configurations
-            WorkflowExecutorInfo applicationCreationConfig = config.getApplicationCreation();
-            String executorClass = applicationCreationConfig.getExecutor();
+            WorkflowExecutorInfo workflowConfig = config.getApplicationCreation();
+            String executorClass = workflowConfig.getExecutor();
             Class clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             WorkflowExecutor workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-            List<WorkflowConfigProperties> properties = applicationCreationConfig.getProperty();
+            List<WorkflowConfigProperties> properties = workflowConfig.getProperty();
             if (properties != null) {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, workFlowExecutor);
+            
+/*            // Load application deletion workflow configurations
+            workflowConfig = config.getSubscriptionDeletion();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }            
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);  
+*/    
+            
+            // Load subscription creation workflow configurations
+            workflowConfig = config.getSubscriptionCreation();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }            
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
+            
+/*            // Load subscription deletion workflow configurations
+            workflowConfig = config.getSubscriptionDeletion();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }            
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
+            
+            // Load production token generation workflow configurations
+            workflowConfig = config.getProductionApplicationRegistration();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION, workFlowExecutor);
+            
+            // Load sandbox token generation workflow configurations
+            workflowConfig = config.getProductionApplicationRegistration();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX, workFlowExecutor);
+            
+            // Load api state change workflow configurations
+            workflowConfig = config.getApiStateChange();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_STATE, workFlowExecutor);
+            
+            // Load singnup workflow configurations
+            workflowConfig = config.getUserSignUp();
+            executorClass = workflowConfig.getExecutor();
+            clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+            properties = workflowConfig.getProperty();
+            if (properties != null) {
+                loadProperties(properties, workFlowExecutor);
+            }
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP, workFlowExecutor);
+*/
 
         } catch (ClassNotFoundException e) {
             log.error("Unable to find class", e);

@@ -29,9 +29,9 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 /**
  * This workflow connects to external bpmn process engine
  */
-public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationWSWorkflowExecutor.class);
-
+public class SubscriptionCreationWSWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(SubscriptionCreationWSWorkflowExecutor.class);
+    
     private String processDefinitionKey;
     private String username;
     private String password;
@@ -45,18 +45,19 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
+            log.info("Executing Subscription creation WS Workflow..");
         }
-
+    
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        // set the state to approved
+        //set the state to approved
         workflowResponse.setWorkflowStatus(WorkflowStatus.CREATED);
-
-        // TODO add BPMN rest calls
+        
+        //TODO add BPMN rest calls
         log.info("======= Defined Property: processDefinitionKey - " + getProcessDefinitionKey() + ", username -"
                 + getUsername());
         log.info("======= WF external ref: " + workFlow.getExternalWorkflowReference());
-
+        
+        
         return workflowResponse;
     }
 
@@ -69,11 +70,11 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Application creation Workflow..");
+            log.info("Complete  Subscription creation WS Workflow..");
         }
-
-        log.info("======= WF Complete() =====" + workFlow.toString());
-
+        
+        log.info("======= WF Complete() =====" + workFlow.toString()); 
+        
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(workFlow.getStatus());
         return workflowResponse;
@@ -81,7 +82,7 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
 
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-
+        
     }
 
     public String getProcessDefinitionKey() {
@@ -106,5 +107,6 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
 
     public void setPassword(String password) {
         this.password = password;
-    }
+    }   
+    
 }

@@ -27,14 +27,10 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
- * This workflow connects to external bpmn process engine
+ * This is a simple work flow extension to have Subscription creation process
  */
-public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationWSWorkflowExecutor.class);
-
-    private String processDefinitionKey;
-    private String username;
-    private String password;
+public class SubscriptionCreationSimpleWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(SubscriptionCreationSimpleWorkflowExecutor.class);
 
     /**
      * Execute the workflow executor
@@ -45,18 +41,12 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
+            log.info("Executing Subscription creation Workflow..");
         }
-
+    
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        // set the state to approved
-        workflowResponse.setWorkflowStatus(WorkflowStatus.CREATED);
-
-        // TODO add BPMN rest calls
-        log.info("======= Defined Property: processDefinitionKey - " + getProcessDefinitionKey() + ", username -"
-                + getUsername());
-        log.info("======= WF external ref: " + workFlow.getExternalWorkflowReference());
-
+        //set the state to approved
+        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
         return workflowResponse;
     }
 
@@ -69,10 +59,8 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Application creation Workflow..");
+            log.info("Complete  Subscription creation Workflow..");
         }
-
-        log.info("======= WF Complete() =====" + workFlow.toString());
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(workFlow.getStatus());
@@ -81,30 +69,6 @@ public class ApplicationCreationWSWorkflowExecutor implements WorkflowExecutor {
 
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-
-    }
-
-    public String getProcessDefinitionKey() {
-        return processDefinitionKey;
-    }
-
-    public void setProcessDefinitionKey(String processDefinitionKey) {
-        this.processDefinitionKey = processDefinitionKey;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+        
     }
 }

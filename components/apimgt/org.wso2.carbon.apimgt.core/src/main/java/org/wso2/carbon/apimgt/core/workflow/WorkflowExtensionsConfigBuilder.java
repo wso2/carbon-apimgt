@@ -44,17 +44,31 @@ import java.util.stream.Stream;
 public class WorkflowExtensionsConfigBuilder {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowExtensionsConfigBuilder.class);
     public static final String WORKFLOW_CONFIG_YML = "workflow-extensions.yml";
-    
-    //TODO move to Constant file
+
+    // TODO move to Constant file
     public static final String WF_DEFAULT_APPCREATION_EXEC = 
             "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
-    
+    private static final String WF_DEFAULT_APISTATE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.APIStateChangeSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_PRODAPP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_SANDBOXAPP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_APPDELETE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_SUBCREATION_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_SUBDELETE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
+    private static final String WF_DEFAULT_SIGNUP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.UserSignUpSimpleWorkflowExecutor";
+
     private static WorkflowConfig workflowConfig;
 
     public static WorkflowConfig getWorkflowConfig() {
-        
-        if (workflowConfig == null) {                    
-            build(generateDefaultConfigurations()); 
+
+        if (workflowConfig == null) {
+            build(generateDefaultConfigurations());
         }
         return workflowConfig;
     }
@@ -129,14 +143,41 @@ public class WorkflowExtensionsConfigBuilder {
             return Optional.empty();
         }
     }
-    
+
     private static WorkflowConfig generateDefaultConfigurations() {
         WorkflowConfig defaultConfig = new WorkflowConfig();
         WorkflowExecutorInfo applicationCreation = new WorkflowExecutorInfo();
         applicationCreation.setExecutor(WF_DEFAULT_APPCREATION_EXEC);
         defaultConfig.setApplicationCreation(applicationCreation);
-        //TODO add other executors
-        
+
+        WorkflowExecutorInfo apiStateChange = new WorkflowExecutorInfo();
+        apiStateChange.setExecutor(WF_DEFAULT_APISTATE_EXEC);
+        defaultConfig.setApiStateChange(apiStateChange);
+
+        WorkflowExecutorInfo productionApplicationRegistration = new WorkflowExecutorInfo();
+        productionApplicationRegistration.setExecutor(WF_DEFAULT_PRODAPP_EXEC);
+        defaultConfig.setProductionApplicationRegistration(productionApplicationRegistration);
+
+        WorkflowExecutorInfo applicationDeletion = new WorkflowExecutorInfo();
+        applicationDeletion.setExecutor(WF_DEFAULT_APPDELETE_EXEC);
+        defaultConfig.setApplicationDeletion(applicationDeletion);
+
+        WorkflowExecutorInfo sandboxApplicationRegistration = new WorkflowExecutorInfo();
+        sandboxApplicationRegistration.setExecutor(WF_DEFAULT_SANDBOXAPP_EXEC);
+        defaultConfig.setSandboxApplicationRegistration(sandboxApplicationRegistration);
+
+        WorkflowExecutorInfo subscriptionCreation = new WorkflowExecutorInfo();
+        subscriptionCreation.setExecutor(WF_DEFAULT_SUBCREATION_EXEC);
+        defaultConfig.setSubscriptionCreation(subscriptionCreation);
+
+        WorkflowExecutorInfo subscriptionDeletion = new WorkflowExecutorInfo();
+        subscriptionDeletion.setExecutor(WF_DEFAULT_SUBDELETE_EXEC);
+        defaultConfig.setSubscriptionDeletion(subscriptionDeletion);
+
+        WorkflowExecutorInfo userSignUp = new WorkflowExecutorInfo();
+        userSignUp.setExecutor(WF_DEFAULT_SIGNUP_EXEC);
+        defaultConfig.setUserSignUp(userSignUp);
+
         return defaultConfig;
     }
 }

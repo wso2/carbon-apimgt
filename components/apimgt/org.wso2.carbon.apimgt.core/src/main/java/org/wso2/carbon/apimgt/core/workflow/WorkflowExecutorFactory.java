@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
 /**
@@ -59,31 +60,36 @@ public class WorkflowExecutorFactory {
     /**
      * Create a DTO object related to a given workflow type.
      *
-     * @param wfType Type of the workflow.
+     * @param workflowType Type of the workflow.
      */
-    public Workflow createWorkflow(String wfType) {
+    public Workflow createWorkflow(String workflowType) {
         Workflow workflow = null;
-        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType)) {
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)) {
             workflow = new ApplicationCreationWorkflow();
-            workflow.setWorkflowType(wfType);
-        }/*else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)){
-            workflowDTO = new ApplicationRegistrationWorkflowDTO();
-            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)){
-            workflowDTO = new ApplicationRegistrationWorkflowDTO();
-            ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
-            workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
-            workflowDTO = new SubscriptionWorkflowDTO();
-            workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
-            workflowDTO = new WorkflowDTO();
-            workflowDTO.setWorkflowType(wfType);
-        }else if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(wfType)){
-            workflowDTO = new APIStateWorkflowDTO();
-            workflowDTO.setWorkflowType(wfType);
-        }*/
+            workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(workflowType)) {
+           // workflow = new ApplicationRegistrationWorkflowDTO();
+           // ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+           // workflowDTO.setWorkflowType(wfType);
+            workflow = new Workflow();
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(workflowType)) {
+           // workflowDTO = new ApplicationRegistrationWorkflowDTO();
+           // ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+           // workflowDTO.setWorkflowType(wfType);
+            workflow = new Workflow();
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
+            workflow = new SubscriptionWorkflow();
+            workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(workflowType)) {
+            //workflowDTO = new WorkflowDTO();
+            //workflowDTO.setWorkflowType(wfType);
+            workflow = new Workflow();
+            workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
+            //workflowDTO = new APIStateWorkflowDTO();
+            //workflowDTO.setWorkflowType(wfType);
+            workflow = new Workflow();
+        }
         
         return workflow;
     }
@@ -97,7 +103,7 @@ public class WorkflowExecutorFactory {
 
     }
 
-    private static void handleException(String msg, Exception e) throws WorkflowException {
+    private void handleException(String msg, Exception e) throws WorkflowException {
         log.error(msg, e);
         throw new WorkflowException(msg, e);
     }
