@@ -1,7 +1,8 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import org.wso2.carbon.apimgt.core.util.APIUtils;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,19 +11,19 @@ import java.util.Objects;
  */
 public final class Label {
     private final String name;
-    private final String accessUrl;
+    private final List<String> accessUrls;
 
     private Label(Builder builder) {
         name = builder.name;
-        accessUrl = builder.accessUrl;
+        accessUrls = builder.accessUrls;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAccessUrl() {
-        return accessUrl;
+    public List<String> getAccessUrls() {
+        return accessUrls;
     }
 
     @Override
@@ -37,19 +38,19 @@ public final class Label {
 
         Label label = (Label) o;
         return Objects.equals(name, label.name) &&
-                Objects.equals(accessUrl, label.accessUrl);
+                APIUtils.isListsEqualIgnoreOrder(accessUrls, label.accessUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, accessUrl);
+        return Objects.hash(name, accessUrls);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("name", name)
-                .append("accessUrl", accessUrl)
+                .append("accessUrls", accessUrls)
                 .toString();
     }
 
@@ -58,14 +59,14 @@ public final class Label {
      */
     public static final class Builder {
         private String name;
-        private String accessUrl;
+        private List<String> accessUrls;
 
         public Builder() {
         }
 
         public Builder(Label label) {
             this.name = label.name;
-            this.accessUrl = label.accessUrl;
+            this.accessUrls = label.accessUrls;
         }
 
         /**
@@ -80,14 +81,14 @@ public final class Label {
         }
 
         /**
-         * Sets the {@code accessUrl} and returns a reference to this Builder so that the methods can be chained
+         * Sets the {@code accessUrls} and returns a reference to this Builder so that the methods can be chained
          * together.
          *
-         * @param accessUrl the {@code accessUrl} to set
+         * @param accessUrls the {@code accessUrls} to set
          * @return a reference to this Builder
          */
-        public Builder accessUrl(String accessUrl) {
-            this.accessUrl = accessUrl;
+        public Builder accessUrls(List<String> accessUrls) {
+            this.accessUrls = accessUrls;
             return this;
         }
 

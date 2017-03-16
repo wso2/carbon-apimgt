@@ -368,10 +368,13 @@ public class SampleTestObjectCreator {
         return uriTemplateMap;
     }
 
-    public static Label createLabel(String name, String accessUrl) {
-        Label label = new Label.Builder().
+    public static Label.Builder createLabel(String name) {
+
+        List<String> accessUrls1 = new ArrayList<>();
+        accessUrls1.add("https://test." + name);
+        Label.Builder label = new Label.Builder().
                 name(name).
-                accessUrl(accessUrl).build();
+                accessUrls(accessUrls1);
         return label;
     }
 }

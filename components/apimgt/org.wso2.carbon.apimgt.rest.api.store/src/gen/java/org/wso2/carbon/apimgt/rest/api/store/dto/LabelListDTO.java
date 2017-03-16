@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.LabelDTO;
 /**
  * LabelListDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-16T11:31:09.449+05:30")
 public class LabelListDTO   {
   @JsonProperty("count")
   private Integer count = null;

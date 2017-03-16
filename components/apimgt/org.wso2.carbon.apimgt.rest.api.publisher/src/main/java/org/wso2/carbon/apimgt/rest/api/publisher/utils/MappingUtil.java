@@ -404,7 +404,7 @@ public class MappingUtil {
         for (Label label : labels) {
             LabelDTO labelDTO = new LabelDTO();
             labelDTO.setName(label.getName());
-            labelDTO.setAccessUrl(label.getAccessUrl());
+            labelDTO.setAccessUrls(label.getAccessUrls());
             labelDTOs.add(labelDTO);
         }
         return labelDTOs;
