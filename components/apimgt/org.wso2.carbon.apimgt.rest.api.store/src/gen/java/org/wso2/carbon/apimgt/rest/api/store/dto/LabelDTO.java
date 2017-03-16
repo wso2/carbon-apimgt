@@ -5,17 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * LabelDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-16T11:31:09.449+05:30")
 public class LabelDTO   {
   @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("access_url")
-  private String accessUrl = null;
+  @JsonProperty("access_urls")
+  private List<String> accessUrls = new ArrayList<String>();
 
   public LabelDTO name(String name) {
     this.name = name;
@@ -35,22 +37,27 @@ public class LabelDTO   {
     this.name = name;
   }
 
-  public LabelDTO accessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public LabelDTO accessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
+    return this;
+  }
+
+  public LabelDTO addAccessUrlsItem(String accessUrlsItem) {
+    this.accessUrls.add(accessUrlsItem);
     return this;
   }
 
    /**
-   * Get accessUrl
-   * @return accessUrl
+   * Get accessUrls
+   * @return accessUrls
   **/
   @ApiModelProperty(required = true, value = "")
-  public String getAccessUrl() {
-    return accessUrl;
+  public List<String> getAccessUrls() {
+    return accessUrls;
   }
 
-  public void setAccessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public void setAccessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
   }
 
 
@@ -64,12 +71,12 @@ public class LabelDTO   {
     }
     LabelDTO label = (LabelDTO) o;
     return Objects.equals(this.name, label.name) &&
-        Objects.equals(this.accessUrl, label.accessUrl);
+        Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, accessUrl);
+    return Objects.hash(name, accessUrls);
   }
 
   @Override
@@ -78,7 +85,7 @@ public class LabelDTO   {
     sb.append("class LabelDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    accessUrl: ").append(toIndentedString(accessUrl)).append("\n");
+    sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();
   }
