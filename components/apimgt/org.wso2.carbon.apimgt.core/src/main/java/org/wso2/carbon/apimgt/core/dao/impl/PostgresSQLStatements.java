@@ -59,7 +59,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
         final String query =
-                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '&')) AND "
+                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+')) AND "
                         + "((GROUP_ID IN (" + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) GROUP BY UUID "
                         + "ORDER BY NAME LIMIT ? OFFSET ?";
         int queryIndex = 1;
