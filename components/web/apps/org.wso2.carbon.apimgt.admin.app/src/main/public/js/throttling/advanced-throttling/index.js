@@ -1,9 +1,8 @@
 $(function () {
-
-    var bearerToken = "Basic YWRtaW46YWRtaW4=";
-    var swaggerClient = new SwaggetClient({
-        url:swaggerUrl,
-        succss: function (swaggerData) {
+    debugger;
+    var swaggerClient = new SwaggerClient({
+        url: swaggerURL,
+        success: function (swaggerData) {
             setAuthHeader(swaggerData);
             swaggerClient["Throttling Tier Collection"].get_policies({"responseContentType": 'application/json'},
             function (jsonData) {
@@ -12,15 +11,26 @@ $(function () {
                 };
                 var callbacks = {
                     onSuccess: function () {
+                        _initDataTable(raw_data);
 
                     },
                     onFailure: function (message, e) {
 
                     }
                 };
+                var mode = "OVERWRITE";
+                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-view", jsonData.obj,
+                                         "policy-view", mode, callbacks);
+            }, function (error) {
+                        if (error.status == 401) {
+                            redirectToLogin(contextPath);
+                        }
+                    }
+            );
 
-            })
-
+        },
+        failure: function (error) {
+            console.log("Error occurred while loading swagger definition");
         }
     });
 
