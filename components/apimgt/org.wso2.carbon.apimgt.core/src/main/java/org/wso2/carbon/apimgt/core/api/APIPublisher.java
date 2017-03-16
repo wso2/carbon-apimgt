@@ -161,7 +161,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId UUID of API
      * @return Last updated time of gateway configuration of the API given its uuid
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 

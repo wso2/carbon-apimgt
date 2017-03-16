@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
@@ -251,8 +252,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String subscriptionId = UUID.randomUUID().toString();
         try {
             getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
-                    APIMgtConstants.SubscriptionStatus.BLOCKED);
-            
+                    APIMgtConstants.SubscriptionStatus.ACTIVE);
+            WorkflowResponse response = new GeneralWorkflowResponse();
+/*            
             
             WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -264,18 +266,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowReference(subscriptionId);
             workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             
-            
-            API api = getAPIbyUUID(apiId);
+            //TODO identify which values needed to pass to workflow
+            API api = getAPIbyUUID(apiId); 
             workflow.setApiName(api.getName());
             workflow.setApiContext(api.getContext());
             workflow.setApiVersion(api.getVersion());
             workflow.setApiProvider(api.getProvider());
+
             workflow.setApiId(apiId);
             
             workflow.setTierName(tier);
             
-            Application application = getApplicationByUuid(applicationId);
+          Application application = getApplicationByUuid(applicationId);
             workflow.setApplicationName(application.getName());
+
             workflow.setApplicationId(applicationId);
             //workflow.setSubscriber(userId); //TODO check
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
@@ -287,7 +291,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
             }      
-
+*/
             subScriptionResponse = new SubscriptionResponse(subscriptionId, response);
             
             

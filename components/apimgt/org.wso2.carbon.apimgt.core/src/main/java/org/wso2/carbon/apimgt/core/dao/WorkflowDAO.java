@@ -29,15 +29,15 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 public interface WorkflowDAO {
     /**
      * Add workflow entry
-     * @param workflow
-     * @throws APIMgtDAOException
+     * @param workflow workflow data
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException;
 
     /**
      * Update workflow entry with the given status
-     * @param workflow
-     * @throws APIMgtDAOException
+     * @param workflow workflow data
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException;    
     
@@ -45,8 +45,8 @@ public interface WorkflowDAO {
      * Returns a workflow object for a given external workflow reference.
      *
      * @param workflowReference
-     * @return
-     * @throws APIManagementException
+     * @return Workflow workflow data
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
 }

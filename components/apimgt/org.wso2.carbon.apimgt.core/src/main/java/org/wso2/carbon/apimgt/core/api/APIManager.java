@@ -61,7 +61,7 @@ public interface APIManager {
      * 
      * @param apiId UUID of API
      * @return Last updated time of API given its uuid
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
 
@@ -227,7 +227,7 @@ public interface APIManager {
      * Retrieve workflow for the given workflow reference ID
      * @param workflowRefId External workflow reference Id
      * @return Workflow workflow entry
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException;
     
@@ -235,7 +235,7 @@ public interface APIManager {
      * Complete workflow task 
      * @param workflowExecutor executor related to the workflow task
      * @param workflow workflow object
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException;
 

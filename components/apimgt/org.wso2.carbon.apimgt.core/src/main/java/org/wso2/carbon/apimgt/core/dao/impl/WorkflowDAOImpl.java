@@ -42,7 +42,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      * Persists WorkflowDTO to Database
      *
      * @param workflow The {@link Workflow} object to be added
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException {
 
@@ -76,7 +76,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      * Update workflow
      * 
      * @param workflow The {@link Workflow} object to be added
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
 
     public void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException {
@@ -110,9 +110,9 @@ public class WorkflowDAOImpl implements WorkflowDAO {
     /**
      * Returns a workflow object for a given external workflow reference.
      *
-     * @param workflowReference
-     * @return
-     * @throws APIManagementException
+     * @param workflowReference workflow related external reference id
+     * @return Workflow The {@link Workflow} object 
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException {
         
