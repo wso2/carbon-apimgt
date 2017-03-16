@@ -544,8 +544,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddGetAPIWithLabels() throws Exception {
 
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public", "https://test.public");
-        Label label2 = SampleTestObjectCreator.createLabel("private", "https://test.private");
+        Label label1 = SampleTestObjectCreator.createLabel("public").build();
+        Label label2 = SampleTestObjectCreator.createLabel("private").build();
         List<Label> labelList = new ArrayList<>();
         labelList.add(label1);
         labelList.add(label2);

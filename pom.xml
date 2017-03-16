@@ -615,7 +615,7 @@
                                 <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
                             </configuration>
                         </execution>
-                        <!--<execution>
+                        <execution>
                             <id>default-check</id>
                             <goals>
                                 <goal>check</goal>
@@ -629,13 +629,13 @@
                                             <limit>
                                                 <counter>INSTRUCTION</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.70</minimum>
+                                                <minimum>0.14</minimum>
                                             </limit>
                                         </limits>
                                     </rule>
                                 </rules>
                             </configuration>
-                        </execution>-->
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>
