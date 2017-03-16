@@ -50,6 +50,13 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;
@@ -156,13 +163,22 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             apiConsumer.updateApplication(applicationId, application);
 
             //retrieves the updated application and send as the response
             Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
-
+            String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            return Response.ok().entity(updatedApplicationDTO).header("Etag", "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating application: " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -171,7 +187,6 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(updatedApplicationDTO).build();
     }
 
     @Override

@@ -150,12 +150,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-                                                      String ifUnmodifiedSince, String minorVersion)
-            throws NotFoundException {
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiStore.deleteAPISubscription(subscriptionId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
