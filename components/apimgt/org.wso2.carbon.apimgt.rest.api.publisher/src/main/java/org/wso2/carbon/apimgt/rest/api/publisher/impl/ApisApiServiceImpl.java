@@ -672,7 +672,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
 
     public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
