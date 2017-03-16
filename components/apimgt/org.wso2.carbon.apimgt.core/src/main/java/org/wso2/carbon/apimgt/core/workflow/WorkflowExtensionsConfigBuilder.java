@@ -45,7 +45,6 @@ public class WorkflowExtensionsConfigBuilder {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowExtensionsConfigBuilder.class);
     public static final String WORKFLOW_CONFIG_YML = "workflow-extensions.yml";
 
-    // TODO move to Constant file
     public static final String WF_DEFAULT_APPCREATION_EXEC = 
             "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
     private static final String WF_DEFAULT_APISTATE_EXEC = 
