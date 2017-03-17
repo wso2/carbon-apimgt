@@ -55,7 +55,7 @@ function createNewVersion(event) {
     );
     promised_update.catch(
         function (error_response) {
-            var message = "Error[" + error_response.status + "]: " + error_response.data;
+            var message = "Error [" + error_response.obj.description + "]: " + error_response.obj.message;
             noty({
                 text: message,
                 type: 'error',

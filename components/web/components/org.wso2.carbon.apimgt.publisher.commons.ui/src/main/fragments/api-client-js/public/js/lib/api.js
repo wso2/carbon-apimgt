@@ -333,7 +333,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createNewAPIVersion(id,version,callback = null) {
-        console.log("CopyAPI"+id+" "+version);
         var promise_copy_api = this.client.then(
             (client) => {
                 return client["API (Individual)"].post_apis_copy_api(
