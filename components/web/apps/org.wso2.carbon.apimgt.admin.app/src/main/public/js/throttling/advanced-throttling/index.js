@@ -1,13 +1,13 @@
 $(function () {
-    debugger;
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (swaggerData) {
-            setAuthHeader(swaggerData);
-            swaggerClient["Throttling Tier Collection"].get_policies({"responseContentType": 'application/json'},
+            setAuthHeader(swaggerClient);
+            swaggerClient["Throttling Tier (Collection)"].get_policies_tierLevel({"tierLevel":"api"},
+                                                                       {"responseContentType": 'application/json'},
             function (jsonData) {
                 var raw_data = {
-                    data: jsonData.obj.list
+                    data: jsonData.obj
                 };
                 var callbacks = {
                     onSuccess: function () {
@@ -19,7 +19,9 @@ $(function () {
                     }
                 };
                 var mode = "OVERWRITE";
-                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-view", jsonData.obj,
+                var obj = {};
+                obj.list=jsonData.obj;
+                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-view", obj,
                                          "policy-view", mode, callbacks);
             }, function (error) {
                         if (error.status == 401) {

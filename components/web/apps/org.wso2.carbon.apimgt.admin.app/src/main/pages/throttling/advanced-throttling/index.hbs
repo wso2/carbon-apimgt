@@ -3,8 +3,9 @@
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Home | " @config.appName}}
 {{js "js/throttling/advanced-throttling/index.js"}}
+{{js "js/main.js"}}
 {{css "css/portal.css"}}
 {{css "css/asset.css"}}
 {{#fillZone "content"}}
-    {{fragment "policy-view"}}
+    {{defineZone "policy-view"}}
 {{/fillZone}}
