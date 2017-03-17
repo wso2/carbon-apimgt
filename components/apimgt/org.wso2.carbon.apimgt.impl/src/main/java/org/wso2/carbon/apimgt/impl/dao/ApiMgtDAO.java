@@ -270,6 +270,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         PreparedStatement queryPs = null;
         PreparedStatement appRegPs = null;
+        ResultSet resultSet = null;
 
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
@@ -287,7 +288,7 @@ public class ApiMgtDAO {
             queryPs.setInt(1, subscriber.getId());
             queryPs.setInt(2, application.getId());
             queryPs.setString(3, dto.getKeyType());
-            ResultSet resultSet = queryPs.executeQuery();
+            resultSet = queryPs.executeQuery();
 
             if (resultSet.next()) {
                 throw new APIManagementException("Application '" + application.getName() + "' is already registered.");
@@ -326,7 +327,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeStatement(queryPs);
             APIMgtDBUtil.closeStatement(appRegPs);
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
     }
 
@@ -1245,7 +1246,7 @@ public class ApiMgtDAO {
             }
             handleException("Failed to add subscriber data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
     }
 
@@ -11181,7 +11182,7 @@ public class ApiMgtDAO {
             log.error(msg, e);
             handleException(msg, e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
+            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, connection, checkIsResultSet);
         }
         return status;
 
