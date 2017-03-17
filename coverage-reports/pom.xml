@@ -79,17 +79,17 @@
                                 <mkdir dir="${basedir}/target/coverage-report" />
                                 <report>
                                     <executiondata>
-                                        <!--<fileset dir="${build.directory.module.apimgt.core}/coverage-reports">
+                                        <fileset dir="${build.directory.module.apimgt.core}/coverage-reports">
                                             <include name="aggregate.exec" />
-                                        </fileset>-->
+                                        </fileset>
                                     </executiondata>
                                     <structure name="carbon-apimgt code coverage">
                                         <group name="carbon-apimgt-coverage">
                                             <classfiles>
-                                                <!--<fileset dir="${classes.directory.module.apimgt.core}" />-->
+                                                <fileset dir="${classes.directory.module.apimgt.core}" />
                                             </classfiles>
                                             <sourcefiles encoding="UTF-8">
-                                                <!--<fileset dir="${sources.directory.module.apimgt.core}" />-->
+                                                <fileset dir="${sources.directory.module.apimgt.core}" />
                                             </sourcefiles>
                                         </group>
                                     </structure>

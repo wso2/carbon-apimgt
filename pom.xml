@@ -43,8 +43,19 @@
         <module>components/apimgt</module>
         <module>components/web</module>
         <module>features/apimgt</module>
-        <module>coverage-reports</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <modules>
+                <module>components/apimgt</module>
+                <module>components/web</module>
+                <module>features/apimgt</module>
+                <module>coverage-reports</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <pluginRepositories>
         <pluginRepository>
