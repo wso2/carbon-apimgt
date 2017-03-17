@@ -370,11 +370,10 @@ public class SampleTestObjectCreator {
 
     public static Label.Builder createLabel(String name) {
 
-        List<String> accessUrls1 = new ArrayList<>();
-        accessUrls1.add("https://test." + name);
-        Label.Builder label = new Label.Builder().
+        List<String> accessUrls = new ArrayList<>();
+        accessUrls.add("https://test." + name);
+        return new Label.Builder().
                 name(name).
-                accessUrls(accessUrls1);
-        return label;
+                accessUrls(accessUrls);
     }
 }
