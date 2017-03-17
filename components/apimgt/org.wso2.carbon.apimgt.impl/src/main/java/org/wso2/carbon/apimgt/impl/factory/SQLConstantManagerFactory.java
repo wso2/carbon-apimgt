@@ -81,6 +81,8 @@ public class SQLConstantManagerFactory {
         } catch (SQLException e) {
             log.error("Error occurred while initializeSQLConstantManager");
             throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
 
     }
