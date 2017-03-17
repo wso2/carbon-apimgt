@@ -17,7 +17,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.common.exception;
+package org.wso2.carbon.apimgt.core.exception;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;

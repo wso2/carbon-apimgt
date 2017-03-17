@@ -11,9 +11,9 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -132,7 +132,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage =
@@ -299,7 +299,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfDocument(documentId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage =
@@ -477,7 +477,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfGatewayConfig(
                     apiId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of gateway config of API " + apiId;
@@ -553,7 +553,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of API " + apiId;
@@ -679,7 +679,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of Swagger definition of API :" + apiId;
@@ -759,7 +759,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfAPIThumbnailImage(apiId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of thumbnail of API " + apiId;

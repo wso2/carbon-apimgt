@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -59,7 +59,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfApplication(applicationId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of application " + applicationId;
