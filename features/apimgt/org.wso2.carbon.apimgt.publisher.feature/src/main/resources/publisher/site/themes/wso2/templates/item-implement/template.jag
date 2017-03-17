@@ -999,9 +999,9 @@
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
-                        <option {{#ifCond "==" retryErroCode "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
-                        <option {{#ifCond "==" retryErroCode "neverTimeout"}}selected{{/ifCond}}value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
-                        <option {{#ifCond "==" retryErroCode "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
+                        <option {{#ifCond "==" actionSelect "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
+                        <option {{#ifCond "==" actionSelect "neverTimeout"}}selected{{/ifCond}} value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
+                        <option {{#ifCond "==" actionSelect "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
                     </select>
                     <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
