@@ -27,10 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
-import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.LabelDAO;
+import org.wso2.carbon.apimgt.core.dao.*;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -58,7 +55,10 @@ public class APIPublisherImplTestCase {
     private static final String TIER = "Gold";
     private static final String API_ID = "apiId";
     private static final String DOC_ID = "docId";
+    private static final String POLICY_LEVEL = "policyLevel";
+    private static final String POLICY_NAME = "policyName";
     private static final String SUB_ID = "subId";
+    private static final String ENDPOINT_ID = "endpointId";
 
     @BeforeClass
     void init() {
@@ -851,5 +851,64 @@ public class APIPublisherImplTestCase {
         Mockito.doThrow(new APIMgtDAOException("", new Throwable())).when(apiSubscriptionDAO)
                 .updateSubscriptionPolicy(SUB_ID, "test policy");
         apiPublisher.updateSubscriptionPolicy(SUB_ID, "test policy");
+    }
+
+    @Test(description = "Get last updated time of endpoint")
+    void getLastUpdatedTimeOfEndpoint() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.when(apiDAO.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID)).thenReturn("2017-03-19T13:45:30");
+        apiPublisher.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
+        Mockito.verify(apiDAO, Mockito.times(1)).getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
+    }
+
+    @Test(description = "Exception when getting last updated time of endpoint",
+            expectedExceptions = APIManagementException.class)
+    void getLastUpdatedTimeOfEndpointException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
+        Mockito.when(apiDAO.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID)).thenThrow(new APIMgtDAOException(
+                "Error occurred while retrieving the last update time of the endpoint with id " + ENDPOINT_ID));
+        apiPublisher.getLastUpdatedTimeOfEndpoint(ENDPOINT_ID);
+    }
+
+    @Test(description = "Get last updated time of Throttling Policy")
+    void getLastUpdatedTimeOfThrottlingPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, null, null, null, policyDAO, null, null);
+        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME))
+                .thenReturn("2017-03-19T13:45:30");
+        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
+        Mockito.verify(policyDAO, Mockito.times(1)).getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
+    }
+
+    @Test(description = "Exception when getting last updated time of Throttling Policy",
+            expectedExceptions = APIManagementException.class)
+    void getLastUpdatedTimeOfThrottlingPolicyException() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, null, null, null, policyDAO, null, null);
+        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME)).thenThrow(
+                new APIMgtDAOException(
+                        "Error while retrieving last updated time of policy :" + POLICY_LEVEL + "/" + POLICY_LEVEL));
+        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
+    }
+
+    @Test(description = "Register gateway labels")
+    void registerGatewayLabels() throws APIManagementException {
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        System.setProperty(APIMgtConstants.OVERWRITE_LABELS, "true");
+        List<Label> labels = new ArrayList<>();
+        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
+        Label label2 = SampleTestObjectCreator.createLabel("testLabel2").build();
+        labels.add(label1);
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(label1.getName());
+        List<Label> existingLabels= new ArrayList<>();
+        existingLabels.add(label1);
+        existingLabels.add(label2);
+        Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(existingLabels);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, null, null, null, null, null, labelDAO);
+        apiPublisher.registerGatewayLabels(labels);
+        Mockito.verify(labelDAO, Mockito.times(1)).addLabels(labels);
     }
 }
