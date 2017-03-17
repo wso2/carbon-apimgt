@@ -332,7 +332,7 @@ public class APIStoreImplTestCase {
      * Tests to catch exceptions in methods
      */
 
-    @Test(description = "Exception when deleting subscription", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when deleting subscription", expectedExceptions = APIManagementException.class)
     public void testDeleteSubscriptionException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
@@ -342,7 +342,7 @@ public class APIStoreImplTestCase {
         apiStore.deleteAPISubscription(UUID);
     }
 
-    @Test(description = "Exception when retrieving all tags", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when retrieving all tags", expectedExceptions = APIManagementException.class)
     public void testGetAllTagsException() throws APIManagementException {
         TagDAO tagDAO = mock(TagDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, tagDAO, null);
@@ -351,7 +351,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception when getting all policies of a specific policy level",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetPoliciesException() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null);
@@ -361,7 +361,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception when getting policy given policy name and policy level",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetPolicyException() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null);
@@ -370,7 +370,7 @@ public class APIStoreImplTestCase {
         apiStore.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME);
     }
 
-    @Test(description = "Exception when deleting an application", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when deleting an application", expectedExceptions = APIManagementException.class)
     public void testDeleteApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -383,7 +383,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception when retrieving an application by uuid",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUUIDException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -393,7 +393,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception when getting API subscriptions by application",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetAPISubscriptionsByApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
@@ -406,7 +406,7 @@ public class APIStoreImplTestCase {
         apiStore.getAPISubscriptionsByApplication(application);
     }
 
-    @Test(description = "Exception when retrieving APIs by status", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when retrieving APIs by status", expectedExceptions = APIManagementException.class)
     public void getAPIsByStatusException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null);
@@ -417,7 +417,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception when retrieving an application by name",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetApplicationByNameException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -427,7 +427,7 @@ public class APIStoreImplTestCase {
         apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
     }
 
-    @Test(description = "Exception when retrieving applications", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when retrieving applications", expectedExceptions = APIManagementException.class)
     public void testGetApplicationsException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -437,7 +437,7 @@ public class APIStoreImplTestCase {
         apiStore.getApplications(USER_ID, GROUP_ID);
     }
 
-    @Test(description = "Exception when updating an application", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when updating an application", expectedExceptions = APIManagementException.class)
     public void testUpdateApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null);
@@ -447,7 +447,7 @@ public class APIStoreImplTestCase {
         apiStore.updateApplication(UUID, application);
     }
 
-    @Test(description = "Exception when adding an application", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when adding an application", expectedExceptions = APIManagementException.class)
     public void testAddApplicationCreationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         PolicyDAO policyDAO = mock(PolicyDAO.class);
@@ -476,7 +476,7 @@ public class APIStoreImplTestCase {
         apiStore.addApplication(application);
     }
 
-    @Test(description = "Exception when retrieving labels", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when retrieving labels", expectedExceptions = APIManagementException.class)
     public void testGetLabelInfoException() throws APIManagementException {
         LabelDAO labelDAO = mock(LabelDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, labelDAO);
