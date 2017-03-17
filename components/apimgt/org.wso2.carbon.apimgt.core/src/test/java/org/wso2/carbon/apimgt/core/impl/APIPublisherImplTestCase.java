@@ -21,9 +21,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
-import org.apache.commons.collections.map.HashedMap;
-import org.ballerinalang.services.dispatchers.uri.URITemplate;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -35,7 +32,13 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
@@ -677,7 +680,8 @@ public class APIPublisherImplTestCase {
         apiPublisher.addDocumentationInfo(API_ID, documentInfo);
     }
 
-    @Test(description = "Parse exception when adding documentation info", expectedExceptions = APIManagementException.class)
+    @Test(description = "Parse exception when adding documentation info",
+            expectedExceptions = APIManagementException.class)
     void addDocumentationInfoJsonParseException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id("")
@@ -902,7 +906,8 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).getImage(uuid);
     }
 
-    @Test(description = "Exception when getting thumbnail image for API", expectedExceptions = APIManagementException.class)
+    @Test(description = "Exception when getting thumbnail image for API",
+            expectedExceptions = APIManagementException.class)
     void getThumbnailImageException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null);
