@@ -143,8 +143,7 @@ public class APIManagerComponent {
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
 
-            String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                              File.separator + "conf" + File.separator + "api-manager.xml";
+            String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
