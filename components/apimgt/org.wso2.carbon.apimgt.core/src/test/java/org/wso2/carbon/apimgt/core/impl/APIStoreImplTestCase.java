@@ -24,6 +24,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -34,18 +37,29 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
+import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -508,6 +522,93 @@ public class APIStoreImplTestCase {
         when(labelDAO.getLabelsByName(labels))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
         apiStore.getLabelInfo(labels);
+    }
+    
+    
+    @Test(description = "Exception when completing workflow without valid workflow obj",
+            expectedExceptions = WorkflowException.class)
+    public void testCompleteWorkflowWithoutValidWokflowObj() throws APIManagementException {
+
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
+        apiStore.completeWorkflow(null, new Workflow());
+    }
+    
+    @Test(description = "Exception when completing application creation workflow without a reference", 
+            expectedExceptions = WorkflowException.class)
+    public void testCompleteApplicaitonWorkflowWithoutReference() throws APIManagementException {
+
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
+
+        WorkflowExecutor executor = new ApplicationCreationSimpleWorkflowExecutor();
+        Workflow workflow = new ApplicationCreationWorkflow();
+        workflow.setWorkflowReference(null);
+        apiStore.completeWorkflow(executor, workflow);
+    }  
+
+    @Test(description = "Test Application workflow rejection")
+    public void testAddApplicationWorkflowReject() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        Policy policy = mock(Policy.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setTier(TIER);
+        application.setPermissionString(
+                "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
+        when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);       
+        
+        apiStore.addApplication(application);
+        
+
+        ApplicationCreationSimpleWorkflowExecutor executor = mock(ApplicationCreationSimpleWorkflowExecutor.class);
+        Workflow workflow = new ApplicationCreationWorkflow();
+        workflow.setWorkflowReference(application.getId());
+        
+        WorkflowResponse reponse = new GeneralWorkflowResponse();
+        reponse.setWorkflowStatus(WorkflowStatus.REJECTED);
+        
+        when(executor.complete(workflow)).thenReturn(reponse);              
+        apiStore.completeWorkflow(executor, workflow);
+  
+        verify(applicationDAO, times(1)).updateApplicationState(application.getId(), "REJECTED");
+    }    
+
+    @Test(description = "Event Observers registration and removal")
+    public void testObserverRegistration() throws APIManagementException {
+        
+        EventLogger observer = new EventLogger();
+
+        APIStoreImpl apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
+        
+        apiStore.registerObserver(new EventLogger());
+       
+        Map<String, EventObserver> observers = apiStore.getEventObservers();        
+        Assert.assertEquals(observers.size(), 1);
+        
+        apiStore.removeObserver(observers.get(observer.getClass().getName()));
+        
+        Assert.assertEquals(observers.size(), 0);
+     
+    }
+    
+    @Test(description = "Event Observers for event listning")
+    public void testObserverEventListner() throws APIManagementException {
+        
+        EventLogger observer = mock(EventLogger.class);
+
+        APIStoreImpl apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);        
+        apiStore.registerObserver(observer);
+       
+        Event event = Event.APP_CREATION;
+        String username = USER_NAME;
+        Map<String, String> metaData = new HashMap<>();
+        ZonedDateTime eventTime = ZonedDateTime.now(ZoneOffset.UTC);
+        apiStore.notifyObservers(event, username, eventTime, metaData);
+     
+        verify(observer, times(1)).captureEvent(event, username, eventTime, metaData);
+        
     }
 
 }

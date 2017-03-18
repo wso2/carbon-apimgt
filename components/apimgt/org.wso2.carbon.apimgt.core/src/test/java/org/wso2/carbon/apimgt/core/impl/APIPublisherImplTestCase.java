@@ -21,12 +21,18 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -34,14 +40,18 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class APIPublisherImplTestCase {
     private static final String user = "admin";
@@ -354,6 +364,43 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null);
         Mockito.when(apiDAO.getAPISummary("bbbbb")).thenThrow(new APIMgtDAOException(""));
         apiPublisher.checkIfAPIExists("bbbbb");
+    }
+    
+
+    @Test(description = "Event Observers registration and removal")
+    public void testObserverRegistration() throws APIManagementException {
+        
+        EventLogger observer = new EventLogger();
+
+        APIPublisherImpl apiPub = new APIPublisherImpl(user, null, null, null, null, null, null, null);
+        
+        apiPub.registerObserver(new EventLogger());
+       
+        Map<String, EventObserver> observers = apiPub.getEventObservers();        
+        Assert.assertEquals(observers.size(), 1);
+        
+        apiPub.removeObserver(observers.get(observer.getClass().getName()));
+        
+        Assert.assertEquals(observers.size(), 0);
+     
+    }
+    
+    @Test(description = "Event Observers for event listning")
+    public void testObserverEventListner() throws APIManagementException {
+        
+        EventLogger observer = Mockito.mock(EventLogger.class);
+
+        APIPublisherImpl apiPub = new APIPublisherImpl(user, null, null, null, null, null, null, null);        
+        apiPub.registerObserver(observer);
+       
+        Event event = Event.APP_CREATION;
+        String username = user;
+        Map<String, String> metaData = new HashMap<>();
+        ZonedDateTime eventTime = ZonedDateTime.now(ZoneOffset.UTC);
+        apiPub.notifyObservers(event, username, eventTime, metaData);
+     
+        Mockito.verify(observer, times(1)).captureEvent(event, username, eventTime, metaData);
+        
     }
 
 }

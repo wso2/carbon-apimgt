@@ -59,13 +59,11 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
@@ -626,7 +624,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
             getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
 
-        } else if (workflow instanceof SubscriptionWorkflow) {
+        } else {
+            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new WorkflowException(message);
+        }
+
+       /*else if (workflow instanceof SubscriptionWorkflow) {  //TODO enable this with subscription wf impl
             if (workflow.getWorkflowReference() == null) {
                 String message = "Error while changing the Subscription state. Missing application UUID";
                 log.error(message);
@@ -651,12 +655,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
 
             getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
-        } else {
-            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
-            log.error(message);
-            throw new WorkflowException(message);
-        }
-
+        } */
+        
     }
     
     private void updateWorkflowEntries(Workflow workflow) throws APIMgtDAOException {

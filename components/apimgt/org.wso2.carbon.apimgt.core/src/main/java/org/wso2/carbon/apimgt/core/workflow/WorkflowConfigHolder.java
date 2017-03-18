@@ -79,7 +79,7 @@ public class WorkflowConfigHolder {
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);  
 */    
             
-            // Load subscription creation workflow configurations
+/*            // Load subscription creation workflow configurations
             workflowConfig = config.getSubscriptionCreation();
             executorClass = workflowConfig.getExecutor();
             clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
@@ -89,6 +89,7 @@ public class WorkflowConfigHolder {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
+*/
             
 /*            // Load subscription deletion workflow configurations
             workflowConfig = config.getSubscriptionDeletion();
@@ -147,16 +148,12 @@ public class WorkflowConfigHolder {
 */
 
         } catch (ClassNotFoundException e) {
-            log.error("Unable to find class", e);
             handleException("Unable to find class", e);
         } catch (InstantiationException e) {
-            log.error("Unable to instantiate class", e);
             handleException("Unable to instantiate class", e);
         } catch (IllegalAccessException e) {
-            log.error("Illegal attempt to invoke class methods", e);
             handleException("Illegal attempt to invoke class methods", e);
         } catch (WorkflowException e) {
-            log.error("Unable to load workflow executor class", e);
             handleException("Unable to load workflow executor class", e);
         }
     }
@@ -221,9 +218,6 @@ public class WorkflowConfigHolder {
                         } else if (boolean.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, boolean.class);
                             method.invoke(obj, new Boolean[] { Boolean.valueOf(value) });
-                        } else if (Class.forName("[C").equals(params[0])) {
-                            method = obj.getClass().getMethod(mName, Class.forName("[C"));
-                            method.invoke(obj, value.toCharArray());
                         } else {
                             continue;
                         }
@@ -237,17 +231,15 @@ public class WorkflowConfigHolder {
             if (!invoked) {
                 String message = "Did not find a setter method named : " + mName
                         + "() that takes a single String, int, long, float, double " + "or boolean parameter";
-                log.error(message);
-                throw new WorkflowException(message);
+                handleException(message);
             }
             
             
         } catch (IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException
-                | InvocationTargetException | ClassNotFoundException e) {
+                | InvocationTargetException e) {
             String message = "Error invoking setter method named : " + mName
                     + "() that takes a single String, int, long, float, double " + "or boolean parameter";
-            log.error(message, e);
-            throw new WorkflowException(message, e);
+           handleException(message, e);
         }
        
     }

@@ -72,23 +72,26 @@ public class WorkflowExecutorFactory {
            // ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
            // workflowDTO.setWorkflowType(wfType);
             workflow = new Workflow();
+            workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(workflowType)) {
            // workflowDTO = new ApplicationRegistrationWorkflowDTO();
            // ((ApplicationRegistrationWorkflowDTO) workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
            // workflowDTO.setWorkflowType(wfType);
-            workflow = new Workflow();
+            workflow = new Workflow(); //TODO use correct workflow when implementing
+            workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
             workflow = new SubscriptionWorkflow();
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(workflowType)) {
             //workflowDTO = new WorkflowDTO();
             //workflowDTO.setWorkflowType(wfType);
-            workflow = new Workflow();
+            workflow = new Workflow(); //TODO use correct workflow when implementing
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
             //workflowDTO = new APIStateWorkflowDTO();
             //workflowDTO.setWorkflowType(wfType);
-            workflow = new Workflow();
+            workflow = new Workflow();  //TODO use correct workflow when implementing
+            workflow.setWorkflowType(workflowType);
         }
         
         return workflow;

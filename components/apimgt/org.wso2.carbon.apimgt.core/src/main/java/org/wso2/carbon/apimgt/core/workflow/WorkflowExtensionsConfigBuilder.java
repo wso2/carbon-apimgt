@@ -72,6 +72,9 @@ public class WorkflowExtensionsConfigBuilder {
         return workflowConfig;
     }
 
+    public static void clearConfig() {
+        workflowConfig = null;
+    }
     public static void build(WorkflowConfig defaultConfig) {
         Optional<String> workflowConfigFileContent = readFile(WORKFLOW_CONFIG_YML);
 
