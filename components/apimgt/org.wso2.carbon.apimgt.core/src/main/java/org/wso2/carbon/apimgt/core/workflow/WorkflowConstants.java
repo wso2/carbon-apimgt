@@ -127,9 +127,7 @@ public class WorkflowConstants {
         public static final String KEY_OAUTH_SAASAPP = "saasApp";
         public static final String KEY_OAUTH_GRANT_TYPES = "grantType";
 
-        private PayloadConstants() {
-
-        }
+        private PayloadConstants() {}
 
     }
 

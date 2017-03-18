@@ -40,6 +40,14 @@ import java.sql.SQLException;
  */
 public class DAOFactory {
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
+    
+    private static final String MYSQL = "MySQL";
+    private static final String H2 = "H2";
+    private static final String DB2 = "DB2";
+    private static final String MICROSOFT = "Microsoft";
+    private static final String MS_SQL = "MS SQL";
+    private static final String POSTGRE = "PostgreSQL";
+    private static final String ORACLE = "Oracle";
 
     public static ApiDAO getApiDAO() throws APIMgtDAOException {
         ApiDAO apiDAO = null;
@@ -47,19 +55,19 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL")) {
+            if (driverName.contains(MYSQL)) {
                 apiDAO = new ApiDAOImpl(new MysqlSQLStatements());
-            } else if (driverName.contains("H2")) {
+            } else if (driverName.contains(H2)) {
                 apiDAO = new ApiDAOImpl(new H2SQLStatements());
 
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 apiDAO = new ApiDAOImpl(new MssqlSQLStatements());
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(POSTGRE)) {
                 apiDAO = new ApiDAOImpl(new PostgresSQLStatements());
 
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(ORACLE)) {
                 apiDAO = new ApiDAOImpl(new OracleSQLStatements());
 
             } else {
@@ -80,15 +88,15 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 appDAO = new ApplicationDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 appDAO = new ApplicationDAOImpl();
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(POSTGRE)) {
                 appDAO = new ApplicationDAOImpl();
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(ORACLE)) {
                 appDAO = new ApplicationDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -108,17 +116,17 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 apiSubscriptionDAO = new APISubscriptionDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                apiSubscriptionDAO = new APISubscriptionDAOImpl();
-
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 apiSubscriptionDAO = new APISubscriptionDAOImpl();
 
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(POSTGRE)) {
+                apiSubscriptionDAO = new APISubscriptionDAOImpl();
+
+            } else if (driverName.contains(ORACLE)) {
                 apiSubscriptionDAO = new APISubscriptionDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -138,17 +146,17 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 policyDAO = new PolicyDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                policyDAO = new PolicyDAOImpl();
-
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 policyDAO = new PolicyDAOImpl();
 
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(POSTGRE)) {
+                policyDAO = new PolicyDAOImpl();
+
+            } else if (driverName.contains(ORACLE)) {
                 policyDAO = new PolicyDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -168,15 +176,15 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 tagDAO = new TagDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
 
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(POSTGRE)) {
 
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(ORACLE)) {
 
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -196,15 +204,15 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 labelDAO = new LabelDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 labelDAO = new LabelDAOImpl();
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(POSTGRE)) {
                 labelDAO = new LabelDAOImpl();
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(ORACLE)) {
                 labelDAO = new LabelDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -224,15 +232,15 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 workflowDAO = new WorkflowDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 workflowDAO = new WorkflowDAOImpl();
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(POSTGRE)) {
                 workflowDAO = new WorkflowDAOImpl();
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(ORACLE)) {
                 workflowDAO = new WorkflowDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
@@ -258,17 +266,17 @@ public class DAOFactory {
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
 
-            if (driverName.contains("MySQL") || driverName.contains("H2")) {
+            if (driverName.contains(MYSQL) || driverName.contains(H2)) {
                 functionDAO = new FunctionDAOImpl();
-            } else if (driverName.contains("DB2")) {
+            } else if (driverName.contains(DB2)) {
 
-            } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                functionDAO = new FunctionDAOImpl();
-
-            } else if (driverName.contains("PostgreSQL")) {
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
                 functionDAO = new FunctionDAOImpl();
 
-            } else if (driverName.contains("Oracle")) {
+            } else if (driverName.contains(POSTGRE)) {
+                functionDAO = new FunctionDAOImpl();
+
+            } else if (driverName.contains(ORACLE)) {
                 functionDAO = new FunctionDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");

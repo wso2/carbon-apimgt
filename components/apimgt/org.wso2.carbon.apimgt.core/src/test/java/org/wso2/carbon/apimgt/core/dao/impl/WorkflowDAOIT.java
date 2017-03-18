@@ -31,43 +31,39 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import java.util.UUID;
 
 /**
- * Test for workflowDAO 
+ * Test for workflowDAO
  */
 public class WorkflowDAOIT extends DAOIntegrationTestBase {
-    
-   @Test
+
+    @Test
     public void testAddWorkflowEntry() throws Exception {
-        
+
         String workflowRefId = UUID.randomUUID().toString();
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
-        
-        workflowDAO.addWorkflowEntry(workflow);        
+        workflowDAO.addWorkflowEntry(workflow);
         Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
-        
+
         Assert.assertEquals(retrieveWorflow.getExternalWorkflowReference(), workflowRefId);
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
-        Assert.assertEquals(retrieveWorflow.getWorkflowReference(), workflow.getWorkflowReference());       
-        
+        Assert.assertEquals(retrieveWorflow.getWorkflowReference(), workflow.getWorkflowReference());
     }
-    
-   @Test
+
+    @Test
     public void testUpdateWorkflowStatus() throws Exception {
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
-        
+
         Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
-        
-        workflow.setStatus(WorkflowStatus.APPROVED);        
+
+        workflow.setStatus(WorkflowStatus.APPROVED);
         workflowDAO.updateWorkflowStatus(workflow);
-        
         retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
         Assert.assertEquals(retrieveWorflow.getStatus(), WorkflowStatus.APPROVED);
-        
 
-    }  
+    }
 
 }

@@ -130,18 +130,23 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         return workflow;  
     }
 
-    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException {
+    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {
         Workflow workflow = null;
 
         if (rs.next()) {
             workflow = WorkflowExecutorFactory.getInstance().createWorkflow(rs.getString("WF_TYPE"));
-            workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
-            workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
-            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
-            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-            workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            if (workflow != null) {
+                workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
+                workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+                workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            } else {
+                throw new APIMgtDAOException("Invalid workflow type");
+            }
+           
 
         }
         return workflow;

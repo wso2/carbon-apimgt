@@ -1,3 +1,22 @@
+/*
+ *
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.slf4j.Logger;
@@ -37,7 +56,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 String errorMessage = "Workflow entry not found for: " + workflowReferenceId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.WORKFLOW_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                HashMap<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
@@ -46,12 +65,11 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 String errorMessage = "Workflow is already in complete state";
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.WORKFLOW_COMPLETED);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                HashMap<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-
             } else {
                 WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(workflow.getWorkflowType());
