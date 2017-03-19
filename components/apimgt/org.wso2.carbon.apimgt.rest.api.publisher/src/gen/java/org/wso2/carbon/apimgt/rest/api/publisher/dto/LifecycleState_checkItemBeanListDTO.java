@@ -13,16 +13,21 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_validationBe
 /**
  * LifecycleState_checkItemBeanListDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class LifecycleState_checkItemBeanListDTO   {
+  @JsonProperty("permissionBeans")
   private List<LifecycleState_permissionBeansDTO> permissionBeans = new ArrayList<LifecycleState_permissionBeansDTO>();
 
+  @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("validationBeans")
   private List<LifecycleState_validationBeansDTO> validationBeans = new ArrayList<LifecycleState_validationBeansDTO>();
 
+  @JsonProperty("targets")
   private List<String> targets = new ArrayList<String>();
 
+  @JsonProperty("value")
   private Boolean value = null;
 
   public LifecycleState_checkItemBeanListDTO permissionBeans(List<LifecycleState_permissionBeansDTO> permissionBeans) {
