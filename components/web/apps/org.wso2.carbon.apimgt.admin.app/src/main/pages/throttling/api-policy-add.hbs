@@ -1,0 +1,9 @@
+{{layout "main"}}
+{{favicon "images/favicon.png" type="image/png"}}
+{{fragment "policy-client"}}
+{{title "Home | " @config.appName}}
+{{css "css/portal.css"}}
+{{css "css/asset.css"}}
+{{#fillZone "content"}}
+    {{fragment "policy-add"}}
+{{/fillZone}}
