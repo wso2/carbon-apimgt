@@ -9,10 +9,12 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * LifecycleState_availableTransitionBeanListDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class LifecycleState_availableTransitionBeanListDTO   {
+  @JsonProperty("event")
   private String event = null;
 
+  @JsonProperty("targetState")
   private String targetState = null;
 
   public LifecycleState_availableTransitionBeanListDTO event(String event) {
