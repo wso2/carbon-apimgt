@@ -79,7 +79,7 @@ public class WorkflowConfigHolder {
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);  
 */    
             
-/*            // Load subscription creation workflow configurations
+            // Load subscription creation workflow configurations
             workflowConfig = config.getSubscriptionCreation();
             executorClass = workflowConfig.getExecutor();
             clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
@@ -89,7 +89,7 @@ public class WorkflowConfigHolder {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
-*/
+
             
 /*            // Load subscription deletion workflow configurations
             workflowConfig = config.getSubscriptionDeletion();

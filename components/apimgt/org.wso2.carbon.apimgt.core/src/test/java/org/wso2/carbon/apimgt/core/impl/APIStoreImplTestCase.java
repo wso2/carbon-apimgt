@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
+import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -52,6 +54,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -234,13 +237,79 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO);
+
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.build();
+        String apiId = api.getId();
+        Application application = new Application("TestApp", USER_ID);
+        application.setId(UUID);
+
+        when(apiDAO.getAPI(apiId)).thenReturn(api);
+        when(applicationDAO.getApplication(UUID)).thenReturn(application);
+
+        SubscriptionResponse subscriptionResponse = apiStore.addApiSubscription(apiId, UUID, TIER);
+        String subscriptionId = subscriptionResponse.getSubscriptionUUID();
+        Assert.assertNotNull(subscriptionId);
+
+        // before workflow add subscription with blocked state
+        verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId, apiId, UUID, TIER,
+                APIMgtConstants.SubscriptionStatus.BLOCKED);
+        // after workflow change the state
+        verify(apiSubscriptionDAO, times(1)).updateSubscriptionStatus(subscriptionId,
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+    }
+
+    @Test(description = "Add subscription without a valid app" , expectedExceptions = APIManagementException.class)
+    public void testAddSubscriptionForInvalidApplicatoin() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
+
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.build();
+        String apiId = api.getId();
+/*        Application application = new Application("TestApp", USER_ID);
+        application.setId(UUID);*/
+
+        when(apiDAO.getAPI(apiId)).thenReturn(api);
+        when(applicationDAO.getApplication(UUID)).thenReturn(null);
+
+        SubscriptionResponse subscriptionResponse = apiStore.addApiSubscription(apiId, UUID, TIER);
+        String subscriptionId = subscriptionResponse.getSubscriptionUUID();
+        Assert.assertNotNull(subscriptionId);
+
+        // subscription should not be added
+        verify(apiSubscriptionDAO, times(0)).addAPISubscription(subscriptionId, apiId, UUID, TIER,
+                APIMgtConstants.SubscriptionStatus.BLOCKED);
+    }
+    
+    @Test(description = "Add subscription without a valid api" , expectedExceptions = APIManagementException.class)
+    public void testAddSubscriptionForInvalidAPI() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
+
+        Application application = new Application("TestApp", USER_ID);
+        application.setId(UUID);
+
+        when(apiDAO.getAPI(API_ID)).thenReturn(null);
+        when(applicationDAO.getApplication(UUID)).thenReturn(application);
+
         SubscriptionResponse subscriptionResponse = apiStore.addApiSubscription(API_ID, UUID, TIER);
         String subscriptionId = subscriptionResponse.getSubscriptionUUID();
         Assert.assertNotNull(subscriptionId);
-        verify(apiSubscriptionDAO, times(1))
-                .addAPISubscription(subscriptionId, API_ID, UUID, TIER, APIMgtConstants.SubscriptionStatus.ACTIVE);
-    }
 
+        // subscription should not be added
+        verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId, API_ID, UUID, TIER,
+                APIMgtConstants.SubscriptionStatus.BLOCKED);
+    }
+    
     @Test(description = "Delete subscription")
     public void testDeleteSubscription() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
@@ -573,7 +642,7 @@ public class APIStoreImplTestCase {
         apiStore.completeWorkflow(executor, workflow);
   
         verify(applicationDAO, times(1)).updateApplicationState(application.getId(), "REJECTED");
-    }    
+    }      
 
     @Test(description = "Event Observers registration and removal")
     public void testObserverRegistration() throws APIManagementException {

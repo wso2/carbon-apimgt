@@ -59,15 +59,16 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
+import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
@@ -249,10 +250,21 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         // Generate UUID for application
         String subscriptionId = UUID.randomUUID().toString();
         try {
+            API api = getAPIbyUUID(apiId);
+            if (api == null) {
+                String errorMsg = "Cannot find an API for given apiId - " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
+            Application application = getApplicationByUuid(applicationId);
+
+            if (application == null) {
+                String errorMsg = "Cannot find an application for given applicationId - " + applicationId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
             getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
-                    APIMgtConstants.SubscriptionStatus.ACTIVE);
-            WorkflowResponse response = new GeneralWorkflowResponse();
-/*            
+                    APIMgtConstants.SubscriptionStatus.BLOCKED);           
             
             WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -262,10 +274,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setCreatedTime(LocalDateTime.now());      
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setWorkflowReference(subscriptionId);
-            workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            
-            //TODO identify which values needed to pass to workflow
-            API api = getAPIbyUUID(apiId); 
+            workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);            
+
             workflow.setApiName(api.getName());
             workflow.setApiContext(api.getContext());
             workflow.setApiVersion(api.getVersion());
@@ -275,10 +285,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             
             workflow.setTierName(tier);
             
-          Application application = getApplicationByUuid(applicationId);
-            workflow.setApplicationName(application.getName());
 
+            workflow.setApplicationName(application.getName());
             workflow.setApplicationId(applicationId);
+            
             //workflow.setSubscriber(userId); //TODO check
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
@@ -289,7 +299,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
             }      
-*/
+
             subScriptionResponse = new SubscriptionResponse(subscriptionId, response);
             
             
@@ -624,13 +634,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
             getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
 
-        } else {
-            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
-            log.error(message);
-            throw new WorkflowException(message);
-        }
-
-       /*else if (workflow instanceof SubscriptionWorkflow) {  //TODO enable this with subscription wf impl
+        } else if (workflow instanceof SubscriptionWorkflow) { 
             if (workflow.getWorkflowReference() == null) {
                 String message = "Error while changing the Subscription state. Missing application UUID";
                 log.error(message);
@@ -655,8 +659,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
 
             getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
-        } */
-        
+        } else {
+            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new WorkflowException(message);
+        }
     }
     
     private void updateWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
