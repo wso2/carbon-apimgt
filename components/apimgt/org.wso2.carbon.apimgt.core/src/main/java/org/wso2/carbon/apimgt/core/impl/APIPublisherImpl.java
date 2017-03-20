@@ -625,9 +625,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
         String newVersionedId;
         LifecycleState lifecycleState;
+        // validate parameters
+        if (StringUtils.isEmpty(newVersion)) {
+            String errorMsg = "New API version cannot be empty";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+        if (StringUtils.isEmpty(apiId)) {
+            String errorMsg = "API ID cannot be empty";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
+                if (api.getVersion().equals(newVersion)) {
+                    String errMsg = "New API version cannot be same as the previous version";
+                    log.error(errMsg);
+                    throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
+                }
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);
@@ -1120,7 +1137,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
             throws APIManagementException {
         try {
-            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername(), LocalDateTime.now());
+            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't save the thumbnail image";
             log.error(errorMsg, e);
@@ -1418,23 +1435,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
-        return lastUpdatedTime;
-    }
-
-    /**
-     * @see APIPublisher#getLastUpdatedTimeOfThrottlingPolicy(String, String)
-     */
-    @Override
-    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
-            throws APIManagementException {
-        String lastUpdatedTime;
-        try {
-            lastUpdatedTime = getPolicyDAO().getLastUpdatedTimeOfThrottlingPolicy(policyLevel, policyName);
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
         return lastUpdatedTime;
     }
 

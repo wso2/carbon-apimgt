@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -22,6 +23,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -151,12 +153,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-                                                      String ifUnmodifiedSince, String minorVersion)
-            throws NotFoundException {
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiStore.deleteAPISubscription(subscriptionId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
@@ -177,8 +185,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
             subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
+            return Response.ok().entity(subscriptionDTO)
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
+                    .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving subscription information - " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -187,6 +205,29 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(subscriptionDTO).build();
+    }
+
+    /**
+     * Retrieves the fingerprint of a subscription given its UUID
+     * 
+     * @param subscriptionId Id of the subscription
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return the fingerprint of the subscription
+     */
+    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfSubscription(subscriptionId);
+            return ETagUtils.generateETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of subscription " + subscriptionId;
+            log.error(errorMessage, e);
+            return null;
+        }
     }
 }

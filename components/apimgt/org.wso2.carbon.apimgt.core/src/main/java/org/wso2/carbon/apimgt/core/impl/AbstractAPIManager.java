@@ -402,7 +402,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfApplication(applicationId);
+            lastUpdatedTime = applicationDAO.getLastUpdatedTimeOfApplication(applicationId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the application " + applicationId;
@@ -419,10 +419,27 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
+            lastUpdatedTime = apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the subscription " + subscriptionId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfThrottlingPolicy(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
+            throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getPolicyDAO().getLastUpdatedTimeOfThrottlingPolicy(policyLevel, policyName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
