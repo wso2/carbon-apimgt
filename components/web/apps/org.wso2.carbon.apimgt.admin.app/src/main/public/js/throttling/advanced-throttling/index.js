@@ -9,10 +9,9 @@ $(function () {
                 var raw_data = {
                     data: jsonData.obj
                 };
-                var temp = _convertData(raw_data);
                 var callbacks = {
                     onSuccess: function () {
-                        _initDataTable(temp);
+                        _initDataTable(raw_data);
                     },
                     onFailure: function (message, e) {
 
@@ -47,22 +46,5 @@ $(function () {
             ]
         })
     }
-    
-    function _convertData(raw_data) {
-        var convertedData = [];
-        var row = {};
-        for (var i = 0; i < raw_data.data.length; i++) {
-            var name = raw_data.data[i].name;
-            var description = raw_data.data[i].description;
-            row['name'] = name;
-            row['description'] = description;
-            convertedData.push(row);
-        }
-        var ret = {};
-        ret.data= convertedData;
-        return ret;
-        
-    }
-
 
 })
