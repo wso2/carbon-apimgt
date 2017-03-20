@@ -20,28 +20,20 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
-import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
-import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +52,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api,apiFromDB));
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -562,8 +554,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getLabels().size(),2);
-        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api,apiFromDB));
+        Assert.assertEquals(apiFromDB.getLabels().size(), 2);
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -586,5 +578,36 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNull(apiFromDB);
+    }
+
+    @Test
+    public void testUpdateAPIWithLabels() throws Exception {
+
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label1 = SampleTestObjectCreator.createLabel("public").build();
+        Label label2 = SampleTestObjectCreator.createLabel("private").build();
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelList.add(label2);
+        labelDAO.addLabels(labelList);
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(label1.getName());
+        API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder1.labels(labelNames).build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        labelNames.add(label2.getName());
+        API substituteAPI = new API.APIBuilder(api).labels(labelNames).build();
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiFromDB.getLabels(),expectedAPI.getLabels()),
+                TestUtil.printDiff(apiFromDB, expectedAPI));
+
     }
 }

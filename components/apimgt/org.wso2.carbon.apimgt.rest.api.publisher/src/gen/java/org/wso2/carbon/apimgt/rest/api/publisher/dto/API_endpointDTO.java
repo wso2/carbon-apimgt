@@ -9,10 +9,12 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_endpointDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class API_endpointDTO   {
+  @JsonProperty("id")
   private String id = null;
 
+  @JsonProperty("type")
   private String type = null;
 
   public API_endpointDTO id(String id) {
@@ -60,9 +62,9 @@ public class API_endpointDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_endpointDTO aPIEndpoint = (API_endpointDTO) o;
-    return Objects.equals(this.id, aPIEndpoint.id) &&
-        Objects.equals(this.type, aPIEndpoint.type);
+    API_endpointDTO apIEndpoint = (API_endpointDTO) o;
+    return Objects.equals(this.id, apIEndpoint.id) &&
+        Objects.equals(this.type, apIEndpoint.type);
   }
 
   @Override
