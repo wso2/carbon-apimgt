@@ -1,3 +1,4 @@
+{{log this}}
 <div class="row">
     <div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
         <object type="image/svg+xml" data="{{public "images/API_LIFECYCLE.svg"}}" id="lifecycle-svg">
@@ -58,7 +59,7 @@
                                     <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
                                             href="/publisher/apis?query=provider:{{this.user}}" title="user">{{this.user}}</a>
                                         {{i18n "changed the API status from "}} '{{i18n this.previousState}}'
-                                        {{i18n "to "}} '{{i18n this.postState}}'
+                                        {{i18n "to"}} '{{i18n this.postState}}'
                                     </td>
                                 </tr>
                             {{else}}
@@ -89,7 +90,7 @@
             <select id="policies-list-dropdown" multiple="multiple">
                 {{#each @params.policies}}
                     <option {{#if this.isSelected }}selected{{/if}}
-                            value="{{this.policyName}}">{{this.displayName}}</option>
+                            value="{{this.policyName}}">{{this.policyName}}</option>
                 {{/each}}
             </select>
         </div>
