@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -96,7 +97,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(subscriptionDTO).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             String msg = "Error while getting the subscription " + subscriptionId;
             RestApiUtil.handleInternalServerError(msg, e, log);
@@ -110,7 +111,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfSubscription(subscriptionId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage = "Error while retrieving last updated time of subscription " + subscriptionId;

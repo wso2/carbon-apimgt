@@ -161,4 +161,13 @@ public interface ApplicationDAO {
      */
     void updateApplicationState(String appID, String state) throws APIMgtDAOException;
 
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

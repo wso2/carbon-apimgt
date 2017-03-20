@@ -46,6 +46,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, DESCRIPTION, " +
             "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
             "FROM AM_APPLICATION";
+    private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
 
     ApplicationDAOImpl() {
     }
@@ -305,7 +306,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
                 "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
                 "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
-                "LAST_UPDATED_TIME=?";
+                "LAST_UPDATED_TIME=? WHERE UUID=?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
@@ -317,6 +318,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(6, updatedApp.getGroupId());
                 ps.setString(7, updatedApp.getUpdatedUser());
                 ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.setString(9, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
                 conn.commit();
@@ -407,6 +409,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
+    }
+
+    /**
+     * @see ApplicationDAO#getLastUpdatedTimeOfApplication(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_APPLICATION_TABLE_NAME, applicationId);
     }
 
     private void setApplicationKeys(Connection conn, Application application, String applicationId)

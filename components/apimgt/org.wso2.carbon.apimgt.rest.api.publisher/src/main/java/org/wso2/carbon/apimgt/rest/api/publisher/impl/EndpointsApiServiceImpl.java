@@ -8,8 +8,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.ETagGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.EndpointsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             }
 
             return Response.ok().entity(MappingUtil.toEndPointDTO(endPoint))
-                    .header("Etag", "\"" + existingFingerprint + "\"").build();
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while get  Endpoint : " + endpointId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -100,7 +101,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfEndpoint(
                     endpointId);
-            return ETagGenerator.getETag(lastUpdatedTime);
+            return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
             String errorMessage =
@@ -140,7 +141,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             apiPublisher.updateEndpoint(updatedEndpint);
             Endpoint updatedEndpoint = apiPublisher.getEndpoint(endpointId);
             String newFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null, null, minorVersion);
-            return Response.ok().header("Etag", "\"" + newFingerprint + "\"")
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .entity(MappingUtil.toEndPointDTO(updatedEndpoint)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting the endpoint :" + endpointId;

@@ -215,6 +215,16 @@ public interface APIManager {
     String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException;
 
     /**
+     * Retrieves the last updated time of a throttling policy given its policy level and policy name
+     *
+     * @param policyLevel level of throttling policy
+     * @param policyName name of throttling policy
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
+
+    /**
      * Retrieves the last updated time of the application
      *
      * @param applicationId UUID of the application
