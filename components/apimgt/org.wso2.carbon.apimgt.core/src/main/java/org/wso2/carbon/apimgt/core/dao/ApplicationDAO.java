@@ -151,5 +151,23 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException   If failed to add application keys.
      */
     void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
+    
+    /**
+     * Update the state of an existing Application
+     *
+     * @param appID      The UUID of the Application that needs to be updated
+     * @param state      State of the application
+     * @throws APIMgtDAOException
+     */
+    void updateApplicationState(String appID, String state) throws APIMgtDAOException;
 
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

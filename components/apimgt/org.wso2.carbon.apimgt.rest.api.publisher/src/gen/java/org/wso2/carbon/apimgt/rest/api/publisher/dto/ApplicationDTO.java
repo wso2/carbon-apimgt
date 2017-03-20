@@ -9,18 +9,24 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * ApplicationDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class ApplicationDTO   {
+  @JsonProperty("applicationId")
   private String applicationId = null;
 
+  @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("subscriber")
   private String subscriber = null;
 
+  @JsonProperty("throttlingTier")
   private String throttlingTier = null;
 
+  @JsonProperty("description")
   private String description = null;
 
+  @JsonProperty("groupId")
   private String groupId = null;
 
   public ApplicationDTO applicationId(String applicationId) {

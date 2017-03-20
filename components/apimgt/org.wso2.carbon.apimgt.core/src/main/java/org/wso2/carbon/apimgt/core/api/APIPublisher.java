@@ -161,7 +161,7 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiId UUID of API
      * @return Last updated time of gateway configuration of the API given its uuid
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 
@@ -493,13 +493,4 @@ public interface APIPublisher extends APIManager {
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
 
-    /**
-     * Retrieves the last updated time of a throttling policy given its policy level and policy name
-     *
-     * @param policyLevel level of throttling policy
-     * @param policyName name of throttling policy
-     * @return last updated time 
-     * @throws APIManagementException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
 }

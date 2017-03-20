@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
 import java.time.Duration;
 import java.util.List;
@@ -119,6 +120,30 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
                 Assert.fail("Invalid Application returned.");
             }
         }
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingApplication() throws Exception {
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+
+        //add new app
+        Application currentApp = TestUtil.addTestApplication();
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(applicationDAO.getLastUpdatedTimeOfApplication(currentApp.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+        
+        Application newApp = SampleTestObjectCreator.createAlternativeApplication();
+        newApp.setId(currentApp.getId());
+        newApp.setCreatedTime(currentApp.getCreatedTime());
+        //update app
+        applicationDAO.updateApplication(currentApp.getId(), newApp);
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(applicationDAO.getLastUpdatedTimeOfApplication(currentApp.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        //compare
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
     }
 
     @Test

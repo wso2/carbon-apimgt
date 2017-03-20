@@ -22,6 +22,8 @@ package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -30,7 +32,16 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -47,6 +58,7 @@ import java.util.UUID;
 public class SampleTestObjectCreator {
     public static String apiDefinition;
     public static InputStream inputStream;
+    private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
     static String endpointId = UUID.randomUUID().toString();
     static {
         try {
@@ -269,6 +281,81 @@ public class SampleTestObjectCreator {
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
 
+    public static String createAlternativeSwaggerDefinition() throws IOException {
+        return IOUtils
+                .toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("api/alternativeSwagger.json"));
+    }
+
+    public static String createSampleGatewayConfig() {
+        try {
+            return IOUtils
+                    .toString(Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream("api/sampleGatewayConfig.bal"));
+        } catch (IOException e) {
+            log.error("Error while reading 'api/sampleGatewayConfig.bal'", e);
+            return null;
+        }
+    }
+
+    public static String createAlternativeGatewayConfig() throws IOException {
+        return IOUtils
+                .toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("api/alternativeGatewayConfig.bal"));
+    }
+
+    public static InputStream createDefaultThumbnailImage() {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("api/thumbnail1.jpg");
+    }
+
+    public static InputStream createAlternativeThumbnailImage() {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("api/thumbnail2.jpg");
+    }
+
+    public static DocumentInfo createDefaultDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name("CalculatorDoc");
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator Documentation");
+        builder.sourceType(DocumentInfo.SourceType.INLINE);
+        builder.sourceURL("");
+        builder.otherType("");
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
+
+    public static DocumentInfo createAlternativeDocumentationInfo(String uuid) {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(uuid);
+        builder.name("CalculatorDoc");
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator Documentation - alternative");
+        builder.sourceType(DocumentInfo.SourceType.INLINE);
+        builder.sourceURL("");
+        builder.otherType("");
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
+
+    public static String createDefaultInlineDocumentationContent() throws IOException {
+        return IOUtils
+                .toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("document/inline1.txt"));
+    }
+
+    public static String createAlternativeInlineDocumentationContent() throws IOException {
+        return IOUtils
+                .toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("document/inline2.txt"));
+    }
+
     public static Application createDefaultApplication(){
         //created by admin
         Application application = new Application("TestApp", "admin");
@@ -312,6 +399,51 @@ public class SampleTestObjectCreator {
         return application;
     }
 
+    public static APIPolicy createDefaultAPIPolicy(){
+        APIPolicy apiPolicy = new APIPolicy("SampleAPIPolicy");
+        apiPolicy.setDisplayName("SampleAPIPolicy");
+        apiPolicy.setDescription("SampleAPIPolicy Description");
+        apiPolicy.setUserLevel("API");
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("s");
+        requestCountLimit.setRequestCount(10000);
+        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return apiPolicy;
+    }
+
+    public static ApplicationPolicy createDefaultApplicationPolicy(){
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy("SampleAppPolicy");
+        applicationPolicy.setDisplayName("SampleAppPolicy");
+        applicationPolicy.setDescription("SampleAppPolicy Description");
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("s");
+        requestCountLimit.setRequestCount(10000);
+        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setLimit(requestCountLimit);
+        applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return applicationPolicy;
+    }
+
+    public static SubscriptionPolicy createDefaultSubscriptionPolicy(){
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy("SampleAPIPolicy");
+        subscriptionPolicy.setDisplayName("SampleSubscriptionPolicy");
+        subscriptionPolicy.setDescription("SampleSubscriptionPolicy Description");
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("s");
+        requestCountLimit.setRequestCount(10000);
+        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setLimit(requestCountLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return subscriptionPolicy;
+    }
 
     public static DocumentInfo getMockDocumentInfoObject(String docId) {
 
@@ -370,11 +502,20 @@ public class SampleTestObjectCreator {
 
     public static Label.Builder createLabel(String name) {
 
-        List<String> accessUrls1 = new ArrayList<>();
-        accessUrls1.add("https://test." + name);
-        Label.Builder label = new Label.Builder().
+        List<String> accessUrls = new ArrayList<>();
+        accessUrls.add("https://test." + name);
+        return new Label.Builder().
                 name(name).
-                accessUrls(accessUrls1);
-        return label;
+                accessUrls(accessUrls);
+    }
+
+    public static Workflow createWorkflow(String workflowReferenceID) {
+        Workflow workflow = new Workflow();      
+        workflow.setExternalWorkflowReference(workflowReferenceID);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflow.setCreatedTime(LocalDateTime.now());
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow.setWorkflowReference(UUID.randomUUID().toString());        
+        return workflow;
     }
 }

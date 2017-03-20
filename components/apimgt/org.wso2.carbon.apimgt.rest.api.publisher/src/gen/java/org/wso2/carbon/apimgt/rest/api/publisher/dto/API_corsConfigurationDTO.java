@@ -12,16 +12,21 @@ import java.util.List;
  * CORS configuration for the API 
  */
 @ApiModel(description = "CORS configuration for the API ")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class API_corsConfigurationDTO   {
+  @JsonProperty("corsConfigurationEnabled")
   private Boolean corsConfigurationEnabled = false;
 
+  @JsonProperty("accessControlAllowOrigins")
   private List<String> accessControlAllowOrigins = new ArrayList<String>();
 
+  @JsonProperty("accessControlAllowCredentials")
   private Boolean accessControlAllowCredentials = false;
 
+  @JsonProperty("accessControlAllowHeaders")
   private List<String> accessControlAllowHeaders = new ArrayList<String>();
 
+  @JsonProperty("accessControlAllowMethods")
   private List<String> accessControlAllowMethods = new ArrayList<String>();
 
   public API_corsConfigurationDTO corsConfigurationEnabled(Boolean corsConfigurationEnabled) {
@@ -138,12 +143,12 @@ public class API_corsConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_corsConfigurationDTO aPICorsConfiguration = (API_corsConfigurationDTO) o;
-    return Objects.equals(this.corsConfigurationEnabled, aPICorsConfiguration.corsConfigurationEnabled) &&
-        Objects.equals(this.accessControlAllowOrigins, aPICorsConfiguration.accessControlAllowOrigins) &&
-        Objects.equals(this.accessControlAllowCredentials, aPICorsConfiguration.accessControlAllowCredentials) &&
-        Objects.equals(this.accessControlAllowHeaders, aPICorsConfiguration.accessControlAllowHeaders) &&
-        Objects.equals(this.accessControlAllowMethods, aPICorsConfiguration.accessControlAllowMethods);
+    API_corsConfigurationDTO apICorsConfiguration = (API_corsConfigurationDTO) o;
+    return Objects.equals(this.corsConfigurationEnabled, apICorsConfiguration.corsConfigurationEnabled) &&
+        Objects.equals(this.accessControlAllowOrigins, apICorsConfiguration.accessControlAllowOrigins) &&
+        Objects.equals(this.accessControlAllowCredentials, apICorsConfiguration.accessControlAllowCredentials) &&
+        Objects.equals(this.accessControlAllowHeaders, apICorsConfiguration.accessControlAllowHeaders) &&
+        Objects.equals(this.accessControlAllowMethods, apICorsConfiguration.accessControlAllowMethods);
   }
 
   @Override

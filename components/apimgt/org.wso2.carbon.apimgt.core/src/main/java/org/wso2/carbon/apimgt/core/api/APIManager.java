@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.util.List;
 import java.util.Set;
@@ -60,7 +61,7 @@ public interface APIManager {
      * 
      * @param apiId UUID of API
      * @return Last updated time of API given its uuid
-     * @throws APIManagementException
+     * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException;
 
@@ -214,6 +215,16 @@ public interface APIManager {
     String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException;
 
     /**
+     * Retrieves the last updated time of a throttling policy given its policy level and policy name
+     *
+     * @param policyLevel level of throttling policy
+     * @param policyName name of throttling policy
+     * @return last updated time 
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
+
+    /**
      * Retrieves the last updated time of the application
      *
      * @param applicationId UUID of the application
@@ -221,4 +232,21 @@ public interface APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException;
+    
+    /**
+     * Retrieve workflow for the given workflow reference ID
+     * @param workflowRefId External workflow reference Id
+     * @return Workflow workflow entry
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException;
+    
+    /**
+     * Complete workflow task 
+     * @param workflowExecutor executor related to the workflow task
+     * @param workflow workflow object
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException;
+
 }

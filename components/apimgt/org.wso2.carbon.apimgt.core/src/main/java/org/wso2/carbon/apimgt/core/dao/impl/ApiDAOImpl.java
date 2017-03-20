@@ -69,8 +69,6 @@ public class ApiDAOImpl implements ApiDAO {
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
-    private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
-    private static final String AM_SUBSCRIPTION_TABLE_NAME = "AM_SUBSCRIPTION";
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
         this.sqlStatements = sqlStatements;
@@ -691,22 +689,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getLastUpdatedTimeOfSubscription(String)
-     */
-    @Override
-    public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_SUBSCRIPTION_TABLE_NAME, subscriptionId);
-    }
-
-    /**
-     * @see ApiDAO#getLastUpdatedTimeOfApplication(String)
-     */
-    @Override
-    public String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_APPLICATION_TABLE_NAME, applicationId);
-    }
-
-    /**
      * Get image of a given API
      *
      * @param apiID The UUID of the respective API
@@ -723,11 +705,11 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#updateImage(String, InputStream, String, String, LocalDateTime) 
+     * @see ApiDAO#updateImage(String, InputStream, String, String)
      */
     @Override
-    public void updateImage(String apiID, InputStream image, String dataType, String updatedBy,
-            LocalDateTime updatedTime) throws APIMgtDAOException {
+    public void updateImage(String apiID, InputStream image, String dataType, String updatedBy)
+            throws APIMgtDAOException {
         if (image != null) {
             try (Connection connection = DAOUtil.getConnection()) {
                 try {

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.util.ArrayList;
@@ -79,6 +80,12 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
         //get subscription
         Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+
+        //validate fingerprint
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(uuid));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+
         //validate tier and status
         Assert.assertNotNull(subscription);
         Assert.assertEquals(subscription.getId(), uuid);
@@ -105,8 +112,11 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         apiSubscriptionDAO.updateSubscriptionStatus(uuid, newSubscriptionStatus);
         //get subscription
         subscription = apiSubscriptionDAO.getAPISubscription(uuid);
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(uuid));
         //validate
         Assert.assertNotNull(subscription);
+        Assert.assertNotNull(fingerprintAfterUpdate);
         Assert.assertEquals(subscription.getId(), uuid);
         Assert.assertEquals(subscription.getStatus(), newSubscriptionStatus);
         Assert.assertEquals(subscription.getSubscriptionTier(), newSubscriptionPolicy);
@@ -114,6 +124,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api)));
         Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app),
                 TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app)));
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
     }
 
     @Test

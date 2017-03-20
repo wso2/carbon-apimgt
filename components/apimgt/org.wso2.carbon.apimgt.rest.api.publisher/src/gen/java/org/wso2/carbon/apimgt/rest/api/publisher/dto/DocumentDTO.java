@@ -10,10 +10,12 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class DocumentDTO   {
+  @JsonProperty("documentId")
   private String documentId = null;
 
+  @JsonProperty("name")
   private String name = null;
 
   /**
@@ -57,8 +59,10 @@ public class DocumentDTO   {
     }
   }
 
+  @JsonProperty("type")
   private TypeEnum type = null;
 
+  @JsonProperty("summary")
   private String summary = null;
 
   /**
@@ -94,14 +98,19 @@ public class DocumentDTO   {
     }
   }
 
+  @JsonProperty("sourceType")
   private SourceTypeEnum sourceType = null;
 
+  @JsonProperty("sourceUrl")
   private String sourceUrl = null;
 
+  @JsonProperty("inlineContent")
   private String inlineContent = null;
 
+  @JsonProperty("otherTypeName")
   private String otherTypeName = null;
 
+  @JsonProperty("permission")
   private String permission = null;
 
   /**
@@ -137,7 +146,20 @@ public class DocumentDTO   {
     }
   }
 
+  @JsonProperty("visibility")
   private VisibilityEnum visibility = null;
+
+  @JsonProperty("createdTime")
+  private String createdTime = null;
+
+  @JsonProperty("createdBy")
+  private String createdBy = null;
+
+  @JsonProperty("lastUpdatedTime")
+  private String lastUpdatedTime = null;
+
+  @JsonProperty("lastUpdatedBy")
+  private String lastUpdatedBy = null;
 
   public DocumentDTO documentId(String documentId) {
     this.documentId = documentId;
@@ -319,6 +341,78 @@ public class DocumentDTO   {
     this.visibility = visibility;
   }
 
+  public DocumentDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+   /**
+   * Get createdTime
+   * @return createdTime
+  **/
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  public DocumentDTO createdBy(String createdBy) {
+    this.createdBy = createdBy;
+    return this;
+  }
+
+   /**
+   * Get createdBy
+   * @return createdBy
+  **/
+  @ApiModelProperty(value = "")
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public DocumentDTO lastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+    return this;
+  }
+
+   /**
+   * Get lastUpdatedTime
+   * @return lastUpdatedTime
+  **/
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  public String getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
+
+  public void setLastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+
+  public DocumentDTO lastUpdatedBy(String lastUpdatedBy) {
+    this.lastUpdatedBy = lastUpdatedBy;
+    return this;
+  }
+
+   /**
+   * Get lastUpdatedBy
+   * @return lastUpdatedBy
+  **/
+  @ApiModelProperty(value = "")
+  public String getLastUpdatedBy() {
+    return lastUpdatedBy;
+  }
+
+  public void setLastUpdatedBy(String lastUpdatedBy) {
+    this.lastUpdatedBy = lastUpdatedBy;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -338,12 +432,16 @@ public class DocumentDTO   {
         Objects.equals(this.inlineContent, document.inlineContent) &&
         Objects.equals(this.otherTypeName, document.otherTypeName) &&
         Objects.equals(this.permission, document.permission) &&
-        Objects.equals(this.visibility, document.visibility);
+        Objects.equals(this.visibility, document.visibility) &&
+        Objects.equals(this.createdTime, document.createdTime) &&
+        Objects.equals(this.createdBy, document.createdBy) &&
+        Objects.equals(this.lastUpdatedTime, document.lastUpdatedTime) &&
+        Objects.equals(this.lastUpdatedBy, document.lastUpdatedBy);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, permission, visibility);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, permission, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -361,6 +459,10 @@ public class DocumentDTO   {
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
+    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    lastUpdatedBy: ").append(toIndentedString(lastUpdatedBy)).append("\n");
     sb.append("}");
     return sb.toString();
   }

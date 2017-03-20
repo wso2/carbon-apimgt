@@ -1185,6 +1185,55 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Workflow approval" resource API
+######################################################
+  /workflows/update-workflow-status:
+
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_workflow
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task. .
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId-Q'
+       - in: body
+         name: body
+         description: |
+            Workflow event that need to be updated
+         required: true
+         schema:
+           $ref: '#/definitions/Workflow'
+      tags:
+        - Workflows (Individual) 
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/Workflow'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1373,6 +1422,16 @@ parameters:
       Validator for API Minor Version
     type: string
     default: 1.0
+
+# Workflow reference ID
+# Specified as part of the path expression
+  workflowReferenceId-Q:
+    name: workflowReferenceId
+    in: query
+    description: |
+      Workflow reference id
+    required: true
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -1861,7 +1920,7 @@ definitions:
   Token :
     title: Token details for invoking APIs
     properties:
-      access_token:
+      accessToken:
         type: string
         description: Access token
       tokenScopes:
@@ -1988,6 +2047,33 @@ definitions:
         items:
           $ref: '#/definitions/Label'
 
+#-----------------------------------------------------
+# The workflow response resource
+#-----------------------------------------------------
+  Workflow:
+    title: workflow
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
+        
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -9,14 +9,18 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * API_businessInformationDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class API_businessInformationDTO   {
+  @JsonProperty("businessOwner")
   private String businessOwner = null;
 
+  @JsonProperty("businessOwnerEmail")
   private String businessOwnerEmail = null;
 
+  @JsonProperty("technicalOwner")
   private String technicalOwner = null;
 
+  @JsonProperty("technicalOwnerEmail")
   private String technicalOwnerEmail = null;
 
   public API_businessInformationDTO businessOwner(String businessOwner) {
@@ -100,11 +104,11 @@ public class API_businessInformationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    API_businessInformationDTO aPIBusinessInformation = (API_businessInformationDTO) o;
-    return Objects.equals(this.businessOwner, aPIBusinessInformation.businessOwner) &&
-        Objects.equals(this.businessOwnerEmail, aPIBusinessInformation.businessOwnerEmail) &&
-        Objects.equals(this.technicalOwner, aPIBusinessInformation.technicalOwner) &&
-        Objects.equals(this.technicalOwnerEmail, aPIBusinessInformation.technicalOwnerEmail);
+    API_businessInformationDTO apIBusinessInformation = (API_businessInformationDTO) o;
+    return Objects.equals(this.businessOwner, apIBusinessInformation.businessOwner) &&
+        Objects.equals(this.businessOwnerEmail, apIBusinessInformation.businessOwnerEmail) &&
+        Objects.equals(this.technicalOwner, apIBusinessInformation.technicalOwner) &&
+        Objects.equals(this.technicalOwnerEmail, apIBusinessInformation.technicalOwnerEmail);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.common.util;
+package org.wso2.carbon.apimgt.core.util;
 /*
 *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.common.util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.rest.api.common.exception.ETagGenerationException;
+import org.wso2.carbon.apimgt.core.exception.ETagGenerationException;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -30,10 +30,10 @@ import java.security.NoSuchAlgorithmException;
  * This class generates ETag hash value for the given timestamp of the resource
  * using MD5 as the default hashing algorithm.
  */
-public class ETagGenerator {
-    private static final Logger log = LoggerFactory.getLogger(ETagGenerator.class);
+public class ETagUtils {
+    private static final Logger log = LoggerFactory.getLogger(ETagUtils.class);
     
-    private ETagGenerator () {
+    private ETagUtils() {
     }
 
     /**
@@ -74,7 +74,7 @@ public class ETagGenerator {
      * @return generated 
      * @throws ETagGenerationException if hash generation failed.
      */
-    public static String getETag(String updatedTime) throws ETagGenerationException {
+    public static String generateETag(String updatedTime) throws ETagGenerationException {
         try {
             return StringUtils.isBlank(updatedTime) ? null : getHash(updatedTime, "MD5");
         } catch (NoSuchAlgorithmException e) {

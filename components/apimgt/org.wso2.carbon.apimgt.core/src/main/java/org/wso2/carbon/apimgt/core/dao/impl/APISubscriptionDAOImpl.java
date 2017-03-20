@@ -45,6 +45,8 @@ import java.util.List;
  */
 public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
+    private static final String AM_SUBSCRIPTION_TABLE_NAME = "AM_SUBSCRIPTION";
+
     /**
      * Retrieve a given instance of an API Subscription
      *
@@ -377,12 +379,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     @Override
     public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus)
             throws APIMgtDAOException {
-        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ? WHERE UUID = ?";
+        final String updateSubscriptionSql = "UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, LAST_UPDATED_TIME = ? " 
+                + "WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn.prepareStatement(updateSubscriptionSql)) {
                 preparedStatement.setString(1, subStatus.toString());
-                preparedStatement.setString(2, subId);
+                preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                preparedStatement.setString(3, subId);
                 preparedStatement.execute();
                 conn.commit();
             } catch (SQLException ex) {
@@ -394,6 +398,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
+    }
+
+    /**
+     * @see APISubscriptionDAO#getLastUpdatedTimeOfSubscription(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_SUBSCRIPTION_TABLE_NAME, subscriptionId);
     }
 
     /**

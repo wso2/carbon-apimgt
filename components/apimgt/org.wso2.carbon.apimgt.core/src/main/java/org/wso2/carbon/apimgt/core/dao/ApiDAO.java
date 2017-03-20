@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
@@ -214,11 +213,9 @@ public interface ApiDAO {
      * @param image    Image stream
      * @param dataType Data Type of image
      * @param updatedBy user who adds/updates the API
-     * @param updatedTime the time of adding/updating the API
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateImage(String apiID, InputStream image, String dataType, String updatedBy,
-            LocalDateTime updatedTime) throws APIMgtDAOException;
+    void updateImage(String apiID, InputStream image, String dataType, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Change the lifecycle status of a given API
@@ -450,21 +447,4 @@ public interface ApiDAO {
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
 
-    /**
-     * Retrieves the last updated time of the subscription
-     *
-     * @param subscriptionId UUID of the subscription
-     * @return  Last updated time of the resource
-     * @throws APIMgtDAOException if DB level exception occurred
-     */
-    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves the last updated time of the application
-     *
-     * @param applicationId UUID of the application
-     * @return  Last updated time of the resource
-     * @throws APIMgtDAOException if DB level exception occurred
-     */
-    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

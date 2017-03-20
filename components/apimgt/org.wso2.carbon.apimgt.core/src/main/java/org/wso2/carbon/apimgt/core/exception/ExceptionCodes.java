@@ -78,7 +78,13 @@ public enum ExceptionCodes implements ErrorHandler {
     LOCATION_HEADER_INCORRECT(900322, "Error while obtaining URI for Location header", 500,
             "Error occurred while obtaining URI for Location header"),
     LAST_UPDATED_TIME_RETRIEVAL_ERROR(900323, "Error while retrieving last access time for the resource", 500,
-            "Error while retrieving last access time for the resource");
+            "Error while retrieving last access time for the resource"),
+    WORKFLOW_EXCEPTION(900324, "Workflow error", 500,
+            "Error occurred while executing workflow task"),
+    WORKFLOW_NOT_FOUND(900325, "Workflow error", 500,
+            "Error while retrieving worklow task for the reference id"),
+    WORKFLOW_COMPLETED(900326, "Workflow error", 500,
+            "Workflow is already completed");
 
     private final long errorCode;
     private final String errorMessage;
