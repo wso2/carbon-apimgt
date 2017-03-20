@@ -484,7 +484,7 @@ public class SampleTestObjectCreator {
     }
     public static Map<String,String> getMockEndpointMap(){
         Map<String,String > endpointMap = new HashedMap();
-        endpointMap.put("PRODUCTION",endpointId);
+        endpointMap.put("production",endpointId);
         return endpointMap;
     }
     public static Map<String,UriTemplate> getMockUriTemplates(){
