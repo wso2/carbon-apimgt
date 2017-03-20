@@ -625,9 +625,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException {
         String newVersionedId;
         LifecycleState lifecycleState;
+        // validate parameters
+        if (StringUtils.isEmpty(newVersion)) {
+            String errorMsg = "New API version cannot be empty";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+        if (StringUtils.isEmpty(apiId)) {
+            String errorMsg = "API ID cannot be empty";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        }
+
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
+                if (api.getVersion().equals(newVersion)) {
+                    String errMsg = "New API version cannot be same as the previous version";
+                    log.error(errMsg);
+                    throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
+                }
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);

@@ -683,6 +683,49 @@ public class APIPublisherImplTestCase {
         apiPublisher.createNewAPIVersion("xxxxxx", "2.0.0");
     }
 
+    @Test(description = "Create new  API version with empty APIID")
+    void CreateNewAPIVersionWithEmptyUUID() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        try {
+            apiPublisher.createNewAPIVersion(null, "2.0.0");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("API ID cannot be empty"));
+        }
+    }
+
+    @Test(description = "Create new  API version with invalid API version")
+    void CreateNewAPIVersionWithEmptyVersion() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        try {
+            apiPublisher.createNewAPIVersion(uuid, null);
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("New API version cannot be empty"));
+        }
+    }
+
+    @Test(description = "Create new  API version with previous API version")
+    void CreateNewAPIVersionWithPreviousVersion() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        try {
+            apiPublisher.createNewAPIVersion(uuid, api.getVersion());
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("New API version cannot be same as the previous version"));
+        }
+    }
+
     @Test(description = "Create new  API version with APIID and new API lifecycle add get failed",
             expectedExceptions = { LifecycleException.class, APIManagementException.class })
     public void testCreateNewAPIVersionAndCheckNewApiLifecycleAddFailure()
