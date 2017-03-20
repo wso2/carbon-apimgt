@@ -440,6 +440,18 @@ public class APIPublisherImplTestCase {
         apiPublisher.createNewAPIVersion("xxxxxx", "2.0.0");
     }
 
+    @Test(description = "Create new  API version with empty APIID")
+    void CreateNewAPIVersionWithEmptyUUID() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        try {
+            apiPublisher.createNewAPIVersion(null, "2.0.0");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("API ID cannot be empty"));
+        }
+    }
+
     @Test(description = "Create new  API version with invalid API version")
     void CreateNewAPIVersionWithEmptyVersion() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = mock(ApiDAO.class);
