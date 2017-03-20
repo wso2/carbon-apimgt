@@ -47,11 +47,7 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 
 public class APIPublisherImplTestCase {
     private static final String user = "admin";
@@ -93,6 +89,35 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
+    @Test(description = "Test add api with sandbox endpoint")
+    void addApiSandboxEndpoint() throws APIManagementException, LifecycleException {
+        Map<String, String> endpointMap = new HashMap<>();
+        endpointMap.put("sandbox", UUID.randomUUID().toString());
+        Map<String, UriTemplate> uriTemplateMap = new HashMap();
+        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+        uriTemplateBuilder.endpoint(endpointMap);
+        uriTemplateBuilder.templateId("getApisApiIdGet");
+        uriTemplateBuilder.uriTemplate("/apis/");
+        uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
+        uriTemplateBuilder.policy("Unlimited");
+        uriTemplateBuilder.httpVerb("GET");
+        uriTemplateMap.put("getApisApiIdGet", uriTemplateBuilder.build());
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id("").endpoint(endpointMap)
+                .uriTemplates(uriTemplateMap);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        System.out.println(apiBuilder.getEndpoint());
+        String endpointId = apiBuilder.getEndpoint().get("sandbox");
+        Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
+        Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
+    }
+
     @Test(description = "Test add api when uri templates are empty")
     void addApiWithEmptyUriTemplate() throws APIManagementException, LifecycleException {
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(new HashMap<>());
@@ -116,7 +141,7 @@ public class APIPublisherImplTestCase {
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
         uriTemplateBuilder.policy("Unlimited");
         uriTemplateBuilder.httpVerb("GET");
-        uriTemplateMap.put("getApisApiIdGet", uriTemplateBuilder.build());
+        uriTemplateMap.put("", uriTemplateBuilder.build());
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(uriTemplateMap)
                 .apiDefinition("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -453,6 +478,43 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         apiPublisher.updateAPI(api);
     }
+
+    @Test(description = "Test UpdateAPI with Status unchanged but different context")
+    void updateAPIWithStatusUnchangedButDifferentContext() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        String uuid = api.getId();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        apiPublisher.updateAPI(api.context("testContext"));
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
+        Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.build());
+    }
+
+    /*@Test(description = "Test UpdateAPI with status unchanged but context already exist")
+    void updateAPIWithContextAlreadyExists() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        String uuid = api.getId();
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus("CREATED").build());
+        Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
+
+        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
+                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
+                + "    resource passthrough (message m) {\n"
+                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
+                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
+                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
+        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(bal);
+        apiPublisher.updateAPI(api.lifeCycleStatus("CREATED").id(uuid).context("testContext"));
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
+        Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.lifeCycleStatus("CREATED").build());
+    }*/
 
     @Test(description = "Update api status")
     void updateAPIStatus() throws APIManagementException, LifecycleException {
