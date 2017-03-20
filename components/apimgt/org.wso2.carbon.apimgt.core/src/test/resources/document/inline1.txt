@@ -1,0 +1,1 @@
+API management is the process of creating and publishing APIs, enforcing their usage policies, controlling access, nurturing the subscriber community, and collecting and analyzing usage statistics.

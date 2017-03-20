@@ -46,6 +46,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, DESCRIPTION, " +
             "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
             "FROM AM_APPLICATION";
+    private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
 
     ApplicationDAOImpl() {
     }
@@ -408,6 +409,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
+    }
+
+    /**
+     * @see ApplicationDAO#getLastUpdatedTimeOfApplication(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_APPLICATION_TABLE_NAME, applicationId);
     }
 
     private void setApplicationKeys(Connection conn, Application application, String applicationId)

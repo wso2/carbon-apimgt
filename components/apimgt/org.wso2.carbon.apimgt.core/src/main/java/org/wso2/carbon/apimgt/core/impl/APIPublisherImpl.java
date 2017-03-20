@@ -1115,7 +1115,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
             throws APIManagementException {
         try {
-            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername(), LocalDateTime.now());
+            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't save the thumbnail image";
             log.error(errorMsg, e);

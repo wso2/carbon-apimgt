@@ -208,4 +208,13 @@ public interface APISubscriptionDAO {
      */
     SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String consumerKey)
             throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
 }

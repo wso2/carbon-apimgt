@@ -20,28 +20,22 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
-import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
-import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -496,6 +490,96 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
     }
+    
+    @Test
+    public void testFingerprintAfterUpdatingAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfAPI(api.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        API substituteAPI = builder.build();
+
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        String fingerprintAfterUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfAPI(api.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingSwaggerDefinition() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(
+                api.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        String swagger = SampleTestObjectCreator.createAlternativeSwaggerDefinition();
+        apiDAO.updateSwaggerDefinition(api.getId(), swagger, "admin");
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(api.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingGatewayConfig() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.gatewayConfig(SampleTestObjectCreator.createSampleGatewayConfig());
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(
+                api.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        String gwConfig = SampleTestObjectCreator.createAlternativeGatewayConfig();
+        apiDAO.updateGatewayConfig(api.getId(), gwConfig, "admin");
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(api.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingThumbnailImage() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", "admin");
+
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(
+                api.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createAlternativeThumbnailImage(), "image/jpg",
+                "admin");
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(api.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
 
     @Test
     public void testAddGetEndpoint() throws Exception {
@@ -587,4 +671,73 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNull(apiFromDB);
     }
+
+    @Test
+    public void testFingerprintAfterUpdatingEndpoint() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfEndpoint(endpoint.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
+        apiDAO.updateEndpoint(updatedEndpoint);
+        String fingerprintAfterUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfEndpoint(endpoint.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingDocument() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        DocumentInfo updateDocument = SampleTestObjectCreator.createAlternativeDocumentationInfo(documentInfo.getId());
+        apiDAO.updateDocumentInfo(api.getId(), updateDocument, "admin");
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testFingerprintAfterUpdatingDocumentContent() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        apiDAO.addDocumentInlineContent(documentInfo.getId(),
+                SampleTestObjectCreator.createDefaultInlineDocumentationContent(), "admin");
+
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        apiDAO.addDocumentInlineContent(documentInfo.getId(),
+                SampleTestObjectCreator.createAlternativeInlineDocumentationContent(), "admin");
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+    
 }

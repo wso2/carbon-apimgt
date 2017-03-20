@@ -152,4 +152,13 @@ public interface ApplicationDAO {
      */
     void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
 
+
+    /**
+     * Retrieves the last updated time of the application
+     *
+     * @param applicationId UUID of the application
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
 }

@@ -19,9 +19,6 @@
  */
 package org.wso2.carbon.apimgt.core.exception;
 
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-
 /**
  * Exception class for ETag generation related functionality
  */

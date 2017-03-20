@@ -396,7 +396,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfApplication(applicationId);
+            lastUpdatedTime = applicationDAO.getLastUpdatedTimeOfApplication(applicationId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the application " + applicationId;
@@ -413,7 +413,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException {
         String lastUpdatedTime;
         try {
-            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
+            lastUpdatedTime = apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
         } catch (APIMgtDAOException e) {
             String errorMsg =
                     "Error occurred while retrieving the last updated time of the subscription " + subscriptionId;
