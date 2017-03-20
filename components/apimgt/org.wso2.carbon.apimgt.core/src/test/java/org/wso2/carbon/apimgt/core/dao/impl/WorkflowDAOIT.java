@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -54,16 +55,16 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
-
+        workflowDAO.addWorkflowEntry(workflow);
         Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
 
         workflow.setStatus(WorkflowStatus.APPROVED);
+        workflow.setUpdatedTime(LocalDateTime.now());        
         workflowDAO.updateWorkflowStatus(workflow);
         retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
         Assert.assertEquals(retrieveWorflow.getStatus(), WorkflowStatus.APPROVED);
-
     }
 
 }
