@@ -685,9 +685,9 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with empty APIID")
     void CreateNewAPIVersionWithEmptyUUID() throws APIManagementException, LifecycleException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null);
         try {
             apiPublisher.createNewAPIVersion(null, "2.0.0");
         } catch (APIManagementException e) {
@@ -697,11 +697,11 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with invalid API version")
     void CreateNewAPIVersionWithEmptyVersion() throws APIManagementException, LifecycleException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null);
         try {
             apiPublisher.createNewAPIVersion(uuid, null);
         } catch (APIManagementException e) {
@@ -711,11 +711,11 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Create new  API version with previous API version")
     void CreateNewAPIVersionWithPreviousVersion() throws APIManagementException, LifecycleException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APILifecycleManager apiLifecycleManager = mock(APILifecycleManager.class);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
+        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
