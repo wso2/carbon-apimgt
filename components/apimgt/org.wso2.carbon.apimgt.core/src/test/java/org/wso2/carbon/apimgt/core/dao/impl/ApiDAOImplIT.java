@@ -54,7 +54,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
-        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api,apiFromDB));
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -646,8 +646,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNotNull(apiFromDB);
-        Assert.assertEquals(apiFromDB.getLabels().size(),2);
-        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api,apiFromDB));
+        Assert.assertEquals(apiFromDB.getLabels().size(), 2);
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -670,6 +670,37 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
         Assert.assertNull(apiFromDB);
+    }
+
+    @Test
+    public void testUpdateAPIWithLabels() throws Exception {
+
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label1 = SampleTestObjectCreator.createLabel("public").build();
+        Label label2 = SampleTestObjectCreator.createLabel("private").build();
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelList.add(label2);
+        labelDAO.addLabels(labelList);
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(label1.getName());
+        API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder1.labels(labelNames).build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        labelNames.add(label2.getName());
+        API substituteAPI = new API.APIBuilder(api).labels(labelNames).build();
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiFromDB.getLabels(),expectedAPI.getLabels()),
+                TestUtil.printDiff(apiFromDB, expectedAPI));
+
     }
 
     @Test

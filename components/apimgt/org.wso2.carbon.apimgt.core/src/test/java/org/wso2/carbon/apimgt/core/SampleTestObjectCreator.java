@@ -38,7 +38,10 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -57,7 +60,6 @@ public class SampleTestObjectCreator {
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
     static String endpointId = UUID.randomUUID().toString();
-
     static {
         try {
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
@@ -500,11 +502,20 @@ public class SampleTestObjectCreator {
 
     public static Label.Builder createLabel(String name) {
 
-        List<String> accessUrls1 = new ArrayList<>();
-        accessUrls1.add("https://test." + name);
-        Label.Builder label = new Label.Builder().
+        List<String> accessUrls = new ArrayList<>();
+        accessUrls.add("https://test." + name);
+        return new Label.Builder().
                 name(name).
-                accessUrls(accessUrls1);
-        return label;
+                accessUrls(accessUrls);
+    }
+
+    public static Workflow createWorkflow(String workflowReferenceID) {
+        Workflow workflow = new Workflow();      
+        workflow.setExternalWorkflowReference(workflowReferenceID);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflow.setCreatedTime(LocalDateTime.now());
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow.setWorkflowReference(UUID.randomUUID().toString());        
+        return workflow;
     }
 }

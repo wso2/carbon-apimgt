@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
@@ -279,8 +280,8 @@ public class ApplicationsApiServiceImpl
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            String applicationUUID = apiConsumer.addApplication(application);
-
+            ApplicationCreationResponse applicationResponse = apiConsumer.addApplication(application);
+            String applicationUUID = applicationResponse.getApplicationUUID();
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
