@@ -1,4 +1,4 @@
-{{log this}}
+{{js "js/index.js"}}
 
 <div class="panel-group form-group accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -13,10 +13,10 @@
                     </span>
                 </label>
                 <div>
-                    <div class="heading">{{i18n "Condition Group"}}</div>
+                    <div class="heading">{{i18n "Condition.Group"}}</div>
                     <div class="description truncate title" title="">
                         <a href="#" id="executionFlow-desc-{{@params.executionFlow.id}}" data-type="text" data-pk="1"
-                           data-title="{{i18n " Enter Description"}}">{{@params.executionFlow.description}}</a>
+                           data-title="{{i18n " Enter.Description"}}">{{@params.executionFlow.description}}</a>
                     </div>
                 </div>
                 <div class="clearfix"></div>
@@ -34,7 +34,7 @@
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
-                                IP Condition
+                                {{i18n "IP.Condition"}}
                                 {{#each @params.executionFlow.conditions}}
                                     {{#if IP}}
                                         {{#if enabled}}
@@ -56,7 +56,7 @@
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
-                                Header Condition
+                                {{i18n "Header.Condition"}}
                                 {{#each @params.executionFlow.conditions}}
                                     {{#if Header}}
                                         {{#if ../enabled}}
@@ -78,7 +78,7 @@
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
-                                Query Param Condition
+                                {{i18n "Query.Param.Condition"}}
                                 {{#each @params.executionFlow.conditions}}
                                     {{#if QueryParam}}
                                         {{#if ../enabled}}
@@ -100,7 +100,7 @@
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
-                                JWT Claim Condition
+                                {{i18n "JWT.Claim.Condition"}}
                                 {{#each @params.executionFlow.conditions}}
                                     {{#if JWTClaim}}
                                         {{#if ../enabled}}
@@ -131,7 +131,7 @@
                                             <div id="ip-condition-heading-{{@params.executionFlow.id}}"
                                                  class="panel-heading" role="tab">
                                                 <h2 class="sub-title panel-title">
-                                                    {{i18n "IP Condition Policy"}}
+                                                    {{i18n "IP.Condition.Policy"}}
                                                     <label id="ip-condition-lbl-{{@params.executionFlow.id}}"
                                                            class="wr-input-control switch" data-toggle="collapse"
                                                            data-target="#ip-condition-body-{{@params.executionFlow.id}}">
@@ -143,7 +143,8 @@
                                                     </label>
                                                     <hr>
                                                     <div class="panel-title-description">
-                                                        {{i18n "This configuration is used to throttle address."}}
+                                                        {{i18n "This.configuration.is.used.to.throttle.based.on.address"}}
+
                                                     </div>
                                                 </h2>
                                             </div>
@@ -159,7 +160,7 @@
                                                 <div class="form-horizontal">
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="ip-condition-type">{{i18n "IP Condition Type:"}}
+                                                               for="ip-condition-type">{{i18n "IP.Condition.Type"}} :
                                                             <span
                                                                     class="requiredAstrix">*</span></label>
                                                         <div class="col-sm-9">
@@ -169,16 +170,16 @@
                                                                     name="ip-condition-type-{{@params.executionFlow.id}}">
                                                                 {{#if specific }}
                                                                     <option value="specificIp" selected>
-                                                                        {{i18n "Specific IP"}}
+                                                                        {{i18n "Specific.IP"}}
                                                                     </option>
-                                                                    <option value="IPRange">{{i18n "IP Range"}}
+                                                                    <option value="IPRange">{{i18n "IP.Range"}}
                                                                     </option>
                                                                 {{else}}
                                                                     <option value="specificIp">
-                                                                        {{i18n "Specific IP"}}
+                                                                        {{i18n "Specific.IP"}}
                                                                     </option>
                                                                     <option value="IPRange" selected>
-                                                                        {{i18n "IP Range"}}
+                                                                        {{i18n "IP.Range"}}
                                                                     </option>
                                                                 {{/if}}
                                                             </select>
@@ -188,7 +189,7 @@
                                                         <div class="form-group" style="display:block"
                                                              id="specific-ip-block-{{@params.executionFlow.id}}">
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "IP Address:"}}
+                                                                   for="request-count">{{i18n "IP.Address"}} :
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
                                                             <div class="col-sm-9">
@@ -203,7 +204,7 @@
                                                         <div class="form-group" style="display:none"
                                                              id="ip-range-block-{{@params.executionFlow.id}}">
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "Start IP Address:"}}
+                                                                   for="request-count">{{i18n "Start.IP.Address"}} :
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
                                                             <div class="col-sm-3">
@@ -215,7 +216,7 @@
                                                             </div>
 
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "End IP Address:"}}
+                                                                   for="request-count">{{i18n "End.IP.Address"}} :
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
                                                             <div class="col-sm-3">
@@ -230,7 +231,7 @@
                                                         <div class="form-group" style="display:none"
                                                              id="specific-ip-block-{{@params.executionFlow.id}}">
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "IP Address:"}}
+                                                                   for="request-count">{{i18n "IP.Address"}} :
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
                                                             <div class="col-sm-9">
@@ -245,7 +246,7 @@
                                                         <div class="form-group" style="display:block"
                                                              id="ip-range-block-{{@params.executionFlow.id}}">
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "Start IP Address:"}}
+                                                                   for="request-count">{{i18n "Start.IP.Address"}} :
 
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
@@ -259,7 +260,7 @@
                                                             </div>
 
                                                             <label class="control-label col-sm-3"
-                                                                   for="request-count">{{i18n "End IP Address:"}}
+                                                                   for="request-count">{{i18n "End.IP.Address"}} :
                                                                 <span
                                                                         class="requiredAstrix">*</span></label>
                                                             <div class="col-sm-3">
@@ -273,7 +274,7 @@
                                                     {{/if}}
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="ip-invert-condition">{{i18n "Invert Condition:"}}
+                                                               for="ip-invert-condition">{{i18n "Invert.Condition"}} :
                                                         </label>
                                                         <div class="col-sm-9">
                                                             <label id="ip-condition-lbl-{{@params.executionFlow.id}}"
@@ -305,7 +306,7 @@
                                              data-operation-code="HEADER_CONDITION_POLICY">
                                             <div id="header-condition-policy-heading" class="panel-heading" role="tab">
                                                 <h2 class="sub-title panel-title">
-                                                    {{i18n "Header Condition Policy "}}
+                                                    {{i18n "Header.Condition.Policy_"}}
                                                     <label id="header-condition-lbl-{{@params.executionFlow.id}}"
                                                            class="wr-input-control switch" data-toggle="collapse"
                                                            data-target="#header-condition-body-{{@params.executionFlow.id}}">
@@ -317,9 +318,7 @@
                                                     </label>
                                                     <hr>
                                                     <div class="panel-title-description">
-                                                        {{i18n "This configuration is used to throttle based on Headers."}}
-
-
+                                                        {{i18n "This.configuration.is.used.to.throttle.based.on.headers"}}
                                                     </div>
                                                 </h2>
                                             </div>
@@ -335,8 +334,8 @@
                                                 <div class="form-horizontal">
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="header-name">{{i18n "Header Name:"}}
-                                                            <span class="requiredAstrix">*</span></label>
+                                                               for="header-name">{{i18n "Header.Name"}} :
+                                                            <span class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="header-name-{{@params.executionFlow.id}}"
@@ -346,14 +345,14 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="header-name-help-{{@params.executionFlow.id}}"
-                                                               class="hide">{{i18n "Name of the header."}}
+                                                               class="hide">{{i18n "Name.of.the.header"}}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="header-value">{{i18n "Param Value:"}}
-                                                            <span class="requiredAstrix">*</span></label>
+                                                               for="header-value">{{i18n "Param.Value"}} :
+                                                            <span class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="header-value-{{@params.executionFlow.id}}"
@@ -363,7 +362,7 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="header-value-help-{{@params.executionFlow.id}}"
-                                                               class="hide">{{i18n "Value of the header."}}
+                                                               class="hide">{{i18n "Value.of.the.header"}}
                                                             </p>
                                                         </div>
 
@@ -385,9 +384,9 @@
                                                                id="header-value-table-content-{{@params.executionFlow.id}}">
                                                             <thead>
                                                             <tr>
-                                                                <th class="col-md-5">Header</th>
-                                                                <th class="col-md-5">Value</th>
-                                                                <th class="col-md-2">Action</th>
+                                                                <th class="col-md-5">{{i18n "Header"}}</th>
+                                                                <th class="col-md-5">{{i18n "Value"}}</th>
+                                                                <th class="col-md-2">{{i18n "Action"}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -410,7 +409,10 @@
 
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="header-invert-condition">Invert Condition:</label>
+                                                               for="header-invert-condition">{{i18n "Invert.Condition"}} :
+
+
+                                                        </label>
                                                         <div class="col-sm-9">
                                                             <label id="header-condition-lbl-{{@params.executionFlow.id}}"
                                                                    class="wr-input-control switch">
@@ -442,7 +444,7 @@
                                             <div id="query-param-condition-heading-{{@params.executionFlow.id}}"
                                                  class="panel-heading" role="tab">
                                                 <h2 class="sub-title panel-title">
-                                                    {{i18n "Query Param Condition Policy"}}
+                                                    {{i18n "Query.Param.Condition.Policy"}}
                                                     <label id="query-param-condition-lbl-{{@params.executionFlow.id}}"
                                                            class="wr-input-control switch" data-toggle="collapse"
                                                            data-target="#query-param-condition-body-{{@params.executionFlow.id}}">
@@ -454,8 +456,7 @@
                                                     </label>
                                                     <hr>
                                                     <div class="panel-title-description">
-                                                        {{i18n "This configuration use to throttle based on query parameters."}}
-
+                                                        {{i18n "This.configuration.use.to.throttle.based.on.query.parameters"}}
                                                     </div>
                                                 </h2>
                                             </div>
@@ -471,8 +472,8 @@
                                                 <div class="form-horizontal">
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="query-param-name">{{i18n "Param Name:"}}
-                                                            <span class="requiredAstrix">*</span></label>
+                                                               for="query-param-name">{{i18n "Param.Name"}} :
+                                                            <span class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="query-param-name-{{@params.executionFlow.id}}"
@@ -482,13 +483,14 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="query-param-name-help-{{@params.executionFlow.id}}"
-                                                               class="hide">{{i18n "Name of the query param."}}
+                                                               class="hide">{{i18n "Name.of.the.query.param"}}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="control-label col-sm-3" for="query-param-name">Param
-                                                            Value:<span class="requiredAstrix">*</span></label>
+                                                        <label class="control-label col-sm-3"
+                                                               for="query-param-name">{{i18n "Param.Value"}} :<span
+                                                        class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="query-param-value-{{@params.executionFlow.id}}"
@@ -498,7 +500,7 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="query-param-value-help-{{@params.executionFlow.id}}"
-                                                               class="hide">{{i18n "Value of the query param."}}
+                                                               class="hide">{{i18n "Value.of.the.query.param"}}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -520,9 +522,9 @@
                                                                id="query-param-value-table-content-{{@params.executionFlow.id}}">
                                                             <thead>
                                                             <tr>
-                                                                <th class="col-md-5">Query Param</th>
-                                                                <th class="col-md-5">Value</th>
-                                                                <th class="col-md-2">Action</th>
+                                                                <th class="col-md-5">{{i18n "Query_Param"}}</th>
+                                                                <th class="col-md-5">{{i18n "Value"}}</th>
+                                                                <th class="col-md-2">{{i18n "Action"}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -545,7 +547,8 @@
 
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="query-param-invert-condition">{{i18n "Invert Condition:"}}
+                                                               for="query-param-invert-condition">{{i18n "Invert.Condition"}} :
+
                                                         </label>
                                                         <div class="col-sm-9">
                                                             <label id="query-param-condition-lbl-{{@params.executionFlow.id}}"
@@ -578,7 +581,7 @@
                                             <div id="jwt-claim-condition-heading-{{@params.executionFlow.id}}"
                                                  class="panel-heading" role="tab">
                                                 <h2 class="sub-title panel-title">
-                                                    {{i18n "JWT Condition Policy"}}
+                                                    {{i18n "JWT.Condition.Policy"}}
                                                     <label id="jwt-claims-condition-policy-lbl-{{@params.executionFlow.id}}"
                                                            class="wr-input-control switch" data-toggle="collapse"
                                                            data-target="#jwt-claim-condition-body-{{@params.executionFlow.id}}">
@@ -590,8 +593,7 @@
                                                     </label>
                                                     <hr>
                                                     <div class="panel-title-description">
-                                                        {{i18n "This configuration is used to define JWT claims conditions"}}
-
+                                                        {{i18n "This.configuration.is.used.to.define.JWT.claims.conditions"}}
                                                     </div>
                                                 </h2>
                                             </div>
@@ -607,8 +609,8 @@
                                                 <div class="form-horizontal">
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="jwt-claim-name">{{i18n "Claim Name:"}}
-                                                            <span class="requiredAstrix">*</span></label>
+                                                               for="jwt-claim-name">{{i18n "Claim.Name"}} :
+                                                            <span class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="jwt-claim-name-{{@params.executionFlow.id}}"
@@ -618,13 +620,13 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="jwt-claim-name-help-{{@params.executionFlow.id}}"
-                                                               class="hide">Name of the query param.</p>
+                                                               class="hide">{{i18n "Name.of.the.claim"}}</p>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="jwt-claim-name">{{i18n "Claim Value:"}}
-                                                            <span class="requiredAstrix">*</span></label>
+                                                               for="jwt-claim-name">{{i18n "Claim.Value"}} :
+                                                            <span class="required-astrix">*</span></label>
                                                         <div class="col-sm-9">
                                                             <input type="text" class="form-control required validInput"
                                                                    id="jwt-claim-value-{{@params.executionFlow.id}}"
@@ -634,7 +636,7 @@
                                                                data-trigger="hover" help_data="name_help"
                                                                data-original-title="" title=""></a>
                                                             <p id="jwt-claim-value-help-{{@params.executionFlow.id}}"
-                                                               class="hide">{{i18n "Value of the JWT claim."}}
+                                                               class="hide">{{i18n "Value.of.the.JWT.claim"}}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -654,9 +656,9 @@
                                                                id="jwt-claim-value-table-content-{{@params.executionFlow.id}}">
                                                             <thead>
                                                             <tr>
-                                                                <th class="col-md-5">Claim</th>
-                                                                <th class="col-md-5">Value</th>
-                                                                <th class="col-md-2">Action</th>
+                                                                <th class="col-md-5">{{i18n "Claim"}}</th>
+                                                                <th class="col-md-5">{{i18n "Value"}}</th>
+                                                                <th class="col-md-2">{{i18n "Action"}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -678,7 +680,8 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label class="control-label col-sm-3"
-                                                               for="jwt-claim-invert-condition">{{i18n "Invert Condition:"}}
+                                                               for="jwt-claim-invert-condition">{{i18n "Invert.Condition"}} :
+
                                                         </label>
                                                         <div class="col-sm-9">
                                                             <label id="jwt-claim-condition-lbl-{{@params.executionFlow.id}}"
@@ -707,19 +710,19 @@
             <div class="no-gutter">
                 <div class="page-header">
                     <h2></h2>
-                    <p class="lead">{{i18n "Execution Policy"}}</p>
+                    <p class="lead">{{i18n "Execution_Policy"}}</p>
                 </div>
                 <div class="form-horizontal">
                     <div class="form-group">
-                        <label class="control-label col-sm-3" for="policy-type">{{i18n "Request Count :"}}
+                        <label class="control-label col-sm-3" for="policy-type">{{i18n "Request_Count"}} :
                             <a class="help_popup" help_data="execution-policy-level-help-{{@params.executionFlow.id}}"
                                data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i
                                     class="fa fa-question-circle" data-original-title="" title=""></i></a>
                             <p id="execution-policy-level-help-{{@params.executionFlow.id}}" class="hide">
-                                <strong>{{i18n "Request Count"}}
-                                </strong> {{i18n "Throttle based on request count ."}}
-                                <br><strong> {{i18n "Bandwidth :"}}</strong>
-                                {{i18n "Throttle Based on bandwidth."}}<br></p>
+                                <strong>{{i18n "Request.Count"}}
+                                </strong> {{i18n "Throttle.based.on.request.count"}}
+                                <br><strong> {{i18n "Bandwidth"}} : </strong>
+                                {{i18n "Throttle.Based.on.bandwidth"}}<br></p>
                         </label>
                         <div class="col-sm-9">
                             <select class="form-control select required valid"
@@ -736,17 +739,17 @@
                         <div id="execution-flow-request-count-block-{{@params.executionFlow.id}}">
                             <div class="form-group">
                                 <label class="control-label col-sm-3"
-                                       for="execution-flow-request-count-{{@params.executionFlow.id}}">{{i18n "Request Count:"}}
-                                    <span class="requiredAstrix">*</span>
+                                       for="execution-flow-request-count-{{@params.executionFlow.id}}">{{i18n "Request.Count"}} :
+                                    <span class="required-astrix">*</span>
                                     <a class="help_popup"
                                        help_data="execution-flow-name_help-{{@params.executionFlow.id}}"
                                        data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i
                                             class="fa fa-question-circle" data-original-title="" title=""></i></a>
                                     <p id="execution-flow-name_help-{{@params.executionFlow.id}}" class="hide">
-                                        <strong>{{i18n "Request Count :"}}
-                                        </strong> {{i18n "Throttle based on request count ."}}
-                                        <br><strong> {{i18n "Bandwidth : "}}
-                                    </strong>  {{i18n "Throttle Based on bandwidth."}}<br></p>
+                                        <strong>{{i18n "Request.Count"}} :
+                                        </strong> {{i18n "Throttle.based.on.request.count"}}
+                                        <br><strong> {{i18n "Bandwidth"}} :
+                                    </strong>  {{i18n "Throttle.Based.on.bandwidth"}}<br></p>
                                 </label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control noSpace"
@@ -758,11 +761,11 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-sm-3" for="request-count">Time:
-                                    <span class="requiredAstrix">*</span>
+                                    <span class="required-astrix">*</span>
                                     <a class="help_popup" help_data="name_help" data-trigger="hover"
                                        data-placement="bottom" data-original-title="" title=""><i
                                             class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                    <p id="name_help" class="hide">{{i18n "Time.Configuration"}}</p>
                                 </label>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control"
@@ -775,11 +778,11 @@
                                     <select class="form-control select required valid"
                                             id="execution-flow-request-count-unit-{{@params.executionFlow.id}}"
                                             name="execution-flow-request-count-unit-{{@params.executionFlow.id}}">
-                                        <option value="min">Minute(s)</option>
-                                        <option value="hour">Hour(s)</option>
-                                        <option value="week">Week(s)</option>
-                                        <option value="month">Month(s)</option>
-                                        <option value="year">Year(s)</option>
+                                        <option value="min">{{i18n "Minutes(s)"}}</option>
+                                        <option value="hour">{{i18n "Hour(s)"}}</option>
+                                        <option value="days">{{i18n "Day(s)"}}</option>
+                                        <option value="month">{{i18n "Month(s)"}}</option>
+                                        <option value="year">{{i18n "Year(s)"}}</option>
                                     </select>
                                 </div>
                             </div>
@@ -788,15 +791,15 @@
                         <div id="execution-flow-bandwidth-block-{{@params.executionFlow.id}}" class="hide">
                             <div class="form-group">
                                 <label class="control-label col-sm-3" for="request-count">Bandwidth:
-                                    <span class="requiredAstrix">*</span>
+                                    <span class="required-astrix">*</span>
                                     <a class="help_popup" help_data="name_help-{{@params.executionFlow.id}}"
                                        data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i
                                             class="fa fa-question-circle" data-original-title="" title=""></i></a>
                                     <p id="name_help-{{@params.executionFlow.id}}" class="hide">
-                                        <strong>{{i18n "Request Count :"}}</strong>
-                                        {{i18n "Throttle based on request count ."}}
-                                        <br><strong> {{i18n "Bandwidth :"}}</strong>
-                                        {{i18n "Throttle Based on bandwidth."}}<br></p>
+                                        <strong>{{i18n "Request.Count"}} :</strong>
+                                        {{i18n "Throttle.based.on.request.count"}}
+                                        <br><strong> {{i18n "Bandwidth"}} :</strong>
+                                        {{i18n "Throttle.Based.on.bandwidth"}}<br></p>
                                 </label>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control required noSpace"
@@ -816,11 +819,11 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-sm-3" for="request-count">Time:
-                                    <span class="requiredAstrix">*</span>
+                                    <span class="required-astrix">*</span>
                                     <a class="help_popup" help_data="name_help" data-trigger="hover"
                                        data-placement="bottom" data-original-title="" title=""><i
                                             class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                    <p id="name_help" class="hide">{{i18n "Time.Configuration"}}</p>
                                 </label>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control"
@@ -833,12 +836,11 @@
                                     <select class="form-control select required valid"
                                             id="execution-flow-request-count-unit-{{@params.executionFlow.id}}"
                                             name="execution-flow-request-count-unit-{{@params.executionFlow.id}}">
-                                        <option value="min">Minute(s)</option>
-                                        <option value="hour">Hour(s)</option>
-                                        <option value="day">Day(s)</option>
-                                        <option value="week">Week(s)</option>
-                                        <option value="month">Month(s)</option>
-                                        <option value="year">Year(s)</option>
+                                        <option value="min">{{i18n "Minutes(s)"}}</option>
+                                        <option value="hour">{{i18n "Hour(s)"}}</option>
+                                        <option value="days">{{i18n "Day(s)"}}</option>
+                                        <option value="month">{{i18n "Month(s)"}}</option>
+                                        <option value="year">{{i18n "Year(s)"}}</option>
                                     </select>
                                 </div>
                             </div>

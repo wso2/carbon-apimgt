@@ -1,19 +1,19 @@
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.data-tables" }}
 {{js "js/index.js"}}
-{{css "css/custom.css"}}
 
 <div class="page-header">
-    <h2 id="tierTopic">{{i18n "Add Advanced Throttle Policy"}}</h2>
+    <h2 id="tierTopic">{{i18n "Add.Advanced.Throttle.Policy"}}</h2>
     <p class="lead"></p>
 </div>
 
 <form class="form-horizontal" method="" id="" action="">
     <div class="page-header">
-        <p class="lead">{{i18n "General Details"}}</p>
+        <p class="lead">{{i18n "General.Details"}}</p>
     </div>
     <div class="form-group">
-        <label class="control-label col-sm-3">{{i18n "Tier Name"}}: <span class="requiredAstrix">*</span>
-            <a class="help_popup" help_data="name_help" data-content="{{i18n "Name of the throttle policy."}}" data-trigger="hover" data-placement="bottom"
+        <label class="control-label col-sm-3">{{i18n "Tier.Name"}}: <span class="required-astrix">*</span>
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "Name.of.the.throttle.policy"}}"
+               data-trigger="hover" data-placement="bottom"
                title="">
 							<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
@@ -29,8 +29,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-sm-3" for="policy-description">{{i18n "Tier Description"}}:
-            <a class="help_popup" help_data="desc_help" data-content ="{{i18n "Description of the throttle policy."}}" data-trigger="hover" data-placement="bottom"
+        <label class="control-label col-sm-3" for="policy-description">{{i18n "Tier.Description"}}:
+            <a class="help_popup" help_data="desc_help" data-content ="{{i18n "Description.of.the.throttle.policy"}}"
+               data-trigger="hover" data-placement="bottom"
                data-original-title="" title="">
                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
@@ -48,7 +49,7 @@
 
     <div class="page-header">
         <h2><br/></h2>
-        <p class="lead">{{i18n "Default Limits"}}</p>
+        <p class="lead">{{i18n "Default.Limits"}}</p>
     </div>
 
     <div id="quotaTypeRadioDev">
@@ -58,14 +59,14 @@
                 <label class="checkbox-inline">
                     <input type="radio" name="select-quota-type" value="requestCount" id="requestCountType" checked="checked"
                            onchange="showHideDefaultQuotaPolicy()"/>
-                    {{i18n "Request Count"}}
+                    {{i18n "Request.Count"}}
                 </label>
             </div>
             <div class="radio radio-inline">
                 <label class="checkbox-inline">
                     <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType"
                            onchange="showHideDefaultQuotaPolicy()"/>
-                    {{i18n "Request Bandwidth"}}
+                    {{i18n "Request.Bandwidth"}}
                 </label>
             </div>
         </div>
@@ -73,8 +74,9 @@
 
     <div id="defaultRequestCountBasedDiv">
         <div class="form-group">
-            <label class="control-label col-sm-3">Request Count: <span class="requiredAstrix">*</span>
-                <a class="help_popup" href="#" help_data="request_count_help" data-content="{{i18n "Number of requests allowed."}}"
+            <label class="control-label col-sm-3">Request Count: <span class="required-astrix">*</span>
+                <a class="help_popup" href="#" help_data="request_count_help" data-content="{{i18n "Number.of.requests.allowed"}}
+                "
                    data-trigger="hover"
                    data-placement="bottom" data-original-title="" title="">
                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
@@ -90,15 +92,16 @@
     </div>
     <div id="defaultBandwidthBasedDiv" class="hide">
         <div class="form-group">
-            <label class="control-label col-sm-3">Data Bandwidth: <span class="requiredAstrix">*</span>
-                <a class="help_popup" help_data="bandwidth_help" data-content="{{i18n "Bandwidth Allowed"}}" data-trigger="hover"
+            <label class="control-label col-sm-3">{{i18n "Data.Bandwidth"}} : <span class="required-astrix">*</span>
+                <a class="help_popup" help_data="bandwidth_help" data-content="{{i18n "Bandwidth.Allowed"}}"
+                   data-trigger="hover"
                    data-placement="bottom" data-original-title="" title="">
                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
 								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
 							</span>
                 </a>
-                <p id="bandwidth_help" class="hide">Bandwidth Allowed.</p>
+                <p id="bandwidth_help" class="hide">{{i18n "Bandwidth.Allowed"}}</p>
             </label>
             <div class="col-sm-6">
                 <input class="form-control required validInput noSpace" type="text" id="bandwidth" name="bandwidth" autofocus="autofocus" value="" />
@@ -112,8 +115,8 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-sm-3">Unit Time: <span class="requiredAstrix">*</span>
-            <a class="help_popup" help_data="unit_time_help" data-content="{{i18n "Time Configuration"}}"
+        <label class="control-label col-sm-3">{{i18n "Unit.Time"}} : <span class="required-astrix">*</span>
+            <a class="help_popup" help_data="unit_time_help" data-content="{{i18n "Time.Configuration"}}"
             data-trigger="hover"
                data-placement="bottom"
                data-original-title="" title="">
@@ -122,18 +125,18 @@
 								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
 							</span>
             </a>
-            <p id="unit_time_help" class="hide">Time Configuration.</p>
+            <p id="unit_time_help" class="hide">{{i18n "Time.Configuration"}}</p>
         </label>
         <div class="col-sm-6">
             <input class="form-control" type="text" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="" />
         </div>
         <div class="col-sm-3">
             <select class="form-control select required" id="request-count-unit" name="request-count-unit">
-                <option value="min">Minutes(s)</option>
-                <option value="hour">Hour(s)</option>
-                <option value="days">Day(s)</option>
-                <option value="month">Month(s)</option>
-                <option value="year">Year(s)</option>
+                <option value="min">{{i18n "Minutes(s)"}}</option>
+                <option value="hour">{{i18n "Hour(s)"}}</option>
+                <option value="days">{{i18n "Day(s)"}}</option>
+                <option value="month">{{i18n "Month(s)"}}</option>
+                <option value="year">{{i18n "Year(s)"}}</option>
             </select>
         </div>
     </div>
@@ -141,18 +144,18 @@
 
 <div class="page-header">
     <h2><br/></h2>
-    <p class="lead">{{i18n "Conditional Groups"}}</p>
+    <p class="lead">{{i18n "Conditional.Groups"}}</p>
 </div>
 <div id="throttle-policies-pipeline-content" class="form-group">
     <button class="btn btn-secondary" type="button" onclick="addPolicy()">
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-                </span>&nbsp;{{i18n "Add Conditional Group"}}
+                </span>&nbsp;{{i18n "Add.Conditional.Group"}}
     </button>
 </div>
 
-<div id="pipeline-content" class="form-group"></div>
+{{defineZone "pipeline-content"}}
 <div class="page-header">
     <h2><br/></h2>
 </div>

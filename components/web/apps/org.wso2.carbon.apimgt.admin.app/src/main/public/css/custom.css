@@ -52,7 +52,7 @@ input.ep-field{
 .navbar-menu-toggle[aria-expanded=true]{
     background:#242932;
 }
-.form-group label>.requiredAstrix {
+.form-group label>.required-astrix {
     color: #E74C3C;
     font-weight: 400;
     margin-left:2px;
