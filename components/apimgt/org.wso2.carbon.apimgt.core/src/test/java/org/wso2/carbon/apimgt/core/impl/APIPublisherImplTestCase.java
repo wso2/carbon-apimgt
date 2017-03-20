@@ -479,7 +479,7 @@ public class APIPublisherImplTestCase {
         try {
             apiPublisher.createNewAPIVersion(uuid, api.getVersion());
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("New API version cannot be same as the previous version"));
+            Assert.assertTrue(e.getMessage().contains("cannot be same as the previous version"));
         }
     }
 
