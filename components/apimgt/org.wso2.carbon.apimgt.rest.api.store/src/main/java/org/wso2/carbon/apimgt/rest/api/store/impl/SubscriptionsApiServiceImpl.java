@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -112,7 +113,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Application application = apiStore.getApplicationByUuid(applicationId);
             API api = apiStore.getAPIbyUUID(apiId);
             if (application != null && api != null) {
-                String subscriptionId = apiStore.addApiSubscription(apiId, applicationId, tier);
+                SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
+                String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
                 subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
             } else {
