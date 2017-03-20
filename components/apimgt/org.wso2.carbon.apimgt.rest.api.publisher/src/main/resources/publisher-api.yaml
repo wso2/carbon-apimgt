@@ -3263,6 +3263,16 @@ definitions:
           - PRIVATE
           - API_LEVEL
         example: API_LEVEL
+      createdTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      createdBy:
+        type: string
+      lastUpdatedTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      lastUpdatedBy:
+        type: string
 
 #-----------------------------------------------------
 # The Tier List resource

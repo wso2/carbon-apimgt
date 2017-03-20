@@ -259,11 +259,15 @@ public class MappingUtil {
         documentDTO.setSummary(documentInfo.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType().toString()));
+        documentDTO.setCreatedBy(documentInfo.getCreatedBy());
+        documentDTO.setCreatedTime(documentInfo.getCreatedTime().toString());
+        documentDTO.setLastUpdatedBy(documentInfo.getUpdatedBy());
+        documentDTO.setLastUpdatedTime(documentInfo.getLastUpdatedTime().toString());
         return documentDTO;
     }
 
     /**
-     * This mrthod convert the Dto object into Model
+     * This method convert the Dto object into Model
      *
      * @param documentDTO Contains data of a document
      * @return DocumentInfo model instance with document data

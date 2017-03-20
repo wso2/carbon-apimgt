@@ -9,22 +9,30 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * LifecycleState_inputBeanListDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class LifecycleState_inputBeanListDTO   {
+  @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("isRequired")
   private Boolean isRequired = null;
 
+  @JsonProperty("label")
   private String label = null;
 
+  @JsonProperty("placeHolder")
   private String placeHolder = null;
 
+  @JsonProperty("tooltip")
   private String tooltip = null;
 
+  @JsonProperty("regex")
   private String regex = null;
 
+  @JsonProperty("values")
   private String values = null;
 
+  @JsonProperty("forTarget")
   private String forTarget = null;
 
   public LifecycleState_inputBeanListDTO name(String name) {
