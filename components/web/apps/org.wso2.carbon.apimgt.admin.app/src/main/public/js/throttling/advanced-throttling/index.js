@@ -9,10 +9,10 @@ $(function () {
                 var raw_data = {
                     data: jsonData.obj
                 };
+                var temp = _convertData(raw_data);
                 var callbacks = {
                     onSuccess: function () {
-                        _initDataTable(raw_data);
-
+                        _initDataTable(temp);
                     },
                     onFailure: function (message, e) {
 
@@ -29,7 +29,6 @@ $(function () {
                         }
                     }
             );
-
         },
         failure: function (error) {
             console.log("Error occurred while loading swagger definition");
@@ -37,26 +36,32 @@ $(function () {
     });
 
     function _initDataTable(raw_data) {
+        debugger;
         $('#api-policy').DataTable({
-            ajax: function (data, callback, setting) {
+            ajax: function (data, callback, settings) {
                 callback(raw_data);
-
             },
             columns: [
                 {'data': 'name'},
-                {'data': 'quotaPolicy'},
-                {'data': 'quota'},
-                {'unitTime': 'unitTime'}
-            ],
-            columnDefs: [
-                {
-                    targets: ["application-listing-action"], //class name will be matched on the TH for the column
-                    searchable: false,
-                    sortable: false
-                }
+                {'data': 'description'}
             ]
         })
-
+    }
+    
+    function _convertData(raw_data) {
+        var convertedData = [];
+        var row = {};
+        for (var i = 0; i < raw_data.data.length; i++) {
+            var name = raw_data.data[i].name;
+            var description = raw_data.data[i].description;
+            row['name'] = name;
+            row['description'] = description;
+            convertedData.push(row);
+        }
+        var ret = {};
+        ret.data= convertedData;
+        return ret;
+        
     }
 
 
