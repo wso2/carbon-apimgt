@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.TierMappingUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             Policy tier = apiStore.getPolicy(tierLevel, tierName);
             tierDTO = TierMappingUtil.fromTierToDTO(tier, tierLevel);
             return Response.ok().entity(tierDTO)
-                    .header("Etag", "\"" + existingFingerprint + "\"")
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tier";

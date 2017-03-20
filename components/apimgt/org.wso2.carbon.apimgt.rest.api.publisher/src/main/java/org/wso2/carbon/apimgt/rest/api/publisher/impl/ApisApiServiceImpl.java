@@ -96,18 +96,18 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok(documentationContent.getFileContent())
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
                 String content = documentationContent.getInlineContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN)
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
                 String sourceUrl = documentInfo.getSourceURL();
                 return Response.seeOther(new URI(sourceUrl))
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             }
         } catch (APIManagementException e) {
@@ -211,7 +211,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     null, null, minorVersion);
             DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
             return Response.status(Response.Status.CREATED)
-                    .header("Etag", "\"" + newFingerprint + "\"").entity(documentDTO).build();
+                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(documentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding content to document" + documentId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -273,7 +273,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             DocumentInfo documentInfo = apiPublisher.getDocumentationSummary(documentId);
             if (documentInfo != null) {
-                return Response.ok().header("Etag", "\"" + existingFingerprint + "\"")
+                return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .entity(MappingUtil.toDocumentDTO(documentInfo)).build();
             } else {
                 String msg = "Documntation not found " + documentId;
@@ -369,7 +369,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
             String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
                     minorVersion);
-            return Response.ok().header("Etag", "\"" + newFingerprint + "\"")
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
@@ -457,7 +457,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.notModified().build();
             }
             String gatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(gatewayConfig).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(gatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -501,7 +501,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
             String newFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, minorVersion);
-            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apiGatewayConfig).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiGatewayConfig).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -536,7 +536,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(apidto).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -634,7 +634,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
-            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apidto).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -663,7 +663,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.notModified().build();
             }
             String swagger = apiPublisher.getSwagger20Definition(apiId);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(swagger).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -707,7 +707,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
             String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
-            return Response.ok().header("Etag", "\"" + newFingerprint + "\"").entity(apiSwagger).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -739,7 +739,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (imageInputStream != null) {
                 return Response.ok(imageInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"icon\"")
-                        .header("Etag", "\"" + existingFingerprint + "\"").build();
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
             } else {
                 return Response.noContent().build();
             }
@@ -797,7 +797,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 */
             String newFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, minorVersion);
             return Response.status(Response.Status.CREATED).entity(infoDTO)
-                    .header("Etag", "\"" + newFingerprint + "\"").build();
+                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while uploading image" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();

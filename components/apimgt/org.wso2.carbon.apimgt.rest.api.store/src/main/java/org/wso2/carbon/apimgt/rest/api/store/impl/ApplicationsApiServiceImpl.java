@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -110,7 +111,7 @@ public class ApplicationsApiServiceImpl
 
                 }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                return Response.ok().entity(applicationDTO).header("Etag", "\"" + existingFingerprint + "\"").build();
+                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
@@ -178,7 +179,7 @@ public class ApplicationsApiServiceImpl
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
                     minorVersion);
-            return Response.ok().entity(updatedApplicationDTO).header("Etag", "\"" + newFingerprint + "\"").build();
+            return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating application: " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();

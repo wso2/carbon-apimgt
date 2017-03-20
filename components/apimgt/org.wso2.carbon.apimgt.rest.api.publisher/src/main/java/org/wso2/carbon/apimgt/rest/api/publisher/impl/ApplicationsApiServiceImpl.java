@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
@@ -45,7 +46,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
 
             ApplicationDTO applicationDTO = MappingUtil.toApplicationDto(application);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(applicationDTO).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(applicationDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
             return null;

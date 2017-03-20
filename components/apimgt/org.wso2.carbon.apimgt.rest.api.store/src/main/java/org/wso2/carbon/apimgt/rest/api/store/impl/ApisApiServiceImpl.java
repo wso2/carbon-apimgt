@@ -56,18 +56,18 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok(documentationContent.getFileContent())
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
                 String content = documentationContent.getInlineContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN)
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
                 String sourceUrl = documentInfo.getSourceURL();
                 return Response.seeOther(new URI(sourceUrl))
-                        .header("Etag", "\"" + existingFingerprint + "\"")
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             }
         } catch (APIManagementException e) {
@@ -133,7 +133,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
             documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
             return Response.ok().entity(documentDTO)
-                    .header("Etag", "\"" + existingFingerprint + "\"").build();
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError(
@@ -222,7 +222,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             API api = apiStore.getAPIbyUUID(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
             return Response.ok().entity(apiToReturn)
-                    .header("Etag", "\"" + existingFingerprint + "\"")
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -272,7 +272,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             String swagger = apiStore.getSwagger20Definition(apiId);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(swagger).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();

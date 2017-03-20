@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
         try {
             Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName(tierLevel, tierName);
-            return Response.ok().header("Etag", "\"" + existingFingerprint + "\"").entity(policy).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(policy).build();
         } catch (APIManagementException e) {
             String msg = "Error occurred while retrieving Policy";
             RestApiUtil.handleInternalServerError(msg, e, log);

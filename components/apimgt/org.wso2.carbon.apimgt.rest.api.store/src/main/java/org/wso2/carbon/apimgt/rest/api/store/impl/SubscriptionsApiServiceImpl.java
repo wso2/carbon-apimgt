@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -192,7 +193,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
             subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
             return Response.ok().entity(subscriptionDTO)
-                    .header("Etag", "\"" + existingFingerprint + "\"")
+                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving subscription information - " + subscriptionId;
