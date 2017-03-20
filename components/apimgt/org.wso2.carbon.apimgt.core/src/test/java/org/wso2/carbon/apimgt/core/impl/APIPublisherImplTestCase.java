@@ -122,7 +122,6 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
-        System.out.println(apiBuilder.getEndpoint());
         String endpointId = apiBuilder.getEndpoint().get("sandbox");
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -523,29 +522,6 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.build());
     }
-
-    /*@Test(description = "Test UpdateAPI with status unchanged but context already exist")
-    void updateAPIWithContextAlreadyExists() throws APIManagementException {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
-        String uuid = api.getId();
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null);
-        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus("CREATED").build());
-        Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
-
-        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
-                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
-                + "    resource passthrough (message m) {\n"
-                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
-                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
-                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
-        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(bal);
-        apiPublisher.updateAPI(api.lifeCycleStatus("CREATED").id(uuid).context("testContext"));
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
-        Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
-        Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.lifeCycleStatus("CREATED").build());
-    }*/
 
     @Test(description = "Update api status")
     void updateAPIStatus() throws APIManagementException, LifecycleException {
