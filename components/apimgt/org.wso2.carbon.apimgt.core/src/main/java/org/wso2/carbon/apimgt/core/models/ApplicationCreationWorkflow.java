@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
 /**
  * Application creation model class for workflow

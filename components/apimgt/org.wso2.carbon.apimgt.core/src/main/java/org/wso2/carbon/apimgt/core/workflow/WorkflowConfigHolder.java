@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfigProperties;
 import org.wso2.carbon.apimgt.core.models.WorkflowExecutorInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
