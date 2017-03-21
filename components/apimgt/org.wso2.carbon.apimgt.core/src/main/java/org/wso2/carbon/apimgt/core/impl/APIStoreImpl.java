@@ -605,7 +605,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
         
         if (workflow.getWorkflowReference() == null) {
-            String message = "Error while changing the workflow Workflow. Missing reference";
+            String message = "Error while changing the workflow. Missing reference";
             log.error(message);
             throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
         }
