@@ -21,10 +21,8 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
-import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
-import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 public class WorkflowExecutorFactoryTestCase {
@@ -32,17 +30,7 @@ public class WorkflowExecutorFactoryTestCase {
     public void testWorkflowCreation() {
         Workflow appCreation = WorkflowExecutorFactory.getInstance()
                 .createWorkflow(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        Assert.assertEquals(appCreation.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-
-        Workflow prodAppReg = WorkflowExecutorFactory.getInstance()
-                .createWorkflow(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-        Assert.assertEquals(prodAppReg.getWorkflowType(),
-                WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-
-        Workflow sandboxAppReg = WorkflowExecutorFactory.getInstance()
-                .createWorkflow(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-        Assert.assertEquals(sandboxAppReg.getWorkflowType(),
-                WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+        Assert.assertEquals(appCreation.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);      
 
         Workflow subcreation = WorkflowExecutorFactory.getInstance()
                 .createWorkflow(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -57,15 +45,4 @@ public class WorkflowExecutorFactoryTestCase {
         Assert.assertEquals(apistate.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_API_STATE);
 
     }
-   /* @Test(description = "Exception when workflow executors creation" ,expectedExceptions = WorkflowException.class)
-    public void testWorkflowCreationException() throws Exception {
-        
-     
-        
-        WorkflowExecutor executor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        
-        
-    }
-    
-*/
 }
