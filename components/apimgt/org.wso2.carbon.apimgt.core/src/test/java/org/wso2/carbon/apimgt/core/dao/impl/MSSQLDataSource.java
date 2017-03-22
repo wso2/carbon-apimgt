@@ -34,9 +34,9 @@ public class MSSQLDataSource implements DataSource {
     static String databaseName = "testamdb";
 
     MSSQLDataSource() throws Exception {
-        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-mssql");
+        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        basicDataSource.setJdbcUrl("jdbc:sqlserver://"+ipAddress+":1433;databaseName=testamdb");
+        basicDataSource.setJdbcUrl("jdbc:sqlserver://"+ipAddress+":11433;databaseName=testamdb");
         basicDataSource.setUsername("SA");
         basicDataSource.setPassword("wso2apim123#");
         basicDataSource.setAutoCommit(true);

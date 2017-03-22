@@ -36,9 +36,9 @@ public class PostgreDataSource implements DataSource{
 
 
     PostgreDataSource() throws Exception {
-        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-postgres");
+        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("org.postgresql.Driver");
-        basicDataSource.setJdbcUrl("jdbc:postgresql://"+ipAddress+":5432/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:postgresql://"+ipAddress+":15432/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(true);
