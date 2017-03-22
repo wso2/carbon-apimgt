@@ -31,6 +31,9 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecutor {
     private static final Log log = LogFactory.getLog(SubscriptionDeletionSimpleWorkflowExecutor.class);
 
+    /**
+     * execute subscription deletion 
+     */
     @Override
     public WorkflowResponse execute(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
@@ -43,6 +46,9 @@ public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecu
         return workflowResponse;
     }
 
+    /**
+     * complete subscription deletion 
+     */
     @Override
     public WorkflowResponse complete(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
@@ -54,6 +60,9 @@ public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecu
         return workflowResponse;
     }
 
+    /**
+     * clean up pending subscription deletiion tasks
+     */
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {}
 

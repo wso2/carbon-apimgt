@@ -168,8 +168,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             ps.setString(1, subscriptionId);
             ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             try (ResultSet rs = ps.executeQuery()) {
-                workflow = this.createWorkflowFromResultSet(rs);
-                
+                workflow = this.createWorkflowFromResultSet(rs);                
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
