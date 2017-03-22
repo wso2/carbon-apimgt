@@ -37,7 +37,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecu
     @Override
     public WorkflowResponse execute(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Subscription deletion Workflow..");
+            log.debug("Executing Subscription deletion Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -52,7 +52,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecu
     @Override
     public WorkflowResponse complete(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Subscription deletion Workflow..");
+            log.debug("Complete  Subscription deletion Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();

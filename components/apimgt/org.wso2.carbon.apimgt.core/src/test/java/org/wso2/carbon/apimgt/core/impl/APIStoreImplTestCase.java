@@ -325,8 +325,7 @@ public class APIStoreImplTestCase {
         Application application = SampleTestObjectCreator.createDefaultApplication();
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-       // API api = mock(API.class);
-        Subscription subscription = new Subscription(UUID, application, api, "Gold");//SampleTestObjectCreator.getMockSubscription();        
+        Subscription subscription = new Subscription(UUID, application, api, "Gold");    
         when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
         apiStore.deleteAPISubscription(UUID);
         verify(apiSubscriptionDAO, times(1)).deleteAPISubscription(UUID);
