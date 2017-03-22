@@ -20,6 +20,8 @@ public class PolicyMappingUtil {
         if (policy != null) {
             tierDTO.setName(policy.getPolicyName());
             tierDTO.setDescription(policy.getDescription());
+            tierDTO.setTimeUnit(policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            tierDTO.setUnitTime(policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         } else {
             tierDTO.setName("DummyPolicy");
             tierDTO.setDescription("Testing Policy");

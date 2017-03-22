@@ -197,8 +197,6 @@ public class APIMgtConstants {
         public static final String API_LEVEL = "api";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
-        public static final String RESOURCE_LEVEL = "resource";
-
     }
 
     /**
